@@ -11,29 +11,23 @@ describe(RushProjectConfiguration.name, () => {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
     const rushProjectJson: IRushProjectJson =
       await RUSH_PROJECT_CONFIGURATION_FILE.loadConfigurationFileForProjectAsync(terminal, testFolder);
-    expect(rushProjectJson.projectOutputFolderNames).toMatchInlineSnapshot(`
-      Array [
-        "a",
-        "b",
-      ]
-    `);
-    expect(rushProjectJson.phaseOptions?.length).toEqual(2);
-    expect(rushProjectJson.phaseOptions?.[0].phaseName).toMatchInlineSnapshot(`"_phase:a"`);
-    expect(rushProjectJson.phaseOptions?.[0].projectOutputFolderNames).toMatchInlineSnapshot(`
+    expect(rushProjectJson.operationSettings?.length).toEqual(2);
+    expect(rushProjectJson.operationSettings?.[0].operationName).toMatchInlineSnapshot(`"_phase:a"`);
+    expect(rushProjectJson.operationSettings?.[0].outputFolderNames).toMatchInlineSnapshot(`
       Array [
         "a-a",
         "a-b",
       ]
     `);
-    expect(rushProjectJson.phaseOptions?.[1].phaseName).toMatchInlineSnapshot(`"_phase:b"`);
-    expect(rushProjectJson.phaseOptions?.[1].projectOutputFolderNames).toMatchInlineSnapshot(`
+    expect(rushProjectJson.operationSettings?.[1].operationName).toMatchInlineSnapshot(`"_phase:b"`);
+    expect(rushProjectJson.operationSettings?.[1].outputFolderNames).toMatchInlineSnapshot(`
       Array [
         "b-a",
       ]
     `);
   });
 
-  it('throws an error when loading a rush-project.json config that lists a phase twice', async () => {
+  it('throws an error when loading a rush-project.json config that lists an operation twice', async () => {
     const testFolder: string = `${__dirname}/jsonFiles/test-project-b`;
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
     try {
@@ -44,7 +38,7 @@ describe(RushProjectConfiguration.name, () => {
         .replace(/\\/g, '/')
         .replace(testFolder.replace(/\\/g, '/'), '<testFolder>');
       expect(errorMessage).toMatchInlineSnapshot(
-        `"The phase \\"_phase:a\\" occurs multiple times in the \\"phaseOptions\\" array in \\"<testFolder>/config/rush-project.json\\"."`
+        `"The operation \\"_phase:a\\" occurs multiple times in the \\"operationSettings\\" array in \\"<testFolder>/config/rush-project.json\\"."`
       );
     }
   });

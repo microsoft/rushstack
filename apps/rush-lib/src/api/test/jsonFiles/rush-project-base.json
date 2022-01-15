@@ -1,14 +1,12 @@
 {
-  "projectOutputFolderNames": ["a"],
-
-  "phaseOptions": [
+  "operationSettings": [
     {
-      "phaseName": "_phase:a",
-      "projectOutputFolderNames": ["a-a"]
+      "operationName": "_phase:a",
+      "outputFolderNames": ["a-a"]
     },
     {
-      "phaseName": "_phase:b",
-      "projectOutputFolderNames": ["b-a"]
+      "operationName": "_phase:b",
+      "outputFolderNames": ["b-a"]
     }
   ]
 }
