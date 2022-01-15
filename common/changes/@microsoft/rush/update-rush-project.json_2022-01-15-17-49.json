@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING CHANGE) Update the schema of \"<project-root>/config/rush-project.json\". The \"projectOutputFolderNames\", \"phaseOptions\", and \"buildCacheOptions\" properties have been removed in favor of a new \"operationSettings\" property that is used to define settings for commands and phases and a \"disableBuildCacheForProject\" property that disables caching for the whole project.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
