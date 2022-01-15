@@ -217,18 +217,6 @@ export class CommandLineConfiguration {
               }
             }
 
-            if (normalizedCommand.skipPhasesForCommand) {
-              for (const phaseName of normalizedCommand.skipPhasesForCommand) {
-                if (!this.phases.has(phaseName)) {
-                  throw new Error(
-                    `In ${RushConstants.commandLineFilename}, in the "skipPhasesForCommand" property of the ` +
-                      `"${normalizedCommand.name}" command, the phase ` +
-                      `"${phaseName}" does not exist.`
-                  );
-                }
-              }
-            }
-
             break;
           }
 
@@ -312,49 +300,6 @@ export class CommandLineConfiguration {
 
         // Do some basic validation
         switch (normalizedParameter.parameterKind) {
-          case 'flag': {
-            const addPhasesToCommandSet: Set<string> = new Set<string>();
-
-            if (normalizedParameter.addPhasesToCommand) {
-              for (const phaseName of normalizedParameter.addPhasesToCommand) {
-                addPhasesToCommandSet.add(phaseName);
-                const phase: IPhase | undefined = this.phases.get(phaseName);
-                if (!phase || phase.isSynthetic) {
-                  throw new Error(
-                    `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                      `that lists phase "${phaseName}" in its "addPhasesToCommand" ` +
-                      'property that does not exist.'
-                  );
-                }
-
-                parameterHasAssociatedPhases = true;
-              }
-            }
-
-            if (normalizedParameter.skipPhasesForCommand) {
-              for (const phaseName of normalizedParameter.skipPhasesForCommand) {
-                const phase: IPhase | undefined = this.phases.get(phaseName);
-                if (!phase || phase.isSynthetic) {
-                  throw new Error(
-                    `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                      `that lists phase "${phaseName}" in its skipPhasesForCommand" ` +
-                      'property that does not exist.'
-                  );
-                } else if (addPhasesToCommandSet.has(phaseName)) {
-                  throw new Error(
-                    `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                      `that lists phase "${phaseName}" in both its "addPhasesToCommand" ` +
-                      'and "skipPhasesForCommand" properties.'
-                  );
-                }
-
-                parameterHasAssociatedPhases = true;
-              }
-            }
-
-            break;
-          }
-
           case 'choice': {
             const alternativeNames: string[] = normalizedParameter.alternatives.map((x) => x.name);
 

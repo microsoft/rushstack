@@ -182,15 +182,7 @@
             },
             "phases": {
               "title": "Phases",
-              "description": "List the phases associated with this command. Note that phases with dependencies will be implicitly included even if they aren't explicitly enumerated in this property unless they are specifically excluded by the \"skipPhasesForCommand\" property.",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "skipPhasesForCommand": {
-              "title": "Skip phases for command",
-              "description": "Exclude the phases listed here from the command's execution. Note that this may change dependency relationships between phases.",
+              "description": "List the phases associated with this command. Note that phases with dependencies will be implicitly included even if they aren't explicitly enumerated in this property.",
               "type": "array",
               "items": {
                 "type": "string"
@@ -210,8 +202,7 @@
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "incremental": { "$ref": "#/definitions/anything" },
-            "phases": { "$ref": "#/definitions/anything" },
-            "skipPhasesForCommand": { "$ref": "#/definitions/anything" }
+            "phases": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -334,22 +325,6 @@
           "properties": {
             "parameterKind": {
               "enum": ["flag"]
-            },
-            "addPhasesToCommand": {
-              "title": "Add phases to command",
-              "description": "Include the phases listed here in the command's execution if this parameter is specified.",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "skipPhasesForCommand": {
-              "title": "Skip phases for command",
-              "description": "Exclude the phases listed here from the command's execution if this parameter is specified. Note that this may change dependency relationships between phases.",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
             }
           }
         },
@@ -363,10 +338,7 @@
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" },
             "associatedPhases": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "addPhasesToCommand": { "$ref": "#/definitions/anything" },
-            "skipPhasesForCommand": { "$ref": "#/definitions/anything" }
+            "required": { "$ref": "#/definitions/anything" }
           }
         }
       ]
