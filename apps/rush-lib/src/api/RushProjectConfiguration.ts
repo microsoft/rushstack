@@ -289,11 +289,6 @@ export class RushProjectConfiguration {
           }
 
           terminal.writeErrorLine(errorMessage);
-        } else if (!repoCommandLineConfiguration.phases.has(operationName)) {
-          terminal.writeErrorLine(
-            `Invalid "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}"` +
-              ` for project "${project.packageName}". Operation "${operationName}" is not defined in the repo's ${RushConstants.commandLineFilename}.`
-          );
         } else {
           operationSettingsByOperationName.set(operationName, operationSettings);
         }
