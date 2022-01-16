@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "rush.json nodeSupportedVersionRange: include node 16 as current node lts in rush.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
