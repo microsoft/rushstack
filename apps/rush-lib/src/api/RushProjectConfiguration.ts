@@ -67,6 +67,12 @@ export interface IOperationSettings {
   disableBuildCacheForOperation?: boolean;
 }
 
+interface IOldRushProjectJson {
+  projectOutputFolderNames?: unknown;
+  phaseOptions?: unknown;
+  buildCacheOptions?: unknown;
+}
+
 export const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
   new ConfigurationFile<IRushProjectJson>({
     projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
@@ -139,6 +145,12 @@ export const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson
         inheritanceType: InheritanceType.replace
       }
     }
+  });
+
+const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IOldRushProjectJson> =
+  new ConfigurationFile<IOldRushProjectJson>({
+    projectRelativeFilePath: RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath,
+    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'anything.schema.json')
   });
 
 /**
@@ -239,14 +251,39 @@ export class RushProjectConfiguration {
       projectFolderPath: project.projectFolder
     });
 
-    const rushProjectJson: IRushProjectJson | undefined =
-      await RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+    try {
+      return await RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
         terminal,
         project.projectFolder,
         rigConfig
       );
+    } catch (e) {
+      // Detect if the project is using the old rush-project.json schema
+      let oldRushProjectJson: IOldRushProjectJson | undefined;
+      try {
+        oldRushProjectJson =
+          await OLD_RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+            terminal,
+            project.projectFolder,
+            rigConfig
+          );
+      } catch (e) {
+        // Ignore
+      }
 
-    return rushProjectJson;
+      if (
+        oldRushProjectJson?.projectOutputFolderNames ||
+        oldRushProjectJson?.phaseOptions ||
+        oldRushProjectJson?.buildCacheOptions
+      ) {
+        throw new Error(
+          `The ${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file appears to be ` +
+            'in an outdated format. Please see the UPGRADING.md file in the Rush project for upgrade instructions.'
+        );
+      } else {
+        throw e;
+      }
+    }
   }
 
   private static _getRushProjectConfiguration(
