@@ -1,0 +1,8 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "build",
+      "outputFolderNames": ["lib", "lib-commonjs", "temp"]
+    }
+  ]
+}
