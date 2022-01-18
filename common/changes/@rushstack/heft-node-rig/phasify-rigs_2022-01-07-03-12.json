@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-node-rig",
-      "comment": "Add a \"_phase:build\" cache configuration to config/rush-project.json.",
+      "comment": "Update the `rush-project.json` file to follow the new schema and configure the \"build\" command output folders for the \"_phase:build\" phase.",
       "type": "minor"
     }
   ],
