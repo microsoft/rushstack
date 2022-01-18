@@ -6,10 +6,10 @@ parameters:
     default: []
 
 steps:
-  - script: 'node common/scripts/install-run-rush.js version --bump --version-policy ${{ parameters.VersionPolicyName }} --target-branch $(Build.SourceBranchName)'
+  - script: 'node common/scripts/install-run-rush.js version --bump --version-policy ${{ parameters.VersionPolicyName }} --target-branch $(Build.SourceBranchName) --override-bump prerelease --override-prerelease-id pr3059.0'
     displayName: 'Rush Version (Policy: ${{ parameters.VersionPolicyName }})'
   - ${{ parameters.PrePublishSteps }}
-  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --include-all --target-branch $(Build.SourceBranchName) --add-commit-details --set-access-level public'
+  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --include-all --target-branch $(Build.SourceBranchName) --add-commit-details --set-access-level public --tag beta'
     displayName: 'Rush Publish (Policy: ${{ parameters.VersionPolicyName }})'
     env:
       NPM_AUTH_TOKEN: $(npmToken)
