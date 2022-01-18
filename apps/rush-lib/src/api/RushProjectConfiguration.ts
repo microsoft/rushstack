@@ -331,7 +331,7 @@ export class RushProjectConfiguration {
       }
 
       // For each phased command, check if any of its phases' output folders overlap.
-      for (const [, command] of repoCommandLineConfiguration.commands) {
+      for (const command of repoCommandLineConfiguration.commands.values()) {
         if (command.commandKind === 'phased') {
           const phasesOverlappingPathAnalyzer: OverlappingPathAnalyzer<string> =
             new OverlappingPathAnalyzer<string>();
