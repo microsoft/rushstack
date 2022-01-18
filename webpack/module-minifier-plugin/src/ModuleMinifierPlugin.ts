@@ -63,6 +63,10 @@ interface IExtendedParser extends webpack.compilation.normalModuleFactory.Parser
   };
 }
 
+interface IExtendedModuleTemplate extends webpack.compilation.ModuleTemplate {
+  render: (module: IExtendedModule, dependencyTemplates: unknown, options: unknown) => Source;
+}
+
 /**
  * https://github.com/webpack/webpack/blob/30e747a55d9e796ae22f67445ae42c7a95a6aa48/lib/Template.js#L36-47
  * @param a first id to be sorted
@@ -353,8 +357,30 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
           return new RawSource('(function(){})');
         }
 
-        // During code generation, send the generated code to the minifier and replace with a placeholder
-        compilation.moduleTemplates.javascript.hooks.package.tap(TAP_AFTER, minifyModule);
+        const jsTemplate: IExtendedModuleTemplate = compilation.moduleTemplates
+          .javascript as IExtendedModuleTemplate;
+        const innerRender: IExtendedModuleTemplate['render'] = jsTemplate.render.bind(jsTemplate);
+
+        // Reset cache if more processing is needed
+        compilation.hooks.seal.tap(PLUGIN_NAME, () => {
+          submittedModules.clear();
+
+          const cache: WeakSet<IExtendedModule> = new WeakSet();
+          const defaultSource: Source = new RawSource('');
+
+          // During code generation, send the generated code to the minifier and replace with a placeholder
+          // Hacking this to avoid calling .source() on a concatenated module multiple times
+          jsTemplate.render = (module: IExtendedModule, dependencyTemplates, options) => {
+            if (!cache.has(module)) {
+              cache.add(module);
+              const rendered: Source = innerRender(module, dependencyTemplates, options);
+
+              minifyModule(rendered, module);
+            }
+
+            return defaultSource;
+          };
+        });
 
         // This should happen before any other tasks that operate during optimizeChunkAssets
         compilation.hooks.optimizeChunkAssets.tapPromise(
