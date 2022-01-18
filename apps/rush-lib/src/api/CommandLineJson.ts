@@ -38,7 +38,6 @@ export interface IPhasedCommandJson extends IBaseCommandJson {
   enableParallelism: boolean;
   incremental?: boolean;
   phases: string[];
-  skipPhasesForCommand?: string[];
 }
 
 /**
@@ -81,8 +80,6 @@ export interface IBaseParameterJson {
  */
 export interface IFlagParameterJson extends IBaseParameterJson {
   parameterKind: 'flag';
-  addPhasesToCommand?: string[];
-  skipPhasesForCommand?: string[];
 }
 
 /**
