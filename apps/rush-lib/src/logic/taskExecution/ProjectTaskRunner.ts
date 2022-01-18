@@ -52,7 +52,6 @@ export interface IProjectTaskRunnerOptions {
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
-  allowWarningsInSuccessfulBuild?: boolean;
   taskName: string;
   phase: IPhase;
 }
@@ -114,9 +113,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = `package-deps_${phase.logFilenameIdentifier}.json`;
     this.warningsAreAllowed =
-      EnvironmentConfiguration.allowWarningsInSuccessfulBuild ||
-      options.allowWarningsInSuccessfulBuild ||
-      false;
+      EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
     this._logFilenameIdentifier = phase.logFilenameIdentifier;
   }
 
