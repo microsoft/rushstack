@@ -48,4 +48,4 @@ Below is an example diff between an old and new `rush-project.json` file:
 }
 ```
 
-See design notes [here](https://github.com/microsoft/rushstack/issues/2300#issuecomment-1012622369).
+For details see [issue #2300](https://github.com/microsoft/rushstack/issues/2300#issuecomment-1012622369).
