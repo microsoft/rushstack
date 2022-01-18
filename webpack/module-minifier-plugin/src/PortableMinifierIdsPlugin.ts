@@ -144,31 +144,27 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
           for (const mod of compilation.modules) {
             const originalId: string | number = mod.id;
 
-            // Need to handle ConcatenatedModules, which don't have the resource property directly
-            // Also need different cache keys for different sets of loaders
-            const { resource } = mod.rootModule || mod;
+            // Need different cache keys for different sets of loaders, so can't use 'resource'
+            const identity: string = mod.identifier();
+            const hashId: string = createHash('sha256').update(identity).digest('hex');
 
-            if (resource) {
-              const hashId: string = createHash('sha256').update(resource).digest('hex');
+            // This is designed to be an easily regex-findable string
+            const stableId: string = `${STABLE_MODULE_ID_PREFIX}${hashId}`;
+            const existingResource: string | undefined = resourceById.get(stableId);
 
-              // This is designed to be an easily regex-findable string
-              const stableId: string = `${STABLE_MODULE_ID_PREFIX}${hashId}`;
-              const existingResource: string | undefined = resourceById.get(stableId);
-
-              if (existingResource) {
-                compilation.errors.push(
-                  new Error(
-                    `Module id collision for ${resource} with ${existingResource}.\n This means you are bundling multiple versions of the same module.`
-                  )
-                );
-              }
-
-              stableIdToFinalId.set(stableId, originalId);
-
-              // Record to detect collisions
-              resourceById.set(stableId, resource);
-              mod.id = stableId;
+            if (existingResource) {
+              compilation.errors.push(
+                new Error(
+                  `Module id collision for ${identity} with ${existingResource}.\n This means you are bundling multiple versions of the same module.`
+                )
+              );
             }
+
+            stableIdToFinalId.set(stableId, originalId);
+
+            // Record to detect collisions
+            resourceById.set(stableId, identity);
+            mod.id = stableId;
           }
         });
 
