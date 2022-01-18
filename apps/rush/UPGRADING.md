@@ -1,6 +1,6 @@
 # Upgrade notes for @microsoft/rush
 
-### Rush 5.60.0
+### Rush 5.60.0-rc.1
 
 This release of Rush includes a breaking change for the experiment build cache feature. It only affects
 monorepos with `buildCacheEnabled=true` in `experiments.json`.
