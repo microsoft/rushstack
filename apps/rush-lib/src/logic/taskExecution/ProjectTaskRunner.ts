@@ -34,7 +34,7 @@ import { BaseTaskRunner, ITaskRunnerContext } from './BaseTaskRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { ICacheOptionsForCommand, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import type { CommandLineConfiguration, IPhase } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../RushConstants';
@@ -413,18 +413,18 @@ export class ProjectTaskRunner extends BaseTaskRunner {
             terminal
           );
         if (projectConfiguration) {
-          if (projectConfiguration.cacheOptions?.disableBuildCache) {
+          if (projectConfiguration.disableBuildCacheForProject) {
             terminal.writeVerboseLine('Caching has been disabled for this project.');
           } else {
-            const commandOptions: ICacheOptionsForCommand | undefined =
-              projectConfiguration.cacheOptions.optionsForCommandsByName.get(this._commandName);
-            if (commandOptions?.disableBuildCache) {
+            const operationSettings: IOperationSettings | undefined =
+              projectConfiguration.operationSettingsByOperationName.get(this._commandName);
+            if (operationSettings?.disableBuildCacheForOperation) {
               terminal.writeVerboseLine(
                 `Caching has been disabled for this project's "${this._commandName}" command.`
               );
             } else {
               const projectOutputFolderNames: ReadonlyArray<string> =
-                projectConfiguration.projectOutputFolderNamesForPhases.get(this._phase.name) || [];
+                operationSettings?.outputFolderNames || [];
               this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
                 projectConfiguration,
                 projectOutputFolderNames,

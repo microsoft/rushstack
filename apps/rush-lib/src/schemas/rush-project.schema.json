@@ -4,6 +4,7 @@
   "description": "For use with the Rush tool, this file provides per-project configuration options. See http://rushjs.io for details.",
 
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
@@ -15,45 +16,6 @@
       "type": "string"
     },
 
-    "buildCacheOptions": {
-      "type": "object",
-      "properties": {
-        "disableBuildCache": {
-          "description": "Selectively disables the build cache for this project. The project will never be restored from cache. This is a useful workaround if that project's build scripts violate the assumptions of the cache, for example by writing files outside the project folder. Where possible, a better solution is to improve the build scripts to be compatible with caching.",
-          "type": "boolean"
-        },
-
-        "optionsForCommands": {
-          "description": "Allows for fine-grained control of cache for individual Rush commands.",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["name"],
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "The Rush command name, as defined in custom-commands.json"
-              },
-
-              "disableBuildCache": {
-                "description": "Selectively disables the build cache for this come. The project will never be restored from cache. This is a useful workaround if that project's build scripts violate the assumptions of the cache, for example by writing files outside the project folder. Where possible, a better solution is to improve the build scripts to be compatible with caching.",
-                "type": "boolean"
-              }
-            }
-          }
-        }
-      }
-    },
-
-    "projectOutputFolderNames": {
-      "type": "array",
-      "description": "Specify the folders where your toolchain writes its output files. If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder. These folders should not be tracked by Git. They must not contain symlinks.",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
-    },
-
     "incrementalBuildIgnoredGlobs": {
       "type": "array",
       "description": "The incremental analyzer can skip Rush commands for projects whose input files have not changed since the last build. Normally, every Git-tracked file under the project folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific files, specified as globs relative to the project folder. The list of file globs will be interpreted the same way your .gitignore file is.",
@@ -62,25 +24,36 @@
       }
     },
 
-    "phaseOptions": {
+    "disableBuildCacheForProject": {
+      "description": "Disable caching for this project. The project will never be restored from cache. This may be useful if this project affects state outside of its folder.",
+      "type": "boolean"
+    },
+
+    "operationSettings": {
       "type": "array",
-      "description": "Options for individual phases.",
+      "description": "Options for individual commands and phases.",
       "items": {
         "type": "object",
-        "required": ["phaseName"],
+        "additionalProperties": false,
+        "required": ["operationName"],
         "properties": {
-          "phaseName": {
+          "operationName": {
             "type": "string",
-            "description": "The name of the phase. This is the name that appears in command-line.json."
+            "description": "The name of the operation. This should be a key in the `package.json`'s `scripts` object."
           },
 
-          "projectOutputFolderNames": {
+          "outputFolderNames": {
             "type": "array",
-            "description": "Specify the folders where this phase writes its output files. If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder. These folders should not be tracked by Git. They must not contain symlinks.",
+            "description": "Specify the folders where this operation writes its output files. If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder. These folders should not be tracked by Git. They must not contain symlinks.",
             "items": {
               "type": "string"
             },
             "uniqueItems": true
+          },
+
+          "disableBuildCacheForOperation": {
+            "description": "Disable caching for this operation. The operation will never be restored from cache. This may be useful if this operation affects state outside of its folder.",
+            "type": "boolean"
           }
         }
       }
