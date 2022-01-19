@@ -352,19 +352,19 @@ export class RushProjectConfiguration {
                       overlappingOperationNames?.includes(operationName);
                     if (overlapsWithOwnOperation) {
                       terminal.writeErrorLine(
-                        `The "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" config file in the ` +
-                          `"${project.packageName}" project defines an operation "${operationName}" with a path ` +
-                          `("${outputFolderName}") in "outputFolderNames" that overlaps with another path in the ` +
-                          'same operation.'
+                        `The project "${project.packageName}" has a ` +
+                          `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines an ` +
+                          `operation with overlapping paths in the "outputFolderNames" list. The operation is ` +
+                          `"${operationName}", and the conflicting path is "${outputFolderName}".`
                       );
                     } else {
                       terminal.writeErrorLine(
-                        `The "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" config file in the ` +
-                          `"${project.packageName}" project defines two potentially simultaneous operations whose ` +
-                          '"outputFolderNames" would overlap. Simultaneous operations should not delete each ' +
-                          "other's output." +
+                        `The project "${project.packageName}" has a ` +
+                          `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines ` +
+                          'two potentially simultaneous operations whose "outputFolderNames" would overlap. ' +
+                          "Simultaneous operations should not delete each other's output." +
                           `\n\n` +
-                          `The "${outputFolderName}" path overlaps across these operations: ` +
+                          `The "${outputFolderName}" path overlaps between these operations: ` +
                           overlappingOperationNames.map((operationName) => `"${operationName}"`).join(', ')
                       );
                     }
