@@ -297,7 +297,6 @@ export class RushProjectConfiguration {
       IOperationSettings
     >();
     if (rushProjectJson.operationSettings) {
-      const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> = new OverlappingPathAnalyzer<string>();
       for (const operationSettings of rushProjectJson.operationSettings) {
         const operationName: string = operationSettings.operationName;
         const existingOperationSettings: IOperationSettings | undefined =
@@ -329,41 +328,51 @@ export class RushProjectConfiguration {
         } else {
           operationSettingsByOperationName.set(operationName, operationSettings);
         }
+      }
 
-        if (operationSettings.outputFolderNames) {
-          for (const outputFolderName of operationSettings.outputFolderNames) {
-            const overlappingOperationNames: string[] | undefined =
-              overlappingPathAnalyzer.addPathAndGetFirstEncounteredLabels(outputFolderName, operationName);
-            if (overlappingOperationNames) {
-              const overlapsWithOwnOperation: boolean = overlappingOperationNames?.includes(operationName);
-              if (overlapsWithOwnOperation) {
-                if (overlappingOperationNames.length === 1) {
-                  terminal.writeErrorLine(
-                    `Invalid "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" ` +
-                      `for project "${project.packageName}". The project output folder name "${outputFolderName}" in ` +
-                      `operation ${operationName} overlaps with another folder name in the same operation.`
-                  );
-                } else {
-                  const otherOperationNames: string[] = overlappingOperationNames.filter(
-                    (overlappingOperationName) => overlappingOperationName !== operationName
-                  );
-                  terminal.writeErrorLine(
-                    `Invalid "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" ` +
-                      `for project "${project.packageName}". The project output folder name "${outputFolderName}" in ` +
-                      `operation ${operationName} overlaps with other folder names in the same operation and with ` +
-                      `folder names in the following other operations: ${otherOperationNames.join(', ')}.`
-                  );
+      // For each phased command, check if any of its phases' output folders overlap.
+      for (const command of repoCommandLineConfiguration.commands.values()) {
+        if (command.commandKind === 'phased') {
+          const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> =
+            new OverlappingPathAnalyzer<string>();
+
+          for (const operationName of command.phases) {
+            const operationSettings: IOperationSettings | undefined =
+              operationSettingsByOperationName.get(operationName);
+            if (operationSettings) {
+              if (operationSettings.outputFolderNames) {
+                for (const outputFolderName of operationSettings.outputFolderNames) {
+                  const overlappingOperationNames: string[] | undefined =
+                    overlappingPathAnalyzer.addPathAndGetFirstEncounteredLabels(
+                      outputFolderName,
+                      operationName
+                    );
+                  if (overlappingOperationNames) {
+                    const overlapsWithOwnOperation: boolean =
+                      overlappingOperationNames?.includes(operationName);
+                    if (overlapsWithOwnOperation) {
+                      terminal.writeErrorLine(
+                        `The "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" config file in the ` +
+                          `"${project.packageName}" project defines an operation "${operationName}" with a path ` +
+                          `("${outputFolderName}") in "outputFolderNames" that overlaps with another path in the ` +
+                          'same operation.'
+                      );
+                    } else {
+                      terminal.writeErrorLine(
+                        `The "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" config file in the ` +
+                          `"${project.packageName}" project defines two potentially simultaneous operations whose ` +
+                          '"outputFolderNames" would overlap. Simultaneous operations should not delete each ' +
+                          "other's output." +
+                          `\n\n` +
+                          `The "${outputFolderName}" path overlaps across these operations: ` +
+                          overlappingOperationNames.map((operationName) => `"${operationName}"`).join(', ')
+                      );
+                    }
+
+                    throw new AlreadyReportedError();
+                  }
                 }
-              } else {
-                terminal.writeErrorLine(
-                  `Invalid "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" ` +
-                    `for project "${project.packageName}". The project output folder name "${outputFolderName}" in ` +
-                    `operation ${operationName} overlaps with other folder name(s) in the following other operations: ` +
-                    `${overlappingOperationNames.join(', ')}.`
-                );
               }
-
-              throw new AlreadyReportedError();
             }
           }
         }
