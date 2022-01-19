@@ -23,7 +23,6 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
 import { IProjectTaskSelectorOptions, ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
-import { IFlagParameterJson } from '../../api/CommandLineJson';
 import { Selection } from '../../logic/Selection';
 
 /**
@@ -128,25 +127,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     }
 
     const phasesToRun: Set<string> = new Set(this._actionPhases);
-    for (const parameter of this.command.associatedParameters) {
-      if (parameter.parameterKind === 'flag') {
-        if (this.getFlagParameter(parameter.longName)!.value) {
-          const flagParameter: IFlagParameterJson = parameter as IFlagParameterJson;
-          if (flagParameter.addPhasesToCommand) {
-            for (const phase of flagParameter.addPhasesToCommand) {
-              phasesToRun.add(phase);
-            }
-          }
-
-          if (flagParameter.skipPhasesForCommand) {
-            for (const phase of flagParameter.skipPhasesForCommand) {
-              phasesToRun.delete(phase);
-            }
-          }
-        }
-      }
-    }
-
     const taskSelectorOptions: IProjectTaskSelectorOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,

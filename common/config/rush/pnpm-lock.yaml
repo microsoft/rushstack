@@ -1036,14 +1036,6 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@4.5.2
       typescript: 4.5.2
 
-  ../../build-tests/install-test-workspace:
-    specifiers:
-      '@microsoft/rush-lib': workspace:*
-      '@rushstack/node-core-library': workspace:*
-    devDependencies:
-      '@microsoft/rush-lib': link:../../apps/rush-lib
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-
   ../../build-tests/localization-plugin-test-01:
     specifiers:
       '@rushstack/localization-plugin': workspace:*
