@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier-plugin",
+      "comment": "Add support for `compressAsyncImports` flag. Modify `usePortableModules` option to use `module.identifier()` instead of `module.resource` so that loader configuration is accounted for during deduplication. Switch to overriding the render function on the JavaScript module template to deduplicate rendering across chunks.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin"
+}
