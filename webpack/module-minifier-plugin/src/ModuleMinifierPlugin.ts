@@ -525,15 +525,10 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             }
 
             // All assets and modules have been minified, hand them off to be rehydrated
-
-            // Clone the maps for safety, even though we won't be using them in the plugin anymore
-            const assets: IAssetMap = new Map(minifiedAssets);
-            const modules: IModuleMap = new Map(minifiedModules);
-
             await this.hooks.rehydrateAssets.promise(
               {
-                assets,
-                modules
+                assets: minifiedAssets,
+                modules: minifiedModules
               },
               compilation
             );
