@@ -16,14 +16,14 @@ steps:
     displayName: 'Rush Rebuild (install-run-rush)'
     env:
       # Prevent time-based browserslist update warning
-      # See https://github.com/microsoft/rushstack/issues/2981 
+      # See https://github.com/microsoft/rushstack/issues/2981
       BROWSERSLIST_IGNORE_OLD_DATA: 1
-# Re-enable after the schema changes to rush-project.json are published and pulled in
-#  - script: 'node apps/rush-lib/lib/start.js build --verbose --production'
-#    displayName: 'Rush Build (rush-lib)'
-#    env:
-#      # Prevent time-based browserslist update warning
-#      # See https://github.com/microsoft/rushstack/issues/2981
-#      BROWSERSLIST_IGNORE_OLD_DATA: 1
-  - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
-    displayName: 'Ensure repo README is up-to-date'
+  # TEMPORARY - Put these back once Rush is published and updated in rush.json
+  # - script: 'node apps/rush-lib/lib/start.js build --verbose --production'
+  #   displayName: 'Rush Build (rush-lib)'
+  #   env:
+  #     # Prevent time-based browserslist update warning
+  #     # See https://github.com/microsoft/rushstack/issues/2981
+  #     BROWSERSLIST_IGNORE_OLD_DATA: 1
+  # - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
+  #   displayName: 'Ensure repo README is up-to-date'

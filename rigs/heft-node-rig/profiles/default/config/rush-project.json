@@ -1,3 +1,12 @@
 {
-  "projectOutputFolderNames": ["dist", "lib", "temp"]
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["lib", "lib-commonjs", "temp"]
+    },
+    {
+      "operationName": "build",
+      "outputFolderNames": ["lib", "lib-commonjs", "temp"]
+    }
+  ]
 }
