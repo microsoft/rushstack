@@ -3,7 +3,7 @@
 
 import { Terminal } from '../Terminal';
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
-import { TerminalWritable } from '../TerminalWritable';
+import { TerminalStreamWritable } from '../TerminalStreamWritable';
 import { TerminalProviderSeverity } from '../ITerminalProvider';
 import type { Writable } from 'stream';
 
@@ -33,14 +33,14 @@ async function writeAsync(writable: Writable, data: string): Promise<void> {
   });
 }
 
-describe(TerminalWritable.name, () => {
+describe(TerminalStreamWritable.name, () => {
   beforeEach(() => {
     provider = new StringBufferTerminalProvider(true);
     terminal = new Terminal(provider);
   });
 
   test('writes a message', async () => {
-    const writable: TerminalWritable = new TerminalWritable({
+    const writable: TerminalStreamWritable = new TerminalStreamWritable({
       terminal,
       severity: TerminalProviderSeverity.log
     });
@@ -50,7 +50,7 @@ describe(TerminalWritable.name, () => {
   });
 
   test('writes a verbose message', async () => {
-    const writable: TerminalWritable = new TerminalWritable({
+    const writable: TerminalStreamWritable = new TerminalStreamWritable({
       terminal,
       severity: TerminalProviderSeverity.verbose
     });
@@ -60,7 +60,7 @@ describe(TerminalWritable.name, () => {
   });
 
   test('writes a debug message', async () => {
-    const writable: TerminalWritable = new TerminalWritable({
+    const writable: TerminalStreamWritable = new TerminalStreamWritable({
       terminal,
       severity: TerminalProviderSeverity.debug
     });
@@ -70,7 +70,7 @@ describe(TerminalWritable.name, () => {
   });
 
   test('writes a warning message', async () => {
-    const writable: TerminalWritable = new TerminalWritable({
+    const writable: TerminalStreamWritable = new TerminalStreamWritable({
       terminal,
       severity: TerminalProviderSeverity.warning
     });
@@ -80,7 +80,7 @@ describe(TerminalWritable.name, () => {
   });
 
   test('writes an error message', async () => {
-    const writable: TerminalWritable = new TerminalWritable({
+    const writable: TerminalStreamWritable = new TerminalStreamWritable({
       terminal,
       severity: TerminalProviderSeverity.error
     });

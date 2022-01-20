@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Writable, type WritableOptions } from 'stream';
 import type { ITerminal } from './ITerminal';
 import { TerminalProviderSeverity } from './ITerminalProvider';
-import { Writable, type WritableOptions } from 'stream';
 
 /**
- * Options for {@link TerminalWritable}.
+ * Options for {@link TerminalStreamWritable}.
  *
  * @beta
  */
-export interface ITerminalWritableOptions {
+export interface ITerminalStreamWritableOptions {
   /**
    * The {@link ITerminal} that the Writable will write to.
    */
@@ -30,10 +30,10 @@ export interface ITerminalWritableOptions {
  *
  * @beta
  */
-export class TerminalWritable extends Writable {
+export class TerminalStreamWritable extends Writable {
   private _writeMethod: (data: string) => void;
 
-  public constructor(options: ITerminalWritableOptions) {
+  public constructor(options: ITerminalStreamWritableOptions) {
     const { terminal, severity, writableOptions } = options;
     super(writableOptions);
 

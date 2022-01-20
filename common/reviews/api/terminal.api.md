@@ -4,15 +4,110 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import type { Brand } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
+import { Writable } from 'stream';
+import { WritableOptions } from 'stream';
+
+// @public
+export class AnsiEscape {
+    static formatForTests(text: string, options?: IAnsiEscapeConvertForTestsOptions): string;
+    static removeCodes(text: string): string;
+}
 
 // @public
 export class CallbackWritable extends TerminalWritable {
     constructor(options: ICallbackWritableOptions);
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
+}
+
+// @beta
+export class Colors {
+    // (undocumented)
+    static black(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static blackBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static blink(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static blue(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static blueBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static bold(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static cyan(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static cyanBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static dim(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static gray(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static grayBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static green(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static greenBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static hidden(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static invertColor(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static magenta(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static magentaBackground(text: string | IColorableSequence): IColorableSequence;
+    // @internal
+    static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static red(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static redBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static underline(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static white(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static whiteBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static yellow(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static yellowBackground(text: string | IColorableSequence): IColorableSequence;
+}
+
+// @beta
+export enum ColorValue {
+    // (undocumented)
+    Black = 0,
+    // (undocumented)
+    Blue = 4,
+    // (undocumented)
+    Cyan = 6,
+    // (undocumented)
+    Gray = 8,
+    // (undocumented)
+    Green = 2,
+    // (undocumented)
+    Magenta = 5,
+    // (undocumented)
+    Red = 1,
+    // (undocumented)
+    White = 7,
+    // (undocumented)
+    Yellow = 3
+}
+
+// @beta
+export class ConsoleTerminalProvider implements ITerminalProvider {
+    constructor(options?: Partial<IConsoleTerminalProviderOptions>);
+    debugEnabled: boolean;
+    get eolCharacter(): string;
+    get supportsColor(): boolean;
+    verboseEnabled: boolean;
+    write(data: string, severity: TerminalProviderSeverity): void;
 }
 
 // @public
@@ -26,13 +121,43 @@ export class DiscardStdoutTransform extends TerminalTransform {
 }
 
 // @public
+export interface IAnsiEscapeConvertForTestsOptions {
+    encodeNewlines?: boolean;
+}
+
+// @public
 export interface ICallbackWritableOptions {
     // (undocumented)
     onWriteChunk: (chunk: ITerminalChunk) => void;
 }
 
+// @beta (undocumented)
+export interface IColorableSequence {
+    // (undocumented)
+    backgroundColor?: ColorValue;
+    // (undocumented)
+    foregroundColor?: ColorValue;
+    // (undocumented)
+    isEol?: boolean;
+    // (undocumented)
+    text: string;
+    // (undocumented)
+    textAttributes?: TextAttribute[];
+}
+
+// @beta
+export interface IConsoleTerminalProviderOptions {
+    debugEnabled: boolean;
+    verboseEnabled: boolean;
+}
+
 // @beta
 export interface IDiscardStdoutTransformOptions extends ITerminalTransformOptions {
+}
+
+// @beta
+export interface IDynamicPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
+    getPrefix: () => string;
 }
 
 // @public
@@ -41,9 +166,22 @@ export interface INormalizeNewlinesTextRewriterOptions {
     newlineKind: NewlineKind;
 }
 
+// @beta (undocumented)
+export type IPrefixProxyTerminalProviderOptions = IStaticPrefixProxyTerminalProviderOptions | IDynamicPrefixProxyTerminalProviderOptions;
+
+// @beta (undocumented)
+export interface IPrefixProxyTerminalProviderOptionsBase {
+    terminalProvider: ITerminalProvider;
+}
+
 // @public
 export interface ISplitterTransformOptions extends ITerminalWritableOptions {
     destinations: TerminalWritable[];
+}
+
+// @beta
+export interface IStaticPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
+    prefix: string;
 }
 
 // @beta
@@ -57,10 +195,45 @@ export interface IStdioSummarizerOptions {
     trailingLines?: number;
 }
 
+// @beta (undocumented)
+export interface IStringBufferOutputOptions {
+    normalizeSpecialCharacters: boolean;
+}
+
+// @beta (undocumented)
+export interface ITerminal {
+    registerProvider(provider: ITerminalProvider): void;
+    unregisterProvider(provider: ITerminalProvider): void;
+    write(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeError(...messageParts: (string | IColorableSequence)[]): void;
+    writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
+    writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeWarning(...messageParts: (string | IColorableSequence)[]): void;
+    writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
+}
+
 // @public
 export interface ITerminalChunk {
     kind: TerminalChunkKind;
     text: string;
+}
+
+// @beta
+export interface ITerminalProvider {
+    eolCharacter: string;
+    supportsColor: boolean;
+    write(data: string, severity: TerminalProviderSeverity): void;
+}
+
+// @beta
+export interface ITerminalStreamWritableOptions {
+    severity: TerminalProviderSeverity;
+    terminal: ITerminal;
+    writableOptions?: WritableOptions;
 }
 
 // @public
@@ -110,9 +283,21 @@ export class NormalizeNewlinesTextRewriter extends TextRewriter {
     process(unknownState: TextRewriterState, text: string): string;
 }
 
+// @beta
+export class PrefixProxyTerminalProvider implements ITerminalProvider {
+    constructor(options: IPrefixProxyTerminalProviderOptions);
+    // @override (undocumented)
+    get eolCharacter(): string;
+    // @override (undocumented)
+    get supportsColor(): boolean;
+    // @override (undocumented)
+    write(data: string, severity: TerminalProviderSeverity): void;
+}
+
 // @public
 export class PrintUtilities {
     static getConsoleWidth(): number | undefined;
+    // Warning: (ae-incompatible-release-tags) The symbol "printMessageInBox" is marked as @public, but its signature references "ITerminal" which is marked as @beta
     static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
     static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
     static wrapWords(text: string, maxLineLength?: number, linePrefix?: string): string;
@@ -170,10 +355,61 @@ export class StdioWritable extends TerminalWritable {
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
+// @beta
+export class StringBufferTerminalProvider implements ITerminalProvider {
+    constructor(supportsColor?: boolean);
+    get eolCharacter(): string;
+    getDebugOutput(options?: IStringBufferOutputOptions): string;
+    getErrorOutput(options?: IStringBufferOutputOptions): string;
+    getOutput(options?: IStringBufferOutputOptions): string;
+    getVerbose(options?: IStringBufferOutputOptions): string;
+    getWarningOutput(options?: IStringBufferOutputOptions): string;
+    get supportsColor(): boolean;
+    write(data: string, severity: TerminalProviderSeverity): void;
+}
+
+// @beta
+export class Terminal implements ITerminal {
+    constructor(provider: ITerminalProvider);
+    registerProvider(provider: ITerminalProvider): void;
+    unregisterProvider(provider: ITerminalProvider): void;
+    write(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeError(...messageParts: (string | IColorableSequence)[]): void;
+    writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
+    writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeWarning(...messageParts: (string | IColorableSequence)[]): void;
+    writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
+}
+
 // @public
 export const enum TerminalChunkKind {
     Stderr = "E",
     Stdout = "O"
+}
+
+// @beta
+export enum TerminalProviderSeverity {
+    // (undocumented)
+    debug = 4,
+    // (undocumented)
+    error = 2,
+    // (undocumented)
+    log = 0,
+    // (undocumented)
+    verbose = 3,
+    // (undocumented)
+    warning = 1
+}
+
+// @beta
+export class TerminalStreamWritable extends Writable {
+    constructor(options: ITerminalStreamWritableOptions);
+    // (undocumented)
+    _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: (error?: Error | null) => void): void;
 }
 
 // @public
@@ -201,6 +437,22 @@ export abstract class TerminalWritable {
     readonly preventAutoclose: boolean;
     // @sealed
     writeChunk(chunk: ITerminalChunk): void;
+}
+
+// @beta
+export enum TextAttribute {
+    // (undocumented)
+    Blink = 3,
+    // (undocumented)
+    Bold = 0,
+    // (undocumented)
+    Dim = 1,
+    // (undocumented)
+    Hidden = 5,
+    // (undocumented)
+    InvertColor = 4,
+    // (undocumented)
+    Underline = 2
 }
 
 // @public

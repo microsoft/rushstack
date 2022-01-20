@@ -7,9 +7,8 @@
  * Run this program with `node write-colors.js`
  */
 
-import { Terminal, ConsoleTerminalProvider } from '../../index';
+import { Terminal, ConsoleTerminalProvider, Colors, type IColorableSequence } from '../index';
 import { createColorGrid } from './createColorGrid';
-import { Colors, type IColorableSequence } from '../Colors';
 
 const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 function writeColorGrid(colorGridSequences: IColorableSequence[][]): void {
