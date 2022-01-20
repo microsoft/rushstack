@@ -3,7 +3,7 @@
 
 import { parseGitStatus, parseGitVersion } from '../getRepoState';
 
-describe('parseGitVersion', () => {
+describe(parseGitVersion.name, () => {
   it('Can parse valid git version responses', () => {
     expect(parseGitVersion('git version 2.30.2.windows.1')).toEqual({
       major: 2,
@@ -38,7 +38,7 @@ describe('parseGitVersion', () => {
   });
 });
 
-describe('parseGitStatus', () => {
+describe(parseGitStatus.name, () => {
   it('Finds index entries', () => {
     const files: string[] = [`A.ts`, `B.ts`, `C.ts`];
     const input: string = [`A  ${files[0]}`, `D  ${files[1]}`, `M  ${files[2]}`, ''].join('\0');
