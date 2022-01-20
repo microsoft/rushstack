@@ -140,8 +140,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     };
 
     const taskSelectorOptions: IProjectTaskSelectorOptions = {
-      projects: this.rushConfiguration.projectsByName,
-      phases: this._phases,
       phasesToRun: phasesToRun
     };
 

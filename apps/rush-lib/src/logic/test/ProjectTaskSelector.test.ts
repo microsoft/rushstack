@@ -54,8 +54,6 @@ describe('ProjectTaskSelector', () => {
       const buildCommand: IPhasedCommand = commandLineConfiguration.commands.get('build')! as IPhasedCommand;
 
       const taskSelector: ProjectTaskSelector = new ProjectTaskSelector({
-        phases: commandLineConfiguration.phases,
-        projects: rushConfiguration.projectsByName,
         phasesToRun: buildCommand.phases
       });
 
@@ -75,8 +73,6 @@ describe('ProjectTaskSelector', () => {
       const buildCommand: IPhasedCommand = commandLineConfiguration.commands.get('build')! as IPhasedCommand;
 
       const taskSelector: ProjectTaskSelector = new ProjectTaskSelector({
-        phases: commandLineConfiguration.phases,
-        projects: rushConfiguration.projectsByName,
         phasesToRun: buildCommand.phases
       });
 
@@ -112,8 +108,6 @@ describe('ProjectTaskSelector', () => {
       expect(
         Array.from(
           new ProjectTaskSelector({
-            phases: commandLineConfiguration.phases,
-            projects: rushConfiguration.projectsByName,
             phasesToRun: new Set([commandLineConfiguration.phases.get('_phase:upstream-self')!])
           }).createTasks({
             projectSelection: new Set(rushConfiguration.projects),
@@ -127,8 +121,6 @@ describe('ProjectTaskSelector', () => {
       expect(
         Array.from(
           new ProjectTaskSelector({
-            phases: commandLineConfiguration.phases,
-            projects: rushConfiguration.projectsByName,
             phasesToRun: new Set([
               commandLineConfiguration.phases.get('_phase:complex')!,
               commandLineConfiguration.phases.get('_phase:upstream-3')!,
@@ -149,8 +141,6 @@ describe('ProjectTaskSelector', () => {
       expect(
         Array.from(
           new ProjectTaskSelector({
-            phases: commandLineConfiguration.phases,
-            projects: rushConfiguration.projectsByName,
             phasesToRun: new Set([commandLineConfiguration.phases.get('_phase:upstream-2')!])
           }).createTasks({
             projectSelection: new Set([
@@ -168,8 +158,6 @@ describe('ProjectTaskSelector', () => {
       expect(
         Array.from(
           new ProjectTaskSelector({
-            phases: commandLineConfiguration.phases,
-            projects: rushConfiguration.projectsByName,
             phasesToRun: new Set([
               commandLineConfiguration.phases.get('_phase:complex')!,
               commandLineConfiguration.phases.get('_phase:upstream-3')!,
