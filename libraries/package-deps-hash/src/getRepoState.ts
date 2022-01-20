@@ -103,7 +103,7 @@ export function parseGitDiffIndex(output: string): Map<string, IFileDiffStatus> 
 }
 
 /**
- * Parses the output of `git status -z -u`
+ * Parses the output of `git status -z -u` to extract the set of files that have changed since HEAD.
  *
  * @param output - The raw output from Git
  * @returns a map of file path to if it exists
@@ -118,19 +118,21 @@ export function parseGitStatus(output: string): Map<string, boolean> {
   // XY <path>\0
   //  M tools/prettier-git/prettier-git.js\0
 
-  let last: number = 0;
-  let index: number = output.indexOf('\0', last);
-  while (index >= 0) {
+  let startOfLine: number = 0;
+  let eolIndex: number = output.indexOf('\0', startOfLine);
+  while (eolIndex >= 0) {
     // We passed --no-renames above, so a rename will be a delete of the old location and an add at the new.
-    const workingTreeStatus: string = output.charAt(last + 2);
-    const exists: boolean =
-      workingTreeStatus !== 'D' && (workingTreeStatus !== ' ' || output.charAt(last + 1) !== 'D');
-    const filePath: string = output.slice(last + 3, index);
+    // charAt(startOfLine) is the index status, charAt(startOfLine + 1) is the working tree status
+    const workingTreeStatus: string = output.charAt(startOfLine + 1);
+    // Deleted in working tree, or not modified in working tree and deleted in index
+    const deleted: boolean =
+      workingTreeStatus === 'D' || (workingTreeStatus === ' ' && output.charAt(startOfLine) === 'D');
 
-    result.set(filePath, exists);
+    const filePath: string = output.slice(startOfLine + 3, eolIndex);
+    result.set(filePath, !deleted);
 
-    last = index + 1;
-    index = output.indexOf('\0', last);
+    startOfLine = eolIndex + 1;
+    eolIndex = output.indexOf('\0', startOfLine);
   }
 
   return result;
