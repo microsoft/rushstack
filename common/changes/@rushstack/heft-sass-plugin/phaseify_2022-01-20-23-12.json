@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-sass-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
