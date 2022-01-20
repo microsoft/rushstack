@@ -511,12 +511,18 @@ export class CommandLineConfiguration {
    */
   public static loadFromFileOrDefault(jsonFilePath?: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineJson | undefined = undefined;
-    if (jsonFilePath && FileSystem.exists(jsonFilePath)) {
-      commandLineJson = JsonFile.load(jsonFilePath);
+    if (jsonFilePath) {
+      try {
+        commandLineJson = JsonFile.load(jsonFilePath);
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e as Error)) {
+          throw e;
+        }
+      }
 
       // merge commands specified in command-line.json and default (re)build settings
       // Ensure both build commands are included and preserve any other commands specified
-      if (commandLineJson && commandLineJson.commands) {
+      if (commandLineJson?.commands) {
         for (let i: number = 0; i < commandLineJson.commands.length; i++) {
           const command: CommandJson = commandLineJson.commands[i];
 
