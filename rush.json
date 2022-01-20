@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.60.0-rc.1",
+  "rushVersion": "5.60.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -747,12 +747,12 @@
       "shouldPublish": false
     },
 
-    // {
-    //   "packageName": "install-test-workspace",
-    //   "projectFolder": "build-tests/install-test-workspace",
-    //   "reviewCategory": "tests",
-    //   "shouldPublish": false
-    // },
+    {
+      "packageName": "install-test-workspace",
+      "projectFolder": "build-tests/install-test-workspace",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
