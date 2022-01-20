@@ -2,15 +2,44 @@
 // See LICENSE in the project root for license information.
 
 import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
-import {
-  type IColorableSequence,
-  ColorValue,
-  Colors,
-  eolSequence,
-  TextAttribute,
-  ConsoleColorCodes
-} from './Colors';
+import { Colors, ConsoleColorCodes } from './Colors';
 import type { ITerminal } from './ITerminal';
+import { AnsiEscape } from './AnsiEscape';
+
+/**
+ * Colors used with {@link ILegacyColorableSequence}.
+ */
+enum ColorValue {
+  Black,
+  Red,
+  Green,
+  Yellow,
+  Blue,
+  Magenta,
+  Cyan,
+  White,
+  Gray
+}
+
+/**
+ * Text styles used with {@link ILegacyColorableSequence}.
+ */
+enum TextAttribute {
+  Bold,
+  Dim,
+  Underline,
+  Blink,
+  InvertColor,
+  Hidden
+}
+
+interface ILegacyColorableSequence {
+  text: string;
+  isEol?: boolean;
+  foregroundColor?: ColorValue;
+  backgroundColor?: ColorValue;
+  textAttributes?: TextAttribute[];
+}
 
 /**
  * This class facilitates writing to a console.
@@ -44,345 +73,320 @@ export class Terminal implements ITerminal {
   /**
    * {@inheritdoc ITerminal.write}
    */
-  public write(...messageParts: (string | IColorableSequence)[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.log);
+  public write(...messageParts: string[]): void {
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.log, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeLine}
    */
-  public writeLine(...messageParts: (string | IColorableSequence)[]): void {
-    this.write(...messageParts, eolSequence);
+  public writeLine(...messageParts: string[]): void {
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.log, true);
   }
 
   /**
    * {@inheritdoc ITerminal.writeWarning}
    */
-  public writeWarning(...messageParts: (string | IColorableSequence)[]): void {
+  public writeWarning(...messageParts: string[]): void {
     this._writeSegmentsToProviders(
-      messageParts.map(
-        (part): IColorableSequence => ({
-          ...Colors._normalizeStringOrColorableSequence(part),
-          foregroundColor: ColorValue.Yellow
-        })
-      ),
-      TerminalProviderSeverity.warning
+      messageParts.map((part): string => Colors.yellow(AnsiEscape.removeCodes(part))),
+      TerminalProviderSeverity.warning,
+      false
     );
   }
 
   /**
    * {@inheritdoc ITerminal.writeWarningLine}
    */
-  public writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
+  public writeWarningLine(...messageParts: string[]): void {
     this._writeSegmentsToProviders(
-      [
-        ...messageParts.map(
-          (part): IColorableSequence => ({
-            ...Colors._normalizeStringOrColorableSequence(part),
-            foregroundColor: ColorValue.Yellow
-          })
-        ),
-        eolSequence
-      ],
-      TerminalProviderSeverity.warning
+      messageParts.map((part): string => Colors.yellow(AnsiEscape.removeCodes(part))),
+      TerminalProviderSeverity.warning,
+      true
     );
   }
 
   /**
    * {@inheritdoc ITerminal.writeError}
    */
-  public writeError(...messageParts: (string | IColorableSequence)[]): void {
+  public writeError(...messageParts: string[]): void {
     this._writeSegmentsToProviders(
-      messageParts.map(
-        (part): IColorableSequence => ({
-          ...Colors._normalizeStringOrColorableSequence(part),
-          foregroundColor: ColorValue.Red
-        })
-      ),
-      TerminalProviderSeverity.error
+      messageParts.map((part): string => Colors.red(AnsiEscape.removeCodes(part))),
+      TerminalProviderSeverity.error,
+      false
     );
   }
 
   /**
    * {@inheritdoc ITerminal.writeErrorLine}
    */
-  public writeErrorLine(...messageParts: (string | IColorableSequence)[]): void {
+  public writeErrorLine(...messageParts: string[]): void {
     this._writeSegmentsToProviders(
-      [
-        ...messageParts.map(
-          (part): IColorableSequence => ({
-            ...Colors._normalizeStringOrColorableSequence(part),
-            foregroundColor: ColorValue.Red
-          })
-        ),
-        eolSequence
-      ],
-      TerminalProviderSeverity.error
+      messageParts.map((part): string => Colors.red(AnsiEscape.removeCodes(part))),
+      TerminalProviderSeverity.error,
+      true
     );
   }
 
   /**
    * {@inheritdoc ITerminal.writeVerbose}
    */
-  public writeVerbose(...messageParts: (string | IColorableSequence)[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.verbose);
+  public writeVerbose(...messageParts: string[]): void {
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.verbose, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeVerboseLine}
    */
-  public writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void {
-    this.writeVerbose(...messageParts, eolSequence);
+  public writeVerboseLine(...messageParts: string[]): void {
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.verbose, true);
   }
 
   /**
    * {@inheritdoc ITerminal.writeDebug}
    */
-  public writeDebug(...messageParts: (string | IColorableSequence)[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.debug);
+  public writeDebug(...messageParts: string[]): void {
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.debug, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeDebugLine}
    */
-  public writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
-    this.writeDebug(...messageParts, eolSequence);
+  public writeDebugLine(...messageParts: string[]): void {
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.debug, true);
   }
 
   private _writeSegmentsToProviders(
-    segments: (string | IColorableSequence)[],
-    severity: TerminalProviderSeverity
+    segments: (string | ILegacyColorableSequence)[],
+    severity: TerminalProviderSeverity,
+    followedByEol: boolean
   ): void {
-    const withColorText: { [eolChar: string]: string } = {};
-    const withoutColorText: { [eolChar: string]: string } = {};
-    let withColorLines: string[] | undefined;
-    let withoutColorLines: string[] | undefined;
-
-    this._providers.forEach((provider) => {
-      const eol: string = provider.eolCharacter;
-      let textToWrite: string;
-      if (provider.supportsColor) {
-        if (!withColorLines) {
-          withColorLines = this._serializeFormattableTextSegments(segments, true);
-        }
-
-        if (!withColorText[eol]) {
-          withColorText[eol] = withColorLines.join(eol);
-        }
-
-        textToWrite = withColorText[eol];
+    const linesSegments: string[][] = [[]];
+    let currentLineSegments: string[] = linesSegments[0];
+    for (const segment of segments) {
+      if (typeof segment === 'string') {
+        currentLineSegments.push(segment);
       } else {
-        if (!withoutColorLines) {
-          withoutColorLines = this._serializeFormattableTextSegments(segments, false);
-        }
-
-        if (!withoutColorText[eol]) {
-          withoutColorText[eol] = withoutColorLines.join(eol);
-        }
-
-        textToWrite = withoutColorText[eol];
-      }
-
-      provider.write(textToWrite, severity);
-    });
-  }
-
-  private _serializeFormattableTextSegments(
-    segments: (string | IColorableSequence)[],
-    withColor: boolean
-  ): string[] {
-    const lines: string[] = [];
-    let segmentsToJoin: string[] = [];
-    let lastSegmentWasEol: boolean = false;
-    for (let i: number = 0; i < segments.length; i++) {
-      const segment: IColorableSequence = Colors._normalizeStringOrColorableSequence(segments[i]);
-      lastSegmentWasEol = !!segment.isEol;
-      if (lastSegmentWasEol) {
-        lines.push(segmentsToJoin.join(''));
-        segmentsToJoin = [];
-      } else {
-        if (withColor) {
-          const startColorCodes: number[] = [];
-          const endColorCodes: number[] = [];
-          switch (segment.foregroundColor) {
-            case ColorValue.Black: {
-              startColorCodes.push(ConsoleColorCodes.BlackForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-
-            case ColorValue.Red: {
-              startColorCodes.push(ConsoleColorCodes.RedForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-
-            case ColorValue.Green: {
-              startColorCodes.push(ConsoleColorCodes.GreenForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-
-            case ColorValue.Yellow: {
-              startColorCodes.push(ConsoleColorCodes.YellowForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-
-            case ColorValue.Blue: {
-              startColorCodes.push(ConsoleColorCodes.BlueForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-
-            case ColorValue.Magenta: {
-              startColorCodes.push(ConsoleColorCodes.MagentaForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-
-            case ColorValue.Cyan: {
-              startColorCodes.push(ConsoleColorCodes.CyanForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-
-            case ColorValue.White: {
-              startColorCodes.push(ConsoleColorCodes.WhiteForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-
-            case ColorValue.Gray: {
-              startColorCodes.push(ConsoleColorCodes.GrayForeground);
-              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
-              break;
-            }
-          }
-
-          switch (segment.backgroundColor) {
-            case ColorValue.Black: {
-              startColorCodes.push(ConsoleColorCodes.BlackBackground);
-              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
-              break;
-            }
-
-            case ColorValue.Red: {
-              startColorCodes.push(ConsoleColorCodes.RedBackground);
-              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
-              break;
-            }
-
-            case ColorValue.Green: {
-              startColorCodes.push(ConsoleColorCodes.GreenBackground);
-              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
-              break;
-            }
-
-            case ColorValue.Yellow: {
-              startColorCodes.push(ConsoleColorCodes.YellowBackground);
-              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
-              break;
-            }
-
-            case ColorValue.Blue: {
-              startColorCodes.push(ConsoleColorCodes.BlueBackground);
-              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
-              break;
-            }
-
-            case ColorValue.Magenta: {
-              startColorCodes.push(ConsoleColorCodes.MagentaBackground);
-              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
-              break;
-            }
-
-            case ColorValue.Cyan: {
-              startColorCodes.push(ConsoleColorCodes.CyanBackground);
-              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
-              break;
-            }
-
-            case ColorValue.White: {
-              startColorCodes.push(ConsoleColorCodes.WhiteBackground);
-              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
-              break;
-            }
-
-            case ColorValue.Gray: {
-              startColorCodes.push(ConsoleColorCodes.GrayBackground);
-              endColorCodes.push(49);
-              break;
-            }
-          }
-
-          if (segment.textAttributes) {
-            for (const textAttribute of segment.textAttributes) {
-              switch (textAttribute) {
-                case TextAttribute.Bold: {
-                  startColorCodes.push(ConsoleColorCodes.Bold);
-                  endColorCodes.push(ConsoleColorCodes.NormalColorOrIntensity);
-                  break;
-                }
-
-                case TextAttribute.Dim: {
-                  startColorCodes.push(ConsoleColorCodes.Dim);
-                  endColorCodes.push(ConsoleColorCodes.NormalColorOrIntensity);
-                  break;
-                }
-
-                case TextAttribute.Underline: {
-                  startColorCodes.push(ConsoleColorCodes.Underline);
-                  endColorCodes.push(ConsoleColorCodes.UnderlineOff);
-                  break;
-                }
-
-                case TextAttribute.Blink: {
-                  startColorCodes.push(ConsoleColorCodes.Blink);
-                  endColorCodes.push(ConsoleColorCodes.BlinkOff);
-                  break;
-                }
-
-                case TextAttribute.InvertColor: {
-                  startColorCodes.push(ConsoleColorCodes.InvertColor);
-                  endColorCodes.push(ConsoleColorCodes.InvertColorOff);
-                  break;
-                }
-
-                case TextAttribute.Hidden: {
-                  startColorCodes.push(ConsoleColorCodes.Hidden);
-                  endColorCodes.push(ConsoleColorCodes.HiddenOff);
-                  break;
-                }
-              }
-            }
-          }
-
-          for (let j: number = 0; j < startColorCodes.length; j++) {
-            const code: number = startColorCodes[j];
-            segmentsToJoin.push(...['\u001b[', code.toString(), 'm']);
-          }
-
-          segmentsToJoin.push(segment.text);
-
-          for (let j: number = endColorCodes.length - 1; j >= 0; j--) {
-            const code: number = endColorCodes[j];
-            segmentsToJoin.push(...['\u001b[', code.toString(), 'm']);
-          }
+        if (segment.isEol) {
+          linesSegments.push([]);
+          currentLineSegments = linesSegments[linesSegments.length - 1];
         } else {
-          segmentsToJoin.push(segment.text);
+          currentLineSegments.push(this._serializeLegacyColorableSequence(segment));
         }
       }
     }
 
-    if (segmentsToJoin.length > 0) {
-      lines.push(segmentsToJoin.join(''));
+    const lines: string[] = [];
+    for (const lineSegments of linesSegments) {
+      lines.push(lineSegments.join(''));
     }
 
-    if (lastSegmentWasEol) {
+    if (followedByEol) {
       lines.push('');
     }
 
-    return lines;
+    let linesWithoutColor: string[] | undefined;
+
+    const concatenatedLinesWithColorByNewlineChar: Map<string, string> = new Map();
+    const concatenatedLinesWithoutColorByNewlineChar: Map<string, string> = new Map();
+    for (const provider of this._providers) {
+      let textToWrite: string | undefined;
+      const eol: string = provider.eolCharacter;
+      if (provider.supportsColor) {
+        textToWrite = concatenatedLinesWithColorByNewlineChar.get(eol);
+        if (!textToWrite) {
+          textToWrite = lines.join(eol);
+          concatenatedLinesWithColorByNewlineChar.set(eol, textToWrite);
+        }
+      } else {
+        textToWrite = concatenatedLinesWithoutColorByNewlineChar.get(eol);
+        if (!textToWrite) {
+          if (!linesWithoutColor) {
+            linesWithoutColor = [];
+            for (const line of lines) {
+              linesWithoutColor.push(AnsiEscape.removeCodes(line));
+            }
+          }
+
+          textToWrite = linesWithoutColor.join(eol);
+          concatenatedLinesWithoutColorByNewlineChar.set(eol, textToWrite);
+        }
+      }
+
+      provider.write(textToWrite, severity);
+    }
+  }
+
+  private _serializeLegacyColorableSequence(segment: ILegacyColorableSequence): string {
+    const startColorCodes: number[] = [];
+    const endColorCodes: number[] = [];
+    switch (segment.foregroundColor) {
+      case ColorValue.Black: {
+        startColorCodes.push(ConsoleColorCodes.BlackForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+
+      case ColorValue.Red: {
+        startColorCodes.push(ConsoleColorCodes.RedForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+
+      case ColorValue.Green: {
+        startColorCodes.push(ConsoleColorCodes.GreenForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+
+      case ColorValue.Yellow: {
+        startColorCodes.push(ConsoleColorCodes.YellowForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+
+      case ColorValue.Blue: {
+        startColorCodes.push(ConsoleColorCodes.BlueForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+
+      case ColorValue.Magenta: {
+        startColorCodes.push(ConsoleColorCodes.MagentaForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+
+      case ColorValue.Cyan: {
+        startColorCodes.push(ConsoleColorCodes.CyanForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+
+      case ColorValue.White: {
+        startColorCodes.push(ConsoleColorCodes.WhiteForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+
+      case ColorValue.Gray: {
+        startColorCodes.push(ConsoleColorCodes.GrayForeground);
+        endColorCodes.push(ConsoleColorCodes.DefaultForeground);
+        break;
+      }
+    }
+
+    switch (segment.backgroundColor) {
+      case ColorValue.Black: {
+        startColorCodes.push(ConsoleColorCodes.BlackBackground);
+        endColorCodes.push(ConsoleColorCodes.DefaultBackground);
+        break;
+      }
+
+      case ColorValue.Red: {
+        startColorCodes.push(ConsoleColorCodes.RedBackground);
+        endColorCodes.push(ConsoleColorCodes.DefaultBackground);
+        break;
+      }
+
+      case ColorValue.Green: {
+        startColorCodes.push(ConsoleColorCodes.GreenBackground);
+        endColorCodes.push(ConsoleColorCodes.DefaultBackground);
+        break;
+      }
+
+      case ColorValue.Yellow: {
+        startColorCodes.push(ConsoleColorCodes.YellowBackground);
+        endColorCodes.push(ConsoleColorCodes.DefaultBackground);
+        break;
+      }
+
+      case ColorValue.Blue: {
+        startColorCodes.push(ConsoleColorCodes.BlueBackground);
+        endColorCodes.push(ConsoleColorCodes.DefaultBackground);
+        break;
+      }
+
+      case ColorValue.Magenta: {
+        startColorCodes.push(ConsoleColorCodes.MagentaBackground);
+        endColorCodes.push(ConsoleColorCodes.DefaultBackground);
+        break;
+      }
+
+      case ColorValue.Cyan: {
+        startColorCodes.push(ConsoleColorCodes.CyanBackground);
+        endColorCodes.push(ConsoleColorCodes.DefaultBackground);
+        break;
+      }
+
+      case ColorValue.White: {
+        startColorCodes.push(ConsoleColorCodes.WhiteBackground);
+        endColorCodes.push(ConsoleColorCodes.DefaultBackground);
+        break;
+      }
+
+      case ColorValue.Gray: {
+        startColorCodes.push(ConsoleColorCodes.GrayBackground);
+        endColorCodes.push(49);
+        break;
+      }
+    }
+
+    if (segment.textAttributes) {
+      for (const textAttribute of segment.textAttributes) {
+        switch (textAttribute) {
+          case TextAttribute.Bold: {
+            startColorCodes.push(ConsoleColorCodes.Bold);
+            endColorCodes.push(ConsoleColorCodes.NormalColorOrIntensity);
+            break;
+          }
+
+          case TextAttribute.Dim: {
+            startColorCodes.push(ConsoleColorCodes.Dim);
+            endColorCodes.push(ConsoleColorCodes.NormalColorOrIntensity);
+            break;
+          }
+
+          case TextAttribute.Underline: {
+            startColorCodes.push(ConsoleColorCodes.Underline);
+            endColorCodes.push(ConsoleColorCodes.UnderlineOff);
+            break;
+          }
+
+          case TextAttribute.Blink: {
+            startColorCodes.push(ConsoleColorCodes.Blink);
+            endColorCodes.push(ConsoleColorCodes.BlinkOff);
+            break;
+          }
+
+          case TextAttribute.InvertColor: {
+            startColorCodes.push(ConsoleColorCodes.InvertColor);
+            endColorCodes.push(ConsoleColorCodes.InvertColorOff);
+            break;
+          }
+
+          case TextAttribute.Hidden: {
+            startColorCodes.push(ConsoleColorCodes.Hidden);
+            endColorCodes.push(ConsoleColorCodes.HiddenOff);
+            break;
+          }
+        }
+      }
+    }
+
+    const resultSegments: string[] = [];
+    for (let j: number = 0; j < startColorCodes.length; j++) {
+      const code: number = startColorCodes[j];
+      resultSegments.push(AnsiEscape.getEscapeSequenceForAnsiCode(code));
+    }
+
+    resultSegments.push(segment.text);
+
+    for (let j: number = endColorCodes.length - 1; j >= 0; j--) {
+      const code: number = endColorCodes[j];
+      resultSegments.push(AnsiEscape.getEscapeSequenceForAnsiCode(code));
+    }
+
+    return resultSegments.join('');
   }
 }

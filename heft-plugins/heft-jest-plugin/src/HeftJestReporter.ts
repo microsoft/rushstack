@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { InternalError, Text } from '@rushstack/node-core-library';
-import { type ITerminal, Colors, type IColorableSequence } from '@rushstack/terminal';
+import { type ITerminal, Colors } from '@rushstack/terminal';
 import type {
   Reporter,
   Test,
@@ -164,7 +164,7 @@ export default class HeftJestReporter implements Reporter {
     const PAD_LENGTH: number = 13; // "console.error" is the longest label
 
     const paddedLabel: string = '|' + label.padStart(PAD_LENGTH) + '|';
-    const prefix: IColorableSequence = debug ? Colors.yellow(paddedLabel) : Colors.cyan(paddedLabel);
+    const prefix: string = debug ? Colors.yellow(paddedLabel) : Colors.cyan(paddedLabel);
 
     for (const line of lines) {
       this._terminal.writeLine(prefix, ' ' + line);

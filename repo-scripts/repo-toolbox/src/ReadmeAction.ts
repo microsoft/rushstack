@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { StringBuilder, Sort, FileSystem, Text, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, ConsoleTerminalProvider, Colors, type IColorableSequence } from '@rushstack/terminal';
+import { Terminal, ConsoleTerminalProvider, Colors } from '@rushstack/terminal';
 import { RushConfiguration, type RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import * as Diff from 'diff';
@@ -154,7 +154,7 @@ export class ReadmeAction extends CommandLineAction {
         for (const change of diff) {
           const lines: string[] = change.value.trimEnd().split('\n');
           let linePrefix: string;
-          let colorizer: (text: string | IColorableSequence) => IColorableSequence;
+          let colorizer: (text: string) => string;
           if (change.added) {
             linePrefix = '+ ';
             colorizer = Colors.green;

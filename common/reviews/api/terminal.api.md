@@ -14,6 +14,8 @@ import { WritableOptions } from 'stream';
 // @public
 export class AnsiEscape {
     static formatForTests(text: string, options?: IAnsiEscapeConvertForTestsOptions): string;
+    // (undocumented)
+    static getEscapeSequenceForAnsiCode(code: number): string;
     static removeCodes(text: string): string;
 }
 
@@ -27,77 +29,53 @@ export class CallbackWritable extends TerminalWritable {
 // @beta
 export class Colors {
     // (undocumented)
-    static black(text: string | IColorableSequence): IColorableSequence;
+    static black(text: string): string;
     // (undocumented)
-    static blackBackground(text: string | IColorableSequence): IColorableSequence;
+    static blackBackground(text: string): string;
     // (undocumented)
-    static blink(text: string | IColorableSequence): IColorableSequence;
+    static blink(text: string): string;
     // (undocumented)
-    static blue(text: string | IColorableSequence): IColorableSequence;
+    static blue(text: string): string;
     // (undocumented)
-    static blueBackground(text: string | IColorableSequence): IColorableSequence;
+    static blueBackground(text: string): string;
     // (undocumented)
-    static bold(text: string | IColorableSequence): IColorableSequence;
+    static bold(text: string): string;
     // (undocumented)
-    static cyan(text: string | IColorableSequence): IColorableSequence;
+    static cyan(text: string): string;
     // (undocumented)
-    static cyanBackground(text: string | IColorableSequence): IColorableSequence;
+    static cyanBackground(text: string): string;
     // (undocumented)
-    static dim(text: string | IColorableSequence): IColorableSequence;
+    static dim(text: string): string;
     // (undocumented)
-    static gray(text: string | IColorableSequence): IColorableSequence;
+    static gray(text: string): string;
     // (undocumented)
-    static grayBackground(text: string | IColorableSequence): IColorableSequence;
+    static grayBackground(text: string): string;
     // (undocumented)
-    static green(text: string | IColorableSequence): IColorableSequence;
+    static green(text: string): string;
     // (undocumented)
-    static greenBackground(text: string | IColorableSequence): IColorableSequence;
+    static greenBackground(text: string): string;
     // (undocumented)
-    static hidden(text: string | IColorableSequence): IColorableSequence;
+    static hidden(text: string): string;
     // (undocumented)
-    static invertColor(text: string | IColorableSequence): IColorableSequence;
+    static invertColor(text: string): string;
     // (undocumented)
-    static magenta(text: string | IColorableSequence): IColorableSequence;
+    static magenta(text: string): string;
     // (undocumented)
-    static magentaBackground(text: string | IColorableSequence): IColorableSequence;
-    // @internal
-    static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
+    static magentaBackground(text: string): string;
     // (undocumented)
-    static red(text: string | IColorableSequence): IColorableSequence;
+    static red(text: string): string;
     // (undocumented)
-    static redBackground(text: string | IColorableSequence): IColorableSequence;
+    static redBackground(text: string): string;
     // (undocumented)
-    static underline(text: string | IColorableSequence): IColorableSequence;
+    static underline(text: string): string;
     // (undocumented)
-    static white(text: string | IColorableSequence): IColorableSequence;
+    static white(text: string): string;
     // (undocumented)
-    static whiteBackground(text: string | IColorableSequence): IColorableSequence;
+    static whiteBackground(text: string): string;
     // (undocumented)
-    static yellow(text: string | IColorableSequence): IColorableSequence;
+    static yellow(text: string): string;
     // (undocumented)
-    static yellowBackground(text: string | IColorableSequence): IColorableSequence;
-}
-
-// @beta
-export enum ColorValue {
-    // (undocumented)
-    Black = 0,
-    // (undocumented)
-    Blue = 4,
-    // (undocumented)
-    Cyan = 6,
-    // (undocumented)
-    Gray = 8,
-    // (undocumented)
-    Green = 2,
-    // (undocumented)
-    Magenta = 5,
-    // (undocumented)
-    Red = 1,
-    // (undocumented)
-    White = 7,
-    // (undocumented)
-    Yellow = 3
+    static yellowBackground(text: string): string;
 }
 
 // @beta
@@ -129,20 +107,6 @@ export interface IAnsiEscapeConvertForTestsOptions {
 export interface ICallbackWritableOptions {
     // (undocumented)
     onWriteChunk: (chunk: ITerminalChunk) => void;
-}
-
-// @beta (undocumented)
-export interface IColorableSequence {
-    // (undocumented)
-    backgroundColor?: ColorValue;
-    // (undocumented)
-    foregroundColor?: ColorValue;
-    // (undocumented)
-    isEol?: boolean;
-    // (undocumented)
-    text: string;
-    // (undocumented)
-    textAttributes?: TextAttribute[];
 }
 
 // @beta
@@ -204,16 +168,16 @@ export interface IStringBufferOutputOptions {
 export interface ITerminal {
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;
-    write(...messageParts: (string | IColorableSequence)[]): void;
-    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
-    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeError(...messageParts: (string | IColorableSequence)[]): void;
-    writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
-    writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeWarning(...messageParts: (string | IColorableSequence)[]): void;
-    writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
+    write(...messageParts: string[]): void;
+    writeDebug(...messageParts: string[]): void;
+    writeDebugLine(...messageParts: string[]): void;
+    writeError(...messageParts: string[]): void;
+    writeErrorLine(...messageParts: string[]): void;
+    writeLine(...messageParts: string[]): void;
+    writeVerbose(...messageParts: string[]): void;
+    writeVerboseLine(...messageParts: string[]): void;
+    writeWarning(...messageParts: string[]): void;
+    writeWarningLine(...messageParts: string[]): void;
 }
 
 // @public
@@ -373,16 +337,16 @@ export class Terminal implements ITerminal {
     constructor(provider: ITerminalProvider);
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;
-    write(...messageParts: (string | IColorableSequence)[]): void;
-    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
-    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeError(...messageParts: (string | IColorableSequence)[]): void;
-    writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
-    writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeWarning(...messageParts: (string | IColorableSequence)[]): void;
-    writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
+    write(...messageParts: string[]): void;
+    writeDebug(...messageParts: string[]): void;
+    writeDebugLine(...messageParts: string[]): void;
+    writeError(...messageParts: string[]): void;
+    writeErrorLine(...messageParts: string[]): void;
+    writeLine(...messageParts: string[]): void;
+    writeVerbose(...messageParts: string[]): void;
+    writeVerboseLine(...messageParts: string[]): void;
+    writeWarning(...messageParts: string[]): void;
+    writeWarningLine(...messageParts: string[]): void;
 }
 
 // @public
@@ -437,22 +401,6 @@ export abstract class TerminalWritable {
     readonly preventAutoclose: boolean;
     // @sealed
     writeChunk(chunk: ITerminalChunk): void;
-}
-
-// @beta
-export enum TextAttribute {
-    // (undocumented)
-    Blink = 3,
-    // (undocumented)
-    Bold = 0,
-    // (undocumented)
-    Dim = 1,
-    // (undocumented)
-    Hidden = 5,
-    // (undocumented)
-    InvertColor = 4,
-    // (undocumented)
-    Underline = 2
 }
 
 // @public

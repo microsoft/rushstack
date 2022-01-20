@@ -1,49 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/**
- * @beta
- */
-export interface IColorableSequence {
-  text: string;
-  isEol?: boolean;
-  foregroundColor?: ColorValue;
-  backgroundColor?: ColorValue;
-  textAttributes?: TextAttribute[];
-}
-
-export const eolSequence: IColorableSequence = {
-  isEol: true
-} as IColorableSequence;
-
-/**
- * Colors used with {@link IColorableSequence}.
- * @beta
- */
-export enum ColorValue {
-  Black,
-  Red,
-  Green,
-  Yellow,
-  Blue,
-  Magenta,
-  Cyan,
-  White,
-  Gray
-}
-
-/**
- * Text styles used with {@link IColorableSequence}.
- * @beta
- */
-export enum TextAttribute {
-  Bold,
-  Dim,
-  Underline,
-  Blink,
-  InvertColor,
-  Hidden
-}
+import { AnsiEscape } from './AnsiEscape';
 
 export enum ConsoleColorCodes {
   BlackForeground = 30,
@@ -97,182 +55,195 @@ export enum ConsoleColorCodes {
  * @beta
  */
 export class Colors {
-  public static black(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Black
-    };
+  public static black(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.BlackForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static red(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Red
-    };
+  public static red(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.RedForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static green(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Green
-    };
+  public static green(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.GreenForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static yellow(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Yellow
-    };
+  public static yellow(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.YellowForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static blue(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Blue
-    };
+  public static blue(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.BlueForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static magenta(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Magenta
-    };
+  public static magenta(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.MagentaForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static cyan(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Cyan
-    };
+  public static cyan(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.CyanForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static white(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.White
-    };
+  public static white(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.WhiteForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static gray(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      foregroundColor: ColorValue.Gray
-    };
+  public static gray(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.GrayForeground,
+      ConsoleColorCodes.DefaultForeground,
+      text
+    );
   }
 
-  public static blackBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Black
-    };
+  public static blackBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.BlackBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static redBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Red
-    };
+  public static redBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.RedBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static greenBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Green
-    };
+  public static greenBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.GreenBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static yellowBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Yellow
-    };
+  public static yellowBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.YellowBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static blueBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Blue
-    };
+  public static blueBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.BlueBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static magentaBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Magenta
-    };
+  public static magentaBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.MagentaBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static cyanBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Cyan
-    };
+  public static cyanBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.CyanBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static whiteBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.White
-    };
+  public static whiteBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.WhiteBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static grayBackground(text: string | IColorableSequence): IColorableSequence {
-    return {
-      ...Colors._normalizeStringOrColorableSequence(text),
-      backgroundColor: ColorValue.Gray
-    };
+  public static grayBackground(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.GrayBackground,
+      ConsoleColorCodes.DefaultBackground,
+      text
+    );
   }
 
-  public static bold(text: string | IColorableSequence): IColorableSequence {
-    return Colors._applyTextAttribute(text, TextAttribute.Bold);
+  public static bold(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.Bold,
+      ConsoleColorCodes.NormalColorOrIntensity,
+      text
+    );
   }
 
-  public static dim(text: string | IColorableSequence): IColorableSequence {
-    return Colors._applyTextAttribute(text, TextAttribute.Dim);
+  public static dim(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.Dim,
+      ConsoleColorCodes.NormalColorOrIntensity,
+      text
+    );
   }
 
-  public static underline(text: string | IColorableSequence): IColorableSequence {
-    return Colors._applyTextAttribute(text, TextAttribute.Underline);
+  public static underline(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.Underline,
+      ConsoleColorCodes.UnderlineOff,
+      text
+    );
   }
 
-  public static blink(text: string | IColorableSequence): IColorableSequence {
-    return Colors._applyTextAttribute(text, TextAttribute.Blink);
+  public static blink(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(ConsoleColorCodes.Blink, ConsoleColorCodes.BlinkOff, text);
   }
 
-  public static invertColor(text: string | IColorableSequence): IColorableSequence {
-    return Colors._applyTextAttribute(text, TextAttribute.InvertColor);
+  public static invertColor(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(
+      ConsoleColorCodes.InvertColor,
+      ConsoleColorCodes.InvertColorOff,
+      text
+    );
   }
 
-  public static hidden(text: string | IColorableSequence): IColorableSequence {
-    return Colors._applyTextAttribute(text, TextAttribute.Hidden);
+  public static hidden(text: string): string {
+    return Colors._wrapTextInAnsiEscapeCodes(ConsoleColorCodes.Hidden, ConsoleColorCodes.HiddenOff, text);
   }
 
-  /**
-   * If called with a string, returns the string wrapped in a {@link IColorableSequence}.
-   * If called with a {@link IColorableSequence}, returns the {@link IColorableSequence}.
-   *
-   * @internal
-   */
-  public static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence {
-    if (typeof value === 'string') {
-      return {
-        text: value
-      };
-    } else {
-      return value;
-    }
-  }
-
-  private static _applyTextAttribute(
-    text: string | IColorableSequence,
-    attribute: TextAttribute
-  ): IColorableSequence {
-    const sequence: IColorableSequence = Colors._normalizeStringOrColorableSequence(text);
-    if (!sequence.textAttributes) {
-      sequence.textAttributes = [];
-    }
-
-    sequence.textAttributes.push(attribute);
-    return sequence;
+  private static _wrapTextInAnsiEscapeCodes(startCode: number, endCode: number, text: string): string {
+    return (
+      AnsiEscape.getEscapeSequenceForAnsiCode(startCode) +
+      text +
+      AnsiEscape.getEscapeSequenceForAnsiCode(endCode)
+    );
   }
 }

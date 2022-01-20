@@ -5,13 +5,11 @@
  * This file is a little program that prints all of the colors to the console
  */
 
-import { Colors, type IColorableSequence } from '../index';
+import { Colors } from '../index';
 
-export function createColorGrid(
-  attributeFunction?: (text: string | IColorableSequence) => IColorableSequence
-): IColorableSequence[][] {
-  const foregroundFunctions: ((text: string | IColorableSequence) => IColorableSequence)[] = [
-    (text) => Colors._normalizeStringOrColorableSequence(text),
+export function createColorGrid(attributeFunction?: (text: string) => string): string[][] {
+  const foregroundFunctions: ((text: string) => string)[] = [
+    (text) => text,
     Colors.black,
     Colors.white,
     Colors.gray,
@@ -23,8 +21,8 @@ export function createColorGrid(
     Colors.blue
   ];
 
-  const backgroundFunctions: ((text: string | IColorableSequence) => IColorableSequence)[] = [
-    (text) => Colors._normalizeStringOrColorableSequence(text),
+  const backgroundFunctions: ((text: string) => string)[] = [
+    (text) => text,
     Colors.blackBackground,
     Colors.whiteBackground,
     Colors.grayBackground,
@@ -36,13 +34,13 @@ export function createColorGrid(
     Colors.blueBackground
   ];
 
-  const lines: IColorableSequence[][] = [];
+  const lines: string[][] = [];
 
   for (const backgroundFunction of backgroundFunctions) {
-    const sequences: IColorableSequence[] = [];
+    const sequences: string[] = [];
 
     for (const foregroundFunction of foregroundFunctions) {
-      let sequence: IColorableSequence = backgroundFunction(foregroundFunction('X'));
+      let sequence: string = backgroundFunction(foregroundFunction('X'));
       if (attributeFunction) {
         sequence = attributeFunction(sequence);
       }

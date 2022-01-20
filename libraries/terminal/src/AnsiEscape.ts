@@ -32,6 +32,10 @@ export class AnsiEscape {
   private static readonly _backslashNRegExp: RegExp = /\n/g;
   private static readonly _backslashRRegExp: RegExp = /\r/g;
 
+  public static getEscapeSequenceForAnsiCode(code: number): string {
+    return `\u001b[${code}m`;
+  }
+
   /**
    * Returns the input text with all ANSI escape codes removed.  For example, this is useful when saving
    * colorized console output to a log file.

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async,  } from '@rushstack/node-core-library';
-import { Colors, type IColorableSequence, type ITerminal} from '@rushstack/terminal'
+import { Async } from '@rushstack/node-core-library';
+import { Colors, type ITerminal } from '@rushstack/terminal';
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
 
@@ -172,7 +172,7 @@ export class AmazonS3Client {
     });
   }
 
-  private _writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
+  private _writeDebugLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a debug message
     try {
       this._terminal.writeDebugLine(...messageParts);
@@ -181,7 +181,7 @@ export class AmazonS3Client {
     }
   }
 
-  private _writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
+  private _writeWarningLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a warning message
     try {
       this._terminal.writeWarningLine(...messageParts);
@@ -433,7 +433,7 @@ export class AmazonS3Client {
   ): Promise<T> {
     const response: RetryableRequestResponse<T> = await sendRequest();
 
-    const log: (...messageParts: (string | IColorableSequence)[]) => void = this._writeDebugLine.bind(this);
+    const log: (...messageParts: string[]) => void = this._writeDebugLine.bind(this);
 
     if (response.hasNetworkError) {
       if (storageRetryOptions && storageRetryOptions.maxTries > 1) {
