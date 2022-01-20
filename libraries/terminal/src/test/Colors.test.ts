@@ -9,7 +9,9 @@ describe(Colors.name, () => {
   test('writes color grid correctly', () => {
     let lineCount: number = 0;
     for (const line of createColorGrid()) {
-      expect(AnsiEscape.formatForTests(line.join(''))).toMatchSnapshot(`line ${lineCount++}`);
+      expect(line.map((linePart) => AnsiEscape.formatForTests(linePart))).toMatchSnapshot(
+        `line ${lineCount++}`
+      );
     }
 
     expect(lineCount).toMatchInlineSnapshot(`10`);
