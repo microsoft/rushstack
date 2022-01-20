@@ -90,7 +90,7 @@ export abstract class PluginLoaderBase<
     const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
       commandLineJsonFilePath,
       {
-        disableDefaultBuildCommands: true
+        doNotIncludeDefaultBuildCommands: true
       }
     );
     for (const additionalPathFolder of this._getCommandLineAdditionalPathFolders().reverse()) {

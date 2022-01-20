@@ -100,9 +100,9 @@ const DEFAULT_REBUILD_COMMAND_JSON: IBulkCommandJson = {
 
 export interface ICommandLineConfigurationOptions {
   /**
-   * If true, do not add default build, rebuild commands.
+   * If true, do not include default build and rebuild commands.
    */
-  disableDefaultBuildCommands?: boolean;
+  doNotIncludeDefaultBuildCommands?: boolean;
 }
 
 /**
@@ -141,7 +141,7 @@ export class CommandLineConfiguration {
     commandLineJson: ICommandLineJson | undefined,
     options: ICommandLineConfigurationOptions = {}
   ) {
-    const { disableDefaultBuildCommands } = options;
+    const { doNotIncludeDefaultBuildCommands: disableDefaultBuildCommands } = options;
     if (commandLineJson?.phases) {
       const phaseNameRegexp: RegExp = new RegExp(
         `^${RushConstants.phaseNamePrefix}[a-z][a-z0-9]*([-][a-z0-9]+)*$`
