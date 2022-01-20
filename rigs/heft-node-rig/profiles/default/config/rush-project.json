@@ -2,11 +2,11 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["lib", "lib-commonjs", "temp"]
+      "outputFolderNames": ["dist", "lib", "lib-commonjs", "temp"]
     },
     {
       "operationName": "build",
-      "outputFolderNames": ["lib", "lib-commonjs", "temp"]
+      "outputFolderNames": ["dist", "lib", "lib-commonjs", "temp"]
     }
   ]
 }
