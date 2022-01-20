@@ -596,8 +596,6 @@ export class RushConfigurationProject {
     get dependencyProjects(): ReadonlySet<RushConfigurationProject>;
     // @deprecated
     get downstreamDependencyProjects(): string[];
-    // @internal
-    readonly _index: number;
     // @beta
     get isMainProject(): boolean;
     // @deprecated

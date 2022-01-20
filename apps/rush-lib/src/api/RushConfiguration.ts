@@ -778,8 +778,7 @@ export class RushConfiguration {
       const project: RushConfigurationProject = new RushConfigurationProject({
         projectJson,
         rushConfiguration: this,
-        tempProjectName,
-        index: i
+        tempProjectName
       });
 
       this._projects.push(project);

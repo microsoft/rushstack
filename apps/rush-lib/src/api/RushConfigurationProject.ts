@@ -42,10 +42,6 @@ export interface IRushConfigurationProjectOptions {
    * A unique string name for this project
    */
   tempProjectName: string;
-  /**
-   * The index of this project in `rushConfiguration.projects`
-   */
-  index: number;
 }
 
 /**
@@ -54,11 +50,6 @@ export interface IRushConfigurationProjectOptions {
  * @public
  */
 export class RushConfigurationProject {
-  /**
-   * This index of this project in the Rush configuration's projects array
-   * @internal
-   */
-  public readonly _index: number;
   private readonly _packageName: string;
   private readonly _projectFolder: string;
   private readonly _projectRelativeFolder: string;
@@ -82,11 +73,10 @@ export class RushConfigurationProject {
 
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
-    const { projectJson, rushConfiguration, tempProjectName, index } = options;
+    const { projectJson, rushConfiguration, tempProjectName } = options;
     this._rushConfiguration = rushConfiguration;
     this._packageName = projectJson.packageName;
     this._projectRelativeFolder = projectJson.projectFolder;
-    this._index = index;
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
     const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
