@@ -18,7 +18,7 @@ describe(AnsiEscape.name, () => {
     }
   });
 
-  test('calls removeCodes() successfully', () => {
+  it('calls removeCodes() successfully', () => {
     const coloredInput: string = colors.rainbow('Hello, world!');
     const decoloredInput: string = AnsiEscape.removeCodes(coloredInput);
     expect(coloredInput).not.toBe(decoloredInput);
