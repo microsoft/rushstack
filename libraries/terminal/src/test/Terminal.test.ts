@@ -3,7 +3,7 @@
 
 import { Terminal } from '../Terminal';
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
-import { Colors } from '../Colors';
+import { Colorize } from '../Colorize';
 
 let terminal: Terminal;
 let provider: StringBufferTerminalProvider;
@@ -37,17 +37,17 @@ describe('01 color enabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.write(Colors.green('message 1'));
+        terminal.write(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.write(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.write(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.write('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.write('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
         verifyProvider();
       });
     });
@@ -64,17 +64,17 @@ describe('01 color enabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeLine(Colors.green('message 1'));
+        terminal.writeLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeLine('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
         verifyProvider();
       });
     });
@@ -91,17 +91,22 @@ describe('01 color enabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeWarning(Colors.green('message 1'));
+        terminal.writeWarning(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeWarning(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeWarning(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeWarning('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeWarning(
+          'message 1',
+          Colorize.green('message 2'),
+          'message 3',
+          Colorize.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -118,21 +123,21 @@ describe('01 color enabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeWarningLine(Colors.green('message 1'));
+        terminal.writeWarningLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeWarningLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeWarningLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
         terminal.writeWarningLine(
           'message 1',
-          Colors.green('message 2'),
+          Colorize.green('message 2'),
           'message 3',
-          Colors.red('message 4')
+          Colorize.red('message 4')
         );
         verifyProvider();
       });
@@ -150,17 +155,17 @@ describe('01 color enabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeError(Colors.green('message 1'));
+        terminal.writeError(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeError(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeError(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeError('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeError('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
         verifyProvider();
       });
     });
@@ -177,17 +182,22 @@ describe('01 color enabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeErrorLine(Colors.green('message 1'));
+        terminal.writeErrorLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeErrorLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeErrorLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeErrorLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeErrorLine(
+          'message 1',
+          Colorize.green('message 2'),
+          'message 3',
+          Colorize.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -204,17 +214,22 @@ describe('01 color enabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeVerbose(Colors.green('message 1'));
+        terminal.writeVerbose(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeVerbose(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeVerbose(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeVerbose('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeVerbose(
+          'message 1',
+          Colorize.green('message 2'),
+          'message 3',
+          Colorize.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -231,21 +246,21 @@ describe('01 color enabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeVerboseLine(Colors.green('message 1'));
+        terminal.writeVerboseLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeVerboseLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeVerboseLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
         terminal.writeVerboseLine(
           'message 1',
-          Colors.green('message 2'),
+          Colorize.green('message 2'),
           'message 3',
-          Colors.red('message 4')
+          Colorize.red('message 4')
         );
         verifyProvider();
       });
@@ -253,45 +268,55 @@ describe('01 color enabled', () => {
   });
 
   it('05 writes to multiple streams', () => {
-    terminal.write('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.write('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeWarningLine('message 1', 'message 2');
     terminal.writeVerbose('test message');
-    terminal.writeVerbose(Colors.green('message 1'));
-    terminal.writeLine(Colors.green('message 1'));
-    terminal.writeError('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeVerbose(Colorize.green('message 1'));
+    terminal.writeLine(Colorize.green('message 1'));
+    terminal.writeError('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeErrorLine('test message');
-    terminal.writeVerboseLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeVerboseLine(
+      'message 1',
+      Colorize.green('message 2'),
+      'message 3',
+      Colorize.red('message 4')
+    );
     terminal.writeVerboseLine('test message');
-    terminal.writeWarning(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarning('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeWarning(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeWarning('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeError('message 1', 'message 2');
-    terminal.write(Colors.green('message 1'));
-    terminal.writeVerbose('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.write(Colorize.green('message 1'));
+    terminal.writeVerbose('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeErrorLine('message 1', 'message 2');
-    terminal.write(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.write(Colorize.green('message 1'), Colorize.red('message 2'));
     terminal.writeVerbose('message 1', 'message 2');
-    terminal.writeVerboseLine(Colors.green('message 1'));
-    terminal.writeLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeError(Colors.green('message 1'));
-    terminal.writeWarningLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeVerboseLine(Colorize.green('message 1'));
+    terminal.writeLine(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeError(Colorize.green('message 1'));
+    terminal.writeWarningLine(
+      'message 1',
+      Colorize.green('message 2'),
+      'message 3',
+      Colorize.red('message 4')
+    );
     terminal.write('test message');
     terminal.writeWarningLine('test message');
-    terminal.writeVerboseLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeVerboseLine(Colorize.green('message 1'), Colorize.red('message 2'));
     terminal.writeVerboseLine('message 1', 'message 2');
-    terminal.writeErrorLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.writeLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeErrorLine('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
+    terminal.writeLine('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeWarning('message 1', 'message 2');
-    terminal.writeErrorLine(Colors.green('message 1'));
+    terminal.writeErrorLine(Colorize.green('message 1'));
     terminal.write('message 1', 'message 2');
-    terminal.writeVerbose(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarning(Colors.green('message 1'));
+    terminal.writeVerbose(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeWarning(Colorize.green('message 1'));
     terminal.writeLine('test message');
     terminal.writeError('test message');
     terminal.writeLine('message 1', 'message 2');
-    terminal.writeErrorLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeError(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarningLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarningLine(Colors.green('message 1'));
+    terminal.writeErrorLine(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeError(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeWarningLine(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeWarningLine(Colorize.green('message 1'));
     verifyProvider();
   });
 });
@@ -315,17 +340,17 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.write(Colors.green('message 1'));
+        terminal.write(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.write(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.write(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.write('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.write('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
         verifyProvider();
       });
     });
@@ -342,17 +367,17 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeLine(Colors.green('message 1'));
+        terminal.writeLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeLine('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
         verifyProvider();
       });
     });
@@ -369,17 +394,22 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeWarning(Colors.green('message 1'));
+        terminal.writeWarning(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeWarning(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeWarning(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeWarning('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeWarning(
+          'message 1',
+          Colorize.green('message 2'),
+          'message 3',
+          Colorize.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -396,21 +426,21 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeWarningLine(Colors.green('message 1'));
+        terminal.writeWarningLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeWarningLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeWarningLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
         terminal.writeWarningLine(
           'message 1',
-          Colors.green('message 2'),
+          Colorize.green('message 2'),
           'message 3',
-          Colors.red('message 4')
+          Colorize.red('message 4')
         );
         verifyProvider();
       });
@@ -428,17 +458,17 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeError(Colors.green('message 1'));
+        terminal.writeError(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeError(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeError(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeError('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeError('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
         verifyProvider();
       });
     });
@@ -455,17 +485,22 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeErrorLine(Colors.green('message 1'));
+        terminal.writeErrorLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeErrorLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeErrorLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeErrorLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeErrorLine(
+          'message 1',
+          Colorize.green('message 2'),
+          'message 3',
+          Colorize.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -482,17 +517,22 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeVerbose(Colors.green('message 1'));
+        terminal.writeVerbose(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeVerbose(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeVerbose(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeVerbose('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeVerbose(
+          'message 1',
+          Colorize.green('message 2'),
+          'message 3',
+          Colorize.red('message 4')
+        );
         verifyProvider();
       });
     });
@@ -509,21 +549,21 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeVerboseLine(Colors.green('message 1'));
+        terminal.writeVerboseLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeVerboseLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeVerboseLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
         terminal.writeVerboseLine(
           'message 1',
-          Colors.green('message 2'),
+          Colorize.green('message 2'),
           'message 3',
-          Colors.red('message 4')
+          Colorize.red('message 4')
         );
         verifyProvider();
       });
@@ -541,17 +581,17 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeDebug(Colors.green('message 1'));
+        terminal.writeDebug(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeDebug(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeDebug(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeDebug('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeDebug('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
         verifyProvider();
       });
     });
@@ -568,62 +608,77 @@ describe('02 color disabled', () => {
       });
 
       it('03 writes a message with colors', () => {
-        terminal.writeDebugLine(Colors.green('message 1'));
+        terminal.writeDebugLine(Colorize.green('message 1'));
         verifyProvider();
       });
 
       it('04 writes a multiple messages with colors', () => {
-        terminal.writeDebugLine(Colors.green('message 1'), Colors.red('message 2'));
+        terminal.writeDebugLine(Colorize.green('message 1'), Colorize.red('message 2'));
         verifyProvider();
       });
 
       it('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeDebugLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        terminal.writeDebugLine(
+          'message 1',
+          Colorize.green('message 2'),
+          'message 3',
+          Colorize.red('message 4')
+        );
         verifyProvider();
       });
     });
   });
 
   it('05 writes to multiple streams', () => {
-    terminal.write('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.write('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeWarningLine('message 1', 'message 2');
     terminal.writeVerbose('test message');
-    terminal.writeVerbose(Colors.green('message 1'));
-    terminal.writeLine(Colors.green('message 1'));
-    terminal.writeError('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeVerbose(Colorize.green('message 1'));
+    terminal.writeLine(Colorize.green('message 1'));
+    terminal.writeError('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeErrorLine('test message');
-    terminal.writeVerboseLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeVerboseLine(
+      'message 1',
+      Colorize.green('message 2'),
+      'message 3',
+      Colorize.red('message 4')
+    );
     terminal.writeVerboseLine('test message');
-    terminal.writeWarning(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarning('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeWarning(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeWarning('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeError('message 1', 'message 2');
-    terminal.write(Colors.green('message 1'));
-    terminal.writeVerbose('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.write(Colorize.green('message 1'));
+    terminal.writeVerbose('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeErrorLine('message 1', 'message 2');
-    terminal.write(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.write(Colorize.green('message 1'), Colorize.red('message 2'));
     terminal.writeVerbose('message 1', 'message 2');
-    terminal.writeVerboseLine(Colors.green('message 1'));
-    terminal.writeLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeError(Colors.green('message 1'));
-    terminal.writeWarningLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeVerboseLine(Colorize.green('message 1'));
+    terminal.writeLine(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeError(Colorize.green('message 1'));
+    terminal.writeWarningLine(
+      'message 1',
+      Colorize.green('message 2'),
+      'message 3',
+      Colorize.red('message 4')
+    );
     terminal.write('test message');
     terminal.writeWarningLine('test message');
-    terminal.writeVerboseLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeVerboseLine(Colorize.green('message 1'), Colorize.red('message 2'));
     terminal.writeVerboseLine('message 1', 'message 2');
-    terminal.writeErrorLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.writeLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeErrorLine('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
+    terminal.writeLine('message 1', Colorize.green('message 2'), 'message 3', Colorize.red('message 4'));
     terminal.writeWarning('message 1', 'message 2');
-    terminal.writeErrorLine(Colors.green('message 1'));
+    terminal.writeErrorLine(Colorize.green('message 1'));
     terminal.write('message 1', 'message 2');
-    terminal.writeVerbose(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarning(Colors.green('message 1'));
+    terminal.writeVerbose(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeWarning(Colorize.green('message 1'));
     terminal.writeLine('test message');
     terminal.writeError('test message');
     terminal.writeLine('message 1', 'message 2');
-    terminal.writeErrorLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeError(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarningLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarningLine(Colors.green('message 1'));
+    terminal.writeErrorLine(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeError(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeWarningLine(Colorize.green('message 1'), Colorize.red('message 2'));
+    terminal.writeWarningLine(Colorize.green('message 1'));
     verifyProvider();
   });
 });

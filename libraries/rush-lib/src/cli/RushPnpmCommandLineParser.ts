@@ -13,7 +13,7 @@ import {
   type JsonObject
 } from '@rushstack/node-core-library';
 import {
-  Colors,
+  Colorize,
   ConsoleTerminalProvider,
   type ITerminal,
   type ITerminalProvider,
@@ -111,13 +111,13 @@ export class RushPnpmCommandLineParser {
     if (!FileSystem.exists(workspaceFilePath)) {
       this._terminal.writeErrorLine('Error: The PNPM workspace file has not been generated:');
       this._terminal.writeErrorLine(`  ${workspaceFilePath}\n`);
-      this._terminal.writeLine(Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
+      this._terminal.writeLine(Colorize.cyan(`Do you need to run "rush install" or "rush update"?`));
       throw new AlreadyReportedError();
     }
 
     if (!FileSystem.exists(rushConfiguration.packageManagerToolFilename)) {
       this._terminal.writeErrorLine('Error: The PNPM local binary has not been installed yet.');
-      this._terminal.writeLine('\n' + Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
+      this._terminal.writeLine('\n' + Colorize.cyan(`Do you need to run "rush install" or "rush update"?`));
       throw new AlreadyReportedError();
     }
 
@@ -196,7 +196,7 @@ export class RushPnpmCommandLineParser {
       this._terminal.writeErrorLine(
         `Warning: The "rush-pnpm" wrapper expects a command verb before "${firstArg}"\n`
       );
-      this._terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
+      this._terminal.writeLine(Colorize.cyan(BYPASS_NOTICE));
       throw new AlreadyReportedError();
     } else {
       const commandName: string = firstArg;
@@ -230,7 +230,7 @@ export class RushPnpmCommandLineParser {
               `Error: The "pnpm ${commandName}" command is known to be incompatible with Rush's environment.`
             ) + '\n'
           );
-          this._terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
+          this._terminal.writeLine(Colorize.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
         }
 
@@ -248,7 +248,7 @@ export class RushPnpmCommandLineParser {
                 ` Use the "rush install" or "rush update" commands instead.`
             ) + '\n'
           );
-          this._terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
+          this._terminal.writeLine(Colorize.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
         }
 
@@ -341,7 +341,7 @@ export class RushPnpmCommandLineParser {
               `Error: The "pnpm ${commandName}" command has not been tested with Rush's environment. It may be incompatible.`
             ) + '\n'
           );
-          this._terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
+          this._terminal.writeLine(Colorize.cyan(BYPASS_NOTICE));
         }
       }
       /* eslint-enable no-fallthrough */
@@ -448,12 +448,12 @@ export class RushPnpmCommandLineParser {
 
   private async _doRushUpdateAsync(): Promise<void> {
     if (this._rushConfiguration.subspacesFeatureEnabled) {
-      this._terminal.writeLine(Colors.red('The rush-pnpm command is not yet supported for subspaces.'));
+      this._terminal.writeLine(Colorize.red('The rush-pnpm command is not yet supported for subspaces.'));
       throw new AlreadyReportedError();
     }
 
     this._terminal.writeLine();
-    this._terminal.writeLine(Colors.green('Running "rush update"'));
+    this._terminal.writeLine(Colorize.green('Running "rush update"'));
     this._terminal.writeLine();
 
     const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();

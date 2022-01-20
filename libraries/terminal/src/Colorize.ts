@@ -50,13 +50,13 @@ export enum ConsoleColorCodes {
  * for use with the node-core-library terminal.
  *
  * @example
- * terminal.writeLine(Colors.green('Green Text!'), ' ', Colors.blue('Blue Text!'));
+ * terminal.writeLine(Colorize.green('Green Text!'), ' ', Colorize.blue('Blue Text!'));
  *
  * @beta
  */
-export class Colors {
+export class Colorize {
   public static black(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.BlackForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -64,7 +64,7 @@ export class Colors {
   }
 
   public static red(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.RedForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -72,7 +72,7 @@ export class Colors {
   }
 
   public static green(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.GreenForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -80,7 +80,7 @@ export class Colors {
   }
 
   public static yellow(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.YellowForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -88,7 +88,7 @@ export class Colors {
   }
 
   public static blue(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.BlueForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -96,7 +96,7 @@ export class Colors {
   }
 
   public static magenta(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.MagentaForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -104,7 +104,7 @@ export class Colors {
   }
 
   public static cyan(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.CyanForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -112,7 +112,7 @@ export class Colors {
   }
 
   public static white(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.WhiteForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -120,7 +120,7 @@ export class Colors {
   }
 
   public static gray(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.GrayForeground,
       ConsoleColorCodes.DefaultForeground,
       text
@@ -128,7 +128,7 @@ export class Colors {
   }
 
   public static blackBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.BlackBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -136,7 +136,7 @@ export class Colors {
   }
 
   public static redBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.RedBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -144,7 +144,7 @@ export class Colors {
   }
 
   public static greenBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.GreenBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -152,7 +152,7 @@ export class Colors {
   }
 
   public static yellowBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.YellowBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -160,7 +160,7 @@ export class Colors {
   }
 
   public static blueBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.BlueBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -168,7 +168,7 @@ export class Colors {
   }
 
   public static magentaBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.MagentaBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -176,7 +176,7 @@ export class Colors {
   }
 
   public static cyanBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.CyanBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -184,7 +184,7 @@ export class Colors {
   }
 
   public static whiteBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.WhiteBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -192,7 +192,7 @@ export class Colors {
   }
 
   public static grayBackground(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.GrayBackground,
       ConsoleColorCodes.DefaultBackground,
       text
@@ -200,7 +200,7 @@ export class Colors {
   }
 
   public static bold(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.Bold,
       ConsoleColorCodes.NormalColorOrIntensity,
       text
@@ -208,7 +208,7 @@ export class Colors {
   }
 
   public static dim(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.Dim,
       ConsoleColorCodes.NormalColorOrIntensity,
       text
@@ -216,7 +216,7 @@ export class Colors {
   }
 
   public static underline(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.Underline,
       ConsoleColorCodes.UnderlineOff,
       text
@@ -224,11 +224,11 @@ export class Colors {
   }
 
   public static blink(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(ConsoleColorCodes.Blink, ConsoleColorCodes.BlinkOff, text);
+    return Colorize._wrapTextInAnsiEscapeCodes(ConsoleColorCodes.Blink, ConsoleColorCodes.BlinkOff, text);
   }
 
   public static invertColor(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(
+    return Colorize._wrapTextInAnsiEscapeCodes(
       ConsoleColorCodes.InvertColor,
       ConsoleColorCodes.InvertColorOff,
       text
@@ -236,7 +236,7 @@ export class Colors {
   }
 
   public static hidden(text: string): string {
-    return Colors._wrapTextInAnsiEscapeCodes(ConsoleColorCodes.Hidden, ConsoleColorCodes.HiddenOff, text);
+    return Colorize._wrapTextInAnsiEscapeCodes(ConsoleColorCodes.Hidden, ConsoleColorCodes.HiddenOff, text);
   }
 
   private static _wrapTextInAnsiEscapeCodes(startCode: number, endCode: number, text: string): string {

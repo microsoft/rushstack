@@ -5,33 +5,33 @@
  * This file is a little program that prints all of the colors to the console
  */
 
-import { Colors } from '../index';
+import { Colorize } from '../index';
 
 export function createColorGrid(attributeFunction?: (text: string) => string): string[][] {
   const foregroundFunctions: ((text: string) => string)[] = [
     (text) => text,
-    Colors.black,
-    Colors.white,
-    Colors.gray,
-    Colors.magenta,
-    Colors.red,
-    Colors.yellow,
-    Colors.green,
-    Colors.cyan,
-    Colors.blue
+    Colorize.black,
+    Colorize.white,
+    Colorize.gray,
+    Colorize.magenta,
+    Colorize.red,
+    Colorize.yellow,
+    Colorize.green,
+    Colorize.cyan,
+    Colorize.blue
   ];
 
   const backgroundFunctions: ((text: string) => string)[] = [
     (text) => text,
-    Colors.blackBackground,
-    Colors.whiteBackground,
-    Colors.grayBackground,
-    Colors.magentaBackground,
-    Colors.redBackground,
-    Colors.yellowBackground,
-    Colors.greenBackground,
-    Colors.cyanBackground,
-    Colors.blueBackground
+    Colorize.blackBackground,
+    Colorize.whiteBackground,
+    Colorize.grayBackground,
+    Colorize.magentaBackground,
+    Colorize.redBackground,
+    Colorize.yellowBackground,
+    Colorize.greenBackground,
+    Colorize.cyanBackground,
+    Colorize.blueBackground
   ];
 
   const lines: string[][] = [];

@@ -4,7 +4,7 @@
 import path from 'node:path';
 
 import { Async, FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
-import { PrintUtilities, Colors, type ITerminal } from '@rushstack/terminal';
+import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
@@ -134,7 +134,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
                 (error as Error).toString()
             );
             terminal.writeLine(
-              Colors.cyan('Rush will proceed without incremental execution and change detection.')
+              Colorize.cyan('Rush will proceed without incremental execution and change detection.')
             );
           }
 
@@ -149,7 +149,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           // To test this code path:
           // Remove the `.git` folder then run "rush build --verbose"
           terminal.writeLine(
-            Colors.cyan(
+            Colorize.cyan(
               PrintUtilities.wrapWords(
                 'This workspace does not appear to be tracked by Git. ' +
                   'Rush will proceed without incremental execution, caching, and change detection.'

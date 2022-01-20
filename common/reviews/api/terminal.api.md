@@ -27,7 +27,7 @@ export class CallbackWritable extends TerminalWritable {
 }
 
 // @beta
-export class Colors {
+export class Colorize {
     // (undocumented)
     static black(text: string): string;
     // (undocumented)

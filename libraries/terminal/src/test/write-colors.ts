@@ -7,7 +7,7 @@
  * Run this program with `node write-colors.js`
  */
 
-import { Terminal, ConsoleTerminalProvider, Colors } from '../index';
+import { Terminal, ConsoleTerminalProvider, Colorize } from '../index';
 import { createColorGrid } from './createColorGrid';
 
 const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
@@ -19,24 +19,24 @@ function writeColorGrid(colorGrid: string[][]): void {
 
 writeColorGrid(createColorGrid());
 terminal.writeLine();
-writeColorGrid(createColorGrid(Colors.bold));
+writeColorGrid(createColorGrid(Colorize.bold));
 terminal.writeLine();
-writeColorGrid(createColorGrid(Colors.dim));
+writeColorGrid(createColorGrid(Colorize.dim));
 terminal.writeLine();
-writeColorGrid(createColorGrid(Colors.underline));
+writeColorGrid(createColorGrid(Colorize.underline));
 terminal.writeLine();
-writeColorGrid(createColorGrid(Colors.blink));
+writeColorGrid(createColorGrid(Colorize.blink));
 terminal.writeLine();
-writeColorGrid(createColorGrid(Colors.invertColor));
+writeColorGrid(createColorGrid(Colorize.invertColor));
 terminal.writeLine();
-writeColorGrid(createColorGrid(Colors.hidden));
+writeColorGrid(createColorGrid(Colorize.hidden));
 terminal.writeLine();
 
 terminal.write('Normal text...');
-terminal.writeLine(Colors.green('done'));
+terminal.writeLine(Colorize.green('done'));
 
 terminal.writeError('Error...');
-terminal.writeErrorLine(Colors.green('done'));
+terminal.writeErrorLine(Colorize.green('done'));
 
 terminal.writeWarning('Warning...');
-terminal.writeWarningLine(Colors.green('done'));
+terminal.writeWarningLine(Colorize.green('done'));

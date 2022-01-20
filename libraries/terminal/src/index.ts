@@ -32,7 +32,7 @@ export { ITextRewriterTransformOptions, TextRewriterTransform } from './TextRewr
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './AnsiEscape';
 export { ITerminal } from './ITerminal';
 export { Terminal } from './Terminal';
-export { Colors } from './Colors';
+export { Colorize } from './Colorize';
 export { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 export { ConsoleTerminalProvider, IConsoleTerminalProviderOptions } from './ConsoleTerminalProvider';
 export { StringBufferTerminalProvider, IStringBufferOutputOptions } from './StringBufferTerminalProvider';

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
-import { Colors, ConsoleColorCodes } from './Colors';
+import { Colorize, ConsoleColorCodes } from './Colorize';
 import type { ITerminal } from './ITerminal';
 import { AnsiEscape } from './AnsiEscape';
 
@@ -89,7 +89,7 @@ export class Terminal implements ITerminal {
    */
   public writeWarning(...messageParts: string[]): void {
     this._writeSegmentsToProviders(
-      messageParts.map((part): string => Colors.yellow(AnsiEscape.removeCodes(part))),
+      messageParts.map((part): string => Colorize.yellow(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.warning,
       false
     );
@@ -100,7 +100,7 @@ export class Terminal implements ITerminal {
    */
   public writeWarningLine(...messageParts: string[]): void {
     this._writeSegmentsToProviders(
-      messageParts.map((part): string => Colors.yellow(AnsiEscape.removeCodes(part))),
+      messageParts.map((part): string => Colorize.yellow(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.warning,
       true
     );
@@ -111,7 +111,7 @@ export class Terminal implements ITerminal {
    */
   public writeError(...messageParts: string[]): void {
     this._writeSegmentsToProviders(
-      messageParts.map((part): string => Colors.red(AnsiEscape.removeCodes(part))),
+      messageParts.map((part): string => Colorize.red(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.error,
       false
     );
@@ -122,7 +122,7 @@ export class Terminal implements ITerminal {
    */
   public writeErrorLine(...messageParts: string[]): void {
     this._writeSegmentsToProviders(
-      messageParts.map((part): string => Colors.red(AnsiEscape.removeCodes(part))),
+      messageParts.map((part): string => Colorize.red(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.error,
       true
     );

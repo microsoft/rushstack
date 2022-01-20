@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { createColorGrid } from './createColorGrid';
-import { Colors } from '../Colors';
+import { Colorize } from '../Colorize';
 import { AnsiEscape } from '../AnsiEscape';
 
-describe(Colors.name, () => {
+describe(Colorize.name, () => {
   test('writes color grid correctly', () => {
     let lineCount: number = 0;
     for (const line of createColorGrid()) {
@@ -19,10 +19,10 @@ describe(Colors.name, () => {
 
   it('generates codes as expected', () => {
     type ColorsFunctionNames = {
-      [K in keyof typeof Colors]: (typeof Colors)[K] extends (str: string) => string ? K : never;
-    }[keyof typeof Colors];
+      [K in keyof typeof Colorize]: (typeof Colorize)[K] extends (str: string) => string ? K : never;
+    }[keyof typeof Colorize];
     function testColorFunction(functionName: ColorsFunctionNames): void {
-      expect(Colors[functionName]('x')).toMatchSnapshot(functionName);
+      expect(Colorize[functionName]('x')).toMatchSnapshot(functionName);
     }
 
     testColorFunction('black');
