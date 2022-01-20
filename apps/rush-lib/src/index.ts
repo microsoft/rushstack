@@ -34,7 +34,7 @@ export { RushConstants } from './logic/RushConstants';
 
 export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
-export { RushConfigurationProject } from './api/RushConfigurationProject';
+export { IRushConfigurationProjectJson, RushConfigurationProject } from './api/RushConfigurationProject';
 
 export { RushUserConfiguration } from './api/RushUserConfiguration';
 
