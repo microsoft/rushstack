@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixes rush plugin error on duplicate build commands",
+      "comment": "Fix an issue with the command-line.json included with plugins are loaded. These command-line.json should not include the default build and rebuild commands.",
       "type": "none"
     }
   ],
