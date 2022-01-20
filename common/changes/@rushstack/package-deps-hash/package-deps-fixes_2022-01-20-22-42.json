@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Remove `--merge-base` from `getRepoChanges` and document need to manually acquire merge-base commit if comparing against a separate branch.\nReduce minimum Git version to 2.20.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash"
+}

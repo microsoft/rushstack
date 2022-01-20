@@ -12,7 +12,7 @@ export interface IGitVersion {
 
 const MINIMUM_GIT_VERSION: IGitVersion = {
   major: 2,
-  minor: 30,
+  minor: 20,
   patch: 0
 };
 
@@ -280,6 +280,7 @@ export function getRepoState(currentWorkingDirectory: string, gitPath?: string):
  * Find all changed files tracked by Git, their current hashes, and the nature of the change. Only useful if all changes are staged or committed.
  * @param currentWorkingDirectory - The working directory. Only used to find the repository root.
  * @param revision - The Git revision specifier to detect changes relative to. Defaults to HEAD (i.e. will compare staged vs. committed)
+ *   If comparing against a different branch, call `git merge-base` first to find the target commit.
  * @param gitPath - The path to the Git executable
  * @returns A map from the Git file path to the corresponding file change metadata
  * @beta
@@ -298,8 +299,6 @@ export function getRepoChanges(
       'diff-index',
       '--color=never',
       '--no-renames',
-      // rush change targets origin/main with this, and usually the current branch is not synced, so use the merge-base
-      '--merge-base',
       '--no-commit-id',
       '--cached',
       '-z',
