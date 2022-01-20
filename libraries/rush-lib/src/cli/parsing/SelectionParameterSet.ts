@@ -1,12 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  AlreadyReportedError,
-  PackageJsonLookup,
-  type IPackageJson,
-  type ITerminal
-} from '@rushstack/node-core-library';
+import { AlreadyReportedError, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type {
   CommandLineParameterProvider,
   CommandLineStringListParameter

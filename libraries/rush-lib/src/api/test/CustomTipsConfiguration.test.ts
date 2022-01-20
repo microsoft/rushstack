@@ -7,8 +7,8 @@ jest.mock('colors/safe', () => {
   return colors;
 });
 
-import { JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { JsonFile } from '@rushstack/node-core-library';
+import { PrintUtilities, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { CustomTipId, CustomTipsConfiguration, type ICustomTipsJson } from '../CustomTipsConfiguration';
 import { RushConfiguration } from '../RushConfiguration';

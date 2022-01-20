@@ -16,7 +16,7 @@ import type {
   RedisModules,
   RedisScripts
 } from '@redis/client';
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 /**
  * The redis client options

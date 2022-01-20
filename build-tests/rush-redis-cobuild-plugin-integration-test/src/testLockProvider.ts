@@ -5,7 +5,7 @@ import {
   RedisCobuildLockProvider,
   type IRedisCobuildLockProviderOptions
 } from '@rushstack/rush-redis-cobuild-plugin';
-import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider } from '@rushstack/terminal';
 import { OperationStatus, type ICobuildContext, RushSession } from '@microsoft/rush-lib';
 
 const options: IRedisCobuildLockProviderOptions = {

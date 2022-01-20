@@ -4,12 +4,7 @@
 import colors from 'colors/safe';
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
-import {
-  ConsoleTerminalProvider,
-  Terminal,
-  type ITerminalProvider,
-  Colors
-} from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Terminal, type ITerminalProvider, Colors } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { BaseInstallManager } from './base/BaseInstallManager';

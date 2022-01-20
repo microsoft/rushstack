@@ -5,10 +5,9 @@ import { ScopedLogger } from './ScopedLogger';
 import {
   FileError,
   type FileLocationStyle,
-  type ITerminalProvider,
   type IFileErrorFormattingOptions
 } from '@rushstack/node-core-library';
-
+import type { ITerminalProvider } from '@rushstack/terminal';
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;
 }

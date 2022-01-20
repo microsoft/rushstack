@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "chokidar": "~3.4.0",
     "fast-glob": "~3.3.1"
   },

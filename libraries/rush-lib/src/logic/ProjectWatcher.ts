@@ -6,7 +6,8 @@ import * as os from 'os';
 import * as readline from 'readline';
 import { once } from 'events';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
-import { Colors, Path, type ITerminal, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
+import { Path, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
+import { Colors, type ITerminal } from '@rushstack/terminal';
 
 import { Git } from './Git';
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';

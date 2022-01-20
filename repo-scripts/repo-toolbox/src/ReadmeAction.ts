@@ -2,17 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  StringBuilder,
-  Sort,
-  FileSystem,
-  Text,
-  Terminal,
-  ConsoleTerminalProvider,
-  AlreadyReportedError,
-  Colors,
-  type IColorableSequence
-} from '@rushstack/node-core-library';
+import { StringBuilder, Sort, FileSystem, Text, AlreadyReportedError } from '@rushstack/node-core-library';
+import { Terminal, ConsoleTerminalProvider, Colors, type IColorableSequence } from '@rushstack/terminal';
 import { RushConfiguration, type RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import * as Diff from 'diff';

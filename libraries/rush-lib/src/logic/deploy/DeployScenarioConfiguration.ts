@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonSchema, Colors, type ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { Colors, type ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import schemaJson from '../../schemas/deploy-scenario.schema.json';

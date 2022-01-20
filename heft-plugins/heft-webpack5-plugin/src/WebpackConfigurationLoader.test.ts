@@ -3,7 +3,7 @@
 
 import type { HeftConfiguration, IHeftParameters, IHeftTaskSession, IScopedLogger } from '@rushstack/heft';
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
-import { type ITerminal, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { type ITerminal, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import * as WebpackConfigurationLoader from './WebpackConfigurationLoader';
 import { _createAccessorHooks } from './Webpack5Plugin';

@@ -3,15 +3,8 @@
 
 import path from 'node:path';
 
-import {
-  Async,
-  ColorValue,
-  FileSystem,
-  JsonFile,
-  type ITerminal,
-  type JsonObject
-} from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { Async, FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
+import { PrintUtilities, ColorValue, type ITerminal } from '@rushstack/terminal';
 
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';

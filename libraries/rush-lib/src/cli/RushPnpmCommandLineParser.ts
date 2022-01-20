@@ -5,18 +5,21 @@ import * as path from 'path';
 import type { SpawnSyncReturns } from 'child_process';
 import {
   AlreadyReportedError,
-  Colors,
-  ConsoleTerminalProvider,
   EnvironmentMap,
   Executable,
   FileConstants,
   FileSystem,
+  JsonFile,
+  type JsonObject
+} from '@rushstack/node-core-library';
+import {
+  Colors,
+  ConsoleTerminalProvider,
   type ITerminal,
   type ITerminalProvider,
-  JsonFile,
-  type JsonObject,
   Terminal
-} from '@rushstack/node-core-library';
+} from '@rushstack/terminal';
+
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { PrintUtilities } from '@rushstack/terminal';

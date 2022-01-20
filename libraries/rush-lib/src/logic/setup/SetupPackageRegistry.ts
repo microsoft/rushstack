@@ -5,17 +5,14 @@ import * as path from 'path';
 import type * as child_process from 'child_process';
 import {
   AlreadyReportedError,
-  Colors,
-  ConsoleTerminalProvider,
   Executable,
   FileSystem,
   InternalError,
   type JsonObject,
   NewlineKind,
-  Terminal,
   Text
 } from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { PrintUtilities, Colors, ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';

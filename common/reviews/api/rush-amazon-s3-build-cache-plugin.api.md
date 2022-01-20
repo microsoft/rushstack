@@ -8,7 +8,7 @@
 
 import * as fetch from 'node-fetch';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
-import { ITerminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
 

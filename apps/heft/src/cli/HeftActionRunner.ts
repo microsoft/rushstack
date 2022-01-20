@@ -5,14 +5,8 @@ import { performance } from 'perf_hooks';
 import { createInterface, type Interface as ReadlineInterface } from 'readline';
 import os from 'os';
 
-import {
-  AlreadyReportedError,
-  Colors,
-  ConsoleTerminalProvider,
-  InternalError,
-  type ITerminal,
-  type IPackageJson
-} from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError, type IPackageJson } from '@rushstack/node-core-library';
+import { Colors, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
 import {
   type IOperationExecutionOptions,
   type IWatchLoopState,

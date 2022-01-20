@@ -21,6 +21,7 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "https-proxy-agent": "~5.0.0",
     "node-fetch": "2.6.7"
   },

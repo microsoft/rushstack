@@ -3,7 +3,8 @@
 
 import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
 
-import { Terminal, type NewlineKind } from '@rushstack/node-core-library';
+import type { NewlineKind } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/terminal';
 import { parseLocFile } from '@rushstack/localization-utilities';
 
 import type { LocalizationPlugin } from '../LocalizationPlugin';

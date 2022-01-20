@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@types/watchpack": "2.4.0",
     "webpack": "~5.82.1",
     "local-node-rig": "workspace:*"

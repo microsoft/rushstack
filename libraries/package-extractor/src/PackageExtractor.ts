@@ -14,12 +14,11 @@ import {
   Path,
   FileSystem,
   Import,
-  Colors,
   JsonFile,
   AlreadyExistsBehavior,
-  type IPackageJson,
-  type ITerminal
+  type IPackageJson
 } from '@rushstack/node-core-library';
+import { Colors, type ITerminal } from '@rushstack/terminal';
 
 import { ArchiveManager } from './ArchiveManager';
 import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';

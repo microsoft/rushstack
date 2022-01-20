@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "@rushstack/localization-utilities": "workspace:*",
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

@@ -34,6 +34,7 @@
   "dependencies": {
     "@rushstack/localization-utilities": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@types/tapable": "1.0.6",
     "loader-utils": "1.4.2",
     "minimatch": "~3.0.3"

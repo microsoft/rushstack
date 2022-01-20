@@ -22,12 +22,8 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as semver from 'semver';
 
-import {
-  ConsoleTerminalProvider,
-  Text,
-  PackageJsonLookup,
-  type ITerminalProvider
-} from '@rushstack/node-core-library';
+import { Text, PackageJsonLookup } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, type ITerminalProvider } from '@rushstack/terminal';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 

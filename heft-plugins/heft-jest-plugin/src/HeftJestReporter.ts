@@ -2,13 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  type ITerminal,
-  Colors,
-  InternalError,
-  Text,
-  type IColorableSequence
-} from '@rushstack/node-core-library';
+import { InternalError, Text } from '@rushstack/node-core-library';
+import { type ITerminal, Colors, type IColorableSequence } from '@rushstack/terminal';
 import type {
   Reporter,
   Test,

@@ -5,7 +5,7 @@
 ```ts
 
 import { IPackageJson } from '@rushstack/node-core-library';
-import { ITerminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/terminal';
 
 // @public
 export interface IExtractorDependencyConfiguration {
