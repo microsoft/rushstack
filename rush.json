@@ -747,12 +747,12 @@
       "shouldPublish": false
     },
 
-    // {
-    //   "packageName": "install-test-workspace",
-    //   "projectFolder": "build-tests/install-test-workspace",
-    //   "reviewCategory": "tests",
-    //   "shouldPublish": false
-    // },
+    {
+      "packageName": "install-test-workspace",
+      "projectFolder": "build-tests/install-test-workspace",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
