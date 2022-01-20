@@ -98,7 +98,7 @@ const DEFAULT_REBUILD_COMMAND_JSON: IBulkCommandJson = {
   safeForSimultaneousRushProcesses: false
 };
 
-export interface ICommandLineConfigurationOptions {
+interface ICommandLineConfigurationOptions {
   /**
    * If true, do not include default build and rebuild commands.
    */
@@ -141,7 +141,6 @@ export class CommandLineConfiguration {
     commandLineJson: ICommandLineJson | undefined,
     options: ICommandLineConfigurationOptions = {}
   ) {
-    const { doNotIncludeDefaultBuildCommands: disableDefaultBuildCommands } = options;
     if (commandLineJson?.phases) {
       const phaseNameRegexp: RegExp = new RegExp(
         `^${RushConstants.phaseNamePrefix}[a-z][a-z0-9]*([-][a-z0-9]+)*$`
@@ -283,7 +282,7 @@ export class CommandLineConfiguration {
       }
     }
 
-    if (!disableDefaultBuildCommands) {
+    if (!options.doNotIncludeDefaultBuildCommands) {
       let buildCommand: Command | undefined = this.commands.get(RushConstants.buildCommandName);
       if (!buildCommand) {
         // If the build command was not specified in the config file, add the default build command
@@ -481,17 +480,39 @@ export class CommandLineConfiguration {
   }
 
   /**
+   * Load the command-line.json configuration file from the specified path. Note that this
+   * does not include the default build settings. This option is intended to be used to load
+   * command-line.json files from plugins. To load a common/config/rush/command-line.json file,
+   * use {@see loadFromFileOrDefault} instead.
+   *
+   * If the file does not exist, this function returns `undefined`
+   */
+  public static tryLoadFromFile(jsonFilePath: string): CommandLineConfiguration | undefined {
+    let commandLineJson: ICommandLineJson | undefined;
+    try {
+      commandLineJson = JsonFile.loadAndValidate(jsonFilePath, CommandLineConfiguration._jsonSchema);
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e as Error)) {
+        throw e;
+      }
+    }
+
+    if (commandLineJson) {
+      return new CommandLineConfiguration(commandLineJson, { doNotIncludeDefaultBuildCommands: true });
+    } else {
+      return undefined;
+    }
+  }
+
+  /**
    * Loads the configuration from the specified file and applies any omitted default build
-   * settings.  If the file does not exist, then an empty default instance is returned.
+   * settings.  If the file does not exist, then a default instance is returned.
    * If the file contains errors, then an exception is thrown.
    */
-  public static loadFromFileOrDefault(
-    jsonFilename?: string,
-    options?: ICommandLineConfigurationOptions
-  ): CommandLineConfiguration {
+  public static loadFromFileOrDefault(jsonFilePath?: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineJson | undefined = undefined;
-    if (jsonFilename && FileSystem.exists(jsonFilename)) {
-      commandLineJson = JsonFile.load(jsonFilename);
+    if (jsonFilePath && FileSystem.exists(jsonFilePath)) {
+      commandLineJson = JsonFile.load(jsonFilePath);
 
       // merge commands specified in command-line.json and default (re)build settings
       // Ensure both build commands are included and preserve any other commands specified
@@ -525,11 +546,11 @@ export class CommandLineConfiguration {
           };
         }
 
-        CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilename);
+        CommandLineConfiguration._jsonSchema.validateObject(commandLineJson, jsonFilePath);
       }
     }
 
-    return new CommandLineConfiguration(commandLineJson, options);
+    return new CommandLineConfiguration(commandLineJson, { doNotIncludeDefaultBuildCommands: false });
   }
 
   public get additionalPathFolders(): Readonly<string[]> {
