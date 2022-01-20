@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Introduce a Terminal, Colors, AsciEscape, and some related APIs. These APIs were previously in the @rushstack/node-core-library package.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
