@@ -7,7 +7,7 @@ import { CollatedWriter } from '@rushstack/stream-collator';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
-import { BaseTaskRunner } from './BaseTaskRunner';
+import { ITaskRunner } from './ITaskRunner';
 
 /**
  * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the
@@ -19,7 +19,7 @@ export class Task {
    * When the scheduler is ready to process this `Task`, the `runner` implements the actual work of
    * running the task.
    */
-  public runner: BaseTaskRunner;
+  public runner: ITaskRunner;
 
   /**
    * The current execution status of a task. Tasks start in the 'ready' state,
@@ -89,7 +89,7 @@ export class Task {
    */
   public stopwatch!: Stopwatch;
 
-  public constructor(runner: BaseTaskRunner, initialStatus: TaskStatus) {
+  public constructor(runner: ITaskRunner, initialStatus: TaskStatus) {
     this.runner = runner;
     this.status = initialStatus;
   }

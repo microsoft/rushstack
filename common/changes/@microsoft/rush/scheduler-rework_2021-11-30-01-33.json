@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Reworked the Rush task scheduler to use a custom AsyncTaskQueue that conforms to the ECMAScript async iteration protocol.\nIndexed tasks during task generation by a composite key generated from the relevant [phase, project] tuple and added support to the scheduler to skip phases while preserving execution order effects.\nModified the TaskSelector to persist across an entire watch command invocation, instead of creating a new instance per build pass.\nRevised build cache interaction to forbid writing to the build cache if any dependencies were skipped in the current execution.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -337,7 +337,8 @@ export class RushProjectConfiguration {
           const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> =
             new OverlappingPathAnalyzer<string>();
 
-          for (const operationName of command.phases) {
+          for (const phase of command.phases) {
+            const operationName: string = phase.name;
             const operationSettings: IOperationSettings | undefined =
               operationSettingsByOperationName.get(operationName);
             if (operationSettings) {

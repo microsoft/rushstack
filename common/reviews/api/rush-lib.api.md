@@ -587,12 +587,10 @@ export class RushConfiguration {
 
 // @public
 export class RushConfigurationProject {
-    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectJson" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectOptions" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
-    // @internal
-    readonly _consumingProjectNames: Set<string>;
+    constructor(options: IRushConfigurationProjectOptions);
     get consumingProjects(): ReadonlySet<RushConfigurationProject>;
     get cyclicDependencyProjects(): Set<string>;
     get dependencyProjects(): ReadonlySet<RushConfigurationProject>;
