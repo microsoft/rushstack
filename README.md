@@ -121,7 +121,6 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-web-rig-library-test](./build-tests/heft-web-rig-library-test/) | A test project for Heft that exercises the '@rushstack/heft-web-rig' package |
 | [/build-tests/heft-webpack4-everything-test](./build-tests/heft-webpack4-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 4 |
 | [/build-tests/heft-webpack5-everything-test](./build-tests/heft-webpack5-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 5 |
-| [/build-tests/install-test-workspace](./build-tests/install-test-workspace/) |  |
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |
@@ -132,6 +131,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
+| [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
 <!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice
