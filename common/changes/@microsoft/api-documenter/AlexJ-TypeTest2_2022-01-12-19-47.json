@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "Update the Yaml Documenter to support type aliases",
+      "comment": "Add support for type aliases to the YAML output format.",
       "type": "minor"
     }
   ],
