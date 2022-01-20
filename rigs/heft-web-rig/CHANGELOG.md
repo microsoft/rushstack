@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Wed, 05 Jan 2022 16:07:47 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Jan 2022 02:43:46 GMT and should not be manually modified.
+
+## 0.8.0
+Thu, 20 Jan 2022 02:43:46 GMT
+
+### Minor changes
+
+- Update the `rush-project.json` file to follow the new schema and configure the "build" command output folders for the "_phase:build" phase.
 
 ## 0.7.2
 Wed, 05 Jan 2022 16:07:47 GMT
