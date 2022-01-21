@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue with the command-line.json included with plugins are loaded. These command-line.json should not include the default build and rebuild commands.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
