@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix project change detection when a new project is added to a repo using PNPM in non-workspace mode.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
