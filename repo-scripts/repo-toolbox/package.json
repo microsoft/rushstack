@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "readme": "node ./lib/start.js readme"
+    "readme": "node ./lib/start.js readme",
+    "_phase:build": "heft build --clean"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",

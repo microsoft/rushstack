@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/set-webpack-public-path-plugin"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
