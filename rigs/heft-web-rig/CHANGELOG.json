@@ -2,6 +2,41 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.8.1",
+      "tag": "@rushstack/heft-web-rig_v0.8.1",
+      "date": "Fri, 21 Jan 2022 01:10:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.3.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.0",
+      "tag": "@rushstack/heft-web-rig_v0.8.0",
+      "date": "Thu, 20 Jan 2022 02:43:46 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update the `rush-project.json` file to follow the new schema and configure the \"build\" command output folders for the \"_phase:build\" phase."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.3.30`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.2",
       "tag": "@rushstack/heft-web-rig_v0.7.2",
       "date": "Wed, 05 Jan 2022 16:07:47 GMT",

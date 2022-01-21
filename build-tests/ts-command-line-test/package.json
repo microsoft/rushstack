@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "start": "node ./lib/start.js"
+    "start": "node ./lib/start.js",
+    "_phase:build": "node build.js"
   },
   "devDependencies": {
     "@rushstack/ts-command-line": "workspace:*",

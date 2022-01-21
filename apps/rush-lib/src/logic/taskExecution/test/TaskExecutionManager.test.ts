@@ -6,14 +6,14 @@ jest.mock('../../../utilities/Utilities');
 
 import colors from 'colors/safe';
 import { EOL } from 'os';
-import { CollatedTerminal } from '@rushstack/stream-collator';
+import type { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable } from '@rushstack/terminal';
 
 import { TaskExecutionManager, ITaskExecutionManagerOptions } from '../TaskExecutionManager';
 import { TaskStatus } from '../TaskStatus';
 import { Task } from '../Task';
 import { Utilities } from '../../../utilities/Utilities';
-import { BaseTaskRunner } from '../BaseTaskRunner';
+import type { ITaskRunner } from '../ITaskRunner';
 import { MockTaskRunner } from './MockTaskRunner';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
@@ -30,11 +30,11 @@ const mockWritable: MockWritable = new MockWritable();
 
 function createTaskExecutionManager(
   taskExecutionManagerOptions: ITaskExecutionManagerOptions,
-  taskRunner: BaseTaskRunner
+  taskRunner: ITaskRunner
 ): TaskExecutionManager {
   const task: Task = new Task(taskRunner, TaskStatus.Ready);
 
-  return new TaskExecutionManager([task], taskExecutionManagerOptions);
+  return new TaskExecutionManager(new Set([task]), taskExecutionManagerOptions);
 }
 
 const EXPECTED_FAIL: string = `Promise returned by ${TaskExecutionManager.prototype.executeAsync.name}() resolved but was expected to fail`;
@@ -64,7 +64,7 @@ describe(TaskExecutionManager.name, () => {
     it('throwsErrorOnInvalidParallelism', () => {
       expect(
         () =>
-          new TaskExecutionManager([], {
+          new TaskExecutionManager(new Set(), {
             quietMode: false,
             debugMode: false,
             parallelism: 'tequila',

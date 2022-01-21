@@ -5,7 +5,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": ""
+    "build": "",
+    "_phase:build": ""
   },
   "dependencies": {
     "typescript": "~4.5.2",

@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "serve": "node serve.js"
+    "serve": "node serve.js",
+    "_phase:build": "node build.js"
   },
   "dependencies": {
     "@rushstack/localization-plugin": "workspace:*",

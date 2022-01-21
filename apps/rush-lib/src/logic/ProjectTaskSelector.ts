@@ -1,220 +1,178 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { convertSlashesForWindows, ProjectTaskRunner } from './taskExecution/ProjectTaskRunner';
-import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
-import { TaskCollection } from './taskExecution/TaskCollection';
-import { IPhase } from '../api/CommandLineConfiguration';
-import { RushConstants } from './RushConstants';
-import { IRegisteredCustomParameter } from '../cli/scriptActions/BaseScriptAction';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { IPhase } from '../api/CommandLineConfiguration';
+import type { Task } from './taskExecution/Task';
 
 export interface IProjectTaskSelectorOptions {
-  rushConfiguration: RushConfiguration;
-  buildCacheConfiguration: BuildCacheConfiguration | undefined;
-  projectSelection: ReadonlySet<RushConfigurationProject>;
-  isQuietMode: boolean;
-  isDebugMode: boolean;
-  isIncrementalBuildAllowed: boolean;
-  projectChangeAnalyzer?: ProjectChangeAnalyzer;
-  customParameters: IRegisteredCustomParameter[];
+  phasesToRun: ReadonlySet<IPhase>;
+}
 
-  phasesToRun: Iterable<string>;
-  phases: Map<string, IPhase>;
+export interface ICreateTasksOptions {
+  projectSelection: ReadonlySet<RushConfigurationProject>;
+  taskFactory: IProjectTaskFactory;
+}
+
+export interface IProjectTaskOptions {
+  project: RushConfigurationProject;
+  phase: IPhase;
+}
+
+export interface IProjectTaskFactory {
+  createTask(options: IProjectTaskOptions): Task;
+}
+
+interface ITaskDependencies {
+  tasks: Set<Task> | undefined;
+  isCacheWriteAllowed: boolean;
+}
+
+interface ITaskNode {
+  key: string;
+  phase: IPhase;
+  project: RushConfigurationProject;
+}
+
+interface ISelectedTaskNode extends ITaskNode {
+  task: Task;
 }
 
 /**
- * This class is responsible for:
- *  - based on to/from flags, solving the dependency graph and figuring out which projects need to be run
- *  - creating a ProjectBuilder for each project that needs to be built
- *  - registering the necessary ProjectBuilders with the TaskExecutionManager, which actually orchestrates execution
+ * This class is responsible for transforming a set of selected phases and selected projects into a task dependency graph.
  */
 export class ProjectTaskSelector {
-  private readonly _options: IProjectTaskSelectorOptions;
-  private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
-  private readonly _phasesToRun: Iterable<string>;
-  private readonly _phases: Map<string, IPhase>;
-  private readonly _customParametersByPhaseName: Map<string, string[]>;
+  private readonly _phasesToRun: ReadonlySet<IPhase>;
 
   public constructor(options: IProjectTaskSelectorOptions) {
-    this._options = options;
-    this._projectChangeAnalyzer =
-      options.projectChangeAnalyzer || new ProjectChangeAnalyzer(options.rushConfiguration);
     this._phasesToRun = options.phasesToRun;
-    this._phases = options.phases;
-    this._customParametersByPhaseName = new Map();
   }
 
-  public static getScriptToRun(
-    rushProject: RushConfigurationProject,
-    commandToRun: string,
-    customParameterValues: string[]
-  ): string | undefined {
-    const script: string | undefined = ProjectTaskSelector._getScriptCommand(rushProject, commandToRun);
+  public createTasks(createTasksOptions: ICreateTasksOptions): Set<Task> {
+    const { projectSelection, taskFactory } = createTasksOptions;
 
-    if (script === undefined) {
-      return undefined;
-    }
+    const selectedNodes: Map<string, ISelectedTaskNode> = new Map();
+    const selectedTasks: Set<Task> = new Set();
 
-    if (!script) {
-      return '';
-    } else {
-      const taskCommand: string = `${script} ${customParameterValues.join(' ')}`;
-      return process.platform === 'win32' ? convertSlashesForWindows(taskCommand) : taskCommand;
-    }
-  }
+    // Create tasks for selected phases and projects
+    for (const phase of this._phasesToRun) {
+      for (const project of projectSelection) {
+        const task: Task = taskFactory.createTask({
+          phase,
+          project
+        });
 
-  public registerTasks(): TaskCollection {
-    const projects: ReadonlySet<RushConfigurationProject> = this._options.projectSelection;
-    const taskCollection: TaskCollection = new TaskCollection();
+        const key: string = getTaskKey(phase, project);
 
-    const selectedDependenciesCache: Map<RushConfigurationProject, Set<RushConfigurationProject>> = new Map();
-    function getSelectedDependencies(project: RushConfigurationProject): Set<RushConfigurationProject> {
-      let selectedDependencies: Set<RushConfigurationProject> | undefined =
-        selectedDependenciesCache.get(project);
-      if (selectedDependencies) {
-        return selectedDependencies;
-      }
-
-      selectedDependencies = new Set();
-      selectedDependenciesCache.set(project, selectedDependencies);
-
-      for (const dependency of project.dependencyProjects) {
-        if (projects.has(dependency)) {
-          // The tasks for this project are part of the set. Preserve dependency as-is
-          selectedDependencies.add(dependency);
-        } else {
-          // This project is not part of the set, but some of its dependencies could be.
-          for (const indirectDependency of getSelectedDependencies(dependency)) {
-            selectedDependencies.add(indirectDependency);
-          }
-        }
-      }
-
-      return selectedDependencies;
-    }
-
-    const taskDependencies: Map<string, Set<string>> = new Map();
-
-    // Register all tasks
-    // This currently does not correctly handle the scenario in which a phase is skipped.
-    // If that happens, the dependency graph will have an error due to a missing task.
-    for (const phaseName of this._phasesToRun) {
-      const phase: IPhase = this._getPhaseByName(phaseName);
-      for (const project of projects) {
-        const taskName: string = this._getPhaseDisplayNameForProject(phase, project);
-
-        const customParameterValues: string[] = this._getCustomParameterValuesForPhase(phase);
-        const commandToRun: string | undefined = ProjectTaskSelector.getScriptToRun(
+        const record: ISelectedTaskNode = {
+          key,
+          phase,
           project,
-          phase.name,
-          customParameterValues
-        );
-        if (commandToRun === undefined && !phase.ignoreMissingScript) {
-          throw new Error(
-            `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
-          );
-        }
+          task
+        };
 
-        taskCollection.addTask(
-          new ProjectTaskRunner({
-            rushProject: project,
-            taskName,
-            rushConfiguration: this._options.rushConfiguration,
-            buildCacheConfiguration: this._options.buildCacheConfiguration,
-            commandToRun: commandToRun || '',
-            isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
-            projectChangeAnalyzer: this._projectChangeAnalyzer,
-            phase
-          })
-        );
+        selectedNodes.set(key, record);
+        selectedTasks.add(task);
+      }
+    }
 
-        const dependencyTasks: Set<string> = new Set();
-        if (phase.dependencies?.self) {
-          for (const dependencyPhaseName of phase.dependencies.self) {
-            const dependencyPhase: IPhase = this._getPhaseByName(dependencyPhaseName);
-            const dependencyTaskName: string = this._getPhaseDisplayNameForProject(dependencyPhase, project);
+    // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key
+    function getTaskKey(phase: IPhase, project: RushConfigurationProject): string {
+      return `${project.packageName};${phase.name}`;
+    }
 
-            dependencyTasks.add(dependencyTaskName);
-          }
-        }
+    /**
+     * Enumerates the declared dependencies
+     */
+    function* getRawDependencies(node: ITaskNode): Iterable<ITaskNode> {
+      const {
+        phase: {
+          phaseDependencies: { self, upstream }
+        },
+        project
+      } = node;
 
-        if (phase.dependencies?.upstream) {
-          for (const dependencyPhaseName of phase.dependencies.upstream) {
-            const dependencyPhase: IPhase = this._getPhaseByName(dependencyPhaseName);
-            for (const dependencyProject of getSelectedDependencies(project)) {
-              const dependencyTaskName: string = this._getPhaseDisplayNameForProject(
-                dependencyPhase,
-                dependencyProject
-              );
+      for (const depPhase of self) {
+        // Different phase, same project
+        yield {
+          key: getTaskKey(depPhase, project),
+          phase: depPhase,
+          project
+        };
+      }
 
-              dependencyTasks.add(dependencyTaskName);
+      if (upstream.size) {
+        const { dependencyProjects } = project;
+        if (dependencyProjects.size) {
+          for (const depPhase of upstream) {
+            for (const dependencyProject of dependencyProjects) {
+              yield {
+                key: getTaskKey(depPhase, dependencyProject),
+                phase: depPhase,
+                project: dependencyProject
+              };
             }
           }
         }
-
-        taskDependencies.set(taskName, dependencyTasks);
       }
     }
 
-    for (const [taskName, dependencies] of taskDependencies) {
-      taskCollection.addDependencies(taskName, dependencies);
-    }
+    const filteredDependencyCache: Map<string, ITaskDependencies> = new Map();
+    function getFilteredDependencies(node: ITaskNode): ITaskDependencies {
+      const { key } = node;
+      const cached: ITaskDependencies | undefined = filteredDependencyCache.get(key);
+      if (cached) {
+        return cached;
+      }
 
-    return taskCollection;
-  }
+      const dependencies: ITaskDependencies = {
+        tasks: undefined,
+        isCacheWriteAllowed: selectedNodes.has(key)
+      };
 
-  private _getPhaseByName(phaseName: string): IPhase {
-    const phase: IPhase | undefined = this._phases.get(phaseName);
-    if (!phase) {
-      throw new Error(`Phase ${phaseName} not found`);
-    }
+      filteredDependencyCache.set(key, dependencies);
 
-    return phase;
-  }
+      for (const dep of getRawDependencies(node)) {
+        const selectedRecord: ISelectedTaskNode | undefined = selectedNodes.get(dep.key);
+        if (selectedRecord) {
+          // This task is part of the current execution
+          if (!dependencies.tasks) {
+            dependencies.tasks = new Set();
+          }
+          dependencies.tasks.add(selectedRecord.task);
+        } else {
+          // This task is not part of the current execution, but may have dependencies that are
+          // Since a task has been excluded, we cannot guarantee the results, so it is cache unsafe
+          dependencies.isCacheWriteAllowed = false;
+          const { tasks: indirectDependencies }: ITaskDependencies = getFilteredDependencies(dep);
+          if (indirectDependencies) {
+            if (!dependencies.tasks) {
+              dependencies.tasks = new Set();
+            }
 
-  private _getPhaseDisplayNameForProject(phase: IPhase, project: RushConfigurationProject): string {
-    if (phase.isSynthetic) {
-      // Because this is a synthetic phase, just use the project name because there aren't any other phases
-      return project.packageName;
-    } else {
-      const phaseNameWithoutPrefix: string = phase.name.substring(RushConstants.phaseNamePrefix.length);
-      return `${project.packageName} (${phaseNameWithoutPrefix})`;
-    }
-  }
-
-  private _getCustomParameterValuesForPhase(phase: IPhase): string[] {
-    let customParameterValues: string[] | undefined = this._customParametersByPhaseName.get(phase.name);
-    if (customParameterValues === undefined) {
-      customParameterValues = [];
-      for (const { tsCommandLineParameter, parameter } of this._options.customParameters) {
-        if (phase.associatedParameters.has(parameter)) {
-          tsCommandLineParameter.appendToArgList(customParameterValues);
+            for (const indirectDep of indirectDependencies) {
+              dependencies.tasks.add(indirectDep);
+            }
+          }
         }
       }
 
-      this._customParametersByPhaseName.set(phase.name, customParameterValues);
+      return dependencies;
     }
 
-    return customParameterValues;
-  }
+    // Add dependency relationships
+    for (const record of selectedNodes.values()) {
+      const deps: ITaskDependencies = getFilteredDependencies(record);
+      if (deps.tasks) {
+        for (const dependencyTask of deps.tasks) {
+          record.task.dependencies.add(dependencyTask);
+          dependencyTask.dependents.add(record.task);
+        }
+      }
 
-  private static _getScriptCommand(
-    rushProject: RushConfigurationProject,
-    script: string
-  ): string | undefined {
-    if (!rushProject.packageJson.scripts) {
-      return undefined;
+      record.task.runner.isCacheWriteAllowed = deps.isCacheWriteAllowed;
     }
 
-    const rawCommand: string = rushProject.packageJson.scripts[script];
-
-    if (rawCommand === undefined || rawCommand === null) {
-      return undefined;
-    }
-
-    return rawCommand;
+    return selectedTasks;
   }
 }

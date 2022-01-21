@@ -12,7 +12,7 @@ export interface IGitVersion {
 
 const MINIMUM_GIT_VERSION: IGitVersion = {
   major: 2,
-  minor: 30,
+  minor: 20,
   patch: 0
 };
 
@@ -103,7 +103,7 @@ export function parseGitDiffIndex(output: string): Map<string, IFileDiffStatus> 
 }
 
 /**
- * Parses the output of `git status -z -u`
+ * Parses the output of `git status -z -u` to extract the set of files that have changed since HEAD.
  *
  * @param output - The raw output from Git
  * @returns a map of file path to if it exists
@@ -118,19 +118,21 @@ export function parseGitStatus(output: string): Map<string, boolean> {
   // XY <path>\0
   //  M tools/prettier-git/prettier-git.js\0
 
-  let last: number = 0;
-  let index: number = output.indexOf('\0', last);
-  while (index >= 0) {
+  let startOfLine: number = 0;
+  let eolIndex: number = output.indexOf('\0', startOfLine);
+  while (eolIndex >= 0) {
     // We passed --no-renames above, so a rename will be a delete of the old location and an add at the new.
-    const workingTreeStatus: string = output.charAt(last + 2);
-    const exists: boolean =
-      workingTreeStatus !== 'D' && (workingTreeStatus !== ' ' || output.charAt(last + 1) !== 'D');
-    const filePath: string = output.slice(last + 3, index);
+    // charAt(startOfLine) is the index status, charAt(startOfLine + 1) is the working tree status
+    const workingTreeStatus: string = output.charAt(startOfLine + 1);
+    // Deleted in working tree, or not modified in working tree and deleted in index
+    const deleted: boolean =
+      workingTreeStatus === 'D' || (workingTreeStatus === ' ' && output.charAt(startOfLine) === 'D');
 
-    result.set(filePath, exists);
+    const filePath: string = output.slice(startOfLine + 3, eolIndex);
+    result.set(filePath, !deleted);
 
-    last = index + 1;
-    index = output.indexOf('\0', last);
+    startOfLine = eolIndex + 1;
+    eolIndex = output.indexOf('\0', startOfLine);
   }
 
   return result;
@@ -278,6 +280,7 @@ export function getRepoState(currentWorkingDirectory: string, gitPath?: string):
  * Find all changed files tracked by Git, their current hashes, and the nature of the change. Only useful if all changes are staged or committed.
  * @param currentWorkingDirectory - The working directory. Only used to find the repository root.
  * @param revision - The Git revision specifier to detect changes relative to. Defaults to HEAD (i.e. will compare staged vs. committed)
+ *   If comparing against a different branch, call `git merge-base` first to find the target commit.
  * @param gitPath - The path to the Git executable
  * @returns A map from the Git file path to the corresponding file change metadata
  * @beta
@@ -296,8 +299,6 @@ export function getRepoChanges(
       'diff-index',
       '--color=never',
       '--no-renames',
-      // rush change targets origin/main with this, and usually the current branch is not synced, so use the merge-base
-      '--merge-base',
       '--no-commit-id',
       '--cached',
       '-z',
