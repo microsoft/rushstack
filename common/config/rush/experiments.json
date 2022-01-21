@@ -22,7 +22,7 @@
    * Used to allow links between workspace projects or the addition/removal of references to existing dependency versions to not
    * cause hash changes.
    */
-  // "omitImportersFromPreventManualShrinkwrapChanges": true,
+  "omitImportersFromPreventManualShrinkwrapChanges": true,
 
   /**
    * If true, the chmod field in temporary project tar headers will not be normalized.
