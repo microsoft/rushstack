@@ -6196,7 +6196,7 @@ packages:
   /@types/heft-jest/1.0.1:
     resolution: {integrity: sha512-cF2iEUpvGh2WgLowHVAdjI05xuDo+GwCA8hGV3Q5PBl8apjd6BTcpPFQ2uPlfUM7BLpgur2xpYo8VeBXopMI4A==}
     dependencies:
-      '@types/jest': 25.2.1
+      '@types/jest': 27.4.0
     dev: true
 
   /@types/html-minifier-terser/5.1.2:
@@ -6234,13 +6234,6 @@ packages:
     resolution: {integrity: sha512-c3mAZEuK0lvBp8tmuL74XRKn1+y2dcwOUpH7x4WrF6gk1GIgiluDRgMYQtw2OFcBvAJWlt6ASU3tSqxp0Uu0Aw==}
     dependencies:
       '@types/istanbul-lib-report': 3.0.0
-
-  /@types/jest/25.2.1:
-    resolution: {integrity: sha512-msra1bCaAeEdkSyA0CZ6gW1ukMIvZ5YoJkdXw/qhQdsuuDlFTcEUrUw8CLCPt2rVRUfXlClVvK2gvPs9IokZaA==}
-    dependencies:
-      jest-diff: 25.5.0
-      pretty-format: 25.5.0
-    dev: true
 
   /@types/jest/27.4.0:
     resolution: {integrity: sha512-gHl8XuC1RZ8H2j5sHv/JqsaxXkDDM9iDOgu0Wp8sjs4u/snb2PVehyWXJPr+ORA0RPpgw231mnutWI1+0hgjIQ==}
