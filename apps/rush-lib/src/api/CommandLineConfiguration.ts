@@ -87,12 +87,9 @@ const DEFAULT_BUILD_COMMAND_JSON: IBulkCommandJson = {
     ' build state is tracked in a per-project folder called ".rush/temp" which should NOT be added to Git. The' +
     ' build command is tracked by the "arguments" field in the "package-deps_build.json" file contained' +
     ' therein; a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
+  safeForSimultaneousRushProcesses: false,
   enableParallelism: true,
-  ignoreMissingScript: false,
-  ignoreDependencyOrder: false,
-  incremental: true,
-  allowWarningsInSuccessfulBuild: false,
-  safeForSimultaneousRushProcesses: false
+  incremental: true
 };
 
 const DEFAULT_REBUILD_COMMAND_JSON: IBulkCommandJson = {
@@ -107,12 +104,9 @@ const DEFAULT_REBUILD_COMMAND_JSON: IBulkCommandJson = {
     ' graph for locally linked projects.  The number of simultaneous processes will be' +
     ' based on the number of machine cores unless overridden by the --parallelism flag.' +
     ' (For an incremental build, see "rush build" instead of "rush rebuild".)',
+  safeForSimultaneousRushProcesses: false,
   enableParallelism: true,
-  ignoreMissingScript: false,
-  ignoreDependencyOrder: false,
-  incremental: false,
-  allowWarningsInSuccessfulBuild: false,
-  safeForSimultaneousRushProcesses: false
+  incremental: false
 };
 
 interface ICommandLineConfigurationOptions {
@@ -539,6 +533,7 @@ export class CommandLineConfiguration {
           // Determine if we have a set of default parameters
           let commandDefaultDefinition: CommandJson | {} = {};
           switch (command.commandKind) {
+            case RushConstants.phasedCommandKind:
             case RushConstants.bulkCommandKind: {
               switch (command.name) {
                 case RushConstants.buildCommandName: {
