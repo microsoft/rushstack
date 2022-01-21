@@ -39,7 +39,7 @@ export class ProjectBuildCache {
    * null === we haven't tried to initialize yet
    * undefined === unable to initialize
    */
-  private static _tarUtility: TarExecutable | null | undefined = null;
+  private static _tarUtilityPromise: Promise<TarExecutable | undefined> | null = null;
 
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
@@ -57,12 +57,12 @@ export class ProjectBuildCache {
     this._cacheId = cacheId;
   }
 
-  private static _tryGetTarUtility(terminal: ITerminal): TarExecutable | undefined {
-    if (ProjectBuildCache._tarUtility === null) {
-      ProjectBuildCache._tarUtility = TarExecutable.tryInitialize(terminal);
+  private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
+    if (ProjectBuildCache._tarUtilityPromise === null) {
+      ProjectBuildCache._tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
     }
 
-    return ProjectBuildCache._tarUtility;
+    return ProjectBuildCache._tarUtilityPromise;
   }
 
   public static async tryGetProjectBuildCache(
@@ -180,7 +180,7 @@ export class ProjectBuildCache {
       )
     );
 
-    const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
     if (tarUtility && localCacheEntryPath) {
       const logFilePath: string = this._getTarLogFilePath();
@@ -263,7 +263,7 @@ export class ProjectBuildCache {
 
     let localCacheEntryPath: string | undefined;
 
-    const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
       const tempLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
       const logFilePath: string = this._getTarLogFilePath();

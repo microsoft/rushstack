@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the TAR exectuable on the Git Bash PATH does not handle Windows paths correctly.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import os from 'os';
 import { Executable, FileSystem, FileWriter, ITerminal } from '@rushstack/node-core-library';
 import { ChildProcess } from 'child_process';
 import events from 'events';
@@ -31,10 +32,10 @@ export class TarExecutable {
     this._tarExecutablePath = tarExecutablePath;
   }
 
-  public static tryInitialize(terminal: ITerminal): TarExecutable | undefined {
+  public static async tryInitializeAsync(terminal: ITerminal): Promise<TarExecutable | undefined> {
     terminal.writeVerboseLine('Trying to find "tar" binary');
     const tarExecutablePath: string | undefined =
-      EnvironmentConfiguration.tarBinaryPath || Executable.tryResolve('tar');
+      EnvironmentConfiguration.tarBinaryPath || (await TarExecutable._tryFindTarExecutablePathAsync());
     if (!tarExecutablePath) {
       terminal.writeVerboseLine('"tar" was not found on the PATH');
       return undefined;
@@ -162,5 +163,23 @@ export class TarExecutable {
     fileWriter.close();
 
     return tarExitCode;
+  }
+
+  private static async _tryFindTarExecutablePathAsync(): Promise<string | undefined> {
+    if (os.platform() === 'win32') {
+      // If we're running on Windows, first try to use the OOB tar executable. If
+      // we're running in the Git Bash, the tar executable on the PATH doesn't handle
+      // Windows file paths correctly.
+      // eslint-disable-next-line dot-notation
+      const windowsFolderPath: string | undefined = process.env['WINDIR'];
+      if (windowsFolderPath) {
+        const defaultWindowsTarExecutablePath: string = `${windowsFolderPath}\\system32\\tar.exe`;
+        if (await FileSystem.existsAsync(defaultWindowsTarExecutablePath)) {
+          return defaultWindowsTarExecutablePath;
+        }
+      }
+    }
+
+    return Executable.tryResolve('tar');
   }
 }
