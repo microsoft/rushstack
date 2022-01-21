@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix project change detection for new projects using PNPM",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
