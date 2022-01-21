@@ -1900,6 +1900,25 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
 
+  ../../rush-plugins/rush-litewatch-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/rush-sdk': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/rush-sdk': link:../../libraries/rush-sdk
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+
   ../../webpack/loader-load-themed-styles:
     specifiers:
       '@microsoft/load-themed-styles': workspace:*

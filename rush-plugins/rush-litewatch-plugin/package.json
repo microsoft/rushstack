@@ -1,0 +1,28 @@
+{
+  "name": "@rushstack/rush-litewatch-plugin",
+  "version": "0.0.0",
+  "private": true,
+  "description": "An experimental alternative approach for multi-project watch mode",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "rush-plugins/rush-litewatch-plugin"
+  },
+  "scripts": {
+    "build": "heft test --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24"
+  }
+}
