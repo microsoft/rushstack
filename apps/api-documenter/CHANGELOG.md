@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 20 Jan 2022 02:43:46 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Jan 2022 01:10:41 GMT and should not be manually modified.
+
+## 7.15.0
+Fri, 21 Jan 2022 01:10:41 GMT
+
+### Minor changes
+
+- Add support for type aliases to the YAML output format.
 
 ## 7.14.2
 Thu, 20 Jan 2022 02:43:46 GMT

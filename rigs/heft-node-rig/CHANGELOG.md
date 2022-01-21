@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Thu, 20 Jan 2022 02:43:46 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Jan 2022 01:10:41 GMT and should not be manually modified.
+
+## 1.7.0
+Fri, 21 Jan 2022 01:10:41 GMT
+
+### Minor changes
+
+- Include "dist" in the list of cached folders for the "build" and "_phase:build" operations.
 
 ## 1.6.0
 Thu, 20 Jan 2022 02:43:46 GMT
