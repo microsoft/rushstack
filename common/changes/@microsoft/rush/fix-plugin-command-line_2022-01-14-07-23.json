@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an issue with the command-line.json included with plugins are loaded. These command-line.json should not include the default build and rebuild commands.",
+      "comment": "(EXPERIMENTAL) Fix a regression for the plugins feature, which caused an error message \"command-line.json defines a command 'build' using a name that already exists\" (GitHub #3155)",
       "type": "none"
     }
   ],
