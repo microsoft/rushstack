@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.61.1",
+      "tag": "@microsoft/rush_v5.61.1",
+      "date": "Sat, 22 Jan 2022 04:22:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Allow common/config/rush/command-line.json to specify the build command as a phased command without specifying all of the options required by the schema. The remaining options will come from the default. This is already supported when a partially-specified build command has \"commandKind\" set to \"bulk\"."
+          },
+          {
+            "comment": "Fix an issue where Git Bash \"tar\" does not handle Windows paths correctly."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Improve the RUSH_BUILD_CACHE_WRITE_ALLOWED environment variable behavior so that it also affects the local build cache. This saves CPU cycles on CI machines that only run a single build. It also avoids cache writes for watch mode commands."
+          },
+          {
+            "comment": "Refactoring to support upcoming watch mode improvements: Rework the task execution engine to interact with the task queue using the ECMAScript async iteration protocol (GitHub #3043)"
+          },
+          {
+            "comment": "Fix project change detection when a new project is added to a repo that uses PNPM with useWorkspaces=false (GitHub #3183)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.61.0",
       "tag": "@microsoft/rush_v5.61.0",
       "date": "Sat, 22 Jan 2022 03:17:59 GMT",

@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 22 Jan 2022 03:17:59 GMT and should not be manually modified.
+This log was last generated on Sat, 22 Jan 2022 04:22:52 GMT and should not be manually modified.
+
+## 5.61.1
+Sat, 22 Jan 2022 04:22:52 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Allow common/config/rush/command-line.json to specify the build command as a phased command without specifying all of the options required by the schema. The remaining options will come from the default. This is already supported when a partially-specified build command has "commandKind" set to "bulk".
+- Fix an issue where Git Bash "tar" does not handle Windows paths correctly.
+- (EXPERIMENTAL) Improve the RUSH_BUILD_CACHE_WRITE_ALLOWED environment variable behavior so that it also affects the local build cache. This saves CPU cycles on CI machines that only run a single build. It also avoids cache writes for watch mode commands.
+- Refactoring to support upcoming watch mode improvements: Rework the task execution engine to interact with the task queue using the ECMAScript async iteration protocol (GitHub #3043)
+- Fix project change detection when a new project is added to a repo that uses PNPM with useWorkspaces=false (GitHub #3183)
 
 ## 5.61.0
 Sat, 22 Jan 2022 03:17:59 GMT
