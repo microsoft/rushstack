@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(EXPERIMENTAL) Improve the RUSH_BUILD_CACHE_WRITE_ALLOWED environment variable behavior so that it also affects the local build cache. This saves CPU cycles on CI machines that only run a single build. It also avoids cache writes for watch mode commands.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

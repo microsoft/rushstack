@@ -45,15 +45,18 @@ export class ProjectBuildCache {
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
   private readonly _buildCacheEnabled: boolean;
+  private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
-    this._project = options.projectConfiguration.project;
-    this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
-    this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
-    this._buildCacheEnabled = options.buildCacheConfiguration.buildCacheEnabled;
-    this._projectOutputFolderNames = options.projectOutputFolderNames || [];
+    const { buildCacheConfiguration, projectConfiguration, projectOutputFolderNames } = options;
+    this._project = projectConfiguration.project;
+    this._localBuildCacheProvider = buildCacheConfiguration.localCacheProvider;
+    this._cloudBuildCacheProvider = buildCacheConfiguration.cloudCacheProvider;
+    this._buildCacheEnabled = buildCacheConfiguration.buildCacheEnabled;
+    this._cacheWriteEnabled = buildCacheConfiguration.cacheWriteEnabled;
+    this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._cacheId = cacheId;
   }
 
@@ -240,14 +243,14 @@ export class ProjectBuildCache {
   }
 
   public async trySetCacheEntryAsync(terminal: ITerminal): Promise<boolean> {
+    if (!this._cacheWriteEnabled) {
+      // Skip writing local and cloud build caches, without any noise
+      return true;
+    }
+
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
-      return false;
-    }
-
-    if (!this._buildCacheEnabled) {
-      // Skip writing local and cloud build caches, without any noise
       return false;
     }
 
