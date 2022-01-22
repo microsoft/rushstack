@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 20 Jan 2022 02:46:15 GMT and should not be manually modified.
+This log was last generated on Sat, 22 Jan 2022 03:32:23 GMT and should not be manually modified.
+
+## 5.60.1
+Sat, 22 Jan 2022 03:32:23 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Fix a regression for the plugins feature, which caused an error message "command-line.json defines a command 'build' using a name that already exists" (GitHub #3155)
 
 ## 5.60.0
 Thu, 20 Jan 2022 02:46:15 GMT

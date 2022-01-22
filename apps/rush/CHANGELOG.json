@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.60.1",
+      "tag": "@microsoft/rush_v5.60.1",
+      "date": "Sat, 22 Jan 2022 03:32:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Fix a regression for the plugins feature, which caused an error message \"command-line.json defines a command 'build' using a name that already exists\" (GitHub #3155)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.60.0",
       "tag": "@microsoft/rush_v5.60.0",
       "date": "Thu, 20 Jan 2022 02:46:15 GMT",
