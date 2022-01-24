@@ -187,6 +187,28 @@
               "items": {
                 "type": "string"
               }
+            },
+            "watchOptions": {
+              "title": "Watch Options",
+              "description": "Controls the file watching behavior of this command. If not specified, this command does not watch files.",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["watchForChanges", "watchPhases"],
+              "properties": {
+                "watchForChanges": {
+                  "title": "Watch For Changes",
+                  "description": "Indicates that this command will watch for changes after the initial execution.",
+                  "enum": [true]
+                },
+                "watchPhases": {
+                  "title": "Watch Phases",
+                  "description": "List *exactly* the phases that should be run in watch mode for this command. If this property is specified and non-empty, after the phases defined in the \"phases\" property run, a file watcher will be started to watch projects for changes, and will run the phases listed in this property on changed projects.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
             }
           }
         },
@@ -202,7 +224,8 @@
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "incremental": { "$ref": "#/definitions/anything" },
-            "phases": { "$ref": "#/definitions/anything" }
+            "phases": { "$ref": "#/definitions/anything" },
+            "watchOptions": { "$ref": "#/definitions/anything" }
           }
         }
       ]

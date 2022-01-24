@@ -21,7 +21,6 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import type { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
-import type { IProjectTaskSelectorOptions } from '../../logic/ProjectTaskSelector';
 import { ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
 import { Selection } from '../../logic/Selection';
 import { IProjectTaskFactoryOptions, ProjectTaskFactory } from '../../logic/taskExecution/ProjectTaskFactory';
@@ -34,10 +33,10 @@ import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPhasedCommand> {
   enableParallelism: boolean;
   incremental: boolean;
-  watchForChanges: boolean;
   disableBuildCache: boolean;
 
-  actionPhases: Set<IPhase>;
+  initialPhases: Set<IPhase>;
+  watchPhases: Set<IPhase>;
   phases: Map<string, IPhase>;
 }
 
@@ -64,11 +63,10 @@ interface IExecuteInternalOptions {
 export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
-  private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
-  private readonly _actionPhases: ReadonlySet<IPhase>;
-  private readonly _phases: Map<string, IPhase>;
+  private readonly _initialPhase: ReadonlySet<IPhase>;
+  private readonly _watchPhases: ReadonlySet<IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -80,11 +78,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._isIncrementalBuildAllowed = options.incremental;
-    this._watchForChanges = options.watchForChanges;
     this._disableBuildCache = options.disableBuildCache;
     this._repoCommandLineConfiguration = options.commandLineConfiguration;
-    this._actionPhases = options.actionPhases;
-    this._phases = options.phases;
+    this._initialPhase = options.initialPhases;
+    this._watchPhases = options.watchPhases;
   }
 
   public async runAsync(): Promise<void> {
@@ -130,17 +127,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       return;
     }
 
-    const phasesToRun: Set<IPhase> = new Set(this._actionPhases);
     const taskFactoryOptions: IProjectTaskFactoryOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       customParameters: this.customParameters,
       projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration)
-    };
-
-    const taskSelectorOptions: IProjectTaskSelectorOptions = {
-      phasesToRun: phasesToRun
     };
 
     const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {
@@ -151,7 +143,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
-    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector(taskSelectorOptions);
+    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector({
+      phasesToRun: new Set(this._initialPhase)
+    });
+
+    const isWatch: boolean = this._watchPhases.size > 0;
 
     const executeOptions: IExecuteInternalOptions = {
       taskSelector,
@@ -162,33 +158,38 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       terminal
     };
 
-    if (this._watchForChanges) {
+    await this._runOnce(executeOptions);
+
+    if (isWatch) {
       if (buildCacheConfiguration) {
         // Cache writes are not supported during watch mode, only reads.
         buildCacheConfiguration.cacheWriteEnabled = false;
       }
       await this._runWatch(executeOptions);
-    } else {
-      await this._runOnce(executeOptions);
     }
   }
 
   /**
    * Runs the command in watch mode. Fundamentally is a simple loop:
-   * 1) Wait for a change to one or more projects in the selection (skipped initially)
+   * 1) Wait for a change to one or more projects in the selection
    * 2) Invoke the command on the changed projects, and, if applicable, impacted projects
    *    Uses the same algorithm as --impacted-by
    * 3) Goto (1)
    */
   private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
     const {
-      taskSelector,
       projectSelection: projectsToWatch,
       taskFactoryOptions,
       taskExecutionManagerOptions,
       stopwatch,
       terminal
     } = options;
+
+    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector({
+      phasesToRun: new Set(this._watchPhases)
+    });
+
+    const { projectChangeAnalyzer: initialState } = taskFactoryOptions;
 
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
@@ -197,7 +198,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       debounceMilliseconds: 1000,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
-      terminal
+      terminal,
+      initialState
     });
 
     const onWatchingFiles = (): void => {

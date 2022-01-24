@@ -15,6 +15,7 @@ export interface IProjectWatcherOptions {
   rushConfiguration: RushConfiguration;
   projectsToWatch: ReadonlySet<RushConfigurationProject>;
   terminal: ITerminal;
+  initialState?: ProjectChangeAnalyzer | undefined;
 }
 
 export interface IProjectChangeResult {
@@ -48,12 +49,21 @@ export class ProjectWatcher {
   private _previousState: ProjectChangeAnalyzer | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
-    const { debounceMilliseconds = 1000, rushConfiguration, projectsToWatch, terminal } = options;
+    const {
+      debounceMilliseconds = 1000,
+      rushConfiguration,
+      projectsToWatch,
+      terminal,
+      initialState
+    } = options;
 
     this._debounceMilliseconds = debounceMilliseconds;
     this._rushConfiguration = rushConfiguration;
     this._projectsToWatch = projectsToWatch;
     this._terminal = terminal;
+
+    this._initialState = initialState;
+    this._previousState = initialState;
   }
 
   /**
