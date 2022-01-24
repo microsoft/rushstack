@@ -265,7 +265,7 @@ importers:
       ssri: ~8.0.0
       strict-uri-encode: ~2.0.0
       tapable: 2.2.1
-      tar: ~5.0.5
+      tar: ~5.0.10
       true-case-path: ~2.2.1
     dependencies:
       '@pnpm/link-bins': 5.3.25
