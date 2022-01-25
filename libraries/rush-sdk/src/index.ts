@@ -9,20 +9,33 @@ import {
   IPackageJson,
   PackageJsonLookup,
   Executable,
-  FileSystem
+  FileSystem,
+  Terminal,
+  ConsoleTerminalProvider
 } from '@rushstack/node-core-library';
+import type { SpawnSyncReturns } from 'child_process';
 
 const RUSH_LIB_NAME: string = '@microsoft/rush-lib';
+
+const verboseEnabled: boolean = typeof process !== 'undefined' && process.env.RUSH_SDK_DEBUG === '1';
+const terminal: Terminal = new Terminal(
+  new ConsoleTerminalProvider({
+    verboseEnabled
+  })
+);
 
 type RushLibModuleType = Record<string, unknown>;
 declare const global: NodeJS.Global &
   typeof globalThis & {
     ___rush___rushLibModule?: RushLibModuleType;
+    ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
   };
 
 // SCENARIO 1:  Rush's PluginManager has initialized "rush-sdk" with Rush's own instance of rush-lib.
 // The Rush host process will assign "global.___rush___rushLibModule" before loading the plugin.
-let rushLibModule: RushLibModuleType | undefined = global.___rush___rushLibModule;
+let rushLibModule: RushLibModuleType | undefined =
+  global.___rush___rushLibModule || global.___rush___rushLibModuleFromInstallAndRunRush;
+let errorMessage: string = '';
 
 // SCENARIO 2:  The project importing "rush-sdk" has installed its own instance of "rush-lib"
 // as a package.json dependency.  For example, this is used by the Jest tests for Rush plugins.
@@ -44,10 +57,12 @@ if (rushLibModule === undefined) {
           callerPackageJson.peerDependencies[RUSH_LIB_NAME] !== undefined)
       ) {
         // Try to resolve rush-lib from the caller's folder
+        terminal.writeVerboseLine(`Try to load ${RUSH_LIB_NAME} from caller package`);
         try {
           rushLibModule = requireRushLibUnderFolderPath(callerPackageFolder);
         } catch (error) {
           // If we fail to resolve it, ignore the error
+          terminal.writeVerboseLine(`Failed to load ${RUSH_LIB_NAME} from caller package`);
         }
 
         // If two different libraries invoke `rush-sdk`, and one of them provides "rush-lib"
@@ -55,6 +70,7 @@ if (rushLibModule === undefined) {
         if (rushLibModule !== undefined) {
           // to track which scenario is active and how it got initialized.
           global.___rush___rushLibModule = rushLibModule;
+          terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} from caller`);
         }
       }
     }
@@ -67,7 +83,10 @@ if (rushLibModule === undefined) {
   try {
     const rushJsonPath: string | undefined = tryFindRushJsonLocation(process.cwd());
     if (!rushJsonPath) {
-      throw new Error('Could not find rush.json');
+      throw new Error(
+        'Unable to find rush.json in the current folder or its parent folders.\n' +
+          'This tool is meant to be invoked from a working directory inside a Rush repository.'
+      );
     }
     const monorepoRoot: string = path.dirname(rushJsonPath);
 
@@ -81,27 +100,45 @@ if (rushLibModule === undefined) {
 
     try {
       // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
+      terminal.writeVerboseLine(`Try to load  ${RUSH_LIB_NAME} from install-run-rush`);
       rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
     } catch (e) {
+      let installAndRunRushStderrContent: string = '';
       try {
         const installAndRunRushJSPath: string = path.join(monorepoRoot, 'common/scripts/install-run-rush.js');
-        Executable.spawnSync('node', [installAndRunRushJSPath, '--help'], {
-          stdio: 'ignore'
-        });
+
+        terminal.writeLine('The Rush engine has not been installed yet. Invoking install-run-rush.js...');
+
+        const installAndRuhRushProcess: SpawnSyncReturns<string> = Executable.spawnSync(
+          'node',
+          [installAndRunRushJSPath, '--help'],
+          {
+            stdio: 'pipe'
+          }
+        );
+
+        installAndRunRushStderrContent = installAndRuhRushProcess.stderr;
+        if (installAndRuhRushProcess.status !== 0) {
+          throw new Error(`The ${RUSH_LIB_NAME} package failed to install`);
+        }
 
         // Retry to load "rush-lib" after install-run-rush run
+        terminal.writeVerboseLine(`Try to load  ${RUSH_LIB_NAME} from install-run-rush a second time`);
         rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
       } catch (e) {
-        throw new Error(`Could not load @microsoft/rush-lib from ${installRunNodeModuleFolder}`);
+        console.error(`${installAndRunRushStderrContent}`);
+        throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
       }
     }
 
     if (rushLibModule !== undefined) {
       // to track which scenario is active and how it got initialized.
-      global.___rush___rushLibModule = rushLibModule;
+      global.___rush___rushLibModuleFromInstallAndRunRush = rushLibModule;
+      terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} from install-run-rush`);
     }
   } catch (e) {
     // no-catch
+    errorMessage = (e as Error).message;
   }
 }
 
@@ -109,7 +146,10 @@ if (rushLibModule === undefined) {
   // This error indicates that a project is trying to import "@rushstack/rush-sdk", but the Rush engine
   // instance cannot be found.  If you are writing Jest tests for a Rush plugin, add "@microsoft/rush-lib"
   // to the devDependencies for your project.
-  throw new Error('The "@rushstack/rush-sdk" package context has not been initialized.');
+  console.error(`Error: The @rushstack/rush-sdk package was not able to load the Rush engine:
+${errorMessage}
+`);
+  process.exit(1);
 }
 
 // Based on TypeScript's __exportStar()
