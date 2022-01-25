@@ -6,7 +6,8 @@
   "main": "lib/index.js",
   "typings": "dist/api-extractor-lib1-test.d.ts",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "_phase:build": "node build.js"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",

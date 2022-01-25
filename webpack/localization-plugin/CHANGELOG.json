@@ -2,6 +2,69 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.9.14",
+      "tag": "@rushstack/localization-plugin_v0.9.14",
+      "date": "Tue, 25 Jan 2022 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.14` to `^3.3.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.13",
+      "tag": "@rushstack/localization-plugin_v0.9.13",
+      "date": "Fri, 21 Jan 2022 01:10:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.13` to `^3.3.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.12",
+      "tag": "@rushstack/localization-plugin_v0.9.12",
+      "date": "Thu, 20 Jan 2022 02:43:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.12` to `^3.3.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.11",
       "tag": "@rushstack/localization-plugin_v0.9.11",
       "date": "Wed, 05 Jan 2022 16:07:47 GMT",

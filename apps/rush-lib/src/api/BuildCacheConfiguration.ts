@@ -72,6 +72,7 @@ export class BuildCacheConfiguration {
    * Typically it is enabled in the build-cache.json config file.
    */
   public readonly buildCacheEnabled: boolean;
+  public cacheWriteEnabled: boolean;
 
   public readonly getCacheEntryId: GetCacheEntryIdFunction;
   public readonly localCacheProvider: FileSystemBuildCacheProvider;
@@ -80,6 +81,8 @@ export class BuildCacheConfiguration {
   private constructor(options: IBuildCacheConfigurationOptions) {
     this.buildCacheEnabled =
       EnvironmentConfiguration.buildCacheEnabled ?? options.buildCacheJson.buildCacheEnabled;
+    this.cacheWriteEnabled =
+      !!this.buildCacheEnabled && EnvironmentConfiguration.buildCacheWriteAllowed !== false;
 
     this.getCacheEntryId = options.getCacheEntryId;
     this.localCacheProvider = new FileSystemBuildCacheProvider({

@@ -88,7 +88,7 @@ export class PublishUtilities {
     allChanges.packageChanges.forEach((change, packageName) => {
       const project: RushConfigurationProject = allPackages.get(packageName)!;
       const pkg: IPackageJson = project.packageJson;
-      const deps: Set<string> = project._consumingProjectNames;
+      const deps: Iterable<RushConfigurationProject> = project.consumingProjects;
 
       // Write the new version expected for the change.
       const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
@@ -100,24 +100,17 @@ export class PublishUtilities {
         change.newVersion = pkg.version;
       } else {
         // For hotfix changes, do not re-write new version
-        const newVersion: string | undefined =
+        change.newVersion =
           change.changeType! >= ChangeType.patch
             ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))!
             : change.changeType === ChangeType.hotfix
             ? change.newVersion
             : pkg.version;
-
-        change.newVersion =
-          newVersion !== undefined &&
-          change.newVersion !== undefined &&
-          semver.gt(change.newVersion, newVersion)
-            ? change.newVersion
-            : newVersion;
       }
 
       if (deps) {
-        for (const depName of deps) {
-          const depChange: IChangeInfo | undefined = allChanges.packageChanges.get(depName);
+        for (const dep of deps) {
+          const depChange: IChangeInfo | undefined = allChanges.packageChanges.get(dep.packageName);
           if (depChange) {
             depChange.order = Math.max(change.order! + 1, depChange.order!);
           }

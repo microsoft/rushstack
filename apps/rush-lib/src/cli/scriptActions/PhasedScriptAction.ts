@@ -7,7 +7,6 @@ import colors from 'colors/safe';
 import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
@@ -21,9 +20,13 @@ import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
-import { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
-import { IProjectTaskSelectorOptions, ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
+import type { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
+import type { IProjectTaskSelectorOptions } from '../../logic/ProjectTaskSelector';
+import { ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
 import { Selection } from '../../logic/Selection';
+import { IProjectTaskFactoryOptions, ProjectTaskFactory } from '../../logic/taskExecution/ProjectTaskFactory';
+import { Event } from '../../api/EventHooks';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -34,13 +37,15 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   watchForChanges: boolean;
   disableBuildCache: boolean;
 
-  actionPhases: string[];
+  actionPhases: Set<IPhase>;
   phases: Map<string, IPhase>;
 }
 
 interface IExecuteInternalOptions {
-  taskSelectorOptions: IProjectTaskSelectorOptions;
+  taskSelector: ProjectTaskSelector;
   taskExecutionManagerOptions: ITaskExecutionManagerOptions;
+  projectSelection: Set<RushConfigurationProject>;
+  taskFactoryOptions: IProjectTaskFactoryOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
   terminal: Terminal;
@@ -62,7 +67,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
-  private readonly _actionPhases: string[];
+  private readonly _actionPhases: ReadonlySet<IPhase>;
   private readonly _phases: Map<string, IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
@@ -100,7 +105,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !this._verboseParameter.value;
-    const isDebugMode: boolean = !!this.parser.isDebug;
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
@@ -126,17 +130,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       return;
     }
 
-    const phasesToRun: Set<string> = new Set(this._actionPhases);
-    const taskSelectorOptions: IProjectTaskSelectorOptions = {
+    const phasesToRun: Set<IPhase> = new Set(this._actionPhases);
+    const taskFactoryOptions: IProjectTaskFactoryOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
-      projectSelection,
-      isQuietMode: isQuietMode,
-      isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       customParameters: this.customParameters,
-      phasesToRun: phasesToRun,
-      phases: this._phases
+      projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration)
+    };
+
+    const taskSelectorOptions: IProjectTaskSelectorOptions = {
+      phasesToRun: phasesToRun
     };
 
     const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {
@@ -147,14 +151,22 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
+    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector(taskSelectorOptions);
+
     const executeOptions: IExecuteInternalOptions = {
-      taskSelectorOptions,
+      taskSelector,
       taskExecutionManagerOptions: taskExecutionManagerOptions,
+      projectSelection,
+      taskFactoryOptions,
       stopwatch,
       terminal
     };
 
     if (this._watchForChanges) {
+      if (buildCacheConfiguration) {
+        // Cache writes are not supported during watch mode, only reads.
+        buildCacheConfiguration.cacheWriteEnabled = false;
+      }
       await this._runWatch(executeOptions);
     } else {
       await this._runOnce(executeOptions);
@@ -170,7 +182,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
    */
   private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
     const {
-      taskSelectorOptions: { projectSelection: projectsToWatch },
+      taskSelector,
+      projectSelection: projectsToWatch,
+      taskFactoryOptions,
+      taskExecutionManagerOptions,
       stopwatch,
       terminal
     } = options;
@@ -221,14 +236,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       );
 
       const executeOptions: IExecuteInternalOptions = {
-        taskSelectorOptions: {
-          ...options.taskSelectorOptions,
-          // Revise down the set of projects to execute the command on
-          projectSelection,
-          // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
+        taskSelector,
+        projectSelection,
+        taskFactoryOptions: {
+          ...taskFactoryOptions,
           projectChangeAnalyzer: state
         },
-        taskExecutionManagerOptions: options.taskExecutionManagerOptions,
+        taskExecutionManagerOptions,
         stopwatch,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
@@ -301,12 +315,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
    * Runs a single invocation of the command
    */
   private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector(options.taskSelectorOptions);
+    const { taskSelector, projectSelection, taskFactoryOptions } = options;
 
-    // Register all tasks with the task collection
+    const taskFactory: ProjectTaskFactory = new ProjectTaskFactory(taskFactoryOptions);
 
     const taskExecutionManager: TaskExecutionManager = new TaskExecutionManager(
-      taskSelector.registerTasks().getOrderedTasks(),
+      taskSelector.createTasks({
+        projectSelection,
+        taskFactory
+      }),
       options.taskExecutionManagerOptions
     );
 

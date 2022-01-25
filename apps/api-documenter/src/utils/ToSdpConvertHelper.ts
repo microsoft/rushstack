@@ -89,8 +89,7 @@ function convertToPackageSDP(transfomredClass: IYamlApiFile): PackageYamlModel {
       } else if (child.endsWith(':enum')) {
         assignPackageModelFields(packageModel, 'enums', child);
       } else if (child.endsWith(':type')) {
-        // version 1 ignore typeAlias
-        // assignPackageModelFields(packageModel, "typeAliases", child);
+        assignPackageModelFields(packageModel, 'typeAliases', child);
       } else {
         // console.log("other type: ", child)
       }

@@ -1,6 +1,27 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Wed, 05 Jan 2022 16:07:47 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+
+## 1.7.1
+Tue, 25 Jan 2022 01:11:07 GMT
+
+### Patches
+
+- Upgrade ESLint to ~8.7.0
+
+## 1.7.0
+Fri, 21 Jan 2022 01:10:41 GMT
+
+### Minor changes
+
+- Include "dist" in the list of cached folders for the "build" and "_phase:build" operations.
+
+## 1.6.0
+Thu, 20 Jan 2022 02:43:46 GMT
+
+### Minor changes
+
+- Update the `rush-project.json` file to follow the new schema and configure the "build" command output folders for the "_phase:build" phase.
 
 ## 1.5.2
 Wed, 05 Jan 2022 16:07:47 GMT

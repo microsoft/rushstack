@@ -1,6 +1,28 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Wed, 05 Jan 2022 16:07:47 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+
+## 3.2.1
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 3.2.0
+Fri, 21 Jan 2022 01:10:41 GMT
+
+### Minor changes
+
+- Remove `--merge-base` from `getRepoChanges` and document the need to manually acquire merge-base commit if comparing against a separate branch.
+- Reduce minimum Git version to 2.20.
+
+### Patches
+
+- Fix incorrect parsing in `parseGitStatus`.
+
+## 3.1.13
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
 
 ## 3.1.12
 Wed, 05 Jan 2022 16:07:47 GMT

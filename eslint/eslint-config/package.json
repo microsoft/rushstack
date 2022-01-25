@@ -10,7 +10,8 @@
   },
   "homepage": "https://rushstack.io",
   "scripts": {
-    "build": ""
+    "build": "",
+    "_phase:build": ""
   },
   "keywords": [
     "eslint",
@@ -39,7 +40,7 @@
     "eslint-plugin-tsdoc": "~0.2.14"
   },
   "devDependencies": {
-    "eslint": "~8.3.0",
+    "eslint": "~8.7.0",
     "typescript": "~4.5.2"
   }
 }

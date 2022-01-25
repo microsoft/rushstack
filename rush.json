@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.60.0-rc.1",
+  "rushVersion": "5.60.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -285,7 +285,7 @@
      * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
      * to retrieve the latest activity for the remote master branch.
      */
-    "url": "https://github.com/microsoft/rushstack.git"
+    "urls": ["https://github.com/microsoft/rushstack.git"]
 
     /**
      * The default branch name. This tells "rush change" which remote branch to compare against.
@@ -440,7 +440,6 @@
     //    */
     //   // "versionPolicyName": ""
     // },
-    //
 
     // "apps" folder (alphabetical order)
     {
@@ -747,12 +746,12 @@
       "shouldPublish": false
     },
 
-    // {
-    //   "packageName": "install-test-workspace",
-    //   "projectFolder": "build-tests/install-test-workspace",
-    //   "reviewCategory": "tests",
-    //   "shouldPublish": false
-    // },
+    {
+      "packageName": "install-test-workspace",
+      "projectFolder": "build-tests/install-test-workspace",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
@@ -953,6 +952,12 @@
       "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/rush-litewatch-plugin",
+      "projectFolder": "rush-plugins/rush-litewatch-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     },
 
     // "webpack" folder (alphabetical order)

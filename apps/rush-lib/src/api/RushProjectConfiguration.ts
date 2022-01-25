@@ -278,7 +278,8 @@ export class RushProjectConfiguration {
       ) {
         throw new Error(
           `The ${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file appears to be ` +
-            'in an outdated format. Please see the UPGRADING.md file in the Rush project for upgrade instructions.'
+            'in an outdated format. Please see the UPGRADING.md notes for details. ' +
+            'Quick link: https://rushjs.io/link/upgrading'
         );
       } else {
         throw e;
@@ -336,7 +337,8 @@ export class RushProjectConfiguration {
           const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> =
             new OverlappingPathAnalyzer<string>();
 
-          for (const operationName of command.phases) {
+          for (const phase of command.phases) {
+            const operationName: string = phase.name;
             const operationSettings: IOperationSettings | undefined =
               operationSettingsByOperationName.get(operationName);
             if (operationSettings) {
