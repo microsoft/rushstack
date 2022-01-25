@@ -14,12 +14,6 @@
     {
       "commandKind": "phased",
       "name": "build",
-      "summary": "Build all projects that haven't been built, or have changed since they were last built.",
-      "description": "Build all projects that haven't been built, or have changed since they were last built.",
-      "safeForSimultaneousRushProcesses": false,
-
-      "enableParallelism": true,
-      "incremental": true,
       "phases": ["_phase:build", "_phase:test"]
     },
     // {
