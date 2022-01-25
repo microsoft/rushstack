@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Fri, 21 Jan 2022 01:10:41 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+
+## 0.8.2
+Tue, 25 Jan 2022 01:11:07 GMT
+
+### Patches
+
+- Upgrade ESLint to ~8.7.0
 
 ## 0.8.1
 Fri, 21 Jan 2022 01:10:41 GMT
