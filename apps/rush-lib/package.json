@@ -43,7 +43,7 @@
     "js-yaml": "~3.13.1",
     "jszip": "~3.7.1",
     "lodash": "~4.17.15",
-    "node-fetch": "2.6.2",
+    "node-fetch": "2.6.7",
     "npm-package-arg": "~6.1.0",
     "npm-packlist": "~2.1.2",
     "read-package-tree": "~5.1.5",
