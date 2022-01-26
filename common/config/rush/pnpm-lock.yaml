@@ -256,7 +256,7 @@ importers:
       js-yaml: ~3.13.1
       jszip: ~3.7.1
       lodash: ~4.17.15
-      node-fetch: 2.6.2
+      node-fetch: 2.6.7
       npm-package-arg: ~6.1.0
       npm-packlist: ~2.1.2
       read-package-tree: ~5.1.5
@@ -290,7 +290,7 @@ importers:
       js-yaml: 3.13.1
       jszip: 3.7.1
       lodash: 4.17.21
-      node-fetch: 2.6.2
+      node-fetch: 2.6.7
       npm-package-arg: 6.1.1
       npm-packlist: 2.1.5
       read-package-tree: 5.1.6
@@ -1858,12 +1858,12 @@ importers:
       '@types/node': 12.20.24
       '@types/node-fetch': 1.6.9
       https-proxy-agent: ~5.0.0
-      node-fetch: 2.6.2
+      node-fetch: 2.6.7
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rush-sdk': link:../../libraries/rush-sdk
       https-proxy-agent: 5.0.0
-      node-fetch: 2.6.2
+      node-fetch: 2.6.7
     devDependencies:
       '@microsoft/rush-lib': link:../../apps/rush-lib
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -4816,6 +4816,7 @@ packages:
       - '@storybook/builder-webpack5'
       - '@storybook/manager-webpack5'
       - '@types/react'
+      - encoding
       - eslint
       - supports-color
       - typescript
@@ -4877,6 +4878,7 @@ packages:
       - '@storybook/theming'
       - '@storybook/vue3'
       - '@types/react'
+      - encoding
       - eslint
       - lit
       - supports-color
@@ -5530,7 +5532,7 @@ packages:
       fs-extra: 9.1.0
       globby: 11.0.4
       ip: 1.1.5
-      node-fetch: 2.6.2
+      node-fetch: 2.6.7
       pretty-hrtime: 1.0.3
       prompts: 2.4.2
       react: 16.13.1
@@ -5545,6 +5547,7 @@ packages:
       - '@babel/core'
       - '@types/react'
       - acorn
+      - encoding
       - eslint
       - supports-color
       - vue-template-compiler
@@ -5594,7 +5597,7 @@ packages:
       fs-extra: 9.1.0
       globby: 11.0.4
       ip: 1.1.5
-      node-fetch: 2.6.2
+      node-fetch: 2.6.7
       pretty-hrtime: 1.0.3
       prompts: 2.4.2
       react: 16.13.1
@@ -5609,6 +5612,7 @@ packages:
       - '@babel/core'
       - '@types/react'
       - acorn
+      - encoding
       - eslint
       - supports-color
       - vue-template-compiler
@@ -5639,6 +5643,7 @@ packages:
       - '@storybook/manager-webpack5'
       - '@types/react'
       - acorn
+      - encoding
       - eslint
       - supports-color
       - vue-template-compiler
@@ -5670,6 +5675,7 @@ packages:
       - '@storybook/manager-webpack5'
       - '@types/react'
       - acorn
+      - encoding
       - eslint
       - supports-color
       - vue-template-compiler
@@ -5739,7 +5745,7 @@ packages:
       find-up: 5.0.0
       fs-extra: 9.1.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
-      node-fetch: 2.6.2
+      node-fetch: 2.6.7
       pnp-webpack-plugin: 1.6.4_typescript@4.5.2
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
@@ -5759,6 +5765,7 @@ packages:
     transitivePeerDependencies:
       - '@types/react'
       - acorn
+      - encoding
       - eslint
       - supports-color
       - vue-template-compiler
@@ -5799,7 +5806,7 @@ packages:
       find-up: 5.0.0
       fs-extra: 9.1.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
-      node-fetch: 2.6.2
+      node-fetch: 2.6.7
       pnp-webpack-plugin: 1.6.4_typescript@4.5.2
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
@@ -5819,6 +5826,7 @@ packages:
     transitivePeerDependencies:
       - '@types/react'
       - acorn
+      - encoding
       - eslint
       - supports-color
       - vue-template-compiler
@@ -5909,6 +5917,7 @@ packages:
       - '@types/react'
       - '@types/webpack'
       - acorn
+      - encoding
       - eslint
       - sockjs-client
       - supports-color
@@ -14019,6 +14028,18 @@ packages:
   /node-fetch/2.6.2:
     resolution: {integrity: sha512-aLoxToI6RfZ+0NOjmWAgn9+LEd30YCkJKFSyWacNZdEKTit/ZMcKjGkTRo8uWEsnIb/hfKecNPEbln02PdWbcA==}
     engines: {node: 4.x || >=6.0.0}
+    dev: false
+
+  /node-fetch/2.6.7:
+    resolution: {integrity: sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==}
+    engines: {node: 4.x || >=6.0.0}
+    peerDependencies:
+      encoding: ^0.1.0
+    peerDependenciesMeta:
+      encoding:
+        optional: true
+    dependencies:
+      whatwg-url: 5.0.0
 
   /node-forge/0.10.0:
     resolution: {integrity: sha512-PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==}
@@ -17318,6 +17339,9 @@ packages:
       punycode: 2.1.1
       universalify: 0.1.2
 
+  /tr46/0.0.3:
+    resolution: {integrity: sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=}
+
   /tr46/2.1.0:
     resolution: {integrity: sha512-15Ih7phfcdP5YxqiB+iDtLoaTz4Nd35+IiAv0kQ5FNKHzXgdWqPoTIqEDDJmXceQt4JZk6lVPT8lnDlPpGDppw==}
     engines: {node: '>=8'}
@@ -17959,6 +17983,9 @@ packages:
     resolution: {integrity: sha512-wYxSGajtmoP4WxfejAPIr4l0fVh+jeMXZb08wNc0tMg6xsfZXj3cECqIK0G7ZAqUq0PP8WlMDtaOGVBTAWztNw==}
     dev: true
 
+  /webidl-conversions/3.0.1:
+    resolution: {integrity: sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=}
+
   /webidl-conversions/5.0.0:
     resolution: {integrity: sha512-VlZwKPCkYKxQgeSbH5EyngOmRp7Ww7I9rQLERETtf5ofd9pGeswWiOtogpEO850jziPRarreGxn5QIiTqpb2wA==}
     engines: {node: '>=8'}
@@ -18398,6 +18425,12 @@ packages:
 
   /whatwg-mimetype/2.3.0:
     resolution: {integrity: sha512-M4yMwr6mAnQz76TbJm914+gPpB/nCwvZbJU28cUD6dR004SAxDLOOSUaB1JDRqLtaOV/vi0IC5lEAGFgrjGv/g==}
+
+  /whatwg-url/5.0.0:
+    resolution: {integrity: sha1-lmRU6HZUYuN2RNNib2dCzotwll0=}
+    dependencies:
+      tr46: 0.0.3
+      webidl-conversions: 3.0.1
 
   /whatwg-url/8.7.0:
     resolution: {integrity: sha512-gAojqb/m9Q8a5IV96E3fHJM70AzCkgt4uXYX2O7EmuyOnLrViCQlsEBmF9UQIu3/aeAIp2U17rtbpZWNntQqdg==}
