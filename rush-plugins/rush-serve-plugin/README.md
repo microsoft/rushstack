@@ -1,5 +1,7 @@
 # @rushstack/rush-serve-plugin
 
+UNDER DEVELOPMENT
+
 A Rush plugin that hooks into action execution and runs an express server to serve project outputs. Meant for use with watch-mode commands.
 
 ```
