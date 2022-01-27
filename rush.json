@@ -959,6 +959,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": false
     },
+    {
+      "packageName": "@rushstack/rush-serve-plugin",
+      "projectFolder": "rush-plugins/rush-serve-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "webpack" folder (alphabetical order)
     {
