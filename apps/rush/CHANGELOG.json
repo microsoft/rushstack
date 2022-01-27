@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.61.2",
+      "tag": "@microsoft/rush_v5.61.2",
+      "date": "Thu, 27 Jan 2022 02:30:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update node-fetch dependency version to address CVE-2022-0235"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.61.1",
       "tag": "@microsoft/rush_v5.61.1",
       "date": "Sat, 22 Jan 2022 04:22:52 GMT",

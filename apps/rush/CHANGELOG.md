@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 22 Jan 2022 04:22:52 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Jan 2022 02:30:10 GMT and should not be manually modified.
+
+## 5.61.2
+Thu, 27 Jan 2022 02:30:10 GMT
+
+### Updates
+
+- Update node-fetch dependency version to address CVE-2022-0235
 
 ## 5.61.1
 Sat, 22 Jan 2022 04:22:52 GMT
