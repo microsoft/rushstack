@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "rush-lib getChangedFiles should not only show added files",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
