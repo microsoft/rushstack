@@ -267,8 +267,7 @@ export class Git {
       'diff',
       `${targetBranch}...`,
       '--name-only',
-      '--no-renames',
-      '--diff-filter=A'
+      '--no-renames'
     ]);
     return output
       .split('\n')
