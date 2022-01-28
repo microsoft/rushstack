@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.61.3",
+      "tag": "@microsoft/rush_v5.61.3",
+      "date": "Fri, 28 Jan 2022 21:03:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the built-in cache provider plugins (rush-amazon-s3-build-cache-plugin and rush-azure-storage-build-cache-plugin) to apply for all commands, enabling cloud caching for custom phased and bulk commands."
+          },
+          {
+            "comment": "Allow build cache to be enabled for custom bulk commands."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.61.2",
       "tag": "@microsoft/rush_v5.61.2",
       "date": "Thu, 27 Jan 2022 02:30:10 GMT",
