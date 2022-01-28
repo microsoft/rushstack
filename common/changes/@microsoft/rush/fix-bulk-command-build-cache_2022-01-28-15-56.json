@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow build cache to be enabled for custom bulk commands.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
