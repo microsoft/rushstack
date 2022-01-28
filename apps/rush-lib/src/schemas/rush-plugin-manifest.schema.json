@@ -32,7 +32,7 @@
             "type": "string"
           },
           "associatedCommands": {
-            "description": "Specifies associated commands with this plugin, plugin will be only installed when a associated command runs.",
+            "description": "Specifies associated commands with this plugin, plugin will be only installed when an associated command runs.",
             "type": "array",
             "items": {
               "type": "string"
