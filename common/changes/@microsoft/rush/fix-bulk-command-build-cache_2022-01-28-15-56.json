@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "fix: build cache cannot be enabled for bulk build command",
+      "comment": "Allow build cache to be enabled for custom bulk commands.",
       "type": "none"
     }
   ],
