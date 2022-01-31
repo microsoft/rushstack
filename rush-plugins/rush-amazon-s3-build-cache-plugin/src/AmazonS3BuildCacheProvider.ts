@@ -15,15 +15,32 @@ import {
 import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
 import { WebClient } from './WebClient';
 
-export interface IAmazonS3BuildCacheProviderOptions {
+/**
+ * Advanced options where user has the specify the full http endpoint
+ * @public
+ */
+export interface IAmazonS3BuildCacheProviderOptionsAdvanced {
+  s3Endpoint: string;
+  s3Region: string;
+  s3Prefix: string | undefined;
+  isCacheWriteAllowed: boolean;
+}
+/**
+ * Simple options where user only provides the bucket and the endpoint is automatically built
+ * @public
+ */
+export interface IAmazonS3BuildCacheProviderOptionsSimple {
   s3Bucket: string;
   s3Region: string;
-  s3Prefix?: string;
+  s3Prefix: string | undefined;
   isCacheWriteAllowed: boolean;
 }
 
+const DEFAULT_S3_REGION: 'us-east-1' = 'us-east-1';
 export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
-  private readonly _options: IAmazonS3BuildCacheProviderOptions;
+  private readonly _options:
+    | IAmazonS3BuildCacheProviderOptionsSimple
+    | IAmazonS3BuildCacheProviderOptionsAdvanced;
   private readonly _s3Prefix: string | undefined;
   private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
@@ -36,7 +53,10 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
 
   private __s3Client: AmazonS3Client | undefined;
 
-  public constructor(options: IAmazonS3BuildCacheProviderOptions, rushSession: RushSession) {
+  public constructor(
+    options: IAmazonS3BuildCacheProviderOptionsSimple | IAmazonS3BuildCacheProviderOptionsAdvanced,
+    rushSession: RushSession
+  ) {
     this._rushSession = rushSession;
     this._options = options;
     this._s3Prefix = options.s3Prefix;
@@ -44,9 +64,25 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
   }
 
+  private get _s3Endpoint(): string {
+    const options: IAmazonS3BuildCacheProviderOptionsSimple | IAmazonS3BuildCacheProviderOptionsAdvanced =
+      this._options;
+    if ('s3Bucket' in options) {
+      // options: IAmazonS3BuildCacheProviderOptionsSimple
+      const bucket: string = options.s3Bucket;
+      if (options.s3Region === DEFAULT_S3_REGION) {
+        return `https://${bucket}.s3.amazonaws.com`;
+      } else {
+        return `https://${bucket}.s3-${options.s3Region}.amazonaws.com`;
+      }
+    }
+    // options: IAmazonS3BuildCacheProviderOptionsAdvanced
+    return options.s3Endpoint;
+  }
+
   private get _credentialCacheId(): string {
     if (!this.__credentialCacheId) {
-      const cacheIdParts: string[] = ['aws-s3', this._options.s3Region, this._options.s3Bucket];
+      const cacheIdParts: string[] = ['aws-s3', this._options.s3Region, this._s3Endpoint];
 
       if (this._isCacheWriteAllowedByConfiguration) {
         cacheIdParts.push('cacheWriteAllowed');
@@ -58,7 +94,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     return this.__credentialCacheId;
   }
 
-  private async _getS3ClientAsync(): Promise<AmazonS3Client> {
+  private async _getS3ClientAsync(terminal: ITerminal): Promise<AmazonS3Client> {
     if (!this.__s3Client) {
       let credentials: IAmazonS3Credentials | undefined = AmazonS3Client.tryDeserializeCredentials(
         this._environmentCredential
@@ -95,7 +131,18 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
         }
       }
 
-      this.__s3Client = new AmazonS3Client(credentials, this._options, new WebClient());
+      this.__s3Client = new AmazonS3Client(
+        credentials,
+        {
+          // advanced options
+          s3Endpoint: this._s3Endpoint,
+          s3Region: this._options.s3Region,
+          s3Prefix: this._options.s3Prefix,
+          isCacheWriteAllowed: this._options.isCacheWriteAllowed
+        },
+        new WebClient(),
+        terminal
+      );
     }
 
     return this.__s3Client;
@@ -106,7 +153,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string
   ): Promise<Buffer | undefined> {
     try {
-      const client: AmazonS3Client = await this._getS3ClientAsync();
+      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
       return await client.getObjectAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId);
     } catch (e) {
       terminal.writeWarningLine(`Error getting cache entry from S3: ${e}`);
@@ -124,8 +171,10 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
       return false;
     }
 
+    terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
+
     try {
-      const client: AmazonS3Client = await this._getS3ClientAsync();
+      const client: AmazonS3Client = await this._getS3ClientAsync(terminal);
       await client.uploadObjectAsync(this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId, objectBuffer);
       return true;
     } catch (e) {

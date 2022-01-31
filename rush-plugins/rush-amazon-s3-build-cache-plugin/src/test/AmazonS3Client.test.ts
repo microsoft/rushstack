@@ -1,23 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { Response, ResponseInit } from 'node-fetch';
 
-import { IAmazonS3BuildCacheProviderOptions } from '../AmazonS3BuildCacheProvider';
+import { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
 import { AmazonS3Client, IAmazonS3Credentials } from '../AmazonS3Client';
 import { WebClient } from '../WebClient';
 
 const webClient = new WebClient();
 
-const DUMMY_OPTIONS_WITHOUT_BUCKET: Omit<IAmazonS3BuildCacheProviderOptions, 's3Bucket'> = {
+const DUMMY_OPTIONS_WITHOUT_ENDPOINT: Omit<IAmazonS3BuildCacheProviderOptionsAdvanced, 's3Endpoint'> = {
   s3Region: 'us-east-1',
-  isCacheWriteAllowed: true
+  isCacheWriteAllowed: true,
+  s3Prefix: undefined
 };
 
-const DUMMY_OPTIONS: IAmazonS3BuildCacheProviderOptions = {
-  ...DUMMY_OPTIONS_WITHOUT_BUCKET,
-  s3Bucket: 'test-s3-bucket'
+const DUMMY_OPTIONS: IAmazonS3BuildCacheProviderOptionsAdvanced = {
+  ...DUMMY_OPTIONS_WITHOUT_ENDPOINT,
+  s3Endpoint: 'http://localhost:9000'
 };
+
+const terminal = new Terminal(
+  new ConsoleTerminalProvider({
+    verboseEnabled: false,
+    debugEnabled: false
+  })
+);
 
 class MockedDate extends Date {
   public constructor() {
@@ -30,63 +39,157 @@ class MockedDate extends Date {
 }
 
 describe('AmazonS3Client', () => {
-  it('Rejects invalid S3 bucket names', () => {
+  it('Rejects invalid S3 endpoint values', () => {
     expect(
       () =>
-        new AmazonS3Client(undefined, { s3Bucket: undefined!, ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
-    ).toThrowErrorMatchingSnapshot();
-
-    expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: '-abc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
-    ).toThrowErrorMatchingSnapshot();
-
-    expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'a!bc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
-    ).toThrowErrorMatchingSnapshot();
-
-    expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'a', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: undefined!, ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
       () =>
-        new AmazonS3Client(undefined, { s3Bucket: '10.10.10.10', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'abc', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc..d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://address.com/', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc.-d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://-abc', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc-.d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc.--.invalid', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc-', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'https://?', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://10.10.10.10:abcd', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc..d', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc.-d', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc-.d', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: `http://abc.${new Array(100).join('a')}.def:123`, ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
   });
 
   it('Accepts valid S3 bucket names', () => {
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc123', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
-    ).not.toThrow();
-
-    expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'https://abc123', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).not.toThrow();
 
     expect(
       () =>
-        new AmazonS3Client(undefined, { s3Bucket: 'foo-bar-baz', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).not.toThrow();
 
     expect(
       () =>
-        new AmazonS3Client(undefined, { s3Bucket: 'foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'https://foo-bar-baz:9000', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).not.toThrow();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'https://foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).not.toThrow();
   });
 
@@ -94,10 +197,11 @@ describe('AmazonS3Client', () => {
     const client: AmazonS3Client = new AmazonS3Client(
       undefined,
       {
-        s3Bucket: 'foo.bar.baz',
-        ...DUMMY_OPTIONS_WITHOUT_BUCKET
+        s3Endpoint: 'http://foo.bar.baz',
+        ...DUMMY_OPTIONS_WITHOUT_ENDPOINT
       },
-      webClient
+      webClient,
+      terminal
     );
     try {
       await client.uploadObjectAsync('temp', undefined!);
@@ -126,7 +230,7 @@ describe('AmazonS3Client', () => {
 
     async function makeS3ClientRequestAsync<TResponse>(
       credentials: IAmazonS3Credentials | undefined,
-      options: IAmazonS3BuildCacheProviderOptions,
+      options: IAmazonS3BuildCacheProviderOptionsAdvanced,
       request: (s3Client: AmazonS3Client) => Promise<TResponse>,
       response: IResponseOptions
     ): Promise<TResponse> {
@@ -134,7 +238,7 @@ describe('AmazonS3Client', () => {
         .spyOn(WebClient.prototype, 'fetchAsync')
         .mockReturnValue(Promise.resolve(new Response(response.body, response.responseInit)));
 
-      const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient);
+      const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient, terminal);
       let result: TResponse;
       let error: Error | undefined;
       try {
@@ -171,7 +275,7 @@ describe('AmazonS3Client', () => {
     describe('Getting an object', () => {
       async function makeGetRequestAsync(
         credentials: IAmazonS3Credentials | undefined,
-        options: IAmazonS3BuildCacheProviderOptions,
+        options: IAmazonS3BuildCacheProviderOptionsAdvanced,
         objectName: string,
         response: IResponseOptions
       ): Promise<Buffer | undefined> {
@@ -290,7 +394,7 @@ describe('AmazonS3Client', () => {
     describe('Uploading an object', () => {
       async function makeUploadRequestAsync(
         credentials: IAmazonS3Credentials | undefined,
-        options: IAmazonS3BuildCacheProviderOptions,
+        options: IAmazonS3BuildCacheProviderOptionsAdvanced,
         objectName: string,
         objectContents: string,
         response: IResponseOptions
@@ -363,6 +467,17 @@ describe('AmazonS3Client', () => {
           sessionToken: 'sessionToken'
         });
       });
+    });
+  });
+  describe('URIEncode', () => {
+    it('can encode', () => {
+      expect(
+        AmazonS3Client.URIEncode(
+          '/@rushstack+rush-azure-storage-build-cache-plugin-_phase_test-5d4149e2298bc927fd33355fb168e6a89ba88fa6'
+        )
+      ).toBe(
+        '/%40rushstack%2Brush-azure-storage-build-cache-plugin-_phase_test-5d4149e2298bc927fd33355fb168e6a89ba88fa6'
+      );
     });
   });
 });
