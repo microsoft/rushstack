@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bump tar to min version of 5.0.10",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
