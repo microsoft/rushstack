@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 28 Jan 2022 21:03:58 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Feb 2022 04:03:24 GMT and should not be manually modified.
+
+## 5.61.4
+Wed, 02 Feb 2022 04:03:24 GMT
+
+### Updates
+
+- Bump tar dependency to have a minimum version of 5.0.10.
 
 ## 5.61.3
 Fri, 28 Jan 2022 21:03:58 GMT
