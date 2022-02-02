@@ -2,6 +2,45 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.61.4",
+      "tag": "@microsoft/rush_v5.61.4",
+      "date": "Wed, 02 Feb 2022 04:03:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump tar dependency to have a minimum version of 5.0.10."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.61.3",
+      "tag": "@microsoft/rush_v5.61.3",
+      "date": "Fri, 28 Jan 2022 21:03:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the built-in cache provider plugins (rush-amazon-s3-build-cache-plugin and rush-azure-storage-build-cache-plugin) to apply for all commands, enabling cloud caching for custom phased and bulk commands."
+          },
+          {
+            "comment": "Allow build cache to be enabled for custom bulk commands."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.61.2",
+      "tag": "@microsoft/rush_v5.61.2",
+      "date": "Thu, 27 Jan 2022 02:30:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update node-fetch dependency version to address CVE-2022-0235"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.61.1",
       "tag": "@microsoft/rush_v5.61.1",
       "date": "Sat, 22 Jan 2022 04:22:52 GMT",

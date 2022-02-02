@@ -1,6 +1,28 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 22 Jan 2022 04:22:52 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Feb 2022 04:03:24 GMT and should not be manually modified.
+
+## 5.61.4
+Wed, 02 Feb 2022 04:03:24 GMT
+
+### Updates
+
+- Bump tar dependency to have a minimum version of 5.0.10.
+
+## 5.61.3
+Fri, 28 Jan 2022 21:03:58 GMT
+
+### Updates
+
+- Update the built-in cache provider plugins (rush-amazon-s3-build-cache-plugin and rush-azure-storage-build-cache-plugin) to apply for all commands, enabling cloud caching for custom phased and bulk commands.
+- Allow build cache to be enabled for custom bulk commands.
+
+## 5.61.2
+Thu, 27 Jan 2022 02:30:10 GMT
+
+### Updates
+
+- Update node-fetch dependency version to address CVE-2022-0235
 
 ## 5.61.1
 Sat, 22 Jan 2022 04:22:52 GMT

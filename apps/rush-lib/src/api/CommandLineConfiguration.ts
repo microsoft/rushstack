@@ -612,7 +612,6 @@ export class CommandLineConfiguration {
     const translatedCommand: IPhasedCommand = {
       ...command,
       commandKind: 'phased',
-      disableBuildCache: true,
       isSynthetic: true,
       associatedParameters: new Set<Parameter>(),
       phases: new Set([phase])

@@ -133,6 +133,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
+| [/rush-plugins/rush-serve-plugin](./rush-plugins/rush-serve-plugin/) | A Rush plugin that hooks into a rush action and serves output folders from all projects in the repository. |
 <!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice

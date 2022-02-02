@@ -15,11 +15,11 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "@jest/create-cache-key-function",
+      "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@jest/core",
+      "name": "@jest/create-cache-key-function",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -332,6 +332,10 @@
     },
     {
       "name": "eslint-plugin-tsdoc",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "express",
       "allowedCategories": [ "libraries" ]
     },
     {

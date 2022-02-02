@@ -53,7 +53,7 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.44.2",
-    "@rushstack/heft-node-rig": "1.6.0",
+    "@rushstack/heft-node-rig": "1.7.1",
     "@types/argparse": "1.0.38",
     "@types/eslint": "8.2.0",
     "@types/glob": "7.1.1",
