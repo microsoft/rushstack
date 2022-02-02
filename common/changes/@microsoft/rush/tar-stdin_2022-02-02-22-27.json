@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Create separate tar logs per phase based on cache id.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

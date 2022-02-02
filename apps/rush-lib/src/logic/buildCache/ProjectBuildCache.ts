@@ -433,7 +433,7 @@ export class ProjectBuildCache {
   }
 
   private _getTarLogFilePath(): string {
-    return path.join(this._project.projectRushTempFolder, 'build-cache-tar.log');
+    return path.join(this._project.projectRushTempFolder, `${this._cacheId}.log`);
   }
 
   private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
