@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Revise architecture of symbolic link scan to use a queue and parallel file system calls.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
