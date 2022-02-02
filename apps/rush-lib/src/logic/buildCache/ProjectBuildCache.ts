@@ -268,7 +268,9 @@ export class ProjectBuildCache {
 
     const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
-      const tempLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+      const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+      // Derive the temp file from the destination path to ensure they are on the same volume
+      const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}.temp`;
       const logFilePath: string = this._getTarLogFilePath();
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
         archivePath: tempLocalCacheEntryPath,
@@ -276,8 +278,15 @@ export class ProjectBuildCache {
         project: this._project,
         logFilePath
       });
+
       if (tarExitCode === 0) {
-        localCacheEntryPath = tempLocalCacheEntryPath;
+        // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
+        await FileSystem.moveAsync({
+          sourcePath: tempLocalCacheEntryPath,
+          destinationPath: finalLocalCacheEntryPath,
+          overwrite: true
+        });
+        localCacheEntryPath = finalLocalCacheEntryPath;
       } else {
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
