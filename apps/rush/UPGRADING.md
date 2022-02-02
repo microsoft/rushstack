@@ -44,7 +44,7 @@ are essentially the same.
 {
   "incrementalBuildIgnoredGlobs": ["temp/**"],
 
-  "disableBuildCache": false,  // formerly buildCacheOptions.disableBuildCache
+  "disableBuildCacheForProject": false,  // formerly buildCacheOptions.disableBuildCache
 
   "operationSettings": [  // formerly phaseOptions
     {
