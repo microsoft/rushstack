@@ -100,7 +100,7 @@ if (rushLibModule === undefined) {
 
     try {
       // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
-      terminal.writeVerboseLine(`Try to load  ${RUSH_LIB_NAME} from install-run-rush`);
+      terminal.writeVerboseLine(`Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`);
       rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
     } catch (e) {
       let installAndRunRushStderrContent: string = '';
@@ -123,7 +123,7 @@ if (rushLibModule === undefined) {
         }
 
         // Retry to load "rush-lib" after install-run-rush run
-        terminal.writeVerboseLine(`Try to load  ${RUSH_LIB_NAME} from install-run-rush a second time`);
+        terminal.writeVerboseLine(`Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`);
         rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
       } catch (e) {
         console.error(`${installAndRunRushStderrContent}`);
@@ -134,7 +134,7 @@ if (rushLibModule === undefined) {
     if (rushLibModule !== undefined) {
       // to track which scenario is active and how it got initialized.
       global.___rush___rushLibModuleFromInstallAndRunRush = rushLibModule;
-      terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} from install-run-rush`);
+      terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} installed by install-run-rush`);
     }
   } catch (e) {
     // no-catch
