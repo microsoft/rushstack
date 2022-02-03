@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 02 Feb 2022 04:03:24 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Feb 2022 00:01:03 GMT and should not be manually modified.
+
+## 5.62.0-pr3059
+Thu, 03 Feb 2022 00:01:03 GMT
+
+_Version update only_
 
 ## 5.61.4
 Wed, 02 Feb 2022 04:03:24 GMT
@@ -1112,7 +1117,7 @@ Thu, 11 Jul 2019 22:00:50 GMT
 
 ### Updates
 
-- Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x 
+- Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x
 - Fix an issue where "rush add" erroneously believes ensureConsistentVersions is unset.
 - Fix an issue that arises when "rush add" is run and the package manager isn't installed.
 - Fix an issue where rush add -m doesn't corretly update the common-versions.json file.
@@ -1594,9 +1599,9 @@ Fri, 06 Oct 2017 22:44:31 GMT
 ### Patches
 
 - Enable strickNullChecks
-- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
-- Fix a bug in "rush change" so it handles rename properly. 
-- Add npm tag support in "rush publish". 
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
+- Fix a bug in "rush change" so it handles rename properly.
+- Add npm tag support in "rush publish".
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
@@ -1851,7 +1856,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped. 
+- Update temp_modules when versions are bumped.
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT
