@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update schema for build-cache to support s3Endpoint",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
