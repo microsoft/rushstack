@@ -61,13 +61,19 @@ function getImportTypeExpression(
   const exportsType: string | undefined = module.buildMeta?.exportsType;
   const strict: boolean | undefined = originModule.buildMeta?.strictHarmonyModule;
 
+  // Logic translated from:
+  // https://github.com/webpack/webpack/blob/3956274f1eada621e105208dcab4608883cdfdb2/lib/RuntimeTemplate.js#L110-L122
   if (exportsType === 'namespace') {
+    // Use the raw module directly
     return '';
   } else if (exportsType === 'named') {
+    // Create a new namespace object and forward all exports
     return ',3';
   } else if (strict) {
+    // Synthetic default export
     return ',1';
   } else {
+    // If modules is marked __esModule, return raw module, otherwise create a new namespace object and forward all exports
     return ',7';
   }
 }
@@ -82,7 +88,7 @@ function needChunkOnDemandLoadingCode(chunk: webpack.compilation.Chunk): boolean
 }
 
 /**
- * Plugin that replaces `Promise.all([__webpack_require__.e(1), __webpack_require__,e(12)]).then(__webpack_require__.t.bind(123,7))`
+ * Plugin that replaces `Promise.all([__webpack_require__.e(1), __webpack_require__.e(12)]).then(__webpack_require__.t.bind(123,7))`
  * with more concise expressions like `__webpack_require__.ee([1,12],123,7)`, etc.
  *
  * Also ensures that the code seen by the minifier does not contain chunk ids, and is therefore portable across chunks/compilations.

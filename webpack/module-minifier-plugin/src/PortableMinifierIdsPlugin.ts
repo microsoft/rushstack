@@ -29,6 +29,7 @@ const TAP_AFTER: TapOptions<'sync'> = {
 };
 
 const STABLE_MODULE_ID_PREFIX: '__MODULEID_SHA_' = '__MODULEID_SHA_';
+// The negative lookback here is to ensure that this regex does not match an async import placeholder
 const STABLE_MODULE_ID_REGEX: RegExp = /(?<!C)['"]?(__MODULEID_SHA_[0-9a-f]+)['"]?/g;
 
 /**
@@ -66,9 +67,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
 
     const stableIdToFinalId: Map<string | number, string | number> = new Map();
 
-    const { finalModuleId } = this._minifierHooks;
-
-    finalModuleId.tap(PLUGIN_NAME, (id: string | number | undefined) => {
+    this._minifierHooks.finalModuleId.tap(PLUGIN_NAME, (id: string | number | undefined) => {
       return id === undefined ? id : stableIdToFinalId.get(id);
     });
 
@@ -82,7 +81,10 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
         let match: RegExpExecArray | null = null;
         while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
           const id: string = match[1];
-          const mapped: string | number | undefined = finalModuleId.call(id, context.compilation);
+          const mapped: string | number | undefined = this._minifierHooks.finalModuleId.call(
+            id,
+            context.compilation
+          );
 
           if (mapped === undefined) {
             context.compilation.errors.push(
