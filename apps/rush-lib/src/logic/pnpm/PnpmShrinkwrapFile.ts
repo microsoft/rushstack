@@ -170,13 +170,16 @@ export function parsePnpmDependencyKey(
   }
 
   if (!semver.valid(parsedVersionPart)) {
-    const urlRegex: RegExp = /^(@?)([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\/([^\/\\]+\/?)*([^\/\\]+)$/i;
+    const urlRegex: RegExp =
+      /^(git@|@)?([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(\/|\+)([^\/\\]+\/?)*([^\/\\]+)$/i;
     // Test for urls:
     // Examples:
     //     @github.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     github.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     github.com.au/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     bitbucket.com/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     bitbucket.com+abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
+    //     git@bitbucket.com+abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     //     bitbucket.co.in/abc/def/188ed64efd5218beda276e02f2277bf3a6b745b2
     if (urlRegex.test(dependencyKey)) {
       const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependencyName, dependencyKey);
