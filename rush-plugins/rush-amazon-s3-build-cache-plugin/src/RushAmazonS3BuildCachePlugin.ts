@@ -75,7 +75,7 @@ export class RushAmazonS3BuildCachePlugin implements IRushPlugin {
 
           // mutually exclusive
           if (s3Bucket && s3Endpoint) {
-            throw new Error('You cant provide s3Bucket and s3Endpoint, pick one');
+            throw new Error('Only one of "s3Bucket" or "s3Endpoint" must be provided.');
           }
 
           if (s3Endpoint) {
