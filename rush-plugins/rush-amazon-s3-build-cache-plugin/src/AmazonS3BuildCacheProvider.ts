@@ -16,24 +16,27 @@ import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
 import { WebClient } from './WebClient';
 
 /**
- * Advanced options where user has the specify the full http endpoint
  * @public
  */
-export interface IAmazonS3BuildCacheProviderOptionsAdvanced {
-  s3Endpoint: string;
+export interface IAmazonS3BuildCacheProviderOptionsBase {
   s3Region: string;
   s3Prefix: string | undefined;
   isCacheWriteAllowed: boolean;
+}
+
+/**
+ * Advanced options where user has the specify the full http endpoint
+ * @public
+ */
+export interface IAmazonS3BuildCacheProviderOptionsAdvanced extends IAmazonS3BuildCacheProviderOptionsBase {
+  s3Endpoint: string;
 }
 /**
  * Simple options where user only provides the bucket and the endpoint is automatically built
  * @public
  */
-export interface IAmazonS3BuildCacheProviderOptionsSimple {
+export interface IAmazonS3BuildCacheProviderOptionsSimple extends IAmazonS3BuildCacheProviderOptionsBase {
   s3Bucket: string;
-  s3Region: string;
-  s3Prefix: string | undefined;
-  isCacheWriteAllowed: boolean;
 }
 
 const DEFAULT_S3_REGION: 'us-east-1' = 'us-east-1';
@@ -134,11 +137,9 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
       this.__s3Client = new AmazonS3Client(
         credentials,
         {
+          ...this._options,
           // advanced options
-          s3Endpoint: this._s3Endpoint,
-          s3Region: this._options.s3Region,
-          s3Prefix: this._options.s3Prefix,
-          isCacheWriteAllowed: this._options.isCacheWriteAllowed
+          s3Endpoint: this._s3Endpoint
         },
         new WebClient(),
         terminal
