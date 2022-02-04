@@ -472,7 +472,7 @@ describe('AmazonS3Client', () => {
   describe('URIEncode', () => {
     it('can encode', () => {
       expect(
-        AmazonS3Client.URIEncode(
+        AmazonS3Client.UriEncode(
           '/@rushstack+rush-azure-storage-build-cache-plugin-_phase_test-5d4149e2298bc927fd33355fb168e6a89ba88fa6'
         )
       ).toBe(

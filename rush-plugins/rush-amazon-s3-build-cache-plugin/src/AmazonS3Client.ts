@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ColorValue, IColorableSequence, ITerminal, TextAttribute } from '@rushstack/node-core-library';
+import { Colors, IColorableSequence, ITerminal } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
 
@@ -14,7 +14,7 @@ const HOST_HEADER_NAME: 'host' = 'host';
 const SECURITY_TOKEN_HEADER_NAME: 'x-amz-security-token' = 'x-amz-security-token';
 
 /**
- * Credentials for authorizaing and signing requests to an Amazon S3 endpoint.
+ * Credentials for authorizing and signing requests to an Amazon S3 endpoint.
  *
  * @public
  */
@@ -65,7 +65,7 @@ export class AmazonS3Client {
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html#create-signature-presign-entire-payload
   // We want to keep all slashes non encoded
-  public static URIEncode(input: string): string {
+  public static UriEncode(input: string): string {
     let output: string = '';
     for (let i: number = 0; i < input.length; i += 1) {
       const ch: string = input[i];
@@ -148,8 +148,8 @@ export class AmazonS3Client {
 
     // the host can be e.g. https://s3.aws.com or http://localhost:9000
     const host: string = this._s3Endpoint.replace(protocolRegex, '');
-    const canonicalUri: string = AmazonS3Client.URIEncode(`/${objectName}`);
-    this._writeDebugLine({ text: 'Canonical URI: ', textAttributes: [TextAttribute.Bold] }, canonicalUri);
+    const canonicalUri: string = AmazonS3Client.UriEncode(`/${objectName}`);
+    this._writeDebugLine(Colors.bold('Canonical URI: '), canonicalUri);
 
     if (this._credentials) {
       // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
@@ -248,14 +248,11 @@ export class AmazonS3Client {
 
     const url: string = `${this._s3Endpoint}${canonicalUri}`;
 
-    this._writeDebugLine({
-      text: 'Sending request to S3',
-      textAttributes: [TextAttribute.Bold, TextAttribute.Underline]
-    });
-    this._writeDebugLine({ text: 'HOST: ', textAttributes: [TextAttribute.Bold] }, url);
-    this._writeDebugLine({ text: 'Headers: ', textAttributes: [TextAttribute.Bold] });
+    this._writeDebugLine(Colors.bold(Colors.underline('Sending request to S3')));
+    this._writeDebugLine(Colors.bold('HOST: '), url);
+    this._writeDebugLine(Colors.bold('Headers: '));
     headers.forEach((value, name) => {
-      this._writeDebugLine({ text: `\t${name}: ${value}`, foregroundColor: ColorValue.Cyan });
+      this._writeDebugLine(Colors.cyan(`\t${name}: ${value}`));
     });
 
     const response: fetch.Response = await this._webClient.fetchAsync(url, webFetchOptions);

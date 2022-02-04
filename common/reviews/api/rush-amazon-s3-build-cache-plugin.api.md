@@ -26,7 +26,7 @@ export class AmazonS3Client {
     // (undocumented)
     uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void>;
     // (undocumented)
-    static URIEncode(input: string): string;
+    static UriEncode(input: string): string;
 }
 
 // @public
