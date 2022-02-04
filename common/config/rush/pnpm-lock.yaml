@@ -1130,6 +1130,24 @@ importers:
       webpack-cli: 3.3.12_webpack@4.44.2
       webpack-dev-server: 3.11.3_93ca2875a658e9d1552850624e6b91c7
 
+  ../../build-tests/rush-amazon-s3-build-cache-plugin-integration-test:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:*
+      '@types/node': 12.20.24
+      eslint: ~8.7.0
+      typescript: ~4.5.2
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/rush-amazon-s3-build-cache-plugin': link:../../rush-plugins/rush-amazon-s3-build-cache-plugin
+      '@types/node': 12.20.24
+      eslint: 8.7.0
+      typescript: 4.5.2
+
   ../../build-tests/rush-project-change-analyzer-test:
     specifiers:
       '@microsoft/rush-lib': workspace:*
