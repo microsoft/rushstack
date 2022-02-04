@@ -160,7 +160,7 @@
     },
     {
       "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/rush-azure-storage-build-cache-plugin",
