@@ -1,0 +1,10 @@
+{
+  "pnpmVersion": "6.23.1",
+  "rushVersion": "5.57.0",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+  "repository": {
+    "url": "someFakeUrl"
+  },
+  "projects": []
+}

@@ -6,7 +6,7 @@ import events from 'events';
 import * as crypto from 'crypto';
 import type * as stream from 'stream';
 import * as tar from 'tar';
-import { FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
+import { Async, FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -268,7 +268,9 @@ export class ProjectBuildCache {
 
     const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
-      const tempLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+      const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+      // Derive the temp file from the destination path to ensure they are on the same volume
+      const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}.temp`;
       const logFilePath: string = this._getTarLogFilePath();
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
         archivePath: tempLocalCacheEntryPath,
@@ -276,8 +278,15 @@ export class ProjectBuildCache {
         project: this._project,
         logFilePath
       });
+
       if (tarExitCode === 0) {
-        localCacheEntryPath = tempLocalCacheEntryPath;
+        // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
+        await FileSystem.moveAsync({
+          sourcePath: tempLocalCacheEntryPath,
+          destinationPath: finalLocalCacheEntryPath,
+          overwrite: true
+        });
+        localCacheEntryPath = finalLocalCacheEntryPath;
       } else {
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
@@ -358,80 +367,82 @@ export class ProjectBuildCache {
     return success;
   }
 
+  /**
+   * Walks the declared output folders of the project and collects a list of files.
+   * @returns The list of output files as project-relative paths, or `undefined` if a
+   *   symbolic link was encountered.
+   */
   private async _tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
-    const projectFolderPath: string = this._project.projectFolder;
-    const outputFolderNamesThatExist: boolean[] = await Promise.all(
-      this._projectOutputFolderNames.map((outputFolderName) =>
-        FileSystem.existsAsync(`${projectFolderPath}/${outputFolderName}`)
-      )
-    );
-    const filteredOutputFolderNames: string[] = [];
-    for (let i: number = 0; i < outputFolderNamesThatExist.length; i++) {
-      if (outputFolderNamesThatExist[i]) {
-        filteredOutputFolderNames.push(this._projectOutputFolderNames[i]);
-      }
-    }
-
-    let encounteredEnumerationIssue: boolean = false;
-    function symbolicLinkPathCallback(entryPath: string): void {
-      terminal.writeError(`Unable to include "${entryPath}" in build cache. It is a symbolic link.`);
-      encounteredEnumerationIssue = true;
-    }
-
+    const posixPrefix: string = this._project.projectFolder;
     const outputFilePaths: string[] = [];
-    for (const filteredOutputFolderName of filteredOutputFolderNames) {
-      if (encounteredEnumerationIssue) {
-        return undefined;
-      }
+    const queue: [string, string][] = [];
 
-      const outputFilePathsForFolder: AsyncIterableIterator<string> = this._getPathsInFolder(
-        terminal,
-        symbolicLinkPathCallback,
-        filteredOutputFolderName,
-        `${projectFolderPath}/${filteredOutputFolderName}`
-      );
+    const filteredOutputFolderNames: string[] = [];
 
-      for await (const outputFilePath of outputFilePathsForFolder) {
-        outputFilePaths.push(outputFilePath);
+    let hasSymbolicLinks: boolean = false;
+
+    // Adds child directories to the queue, files to the path list, and bails on symlinks
+    function processChildren(relativePath: string, diskPath: string, children: FolderItem[]): void {
+      for (const child of children) {
+        const childRelativePath: string = `${relativePath}/${child.name}`;
+        if (child.isSymbolicLink()) {
+          terminal.writeError(
+            `Unable to include "${childRelativePath}" in build cache. It is a symbolic link.`
+          );
+          hasSymbolicLinks = true;
+        } else if (child.isDirectory()) {
+          queue.push([childRelativePath, `${diskPath}/${child.name}`]);
+        } else {
+          outputFilePaths.push(childRelativePath);
+        }
       }
     }
 
-    if (encounteredEnumerationIssue) {
+    // Handle declared output folders.
+    for (const outputFolder of this._projectOutputFolderNames) {
+      const diskPath: string = `${posixPrefix}/${outputFolder}`;
+      try {
+        const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
+        processChildren(outputFolder, diskPath, children);
+        // The folder exists, record it
+        filteredOutputFolderNames.push(outputFolder);
+      } catch (error) {
+        if (!FileSystem.isNotExistError(error as Error)) {
+          throw error;
+        }
+
+        // If the folder does not exist, ignore it.
+      }
+    }
+
+    // Walk the tree in parallel
+    await Async.forEachAsync(
+      queue,
+      async ([relativePath, diskPath]: [string, string]) => {
+        const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
+        processChildren(relativePath, diskPath, children);
+      },
+      {
+        concurrency: 10
+      }
+    );
+
+    if (hasSymbolicLinks) {
+      // Symbolic links do not round-trip safely.
       return undefined;
     }
 
+    // Ensure stable output path order.
+    outputFilePaths.sort();
+
     return {
-      filteredOutputFolderNames,
-      outputFilePaths
+      outputFilePaths,
+      filteredOutputFolderNames
     };
   }
 
-  private async *_getPathsInFolder(
-    terminal: ITerminal,
-    symbolicLinkPathCallback: (path: string) => void,
-    posixPrefix: string,
-    folderPath: string
-  ): AsyncIterableIterator<string> {
-    const folderEntries: FolderItem[] = await FileSystem.readFolderItemsAsync(folderPath);
-    for (const folderEntry of folderEntries) {
-      const entryPath: string = `${posixPrefix}/${folderEntry.name}`;
-      if (folderEntry.isSymbolicLink()) {
-        symbolicLinkPathCallback(entryPath);
-      } else if (folderEntry.isDirectory()) {
-        yield* this._getPathsInFolder(
-          terminal,
-          symbolicLinkPathCallback,
-          entryPath,
-          `${folderPath}/${folderEntry.name}`
-        );
-      } else {
-        yield entryPath;
-      }
-    }
-  }
-
   private _getTarLogFilePath(): string {
-    return path.join(this._project.projectRushTempFolder, 'build-cache-tar.log');
+    return path.join(this._project.projectRushTempFolder, `${this._cacheId}.log`);
   }
 
   private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {

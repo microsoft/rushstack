@@ -2,14 +2,14 @@
 
 exports[`AmazonS3BuildCacheProvider Has an expected cached credential name (write allowed) 1`] = `
 Array [
-  "aws-s3|region-name|bucket-name|cacheWriteAllowed",
+  "aws-s3|region-name|localhost:9000|cacheWriteAllowed",
   "credential",
 ]
 `;
 
 exports[`AmazonS3BuildCacheProvider Has an expected cached credential name (write not allowed) 1`] = `
 Array [
-  "aws-s3|region-name|bucket-name",
+  "aws-s3|region-name|localhost:9000",
   "credential",
 ]
 `;

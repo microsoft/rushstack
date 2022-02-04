@@ -771,6 +771,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-amazon-s3-build-cache-plugin-integration-test",
+      "projectFolder": "build-tests/rush-amazon-s3-build-cache-plugin-integration-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-project-change-analyzer-test",
       "projectFolder": "build-tests/rush-project-change-analyzer-test",
       "reviewCategory": "tests",

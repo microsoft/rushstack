@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for a new URL-based version specifier in PNPM lockfiles.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
