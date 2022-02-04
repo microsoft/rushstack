@@ -30,11 +30,15 @@ export class AmazonS3Client {
 }
 
 // @public
-export interface IAmazonS3BuildCacheProviderOptionsAdvanced {
-    // (undocumented)
-    isCacheWriteAllowed: boolean;
+export interface IAmazonS3BuildCacheProviderOptionsAdvanced extends IAmazonS3BuildCacheProviderOptionsBase {
     // (undocumented)
     s3Endpoint: string;
+}
+
+// @public (undocumented)
+export interface IAmazonS3BuildCacheProviderOptionsBase {
+    // (undocumented)
+    isCacheWriteAllowed: boolean;
     // (undocumented)
     s3Prefix: string | undefined;
     // (undocumented)
@@ -42,15 +46,9 @@ export interface IAmazonS3BuildCacheProviderOptionsAdvanced {
 }
 
 // @public
-export interface IAmazonS3BuildCacheProviderOptionsSimple {
-    // (undocumented)
-    isCacheWriteAllowed: boolean;
+export interface IAmazonS3BuildCacheProviderOptionsSimple extends IAmazonS3BuildCacheProviderOptionsBase {
     // (undocumented)
     s3Bucket: string;
-    // (undocumented)
-    s3Prefix: string | undefined;
-    // (undocumented)
-    s3Region: string;
 }
 
 // @public
