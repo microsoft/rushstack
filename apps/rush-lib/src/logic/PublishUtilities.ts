@@ -625,7 +625,7 @@ export class PublishUtilities {
           throw new Error(`Cannot add hotfix change; hotfixChangeEnabled is false in configuration.`);
         }
 
-        currentChange.newVersion = change.newVersion ?? pkg.version;
+        currentChange.newVersion = change.newVersion ?? (pkg.version as string);
         if (!prereleaseComponents) {
           currentChange.newVersion += '-hotfix';
         }
@@ -646,6 +646,8 @@ export class PublishUtilities {
 
         // set versionpolicy version to the current bumped version
         if (
+          hasChanged &&
+          shouldBump &&
           project.versionPolicyName !== undefined &&
           project.versionPolicy !== undefined &&
           project.versionPolicy.isLockstepped
