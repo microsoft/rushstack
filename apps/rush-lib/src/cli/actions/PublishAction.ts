@@ -236,14 +236,15 @@ export class PublishAction extends BaseRushAction {
 
     const git: Git = new Git(this.rushConfiguration);
     const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
+    this._prereleaseToken = new PrereleaseToken(
+      this._prereleaseName.value,
+      this._suffix.value,
+      this._partialPrerelease.value
+    );
+
     if (this._includeAll.value) {
       this._publishAll(publishGit, allPackages);
     } else {
-      this._prereleaseToken = new PrereleaseToken(
-        this._prereleaseName.value,
-        this._suffix.value,
-        this._partialPrerelease.value
-      );
       this._publishChanges(git, publishGit, allPackages);
     }
 

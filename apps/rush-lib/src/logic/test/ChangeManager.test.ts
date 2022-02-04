@@ -67,15 +67,15 @@ describe('ChangeManager', () => {
     changeManager.load(path.join(__dirname, 'rootPatchChange'), prereleaseToken);
     changeManager.apply(false);
 
-    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
-    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
+    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
+    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
     expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
-      '1.0.1-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
-    expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
-    expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
+    expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
+    expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      '1.0.1-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
   });
 
@@ -89,10 +89,10 @@ describe('ChangeManager', () => {
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
     expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.0');
     expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual('>=1.0.0 <2.0.0');
-    expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
-    expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
+    expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
+    expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      '1.0.1-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
   });
 
@@ -104,16 +104,16 @@ describe('ChangeManager', () => {
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
-      '2.0.0-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.dependencies!['cyclic-dep-2']).toEqual(
-      '1.0.1-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
     expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.version).toEqual(
-      '1.0.1-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
     expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.dependencies!['cyclic-dep-1']).toEqual(
-      '2.0.0-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
   });
 
@@ -234,15 +234,15 @@ describe('WorkspaceChangeManager', () => {
     changeManager.load(path.join(__dirname, 'rootPatchChange'), prereleaseToken);
     changeManager.apply(false);
 
-    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
-    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
+    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
+    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
     expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
-      'workspace:1.0.1-' + prereleaseName
+      'workspace:1.0.0-' + prereleaseName
     );
-    expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
-    expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
+    expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
+    expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      'workspace:1.0.1-' + prereleaseName
+      'workspace:1.0.0-' + prereleaseName
     );
   });
 
@@ -258,10 +258,10 @@ describe('WorkspaceChangeManager', () => {
     expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
       'workspace:>=1.0.0 <2.0.0'
     );
-    expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
-    expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
+    expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
+    expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.0-' + prereleaseName);
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      'workspace:1.0.1-' + prereleaseName
+      'workspace:1.0.0-' + prereleaseName
     );
   });
 
@@ -273,16 +273,16 @@ describe('WorkspaceChangeManager', () => {
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
-      '2.0.0-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.dependencies!['cyclic-dep-2']).toEqual(
-      'workspace:1.0.1-' + prereleaseName
+      'workspace:1.0.0-' + prereleaseName
     );
     expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.version).toEqual(
-      '1.0.1-' + prereleaseName
+      '1.0.0-' + prereleaseName
     );
     expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.dependencies!['cyclic-dep-1']).toEqual(
-      'workspace:2.0.0-' + prereleaseName
+      'workspace:1.0.0-' + prereleaseName
     );
   });
 

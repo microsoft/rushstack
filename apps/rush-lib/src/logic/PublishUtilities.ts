@@ -333,7 +333,7 @@ export class PublishUtilities {
 
     const newVersion: string = shouldSkipVersionBump
       ? pkg.version
-      : PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
+      : PublishUtilities._getChangeInfoNewVersion(project, change, prereleaseToken);
 
     if (!shouldSkipVersionBump) {
       console.log(
@@ -440,7 +440,11 @@ export class PublishUtilities {
               depName,
               dependencies[depName]
             );
-            const newVersion: string = PublishUtilities._getChangeInfoNewVersion(depChange, prereleaseToken);
+            const newVersion: string = PublishUtilities._getChangeInfoNewVersion(
+              depProject,
+              depChange,
+              prereleaseToken
+            );
             dependencies[depName] =
               currentSpecifier.specifierType === DependencySpecifierType.Workspace
                 ? `workspace:${newVersion}`
@@ -464,26 +468,26 @@ export class PublishUtilities {
   /**
    * Gets the new version from the ChangeInfo.
    * The value of newVersion in ChangeInfo remains unchanged when the change type is dependency,
-   * However, for pre-release build, it won't pick up the updated pre-released dependencies. That is why
-   * this function should return a pre-released patch for that case. The exception to this is when we're
-   * running a partial pre-release build. In this case, only user-changed packages should update.
+   * In order to satisfy semver, the prerelease version must be the current version + the prerelease tag.
+   * The exception to this is when we're running a partial pre-release build. In this case,
+   * only user-changed packages should update.
    */
   private static _getChangeInfoNewVersion(
+    project: RushConfigurationProject,
     change: IChangeInfo,
     prereleaseToken: PrereleaseToken | undefined
   ): string {
-    let newVersion: string = change.newVersion!;
-    if (prereleaseToken && prereleaseToken.hasValue) {
-      if (prereleaseToken.isPartialPrerelease && change.changeType! <= ChangeType.hotfix) {
-        return newVersion;
-      }
-      if (prereleaseToken.isPrerelease && change.changeType === ChangeType.dependency) {
-        newVersion = semver.inc(newVersion, 'patch')!;
-      }
-      return `${newVersion}-${prereleaseToken.name}`;
-    } else {
-      return newVersion;
+    if (!prereleaseToken || !prereleaseToken.hasValue) {
+      return change.newVersion!;
     }
+
+    const projectVersion = semver.coerce(project.packageJson.version)!.format();
+
+    if (prereleaseToken.isPartialPrerelease && change.changeType! <= ChangeType.hotfix) {
+      return projectVersion;
+    }
+
+    return `${projectVersion}-${prereleaseToken.name}`;
   }
 
   /**
