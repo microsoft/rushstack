@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update schema for build-cache to support s3Endpoint",
+      "comment": "Add support for specifying a custom S3 endpoint. This is useful for using a custom S3 provider.",
       "type": "none"
     }
   ],
