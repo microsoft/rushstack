@@ -231,10 +231,6 @@ export class AmazonS3Client {
 
       const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this._credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNamesString},Signature=${signature}`;
 
-      this._writeDebugLine(
-        `signinged request to S3 with <AccessKeyId>:<SecretAccessKey> = ${this._credentials.accessKeyId}:${this._credentials.secretAccessKey}`
-      );
-
       headers.set('Authorization', authorizationHeader);
       if (this._credentials.sessionToken) {
         // Handle signing with temporary credentials (via sts:assume-role)
