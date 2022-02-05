@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "6.7.1",
+  "pnpmVersion": "6.29.1",
 
   // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
@@ -62,7 +62,7 @@
      * The default value is false to avoid legacy compatibility issues.
      * It is strongly recommended to set strictPeerDependencies=true.
      */
-    // "strictPeerDependencies": true,
+    "strictPeerDependencies": true,
 
     /**
      * Configures the strategy used to select versions during installation.

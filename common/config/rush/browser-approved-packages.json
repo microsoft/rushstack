@@ -2,14 +2,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
-    {
-      "name": "css-minimizer-webpack-plugin",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "mini-css-extract-plugin",
-      "allowedCategories": [ "libraries" ]
-    },
+
     {
       "name": "react",
       "allowedCategories": [ "tests" ]
@@ -19,19 +12,7 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "sass",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "terser-webpack-plugin",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "url-loader",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "webpack-merge",
+      "name": "tslib",
       "allowedCategories": [ "libraries" ]
     }
   ]

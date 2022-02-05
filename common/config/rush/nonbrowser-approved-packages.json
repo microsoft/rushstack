@@ -1,7 +1,10 @@
 // DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
-  "packages": [
+  "packages": [    {
+      "name": "heft-webpack5-plugin",
+      "allowedCategories": [   ]
+    },
     {
       "name": "@azure/identity",
       "allowedCategories": [ "libraries" ]
@@ -307,6 +310,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "css-minimizer-webpack-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "decache",
       "allowedCategories": [ "libraries" ]
     },
@@ -475,6 +482,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "mini-css-extract-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "minimatch",
       "allowedCategories": [ "libraries" ]
     },
@@ -527,6 +538,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "sass",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "sass-loader",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -576,7 +591,11 @@
     },
     {
       "name": "terser",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "terser-webpack-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "timsort",
@@ -603,6 +622,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "url-loader",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "webpack",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -617,6 +640,10 @@
     {
       "name": "webpack-dev-server",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "webpack-merge",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "webpack-sources",
