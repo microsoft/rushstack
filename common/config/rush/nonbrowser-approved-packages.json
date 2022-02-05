@@ -136,7 +136,7 @@
     },
     {
       "name": "@rushstack/heft-webpack5-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/localization-plugin",
@@ -276,7 +276,7 @@
     },
     {
       "name": "autoprefixer",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "babel-loader",
@@ -304,7 +304,7 @@
     },
     {
       "name": "css-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "decache",
@@ -400,7 +400,7 @@
     },
     {
       "name": "html-webpack-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "https-proxy-agent",
@@ -504,7 +504,7 @@
     },
     {
       "name": "postcss-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "postcss-modules",
@@ -528,7 +528,7 @@
     },
     {
       "name": "sass-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "semver",
@@ -540,7 +540,7 @@
     },
     {
       "name": "source-map-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "ssri",
@@ -560,7 +560,7 @@
     },
     {
       "name": "style-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "sudo",
@@ -608,7 +608,7 @@
     },
     {
       "name": "webpack-bundle-analyzer",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "webpack-cli",
