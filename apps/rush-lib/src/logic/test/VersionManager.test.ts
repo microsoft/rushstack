@@ -35,22 +35,26 @@ describe('VersionManager', () => {
   describe('ensure', () => {
     it('fixes lock step versions', () => {
       versionManager.ensure('testPolicy1');
+      versionManager.ensure('lockStepWithoutNextBump');
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
-      const expectedVersion: string = '10.10.0';
-      expect(updatedPackages.size).toEqual(6);
-      expect(updatedPackages.get('a')!.version).toEqual(expectedVersion);
-      expect(updatedPackages.get('b')!.version).toEqual(expectedVersion);
-      expect(updatedPackages.get('b')!.dependencies!['a']).toEqual(`~${expectedVersion}`);
+
+      expect(updatedPackages.size).toEqual(7);
+      expect(updatedPackages.get('a')!.version).toEqual('10.10.0');
+      expect(updatedPackages.get('b')!.version).toEqual('10.10.0');
+      expect(updatedPackages.get('b')!.dependencies!['a']).toEqual('~10.10.0');
       expect(updatedPackages.get('c')!.version).toEqual('3.1.1');
       expect(updatedPackages.get('c')!.dependencies!['b']).toEqual(`>=10.10.0 <11.0.0`);
       expect(updatedPackages.get('d')!.version).toEqual('4.1.1');
       expect(updatedPackages.get('d')!.dependencies!['b']).toEqual(`>=10.10.0 <11.0.0`);
       expect(updatedPackages.get('f')!.version).toEqual('1.0.0');
       expect(updatedPackages.get('f')!.dependencies!['a']).toEqual(`~10.10.0`);
+      expect(updatedPackages.get('f')!.dependencies!['h']).toEqual(`^1.2.3`);
       expect(updatedPackages.get('g')!.devDependencies!['a']).toEqual(`~10.10.0`);
+      expect(updatedPackages.get('h')!.version).toEqual('1.2.3');
+      expect(updatedPackages.get('h')!.dependencies!['a']).toEqual(`~10.10.0`);
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
-      expect(changeFiles.size).toEqual(4);
+      expect(changeFiles.size).toEqual(5);
       expect(_getChanges(changeFiles, 'a')!).toHaveLength(1);
       expect(_getChanges(changeFiles, 'a')![0].changeType).toEqual(ChangeType.none);
       expect(_getChanges(changeFiles, 'b')!).toHaveLength(1);
@@ -61,6 +65,9 @@ describe('VersionManager', () => {
       expect(_getChanges(changeFiles, 'd')!).toHaveLength(2);
       expect(_getChanges(changeFiles, 'd')![0].changeType).toEqual(ChangeType.patch);
       expect(_getChanges(changeFiles, 'd')![1].changeType).toEqual(ChangeType.dependency);
+      expect(_getChanges(changeFiles, 'h')!).toHaveLength(2);
+      expect(_getChanges(changeFiles, 'h')![0].changeType).toEqual(ChangeType.patch);
+      expect(_getChanges(changeFiles, 'h')![1].changeType).toEqual(ChangeType.dependency);
     });
 
     it('fixes major version for individual version policy', () => {
@@ -81,19 +88,29 @@ describe('VersionManager', () => {
   });
 
   describe('bump', () => {
-    it('bumps to prerelease version', async () => {
+    it('bumps a lockStepPolicy to prerelease version', async () => {
       await versionManager.bumpAsync('testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
-      const expectedVersion: string = '10.10.1-dev.0';
-
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
 
+      const expectedVersion: string = '10.10.1-dev.0';
       expect(updatedPackages.get('a')!.version).toEqual(expectedVersion);
       expect(updatedPackages.get('b')!.version).toEqual(expectedVersion);
       expect(updatedPackages.get('e')!.version).toEqual(expectedVersion);
       expect(updatedPackages.get('g')!.devDependencies!['a']).toEqual(`~${expectedVersion}`);
       expect(_getChanges(changeFiles, 'a')).not.toBeDefined();
       expect(_getChanges(changeFiles, 'b')).not.toBeDefined();
+    });
+
+    it('bumps a lockStepPolicy without bumpType to prerelease version', async () => {
+      await versionManager.bumpAsync('lockStepWithoutNextBump', BumpType.prerelease, 'dev', false);
+      const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
+      const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
+
+      const expectedVersion: string = '1.2.4-dev.0';
+      expect(updatedPackages.get('h')!.version).toEqual(expectedVersion);
+      expect(updatedPackages.get('f')!.dependencies!['h']).toEqual(`^${expectedVersion}`);
+      expect(_getChanges(changeFiles, 'h')).not.toBeDefined();
     });
   });
   /* eslint-enable dot-notation */
@@ -116,22 +133,26 @@ describe('WorkspaceVersionManager', () => {
   describe('ensure', () => {
     it('fixes lock step versions', () => {
       versionManager.ensure('testPolicy1');
+      versionManager.ensure('lockStepWithoutNextBump');
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
-      const expectedVersion: string = '10.10.0';
-      expect(updatedPackages.size).toEqual(6);
-      expect(updatedPackages.get('a')!.version).toEqual(expectedVersion);
-      expect(updatedPackages.get('b')!.version).toEqual(expectedVersion);
-      expect(updatedPackages.get('b')!.dependencies!['a']).toEqual(`workspace:~${expectedVersion}`);
+
+      expect(updatedPackages.size).toEqual(7);
+      expect(updatedPackages.get('a')!.version).toEqual('10.10.0');
+      expect(updatedPackages.get('b')!.version).toEqual('10.10.0');
+      expect(updatedPackages.get('b')!.dependencies!['a']).toEqual(`workspace:~10.10.0`);
       expect(updatedPackages.get('c')!.version).toEqual('3.1.1');
       expect(updatedPackages.get('c')!.dependencies!['b']).toEqual(`workspace:>=10.10.0 <11.0.0`);
       expect(updatedPackages.get('d')!.version).toEqual('4.1.1');
       expect(updatedPackages.get('d')!.dependencies!['b']).toEqual(`workspace:>=10.10.0 <11.0.0`);
       expect(updatedPackages.get('f')!.version).toEqual('1.0.0');
       expect(updatedPackages.get('f')!.dependencies!['a']).toEqual(`workspace:~10.10.0`);
+      expect(updatedPackages.get('f')!.dependencies!['h']).toEqual(`workspace:^1.2.3`);
       expect(updatedPackages.get('g')!.devDependencies!['a']).toEqual(`workspace:~10.10.0`);
+      expect(updatedPackages.get('h')!.version).toEqual('1.2.3');
+      expect(updatedPackages.get('h')!.dependencies!['a']).toEqual(`workspace:~10.10.0`);
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
-      expect(changeFiles.size).toEqual(4);
+      expect(changeFiles.size).toEqual(5);
       expect(_getChanges(changeFiles, 'a')!).toHaveLength(1);
       expect(_getChanges(changeFiles, 'a')![0].changeType).toEqual(ChangeType.none);
       expect(_getChanges(changeFiles, 'b')!).toHaveLength(1);
@@ -142,6 +163,9 @@ describe('WorkspaceVersionManager', () => {
       expect(_getChanges(changeFiles, 'd')!).toHaveLength(2);
       expect(_getChanges(changeFiles, 'd')![0].changeType).toEqual(ChangeType.patch);
       expect(_getChanges(changeFiles, 'd')![1].changeType).toEqual(ChangeType.dependency);
+      expect(_getChanges(changeFiles, 'h')!).toHaveLength(2);
+      expect(_getChanges(changeFiles, 'h')![0].changeType).toEqual(ChangeType.patch);
+      expect(_getChanges(changeFiles, 'h')![1].changeType).toEqual(ChangeType.dependency);
     });
 
     it('fixes major version for individual version policy', () => {

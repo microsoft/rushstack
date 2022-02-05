@@ -24,7 +24,10 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
   }
 
   public hasChanges(otherShrinkwrap: PnpmProjectShrinkwrapFile): boolean {
-    if (!otherShrinkwrap.shrinkwrapFile.isWorkspaceCompatible && !otherShrinkwrap.shrinkwrapFile.getTempProjectDependencyKey(this.project.tempProjectName)) {
+    if (
+      !otherShrinkwrap.shrinkwrapFile.isWorkspaceCompatible &&
+      !otherShrinkwrap.shrinkwrapFile.getTempProjectDependencyKey(this.project.tempProjectName)
+    ) {
       // The project is new to the shrinkwrap file.
       return true;
     }

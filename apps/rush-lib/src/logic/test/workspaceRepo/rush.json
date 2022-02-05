@@ -42,6 +42,18 @@
       "packageName": "g",
       "projectFolder": "g",
       "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "h",
+      "projectFolder": "h",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "lockStepWithoutNextBump"
+    },
+    {
+      "packageName": "i",
+      "projectFolder": "i",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "lockStepWithoutNextBump"
     }
   ]
 }

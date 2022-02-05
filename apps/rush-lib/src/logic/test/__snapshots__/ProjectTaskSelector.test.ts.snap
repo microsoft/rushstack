@@ -38,6 +38,16 @@ Array [
     "name": "g (no-deps)",
   },
   Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "h (no-deps)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "i (no-deps)",
+  },
+  Object {
     "dependencies": Array [
       "a (no-deps)",
     ],
@@ -80,6 +90,7 @@ Array [
     "dependencies": Array [
       "f (no-deps)",
       "a (upstream-self)",
+      "h (upstream-self)",
     ],
     "isCacheWriteAllowed": true,
     "name": "f (upstream-self)",
@@ -91,6 +102,21 @@ Array [
     ],
     "isCacheWriteAllowed": true,
     "name": "g (upstream-self)",
+  },
+  Object {
+    "dependencies": Array [
+      "h (no-deps)",
+      "a (upstream-self)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (upstream-self)",
+  },
+  Object {
+    "dependencies": Array [
+      "i (no-deps)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-self)",
   },
   Object {
     "dependencies": Array [],
@@ -128,6 +154,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (no-deps)",
+      "h (no-deps)",
     ],
     "isCacheWriteAllowed": true,
     "name": "f (upstream-1)",
@@ -138,6 +165,18 @@ Array [
     ],
     "isCacheWriteAllowed": true,
     "name": "g (upstream-1)",
+  },
+  Object {
+    "dependencies": Array [
+      "a (no-deps)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (upstream-1)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-1)",
   },
   Object {
     "dependencies": Array [],
@@ -175,6 +214,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-1)",
+      "h (upstream-1)",
     ],
     "isCacheWriteAllowed": true,
     "name": "f (upstream-2)",
@@ -185,6 +225,18 @@ Array [
     ],
     "isCacheWriteAllowed": true,
     "name": "g (upstream-2)",
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (upstream-2)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-2)",
   },
   Object {
     "dependencies": Array [],
@@ -222,6 +274,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-2)",
+      "h (upstream-2)",
     ],
     "isCacheWriteAllowed": true,
     "name": "f (upstream-3)",
@@ -232,6 +285,18 @@ Array [
     ],
     "isCacheWriteAllowed": true,
     "name": "g (upstream-3)",
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-2)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (upstream-3)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-3)",
   },
   Object {
     "dependencies": Array [
@@ -284,6 +349,20 @@ Array [
   },
   Object {
     "dependencies": Array [
+      "h (upstream-1)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (upstream-1-self)",
+  },
+  Object {
+    "dependencies": Array [
+      "i (upstream-1)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-1-self)",
+  },
+  Object {
+    "dependencies": Array [
       "a (upstream-2)",
     ],
     "isCacheWriteAllowed": true,
@@ -332,6 +411,20 @@ Array [
     "name": "g (upstream-2-self)",
   },
   Object {
+    "dependencies": Array [
+      "h (upstream-2)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (upstream-2-self)",
+  },
+  Object {
+    "dependencies": Array [
+      "i (upstream-2)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-2-self)",
+  },
+  Object {
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "a (upstream-1-self-upstream)",
@@ -367,6 +460,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
+      "h (upstream-1-self)",
     ],
     "isCacheWriteAllowed": true,
     "name": "f (upstream-1-self-upstream)",
@@ -377,6 +471,18 @@ Array [
     ],
     "isCacheWriteAllowed": true,
     "name": "g (upstream-1-self-upstream)",
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1-self)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (upstream-1-self-upstream)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-1-self-upstream)",
   },
   Object {
     "dependencies": Array [
@@ -425,7 +531,9 @@ Array [
     "dependencies": Array [
       "f (upstream-3)",
       "a (upstream-1-self-upstream)",
+      "h (upstream-1-self-upstream)",
       "a (upstream-2-self)",
+      "h (upstream-2-self)",
     ],
     "isCacheWriteAllowed": true,
     "name": "f (complex)",
@@ -438,6 +546,22 @@ Array [
     ],
     "isCacheWriteAllowed": true,
     "name": "g (complex)",
+  },
+  Object {
+    "dependencies": Array [
+      "h (upstream-3)",
+      "a (upstream-1-self-upstream)",
+      "a (upstream-2-self)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (complex)",
+  },
+  Object {
+    "dependencies": Array [
+      "i (upstream-3)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "i (complex)",
   },
 ]
 `;
@@ -480,6 +604,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-self)",
+      "h (upstream-self)",
     ],
     "isCacheWriteAllowed": false,
     "name": "f (upstream-self)",
@@ -490,6 +615,18 @@ Array [
     ],
     "isCacheWriteAllowed": false,
     "name": "g (upstream-self)",
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-self)",
+    ],
+    "isCacheWriteAllowed": false,
+    "name": "h (upstream-self)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": false,
+    "name": "i (upstream-self)",
   },
 ]
 `;
@@ -537,6 +674,7 @@ Array [
   Object {
     "dependencies": Array [
       "f (upstream-3)",
+      "a (upstream-1)",
     ],
     "isCacheWriteAllowed": false,
     "name": "f (complex)",
@@ -547,6 +685,20 @@ Array [
     ],
     "isCacheWriteAllowed": false,
     "name": "g (complex)",
+  },
+  Object {
+    "dependencies": Array [
+      "h (upstream-3)",
+    ],
+    "isCacheWriteAllowed": false,
+    "name": "h (complex)",
+  },
+  Object {
+    "dependencies": Array [
+      "i (upstream-3)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "i (complex)",
   },
   Object {
     "dependencies": Array [],
@@ -580,7 +732,9 @@ Array [
     "name": "e (upstream-3)",
   },
   Object {
-    "dependencies": Array [],
+    "dependencies": Array [
+      "a (upstream-1)",
+    ],
     "isCacheWriteAllowed": false,
     "name": "f (upstream-3)",
   },
@@ -588,6 +742,16 @@ Array [
     "dependencies": Array [],
     "isCacheWriteAllowed": false,
     "name": "g (upstream-3)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": false,
+    "name": "h (upstream-3)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-3)",
   },
   Object {
     "dependencies": Array [],
@@ -625,6 +789,7 @@ Array [
   Object {
     "dependencies": Array [
       "a (no-deps)",
+      "h (no-deps)",
     ],
     "isCacheWriteAllowed": true,
     "name": "f (upstream-1)",
@@ -635,6 +800,18 @@ Array [
     ],
     "isCacheWriteAllowed": true,
     "name": "g (upstream-1)",
+  },
+  Object {
+    "dependencies": Array [
+      "a (no-deps)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "h (upstream-1)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "i (upstream-1)",
   },
   Object {
     "dependencies": Array [],
@@ -671,6 +848,16 @@ Array [
     "isCacheWriteAllowed": true,
     "name": "g (no-deps)",
   },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "h (no-deps)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "i (no-deps)",
+  },
 ]
 `;
 
@@ -699,6 +886,7 @@ Array [
   Object {
     "dependencies": Array [
       "f (upstream-3)",
+      "a (upstream-1)",
     ],
     "isCacheWriteAllowed": false,
     "name": "f (complex)",
@@ -719,7 +907,9 @@ Array [
     "name": "c (complex)",
   },
   Object {
-    "dependencies": Array [],
+    "dependencies": Array [
+      "a (upstream-1)",
+    ],
     "isCacheWriteAllowed": false,
     "name": "f (upstream-3)",
   },
@@ -739,7 +929,7 @@ Array [
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
+    "isCacheWriteAllowed": false,
     "name": "f (upstream-1)",
   },
   Object {
@@ -850,7 +1040,7 @@ Array [
       "f (no-deps)",
       "a (upstream-self)",
     ],
-    "isCacheWriteAllowed": true,
+    "isCacheWriteAllowed": false,
     "name": "f (upstream-self)",
   },
   Object {
@@ -872,7 +1062,7 @@ Array [
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
+    "isCacheWriteAllowed": false,
     "name": "f (upstream-1)",
   },
   Object {
@@ -888,8 +1078,9 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-1)",
+      "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
+    "isCacheWriteAllowed": false,
     "name": "f (upstream-2)",
   },
   Object {
@@ -907,8 +1098,9 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-2)",
+      "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
+    "isCacheWriteAllowed": false,
     "name": "f (upstream-3)",
   },
   Object {
@@ -968,8 +1160,9 @@ Array [
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
+      "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
+    "isCacheWriteAllowed": false,
     "name": "f (upstream-1-self-upstream)",
   },
   Object {
@@ -988,9 +1181,11 @@ Array [
     "dependencies": Array [
       "f (upstream-3)",
       "a (upstream-1-self-upstream)",
+      "a (upstream-1-self)",
       "a (upstream-2-self)",
+      "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
+    "isCacheWriteAllowed": false,
     "name": "f (complex)",
   },
   Object {

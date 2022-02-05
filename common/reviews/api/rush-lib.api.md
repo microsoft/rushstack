@@ -368,7 +368,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     // @internal
     get _json(): ILockStepVersionJson;
     get mainProject(): string | undefined;
-    get nextBump(): BumpType;
+    get nextBump(): BumpType | undefined;
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;
@@ -734,7 +734,7 @@ export class VersionPolicyConfiguration {
     constructor(jsonFileName: string);
     bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
     getVersionPolicy(policyName: string): VersionPolicy;
-    update(versionPolicyName: string, newVersion: string): void;
+    update(versionPolicyName: string, newVersion: string, shouldCommit?: boolean): void;
     validate(projectsByName: Map<string, RushConfigurationProject>): void;
     get versionPolicies(): Map<string, VersionPolicy>;
 }

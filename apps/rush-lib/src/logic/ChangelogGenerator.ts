@@ -6,7 +6,7 @@ import * as semver from 'semver';
 
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
-import { PublishUtilities, IChangeInfoHash } from './PublishUtilities';
+import { IChangeRequests, PublishUtilities } from './PublishUtilities';
 import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
 import { IChangelog, IChangeLogEntry, IChangeLogComment, IChangeLogEntryComments } from '../api/Changelog';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
@@ -21,33 +21,31 @@ export class ChangelogGenerator {
    * Updates the appropriate changelogs with the given changes.
    */
   public static updateChangelogs(
-    allChanges: IChangeInfoHash,
+    allChanges: IChangeRequests,
     allProjects: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean
   ): IChangelog[] {
     const updatedChangeLogs: IChangelog[] = [];
 
-    for (const packageName in allChanges) {
-      if (allChanges.hasOwnProperty(packageName)) {
-        const project: RushConfigurationProject | undefined = allProjects.get(packageName);
+    allChanges.packageChanges.forEach((change, packageName) => {
+      const project: RushConfigurationProject | undefined = allProjects.get(packageName);
 
-        if (project && ChangelogGenerator._shouldUpdateChangeLog(project, allChanges)) {
-          const changeLog: IChangelog | undefined = ChangelogGenerator.updateIndividualChangelog(
-            allChanges[packageName],
-            project.projectFolder,
-            shouldCommit,
-            rushConfiguration,
-            project.versionPolicy && project.versionPolicy.isLockstepped,
-            project.isMainProject
-          );
+      if (project && ChangelogGenerator._shouldUpdateChangeLog(project, allChanges)) {
+        const changeLog: IChangelog | undefined = ChangelogGenerator.updateIndividualChangelog(
+          change,
+          project.projectFolder,
+          shouldCommit,
+          rushConfiguration,
+          project.versionPolicy && project.versionPolicy.isLockstepped,
+          project.isMainProject
+        );
 
-          if (changeLog) {
-            updatedChangeLogs.push(changeLog);
-          }
+        if (changeLog) {
+          updatedChangeLogs.push(changeLog);
         }
       }
-    }
+    });
     return updatedChangeLogs;
   }
 
@@ -267,12 +265,12 @@ export class ChangelogGenerator {
    */
   private static _shouldUpdateChangeLog(
     project: RushConfigurationProject,
-    allChanges: IChangeInfoHash
+    allChanges: IChangeRequests
   ): boolean {
     return (
       project.shouldPublish &&
       (!semver.prerelease(project.packageJson.version) ||
-        allChanges[project.packageName].changeType === ChangeType.hotfix)
+        allChanges.packageChanges.get(project.packageName)?.changeType === ChangeType.hotfix)
     );
   }
 }

@@ -175,8 +175,7 @@ export class VersionAction extends BaseRushAction {
       }
 
       if (newVersion) {
-        console.log(`Update version policy ${policy.policyName} from ${policy.version} to ${newVersion}`);
-        versionConfig.update(this._versionPolicy.value, newVersion);
+        versionConfig.update(this._versionPolicy.value, newVersion, true);
       }
     } else {
       throw new Error(
