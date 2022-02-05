@@ -15,23 +15,24 @@ describe('used in script', () => {
       [
         '-e',
         `
-const { Import } = require("${coreLibPath}");
+const { Import } = require(${JSON.stringify(coreLibPath)});
 const originalResolveModule = Import.resolveModule;
 const mockResolveModule = (options) => {
   if (options.baseFolderPath.includes('install-run') && options.modulePath === '@microsoft/rush-lib') {
-    return "${mockRushLibPath}";
+    return ${JSON.stringify(mockRushLibPath)};
   }
   return originalResolveModule(options);
 }
 Import.resolveModule = mockResolveModule;
-console.log(require("${rushSdkPath}"));
+console.log(require(${JSON.stringify(rushSdkPath)}));
 `
       ],
       {
         currentWorkingDirectory: mockPackageFolder
       }
     );
-    expect(result.status).toBe(0);
+    expect(result.stderr.trim()).toMatchInlineSnapshot(`""`);
     expect(result.stdout.trim()).toMatchInlineSnapshot(`"{ foo: [Getter] }"`);
+    expect(result.status).toBe(0);
   });
 });
