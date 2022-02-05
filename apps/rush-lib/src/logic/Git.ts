@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as url from 'url';
 import colors from 'colors/safe';
+import { trueCasePathSync } from 'true-case-path';
 import { Executable, AlreadyReportedError, Path, ITerminal } from '@rushstack/node-core-library';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
@@ -155,7 +156,13 @@ export class Git {
       // This should have never been called in a non-Git environment
       return true;
     }
-    const defaultHooksPath: string = path.resolve(repoInfo.commonGitDir, 'hooks');
+    let commonGitDir: string = repoInfo.commonGitDir;
+    try {
+      commonGitDir = trueCasePathSync(commonGitDir);
+    } catch (error) {
+      /* ignore errors from true-case-path */
+    }
+    const defaultHooksPath: string = path.resolve(commonGitDir, 'hooks');
     const hooksResult: IResultOrError<string> = this._tryGetGitHooksPath();
     if (hooksResult.error) {
       console.log(
