@@ -10,7 +10,9 @@ import type {
   IScopedLogger
 } from '@rushstack/heft';
 import { CertificateManager, ICertificate } from '@rushstack/debug-certificate-manager';
-import { Configuration as WebpackDevServerConfig } from 'webpack-dev-server';
+
+// IMPORTANT: To simplify versioning, 'webpack-dev-server' is a devDependency, not a regular dependency
+import type { Configuration as WebpackDevServerConfig } from 'webpack-dev-server';
 
 export interface IWebpackConfigPartial {
   devServer?: WebpackDevServerConfig;
