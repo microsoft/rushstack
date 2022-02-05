@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Set useUnknownInCatchVariables=false in tsconfig.json, to work around https://github.com/microsoft/TypeScript/issues/42596",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}
