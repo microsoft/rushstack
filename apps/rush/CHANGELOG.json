@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.62.0",
+      "tag": "@microsoft/rush_v5.62.0",
+      "date": "Sat, 05 Feb 2022 00:55:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for directly invoking a script that depends on `rush-sdk` from inside a Rush repo."
+          },
+          {
+            "comment": "Add support for a new URL-based version specifier in PNPM lockfiles."
+          },
+          {
+            "comment": "Add support for specifying a custom S3 endpoint. This is useful for using a custom S3 provider."
+          },
+          {
+            "comment": "Optimize invocation of tar to use stdin instead of a temporary file."
+          },
+          {
+            "comment": "Revise architecture of symbolic link scan to use a queue and parallel file system calls."
+          },
+          {
+            "comment": "Create separate tar logs per phase based on cache id."
+          },
+          {
+            "comment": "Pack tar to a temp file, then move into the cache to ensure cache integrity."
+          },
+          {
+            "comment": "Fix git-hooks folder check failing when compared paths have different drive letter casing"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.61.4",
       "tag": "@microsoft/rush_v5.61.4",
       "date": "Wed, 02 Feb 2022 04:03:24 GMT",

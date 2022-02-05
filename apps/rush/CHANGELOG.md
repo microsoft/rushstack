@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 02 Feb 2022 04:03:24 GMT and should not be manually modified.
+This log was last generated on Sat, 05 Feb 2022 00:55:18 GMT and should not be manually modified.
+
+## 5.62.0
+Sat, 05 Feb 2022 00:55:18 GMT
+
+### Updates
+
+- Add support for directly invoking a script that depends on `rush-sdk` from inside a Rush repo.
+- Add support for a new URL-based version specifier in PNPM lockfiles.
+- Add support for specifying a custom S3 endpoint. This is useful for using a custom S3 provider.
+- Optimize invocation of tar to use stdin instead of a temporary file.
+- Revise architecture of symbolic link scan to use a queue and parallel file system calls.
+- Create separate tar logs per phase based on cache id.
+- Pack tar to a temp file, then move into the cache to ensure cache integrity.
+- Fix git-hooks folder check failing when compared paths have different drive letter casing
 
 ## 5.61.4
 Wed, 02 Feb 2022 04:03:24 GMT
