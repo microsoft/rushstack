@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix git-hooks folder check failing when compared paths have different drive letter casing",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
