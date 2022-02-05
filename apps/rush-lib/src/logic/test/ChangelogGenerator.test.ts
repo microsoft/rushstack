@@ -6,9 +6,9 @@ import { ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ChangelogGenerator } from '../ChangelogGenerator';
-import { IChangeInfoHash } from '../PublishUtilities';
 
 import * as path from 'path';
+import { IChangeRequests } from '../PublishUtilities';
 
 describe('updateIndividualChangelog', () => {
   const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');
@@ -264,23 +264,23 @@ describe('updateChangelogs', () => {
 
   /* eslint-disable dot-notation */
   it('skips changes logs if the project version is not changed.', () => {
-    const changeHash: IChangeInfoHash = {};
+    const allChanges: IChangeRequests = { packageChanges: new Map(), versionPolicyChanges: new Map() };
     // Package a does not have version change.
-    changeHash['a'] = {
+    allChanges.packageChanges.set('a', {
       packageName: 'a',
       changeType: ChangeType.dependency,
       newVersion: '1.0.0',
       changes: []
-    };
+    });
     // Package b has version change.
-    changeHash['b'] = {
+    allChanges.packageChanges.set('b', {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',
       changes: []
-    };
+    });
     const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
-      changeHash,
+      allChanges,
       rushConfiguration.projectsByName,
       rushConfiguration,
       false
@@ -290,27 +290,27 @@ describe('updateChangelogs', () => {
   });
 
   it('skips changes logs if the project is in pre-release', () => {
-    const changeHash: IChangeInfoHash = {};
+    const allChanges: IChangeRequests = { packageChanges: new Map(), versionPolicyChanges: new Map() };
     // Package a is a prerelease
-    changeHash['a'] = {
+    allChanges.packageChanges.set('a', {
       packageName: 'a',
       changeType: ChangeType.dependency,
       newVersion: '1.0.1-pre.1',
       changes: []
-    };
+    });
     // Package b is not a prerelease
-    changeHash['b'] = {
+    allChanges.packageChanges.set('b', {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',
       changes: []
-    };
+    });
     // Makes package 'a' prerelease package.
     const rushProjectA: RushConfigurationProject = rushConfiguration.projectsByName.get('a')!;
     rushProjectA.packageJson.version = '1.0.1-pre.1';
 
     const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
-      changeHash,
+      allChanges,
       rushConfiguration.projectsByName,
       rushConfiguration,
       false
@@ -320,27 +320,27 @@ describe('updateChangelogs', () => {
   });
 
   it('writes changelog for hotfix changes', () => {
-    const changeHash: IChangeInfoHash = {};
+    const allChanges: IChangeRequests = { packageChanges: new Map(), versionPolicyChanges: new Map() };
     // Package a is a hotfix
-    changeHash['a'] = {
+    allChanges.packageChanges.set('a', {
       packageName: 'a',
       changeType: ChangeType.hotfix,
       newVersion: '1.0.1-hotfix.1',
       changes: []
-    };
+    });
     // Package b is not a hotfix
-    changeHash['b'] = {
+    allChanges.packageChanges.set('b', {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',
       changes: []
-    };
+    });
     // Makes package 'a' hotfix package.
     const rushProjectA: RushConfigurationProject = rushConfiguration.projectsByName.get('a')!;
     rushProjectA.packageJson.version = '1.0.1-hotfix.1';
 
     const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
-      changeHash,
+      allChanges,
       rushConfiguration.projectsByName,
       rushConfiguration,
       false

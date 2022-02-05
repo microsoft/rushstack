@@ -73,6 +73,9 @@ export class ChangeAction extends BaseRushAction {
         'Examples are: Modifying a private API or fixing a bug in the logic ' +
         'of how an existing API works.',
       '',
+      "NONE - these are changes that are backwards and forwards compatible and don't require an immediate release. " +
+        'Examples are: Modifying dev tooling configuration like eslint.',
+      '',
       'HOTFIX (EXPERIMENTAL) - these are changes that are hotfixes targeting a ' +
         'specific older version of the package. When a hotfix change is added, ' +
         'other changes will not be able to increment the version number. ' +
@@ -150,7 +153,7 @@ export class ChangeAction extends BaseRushAction {
 
     this._bulkChangeBumpTypeParameter = this.defineChoiceParameter({
       parameterLongName: BULK_BUMP_TYPE_LONG_NAME,
-      alternatives: [...Object.keys(this._getBumpOptions()), ChangeType[ChangeType.none]],
+      alternatives: [...Object.keys(this._getBumpOptions())],
       description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
     });
   }
@@ -496,7 +499,9 @@ export class ChangeAction extends BaseRushAction {
               'major - for changes that break compatibility, e.g. removing an API',
             [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
             [ChangeType[ChangeType.patch]]:
-              'patch - for changes that do not affect compatibility, e.g. fixing a bug'
+              'patch - for changes that do not affect compatibility, e.g. fixing a bug',
+            [ChangeType[ChangeType.none]]:
+              'none - for changes that do not need an immediate release, e.g. eslint config change'
           };
 
     if (packageName) {
@@ -506,8 +511,11 @@ export class ChangeAction extends BaseRushAction {
 
       if (versionPolicy) {
         if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
-          // No need to ask for bump types if project is lockstep versioned.
-          bumpOptions = {};
+          const lockStepPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+          // No need to ask for bump types if project is lockstep versioned with an explicit nextBump
+          if (lockStepPolicy.nextBump !== undefined) {
+            bumpOptions = {};
+          }
         } else if (versionPolicy.definitionName === VersionPolicyDefinitionName.individualVersion) {
           const individualPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
           if (individualPolicy.lockedMajor !== undefined) {

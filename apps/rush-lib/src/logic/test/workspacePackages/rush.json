@@ -51,6 +51,20 @@
       "shouldPublish": true
     },
     {
+      "packageName": "h",
+      "projectFolder": "h",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "lockStepWithoutNextBump",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "i",
+      "projectFolder": "i",
+      "reviewCategory": "third-party",
+      "versionPolicyName": "lockStepWithoutNextBump",
+      "shouldPublish": true
+    },
+    {
       "packageName": "cyclic-dep-1",
       "projectFolder": "cyclic-dep-1",
       "reviewCategory": "third-party",

@@ -13,5 +13,10 @@
   {
     "policyName": "testPolicy3",
     "definitionName": "individualVersion"
+  },
+  {
+    "policyName": "lockStepWithoutNextBump",
+    "definitionName": "lockStepVersion",
+    "version": "1.2.3"
   }
 ]
