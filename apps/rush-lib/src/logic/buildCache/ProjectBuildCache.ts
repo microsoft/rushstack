@@ -6,7 +6,7 @@ import events from 'events';
 import * as crypto from 'crypto';
 import type * as stream from 'stream';
 import * as tar from 'tar';
-import { Async, FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
+import { FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -375,7 +375,7 @@ export class ProjectBuildCache {
   private async _tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
     const projectFolderPath: string = this._project.projectFolder;
     const outputFilePaths: string[] = [];
-    let nextLevelFolders: [string, string][] = [];
+    const queue: [string, string][] = [];
 
     const filteredOutputFolderNames: string[] = [];
 
@@ -391,7 +391,7 @@ export class ProjectBuildCache {
           );
           hasSymbolicLinks = true;
         } else if (child.isDirectory()) {
-          nextLevelFolders.push([childRelativePath, `${diskPath}/${child.name}`]);
+          queue.push([childRelativePath, `${diskPath}/${child.name}`]);
         } else {
           outputFilePaths.push(childRelativePath);
         }
@@ -415,21 +415,9 @@ export class ProjectBuildCache {
       }
     }
 
-    // Iterate through each folder level until we reach one that contains no subfolders.
-    while (nextLevelFolders.length > 0) {
-      const currentLevelFolders: [string, string][] = nextLevelFolders;
-      nextLevelFolders = [];
-      // Walk the tree in parallel
-      await Async.forEachAsync(
-        currentLevelFolders,
-        async ([relativePath, diskPath]: [string, string]) => {
-          const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
-          processChildren(relativePath, diskPath, children);
-        },
-        {
-          concurrency: 10
-        }
-      );
+    for (const [relativePath, diskPath] of queue) {
+      const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
+      processChildren(relativePath, diskPath, children);
     }
 
     if (hasSymbolicLinks) {
