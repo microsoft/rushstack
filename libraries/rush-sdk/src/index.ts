@@ -31,10 +31,10 @@ declare const global: NodeJS.Global &
     ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
   };
 
-// eslint-disable-next-line @typescript-eslint/naming-convention,@typescript-eslint/no-explicit-any
-declare const __non_webpack_require__: ((moduleName: string) => any) | undefined;
 function _require<TResult>(moduleName: string): TResult {
   if (typeof __non_webpack_require__ === 'function') {
+    // If this library has been webpacked, we need to call the real `require` function
+    // that doesn't get turned into a __webpack_require__ statement
     return __non_webpack_require__(moduleName);
   } else {
     return require(moduleName);
