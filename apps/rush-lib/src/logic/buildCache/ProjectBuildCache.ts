@@ -373,9 +373,9 @@ export class ProjectBuildCache {
    *   symbolic link was encountered.
    */
   private async _tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
-    const posixPrefix: string = this._project.projectFolder;
+    const projectFolderPath: string = this._project.projectFolder;
     const outputFilePaths: string[] = [];
-    const queue: [string, string][] = [];
+    let nextLevelFolders: [string, string][] = [];
 
     const filteredOutputFolderNames: string[] = [];
 
@@ -391,7 +391,7 @@ export class ProjectBuildCache {
           );
           hasSymbolicLinks = true;
         } else if (child.isDirectory()) {
-          queue.push([childRelativePath, `${diskPath}/${child.name}`]);
+          nextLevelFolders.push([childRelativePath, `${diskPath}/${child.name}`]);
         } else {
           outputFilePaths.push(childRelativePath);
         }
@@ -400,7 +400,7 @@ export class ProjectBuildCache {
 
     // Handle declared output folders.
     for (const outputFolder of this._projectOutputFolderNames) {
-      const diskPath: string = `${posixPrefix}/${outputFolder}`;
+      const diskPath: string = `${projectFolderPath}/${outputFolder}`;
       try {
         const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
         processChildren(outputFolder, diskPath, children);
@@ -415,17 +415,22 @@ export class ProjectBuildCache {
       }
     }
 
-    // Walk the tree in parallel
-    await Async.forEachAsync(
-      queue,
-      async ([relativePath, diskPath]: [string, string]) => {
-        const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
-        processChildren(relativePath, diskPath, children);
-      },
-      {
-        concurrency: 10
-      }
-    );
+    // Iterate through each folder level until we reach one that contains no subfolders.
+    while (nextLevelFolders.length > 0) {
+      const currentLevelFolders: [string, string][] = nextLevelFolders;
+      nextLevelFolders = [];
+      // Walk the tree in parallel
+      await Async.forEachAsync(
+        currentLevelFolders,
+        async ([relativePath, diskPath]: [string, string]) => {
+          const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
+          processChildren(relativePath, diskPath, children);
+        },
+        {
+          concurrency: 10
+        }
+      );
+    }
 
     if (hasSymbolicLinks) {
       // Symbolic links do not round-trip safely.
