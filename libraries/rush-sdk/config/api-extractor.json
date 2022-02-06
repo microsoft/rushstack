@@ -1,0 +1,23 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+
+  "mainEntryPointFilePath": "<projectFolder>/lib/RushSdkLoader.d.ts",
+
+  "apiReport": {
+    "enabled": true,
+    "reportFolder": "../../../common/reviews/api",
+    "reportFileName": "<unscopedPackageName>-loader.api.md"
+  },
+
+  "docModel": {
+    "enabled": true,
+    "apiJsonFilePath": "../../../common/temp/api/<unscopedPackageName>-loader.api.json"
+  },
+
+  "dtsRollup": {
+    "enabled": true,
+    "omitTrimmingComments": true,
+    "untrimmedFilePath": "<projectFolder>/temp/<unscopedPackageName>-loader.d.ts",
+    "betaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-loader.d.ts"
+  }
+}
