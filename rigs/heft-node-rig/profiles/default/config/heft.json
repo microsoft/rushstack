@@ -130,7 +130,7 @@
       "actionKind": "deleteGlobs",
       "heftEvent": "clean",
       "actionId": "defaultClean",
-      "globsToDelete": ["dist", "lib", "temp"]
+      "globsToDelete": ["dist", "lib", "lib-commonjs", "temp"]
     }
   ],
 
