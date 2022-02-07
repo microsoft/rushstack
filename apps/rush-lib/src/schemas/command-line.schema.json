@@ -193,12 +193,12 @@
               "description": "Controls the file watching behavior of this command. If not specified, this command does not watch files.",
               "type": "object",
               "additionalProperties": false,
-              "required": ["watchForChanges", "watchPhases"],
+              "required": ["alwaysWatch", "watchPhases"],
               "properties": {
-                "watchForChanges": {
-                  "title": "Watch For Changes",
-                  "description": "Indicates that this command will watch for changes after the initial execution.",
-                  "enum": [true]
+                "alwaysWatch": {
+                  "title": "Always Watch",
+                  "description": "Indicates that this command will always watch for changes after the initial execution, as if the \"--watch\" CLI flag was passed.",
+                  "type": "boolean"
                 },
                 "watchPhases": {
                   "title": "Watch Phases",

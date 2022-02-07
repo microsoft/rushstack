@@ -58,13 +58,21 @@ export interface ICommandWithParameters {
 }
 export interface IPhasedCommand extends IPhasedCommandWithoutPhasesJson, ICommandWithParameters {
   /**
-   * If set to "true," this this phased command was generated from a bulk command, and
+   * If set to "true," then this phased command was generated from a bulk command, and
    * was not explicitly defined in the command-line.json file.
    */
   isSynthetic: boolean;
   disableBuildCache?: boolean;
 
   phases: Set<IPhase>;
+
+  /**
+   * If set to "true," this phased command will alwasy run in watch mode, regardless of CLI flags.
+   */
+  alwaysWatch: boolean;
+  /**
+   * The set of phases to execute when running this phased command in watch mode.
+   */
   watchPhases: Set<IPhase>;
 }
 
@@ -249,7 +257,8 @@ export class CommandLineConfiguration {
               isSynthetic: false,
               associatedParameters: new Set<Parameter>(),
               phases: commandPhases,
-              watchPhases
+              watchPhases,
+              alwaysWatch: false
             };
 
             for (const phaseName of command.phases) {
@@ -280,6 +289,8 @@ export class CommandLineConfiguration {
             const { watchOptions } = command;
 
             if (watchOptions) {
+              normalizedCommand.alwaysWatch = watchOptions.alwaysWatch;
+
               // No implicit phase dependency expansion for watch mode.
               for (const phaseName of watchOptions.watchPhases) {
                 const phase: IPhase | undefined = this.phases.get(phaseName);
@@ -360,7 +371,8 @@ export class CommandLineConfiguration {
           phases: buildCommandPhases,
           disableBuildCache: DEFAULT_REBUILD_COMMAND_JSON.disableBuildCache,
           associatedParameters: buildCommand.associatedParameters, // rebuild should share build's parameters in this case,
-          watchPhases: new Set()
+          watchPhases: new Set(),
+          alwaysWatch: false
         };
         this.commands.set(rebuildCommand.name, rebuildCommand);
       }
@@ -638,7 +650,8 @@ export class CommandLineConfiguration {
       associatedParameters: new Set<Parameter>(),
       phases,
       // Bulk commands used the same phases for watch as for regular execution. Preserve behavior.
-      watchPhases: command.watchForChanges ? phases : new Set()
+      watchPhases: command.watchForChanges ? phases : new Set(),
+      alwaysWatch: !!command.watchForChanges
     };
 
     return translatedCommand;

@@ -38,6 +38,8 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   initialPhases: Set<IPhase>;
   watchPhases: Set<IPhase>;
   phases: Map<string, IPhase>;
+
+  alwaysWatch: boolean;
 }
 
 interface IExecuteInternalOptions {
@@ -67,12 +69,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
   private readonly _initialPhase: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
+  private readonly _alwaysWatch: boolean;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
+  private _watchParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -82,6 +86,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     this._repoCommandLineConfiguration = options.commandLineConfiguration;
     this._initialPhase = options.initialPhases;
     this._watchPhases = options.watchPhases;
+    this._alwaysWatch = options.alwaysWatch;
   }
 
   public async runAsync(): Promise<void> {
@@ -147,7 +152,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       phasesToRun: new Set(this._initialPhase)
     });
 
-    const isWatch: boolean = this._watchPhases.size > 0;
+    const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
 
     const executeOptions: IExecuteInternalOptions = {
       taskSelector,
@@ -309,6 +314,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       parameterLongName: '--ignore-hooks',
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
+
+    if (this._watchPhases.size > 0 && !this._alwaysWatch) {
+      // Only define the parameter if it has an effect.
+      this._watchParameter = this.defineFlagParameter({
+        parameterLongName: '--watch',
+        description: `Starts a file watcher after initial execution finishes. Will run the following phases on affected projects: ${Array.from(
+          this._watchPhases,
+          (phase: IPhase) => phase.name
+        ).join(', ')}`
+      });
+    }
 
     this.defineScriptParameters();
   }
