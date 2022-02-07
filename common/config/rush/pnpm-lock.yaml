@@ -1641,9 +1641,9 @@ importers:
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
       '@types/node-fetch': 1.6.9
       '@types/semver': 7.3.5
+      '@types/webpack-env': 1.13.0
       tapable: 2.2.1
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
@@ -1655,8 +1655,8 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
       '@types/semver': 7.3.5
+      '@types/webpack-env': 1.13.0
 
   ../../libraries/rushell:
     specifiers:

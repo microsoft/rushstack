@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 05 Feb 2022 00:55:18 GMT and should not be manually modified.
+This log was last generated on Sun, 06 Feb 2022 04:59:08 GMT and should not be manually modified.
+
+## 5.62.1
+Sun, 06 Feb 2022 04:59:08 GMT
+
+### Updates
+
+- Fix an issue where cache entries in certain circumstances would be missing files in nested subfolders. For full details see https://github.com/microsoft/rushstack/pull/3211.
 
 ## 5.62.0
 Sat, 05 Feb 2022 00:55:18 GMT

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.62.0",
+  "version": "5.62.1",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -9,6 +9,7 @@
   },
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",
+  "module": "lib/index.mjs",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
     "build": "heft build --clean",
@@ -27,7 +28,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24",
-    "@types/semver": "7.3.5"
+    "@types/semver": "7.3.5",
+    "@types/webpack-env": "1.13.0"
   }
 }

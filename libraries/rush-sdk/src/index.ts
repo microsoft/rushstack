@@ -31,6 +31,18 @@ declare const global: NodeJS.Global &
     ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
   };
 
+function _require<TResult>(moduleName: string): TResult {
+  if (typeof __non_webpack_require__ === 'function') {
+    // If this library has been bundled with Webpack, we need to call the real `require` function
+    // that doesn't get turned into a `__webpack_require__` statement.
+    // `__non_webpack_require__` is a Webpack macro that gets turned into a `require` statement
+    // during bundling.
+    return __non_webpack_require__(moduleName);
+  } else {
+    return require(moduleName);
+  }
+}
+
 // SCENARIO 1:  Rush's PluginManager has initialized "rush-sdk" with Rush's own instance of rush-lib.
 // The Rush host process will assign "global.___rush___rushLibModule" before loading the plugin.
 let rushLibModule: RushLibModuleType | undefined =
@@ -40,13 +52,13 @@ let errorMessage: string = '';
 // SCENARIO 2:  The project importing "rush-sdk" has installed its own instance of "rush-lib"
 // as a package.json dependency.  For example, this is used by the Jest tests for Rush plugins.
 if (rushLibModule === undefined) {
-  const importingPath: string | undefined = module?.parent?.filename;
-  if (importingPath !== undefined) {
+  const importingPath: string | null | undefined = module?.parent?.filename;
+  if (importingPath) {
     const callerPackageFolder: string | undefined =
       PackageJsonLookup.instance.tryGetPackageFolderFor(importingPath);
 
     if (callerPackageFolder !== undefined) {
-      const callerPackageJson: IPackageJson = require(path.join(callerPackageFolder, 'package.json'));
+      const callerPackageJson: IPackageJson = _require(path.join(callerPackageFolder, 'package.json'));
 
       // Does the caller properly declare a dependency on rush-lib?
       if (
@@ -123,7 +135,9 @@ if (rushLibModule === undefined) {
         }
 
         // Retry to load "rush-lib" after install-run-rush run
-        terminal.writeVerboseLine(`Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`);
+        terminal.writeVerboseLine(
+          `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
+        );
         rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
       } catch (e) {
         console.error(`${installAndRunRushStderrContent}`);
@@ -176,7 +190,7 @@ function requireRushLibUnderFolderPath(folderPath: string): RushLibModuleType {
     baseFolderPath: folderPath
   });
 
-  return require(rushLibModulePath);
+  return _require(rushLibModulePath);
 }
 
 /**

@@ -6,7 +6,7 @@ import events from 'events';
 import * as crypto from 'crypto';
 import type * as stream from 'stream';
 import * as tar from 'tar';
-import { Async, FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
+import { FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -373,7 +373,7 @@ export class ProjectBuildCache {
    *   symbolic link was encountered.
    */
   private async _tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
-    const posixPrefix: string = this._project.projectFolder;
+    const projectFolderPath: string = this._project.projectFolder;
     const outputFilePaths: string[] = [];
     const queue: [string, string][] = [];
 
@@ -400,7 +400,7 @@ export class ProjectBuildCache {
 
     // Handle declared output folders.
     for (const outputFolder of this._projectOutputFolderNames) {
-      const diskPath: string = `${posixPrefix}/${outputFolder}`;
+      const diskPath: string = `${projectFolderPath}/${outputFolder}`;
       try {
         const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
         processChildren(outputFolder, diskPath, children);
@@ -415,17 +415,10 @@ export class ProjectBuildCache {
       }
     }
 
-    // Walk the tree in parallel
-    await Async.forEachAsync(
-      queue,
-      async ([relativePath, diskPath]: [string, string]) => {
-        const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
-        processChildren(relativePath, diskPath, children);
-      },
-      {
-        concurrency: 10
-      }
-    );
+    for (const [relativePath, diskPath] of queue) {
+      const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
+      processChildren(relativePath, diskPath, children);
+    }
 
     if (hasSymbolicLinks) {
       // Symbolic links do not round-trip safely.
