@@ -9,6 +9,10 @@
     "directory": "stack/eslint-config"
   },
   "homepage": "https://rushstack.io",
+  "scripts": {
+    "build": "",
+    "_phase:build": ""
+  },
   "keywords": [
     "eslint",
     "eslint-config",
@@ -23,10 +27,10 @@
     "typescript": ">=3.0.0"
   },
   "dependencies": {
-    "@rushstack/eslint-patch": "1.1.0",
-    "@rushstack/eslint-plugin": "0.8.4",
-    "@rushstack/eslint-plugin-packlets": "0.3.4",
-    "@rushstack/eslint-plugin-security": "0.2.4",
+    "@rushstack/eslint-patch": "workspace:*",
+    "@rushstack/eslint-plugin": "workspace:*",
+    "@rushstack/eslint-plugin-packlets": "workspace:*",
+    "@rushstack/eslint-plugin-security": "workspace:*",
     "@typescript-eslint/eslint-plugin": "~5.6.0",
     "@typescript-eslint/experimental-utils": "~5.6.0",
     "@typescript-eslint/parser": "~5.6.0",
@@ -38,9 +42,5 @@
   "devDependencies": {
     "eslint": "~8.7.0",
     "typescript": "~4.5.2"
-  },
-  "scripts": {
-    "build": "",
-    "_phase:build": ""
   }
 }
