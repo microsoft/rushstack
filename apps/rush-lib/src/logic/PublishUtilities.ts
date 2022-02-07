@@ -84,40 +84,6 @@ export class PublishUtilities {
       );
     });
 
-    // Update orders so that downstreams are marked to come after upstreams.
-    allChanges.packageChanges.forEach((change, packageName) => {
-      const project: RushConfigurationProject = allPackages.get(packageName)!;
-      const pkg: IPackageJson = project.packageJson;
-      const deps: Iterable<RushConfigurationProject> = project.consumingProjects;
-
-      // Write the new version expected for the change.
-      const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
-        project,
-        prereleaseToken,
-        projectsToExclude
-      );
-      if (skipVersionBump) {
-        change.newVersion = pkg.version;
-      } else {
-        // For hotfix changes, do not re-write new version
-        change.newVersion =
-          change.changeType! >= ChangeType.patch
-            ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))!
-            : change.changeType === ChangeType.hotfix
-            ? change.newVersion
-            : pkg.version;
-      }
-
-      if (deps) {
-        for (const dep of deps) {
-          const depChange: IChangeInfo | undefined = allChanges.packageChanges.get(dep.packageName);
-          if (depChange) {
-            depChange.order = Math.max(change.order! + 1, depChange.order!);
-          }
-        }
-      }
-    });
-
     // Bump projects affected by the version policy changes.
     allPackages.forEach((pkg) => {
       const versionPolicyVersion: string | undefined =
@@ -153,6 +119,52 @@ export class PublishUtilities {
         )
       ) {
         console.log(`${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyVersion}`);
+      }
+    });
+
+    // For each requested package change, ensure downstream dependencies are also updated.
+    allChanges.packageChanges.forEach((change, packageName) => {
+      PublishUtilities._updateDownstreamDependencies(
+        change,
+        allChanges,
+        allPackages,
+        rushConfiguration,
+        prereleaseToken,
+        projectsToExclude
+      );
+    });
+
+    // Update orders so that downstreams are marked to come after upstreams.
+    allChanges.packageChanges.forEach((change, packageName) => {
+      const project: RushConfigurationProject = allPackages.get(packageName)!;
+      const pkg: IPackageJson = project.packageJson;
+      const deps: Iterable<RushConfigurationProject> = project.consumingProjects;
+
+      // Write the new version expected for the change.
+      const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
+        project,
+        prereleaseToken,
+        projectsToExclude
+      );
+      if (skipVersionBump) {
+        change.newVersion = pkg.version;
+      } else {
+        // For hotfix changes, do not re-write new version
+        change.newVersion =
+          change.changeType! >= ChangeType.patch
+            ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))!
+            : change.changeType === ChangeType.hotfix
+            ? change.newVersion
+            : pkg.version;
+      }
+
+      if (deps) {
+        for (const dep of deps) {
+          const depChange: IChangeInfo | undefined = allChanges.packageChanges.get(dep.packageName);
+          if (depChange) {
+            depChange.order = Math.max(change.order! + 1, depChange.order!);
+          }
+        }
       }
     });
 

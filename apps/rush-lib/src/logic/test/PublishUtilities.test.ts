@@ -80,7 +80,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.0');
   });
 
-  it('returns 8 changes when hotfixing a root package', () => {
+  it('returns 7 changes when hotfixing a root package', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       packagesRushConfiguration.projectsByName,
       packagesRushConfiguration,
@@ -118,7 +118,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.0-hotfix.0');
   });
 
-  it('returns 8 changes when major bumping a root package', () => {
+  it('returns 9 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
@@ -126,7 +126,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
     );
 
-    expect(allChanges.packageChanges.size).toEqual(8);
+    expect(allChanges.packageChanges.size).toEqual(9);
     expect(allChanges.versionPolicyChanges.size).toEqual(1);
 
     expect(allChanges.packageChanges.get('a')).not.toBeUndefined();
@@ -137,6 +137,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('h')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('i')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('j')).not.toBeUndefined();
 
     expect(allChanges.packageChanges.get('a')!.changeType).toEqual(ChangeType.major);
     expect(allChanges.packageChanges.get('b')!.changeType).toEqual(ChangeType.patch);
@@ -146,6 +147,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.changeType).toEqual(ChangeType.dependency);
     expect(allChanges.packageChanges.get('h')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('i')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.packageChanges.get('j')!.changeType).toEqual(ChangeType.patch);
 
     expect(allChanges.packageChanges.get('a')!.newVersion).toEqual('2.0.0');
     expect(allChanges.packageChanges.get('b')!.newVersion).toEqual('1.0.1');
@@ -155,8 +157,38 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.newVersion).toEqual('1.0.0');
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('i')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.packageChanges.get('j')!.newVersion).toEqual('1.0.1');
 
     expect(allChanges.versionPolicyChanges.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
+  });
+
+  it('updates policy project dependencies when updating a lockstep version policy with no nextBump', () => {
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+      allPackages,
+      packagesRushConfiguration,
+      new ChangeFiles(path.join(__dirname, 'lockStepWithoutNextBump'))
+    );
+
+    expect(allChanges.packageChanges.size).toEqual(4);
+    expect(allChanges.versionPolicyChanges.size).toEqual(1);
+
+    expect(allChanges.packageChanges.get('f')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('h')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('i')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('j')).not.toBeUndefined();
+
+    expect(allChanges.packageChanges.get('f')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.packageChanges.get('h')!.changeType).toEqual(ChangeType.minor);
+    expect(allChanges.packageChanges.get('i')!.changeType).toEqual(ChangeType.minor);
+    expect(allChanges.packageChanges.get('j')!.changeType).toEqual(ChangeType.patch);
+
+    expect(allChanges.packageChanges.get('f')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.1.0');
+    expect(allChanges.packageChanges.get('i')!.newVersion).toEqual('1.1.0');
+    expect(allChanges.packageChanges.get('j')!.newVersion).toEqual('1.0.1');
+
+    expect(allChanges.versionPolicyChanges.get('lockStepWithoutNextBump')!.format()).toEqual('1.1.0');
   });
 
   it('returns 2 changes when bumping cyclic dependencies', () => {
@@ -212,7 +244,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
     );
 
-    expect(allChanges.packageChanges.size).toEqual(8);
+    expect(allChanges.packageChanges.size).toEqual(9);
     expect(allChanges.versionPolicyChanges.size).toEqual(1);
 
     expect(allChanges.packageChanges.get('a')).not.toBeUndefined();
@@ -223,6 +255,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('h')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('i')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('j')).not.toBeUndefined();
 
     expect(allChanges.packageChanges.get('a')!.changeType).toEqual(ChangeType.major);
     expect(allChanges.packageChanges.get('b')!.changeType).toEqual(ChangeType.patch);
@@ -232,6 +265,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.changeType).toEqual(ChangeType.dependency);
     expect(allChanges.packageChanges.get('h')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('i')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.packageChanges.get('j')!.changeType).toEqual(ChangeType.patch);
 
     expect(allChanges.packageChanges.get('a')!.newVersion).toEqual('2.0.0');
     expect(allChanges.packageChanges.get('b')!.newVersion).toEqual('1.0.1');
@@ -241,6 +275,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.newVersion).toEqual('1.0.0');
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('i')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.packageChanges.get('j')!.newVersion).toEqual('1.0.1');
 
     expect(allChanges.versionPolicyChanges.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
@@ -253,7 +288,7 @@ describe('findChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'orderedChanges'))
     );
 
-    expect(allChanges.packageChanges.size).toEqual(8);
+    expect(allChanges.packageChanges.size).toEqual(9);
     expect(allChanges.versionPolicyChanges.size).toEqual(1);
 
     expect(allChanges.packageChanges.get('a')).not.toBeUndefined();
@@ -264,6 +299,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('h')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('i')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('j')).not.toBeUndefined();
 
     expect(allChanges.packageChanges.get('a')!.changeType).toEqual(ChangeType.major);
     expect(allChanges.packageChanges.get('b')!.changeType).toEqual(ChangeType.patch);
@@ -273,6 +309,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.changeType).toEqual(ChangeType.dependency);
     expect(allChanges.packageChanges.get('h')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('i')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.packageChanges.get('j')!.changeType).toEqual(ChangeType.patch);
 
     expect(allChanges.packageChanges.get('a')!.newVersion).toEqual('2.0.0');
     expect(allChanges.packageChanges.get('b')!.newVersion).toEqual('1.0.1');
@@ -282,6 +319,7 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.newVersion).toEqual('1.0.0');
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('i')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.packageChanges.get('j')!.newVersion).toEqual('1.0.1');
 
     expect(allChanges.versionPolicyChanges.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
@@ -391,15 +429,16 @@ describe('sortChangeRequests', () => {
     );
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges.packageChanges);
 
-    expect(orderedChanges).toHaveLength(8);
+    expect(orderedChanges).toHaveLength(9);
     expect(orderedChanges[0].packageName).toEqual('a');
     expect(orderedChanges[1].packageName).toEqual('i');
     expect(orderedChanges[2].packageName).toEqual('b');
     expect(orderedChanges[3].packageName).toEqual('e');
     expect(orderedChanges[4].packageName).toEqual('g');
     expect(orderedChanges[5].packageName).toEqual('h');
-    expect(orderedChanges[6].packageName).toEqual('c');
-    expect(orderedChanges[7].packageName).toEqual('f');
+    expect(orderedChanges[6].packageName).toEqual('j');
+    expect(orderedChanges[7].packageName).toEqual('c');
+    expect(orderedChanges[8].packageName).toEqual('f');
   });
 });
 
@@ -564,7 +603,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.0-hotfix.0');
   });
 
-  it('returns 8 changes when major bumping a root package', () => {
+  it('returns 9 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
@@ -572,7 +611,7 @@ describe('findWorkspaceChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
     );
 
-    expect(allChanges.packageChanges.size).toEqual(8);
+    expect(allChanges.packageChanges.size).toEqual(9);
     expect(allChanges.versionPolicyChanges.size).toEqual(1);
 
     expect(allChanges.packageChanges.get('a')).not.toBeUndefined();
@@ -583,6 +622,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('h')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('i')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('j')).not.toBeUndefined();
 
     expect(allChanges.packageChanges.get('a')!.changeType).toEqual(ChangeType.major);
     expect(allChanges.packageChanges.get('b')!.changeType).toEqual(ChangeType.patch);
@@ -592,6 +632,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('h')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('i')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.packageChanges.get('j')!.changeType).toEqual(ChangeType.patch);
 
     expect(allChanges.packageChanges.get('a')!.newVersion).toEqual('2.0.0');
     expect(allChanges.packageChanges.get('b')!.newVersion).toEqual('1.0.1');
@@ -601,6 +642,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('i')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.packageChanges.get('j')!.newVersion).toEqual('1.0.1');
 
     expect(allChanges.versionPolicyChanges.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
@@ -658,7 +700,7 @@ describe('findWorkspaceChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
     );
 
-    expect(allChanges.packageChanges.size).toEqual(8);
+    expect(allChanges.packageChanges.size).toEqual(9);
     expect(allChanges.versionPolicyChanges.size).toEqual(1);
 
     expect(allChanges.packageChanges.get('a')).not.toBeUndefined();
@@ -669,6 +711,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('h')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('i')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('j')).not.toBeUndefined();
 
     expect(allChanges.packageChanges.get('a')!.changeType).toEqual(ChangeType.major);
     expect(allChanges.packageChanges.get('b')!.changeType).toEqual(ChangeType.patch);
@@ -678,6 +721,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('h')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('i')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.packageChanges.get('j')!.changeType).toEqual(ChangeType.patch);
 
     expect(allChanges.packageChanges.get('a')!.newVersion).toEqual('2.0.0');
     expect(allChanges.packageChanges.get('b')!.newVersion).toEqual('1.0.1');
@@ -687,6 +731,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('i')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.packageChanges.get('j')!.newVersion).toEqual('1.0.1');
 
     expect(allChanges.versionPolicyChanges.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
@@ -699,7 +744,7 @@ describe('findWorkspaceChangeRequests', () => {
       new ChangeFiles(path.join(__dirname, 'orderedChanges'))
     );
 
-    expect(allChanges.packageChanges.size).toEqual(8);
+    expect(allChanges.packageChanges.size).toEqual(9);
     expect(allChanges.versionPolicyChanges.size).toEqual(1);
 
     expect(allChanges.packageChanges.get('a')).not.toBeUndefined();
@@ -710,6 +755,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('h')).not.toBeUndefined();
     expect(allChanges.packageChanges.get('i')).not.toBeUndefined();
+    expect(allChanges.packageChanges.get('j')).not.toBeUndefined();
 
     expect(allChanges.packageChanges.get('a')!.changeType).toEqual(ChangeType.major);
     expect(allChanges.packageChanges.get('b')!.changeType).toEqual(ChangeType.patch);
@@ -719,6 +765,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('h')!.changeType).toEqual(ChangeType.patch);
     expect(allChanges.packageChanges.get('i')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.packageChanges.get('j')!.changeType).toEqual(ChangeType.patch);
 
     expect(allChanges.packageChanges.get('a')!.newVersion).toEqual('2.0.0');
     expect(allChanges.packageChanges.get('b')!.newVersion).toEqual('1.0.1');
@@ -728,6 +775,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('g')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('h')!.newVersion).toEqual('1.0.1');
     expect(allChanges.packageChanges.get('i')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.packageChanges.get('j')!.newVersion).toEqual('1.0.1');
 
     expect(allChanges.versionPolicyChanges.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
