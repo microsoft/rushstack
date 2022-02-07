@@ -150,7 +150,7 @@
     //  // "options": { }
     // }
     { "plugin": "@rushstack/heft-jest-plugin" },
-    { "plugin": "@rushstack/heft-sass-plugin" }
-    // { "plugin": "@rushstack/heft-webpack5-plugin" }
+    { "plugin": "@rushstack/heft-sass-plugin" },
+    { "plugin": "@rushstack/heft-webpack5-plugin" }
   ]
 }
