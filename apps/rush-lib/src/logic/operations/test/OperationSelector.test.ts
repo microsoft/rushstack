@@ -10,7 +10,6 @@ import { IOperationOptions, IOperationFactory, OperationSelector } from '../Oper
 import { Operation } from '../Operation';
 import { ICommandLineJson } from '../../../api/CommandLineJson';
 import { RushConstants } from '../../RushConstants';
-import { OperationStatus } from '../OperationStatus';
 import { MockOperationRunner } from './MockOperationRunner';
 
 interface ISerializedOperation {
@@ -40,7 +39,7 @@ describe(OperationSelector.name, () => {
         RushConstants.phaseNamePrefix.length
       )})`;
 
-      return new Operation(new MockOperationRunner(name), OperationStatus.Ready);
+      return new Operation(new MockOperationRunner(name));
     }
   };
 

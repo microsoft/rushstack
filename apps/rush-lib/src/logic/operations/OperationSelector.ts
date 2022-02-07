@@ -166,7 +166,6 @@ export class OperationSelector {
       if (deps.operations) {
         for (const dependencyOperation of deps.operations) {
           record.operation.dependencies.add(dependencyOperation);
-          dependencyOperation.dependents.add(record.operation);
         }
       }
 

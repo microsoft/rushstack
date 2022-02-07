@@ -77,7 +77,17 @@ export {
   CloudBuildCacheProviderFactory
 } from './pluginFramework/RushSession';
 
-export { RushLifecycleHooks } from './pluginFramework/RushLifeCycle';
+export {
+  RushLifecycleHooks,
+  IRushAction,
+  IGlobalScriptAction,
+  IPhasedScriptAction
+} from './pluginFramework/RushLifeCycle';
+export { PhasedScriptActionHooks } from './pluginFramework/PhasedScriptActionHooks';
+
+export { Operation } from './logic/operations/Operation';
+export { OperationStatus } from './logic/operations/OperationStatus';
+export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 
 export { IRushPlugin } from './pluginFramework/IRushPlugin';
 export { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader';

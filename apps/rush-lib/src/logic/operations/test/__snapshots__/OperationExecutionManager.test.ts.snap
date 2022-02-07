@@ -8,7 +8,7 @@ exports[`OperationExecutionManager Error logging printedStderrAfterError 2`] = `
 Array [
   Object {
     "kind": "O",
-    "text": "Selected 1 project:
+    "text": "Selected 1 operation:
 ",
   },
   Object {
@@ -71,7 +71,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]==[[default] [red]FAILURE: 1 project[default] [gray]]=======================================================[default]
+    "text": "[gray]==[[default] [red]FAILURE: 1 operation[default] [gray]]=====================================================[default]
 ",
   },
   Object {
@@ -97,7 +97,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "[red]Projects failed to build.[default]
+    "text": "[red]Operations failed.[default]
 
 ",
   },
@@ -110,7 +110,7 @@ exports[`OperationExecutionManager Error logging printedStdoutAfterErrorWithEmpt
 Array [
   Object {
     "kind": "O",
-    "text": "Selected 1 project:
+    "text": "Selected 1 operation:
 ",
   },
   Object {
@@ -173,7 +173,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]==[[default] [red]FAILURE: 1 project[default] [gray]]=======================================================[default]
+    "text": "[gray]==[[default] [red]FAILURE: 1 operation[default] [gray]]=====================================================[default]
 ",
   },
   Object {
@@ -199,7 +199,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "[red]Projects failed to build.[default]
+    "text": "[red]Operations failed.[default]
 
 ",
   },
@@ -212,7 +212,7 @@ exports[`OperationExecutionManager Warning logging Fail on warning Logs warnings
 Array [
   Object {
     "kind": "O",
-    "text": "Selected 1 project:
+    "text": "Selected 1 operation:
 ",
   },
   Object {
@@ -275,7 +275,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]==[[default] [yellow]SUCCESS WITH WARNINGS: 1 project[default] [gray]]=========================================[default]
+    "text": "[gray]==[[default] [yellow]SUCCESS WITH WARNINGS: 1 operation[default] [gray]]=======================================[default]
 ",
   },
   Object {
@@ -285,7 +285,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default] [yellow]WARNING: success with warnings (failure)[default] [gray]]---------------[[default] [white]0.10 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default] [yellow]WARNING: success with warnings (failure)[default] [gray]]---------------[[default] [white]0.20 seconds[default] [gray]]--[default]
 
 ",
   },
@@ -301,7 +301,7 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "[yellow]Projects succeeded with warnings.[default]
+    "text": "[yellow]Operations succeeded with warnings.[default]
 
 ",
   },
@@ -312,7 +312,7 @@ exports[`OperationExecutionManager Warning logging Success on warning Logs warni
 Array [
   Object {
     "kind": "O",
-    "text": "Selected 1 project:
+    "text": "Selected 1 operation:
 ",
   },
   Object {
@@ -375,7 +375,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]==[[default] [yellow]SUCCESS WITH WARNINGS: 1 project[default] [gray]]=========================================[default]
+    "text": "[gray]==[[default] [yellow]SUCCESS WITH WARNINGS: 1 operation[default] [gray]]=======================================[default]
 ",
   },
   Object {
@@ -385,7 +385,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default] [yellow]WARNING: success with warnings (success)[default] [gray]]---------------[[default] [white]0.10 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default] [yellow]WARNING: success with warnings (success)[default] [gray]]---------------[[default] [white]0.20 seconds[default] [gray]]--[default]
 
 ",
   },

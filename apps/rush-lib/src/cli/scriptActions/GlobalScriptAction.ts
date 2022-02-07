@@ -10,6 +10,8 @@ import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import { IGlobalCommand, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
+import { AsyncSeriesHook } from 'tapable';
+import { IGlobalScriptAction } from '../../pluginFramework/RushLifeCycle';
 
 /**
  * Constructor parameters for GlobalScriptAction.
@@ -87,6 +89,18 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommand> {
   }
 
   public async runAsync(): Promise<void> {
+    const { hooks } = this.rushSession;
+    if (hooks.anyGlobalScriptCommand.isUsed()) {
+      await hooks.anyGlobalScriptCommand.promise(this);
+    }
+
+    const specificHook: AsyncSeriesHook<IGlobalScriptAction> | undefined = hooks.globalScriptCommand.get(
+      this.actionName
+    );
+    if (specificHook) {
+      await specificHook.promise(this);
+    }
+
     const additionalPathFolders: string[] =
       this.commandLineConfiguration?.additionalPathFolders.slice() || [];
 

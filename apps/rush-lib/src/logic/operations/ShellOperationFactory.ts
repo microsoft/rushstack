@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { CommandLineConfiguration, IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IRegisteredCustomParameter } from '../../cli/scriptActions/BaseScriptAction';
@@ -18,6 +18,7 @@ import { OperationStatus } from './OperationStatus';
 export interface IOperationFactoryOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration?: BuildCacheConfiguration | undefined;
+  commandLineConfiguration: CommandLineConfiguration;
   isIncrementalBuildAllowed: boolean;
   customParameters: Iterable<IRegisteredCustomParameter>;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
@@ -59,6 +60,7 @@ export class OperationFactory implements IOperationFactory {
           displayName,
           rushConfiguration: factoryOptions.rushConfiguration,
           buildCacheConfiguration: factoryOptions.buildCacheConfiguration,
+          commandLineConfiguration: factoryOptions.commandLineConfiguration,
           commandToRun: commandToRun || '',
           isIncrementalBuildAllowed: factoryOptions.isIncrementalBuildAllowed,
           projectChangeAnalyzer: factoryOptions.projectChangeAnalyzer,
@@ -66,7 +68,7 @@ export class OperationFactory implements IOperationFactory {
         })
       : new NullOperationRunner(displayName, OperationStatus.FromCache);
 
-    const operation: Operation = new Operation(runner, OperationStatus.Ready);
+    const operation: Operation = new Operation(runner);
 
     return operation;
   }

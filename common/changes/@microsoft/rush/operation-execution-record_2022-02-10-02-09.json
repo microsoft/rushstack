@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add new hooks for plugins to interact with global and phased commands. Add hooks into the phased command execution lifecycle for initial and watch runs. Expose relevant API surface for customizing the operation graph and injecting custom operation runners before execution.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

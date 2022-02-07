@@ -32,7 +32,7 @@ function createExecutionManager(
   executionManagerOptions: IOperationExecutionManagerOptions,
   operationRunner: IOperationRunner
 ): OperationExecutionManager {
-  const operation: Operation = new Operation(operationRunner, OperationStatus.Ready);
+  const operation: Operation = new Operation(operationRunner);
 
   return new OperationExecutionManager(new Set([operation]), executionManagerOptions);
 }
@@ -69,8 +69,7 @@ describe(OperationExecutionManager.name, () => {
             debugMode: false,
             parallelism: 'tequila',
             changedProjectsOnly: false,
-            destination: mockWritable,
-            repoCommandLineConfiguration: undefined!
+            destination: mockWritable
           })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -83,8 +82,7 @@ describe(OperationExecutionManager.name, () => {
         debugMode: false,
         parallelism: '1',
         changedProjectsOnly: false,
-        destination: mockWritable,
-        repoCommandLineConfiguration: undefined!
+        destination: mockWritable
       };
     });
 
@@ -140,8 +138,7 @@ describe(OperationExecutionManager.name, () => {
           debugMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
-          destination: mockWritable,
-          repoCommandLineConfiguration: undefined!
+          destination: mockWritable
         };
       });
 
@@ -175,8 +172,7 @@ describe(OperationExecutionManager.name, () => {
           debugMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
-          destination: mockWritable,
-          repoCommandLineConfiguration: undefined!
+          destination: mockWritable
         };
       });
 

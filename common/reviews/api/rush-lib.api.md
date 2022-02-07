@@ -7,11 +7,15 @@
 /// <reference types="node" />
 
 import { AsyncSeriesHook } from 'tapable';
+import { AsyncSeriesWaterfallHook } from 'tapable';
+import type { CollatedWriter } from '@rushstack/stream-collator';
+import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import type { StdioSummarizer } from '@rushstack/terminal';
 import { Terminal } from '@rushstack/node-core-library';
 
 // @public
@@ -266,6 +270,10 @@ export interface IGetChangedProjectsOptions {
     terminal: ITerminal;
 }
 
+// @beta
+export interface IGlobalScriptAction extends IRushAction {
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -300,9 +308,32 @@ export class IndividualVersionPolicy extends VersionPolicy {
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
+// @beta
+export interface IOperationRunner {
+    executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+    isCacheWriteAllowed: boolean;
+    isNoop: boolean;
+    isSkipAllowed: boolean;
+    readonly name: string;
+    warningsAreAllowed: boolean;
+}
+
+// @beta
+export interface IOperationRunnerContext {
+    collatedWriter: CollatedWriter;
+    debugMode: boolean;
+    quietMode: boolean;
+    stdioSummarizer: StdioSummarizer;
+}
+
 // @public
 export interface IPackageManagerOptionsJsonBase {
     environmentVariables?: IConfigurationEnvironment;
+}
+
+// @beta
+export interface IPhasedScriptAction extends IRushAction {
+    readonly hooks: PhasedScriptActionHooks;
 }
 
 // @internal
@@ -311,6 +342,11 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
     useWorkspaces?: boolean;
+}
+
+// @beta
+export interface IRushAction {
+    readonly actionName: string;
 }
 
 // @beta (undocumented)
@@ -391,6 +427,28 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
     constructor(json: _INpmOptionsJson);
 }
 
+// @beta
+export class Operation {
+    constructor(runner: IOperationRunner);
+    readonly dependencies: Set<Operation>;
+    // (undocumented)
+    get name(): string;
+    runner: IOperationRunner;
+    weight: number;
+}
+
+// @beta
+export enum OperationStatus {
+    Blocked = "BLOCKED",
+    Executing = "EXECUTING",
+    Failure = "FAILURE",
+    FromCache = "FROM CACHE",
+    Ready = "READY",
+    Skipped = "SKIPPED",
+    Success = "SUCCESS",
+    SuccessWithWarning = "SUCCESS WITH WARNINGS"
+}
+
 // @public (undocumented)
 export class PackageJsonDependency {
     constructor(name: string, version: string, type: DependencyType, onChange: () => void);
@@ -449,6 +507,14 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
     // @internal
     protected constructor(json: IPackageManagerOptionsJsonBase);
     readonly environmentVariables?: IConfigurationEnvironment;
+}
+
+// @beta
+export class PhasedScriptActionHooks {
+    afterRun: AsyncSeriesHook<void>;
+    afterWatchRun: AsyncSeriesHook<void>;
+    prepareOperations: AsyncSeriesWaterfallHook<Set<Operation>>;
+    prepareWatchOperations: AsyncSeriesWaterfallHook<Set<Operation>>;
 }
 
 // @public
@@ -678,9 +744,13 @@ export class _RushGlobalFolder {
     get path(): string;
 }
 
-// @beta (undocumented)
+// @beta
 export class RushLifecycleHooks {
-    initialize: AsyncSeriesHook<void>;
+    anyGlobalScriptCommand: AsyncSeriesHook<IGlobalScriptAction>;
+    anyPhasedScriptComamnd: AsyncSeriesHook<IPhasedScriptAction>;
+    globalScriptCommand: HookMap<AsyncSeriesHook<IGlobalScriptAction>>;
+    initialize: AsyncSeriesHook<IRushAction>;
+    phasedScriptCommand: HookMap<AsyncSeriesHook<IPhasedScriptAction>>;
 }
 
 // @beta (undocumented)
