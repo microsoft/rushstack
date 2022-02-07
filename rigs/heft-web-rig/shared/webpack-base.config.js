@@ -30,7 +30,7 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
     // Documentation: https://webpack.js.org/configuration/mode/
     mode: production ? 'production' : 'development',
     resolve: {
-      extensions: ['.js', '.json']
+      extensions: ['.mjs', '.js', '.json']
     },
     output: production
       ? {
