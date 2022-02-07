@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-web-rig",
       "comment": "A major overhaul of heft-web-rig; for details refer to https://github.com/microsoft/rushstack/pull/3204",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-web-rig"
