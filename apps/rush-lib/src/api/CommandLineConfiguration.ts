@@ -58,14 +58,22 @@ export interface ICommandWithParameters {
 }
 export interface IPhasedCommand extends IPhasedCommandWithoutPhasesJson, ICommandWithParameters {
   /**
-   * If set to "true," this this phased command was generated from a bulk command, and
+   * If set to "true," then this phased command was generated from a bulk command, and
    * was not explicitly defined in the command-line.json file.
    */
   isSynthetic: boolean;
-  watchForChanges?: boolean;
   disableBuildCache?: boolean;
 
   phases: Set<IPhase>;
+
+  /**
+   * If set to "true," this phased command will alwasy run in watch mode, regardless of CLI flags.
+   */
+  alwaysWatch: boolean;
+  /**
+   * The set of phases to execute when running this phased command in watch mode.
+   */
+  watchPhases: Set<IPhase>;
 }
 
 export interface IGlobalCommand extends IGlobalCommandJson, ICommandWithParameters {}
@@ -242,12 +250,15 @@ export class CommandLineConfiguration {
         switch (command.commandKind) {
           case RushConstants.phasedCommandKind: {
             const commandPhases: Set<IPhase> = new Set();
+            const watchPhases: Set<IPhase> = new Set();
 
             normalizedCommand = {
               ...command,
               isSynthetic: false,
               associatedParameters: new Set<Parameter>(),
-              phases: commandPhases
+              phases: commandPhases,
+              watchPhases,
+              alwaysWatch: false
             };
 
             for (const phaseName of command.phases) {
@@ -272,6 +283,25 @@ export class CommandLineConfiguration {
 
               for (const dependency of phase.phaseDependencies.upstream) {
                 commandPhases.add(dependency);
+              }
+            }
+
+            const { watchOptions } = command;
+
+            if (watchOptions) {
+              normalizedCommand.alwaysWatch = watchOptions.alwaysWatch;
+
+              // No implicit phase dependency expansion for watch mode.
+              for (const phaseName of watchOptions.watchPhases) {
+                const phase: IPhase | undefined = this.phases.get(phaseName);
+                if (!phase) {
+                  throw new Error(
+                    `In ${RushConstants.commandLineFilename}, in the "watchPhases" property of the ` +
+                      `"${normalizedCommand.name}" command, the phase "${phaseName}" does not exist.`
+                  );
+                }
+
+                watchPhases.add(phase);
               }
             }
 
@@ -340,7 +370,9 @@ export class CommandLineConfiguration {
           isSynthetic: true,
           phases: buildCommandPhases,
           disableBuildCache: DEFAULT_REBUILD_COMMAND_JSON.disableBuildCache,
-          associatedParameters: buildCommand.associatedParameters // rebuild should share build's parameters in this case
+          associatedParameters: buildCommand.associatedParameters, // rebuild should share build's parameters in this case,
+          watchPhases: new Set(),
+          alwaysWatch: false
         };
         this.commands.set(rebuildCommand.name, rebuildCommand);
       }
@@ -609,13 +641,19 @@ export class CommandLineConfiguration {
     this.phases.set(phaseName, phase);
     this._syntheticPhasesByTranslatedBulkCommandName.set(command.name, phase);
 
+    const phases: Set<IPhase> = new Set([phase]);
+
     const translatedCommand: IPhasedCommand = {
       ...command,
       commandKind: 'phased',
       isSynthetic: true,
       associatedParameters: new Set<Parameter>(),
-      phases: new Set([phase])
+      phases,
+      // Bulk commands used the same phases for watch as for regular execution. Preserve behavior.
+      watchPhases: command.watchForChanges ? phases : new Set(),
+      alwaysWatch: !!command.watchForChanges
     };
+
     return translatedCommand;
   }
 }
