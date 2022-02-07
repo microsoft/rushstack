@@ -1,15 +1,6 @@
 'use strict';
 
-// Import the Webpack instance installed by heft-webpack5-plugin
-const nodeCoreLibrary = require('@rushstack/node-core-library');
-const webpack = require(nodeCoreLibrary.Import.resolveModule({
-  modulePath: 'webpack',
-  baseFolderPath: nodeCoreLibrary.Import.resolvePackage({
-    packageName: '@rushstack/heft-webpack5-plugin',
-    baseFolderPath: __dirname
-  })
-}));
-
+const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { DefinePlugin } = webpack;
