@@ -167,7 +167,7 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'lockStepWithoutNextBump'))
+      new ChangeFiles(path.join(__dirname, 'lockstepWithoutNextBump'))
     );
 
     expect(allChanges.packageChanges.size).toEqual(4);
