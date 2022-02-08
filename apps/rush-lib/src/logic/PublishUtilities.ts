@@ -83,19 +83,23 @@ export class PublishUtilities {
       );
     });
 
-    // Bump projects affected by the version policy changes.
-    allPackages.forEach((pkg) => {
-      const versionPolicyChange: IVersionPolicyChangeInfo | undefined =
-        pkg.versionPolicyName !== undefined
-          ? allChanges.versionPolicyChanges.get(pkg.versionPolicyName)
-          : undefined;
+    let hasChanges: boolean;
 
-      if (versionPolicyChange === undefined) {
-        return;
-      }
+    do {
+      hasChanges = false;
 
-      if (
-        this._addChange(
+      // Bump projects affected by the version policy changes.
+      allPackages.forEach((pkg) => {
+        const versionPolicyChange: IVersionPolicyChangeInfo | undefined =
+          pkg.versionPolicyName !== undefined
+            ? allChanges.versionPolicyChanges.get(pkg.versionPolicyName)
+            : undefined;
+
+        if (versionPolicyChange === undefined) {
+          return;
+        }
+
+        const hasChanged: boolean = this._addChange(
           {
             packageName: pkg.packageName,
             changeType: versionPolicyChange.changeType,
@@ -106,25 +110,29 @@ export class PublishUtilities {
           rushConfiguration,
           prereleaseToken,
           projectsToExclude
-        )
-      ) {
-        console.log(
-          `${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyChange.newVersion}`
         );
-      }
-    });
 
-    // For each requested package change, ensure downstream dependencies are also updated.
-    allChanges.packageChanges.forEach((change, packageName) => {
-      PublishUtilities._updateDownstreamDependencies(
-        change,
-        allChanges,
-        allPackages,
-        rushConfiguration,
-        prereleaseToken,
-        projectsToExclude
-      );
-    });
+        if (hasChanged) {
+          console.log(
+            `${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyChange.newVersion}`
+          );
+        }
+
+        hasChanges ||= hasChanged;
+      });
+
+      // For each requested package change, ensure downstream dependencies are also updated.
+      allChanges.packageChanges.forEach((change, packageName) => {
+        hasChanges ||= PublishUtilities._updateDownstreamDependencies(
+          change,
+          allChanges,
+          allPackages,
+          rushConfiguration,
+          prereleaseToken,
+          projectsToExclude
+        );
+      });
+    } while (hasChanges);
 
     // Update orders so that downstreams are marked to come after upstreams.
     allChanges.packageChanges.forEach((change, packageName) => {
@@ -689,7 +697,8 @@ export class PublishUtilities {
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
-  ): void {
+  ): boolean {
+    let hasChanges: boolean = false;
     const packageName: string = change.packageName;
     const downstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.consumingProjects;
 
@@ -699,7 +708,7 @@ export class PublishUtilities {
         for (const dependency of downstream) {
           const pkg: IPackageJson = dependency.packageJson;
 
-          PublishUtilities._updateDownstreamDependency(
+          hasChanges ||= PublishUtilities._updateDownstreamDependency(
             pkg.name,
             pkg.dependencies,
             change,
@@ -709,7 +718,8 @@ export class PublishUtilities {
             prereleaseToken,
             projectsToExclude
           );
-          PublishUtilities._updateDownstreamDependency(
+
+          hasChanges ||= PublishUtilities._updateDownstreamDependency(
             pkg.name,
             pkg.devDependencies,
             change,
@@ -722,6 +732,8 @@ export class PublishUtilities {
         }
       }
     }
+
+    return hasChanges;
   }
 
   private static _updateDownstreamDependency(
@@ -733,7 +745,8 @@ export class PublishUtilities {
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
-  ): void {
+  ): boolean {
+    let hasChanges: boolean = false;
     if (
       dependencies &&
       dependencies[change.packageName] &&
@@ -784,10 +797,12 @@ export class PublishUtilities {
           projectsToExclude
         );
 
+        hasChanges ||= hasChanged;
+
         if (hasChanged || alwaysUpdate) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
           // caused a version bump.
-          PublishUtilities._updateDownstreamDependencies(
+          hasChanges ||= PublishUtilities._updateDownstreamDependencies(
             allChanges.packageChanges.get(parentPackageName)!,
             allChanges,
             allPackages,
@@ -798,6 +813,8 @@ export class PublishUtilities {
         }
       }
     }
+
+    return hasChanges;
   }
 
   private static _updateDependencyVersion(
