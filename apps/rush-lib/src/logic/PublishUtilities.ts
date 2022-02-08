@@ -94,20 +94,11 @@ export class PublishUtilities {
         return;
       }
 
-      const versionDiff: semver.ReleaseType | null = semver.diff(
-        pkg.packageJson.version,
-        versionPolicyChange.newVersion
-      );
-
-      if (versionDiff === null) {
-        return;
-      }
-
       if (
         this._addChange(
           {
             packageName: pkg.packageName,
-            changeType: this._getChangeTypeForSemverReleaseType(versionDiff),
+            changeType: versionPolicyChange.changeType,
             newVersion: versionPolicyChange.newVersion // enforce the specific policy version
           },
           allChanges,
@@ -651,16 +642,16 @@ export class PublishUtilities {
           packageVersion = currentChange.newVersion;
         }
 
-        const shouldBump: boolean = change.newVersion === undefined && change.changeType! >= ChangeType.patch;
+        const shouldBump: boolean =
+          change.newVersion === undefined && change.changeType! >= ChangeType.hotfix;
 
         currentChange.newVersion = shouldBump
           ? semver.inc(packageVersion, PublishUtilities._getReleaseType(currentChange.changeType!))!
           : packageVersion;
 
-        // set versionpolicy version to the current bumped version
+        // set versionpolicy version to the current version
         if (
           hasChanged &&
-          shouldBump &&
           project.versionPolicyName !== undefined &&
           project.versionPolicy !== undefined &&
           project.versionPolicy.isLockstepped
