@@ -7,8 +7,9 @@ import * as path from 'path';
 
 import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
+import { AddAction } from '../AddAction';
 
-describe('AddAction', () => {
+describe(AddAction.name, () => {
   describe(`basic "rush add" tests`, () => {
     let doRushAddMock: jest.SpyInstance;
     let oldExitCode: number | undefined;

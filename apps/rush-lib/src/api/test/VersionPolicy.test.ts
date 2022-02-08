@@ -7,8 +7,8 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
 import { VersionPolicy, LockStepVersionPolicy, IndividualVersionPolicy, BumpType } from '../VersionPolicy';
 
-describe('VersionPolicy', () => {
-  describe('LockStepVersion', () => {
+describe(VersionPolicy.name, () => {
+  describe(LockStepVersionPolicy.name, () => {
     const filename: string = path.resolve(__dirname, 'jsonFiles', 'rushWithLockVersion.json');
     const versionPolicyConfig: VersionPolicyConfiguration = new VersionPolicyConfiguration(filename);
     let versionPolicy1: VersionPolicy;
@@ -116,7 +116,7 @@ describe('VersionPolicy', () => {
     });
   });
 
-  describe('IndividualVersionPolicy', () => {
+  describe(IndividualVersionPolicy.name, () => {
     const fileName: string = path.resolve(__dirname, 'jsonFiles', 'rushWithIndividualVersion.json');
     const versionPolicyConfig: VersionPolicyConfiguration = new VersionPolicyConfiguration(fileName);
     const versionPolicy: VersionPolicy = versionPolicyConfig.getVersionPolicy('testPolicy2');

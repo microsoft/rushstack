@@ -8,14 +8,14 @@ import { IChangelog } from '../../api/Changelog';
 import { ChangeFiles } from '../ChangeFiles';
 import { RushConfiguration } from '../../api/RushConfiguration';
 
-describe('ChangeFiles', () => {
+describe(ChangeFiles.name, () => {
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {
     rushConfiguration = {} as RushConfiguration;
   });
 
-  describe('getFiles', () => {
+  describe(ChangeFiles.prototype.getFiles.name, () => {
     it('returns correctly when there is one change file', () => {
       const changesPath: string = path.join(__dirname, 'leafChange');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
@@ -44,7 +44,7 @@ describe('ChangeFiles', () => {
     });
   });
 
-  describe('validate', () => {
+  describe(ChangeFiles.validate.name, () => {
     it('throws when there is a patch in a hotfix branch.', () => {
       const changeFile: string = path.join(__dirname, 'leafChange', 'change1.json');
       const changedPackages: string[] = ['d'];
@@ -97,7 +97,7 @@ describe('ChangeFiles', () => {
     });
   });
 
-  describe('deleteAll', () => {
+  describe(ChangeFiles.prototype.deleteAll.name, () => {
     it('delete all files when there are no prerelease packages', () => {
       const changesPath: string = path.join(__dirname, 'multipleChangeFiles');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);

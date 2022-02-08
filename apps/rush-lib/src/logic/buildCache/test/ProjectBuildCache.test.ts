@@ -16,7 +16,7 @@ interface ITestOptions {
   trackedProjectFiles: string[] | undefined;
 }
 
-describe('ProjectBuildCache', () => {
+describe(ProjectBuildCache.name, () => {
   async function prepareSubject(options: Partial<ITestOptions>): Promise<ProjectBuildCache | undefined> {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
     const projectChangeAnalyzer = {
@@ -53,7 +53,7 @@ describe('ProjectBuildCache', () => {
     return subject;
   }
 
-  describe('tryGetProjectBuildCache', () => {
+  describe(ProjectBuildCache.tryGetProjectBuildCache.name, () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
       const subject: ProjectBuildCache = (await prepareSubject({}))!;
       expect(subject['_cacheId']).toMatchInlineSnapshot(

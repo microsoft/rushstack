@@ -7,7 +7,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
 import { Telemetry, ITelemetryData } from '../Telemetry';
 
-describe('Telemetry', () => {
+describe(Telemetry.name, () => {
   it('adds data to store if telemetry is enabled', () => {
     const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);

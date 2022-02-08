@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { LastInstallFlag } from '../LastInstallFlag';
-import { FileSystem } from '@rushstack/node-core-library';
 
 const TEMP_DIR: string = path.join(__dirname, 'temp');
 
-describe('LastInstallFlag', () => {
+describe(LastInstallFlag.name, () => {
   beforeEach(() => {
     FileSystem.ensureEmptyFolder(TEMP_DIR);
   });

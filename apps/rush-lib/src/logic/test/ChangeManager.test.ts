@@ -7,7 +7,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { ChangeManager } from '../ChangeManager';
 import { PrereleaseToken } from '../PrereleaseToken';
 
-describe('ChangeManager', () => {
+describe(ChangeManager.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');
   let rushConfiguration: RushConfiguration;
   let changeManager: ChangeManager;
@@ -179,7 +179,7 @@ describe('ChangeManager', () => {
   /* eslint-enable dot-notation */
 });
 
-describe('WorkspaceChangeManager', () => {
+describe(`${ChangeManager.name} (workspace)`, () => {
   const rushJsonFile: string = path.resolve(__dirname, 'workspacePackages', 'rush.json');
   let rushConfiguration: RushConfiguration;
   let changeManager: ChangeManager;

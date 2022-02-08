@@ -11,7 +11,7 @@ function pseudoTimeSeconds(times: number[]): () => number {
   return pseudoTimeMilliseconds(times.map((time) => time * 1000));
 }
 
-describe('Stopwatch', () => {
+describe(Stopwatch.name, () => {
   it('allows a static invocation as a quick shorthand', () => {
     expect(Stopwatch.start().reset().toString()).toEqual('0.00 seconds (stopped)');
   });

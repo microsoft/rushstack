@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
 
-describe('CommonVersionsConfiguration', () => {
+describe(CommonVersionsConfiguration.name, () => {
   it('can load the file', () => {
     const filename: string = path.resolve(__dirname, 'jsonFiles', 'common-versions.json');
     const configuration: CommonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(filename);

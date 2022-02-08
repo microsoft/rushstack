@@ -5,10 +5,11 @@ import * as path from 'path';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
-import { parsePnpmDependencyKey } from '../pnpm/PnpmShrinkwrapFile';
+import { parsePnpmDependencyKey, PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile';
 
-describe('npm ShrinkwrapFile', () => {
+describe(NpmShrinkwrapFile.name, () => {
   const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', {}, filename)!;
 
@@ -42,7 +43,7 @@ describe('npm ShrinkwrapFile', () => {
   });
 });
 
-describe('pnpm ShrinkwrapFile', () => {
+describe(PnpmShrinkwrapFile.name, () => {
   const filename: string = path.resolve(
     path.join(__dirname, '../../../src/logic/test/shrinkwrapFile/pnpm-lock.yaml')
   );
@@ -96,7 +97,7 @@ function testParsePnpmDependencyKey(packageName: string, key: string): string | 
   return specifier.versionSpecifier;
 }
 
-describe('extractVersionFromPnpmVersionSpecifier', () => {
+describe(parsePnpmDependencyKey.name, () => {
   it('extracts a simple version with no slashes', () => {
     expect(testParsePnpmDependencyKey('anonymous', '0.0.5')).toEqual('0.0.5');
   });

@@ -54,7 +54,7 @@ describe(OperationSelector.name, () => {
     commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
   });
 
-  describe('#createOperations', () => {
+  describe(OperationSelector.prototype.createOperations.name, () => {
     it('handles a full build', () => {
       const buildCommand: IPhasedCommand = commandLineConfiguration.commands.get('build')! as IPhasedCommand;
 

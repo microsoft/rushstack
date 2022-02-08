@@ -7,7 +7,7 @@ import { ChangeFile } from '../ChangeFile';
 import { RushConfiguration } from '../RushConfiguration';
 import { ChangeType } from '../ChangeManagement';
 
-describe('ChangeFile', () => {
+describe(ChangeFile.name, () => {
   it('can add a change', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);

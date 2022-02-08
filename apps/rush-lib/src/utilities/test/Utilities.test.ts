@@ -3,8 +3,8 @@
 
 import { IDisposable, Utilities } from '../Utilities';
 
-describe('Utilities', () => {
-  describe('usingAsync', () => {
+describe(Utilities.name, () => {
+  describe(Utilities.usingAsync.name, () => {
     let disposed: boolean;
 
     beforeEach(() => {

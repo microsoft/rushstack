@@ -57,7 +57,7 @@ function generateVersionPolicySnapshot(allChanges: IChangeRequests): string {
   return lines.join('\n');
 }
 
-describe('findChangeRequests', () => {
+describe(PublishUtilities.findChangeRequests.name, () => {
   let packagesRushConfiguration: RushConfiguration;
   let repoRushConfiguration: RushConfiguration;
 
@@ -461,7 +461,7 @@ describe('findChangeRequests', () => {
   });
 });
 
-describe('sortChangeRequests', () => {
+describe(PublishUtilities.sortChangeRequests.name, () => {
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {
@@ -492,7 +492,7 @@ describe('sortChangeRequests', () => {
   });
 });
 
-describe('isRangeDependency', () => {
+describe(PublishUtilities.isRangeDependency.name, () => {
   it('can test ranges', () => {
     expect(PublishUtilities.isRangeDependency('>=1.0.0 <2.0.0')).toEqual(true);
     expect(PublishUtilities.isRangeDependency('>=1.0.0-pr.1 <2.0.0')).toEqual(true);
@@ -502,7 +502,7 @@ describe('isRangeDependency', () => {
   });
 });
 
-describe('getNewDependencyVersion', () => {
+describe(PublishUtilities.getNewDependencyVersion.name, () => {
   it('can update dependency versions', () => {
     const dependencies: { [key: string]: string } = {
       a: '~1.0.0',
@@ -545,7 +545,7 @@ describe('getNewDependencyVersion', () => {
   });
 });
 
-describe('findWorkspaceChangeRequests', () => {
+describe(PublishUtilities.findChangeRequests.name, () => {
   let packagesRushConfiguration: RushConfiguration;
   let repoRushConfiguration: RushConfiguration;
 
@@ -888,7 +888,7 @@ describe('findWorkspaceChangeRequests', () => {
   });
 });
 
-describe('getNewWorkspaceDependencyVersion', () => {
+describe(PublishUtilities.getNewDependencyVersion.name, () => {
   it('can update dependency versions', () => {
     const dependencies: { [key: string]: string } = {
       a: 'workspace:~1.0.0',

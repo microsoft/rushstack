@@ -19,7 +19,7 @@ function assertPathProperty(validatedPropertyName: string, absolutePath: string,
   expect(normalizePathForComparison(absolutePath)).toEqual(normalizePathForComparison(resolvedRelativePath));
 }
 
-describe('RushConfiguration', () => {
+describe(RushConfiguration.name, () => {
   let _oldEnv: typeof process.env;
 
   beforeEach(() => {

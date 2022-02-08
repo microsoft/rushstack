@@ -3,7 +3,7 @@
 
 import { LookupByPath } from '../LookupByPath';
 
-describe('iteratePathSegments', () => {
+describe(LookupByPath.iteratePathSegments.name, () => {
   it('returns empty for an empty string', () => {
     const result = [...LookupByPath.iteratePathSegments('')];
     expect(result.length).toEqual(0);
@@ -22,7 +22,7 @@ describe('iteratePathSegments', () => {
   });
 });
 
-describe('findChildPath', () => {
+describe(LookupByPath.prototype.findChildPath.name, () => {
   it('returns empty for an empty tree', () => {
     expect(new LookupByPath().findChildPath('foo')).toEqual(undefined);
   });

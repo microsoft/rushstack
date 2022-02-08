@@ -10,7 +10,7 @@ import { ChangelogGenerator } from '../ChangelogGenerator';
 import * as path from 'path';
 import { IChangeRequests } from '../PublishUtilities';
 
-describe('updateIndividualChangelog', () => {
+describe(ChangelogGenerator.updateIndividualChangelog.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');
   let rushConfiguration: RushConfiguration;
 
@@ -254,7 +254,7 @@ describe('updateIndividualChangelog', () => {
   });
 });
 
-describe('updateChangelogs', () => {
+describe(ChangelogGenerator.updateChangelogs.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');
   let rushConfiguration: RushConfiguration;
 

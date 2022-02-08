@@ -82,8 +82,8 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
 const SPAWN_ARG_ARGS: number = 1;
 const SPAWN_ARG_OPTIONS: number = 2;
 
-describe('RushCommandLineParser', () => {
-  describe('execute', () => {
+describe(RushCommandLineParser.name, () => {
+  describe(RushCommandLineParser.prototype.execute.name, () => {
     afterEach(() => {
       jest.clearAllMocks();
     });

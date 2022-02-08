@@ -12,7 +12,7 @@ import { VersionMismatchFinderProject } from '../../logic/versionMismatch/Versio
 import { VersionMismatchFinderCommonVersions } from '../../logic/versionMismatch/VersionMismatchFinderCommonVersions';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-describe('VersionMismatchFinder', () => {
+describe(VersionMismatchFinder.name, () => {
   it('finds no mismatches if there are none', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',

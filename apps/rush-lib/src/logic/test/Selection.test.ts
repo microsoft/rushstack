@@ -122,7 +122,7 @@ declare global {
   }
 }
 
-describe('union', () => {
+describe(union.name, () => {
   it('combines sets', () => {
     const result: ReadonlySet<ISimpleGraphable> = union(
       [projectA, projectB],
@@ -135,7 +135,7 @@ describe('union', () => {
   });
 });
 
-describe('intersection', () => {
+describe(intersection.name, () => {
   it('intersects sets', () => {
     const result: ReadonlySet<ISimpleGraphable> = intersection(
       [projectC, projectD],
@@ -163,7 +163,7 @@ describe('intersection', () => {
   });
 });
 
-describe('expandAllDependencies', () => {
+describe(expandAllDependencies.name, () => {
   it('expands at least one level of dependencies', () => {
     const result: ReadonlySet<ISimpleGraphable> = expandAllDependencies([projectD]);
 
@@ -181,7 +181,7 @@ describe('expandAllDependencies', () => {
   });
 });
 
-describe('expandAllConsumers', () => {
+describe(expandAllConsumers.name, () => {
   it('expands at least one level of dependents', () => {
     const result: ReadonlySet<ISimpleGraphable> = expandAllConsumers([projectF]);
 

@@ -5,7 +5,7 @@ import * as path from 'path';
 import { RushConfiguration } from '../RushConfiguration';
 import { Event, EventHooks } from '../EventHooks';
 
-describe('EventHooks', () => {
+describe(EventHooks.name, () => {
   it('loads a post build hook from rush.json', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
