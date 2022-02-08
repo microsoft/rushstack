@@ -627,6 +627,7 @@ export class RushConstants {
     static readonly artifactoryFilename: string;
     static readonly browserApprovedPackagesFilename: string;
     static readonly buildCacheFilename: string;
+    static readonly buildCacheVersion: number;
     static readonly buildCommandName: string;
     static readonly bulkCommandKind: 'bulk';
     static readonly changeFilesFolderName: string;
