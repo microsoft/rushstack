@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TaskExecutionManager Constructor throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of 'tequila', expected a number or 'max'"`;
+exports[`OperationExecutionManager Constructor throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of 'tequila', expected a number or 'max'"`;
 
-exports[`TaskExecutionManager Error logging printedStderrAfterError 1`] = `"An error occurred."`;
+exports[`OperationExecutionManager Error logging printedStderrAfterError 1`] = `"An error occurred."`;
 
-exports[`TaskExecutionManager Error logging printedStderrAfterError 2`] = `
+exports[`OperationExecutionManager Error logging printedStderrAfterError 2`] = `
 Array [
   Object {
     "kind": "O",
@@ -104,9 +104,9 @@ Array [
 ]
 `;
 
-exports[`TaskExecutionManager Error logging printedStdoutAfterErrorWithEmptyStderr 1`] = `"An error occurred."`;
+exports[`OperationExecutionManager Error logging printedStdoutAfterErrorWithEmptyStderr 1`] = `"An error occurred."`;
 
-exports[`TaskExecutionManager Error logging printedStdoutAfterErrorWithEmptyStderr 2`] = `
+exports[`OperationExecutionManager Error logging printedStdoutAfterErrorWithEmptyStderr 2`] = `
 Array [
   Object {
     "kind": "O",
@@ -206,9 +206,9 @@ Array [
 ]
 `;
 
-exports[`TaskExecutionManager Warning logging Fail on warning Logs warnings correctly 1`] = `"An error occurred."`;
+exports[`OperationExecutionManager Warning logging Fail on warning Logs warnings correctly 1`] = `"An error occurred."`;
 
-exports[`TaskExecutionManager Warning logging Fail on warning Logs warnings correctly 2`] = `
+exports[`OperationExecutionManager Warning logging Fail on warning Logs warnings correctly 2`] = `
 Array [
   Object {
     "kind": "O",
@@ -308,7 +308,7 @@ Array [
 ]
 `;
 
-exports[`TaskExecutionManager Warning logging Success on warning Logs warnings correctly 1`] = `
+exports[`OperationExecutionManager Warning logging Success on warning Logs warnings correctly 1`] = `
 Array [
   Object {
     "kind": "O",

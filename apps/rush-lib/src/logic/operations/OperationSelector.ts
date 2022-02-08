@@ -1,90 +1,90 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import type { IPhase } from '../api/CommandLineConfiguration';
-import type { Task } from './taskExecution/Task';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { Operation } from './Operation';
 
-export interface IProjectTaskSelectorOptions {
+export interface IOperationSelectorOptions {
   phasesToRun: ReadonlySet<IPhase>;
 }
 
-export interface ICreateTasksOptions {
+export interface ICreateOperationsOptions {
   projectSelection: ReadonlySet<RushConfigurationProject>;
-  taskFactory: IProjectTaskFactory;
+  operationFactory: IOperationFactory;
 }
 
-export interface IProjectTaskOptions {
+export interface IOperationOptions {
   project: RushConfigurationProject;
   phase: IPhase;
 }
 
-export interface IProjectTaskFactory {
-  createTask(options: IProjectTaskOptions): Task;
+export interface IOperationFactory {
+  createTask(options: IOperationOptions): Operation;
 }
 
-interface ITaskDependencies {
-  tasks: Set<Task> | undefined;
+interface IOperationDependencies {
+  operations: Set<Operation> | undefined;
   isCacheWriteAllowed: boolean;
 }
 
-interface ITaskNode {
+interface IOperationNode {
   key: string;
   phase: IPhase;
   project: RushConfigurationProject;
 }
 
-interface ISelectedTaskNode extends ITaskNode {
-  task: Task;
+interface ISelectedOperationNode extends IOperationNode {
+  operation: Operation;
 }
 
 /**
- * This class is responsible for transforming a set of selected phases and selected projects into a task dependency graph.
+ * This class is responsible for transforming a set of selected phases and selected projects into an operation dependency graph.
  */
-export class ProjectTaskSelector {
+export class OperationSelector {
   private readonly _phasesToRun: ReadonlySet<IPhase>;
 
-  public constructor(options: IProjectTaskSelectorOptions) {
+  public constructor(options: IOperationSelectorOptions) {
     this._phasesToRun = options.phasesToRun;
   }
 
-  public createTasks(createTasksOptions: ICreateTasksOptions): Set<Task> {
-    const { projectSelection, taskFactory } = createTasksOptions;
+  public createOperations(createTasksOptions: ICreateOperationsOptions): Set<Operation> {
+    const { projectSelection, operationFactory: taskFactory } = createTasksOptions;
 
-    const selectedNodes: Map<string, ISelectedTaskNode> = new Map();
-    const selectedTasks: Set<Task> = new Set();
+    const selectedNodes: Map<string, ISelectedOperationNode> = new Map();
+    const selectedOperations: Set<Operation> = new Set();
 
     // Create tasks for selected phases and projects
     for (const phase of this._phasesToRun) {
       for (const project of projectSelection) {
-        const task: Task = taskFactory.createTask({
+        const operation: Operation = taskFactory.createTask({
           phase,
           project
         });
 
-        const key: string = getTaskKey(phase, project);
+        const key: string = getOperationKey(phase, project);
 
-        const record: ISelectedTaskNode = {
+        const record: ISelectedOperationNode = {
           key,
           phase,
           project,
-          task
+          operation
         };
 
         selectedNodes.set(key, record);
-        selectedTasks.add(task);
+        selectedOperations.add(operation);
       }
     }
 
     // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key
-    function getTaskKey(phase: IPhase, project: RushConfigurationProject): string {
+    function getOperationKey(phase: IPhase, project: RushConfigurationProject): string {
       return `${project.packageName};${phase.name}`;
     }
 
     /**
      * Enumerates the declared dependencies
      */
-    function* getRawDependencies(node: ITaskNode): Iterable<ITaskNode> {
+    function* getRawDependencies(node: IOperationNode): Iterable<IOperationNode> {
       const {
         phase: {
           phaseDependencies: { self, upstream }
@@ -95,7 +95,7 @@ export class ProjectTaskSelector {
       for (const depPhase of self) {
         // Different phase, same project
         yield {
-          key: getTaskKey(depPhase, project),
+          key: getOperationKey(depPhase, project),
           phase: depPhase,
           project
         };
@@ -107,7 +107,7 @@ export class ProjectTaskSelector {
           for (const depPhase of upstream) {
             for (const dependencyProject of dependencyProjects) {
               yield {
-                key: getTaskKey(depPhase, dependencyProject),
+                key: getOperationKey(depPhase, dependencyProject),
                 phase: depPhase,
                 project: dependencyProject
               };
@@ -117,41 +117,41 @@ export class ProjectTaskSelector {
       }
     }
 
-    const filteredDependencyCache: Map<string, ITaskDependencies> = new Map();
-    function getFilteredDependencies(node: ITaskNode): ITaskDependencies {
+    const filteredDependencyCache: Map<string, IOperationDependencies> = new Map();
+    function getFilteredDependencies(node: IOperationNode): IOperationDependencies {
       const { key } = node;
-      const cached: ITaskDependencies | undefined = filteredDependencyCache.get(key);
+      const cached: IOperationDependencies | undefined = filteredDependencyCache.get(key);
       if (cached) {
         return cached;
       }
 
-      const dependencies: ITaskDependencies = {
-        tasks: undefined,
+      const dependencies: IOperationDependencies = {
+        operations: undefined,
         isCacheWriteAllowed: selectedNodes.has(key)
       };
 
       filteredDependencyCache.set(key, dependencies);
 
       for (const dep of getRawDependencies(node)) {
-        const selectedRecord: ISelectedTaskNode | undefined = selectedNodes.get(dep.key);
+        const selectedRecord: ISelectedOperationNode | undefined = selectedNodes.get(dep.key);
         if (selectedRecord) {
-          // This task is part of the current execution
-          if (!dependencies.tasks) {
-            dependencies.tasks = new Set();
+          // This operation is part of the current execution
+          if (!dependencies.operations) {
+            dependencies.operations = new Set();
           }
-          dependencies.tasks.add(selectedRecord.task);
+          dependencies.operations.add(selectedRecord.operation);
         } else {
-          // This task is not part of the current execution, but may have dependencies that are
-          // Since a task has been excluded, we cannot guarantee the results, so it is cache unsafe
+          // This operation is not part of the current execution, but may have dependencies that are
+          // Since an operation has been excluded, we cannot guarantee the results, so it is cache unsafe
           dependencies.isCacheWriteAllowed = false;
-          const { tasks: indirectDependencies }: ITaskDependencies = getFilteredDependencies(dep);
+          const { operations: indirectDependencies }: IOperationDependencies = getFilteredDependencies(dep);
           if (indirectDependencies) {
-            if (!dependencies.tasks) {
-              dependencies.tasks = new Set();
+            if (!dependencies.operations) {
+              dependencies.operations = new Set();
             }
 
             for (const indirectDep of indirectDependencies) {
-              dependencies.tasks.add(indirectDep);
+              dependencies.operations.add(indirectDep);
             }
           }
         }
@@ -162,17 +162,17 @@ export class ProjectTaskSelector {
 
     // Add dependency relationships
     for (const record of selectedNodes.values()) {
-      const deps: ITaskDependencies = getFilteredDependencies(record);
-      if (deps.tasks) {
-        for (const dependencyTask of deps.tasks) {
-          record.task.dependencies.add(dependencyTask);
-          dependencyTask.dependents.add(record.task);
+      const deps: IOperationDependencies = getFilteredDependencies(record);
+      if (deps.operations) {
+        for (const dependencyOperation of deps.operations) {
+          record.operation.dependencies.add(dependencyOperation);
+          dependencyOperation.dependents.add(record.operation);
         }
       }
 
-      record.task.runner.isCacheWriteAllowed = deps.isCacheWriteAllowed;
+      record.operation.runner.isCacheWriteAllowed = deps.isCacheWriteAllowed;
     }
 
-    return selectedTasks;
+    return selectedOperations;
   }
 }

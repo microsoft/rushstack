@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ProjectTaskSelector #createTasks handles a full build 1`] = `
+exports[`OperationSelector #createOperations handles a full build 1`] = `
 Array [
   Object {
     "dependencies": Array [],
@@ -566,7 +566,7 @@ Array [
 ]
 `;
 
-exports[`ProjectTaskSelector #createTasks handles filtered phases 1`] = `
+exports[`OperationSelector #createOperations handles filtered phases 1`] = `
 Array [
   Object {
     "dependencies": Array [],
@@ -631,7 +631,7 @@ Array [
 ]
 `;
 
-exports[`ProjectTaskSelector #createTasks handles filtered phases 2`] = `
+exports[`OperationSelector #createOperations handles filtered phases 2`] = `
 Array [
   Object {
     "dependencies": Array [
@@ -861,7 +861,7 @@ Array [
 ]
 `;
 
-exports[`ProjectTaskSelector #createTasks handles filtered phases on filtered projects 1`] = `
+exports[`OperationSelector #createOperations handles filtered phases on filtered projects 1`] = `
 Array [
   Object {
     "dependencies": Array [],
@@ -881,7 +881,7 @@ Array [
 ]
 `;
 
-exports[`ProjectTaskSelector #createTasks handles filtered phases on filtered projects 2`] = `
+exports[`OperationSelector #createOperations handles filtered phases on filtered projects 2`] = `
 Array [
   Object {
     "dependencies": Array [
@@ -960,7 +960,7 @@ Array [
 ]
 `;
 
-exports[`ProjectTaskSelector #createTasks handles filtered projects 1`] = `
+exports[`OperationSelector #createOperations handles filtered projects 1`] = `
 Array [
   Object {
     "dependencies": Array [],
@@ -1018,7 +1018,7 @@ Array [
 ]
 `;
 
-exports[`ProjectTaskSelector #createTasks handles filtered projects 2`] = `
+exports[`OperationSelector #createOperations handles filtered projects 2`] = `
 Array [
   Object {
     "dependencies": Array [],
