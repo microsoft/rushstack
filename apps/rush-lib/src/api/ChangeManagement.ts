@@ -22,6 +22,23 @@ export enum ChangeType {
   major = 5
 }
 
+export interface IVersionPolicyChangeInfo {
+  /**
+   * Defines the type of change.
+   */
+  changeType: ChangeType;
+
+  /**
+   * The new version for the version policy, as calculated by the findChangeRequests function.
+   */
+  newVersion: string;
+
+  /**
+   * The name of the version policy.
+   */
+  versionPolicyName: string;
+}
+
 /**
  * Defines an IChangeInfo object.
  */

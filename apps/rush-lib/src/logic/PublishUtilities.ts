@@ -12,7 +12,7 @@ import * as semver from 'semver';
 import { execSync } from 'child_process';
 import { IPackageJson, JsonFile, FileConstants, Text, Enum } from '@rushstack/node-core-library';
 
-import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
+import { IChangeInfo, ChangeType, IVersionPolicyChangeInfo } from '../api/ChangeManagement';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Utilities, IEnvironment } from '../utilities/Utilities';
 import { PrereleaseToken } from './PrereleaseToken';
@@ -21,11 +21,10 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
 import { LockStepVersionPolicy } from '../api/VersionPolicy';
-import { SemVer } from 'semver';
 
 export interface IChangeRequests {
   packageChanges: Map<string, IChangeInfo>;
-  versionPolicyChanges: Map<string, SemVer>;
+  versionPolicyChanges: Map<string, IVersionPolicyChangeInfo>;
 }
 
 export class PublishUtilities {
@@ -44,7 +43,7 @@ export class PublishUtilities {
   ): IChangeRequests {
     const allChanges: IChangeRequests = {
       packageChanges: new Map<string, IChangeInfo>(),
-      versionPolicyChanges: new Map<string, SemVer>()
+      versionPolicyChanges: new Map<string, IVersionPolicyChangeInfo>()
     };
 
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
@@ -86,18 +85,18 @@ export class PublishUtilities {
 
     // Bump projects affected by the version policy changes.
     allPackages.forEach((pkg) => {
-      const versionPolicyVersion: string | undefined =
+      const versionPolicyChange: IVersionPolicyChangeInfo | undefined =
         pkg.versionPolicyName !== undefined
-          ? allChanges.versionPolicyChanges.get(pkg.versionPolicyName)?.format()
+          ? allChanges.versionPolicyChanges.get(pkg.versionPolicyName)
           : undefined;
 
-      if (versionPolicyVersion === undefined) {
+      if (versionPolicyChange === undefined) {
         return;
       }
 
       const versionDiff: semver.ReleaseType | null = semver.diff(
         pkg.packageJson.version,
-        versionPolicyVersion
+        versionPolicyChange.newVersion
       );
 
       if (versionDiff === null) {
@@ -109,7 +108,7 @@ export class PublishUtilities {
           {
             packageName: pkg.packageName,
             changeType: this._getChangeTypeForSemverReleaseType(versionDiff),
-            newVersion: versionPolicyVersion // enforce the specific policy version
+            newVersion: versionPolicyChange.newVersion // enforce the specific policy version
           },
           allChanges,
           allPackages,
@@ -118,7 +117,9 @@ export class PublishUtilities {
           projectsToExclude
         )
       ) {
-        console.log(`${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyVersion}`);
+        console.log(
+          `${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyChange.newVersion}`
+        );
       }
     });
 
@@ -665,19 +666,19 @@ export class PublishUtilities {
           project.versionPolicy.isLockstepped
         ) {
           const projectVersionPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
-          const currentVersionPolicyChange: SemVer | undefined = allChanges.versionPolicyChanges.get(
-            project.versionPolicyName
-          );
+          const currentVersionPolicyChange: IVersionPolicyChangeInfo | undefined =
+            allChanges.versionPolicyChanges.get(project.versionPolicyName);
           if (
             projectVersionPolicy.nextBump === undefined &&
             semver.gt(currentChange.newVersion, projectVersionPolicy.version) &&
             (currentVersionPolicyChange === undefined ||
-              semver.gt(currentChange.newVersion, currentVersionPolicyChange))
+              semver.gt(currentChange.newVersion, currentVersionPolicyChange.newVersion))
           ) {
-            allChanges.versionPolicyChanges.set(
-              project.versionPolicyName,
-              new SemVer(currentChange.newVersion)
-            );
+            allChanges.versionPolicyChanges.set(project.versionPolicyName, {
+              versionPolicyName: project.versionPolicyName,
+              changeType: currentChange.changeType!,
+              newVersion: currentChange.newVersion
+            });
           }
         }
       }
