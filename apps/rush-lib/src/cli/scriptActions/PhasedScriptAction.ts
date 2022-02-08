@@ -189,7 +189,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       terminal
     } = options;
 
-    const taskSelector: OperationSelector = new OperationSelector({
+    const operationSelector: OperationSelector = new OperationSelector({
       phasesToRun: new Set(this._watchPhases)
     });
 
@@ -242,7 +242,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       );
 
       const executeOptions: IExecuteInternalOptions = {
-        operationSelector: taskSelector,
+        operationSelector,
         projectSelection,
         operationFactoryOptions: {
           ...operationFactoryOptions,
