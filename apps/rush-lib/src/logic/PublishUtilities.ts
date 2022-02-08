@@ -661,7 +661,6 @@ export class PublishUtilities {
             allChanges.versionPolicyChanges.get(project.versionPolicyName);
           if (
             projectVersionPolicy.nextBump === undefined &&
-            semver.gt(currentChange.newVersion, projectVersionPolicy.version) &&
             (currentVersionPolicyChange === undefined ||
               semver.gt(currentChange.newVersion, currentVersionPolicyChange.newVersion))
           ) {
