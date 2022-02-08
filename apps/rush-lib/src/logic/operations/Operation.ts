@@ -5,49 +5,49 @@ import { StdioSummarizer } from '@rushstack/terminal';
 import { CollatedWriter } from '@rushstack/stream-collator';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { TaskStatus } from './TaskStatus';
-import { TaskError } from './TaskError';
-import { ITaskRunner } from './ITaskRunner';
+import { OperationStatus } from './OperationStatus';
+import { OperationError } from './OperationError';
+import { IOperationRunner } from './IOperationRunner';
 
 /**
- * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the
- * `TaskExecutionManager`. Each `Task` has a `runner` member of type `BaseTaskRunner`, whose subclass
- * manages the actual operations for running a single task.
+ * The `Operation` class is a node in the dependency graph of work that needs to be scheduled by the
+ * `OperationExecutionManager`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
+ * implementation manages the actual process of running a single operation.
  */
-export class Task {
+export class Operation {
   /**
-   * When the scheduler is ready to process this `Task`, the `runner` implements the actual work of
-   * running the task.
+   * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
+   * running the operation.
    */
-  public runner: ITaskRunner;
+  public runner: IOperationRunner;
 
   /**
-   * The current execution status of a task. Tasks start in the 'ready' state,
-   * but can be 'blocked' if an upstream task failed. It is 'executing' when
-   * the task is executing. Once execution is complete, it is either 'success' or
+   * The current execution status of an operation. Operations start in the 'ready' state,
+   * but can be 'blocked' if an upstream operation failed. It is 'executing' when
+   * the operation is executing. Once execution is complete, it is either 'success' or
    * 'failure'.
    */
-  public status: TaskStatus;
+  public status: OperationStatus;
 
   /**
-   * A set of all dependencies which must be executed before this task is complete.
+   * A set of all dependencies which must be executed before this operation is complete.
    * When dependencies finish execution, they are removed from this list.
    */
-  public dependencies: Set<Task> = new Set<Task>();
+  public dependencies: Set<Operation> = new Set<Operation>();
 
   /**
    * The inverse of dependencies, lists all projects which are directly dependent on this one.
    */
-  public dependents: Set<Task> = new Set<Task>();
+  public dependents: Set<Operation> = new Set<Operation>();
 
   /**
-   * This number represents how far away this Task is from the furthest "root" project (i.e.
+   * This number represents how far away this Operation is from the furthest "root" project (i.e.
    * a project with no dependents). This helps us to calculate the critical path (i.e. the
    * longest chain of projects which must be executed in order, thereby limiting execution speed
-   * of the entire task tree.
+   * of the entire operation tree.
    *
-   * This number is calculated via a memoized recursive function, and when choosing the next
-   * task to execute, the task with the highest criticalPathLength is chosen.
+   * This number is calculated via a memoized depth-first search, and when choosing the next
+   * operation to execute, the operation with the highest criticalPathLength is chosen.
    *
    * Example:
    *        (0) A
@@ -67,29 +67,29 @@ export class Task {
    * Z has a score of 2, since only X depends on it, and X has a score of 1
    * Y has a score of 2, since the chain Y->X->C is longer than Y->C
    *
-   * The algorithm is implemented in TaskExecutionManager as _calculateCriticalPaths()
+   * The algorithm is implemented in AsyncOperationQueue.ts as calculateCriticalPathLength()
    */
   public criticalPathLength: number | undefined;
 
   /**
-   * The error which occurred while executing this task, this is stored in case we need
+   * The error which occurred while executing this operation, this is stored in case we need
    * it later (for example to re-print errors at end of execution).
    */
-  public error: TaskError | undefined;
+  public error: OperationError | undefined;
 
   /**
-   * The task writer which contains information from the output streams of this task
+   * The operation writer which contains information from the output streams of this operation
    */
   public collatedWriter!: CollatedWriter;
 
   public stdioSummarizer!: StdioSummarizer;
 
   /**
-   * The stopwatch which measures how long it takes the task to execute
+   * The stopwatch which measures how long it takes the operation to execute
    */
   public stopwatch!: Stopwatch;
 
-  public constructor(runner: ITaskRunner, initialStatus: TaskStatus) {
+  public constructor(runner: IOperationRunner, initialStatus: OperationStatus) {
     this.runner = runner;
     this.status = initialStatus;
   }

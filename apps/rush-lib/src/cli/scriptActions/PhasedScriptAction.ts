@@ -11,9 +11,9 @@ import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import {
-  ITaskExecutionManagerOptions,
-  TaskExecutionManager
-} from '../../logic/taskExecution/TaskExecutionManager';
+  IOperationExecutionManagerOptions,
+  OperationExecutionManager
+} from '../../logic/operations/OperationExecutionManager';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
@@ -21,9 +21,9 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import type { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
-import { ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
+import { OperationSelector } from '../../logic/operations/OperationSelector';
 import { Selection } from '../../logic/Selection';
-import { IProjectTaskFactoryOptions, ProjectTaskFactory } from '../../logic/taskExecution/ProjectTaskFactory';
+import { IOperationFactoryOptions, OperationFactory } from '../../logic/operations/ShellOperationFactory';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 
@@ -43,31 +43,30 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
 }
 
 interface IExecuteInternalOptions {
-  taskSelector: ProjectTaskSelector;
-  taskExecutionManagerOptions: ITaskExecutionManagerOptions;
+  operationSelector: OperationSelector;
+  executionManagerOptions: IOperationExecutionManagerOptions;
   projectSelection: Set<RushConfigurationProject>;
-  taskFactoryOptions: IProjectTaskFactoryOptions;
+  operationFactoryOptions: IOperationFactoryOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
   terminal: Terminal;
 }
 
 /**
- * This class implements bulk commands which are run individually for each project in the repo,
- * possibly in parallel. The task selector is abstract and is implemented for phased or non-phased
- * commands.
+ * This class implements phased commands which are run individually for each project in the repo,
+ * possibly in parallel, and which may define multiple phases.
  *
  * @remarks
- * Bulk commands can be defined via common/config/command-line.json.  Rush's predefined "build"
- * and "rebuild" commands are also modeled as bulk commands, because they essentially just
- * execute scripts from package.json in the same as any custom command.
+ * Phased commands can be defined via common/config/command-line.json.  Rush's predefined "build"
+ * and "rebuild" commands are also modeled as phased commands with a single phase that invokes the npm
+ * "build" script for each project.
  */
 export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
-  private readonly _initialPhase: ReadonlySet<IPhase>;
+  private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _alwaysWatch: boolean;
 
@@ -84,7 +83,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     this._isIncrementalBuildAllowed = options.incremental;
     this._disableBuildCache = options.disableBuildCache;
     this._repoCommandLineConfiguration = options.commandLineConfiguration;
-    this._initialPhase = options.initialPhases;
+    this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._alwaysWatch = options.alwaysWatch;
   }
@@ -132,7 +131,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       return;
     }
 
-    const taskFactoryOptions: IProjectTaskFactoryOptions = {
+    const operationFactoryOptions: IOperationFactoryOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
@@ -140,7 +139,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration)
     };
 
-    const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {
+    const executionManagerOptions: IOperationExecutionManagerOptions = {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism: parallelism,
@@ -148,17 +147,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
-    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector({
-      phasesToRun: new Set(this._initialPhase)
+    const operationSelector: OperationSelector = new OperationSelector({
+      phasesToRun: new Set(this._initialPhases)
     });
 
     const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
 
     const executeOptions: IExecuteInternalOptions = {
-      taskSelector,
-      taskExecutionManagerOptions: taskExecutionManagerOptions,
+      operationSelector,
+      executionManagerOptions,
       projectSelection,
-      taskFactoryOptions,
+      operationFactoryOptions,
       stopwatch,
       terminal
     };
@@ -184,17 +183,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
     const {
       projectSelection: projectsToWatch,
-      taskFactoryOptions,
-      taskExecutionManagerOptions,
+      operationFactoryOptions,
+      executionManagerOptions,
       stopwatch,
       terminal
     } = options;
 
-    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector({
+    const operationSelector: OperationSelector = new OperationSelector({
       phasesToRun: new Set(this._watchPhases)
     });
 
-    const { projectChangeAnalyzer: initialState } = taskFactoryOptions;
+    const { projectChangeAnalyzer: initialState } = operationFactoryOptions;
 
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
@@ -243,13 +242,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       );
 
       const executeOptions: IExecuteInternalOptions = {
-        taskSelector,
+        operationSelector,
         projectSelection,
-        taskFactoryOptions: {
-          ...taskFactoryOptions,
+        operationFactoryOptions: {
+          ...operationFactoryOptions,
           projectChangeAnalyzer: state
         },
-        taskExecutionManagerOptions,
+        executionManagerOptions,
         stopwatch,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
@@ -333,22 +332,22 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
    * Runs a single invocation of the command
    */
   private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const { taskSelector, projectSelection, taskFactoryOptions } = options;
+    const { operationSelector, projectSelection, operationFactoryOptions } = options;
 
-    const taskFactory: ProjectTaskFactory = new ProjectTaskFactory(taskFactoryOptions);
+    const operationFactory: OperationFactory = new OperationFactory(operationFactoryOptions);
 
-    const taskExecutionManager: TaskExecutionManager = new TaskExecutionManager(
-      taskSelector.createTasks({
+    const executionManager: OperationExecutionManager = new OperationExecutionManager(
+      operationSelector.createOperations({
         projectSelection,
-        taskFactory
+        operationFactory
       }),
-      options.taskExecutionManagerOptions
+      options.executionManagerOptions
     );
 
     const { ignoreHooks, stopwatch } = options;
 
     try {
-      await taskExecutionManager.executeAsync();
+      await executionManager.executeAsync();
 
       stopwatch.stop();
       console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));

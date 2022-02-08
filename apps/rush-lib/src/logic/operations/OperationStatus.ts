@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Enumeration defining potential states of a task: not started, executing, or completed
+ * Enumeration defining potential states of an operation: not started, executing, or completed
  */
-export enum TaskStatus {
+export enum OperationStatus {
   Ready = 'READY',
   Executing = 'EXECUTING',
   Success = 'SUCCESS',
