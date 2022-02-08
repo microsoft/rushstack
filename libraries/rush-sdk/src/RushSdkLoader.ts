@@ -151,7 +151,7 @@ export class RushSdkLoader {
 
       let callingModule: NodeModule | null | undefined = module?.parent;
       while (callingModule?.filename?.startsWith(thisProjectRoot)) {
-        // Walk up calling modules until we're out of this pacakge.
+        // Walk up calling modules until we're out of this package.
         callingModule = callingModule.parent;
       }
 
@@ -167,7 +167,10 @@ export class RushSdkLoader {
 
           // Does the caller properly declare a dependency on rush-lib?
           if (
-            (callerPackageJson.dependencies && callerPackageJson.dependencies[RUSH_LIB_NAME] !== undefined) ||
+            (callerPackageJson.devDependencies?.[RUSH_LIB_NAME] ??
+              callerPackageJson.dependencies?.[RUSH_LIB_NAME] ??
+              callerPackageJson.peerDependencies?.[RUSH_LIB_NAME] ??
+              callerPackageJson.optionalDependencies?.[RUSH_LIB_NAME]) !== undefined
             (callerPackageJson.devDependencies &&
               callerPackageJson.devDependencies[RUSH_LIB_NAME] !== undefined) ||
             (callerPackageJson.peerDependencies &&
