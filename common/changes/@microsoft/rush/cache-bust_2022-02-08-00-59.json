@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add \"buildCacheVersion\" field to build cache hash computation to forcibly replace bad cache entries. Will be incremented when changes are made to the cache algorithm in the future.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

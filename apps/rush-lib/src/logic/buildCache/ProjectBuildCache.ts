@@ -484,6 +484,9 @@ export class ProjectBuildCache {
 
     const sortedProjectStates: string[] = projectStates.sort();
     const hash: crypto.Hash = crypto.createHash('sha1');
+    // This value is used to force cache bust when the build cache algorithm changes
+    hash.update(`${RushConstants.buildCacheVersion}`);
+    hash.update(RushConstants.hashDelimiter);
     const serializedOutputFolders: string = JSON.stringify(options.projectOutputFolderNames);
     hash.update(serializedOutputFolders);
     hash.update(RushConstants.hashDelimiter);
