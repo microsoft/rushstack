@@ -71,22 +71,23 @@ export class PublishUtilities {
       }
     });
 
-    // For each requested package change, ensure downstream dependencies are also updated.
-    allChanges.packageChanges.forEach((change, packageName) => {
-      PublishUtilities._updateDownstreamDependencies(
-        change,
-        allChanges,
-        allPackages,
-        rushConfiguration,
-        prereleaseToken,
-        projectsToExclude
-      );
-    });
-
+    // keep resolving downstream dependency changes and version policy changes
+    // until no more changes are detected
     let hasChanges: boolean;
-
     do {
       hasChanges = false;
+
+      // For each requested package change, ensure downstream dependencies are also updated.
+      allChanges.packageChanges.forEach((change, packageName) => {
+        hasChanges ||= PublishUtilities._updateDownstreamDependencies(
+          change,
+          allChanges,
+          allPackages,
+          rushConfiguration,
+          prereleaseToken,
+          projectsToExclude
+        );
+      });
 
       // Bump projects affected by the version policy changes.
       allPackages.forEach((pkg) => {
@@ -119,18 +120,6 @@ export class PublishUtilities {
         }
 
         hasChanges ||= hasChanged;
-      });
-
-      // For each requested package change, ensure downstream dependencies are also updated.
-      allChanges.packageChanges.forEach((change, packageName) => {
-        hasChanges ||= PublishUtilities._updateDownstreamDependencies(
-          change,
-          allChanges,
-          allPackages,
-          rushConfiguration,
-          prereleaseToken,
-          projectsToExclude
-        );
       });
     } while (hasChanges);
 
