@@ -34,8 +34,9 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
   private _apiSetUrls: Record<string, string> = {
     Excel: '/office/dev/add-ins/reference/requirement-sets/excel-api-requirement-sets',
     OneNote: '/office/dev/add-ins/reference/requirement-sets/onenote-api-requirement-sets',
-    Visio: '/office/dev/add-ins/reference/overview/visio-javascript-reference-overview',
     Outlook: '/office/dev/add-ins/reference/requirement-sets/outlook-api-requirement-sets',
+    PowerPoint: '/office/dev/add-ins/reference/requirement-sets/powerpoint-api-requirement-sets',
+    Visio: '/office/dev/add-ins/reference/overview/visio-javascript-reference-overview',
     Word: '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
   };
 
