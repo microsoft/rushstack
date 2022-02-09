@@ -2,6 +2,7 @@ import * as React from 'react';
 
 /**
  * Slider positions for `ToggleSwitch`.
+ * @public
  */
 export const enum ToggleSwitchPosition {
   Left = 'left',
@@ -10,11 +11,15 @@ export const enum ToggleSwitchPosition {
 
 /**
  * Event arguments for `IToggleSwitchProps.onToggle`.
+ * @public
  */
 export interface IToggleEventArgs {
   sliderPosition: ToggleSwitchPosition;
 }
 
+/**
+ * @public
+ */
 export interface IToggleSwitchProps {
   /**
    * The CSS color when the `ToggleSwitch` slider is in the left position.
@@ -36,13 +41,15 @@ export interface IToggleSwitchProps {
 
 /**
  * Private state for ToggleSwitch.
+ * @public
  */
-interface IToggleSwitchState {
+export interface IToggleSwitchState {
   sliderPosition: ToggleSwitchPosition;
 }
 
 /**
  * An example component that renders a switch whose slider position can be "left" or "right".
+ * @public
  */
 export class ToggleSwitch extends React.Component<IToggleSwitchProps, IToggleSwitchState> {
   public constructor(props: IToggleSwitchProps) {

@@ -3,6 +3,9 @@
   "description": "(Copy of sample project) Building this project is a regression test for Heft",
   "version": "1.0.0",
   "private": true,
+  "main": "lib-commonjs/index.js",
+  "module": "lib/heft-web-rig-library-tutorial.js",
+  "typings": "dist/heft-web-rig-library-tutorial.d.ts",
   "scripts": {
     "build": "heft test --clean",
     "start": "heft start",

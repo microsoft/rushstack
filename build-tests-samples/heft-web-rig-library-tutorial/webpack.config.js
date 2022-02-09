@@ -8,14 +8,10 @@ module.exports = function createConfig(env, argv) {
     argv: argv,
     projectRoot: __dirname,
 
-    externals: {
-      react: 'react',
-      'react-dom': 'react-dom',
-      tslib: 'tslib'
-    },
-
     // Documentation: https://webpack.js.org/configuration/
     configOverride: {
+      externals: ['react', 'react-dom', 'tslib'],
+
       performance: {
         hints: env.production ? 'error' : false
         // This specifies the bundle size limit that will trigger Webpack's warning saying:
