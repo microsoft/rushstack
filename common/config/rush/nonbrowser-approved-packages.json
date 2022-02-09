@@ -1,10 +1,7 @@
 // DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
-  "packages": [    {
-      "name": "heft-webpack5-plugin",
-      "allowedCategories": [   ]
-    },
+  "packages": [
     {
       "name": "@azure/identity",
       "allowedCategories": [ "libraries" ]
@@ -404,6 +401,14 @@
     {
       "name": "heft-storybook-react-tutorial-storykit",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-web-rig-library-tutorial",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-webpack5-plugin",
+      "allowedCategories": []
     },
     {
       "name": "html-webpack-plugin",

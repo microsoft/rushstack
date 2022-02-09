@@ -2,7 +2,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
-
     {
       "name": "react",
       "allowedCategories": [ "tests" ]
@@ -13,7 +12,7 @@
     },
     {
       "name": "tslib",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     }
   ]
 }
