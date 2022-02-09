@@ -4,10 +4,10 @@
 import type { StdioSummarizer } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 
-import type { TaskStatus } from './TaskStatus';
+import type { OperationStatus } from './OperationStatus';
 import type { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
-export interface ITaskRunnerContext {
+export interface IOperationRunnerContext {
   repoCommandLineConfiguration: CommandLineConfiguration;
   collatedWriter: CollatedWriter;
   stdioSummarizer: StdioSummarizer;
@@ -16,18 +16,18 @@ export interface ITaskRunnerContext {
 }
 
 /**
- * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the
- * `TaskExecutionManager`. Each `Task` has a `runner` member of type `BITaskRunner`, whose implementation
- * manages the actual operations for running a single task.
+ * The `Operation` class is a node in the dependency graph of work that needs to be scheduled by the
+ * `OperationExecutionManager`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
+ * implementation manages the actual process for running a single operation.
  */
-export interface ITaskRunner {
+export interface IOperationRunner {
   /**
-   * Name of the task definition.
+   * Name of the operation, for logging.
    */
   readonly name: string;
 
   /**
-   * This flag determines if the task is allowed to be skipped if up to date.
+   * This flag determines if the operation is allowed to be skipped if up to date.
    */
   isSkipAllowed: boolean;
 
@@ -44,12 +44,12 @@ export interface ITaskRunner {
   warningsAreAllowed: boolean;
 
   /**
-   * Indicates if the output of this task may be written to the cache
+   * Indicates if the output of this operation may be written to the cache
    */
   isCacheWriteAllowed: boolean;
 
   /**
-   * Method to be executed for the task.
+   * Method to be executed for the operation.
    */
-  executeAsync(context: ITaskRunnerContext): Promise<TaskStatus>;
+  executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
 }

@@ -1,41 +1,46 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { CommandLineConfiguration, IPhasedCommand } from '../../api/CommandLineConfiguration';
-import { IProjectTaskOptions, IProjectTaskFactory, ProjectTaskSelector } from '../ProjectTaskSelector';
-import { Task } from '../taskExecution/Task';
+import path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
-import { ICommandLineJson } from '../../api/CommandLineJson';
-import { RushConstants } from '../RushConstants';
-import { TaskStatus } from '../taskExecution/TaskStatus';
-import { MockTaskRunner } from '../taskExecution/test/MockTaskRunner';
 
-interface ISerializedTask {
+import { RushConfiguration } from '../../../api/RushConfiguration';
+import { CommandLineConfiguration, IPhasedCommand } from '../../../api/CommandLineConfiguration';
+import { IOperationOptions, IOperationFactory, OperationSelector } from '../OperationSelector';
+import { Operation } from '../Operation';
+import { ICommandLineJson } from '../../../api/CommandLineJson';
+import { RushConstants } from '../../RushConstants';
+import { OperationStatus } from '../OperationStatus';
+import { MockOperationRunner } from './MockOperationRunner';
+
+interface ISerializedOperation {
   name: string;
   isCacheWriteAllowed: boolean;
   dependencies: string[];
 }
 
-function serializeTask(task: Task): ISerializedTask {
+function serializeOperation(operation: Operation): ISerializedOperation {
   return {
-    name: task.name,
-    isCacheWriteAllowed: task.runner.isCacheWriteAllowed,
-    dependencies: Array.from(task.dependencies, (dep: Task) => dep.name)
+    name: operation.name,
+    isCacheWriteAllowed: operation.runner.isCacheWriteAllowed,
+    dependencies: Array.from(operation.dependencies, (dep: Operation) => dep.name)
   };
 }
 
-describe('ProjectTaskSelector', () => {
-  const rushJsonFile: string = `${__dirname}/workspaceRepo/rush.json`;
-  const commandLineJsonFile: string = `${__dirname}/workspaceRepo/common/config/rush/command-line.json`;
+describe(OperationSelector.name, () => {
+  const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
+  const commandLineJsonFile: string = path.resolve(
+    __dirname,
+    `../../test/workspaceRepo/common/config/rush/command-line.json`
+  );
 
-  const taskFactory: IProjectTaskFactory = {
-    createTask({ phase, project }: IProjectTaskOptions): Task {
+  const operationFactory: IOperationFactory = {
+    createTask({ phase, project }: IOperationOptions): Operation {
       const name: string = `${project.packageName} (${phase.name.slice(
         RushConstants.phaseNamePrefix.length
       )})`;
 
-      return new Task(new MockTaskRunner(name), TaskStatus.Ready);
+      return new Operation(new MockOperationRunner(name), OperationStatus.Ready);
     }
   };
 
@@ -49,22 +54,22 @@ describe('ProjectTaskSelector', () => {
     commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
   });
 
-  describe('#createTasks', () => {
+  describe('#createOperations', () => {
     it('handles a full build', () => {
       const buildCommand: IPhasedCommand = commandLineConfiguration.commands.get('build')! as IPhasedCommand;
 
-      const taskSelector: ProjectTaskSelector = new ProjectTaskSelector({
+      const selector: OperationSelector = new OperationSelector({
         phasesToRun: buildCommand.phases
       });
 
       // All projects
       expect(
         Array.from(
-          taskSelector.createTasks({
+          selector.createOperations({
             projectSelection: new Set(rushConfiguration.projects),
-            taskFactory
+            operationFactory: operationFactory
           }),
-          serializeTask
+          serializeOperation
         )
       ).toMatchSnapshot();
     });
@@ -72,33 +77,33 @@ describe('ProjectTaskSelector', () => {
     it('handles filtered projects', () => {
       const buildCommand: IPhasedCommand = commandLineConfiguration.commands.get('build')! as IPhasedCommand;
 
-      const taskSelector: ProjectTaskSelector = new ProjectTaskSelector({
+      const selector: OperationSelector = new OperationSelector({
         phasesToRun: buildCommand.phases
       });
 
       // Single project
       expect(
         Array.from(
-          taskSelector.createTasks({
+          selector.createOperations({
             projectSelection: new Set([rushConfiguration.getProjectByName('g')!]),
-            taskFactory
+            operationFactory: operationFactory
           }),
-          serializeTask
+          serializeOperation
         )
       ).toMatchSnapshot();
 
       // Filtered projects
       expect(
         Array.from(
-          taskSelector.createTasks({
+          selector.createOperations({
             projectSelection: new Set([
               rushConfiguration.getProjectByName('f')!,
               rushConfiguration.getProjectByName('a')!,
               rushConfiguration.getProjectByName('c')!
             ]),
-            taskFactory
+            operationFactory: operationFactory
           }),
-          serializeTask
+          serializeOperation
         )
       ).toMatchSnapshot();
     });
@@ -107,31 +112,31 @@ describe('ProjectTaskSelector', () => {
       // Single phase with a missing dependency
       expect(
         Array.from(
-          new ProjectTaskSelector({
+          new OperationSelector({
             phasesToRun: new Set([commandLineConfiguration.phases.get('_phase:upstream-self')!])
-          }).createTasks({
+          }).createOperations({
             projectSelection: new Set(rushConfiguration.projects),
-            taskFactory
+            operationFactory: operationFactory
           }),
-          serializeTask
+          serializeOperation
         )
       ).toMatchSnapshot();
 
       // Two phases with a missing link
       expect(
         Array.from(
-          new ProjectTaskSelector({
+          new OperationSelector({
             phasesToRun: new Set([
               commandLineConfiguration.phases.get('_phase:complex')!,
               commandLineConfiguration.phases.get('_phase:upstream-3')!,
               commandLineConfiguration.phases.get('_phase:upstream-1')!,
               commandLineConfiguration.phases.get('_phase:no-deps')!
             ])
-          }).createTasks({
+          }).createOperations({
             projectSelection: new Set(rushConfiguration.projects),
-            taskFactory
+            operationFactory: operationFactory
           }),
-          serializeTask
+          serializeOperation
         )
       ).toMatchSnapshot();
     });
@@ -140,39 +145,39 @@ describe('ProjectTaskSelector', () => {
       // Single phase with a missing dependency
       expect(
         Array.from(
-          new ProjectTaskSelector({
+          new OperationSelector({
             phasesToRun: new Set([commandLineConfiguration.phases.get('_phase:upstream-2')!])
-          }).createTasks({
+          }).createOperations({
             projectSelection: new Set([
               rushConfiguration.getProjectByName('f')!,
               rushConfiguration.getProjectByName('a')!,
               rushConfiguration.getProjectByName('c')!
             ]),
-            taskFactory
+            operationFactory: operationFactory
           }),
-          serializeTask
+          serializeOperation
         )
       ).toMatchSnapshot();
 
       // Phases with missing links
       expect(
         Array.from(
-          new ProjectTaskSelector({
+          new OperationSelector({
             phasesToRun: new Set([
               commandLineConfiguration.phases.get('_phase:complex')!,
               commandLineConfiguration.phases.get('_phase:upstream-3')!,
               commandLineConfiguration.phases.get('_phase:upstream-1')!,
               commandLineConfiguration.phases.get('_phase:no-deps')!
             ])
-          }).createTasks({
+          }).createOperations({
             projectSelection: new Set([
               rushConfiguration.getProjectByName('f')!,
               rushConfiguration.getProjectByName('a')!,
               rushConfiguration.getProjectByName('c')!
             ]),
-            taskFactory
+            operationFactory: operationFactory
           }),
-          serializeTask
+          serializeOperation
         )
       ).toMatchSnapshot();
     });

@@ -4,7 +4,7 @@
 /**
  * Encapsulates information about an error
  */
-export class TaskError extends Error {
+export class OperationError extends Error {
   protected _type: string;
 
   public constructor(type: string, message: string) {

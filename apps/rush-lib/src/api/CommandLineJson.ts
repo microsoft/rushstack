@@ -45,6 +45,10 @@ export interface IPhasedCommandWithoutPhasesJson extends IBaseCommandJson {
  */
 export interface IPhasedCommandJson extends IPhasedCommandWithoutPhasesJson {
   phases: string[];
+  watchOptions?: {
+    alwaysWatch: boolean;
+    watchPhases: string[];
+  };
 }
 
 /**

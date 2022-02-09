@@ -7,15 +7,15 @@ import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IRegisteredCustomParameter } from '../../cli/scriptActions/BaseScriptAction';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import type { IProjectTaskOptions, IProjectTaskFactory } from '../ProjectTaskSelector';
+import type { IOperationOptions, IOperationFactory } from './OperationSelector';
 import { RushConstants } from '../RushConstants';
-import { ITaskRunner } from './ITaskRunner';
-import { NullTaskRunner } from './NullTaskRunner';
-import { convertSlashesForWindows, ProjectTaskRunner } from './ProjectTaskRunner';
-import { Task } from './Task';
-import { TaskStatus } from './TaskStatus';
+import { IOperationRunner } from './IOperationRunner';
+import { NullOperationRunner } from './NullOperationRunner';
+import { convertSlashesForWindows, ShellOperationRunner } from './ShellOperationRunner';
+import { Operation } from './Operation';
+import { OperationStatus } from './OperationStatus';
 
-export interface IProjectTaskFactoryOptions {
+export interface IOperationFactoryOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration?: BuildCacheConfiguration | undefined;
   isIncrementalBuildAllowed: boolean;
@@ -23,23 +23,23 @@ export interface IProjectTaskFactoryOptions {
   projectChangeAnalyzer: ProjectChangeAnalyzer;
 }
 
-export class ProjectTaskFactory implements IProjectTaskFactory {
-  private readonly _options: IProjectTaskFactoryOptions;
+export class OperationFactory implements IOperationFactory {
+  private readonly _options: IOperationFactoryOptions;
   private readonly _customParametersByPhase: Map<IPhase, string[]>;
 
-  public constructor(options: IProjectTaskFactoryOptions) {
+  public constructor(options: IOperationFactoryOptions) {
     this._options = options;
     this._customParametersByPhase = new Map();
   }
 
-  public createTask(options: IProjectTaskOptions): Task {
+  public createTask(options: IOperationOptions): Operation {
     const { phase, project } = options;
 
-    const factoryOptions: IProjectTaskFactoryOptions = this._options;
+    const factoryOptions: IOperationFactoryOptions = this._options;
 
     const customParameterValues: ReadonlyArray<string> = this._getCustomParameterValuesForPhase(phase);
 
-    const commandToRun: string | undefined = ProjectTaskFactory._getScriptToRun(
+    const commandToRun: string | undefined = OperationFactory._getScriptToRun(
       project,
       phase.name,
       customParameterValues
@@ -50,13 +50,13 @@ export class ProjectTaskFactory implements IProjectTaskFactory {
       );
     }
 
-    const taskName: string = ProjectTaskFactory._getTaskDisplayName(phase, project);
+    const displayName: string = OperationFactory._getDisplayName(phase, project);
 
     // Empty build script indicates a no-op, so use a no-op runner
-    const runner: ITaskRunner = commandToRun
-      ? new ProjectTaskRunner({
+    const runner: IOperationRunner = commandToRun
+      ? new ShellOperationRunner({
           rushProject: project,
-          taskName,
+          displayName,
           rushConfiguration: factoryOptions.rushConfiguration,
           buildCacheConfiguration: factoryOptions.buildCacheConfiguration,
           commandToRun: commandToRun || '',
@@ -64,11 +64,11 @@ export class ProjectTaskFactory implements IProjectTaskFactory {
           projectChangeAnalyzer: factoryOptions.projectChangeAnalyzer,
           phase
         })
-      : new NullTaskRunner(taskName, TaskStatus.FromCache);
+      : new NullOperationRunner(displayName, OperationStatus.FromCache);
 
-    const task: Task = new Task(runner, TaskStatus.Ready);
+    const operation: Operation = new Operation(runner, OperationStatus.Ready);
 
-    return task;
+    return operation;
   }
 
   private static _getScriptToRun(
@@ -87,12 +87,12 @@ export class ProjectTaskFactory implements IProjectTaskFactory {
     if (!rawCommand) {
       return '';
     } else {
-      const taskCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
-      return process.platform === 'win32' ? convertSlashesForWindows(taskCommand) : taskCommand;
+      const shellCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
+      return process.platform === 'win32' ? convertSlashesForWindows(shellCommand) : shellCommand;
     }
   }
 
-  private static _getTaskDisplayName(phase: IPhase, project: RushConfigurationProject): string {
+  private static _getDisplayName(phase: IPhase, project: RushConfigurationProject): string {
     if (phase.isSynthetic) {
       // Because this is a synthetic phase, just use the project name because there aren't any other phases
       return project.packageName;
