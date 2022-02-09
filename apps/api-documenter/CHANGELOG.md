@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Feb 2022 16:18:11 GMT and should not be manually modified.
+
+## 7.15.2
+Wed, 09 Feb 2022 16:18:11 GMT
+
+### Patches
+
+- Adding PowerPoint option to OfficeYamlDocumenter API set mapping
 
 ## 7.15.1
 Tue, 25 Jan 2022 01:11:07 GMT
