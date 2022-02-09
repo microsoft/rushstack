@@ -113,14 +113,13 @@ export class VersionManager {
   private _ensure(versionPolicyName?: string, shouldCommit?: boolean, force?: boolean): void {
     this._updateVersionsByPolicy(versionPolicyName, force);
 
-    let updated: boolean = false;
+    let changed: boolean = false;
     do {
-      updated = false;
-
+      changed = false;
       // Update all dependencies if needed.
-      const dependenciesUpdated = this._updateDependencies();
-      updated = updated || dependenciesUpdated;
-    } while (updated);
+      const dependenciesUpdated: boolean = this._updateDependencies();
+      changed = changed || dependenciesUpdated;
+    } while (changed);
 
     if (shouldCommit) {
       this._updatePackageJsonFiles();
@@ -160,7 +159,7 @@ export class VersionManager {
         const versionPolicy: VersionPolicy =
           this._versionPolicyConfiguration.getVersionPolicy(projectVersionPolicyName);
 
-        const oldVersion =
+        const oldVersion: string =
           this._updatedProjects.get(rushProject.packageName)?.version || rushProject.packageJson.version;
         const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson, force);
         changed = changed || updatedProject?.version !== oldVersion;
