@@ -23,6 +23,7 @@ export interface IRushPluginManifest {
   entryPoint?: string;
   optionsSchema?: string;
   associatedCommands?: string[];
+  featureKinds?: string[];
   commandLineJsonFilePath?: string;
 }
 

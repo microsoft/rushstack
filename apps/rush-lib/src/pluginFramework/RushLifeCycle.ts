@@ -74,3 +74,9 @@ export class RushLifecycleHooks {
     return new AsyncSeriesHook<IPhasedCommand>(['command'], key);
   }, 'runPhasedCommand');
 }
+
+export class PluginManagerLifecycleHooks {
+  public initializeFeatureKind: HookMap<AsyncSeriesHook<void>> = new HookMap(
+    (key: string) => new AsyncSeriesHook<void>()
+  );
+}

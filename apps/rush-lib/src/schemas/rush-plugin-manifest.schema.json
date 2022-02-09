@@ -32,7 +32,14 @@
             "type": "string"
           },
           "associatedCommands": {
-            "description": "Specifies associated commands with this plugin, plugin will be only installed when an associated command runs.",
+            "description": "Specifies associated commands with this plugin, plugin will be lazy installed and loaded when any associated commands runs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "featureKinds": {
+            "description": "Specifies feature kinds with this plugin, plugin will be lazy installed and loaded when any feature kinds runs.",
             "type": "array",
             "items": {
               "type": "string"

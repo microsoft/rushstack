@@ -10,6 +10,8 @@ import { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
 import { RushSession } from './RushSession';
 import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
+import { PluginManagerLifecycleHooks } from './RushLifeCycle';
+import { FeatureKind } from './FeatureKind';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -33,6 +35,8 @@ export class PluginManager {
   private readonly _loadedPluginNames: Set<string> = new Set<string>();
 
   private _error: Error | undefined;
+
+  public hooks: PluginManagerLifecycleHooks = new PluginManagerLifecycleHooks();
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
@@ -87,6 +91,8 @@ export class PluginManager {
         terminal: this._terminal
       });
     });
+
+    this._setupInitializeFeatureKinds();
   }
 
   /**
@@ -115,7 +121,7 @@ export class PluginManager {
 
   public async reinitializeAllPluginsForCommandAsync(commandName: string): Promise<void> {
     this._error = undefined;
-    await this.tryInitializeUnassociatedPluginsAsync();
+    await this.tryInitializeEagerPluginsAsync();
     await this.tryInitializeAssociatedCommandPluginsAsync(commandName);
   }
 
@@ -128,13 +134,13 @@ export class PluginManager {
     }
   }
 
-  public async tryInitializeUnassociatedPluginsAsync(): Promise<void> {
+  public async tryInitializeEagerPluginsAsync(): Promise<void> {
     try {
-      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getUnassociatedPluginLoaders(
+      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getEagerPluginLoaders(
         this._autoinstallerPluginLoaders
       );
       await this._preparePluginAutoinstallersAsync(autoinstallerPluginLoaders);
-      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getUnassociatedPluginLoaders(
+      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getEagerPluginLoaders(
         this._builtInPluginLoaders
       );
       this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
@@ -175,10 +181,17 @@ export class PluginManager {
     return commandLineConfigurationInfos;
   }
 
-  private _initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
+  private _initializePlugins(
+    pluginLoaders: PluginLoaderBase[],
+    { notThrowSamePluginName }: { notThrowSamePluginName: boolean } = { notThrowSamePluginName: false }
+  ): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
       if (this._loadedPluginNames.has(pluginName)) {
+        if (notThrowSamePluginName) {
+          // No need to apply same plugin name twice
+          return;
+        }
         throw new Error(`Error applying plugin: A plugin with name "${pluginName}" has already been applied`);
       }
       const plugin: IRushPlugin | undefined = pluginLoader.load();
@@ -189,11 +202,11 @@ export class PluginManager {
     }
   }
 
-  private _getUnassociatedPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
+  private _getEagerPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
     pluginLoaders: T[]
   ): T[] {
     return pluginLoaders.filter((pluginLoader) => {
-      return !pluginLoader.pluginManifest.associatedCommands;
+      return !pluginLoader.pluginManifest.associatedCommands && !pluginLoader.pluginManifest.featureKinds;
     });
   }
 
@@ -211,6 +224,32 @@ export class PluginManager {
       plugin.apply(this._rushSession, this._rushConfiguration);
     } catch (e) {
       throw new InternalError(`Error applying "${pluginName}": ${e}`);
+    }
+  }
+
+  private _setupInitializeFeatureKinds(): void {
+    for (const pluginLoader of [...this._builtInPluginLoaders, ...this._autoinstallerPluginLoaders]) {
+      if (Array.isArray(pluginLoader.pluginManifest.featureKinds)) {
+        const { pluginName } = pluginLoader;
+        for (const featureKind of pluginLoader.pluginManifest.featureKinds) {
+          switch (featureKind) {
+            case FeatureKind.buildCacheProvider: {
+              this.hooks.initializeFeatureKind
+                .for(FeatureKind.buildCacheProvider)
+                .tapPromise(pluginName, async () => {
+                  if (pluginLoader instanceof AutoinstallerPluginLoader) {
+                    await this._preparePluginAutoinstallersAsync([pluginLoader]);
+                  }
+                  this._initializePlugins([pluginLoader], { notThrowSamePluginName: true });
+                });
+              break;
+            }
+            default: {
+              // no-default
+            }
+          }
+        }
+      }
     }
   }
 }
