@@ -207,9 +207,6 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
     optimization: {
       minimize: !!production,
       nodeEnv: production ? 'production' : 'development',
-      splitChunks: {
-        chunks: 'all'
-      },
       minimizer: [
         new CssMinimizerPlugin({
           minimizerOptions: {

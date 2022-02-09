@@ -15,11 +15,11 @@ module.exports = function createWebpackConfig({ env, argv, projectRoot, configOv
     entry: {
       // Rush Stack convention is that the entry point for libraries is "src/index.ts"
       // whereas the entry point for apps is "src/start.ts"
-      index: path.resolve(projectRoot, 'lib', 'index.js')
+      [packageNameWithoutScope]: path.resolve(projectRoot, 'lib', 'index.js')
     },
     output: {
       // For libraries, the filename is unhashed so that the package.json "main" field can refer to it
-      filename: `${packageNameWithoutScope}.js`,
+      filename: `[name].js`,
       library: {
         // Use the full package name as the module-id name for AMD
         amd: packageName

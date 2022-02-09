@@ -11,6 +11,11 @@ module.exports = function createWebpackConfig({ env, argv, projectRoot, configOv
     entry: {
       app: path.resolve(projectRoot, 'lib', 'start.js')
     },
+    optimization: {
+      splitChunks: {
+        chunks: 'all'
+      }
+    },
     plugins: [
       // NOTE: If your project's webpack.config.js provides its own "HtmlWebpackPlugin" configuration,
       // it will replace the default definition here.  This replacement is implemented
