@@ -2,10 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  IPackageJson,
+  FileSystem,
+  FileConstants,
+  FileSystemStats
+} from '@rushstack/node-core-library';
 import type * as stream from 'stream';
 import { CommandLineHelper } from '@rushstack/ts-command-line';
 
@@ -235,7 +240,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = FileSystem.getLinkStatistics(filePath);
+      const lstat: FileSystemStats = FileSystem.getLinkStatistics(filePath);
       exists = lstat.isFile();
     } catch (e) {
       /* no-op */
@@ -251,7 +256,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = FileSystem.getLinkStatistics(directoryPath);
+      const lstat: FileSystemStats = FileSystem.getLinkStatistics(directoryPath);
       exists = lstat.isDirectory();
     } catch (e) {
       /* no-op */
@@ -299,7 +304,7 @@ export class Utilities {
         return false;
       }
 
-      const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
+      const inputStats: FileSystemStats = FileSystem.getStatistics(inputFilename);
       if (dateToCompare < inputStats.mtime) {
         return false;
       }
@@ -594,10 +599,6 @@ export class Utilities {
     return new Error('Unable to find rush.json configuration file');
   }
 
-  public static getPackageDepsFilenameForCommand(command: string): string {
-    return `package-deps_${command}.json`;
-  }
-
   public static async usingAsync<TDisposable extends IDisposable>(
     getDisposableAsync: () => Promise<TDisposable> | IDisposable,
     doActionAsync: (disposable: TDisposable) => Promise<void> | void
@@ -774,7 +775,8 @@ export class Utilities {
       stdio: stdio,
       env: keepEnvironment
         ? environment
-        : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
+        : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment }),
+      maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
     };
 
     // This is needed since we specify shell=true below.

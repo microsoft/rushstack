@@ -4,17 +4,19 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "heft test --clean",
-    "start": "heft start"
+    "build": "heft build --clean",
+    "start": "heft start",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "devDependencies": {
+    "@jest/reporters": "~27.4.2",
+    "@jest/types": "~27.4.2",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "eslint": "~7.30.0",
-    "typescript": "~4.4.2",
-    "@jest/reporters": "~25.4.0",
-    "@jest/types": "~25.4.0"
+    "eslint": "~8.7.0",
+    "typescript": "~4.5.2"
   }
 }

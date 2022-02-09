@@ -6,26 +6,27 @@ import events from 'events';
 import * as crypto from 'crypto';
 import type * as stream from 'stream';
 import * as tar from 'tar';
-import { FileSystem, LegacyAdapters, Path, Terminal } from '@rushstack/node-core-library';
-import * as fs from 'fs';
+import { FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
+import { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { Utilities } from '../../utilities/Utilities';
 
-interface IProjectBuildCacheOptions {
+export interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
+  projectOutputFolderNames: ReadonlyArray<string>;
   command: string;
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
-  terminal: Terminal;
+  terminal: ITerminal;
+  phaseName: string;
 }
 
 interface IPathsToCache {
@@ -38,41 +39,51 @@ export class ProjectBuildCache {
    * null === we haven't tried to initialize yet
    * undefined === unable to initialize
    */
-  private static _tarUtility: TarExecutable | null | undefined = null;
+  private static _tarUtilityPromise: Promise<TarExecutable | undefined> | null = null;
 
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
-  private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
+  private readonly _cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
   private readonly _buildCacheEnabled: boolean;
-  private readonly _projectOutputFolderNames: string[];
+  private readonly _cacheWriteEnabled: boolean;
+  private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
-    this._project = options.projectConfiguration.project;
-    this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
-    this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
-    this._buildCacheEnabled = options.buildCacheConfiguration.buildCacheEnabled;
-    this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames || [];
+    const { buildCacheConfiguration, projectConfiguration, projectOutputFolderNames } = options;
+    this._project = projectConfiguration.project;
+    this._localBuildCacheProvider = buildCacheConfiguration.localCacheProvider;
+    this._cloudBuildCacheProvider = buildCacheConfiguration.cloudCacheProvider;
+    this._buildCacheEnabled = buildCacheConfiguration.buildCacheEnabled;
+    this._cacheWriteEnabled = buildCacheConfiguration.cacheWriteEnabled;
+    this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._cacheId = cacheId;
   }
 
-  private static _tryGetTarUtility(terminal: Terminal): TarExecutable | undefined {
-    if (ProjectBuildCache._tarUtility === null) {
-      ProjectBuildCache._tarUtility = TarExecutable.tryInitialize(terminal);
+  private static _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
+    if (ProjectBuildCache._tarUtilityPromise === null) {
+      ProjectBuildCache._tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
     }
 
-    return ProjectBuildCache._tarUtility;
+    return ProjectBuildCache._tarUtilityPromise;
   }
 
   public static async tryGetProjectBuildCache(
     options: IProjectBuildCacheOptions
   ): Promise<ProjectBuildCache | undefined> {
-    const { terminal, projectConfiguration, trackedProjectFiles } = options;
+    const { terminal, projectConfiguration, projectOutputFolderNames, trackedProjectFiles } = options;
     if (!trackedProjectFiles) {
       return undefined;
     }
 
-    if (!ProjectBuildCache._validateProject(terminal, projectConfiguration, trackedProjectFiles)) {
+    if (
+      !ProjectBuildCache._validateProject(
+        terminal,
+        projectConfiguration,
+        projectOutputFolderNames,
+        trackedProjectFiles
+      )
+    ) {
       return undefined;
     }
 
@@ -81,16 +92,17 @@ export class ProjectBuildCache {
   }
 
   private static _validateProject(
-    terminal: Terminal,
+    terminal: ITerminal,
     projectConfiguration: RushProjectConfiguration,
+    projectOutputFolderNames: ReadonlyArray<string>,
     trackedProjectFiles: string[]
   ): boolean {
     const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
       projectConfiguration.project.projectRelativeFolder
     );
     const outputFolders: string[] = [];
-    if (projectConfiguration.projectOutputFolderNames) {
-      for (const outputFolderName of projectConfiguration.projectOutputFolderNames) {
+    if (projectOutputFolderNames) {
+      for (const outputFolderName of projectOutputFolderNames) {
         outputFolders.push(`${normalizedProjectRelativeFolder}/${outputFolderName}/`);
       }
     }
@@ -115,7 +127,7 @@ export class ProjectBuildCache {
     }
   }
 
-  public async tryRestoreFromCacheAsync(terminal: Terminal): Promise<boolean> {
+  public async tryRestoreFromCacheAsync(terminal: ITerminal): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
@@ -171,7 +183,7 @@ export class ProjectBuildCache {
       )
     );
 
-    const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
     if (tarUtility && localCacheEntryPath) {
       const logFilePath: string = this._getTarLogFilePath();
@@ -230,15 +242,15 @@ export class ProjectBuildCache {
     return restoreSuccess;
   }
 
-  public async trySetCacheEntryAsync(terminal: Terminal): Promise<boolean> {
+  public async trySetCacheEntryAsync(terminal: ITerminal): Promise<boolean> {
+    if (!this._cacheWriteEnabled) {
+      // Skip writing local and cloud build caches, without any noise
+      return true;
+    }
+
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
-      return false;
-    }
-
-    if (!this._buildCacheEnabled) {
-      // Skip writing local and cloud build caches, without any noise
       return false;
     }
 
@@ -254,9 +266,11 @@ export class ProjectBuildCache {
 
     let localCacheEntryPath: string | undefined;
 
-    const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
+    const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
-      const tempLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+      const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+      // Derive the temp file from the destination path to ensure they are on the same volume
+      const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}.temp`;
       const logFilePath: string = this._getTarLogFilePath();
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
         archivePath: tempLocalCacheEntryPath,
@@ -264,8 +278,15 @@ export class ProjectBuildCache {
         project: this._project,
         logFilePath
       });
+
       if (tarExitCode === 0) {
-        localCacheEntryPath = tempLocalCacheEntryPath;
+        // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
+        await FileSystem.moveAsync({
+          sourcePath: tempLocalCacheEntryPath,
+          destinationPath: finalLocalCacheEntryPath,
+          overwrite: true
+        });
+        localCacheEntryPath = finalLocalCacheEntryPath;
       } else {
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
@@ -346,82 +367,75 @@ export class ProjectBuildCache {
     return success;
   }
 
-  private async _tryCollectPathsToCacheAsync(terminal: Terminal): Promise<IPathsToCache | undefined> {
+  /**
+   * Walks the declared output folders of the project and collects a list of files.
+   * @returns The list of output files as project-relative paths, or `undefined` if a
+   *   symbolic link was encountered.
+   */
+  private async _tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
     const projectFolderPath: string = this._project.projectFolder;
-    const outputFolderNamesThatExist: boolean[] = await Promise.all(
-      this._projectOutputFolderNames.map((outputFolderName) =>
-        FileSystem.existsAsync(`${projectFolderPath}/${outputFolderName}`)
-      )
-    );
-    const filteredOutputFolderNames: string[] = [];
-    for (let i: number = 0; i < outputFolderNamesThatExist.length; i++) {
-      if (outputFolderNamesThatExist[i]) {
-        filteredOutputFolderNames.push(this._projectOutputFolderNames[i]);
-      }
-    }
-
-    let encounteredEnumerationIssue: boolean = false;
-    function symbolicLinkPathCallback(entryPath: string): void {
-      terminal.writeError(`Unable to include "${entryPath}" in build cache. It is a symbolic link.`);
-      encounteredEnumerationIssue = true;
-    }
-
     const outputFilePaths: string[] = [];
-    for (const filteredOutputFolderName of filteredOutputFolderNames) {
-      if (encounteredEnumerationIssue) {
-        return undefined;
-      }
+    const queue: [string, string][] = [];
 
-      const outputFilePathsForFolder: AsyncIterableIterator<string> = this._getPathsInFolder(
-        terminal,
-        symbolicLinkPathCallback,
-        filteredOutputFolderName,
-        `${projectFolderPath}/${filteredOutputFolderName}`
-      );
+    const filteredOutputFolderNames: string[] = [];
 
-      for await (const outputFilePath of outputFilePathsForFolder) {
-        outputFilePaths.push(outputFilePath);
+    let hasSymbolicLinks: boolean = false;
+
+    // Adds child directories to the queue, files to the path list, and bails on symlinks
+    function processChildren(relativePath: string, diskPath: string, children: FolderItem[]): void {
+      for (const child of children) {
+        const childRelativePath: string = `${relativePath}/${child.name}`;
+        if (child.isSymbolicLink()) {
+          terminal.writeError(
+            `Unable to include "${childRelativePath}" in build cache. It is a symbolic link.`
+          );
+          hasSymbolicLinks = true;
+        } else if (child.isDirectory()) {
+          queue.push([childRelativePath, `${diskPath}/${child.name}`]);
+        } else {
+          outputFilePaths.push(childRelativePath);
+        }
       }
     }
 
-    if (encounteredEnumerationIssue) {
+    // Handle declared output folders.
+    for (const outputFolder of this._projectOutputFolderNames) {
+      const diskPath: string = `${projectFolderPath}/${outputFolder}`;
+      try {
+        const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
+        processChildren(outputFolder, diskPath, children);
+        // The folder exists, record it
+        filteredOutputFolderNames.push(outputFolder);
+      } catch (error) {
+        if (!FileSystem.isNotExistError(error as Error)) {
+          throw error;
+        }
+
+        // If the folder does not exist, ignore it.
+      }
+    }
+
+    for (const [relativePath, diskPath] of queue) {
+      const children: FolderItem[] = await FileSystem.readFolderItemsAsync(diskPath);
+      processChildren(relativePath, diskPath, children);
+    }
+
+    if (hasSymbolicLinks) {
+      // Symbolic links do not round-trip safely.
       return undefined;
     }
 
+    // Ensure stable output path order.
+    outputFilePaths.sort();
+
     return {
-      filteredOutputFolderNames,
-      outputFilePaths
+      outputFilePaths,
+      filteredOutputFolderNames
     };
   }
 
-  private async *_getPathsInFolder(
-    terminal: Terminal,
-    symbolicLinkPathCallback: (path: string) => void,
-    posixPrefix: string,
-    folderPath: string
-  ): AsyncIterableIterator<string> {
-    const folderEntries: fs.Dirent[] = await LegacyAdapters.convertCallbackToPromise(fs.readdir, folderPath, {
-      withFileTypes: true
-    });
-    for (const folderEntry of folderEntries) {
-      const entryPath: string = `${posixPrefix}/${folderEntry.name}`;
-      if (folderEntry.isSymbolicLink()) {
-        symbolicLinkPathCallback(entryPath);
-      } else if (folderEntry.isDirectory()) {
-        yield* this._getPathsInFolder(
-          terminal,
-          symbolicLinkPathCallback,
-          entryPath,
-          `${folderPath}/${folderEntry.name}`
-        );
-      } else {
-        yield entryPath;
-      }
-    }
-  }
-
   private _getTarLogFilePath(): string {
-    return path.join(this._project.projectRushTempFolder, 'build-cache-tar.log');
+    return path.join(this._project.projectRushTempFolder, `${this._cacheId}.log`);
   }
 
   private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
@@ -449,7 +463,7 @@ export class ProjectBuildCache {
         projectsThatHaveBeenProcessed.add(projectToProcess);
 
         const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
-          projectToProcess.packageName,
+          projectToProcess,
           options.terminal
         );
         if (!projectState) {
@@ -470,9 +484,10 @@ export class ProjectBuildCache {
 
     const sortedProjectStates: string[] = projectStates.sort();
     const hash: crypto.Hash = crypto.createHash('sha1');
-    const serializedOutputFolders: string = JSON.stringify(
-      options.projectConfiguration.projectOutputFolderNames
-    );
+    // This value is used to force cache bust when the build cache algorithm changes
+    hash.update(`${RushConstants.buildCacheVersion}`);
+    hash.update(RushConstants.hashDelimiter);
+    const serializedOutputFolders: string = JSON.stringify(options.projectOutputFolderNames);
     hash.update(serializedOutputFolders);
     hash.update(RushConstants.hashDelimiter);
     hash.update(options.command);
@@ -486,7 +501,8 @@ export class ProjectBuildCache {
 
     return options.buildCacheConfiguration.getCacheEntryId({
       projectName: options.projectConfiguration.project.packageName,
-      projectStateHash
+      projectStateHash,
+      phaseName: options.phaseName
     });
   }
 }

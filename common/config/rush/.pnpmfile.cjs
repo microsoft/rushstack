@@ -42,7 +42,7 @@ function readPackage(packageJson, context) {
     }
 
     switch (packageJson.version) {
-      case '3.11.2': {
+      case '3.11.3': {
         // This is for heft-webpack4-plugin and the other projects that use Webpack 4
         packageJson.peerDependencies['@types/webpack'] = '^4.0.0';
         break;

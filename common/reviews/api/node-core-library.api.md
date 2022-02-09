@@ -10,7 +10,7 @@ import * as child_process from 'child_process';
 import * as fs from 'fs';
 
 // @public
-export const enum AlreadyExistsBehavior {
+export enum AlreadyExistsBehavior {
     Error = "error",
     Ignore = "ignore",
     Overwrite = "overwrite"
@@ -31,8 +31,8 @@ export class AnsiEscape {
 
 // @beta
 export class Async {
-    static forEachAsync<TEntry>(array: TEntry[], callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
-    static mapAsync<TEntry, TRetVal>(array: TEntry[], callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
+    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static sleep(ms: number): Promise<void>;
 }
 
@@ -128,7 +128,7 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
 }
 
 // @public
-export const enum Encoding {
+export enum Encoding {
     // (undocumented)
     Utf8 = "utf8"
 }
@@ -180,7 +180,7 @@ export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableS
 export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit' | NodeJS.WritableStream | NodeJS.ReadableStream | number | undefined;
 
 // @public
-export const enum FileConstants {
+export enum FileConstants {
     PackageJson = "package.json"
 }
 
@@ -233,8 +233,14 @@ export class FileSystem {
     static readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string>;
     static readFileToBuffer(filePath: string): Buffer;
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
+    // @deprecated (undocumented)
     static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
+    // @deprecated (undocumented)
     static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
+    static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
+    static readFolderItemNamesAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
+    static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[];
+    static readFolderItemsAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<FolderItem[]>;
     static readLink(path: string): string;
     static readLinkAsync(path: string): Promise<string>;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
@@ -261,10 +267,13 @@ export class FileWriter {
 }
 
 // @public
-export const enum FolderConstants {
+export enum FolderConstants {
     Git = ".git",
     NodeModules = "node_modules"
 }
+
+// @public
+export type FolderItem = fs.Dirent;
 
 // @public
 export interface IAnsiEscapeConvertForTestsOptions {
@@ -465,7 +474,7 @@ export interface INodePackageJson {
     optionalDependencies?: IPackageJsonDependencyTable;
     peerDependencies?: IPackageJsonDependencyTable;
     private?: boolean;
-    repository?: string;
+    repository?: string | IPackageJsonRepository;
     resolutions?: Record<string, string>;
     scripts?: IPackageJsonScriptTable;
     // @beta
@@ -497,6 +506,13 @@ export interface IPackageJsonDependencyTable {
 // @public
 export interface IPackageJsonLookupParameters {
     loadExtraFields?: boolean;
+}
+
+// @public
+export interface IPackageJsonRepository {
+    directory?: string;
+    type: string;
+    url: string;
 }
 
 // @public
@@ -542,6 +558,22 @@ export interface IStringBufferOutputOptions {
 export interface IStringBuilder {
     append(text: string): void;
     toString(): string;
+}
+
+// @beta (undocumented)
+export interface ITerminal {
+    registerProvider(provider: ITerminalProvider): void;
+    unregisterProvider(provider: ITerminalProvider): void;
+    write(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeError(...messageParts: (string | IColorableSequence)[]): void;
+    writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
+    writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeWarning(...messageParts: (string | IColorableSequence)[]): void;
+    writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
 }
 
 // @beta
@@ -623,7 +655,7 @@ export class MapExtensions {
 }
 
 // @public
-export const enum NewlineKind {
+export enum NewlineKind {
     CrLf = "\r\n",
     Lf = "\n",
     OsDefault = "os"
@@ -678,7 +710,7 @@ export class Path {
 }
 
 // @public
-export const enum PosixModeBits {
+export enum PosixModeBits {
     AllExecute = 73,
     AllRead = 292,
     AllWrite = 146,
@@ -739,7 +771,7 @@ export class StringBuilder implements IStringBuilder {
 }
 
 // @beta
-export class Terminal {
+export class Terminal implements ITerminal {
     constructor(provider: ITerminalProvider);
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;

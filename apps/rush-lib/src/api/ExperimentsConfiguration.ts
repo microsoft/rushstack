@@ -40,12 +40,18 @@ export interface IExperimentsJson {
    * This will not replay warnings from the cached build.
    */
   buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
+
+  /**
+   * If true, the phased commands feature is enabled. To use this feature, create a "phased" command
+   * in common/config/rush/command-line.json.
+   */
+  phasedCommands?: boolean;
 }
 
 /**
  * Use this class to load the "common/config/rush/experiments.json" config file.
  * This file allows repo maintainers to enable and disable experimental Rush features.
- * @beta
+ * @public
  */
 export class ExperimentsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -74,6 +80,7 @@ export class ExperimentsConfiguration {
 
   /**
    * Get the experiments configuration.
+   * @beta
    */
   public get configuration(): Readonly<IExperimentsJson> {
     return this._experimentConfiguration;

@@ -35,8 +35,8 @@ describe('ProjectBuildCache', () => {
           isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false
         }
       } as unknown as BuildCacheConfiguration,
+      projectOutputFolderNames: ['dist'],
       projectConfiguration: {
-        projectOutputFolderNames: ['dist'],
         project: {
           packageName: 'acme-wizard',
           projectRelativeFolder: 'apps/acme-wizard',
@@ -46,7 +46,8 @@ describe('ProjectBuildCache', () => {
       command: 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       projectChangeAnalyzer,
-      terminal
+      terminal,
+      phaseName: 'build'
     });
 
     return subject;
@@ -56,7 +57,7 @@ describe('ProjectBuildCache', () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
       const subject: ProjectBuildCache = (await prepareSubject({}))!;
       expect(subject['_cacheId']).toMatchInlineSnapshot(
-        `"acme-wizard/e229f8765b7d450a8a84f711a81c21e37935d661"`
+        `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
       );
     });
 

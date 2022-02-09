@@ -1,6 +1,148 @@
 # Change Log - @rushstack/stream-collator
 
-This log was last generated on Thu, 23 Sep 2021 00:10:41 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+
+## 4.0.156
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 4.0.155
+Fri, 21 Jan 2022 01:10:41 GMT
+
+_Version update only_
+
+## 4.0.154
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 4.0.153
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 4.0.152
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 4.0.151
+Tue, 14 Dec 2021 19:27:52 GMT
+
+_Version update only_
+
+## 4.0.150
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 4.0.149
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 4.0.148
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 4.0.147
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 4.0.146
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 4.0.145
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 4.0.144
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 4.0.143
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 4.0.142
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 4.0.141
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 4.0.140
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 4.0.139
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 4.0.138
+Wed, 13 Oct 2021 15:09:55 GMT
+
+_Version update only_
+
+## 4.0.137
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 4.0.136
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 4.0.135
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 4.0.134
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 4.0.133
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 4.0.132
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 4.0.131
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 4.0.130
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 4.0.129
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
 
 ## 4.0.128
 Thu, 23 Sep 2021 00:10:41 GMT

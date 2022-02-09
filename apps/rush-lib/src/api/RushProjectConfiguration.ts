@@ -2,25 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, ITerminal, Path } from '@rushstack/node-core-library';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
 import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { CommandLineConfiguration } from './CommandLineConfiguration';
+import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 
 /**
  * Describes the file structure for the "<project root>/config/rush-project.json" config file.
  */
-interface IRushProjectJson {
-  /**
-   * A list of folder names under the project root that should be cached.
-   *
-   * These folders should not be tracked by git.
-   */
-  projectOutputFolderNames?: string[];
-
+export interface IRushProjectJson {
   /**
    * The incremental analyzer can skip Rush commands for projects whose input files have
    * not changed since the last build. Normally, every Git-tracked file under the project
@@ -31,57 +25,133 @@ interface IRushProjectJson {
   incrementalBuildIgnoredGlobs?: string[];
 
   /**
-   * Additional project-specific options related to build caching.
-   */
-  buildCacheOptions?: IBuildCacheOptionsJson;
-}
-
-interface IBuildCacheOptionsJson extends IBuildCacheOptionsBase {
-  /**
-   * Allows for fine-grained control of cache for individual commands.
-   */
-  optionsForCommands?: ICacheOptionsForCommand[];
-}
-
-export interface IBuildCacheOptionsBase {
-  /**
    * Disable caching for this project. The project will never be restored from cache.
    * This may be useful if this project affects state outside of its folder.
    *
-   * This option is only used when the cloud build cache is enabled for the repo. You can set
-   * disableBuildCache=true to disable caching for a specific project. This is a useful workaround
+   * This option is only used when the build cache is enabled for the repo. You can set
+   * disableBuildCacheForProject=true to disable caching for a specific project. This is a useful workaround
    * if that project's build scripts violate the assumptions of the cache, for example by writing
    * files outside the project folder. Where possible, a better solution is to improve the build scripts
    * to be compatible with caching.
    */
-  disableBuildCache?: boolean;
+  disableBuildCacheForProject?: boolean;
+
+  operationSettings?: IOperationSettings[];
 }
 
-export interface IBuildCacheOptions extends IBuildCacheOptionsBase {
+export interface IOperationSettings {
   /**
-   * Allows for fine-grained control of cache for individual commands.
+   * The name of the operation. This should be a key in the `package.json`'s `scripts` object.
    */
-  optionsForCommandsByName: Map<string, ICacheOptionsForCommand>;
-}
-
-export interface ICacheOptionsForCommand {
-  /**
-   * The command name.
-   */
-  name: string;
+  operationName: string;
 
   /**
-   * Disable caching for this command.
-   * This may be useful if this command for this project affects state outside of this project folder.
+   * Specify the folders where this operation writes its output files. If enabled, the Rush build
+   * cache will restore these folders from the cache. The strings are folder names under the project
+   * root folder.
    *
-   * This option is only used when the cloud build cache is enabled for the repo. You can set
-   * disableBuildCache=true to disable caching for a command in a specific project. This is a useful workaround
-   * if that project's build scripts violate the assumptions of the cache, for example by writing
-   * files outside the project folder. Where possible, a better solution is to improve the build scripts
-   * to be compatible with caching.
+   * These folders should not be tracked by Git. They must not contain symlinks.
    */
-  disableBuildCache?: boolean;
+  outputFolderNames?: string[];
+
+  /**
+   * Disable caching for this operation. The operation will never be restored from cache.
+   * This may be useful if this operation affects state outside of its folder.
+   *
+   * This option is only used when the build cache is enabled for the repo. You can set
+   * disableBuildCacheForOperation=true to disable caching for a specific project operation.
+   * This is a useful workaround if that project's build scripts violate the assumptions of the cache,
+   * for example by writing files outside the project folder. Where possible, a better solution is to improve
+   * the build scripts to be compatible with caching.
+   */
+  disableBuildCacheForOperation?: boolean;
 }
+
+interface IOldRushProjectJson {
+  projectOutputFolderNames?: unknown;
+  phaseOptions?: unknown;
+  buildCacheOptions?: unknown;
+}
+
+export const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
+  new ConfigurationFile<IRushProjectJson>({
+    projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
+    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
+    propertyInheritance: {
+      operationSettings: {
+        inheritanceType: InheritanceType.custom,
+        inheritanceFunction: (
+          child: IOperationSettings[] | undefined,
+          parent: IOperationSettings[] | undefined
+        ) => {
+          if (!child) {
+            return parent;
+          } else if (!parent) {
+            return child;
+          } else {
+            // Merge the outputFolderNames arrays
+            const resultOperationSettingsByOperationName: Map<string, IOperationSettings> = new Map();
+            for (const parentOperationSettings of parent) {
+              resultOperationSettingsByOperationName.set(
+                parentOperationSettings.operationName,
+                parentOperationSettings
+              );
+            }
+
+            const childEncounteredOperationNames: Set<string> = new Set();
+            for (const childOperationSettings of child) {
+              const operationName: string = childOperationSettings.operationName;
+              if (childEncounteredOperationNames.has(operationName)) {
+                // If the operation settings already exist, but didn't come from the parent, then
+                // it shows up multiple times in the child.
+                const childSourceFilePath: string =
+                  RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(child)!;
+                throw new Error(
+                  `The operation "${operationName}" occurs multiple times in the "operationSettings" array ` +
+                    `in "${childSourceFilePath}".`
+                );
+              }
+
+              childEncounteredOperationNames.add(operationName);
+
+              let mergedOperationSettings: IOperationSettings | undefined =
+                resultOperationSettingsByOperationName.get(operationName);
+              if (mergedOperationSettings) {
+                // The parent operation settings object already exists, so append to the outputFolderNames
+                const outputFolderNames: string[] | undefined =
+                  mergedOperationSettings.outputFolderNames && childOperationSettings.outputFolderNames
+                    ? [
+                        ...mergedOperationSettings.outputFolderNames,
+                        ...childOperationSettings.outputFolderNames
+                      ]
+                    : mergedOperationSettings.outputFolderNames || childOperationSettings.outputFolderNames;
+
+                mergedOperationSettings = {
+                  ...mergedOperationSettings,
+                  ...childOperationSettings,
+                  outputFolderNames
+                };
+                resultOperationSettingsByOperationName.set(operationName, mergedOperationSettings);
+              } else {
+                resultOperationSettingsByOperationName.set(operationName, childOperationSettings);
+              }
+            }
+
+            return Array.from(resultOperationSettingsByOperationName.values());
+          }
+        }
+      },
+      incrementalBuildIgnoredGlobs: {
+        inheritanceType: InheritanceType.replace
+      }
+    }
+  });
+
+const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IOldRushProjectJson> =
+  new ConfigurationFile<IOldRushProjectJson>({
+    projectRelativeFilePath: RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath,
+    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'anything.schema.json')
+  });
 
 /**
  * Use this class to load the "config/rush-project.json" config file.
@@ -90,88 +160,32 @@ export interface ICacheOptionsForCommand {
  * @public
  */
 export class RushProjectConfiguration {
-  private static _projectBuildCacheConfigurationFile: ConfigurationFile<IRushProjectJson> =
-    new ConfigurationFile<IRushProjectJson>({
-      projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
-      jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
-      propertyInheritance: {
-        projectOutputFolderNames: {
-          inheritanceType: InheritanceType.append
-        },
-        incrementalBuildIgnoredGlobs: {
-          inheritanceType: InheritanceType.replace
-        },
-        buildCacheOptions: {
-          inheritanceType: InheritanceType.custom,
-          inheritanceFunction: (
-            current: IBuildCacheOptionsJson | undefined,
-            parent: IBuildCacheOptionsJson | undefined
-          ): IBuildCacheOptionsJson | undefined => {
-            if (!current) {
-              return parent;
-            } else if (!parent) {
-              return current;
-            } else {
-              return {
-                ...parent,
-                ...current,
-                optionsForCommands: [
-                  ...(parent.optionsForCommands || []),
-                  ...(current.optionsForCommands || [])
-                ]
-              };
-            }
-          }
-        }
-      }
-    });
-
   private static readonly _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> =
     new Map();
 
   public readonly project: RushConfigurationProject;
 
   /**
-   * A list of folder names under the project root that should be cached.
-   *
-   * These folders should not be tracked by git.
+   * {@inheritdoc IRushProjectJson.incrementalBuildIgnoredGlobs}
    */
-  public readonly projectOutputFolderNames?: string[];
+  public readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
 
   /**
-   * The incremental analyzer can skip Rush commands for projects whose input files have
-   * not changed since the last build. Normally, every Git-tracked file under the project
-   * folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific
-   * files, specified as globs relative to the project folder. The list of file globs will
-   * be interpreted the same way your .gitignore file is.
+   * {@inheritdoc IRushProjectJson.disableBuildCacheForProject}
    */
-  public readonly incrementalBuildIgnoredGlobs?: string[];
+  public readonly disableBuildCacheForProject: boolean;
 
-  /**
-   * Project-specific cache options.
-   */
-  public readonly cacheOptions: IBuildCacheOptions;
+  public readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
 
-  private constructor(project: RushConfigurationProject, rushProjectJson: IRushProjectJson) {
+  private constructor(
+    project: RushConfigurationProject,
+    rushProjectJson: IRushProjectJson,
+    operationSettingsByOperationName: ReadonlyMap<string, IOperationSettings>
+  ) {
     this.project = project;
-
-    this.projectOutputFolderNames = rushProjectJson.projectOutputFolderNames;
-
-    this.incrementalBuildIgnoredGlobs = rushProjectJson.incrementalBuildIgnoredGlobs;
-
-    const optionsForCommandsByName: Map<string, ICacheOptionsForCommand> = new Map<
-      string,
-      ICacheOptionsForCommand
-    >();
-    if (rushProjectJson.buildCacheOptions?.optionsForCommands) {
-      for (const cacheOptionsForCommand of rushProjectJson.buildCacheOptions.optionsForCommands) {
-        optionsForCommandsByName.set(cacheOptionsForCommand.name, cacheOptionsForCommand);
-      }
-    }
-    this.cacheOptions = {
-      disableBuildCache: rushProjectJson.buildCacheOptions?.disableBuildCache,
-      optionsForCommandsByName
-    };
+    this.incrementalBuildIgnoredGlobs = rushProjectJson.incrementalBuildIgnoredGlobs || [];
+    this.disableBuildCacheForProject = rushProjectJson.disableBuildCacheForProject || false;
+    this.operationSettingsByOperationName = operationSettingsByOperationName;
   }
 
   /**
@@ -179,37 +193,28 @@ export class RushProjectConfiguration {
    */
   public static async tryLoadForProjectAsync(
     project: RushConfigurationProject,
-    repoCommandLineConfiguration: CommandLineConfiguration | undefined,
-    terminal: Terminal,
-    skipCache?: boolean
+    repoCommandLineConfiguration: CommandLineConfiguration,
+    terminal: ITerminal
   ): Promise<RushProjectConfiguration | undefined> {
     // false is a signal that the project config does not exist
-    const cacheEntry: RushProjectConfiguration | false | undefined = skipCache
-      ? undefined
-      : RushProjectConfiguration._configCache.get(project);
+    const cacheEntry: RushProjectConfiguration | false | undefined =
+      RushProjectConfiguration._configCache.get(project);
     if (cacheEntry !== undefined) {
       return cacheEntry || undefined;
     }
 
-    const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
-      projectFolderPath: project.projectFolder
-    });
-
-    const rushProjectJson: IRushProjectJson | undefined =
-      await this._projectBuildCacheConfigurationFile.tryLoadConfigurationFileForProjectAsync(
-        terminal,
-        project.projectFolder,
-        rigConfig
-      );
+    const rushProjectJson: IRushProjectJson | undefined = await this._tryLoadJsonForProjectAsync(
+      project,
+      terminal
+    );
 
     if (rushProjectJson) {
-      RushProjectConfiguration._validateConfiguration(
+      const result: RushProjectConfiguration = RushProjectConfiguration._getRushProjectConfiguration(
         project,
         rushProjectJson,
         repoCommandLineConfiguration,
         terminal
       );
-      const result: RushProjectConfiguration = new RushProjectConfiguration(project, rushProjectJson);
       RushProjectConfiguration._configCache.set(project, result);
       return result;
     } else {
@@ -218,69 +223,164 @@ export class RushProjectConfiguration {
     }
   }
 
-  private static _validateConfiguration(
+  /**
+   * Load only the `incrementalBuildIgnoredGlobs` property from the rush-project.json file, skipping
+   * validation of other parts of the config file.
+   *
+   * @remarks
+   * This function exists to allow the ProjectChangeAnalyzer to load just the ignore globs without
+   * having to validate the rest of the `rush-project.json` file against the repo's command-line configuration.
+   */
+  public static async tryLoadIgnoreGlobsForProjectAsync(
     project: RushConfigurationProject,
-    rushProjectJson: IRushProjectJson,
-    repoCommandLineConfiguration: CommandLineConfiguration | undefined,
-    terminal: Terminal
-  ): void {
-    const invalidFolderNames: string[] = [];
-    for (const projectOutputFolder of rushProjectJson.projectOutputFolderNames || []) {
-      if (projectOutputFolder.match(/[\/\\]/)) {
-        invalidFolderNames.push(projectOutputFolder);
+    terminal: ITerminal
+  ): Promise<ReadonlyArray<string> | undefined> {
+    const rushProjectJson: IRushProjectJson | undefined = await this._tryLoadJsonForProjectAsync(
+      project,
+      terminal
+    );
+
+    return rushProjectJson?.incrementalBuildIgnoredGlobs;
+  }
+
+  private static async _tryLoadJsonForProjectAsync(
+    project: RushConfigurationProject,
+    terminal: ITerminal
+  ): Promise<IRushProjectJson | undefined> {
+    const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+      projectFolderPath: project.projectFolder
+    });
+
+    try {
+      return await RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        project.projectFolder,
+        rigConfig
+      );
+    } catch (e) {
+      // Detect if the project is using the old rush-project.json schema
+      let oldRushProjectJson: IOldRushProjectJson | undefined;
+      try {
+        oldRushProjectJson =
+          await OLD_RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+            terminal,
+            project.projectFolder,
+            rigConfig
+          );
+      } catch (e) {
+        // Ignore
+      }
+
+      if (
+        oldRushProjectJson?.projectOutputFolderNames ||
+        oldRushProjectJson?.phaseOptions ||
+        oldRushProjectJson?.buildCacheOptions
+      ) {
+        throw new Error(
+          `The ${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file appears to be ` +
+            'in an outdated format. Please see the UPGRADING.md notes for details. ' +
+            'Quick link: https://rushjs.io/link/upgrading'
+        );
+      } else {
+        throw e;
       }
     }
+  }
 
-    if (invalidFolderNames.length > 0) {
-      terminal.writeErrorLine(
-        `Invalid project configuration for project "${project.packageName}". Entries in ` +
-          '"projectOutputFolderNames" must not contain slashes and the following entries do: ' +
-          invalidFolderNames.join(', ')
-      );
-    }
+  private static _getRushProjectConfiguration(
+    project: RushConfigurationProject,
+    rushProjectJson: IRushProjectJson,
+    repoCommandLineConfiguration: CommandLineConfiguration,
+    terminal: ITerminal
+  ): RushProjectConfiguration {
+    const operationSettingsByOperationName: Map<string, IOperationSettings> = new Map<
+      string,
+      IOperationSettings
+    >();
+    if (rushProjectJson.operationSettings) {
+      for (const operationSettings of rushProjectJson.operationSettings) {
+        const operationName: string = operationSettings.operationName;
+        const existingOperationSettings: IOperationSettings | undefined =
+          operationSettingsByOperationName.get(operationName);
+        if (existingOperationSettings) {
+          const existingOperationSettingsJsonPath: string | undefined =
+            RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(existingOperationSettings);
+          const operationSettingsJsonPath: string | undefined =
+            RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(operationSettings);
+          let errorMessage: string =
+            `The operation "${operationName}" appears multiple times in the "${project.packageName}" project's ` +
+            `${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file's ` +
+            'operationSettings property.';
+          if (existingOperationSettingsJsonPath && operationSettingsJsonPath) {
+            if (existingOperationSettingsJsonPath !== operationSettingsJsonPath) {
+              errorMessage +=
+                ` It first appears in "${existingOperationSettingsJsonPath}" and again ` +
+                `in "${operationSettingsJsonPath}".`;
+            } else if (
+              !Path.convertToSlashes(existingOperationSettingsJsonPath).startsWith(
+                Path.convertToSlashes(project.projectFolder)
+              )
+            ) {
+              errorMessage += ` It appears multiple times in "${operationSettingsJsonPath}".`;
+            }
+          }
 
-    const duplicateCommandNames: Set<string> = new Set<string>();
-    const invalidCommandNames: string[] = [];
-    if (rushProjectJson.buildCacheOptions?.optionsForCommands) {
-      const commandNames: Set<string> = new Set<string>([
-        RushConstants.buildCommandName,
-        RushConstants.rebuildCommandName
-      ]);
-      if (repoCommandLineConfiguration) {
-        for (const command of repoCommandLineConfiguration.commands) {
-          if (command.commandKind === RushConstants.bulkCommandKind) {
-            commandNames.add(command.name);
+          terminal.writeErrorLine(errorMessage);
+        } else {
+          operationSettingsByOperationName.set(operationName, operationSettings);
+        }
+      }
+
+      // For each phased command, check if any of its phases' output folders overlap.
+      for (const command of repoCommandLineConfiguration.commands.values()) {
+        if (command.commandKind === 'phased') {
+          const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> =
+            new OverlappingPathAnalyzer<string>();
+
+          for (const phase of command.phases) {
+            const operationName: string = phase.name;
+            const operationSettings: IOperationSettings | undefined =
+              operationSettingsByOperationName.get(operationName);
+            if (operationSettings) {
+              if (operationSettings.outputFolderNames) {
+                for (const outputFolderName of operationSettings.outputFolderNames) {
+                  const overlappingOperationNames: string[] | undefined =
+                    overlappingPathAnalyzer.addPathAndGetFirstEncounteredLabels(
+                      outputFolderName,
+                      operationName
+                    );
+                  if (overlappingOperationNames) {
+                    const overlapsWithOwnOperation: boolean =
+                      overlappingOperationNames?.includes(operationName);
+                    if (overlapsWithOwnOperation) {
+                      terminal.writeErrorLine(
+                        `The project "${project.packageName}" has a ` +
+                          `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines an ` +
+                          `operation with overlapping paths in the "outputFolderNames" list. The operation is ` +
+                          `"${operationName}", and the conflicting path is "${outputFolderName}".`
+                      );
+                    } else {
+                      terminal.writeErrorLine(
+                        `The project "${project.packageName}" has a ` +
+                          `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines ` +
+                          'two potentially simultaneous operations whose "outputFolderNames" would overlap. ' +
+                          "Simultaneous operations should not delete each other's output." +
+                          `\n\n` +
+                          `The "${outputFolderName}" path overlaps between these operations: ` +
+                          overlappingOperationNames.map((operationName) => `"${operationName}"`).join(', ')
+                      );
+                    }
+
+                    throw new AlreadyReportedError();
+                  }
+                }
+              }
+            }
           }
         }
       }
-
-      const alreadyEncounteredCommandNames: Set<string> = new Set<string>();
-      for (const cacheOptionsForCommand of rushProjectJson.buildCacheOptions.optionsForCommands) {
-        const commandName: string = cacheOptionsForCommand.name;
-        if (!commandNames.has(commandName)) {
-          invalidCommandNames.push(commandName);
-        } else if (alreadyEncounteredCommandNames.has(commandName)) {
-          duplicateCommandNames.add(commandName);
-        } else {
-          alreadyEncounteredCommandNames.add(commandName);
-        }
-      }
     }
 
-    if (invalidCommandNames.length > 0) {
-      terminal.writeErrorLine(
-        `Invalid project configuration fpr project "${project.packageName}". The following ` +
-          'command names in cacheOptions.optionsForCommands are not specified in this repo: ' +
-          invalidCommandNames.join(', ')
-      );
-    }
-
-    if (duplicateCommandNames.size > 0) {
-      terminal.writeErrorLine(
-        `Invalid project configuration fpr project "${project.packageName}". The following ` +
-          'command names in cacheOptions.optionsForCommands are specified more than once: ' +
-          Array.from(duplicateCommandNames).join(', ')
-      );
-    }
+    return new RushProjectConfiguration(project, rushProjectJson, operationSettingsByOperationName);
   }
 }

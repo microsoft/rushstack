@@ -1,6 +1,169 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Thu, 23 Sep 2021 00:10:41 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+
+## 0.6.14
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 0.6.13
+Fri, 21 Jan 2022 01:10:41 GMT
+
+_Version update only_
+
+## 0.6.12
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 0.6.11
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.6.10
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.6.9
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 0.6.8
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.6.7
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.6.6
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 0.6.5
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.6.4
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 0.6.3
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.6.2
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 0.6.1
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 0.6.0
+Wed, 24 Nov 2021 01:10:33 GMT
+
+### Minor changes
+
+- Export a getIdentifier function for generating safe JavaScript identifiers.
+
+## 0.5.0
+Thu, 18 Nov 2021 01:10:06 GMT
+
+### Minor changes
+
+- Upgrade to terser 5.10.2, fix source maps in NoopMinifier
+
+## 0.4.36
+Sat, 13 Nov 2021 01:09:28 GMT
+
+### Patches
+
+- Fix a minor mistake in the README.
+
+## 0.4.35
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.4.34
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 0.4.33
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 0.4.32
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 0.4.31
+Wed, 13 Oct 2021 15:09:55 GMT
+
+_Version update only_
+
+## 0.4.30
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 0.4.29
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.4.28
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 0.4.27
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.4.26
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 0.4.25
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 0.4.24
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 0.4.23
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 0.4.22
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
 
 ## 0.4.21
 Thu, 23 Sep 2021 00:10:41 GMT

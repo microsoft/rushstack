@@ -2,6 +2,473 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.44.2",
+      "tag": "@rushstack/heft_v0.44.2",
+      "date": "Wed, 05 Jan 2022 16:07:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.44.1",
+      "tag": "@rushstack/heft_v0.44.1",
+      "date": "Mon, 27 Dec 2021 16:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.10.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.44.0",
+      "tag": "@rushstack/heft_v0.44.0",
+      "date": "Tue, 14 Dec 2021 19:27:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove Jest-specific CLI arguments from Heft. These parameters have been moved to @rushstack/heft-jest-plugin."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.43.2",
+      "tag": "@rushstack/heft_v0.43.2",
+      "date": "Thu, 09 Dec 2021 20:34:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.43.1",
+      "tag": "@rushstack/heft_v0.43.1",
+      "date": "Thu, 09 Dec 2021 00:21:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.43.0",
+      "tag": "@rushstack/heft_v0.43.0",
+      "date": "Wed, 08 Dec 2021 19:05:08 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 4.5"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.42.6",
+      "tag": "@rushstack/heft_v0.42.6",
+      "date": "Wed, 08 Dec 2021 16:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.42.5",
+      "tag": "@rushstack/heft_v0.42.5",
+      "date": "Mon, 06 Dec 2021 16:08:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.10.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.42.4",
+      "tag": "@rushstack/heft_v0.42.4",
+      "date": "Fri, 03 Dec 2021 03:05:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.42.3",
+      "tag": "@rushstack/heft_v0.42.3",
+      "date": "Mon, 29 Nov 2021 07:26:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove an unused dependency."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.42.2",
+      "tag": "@rushstack/heft_v0.42.2",
+      "date": "Sat, 06 Nov 2021 00:09:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.42.1",
+      "tag": "@rushstack/heft_v0.42.1",
+      "date": "Fri, 05 Nov 2021 15:09:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.42.0",
+      "tag": "@rushstack/heft_v0.42.0",
+      "date": "Thu, 28 Oct 2021 00:08:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add environment variables for common heft test parameters"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.8",
+      "tag": "@rushstack/heft_v0.41.8",
+      "date": "Wed, 27 Oct 2021 00:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.10.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.7",
+      "tag": "@rushstack/heft_v0.41.7",
+      "date": "Wed, 13 Oct 2021 15:09:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.10.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.6",
+      "tag": "@rushstack/heft_v0.41.6",
+      "date": "Fri, 08 Oct 2021 09:35:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix reuse of TypeScript program to avoid breaking on older versions of @typescript-eslint/typescript-estree"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.5",
+      "tag": "@rushstack/heft_v0.41.5",
+      "date": "Fri, 08 Oct 2021 08:08:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.4",
+      "tag": "@rushstack/heft_v0.41.4",
+      "date": "Thu, 07 Oct 2021 23:43:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Re-use the compiler TypeScript program when running ESLint to reduce overhead"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.3",
+      "tag": "@rushstack/heft_v0.41.3",
+      "date": "Thu, 07 Oct 2021 07:13:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix support for TypeScript 4.4 in --watch mode."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.2",
+      "tag": "@rushstack/heft_v0.41.2",
+      "date": "Wed, 06 Oct 2021 15:08:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. "
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.1",
+      "tag": "@rushstack/heft_v0.41.1",
+      "date": "Wed, 06 Oct 2021 02:41:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace ITerminal with Terminal in data structure values to preserve compatability with plugins written before ITerminal."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.41.0",
+      "tag": "@rushstack/heft_v0.41.0",
+      "date": "Tue, 05 Oct 2021 15:08:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.40.0",
+      "tag": "@rushstack/heft_v0.40.0",
+      "date": "Mon, 04 Oct 2021 15:10:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add register custom parameters feature to Heft."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.39.2",
+      "tag": "@rushstack/heft_v0.39.2",
+      "date": "Fri, 24 Sep 2021 00:09:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.41.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.39.1",
       "tag": "@rushstack/heft_v0.39.1",
       "date": "Thu, 23 Sep 2021 00:10:40 GMT",

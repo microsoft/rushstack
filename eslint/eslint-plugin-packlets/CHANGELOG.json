@@ -1,0 +1,148 @@
+{
+  "name": "@rushstack/eslint-plugin-packlets",
+  "entries": [
+    {
+      "version": "0.3.4",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.3.4",
+      "date": "Mon, 06 Dec 2021 16:08:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for ESLint v8"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.3",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.3.3",
+      "date": "Wed, 27 Oct 2021 00:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.2",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.3.2",
+      "date": "Thu, 07 Oct 2021 07:13:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update typescript-eslint to add support for TypeScript 4.4."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.3.1",
+      "date": "Thu, 23 Sep 2021 00:10:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.3.0",
+      "date": "Mon, 12 Jul 2021 23:08:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade @typescript-eslint/* packages to 4.28.0 (GitHub #2389)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.2.2",
+      "date": "Mon, 12 Apr 2021 15:10:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the @rushstack/packlets/circular-deps rule did not work correctly with TypeScript 4.2"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.2.1",
+      "date": "Tue, 06 Apr 2021 15:14:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix unlisted dependency on @typescript-eslint/experimental-utils"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.2.0",
+      "date": "Wed, 11 Nov 2020 01:08:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an optional \"@rushstack/packlets/readme\" rule that requires a README.md in each packlet folder"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.1.2",
+      "date": "Wed, 28 Oct 2020 01:18:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an exception that occured if a source file was added to the \"src/packlets\" folder, not belonging to any packlet"
+          },
+          {
+            "comment": "Fix an issue where linting was sometimes not performed on MacOS, because Node.js \"path.relative()\" incorrectly assumes that every POSIX file system is case-sensitive"
+          },
+          {
+            "comment": "Fix an issue where @rushstack/packlets/circular-deps did not detect certain types of circular dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.1.1",
+      "date": "Tue, 06 Oct 2020 00:24:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to tutorial project in README.md"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.1.0",
+      "date": "Mon, 05 Oct 2020 22:36:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

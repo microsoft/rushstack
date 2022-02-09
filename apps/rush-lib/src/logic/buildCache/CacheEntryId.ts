@@ -5,6 +5,7 @@ const OPTIONS_ARGUMENT_NAME: string = 'options';
 
 export interface IGenerateCacheEntryIdOptions {
   projectName: string;
+  phaseName: string;
   projectStateHash: string;
 }
 
@@ -12,6 +13,7 @@ export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) =>
 
 const HASH_TOKEN_NAME: string = 'hash';
 const PROJECT_NAME_TOKEN_NAME: string = 'projectName';
+const PHASE_NAME_TOKEN_NAME: string = 'phaseName';
 
 // This regex matches substrings that look like [token]
 const TOKEN_REGEX: RegExp = /\[[^\]]*\]/g;
@@ -76,6 +78,31 @@ export class CacheEntryId {
 
               case 'normalize': {
                 return `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace(/\\+/g, '++').replace(/\\/\/g, '+')}`;
+              }
+
+              default: {
+                throw new Error(`Unexpected attribute "${tokenAttribute}" for the "${tokenName}" token.`);
+              }
+            }
+          }
+
+          case PHASE_NAME_TOKEN_NAME: {
+            switch (tokenAttribute) {
+              case undefined: {
+                throw new Error(
+                  'Either the "normalize" or the "trimPrefix" attribute is required ' +
+                    `for the "${tokenName}" token.`
+                );
+              }
+
+              case 'normalize': {
+                // Replace colons with underscores.
+                return `\${${OPTIONS_ARGUMENT_NAME}.phaseName.replace(/:/g, '_')}`;
+              }
+
+              case 'trimPrefix': {
+                // Trim the "_phase:" prefix from the phase name.
+                return `\${${OPTIONS_ARGUMENT_NAME}.phaseName.replace(/^_phase:/, '')}`;
               }
 
               default: {

@@ -7,6 +7,7 @@ import * as fsx from 'fs-extra';
 
 import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
+import { LegacyAdapters } from './LegacyAdapters';
 
 /**
  * An alias for the Node.js `fs.Stats` object.
@@ -16,6 +17,15 @@ import { PosixModeBits } from './PosixModeBits';
  * @public
  */
 export type FileSystemStats = fs.Stats;
+
+/**
+ * An alias for the Node.js `fs.Dirent` object.
+ *
+ * @remarks
+ * This avoids the need to import the `fs` package when using the {@link FileSystem} API.
+ * @public
+ */
+export type FolderItem = fs.Dirent;
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
@@ -146,7 +156,7 @@ export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptio
  *
  * @public
  */
-export const enum AlreadyExistsBehavior {
+export enum AlreadyExistsBehavior {
   /**
    * If the output file path already exists, try to overwrite the existing object.
    *
@@ -586,19 +596,37 @@ export class FileSystem {
   }
 
   /**
-   * Reads the contents of the folder, not including "." or "..".
+   * @deprecated
+   * Use {@link FileSystem.readFolderItemNames} instead.
+   */
+  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
+    return FileSystem.readFolderItemNames(folderPath, options);
+  }
+
+  /**
+   * @deprecated
+   * Use {@link FileSystem.readFolderItemNamesAsync} instead.
+   */
+  public static async readFolderAsync(
+    folderPath: string,
+    options?: IFileSystemReadFolderOptions
+  ): Promise<string[]> {
+    return await FileSystem.readFolderItemNamesAsync(folderPath, options);
+  }
+
+  /**
+   * Reads the names of folder entries, not including "." or "..".
    * Behind the scenes it uses `fs.readdirSync()`.
    * @param folderPath - The absolute or relative path to the folder which should be read.
    * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
    */
-  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
+  public static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
     return FileSystem._wrapException(() => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
         ...options
       };
 
-      // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       const fileNames: string[] = fsx.readdirSync(folderPath);
       if (options.absolutePaths) {
         return fileNames.map((fileName) => nodeJsPath.resolve(folderPath, fileName));
@@ -609,9 +637,9 @@ export class FileSystem {
   }
 
   /**
-   * An async version of {@link FileSystem.readFolder}.
+   * An async version of {@link FileSystem.readFolderItemNames}.
    */
-  public static async readFolderAsync(
+  public static async readFolderItemNamesAsync(
     folderPath: string,
     options?: IFileSystemReadFolderOptions
   ): Promise<string[]> {
@@ -621,12 +649,66 @@ export class FileSystem {
         ...options
       };
 
-      // @todo: Update this to use Node 10's `withFileTypes: true` option when we drop support for Node 8
       const fileNames: string[] = await fsx.readdir(folderPath);
       if (options.absolutePaths) {
         return fileNames.map((fileName) => nodeJsPath.resolve(folderPath, fileName));
       } else {
         return fileNames;
+      }
+    });
+  }
+
+  /**
+   * Reads the contents of the folder, not including "." or "..", returning objects including the
+   * entry names and types.
+   * Behind the scenes it uses `fs.readdirSync()`.
+   * @param folderPath - The absolute or relative path to the folder which should be read.
+   * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
+   */
+  public static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[] {
+    return FileSystem._wrapException(() => {
+      options = {
+        ...READ_FOLDER_DEFAULT_OPTIONS,
+        ...options
+      };
+
+      const folderEntries: FolderItem[] = fsx.readdirSync(folderPath, { withFileTypes: true });
+      if (options.absolutePaths) {
+        return folderEntries.map((folderEntry) => {
+          folderEntry.name = nodeJsPath.resolve(folderPath, folderEntry.name);
+          return folderEntry;
+        });
+      } else {
+        return folderEntries;
+      }
+    });
+  }
+
+  /**
+   * An async version of {@link FileSystem.readFolderItems}.
+   */
+  public static async readFolderItemsAsync(
+    folderPath: string,
+    options?: IFileSystemReadFolderOptions
+  ): Promise<FolderItem[]> {
+    return await FileSystem._wrapExceptionAsync(async () => {
+      options = {
+        ...READ_FOLDER_DEFAULT_OPTIONS,
+        ...options
+      };
+
+      const folderEntries: FolderItem[] = await LegacyAdapters.convertCallbackToPromise(
+        fs.readdir,
+        folderPath,
+        { withFileTypes: true }
+      );
+      if (options.absolutePaths) {
+        return folderEntries.map((folderEntry) => {
+          folderEntry.name = nodeJsPath.resolve(folderPath, folderEntry.name);
+          return folderEntry;
+        });
+      } else {
+        return folderEntries;
       }
     });
   }
@@ -936,7 +1018,7 @@ export class FileSystem {
       ...options
     };
 
-    if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
+    if ((await FileSystem.getStatisticsAsync(options.sourcePath)).isDirectory()) {
       throw new Error(
         'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
       );

@@ -1,6 +1,162 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+
+## 1.7.1
+Tue, 25 Jan 2022 01:11:07 GMT
+
+### Patches
+
+- Upgrade ESLint to ~8.7.0
+
+## 1.7.0
+Fri, 21 Jan 2022 01:10:41 GMT
+
+### Minor changes
+
+- Include "dist" in the list of cached folders for the "build" and "_phase:build" operations.
+
+## 1.6.0
+Thu, 20 Jan 2022 02:43:46 GMT
+
+### Minor changes
+
+- Update the `rush-project.json` file to follow the new schema and configure the "build" command output folders for the "_phase:build" phase.
+
+## 1.5.2
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 1.5.1
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 1.5.0
+Tue, 14 Dec 2021 19:27:51 GMT
+
+### Minor changes
+
+- Upgrade Jest to v27
+
+## 1.4.3
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 1.4.2
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 1.4.1
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 1.4.0
+Wed, 08 Dec 2021 16:14:05 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.5
+
+## 1.3.0
+Mon, 06 Dec 2021 16:08:32 GMT
+
+### Minor changes
+
+- Bump ESLint to v8
+
+## 1.2.33
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 1.2.32
+Tue, 30 Nov 2021 20:18:41 GMT
+
+### Patches
+
+- Set default Jest environment in Jest configuration to "jest-environment-node"
+
+## 1.2.31
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 1.2.30
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 1.2.29
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 1.2.28
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 1.2.27
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 1.2.26
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 1.2.25
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 1.2.24
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 1.2.23
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 1.2.22
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 1.2.21
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 1.2.20
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 1.2.19
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 1.2.18
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 1.2.17
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
 
 ## 1.2.16
 Thu, 23 Sep 2021 00:10:40 GMT

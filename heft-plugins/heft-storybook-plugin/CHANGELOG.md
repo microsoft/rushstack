@@ -1,6 +1,150 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+
+## 0.1.32
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 0.1.31
+Fri, 21 Jan 2022 01:10:41 GMT
+
+_Version update only_
+
+## 0.1.30
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 0.1.29
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.1.28
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.1.27
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 0.1.26
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.1.25
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.1.24
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 0.1.23
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.1.22
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 0.1.21
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.1.20
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 0.1.19
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 0.1.18
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.1.17
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 0.1.16
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 0.1.15
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 0.1.14
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 0.1.13
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 0.1.12
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.1.11
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 0.1.10
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.1.9
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 0.1.8
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 0.1.7
+Tue, 05 Oct 2021 15:08:37 GMT
+
+_Version update only_
+
+## 0.1.6
+Mon, 04 Oct 2021 15:10:18 GMT
+
+### Patches
+
+- Adopt new Heft RegisterParameter feature.
+
+## 0.1.5
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
 
 ## 0.1.4
 Thu, 23 Sep 2021 00:10:40 GMT

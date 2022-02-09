@@ -52,7 +52,7 @@
     /**
      * File extensions that should be copied from the src folder to the destination folder(s).
      */
-    "fileExtensions": [".sass", ".scss", ".css"]
+    "fileExtensions": []
 
     /**
      * Glob patterns that should be explicitly included.

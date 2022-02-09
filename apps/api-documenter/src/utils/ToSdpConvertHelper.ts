@@ -29,7 +29,7 @@ function convert(inputPath: string, outputPath: string): void {
     return;
   }
 
-  FileSystem.readFolder(inputPath).forEach((name) => {
+  FileSystem.readFolderItemNames(inputPath).forEach((name) => {
     const fpath: string = path.join(inputPath, name);
     if (FileSystem.getStatistics(fpath).isFile()) {
       // only convert yaml
@@ -89,8 +89,7 @@ function convertToPackageSDP(transfomredClass: IYamlApiFile): PackageYamlModel {
       } else if (child.endsWith(':enum')) {
         assignPackageModelFields(packageModel, 'enums', child);
       } else if (child.endsWith(':type')) {
-        // version 1 ignore typeAlias
-        // assignPackageModelFields(packageModel, "typeAliases", child);
+        assignPackageModelFields(packageModel, 'typeAliases', child);
       } else {
         // console.log("other type: ", child)
       }
@@ -291,6 +290,12 @@ function convertCommonYamlModel(
     result.remarks = element.remarks;
   } else {
     result.remarks = '';
+  }
+
+  if (element.example) {
+    result.example = element.example;
+  } else {
+    result.example = [];
   }
 
   result.isPreview = element.isPreview;

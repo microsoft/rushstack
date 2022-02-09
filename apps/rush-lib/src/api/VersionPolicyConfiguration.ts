@@ -6,10 +6,8 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
 import { RushConfigurationProject } from './RushConfigurationProject';
+import { EOL } from 'os';
 
-/**
- * @beta
- */
 export interface IVersionPolicyJson {
   policyName: string;
   definitionName: string;
@@ -18,41 +16,26 @@ export interface IVersionPolicyJson {
   includeEmailInChangeFile?: boolean;
 }
 
-/**
- * @beta
- */
 export interface ILockStepVersionJson extends IVersionPolicyJson {
   version: string;
-  nextBump: string;
+  nextBump?: string;
   mainProject?: string;
 }
 
-/**
- * @beta
- */
 export interface IIndividualVersionJson extends IVersionPolicyJson {
   lockedMajor?: number;
 }
 
-/**
- * @beta
- */
 export enum VersionFormatForPublish {
   original = 'original',
   exact = 'exact'
 }
 
-/**
- * @beta
- */
 export enum VersionFormatForCommit {
   wildcard = 'wildcard',
   original = 'original'
 }
 
-/**
- * @beta
- */
 export interface IVersionPolicyDependencyJson {
   versionFormatForPublish?: VersionFormatForPublish;
   versionFormatForCommit?: VersionFormatForCommit;
@@ -62,7 +45,7 @@ export interface IVersionPolicyDependencyJson {
  * Use this class to load and save the "common/config/rush/version-policies.json" config file.
  * This config file configures how different groups of projects will be published by Rush,
  * and how their version numbers will be determined.
- * @beta
+ * @public
  */
 export class VersionPolicyConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -153,14 +136,18 @@ export class VersionPolicyConfiguration {
    * @param versionPolicyName - version policy name
    * @param newVersion - new version
    */
-  public update(versionPolicyName: string, newVersion: string): void {
+  public update(versionPolicyName: string, newVersion: string, shouldCommit?: boolean): void {
     const policy: VersionPolicy | undefined = this.versionPolicies.get(versionPolicyName);
     if (!policy || !policy.isLockstepped) {
       throw new Error(`Lockstep Version policy with name "${versionPolicyName}" cannot be found`);
     }
     const lockStepVersionPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
+    const previousVersion: string = lockStepVersionPolicy.version;
     if (lockStepVersionPolicy.update(newVersion)) {
-      this._saveFile(true);
+      console.log(
+        `${EOL}Update version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`
+      );
+      this._saveFile(!!shouldCommit);
     }
   }
 

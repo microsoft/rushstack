@@ -2,6 +2,18 @@
   "name": "@rushstack/tree-pattern",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/tree-pattern_v0.2.2",
+      "date": "Wed, 27 Oct 2021 00:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@rushstack/tree-pattern_v0.2.1",
       "date": "Wed, 30 Sep 2020 18:39:17 GMT",

@@ -4,12 +4,16 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 
-import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
+import { FileSystem, IPackageJson, JsonFile, LockFile, NewlineKind } from '@rushstack/node-core-library';
 import { Utilities } from '../utilities/Utilities';
 
 import { PackageName, IParsedPackageNameOrError } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { PackageJsonEditor } from '../api/PackageJsonEditor';
+import { InstallHelpers } from './installManager/InstallHelpers';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { RushConstants } from './RushConstants';
+import { LastInstallFlag } from '../api/LastInstallFlag';
 
 export class Autoinstaller {
   public name: string;
@@ -51,6 +55,81 @@ export class Autoinstaller {
     }
   }
 
+  public async prepareAsync(): Promise<void> {
+    const autoinstallerFullPath: string = this.folderFullPath;
+
+    if (!FileSystem.exists(autoinstallerFullPath)) {
+      throw new Error(
+        `The autoinstaller ${this.name} does not exist, Please run\nrush init-autoinstaller --name ${this.name}\n`
+      );
+    }
+
+    const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
+    await InstallHelpers.ensureLocalPackageManager(
+      this._rushConfiguration,
+      rushGlobalFolder,
+      RushConstants.defaultMaxInstallAttempts
+    );
+
+    // Example: common/autoinstallers/my-task/package.json
+    const relativePathForLogs: string = path.relative(
+      this._rushConfiguration.rushJsonFolder,
+      autoinstallerFullPath
+    );
+
+    console.log(`Acquiring lock for "${relativePathForLogs}" folder...`);
+
+    const lock: LockFile = await LockFile.acquire(autoinstallerFullPath, 'autoinstaller');
+
+    // Example: .../common/autoinstallers/my-task/.rush/temp
+    const lastInstallFlagPath: string = path.join(
+      autoinstallerFullPath,
+      RushConstants.projectRushFolderName,
+      'temp'
+    );
+
+    const packageJsonPath: string = path.join(autoinstallerFullPath, 'package.json');
+    const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
+
+    const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
+      node: process.versions.node,
+      packageManager: this._rushConfiguration.packageManager,
+      packageManagerVersion: this._rushConfiguration.packageManagerToolVersion,
+      packageJson: packageJson
+    });
+
+    if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
+      // Example: ../common/autoinstallers/my-task/node_modules
+      const nodeModulesFolder: string = path.join(autoinstallerFullPath, 'node_modules');
+
+      if (FileSystem.exists(nodeModulesFolder)) {
+        console.log('Deleting old files from ' + nodeModulesFolder);
+        FileSystem.ensureEmptyFolder(nodeModulesFolder);
+      }
+
+      // Copy: .../common/autoinstallers/my-task/.npmrc
+      Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, autoinstallerFullPath);
+
+      console.log(`Installing dependencies under ${autoinstallerFullPath}...\n`);
+
+      Utilities.executeCommand({
+        command: this._rushConfiguration.packageManagerToolFilename,
+        args: ['install', '--frozen-lockfile'],
+        workingDirectory: autoinstallerFullPath,
+        keepEnvironment: true
+      });
+
+      // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
+      lastInstallFlag.create();
+
+      console.log('Auto install completed successfully\n');
+    } else {
+      console.log('Autoinstaller folder is already up to date\n');
+    }
+
+    lock.release();
+  }
+
   public update(): void {
     const autoinstallerPackageJsonPath: string = path.join(this.folderFullPath, 'package.json');
 
@@ -90,6 +169,18 @@ export class Autoinstaller {
     });
 
     console.log();
+
+    if (this._rushConfiguration.packageManager === 'npm') {
+      console.log(colors.bold('Running "npm shrinkwrap"...'));
+      Utilities.executeCommand({
+        command: this._rushConfiguration.packageManagerToolFilename,
+        args: ['shrinkwrap'],
+        workingDirectory: this.folderFullPath,
+        keepEnvironment: true
+      });
+      console.log('"npm shrinkwrap" completed');
+      console.log();
+    }
 
     if (!FileSystem.exists(this.shrinkwrapFilePath)) {
       throw new Error(

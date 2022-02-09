@@ -6,14 +6,15 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "heft build --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "12.20.24",
-    "eslint": "~7.30.0",
-    "typescript": "~4.4.2"
+    "eslint": "~8.7.0",
+    "typescript": "~4.5.2"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"

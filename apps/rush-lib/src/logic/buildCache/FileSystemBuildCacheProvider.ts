@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Terminal } from '@rushstack/node-core-library';
+import { FileSystem, ITerminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushUserConfiguration } from '../../api/RushUserConfiguration';
@@ -28,7 +28,7 @@ export class FileSystemBuildCacheProvider {
   }
 
   public async tryGetCacheEntryPathByIdAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     cacheId: string
   ): Promise<string | undefined> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
@@ -40,7 +40,7 @@ export class FileSystemBuildCacheProvider {
   }
 
   public async trySetCacheEntryBufferAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     cacheId: string,
     entryBuffer: Buffer
   ): Promise<string> {

@@ -1,6 +1,130 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Jan 2022 16:07:47 GMT and should not be manually modified.
+
+## 0.2.2
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.2.1
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.2.0
+Tue, 14 Dec 2021 19:27:51 GMT
+
+### Minor changes
+
+- Upgrade Jest to v27
+
+## 0.1.53
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.1.52
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.1.51
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 0.1.50
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.1.49
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
+
+## 0.1.48
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.1.47
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 0.1.46
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.1.45
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 0.1.44
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 0.1.43
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 0.1.42
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 0.1.41
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 0.1.40
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.1.39
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 0.1.38
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.1.37
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 0.1.36
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 0.1.35
+Tue, 05 Oct 2021 15:08:37 GMT
+
+_Version update only_
+
+## 0.1.34
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 0.1.33
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
 
 ## 0.1.32
 Thu, 23 Sep 2021 00:10:40 GMT

@@ -119,7 +119,8 @@ function generateConfiguration(mode, outputFolderName) {
         },
         localizationStats: {
           dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
-        }
+        },
+        globsToIgnore: ['**/invalid-strings.loc.json']
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,

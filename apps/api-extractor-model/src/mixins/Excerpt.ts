@@ -5,7 +5,7 @@ import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/Declara
 import { Text } from '@rushstack/node-core-library';
 
 /** @public */
-export const enum ExcerptTokenKind {
+export enum ExcerptTokenKind {
   /**
    * Generic text without any special properties
    */

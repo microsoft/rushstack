@@ -8,12 +8,13 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { LookupByPath } from '../LookupByPath';
 import { UNINITIALIZED } from '../../utilities/Utilities';
 
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
     jest.spyOn(EnvironmentConfiguration, 'gitBinaryPath', 'get').mockReturnValue(undefined);
-    jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValue(undefined);
+    jest.spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -31,8 +32,12 @@ describe(ProjectChangeAnalyzer.name, () => {
       getCommittedShrinkwrapFilename(): string {
         return 'common/config/rush/pnpm-lock.yaml';
       },
-      findProjectForPosixRelativePath(path: string): RushConfigurationProject | undefined {
-        return projects.find((project) => path.startsWith(project.projectRelativeFolder));
+      getProjectLookupForRoot(root: string): LookupByPath<RushConfigurationProject> {
+        const lookup: LookupByPath<RushConfigurationProject> = new LookupByPath();
+        for (const project of projects) {
+          lookup.setItem(project.projectRelativeFolder, project);
+        }
+        return lookup;
       },
       getProjectByName(name: string): RushConfigurationProject | undefined {
         return projects.find((project) => project.packageName === name);
@@ -42,7 +47,11 @@ describe(ProjectChangeAnalyzer.name, () => {
     const subject: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
 
     subject['_getRepoDeps'] = jest.fn(() => {
-      return files;
+      return {
+        gitPath: 'git',
+        hashes: files,
+        rootDir: ''
+      };
     });
 
     return subject;
@@ -69,21 +78,23 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectDependenciesAsync('apple', terminal)).toEqual(
+      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([['apps/apple/core.js', 'a101']])
       );
-      expect(await subject._tryGetProjectDependenciesAsync('banana', terminal)).toEqual(
+      expect(await subject._tryGetProjectDependenciesAsync(projects[1], terminal)).toEqual(
         new Map([['apps/banana/peel.js', 'b201']])
       );
     });
 
     it('ignores files specified by project configuration files, relative to project folder', async () => {
       // rush-project.json configuration for 'apple'
-      jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValueOnce({
-        incrementalBuildIgnoredGlobs: ['assets/*.png', '*.js.map']
-      } as RushProjectConfiguration);
+      jest
+        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
+        .mockResolvedValueOnce(['assets/*.png', '*.js.map']);
       // rush-project.json configuration for 'banana' does not exist
-      jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValueOnce(undefined);
+      jest
+        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
+        .mockResolvedValueOnce(undefined);
 
       const projects: RushConfigurationProject[] = [
         {
@@ -108,13 +119,13 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectDependenciesAsync('apple', terminal)).toEqual(
+      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([
           ['apps/apple/core.js', 'a101'],
           ['apps/apple/assets/one.jpg', 'a103']
         ])
       );
-      expect(await subject._tryGetProjectDependenciesAsync('banana', terminal)).toEqual(
+      expect(await subject._tryGetProjectDependenciesAsync(projects[1], terminal)).toEqual(
         new Map([
           ['apps/banana/peel.js', 'b201'],
           ['apps/banana/peel.js.map', 'b202']
@@ -124,9 +135,9 @@ describe(ProjectChangeAnalyzer.name, () => {
 
     it('interprets ignored globs as a dot-ignore file (not as individually handled globs)', async () => {
       // rush-project.json configuration for 'apple'
-      jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValue({
-        incrementalBuildIgnoredGlobs: ['*.png', 'assets/*.psd', '!assets/important/**']
-      } as RushProjectConfiguration);
+      jest
+        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
+        .mockResolvedValue(['*.png', 'assets/*.psd', '!assets/important/**']);
 
       const projects: RushConfigurationProject[] = [
         {
@@ -149,7 +160,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       // In a dot-ignore file, the later rule '!assets/important/**' should override the previous
       // rule of '*.png'. This unit test verifies that this behavior doesn't change later if
       // we modify the implementation.
-      expect(await subject._tryGetProjectDependenciesAsync('apple', terminal)).toEqual(
+      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([
           ['apps/apple/assets/important/four.png', 'a104'],
           ['apps/apple/assets/important/five.psd', 'a105'],
@@ -180,13 +191,13 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectDependenciesAsync('apple', terminal)).toEqual(
+      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([
           ['apps/apple/core.js', 'a101'],
           ['common/config/rush/pnpm-lock.yaml', 'ffff']
         ])
       );
-      expect(await subject._tryGetProjectDependenciesAsync('banana', terminal)).toEqual(
+      expect(await subject._tryGetProjectDependenciesAsync(projects[1], terminal)).toEqual(
         new Map([
           ['apps/banana/peel.js', 'b201'],
           ['common/config/rush/pnpm-lock.yaml', 'ffff']
@@ -207,7 +218,12 @@ describe(ProjectChangeAnalyzer.name, () => {
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       try {
-        await subject._tryGetProjectDependenciesAsync('carrot', terminal);
+        await subject._tryGetProjectDependenciesAsync(
+          {
+            packageName: 'carrot'
+          } as RushConfigurationProject,
+          terminal
+        );
         fail('Should have thrown error');
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -231,11 +247,12 @@ describe(ProjectChangeAnalyzer.name, () => {
       // this test makes that expectation explicit.
 
       expect(subject['_data']).toEqual(UNINITIALIZED);
-      expect(await subject._tryGetProjectDependenciesAsync('apple', terminal)).toEqual(
+      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([['apps/apple/core.js', 'a101']])
       );
       expect(subject['_data']).toBeDefined();
-      expect(await subject._tryGetProjectDependenciesAsync('apple', terminal)).toEqual(
+      expect(subject['_data']).not.toEqual(UNINITIALIZED);
+      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([['apps/apple/core.js', 'a101']])
       );
       expect(subject['_getRepoDeps']).toHaveBeenCalledTimes(1);
@@ -259,7 +276,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectStateHashAsync('apple', terminal)).toMatchInlineSnapshot(
+      expect(await subject._tryGetProjectStateHashAsync(projects[0], terminal)).toMatchInlineSnapshot(
         `"265536e325cdfac3fa806a51873d927a712fc6c9"`
       );
     });
@@ -268,7 +285,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       const projectsA: RushConfigurationProject[] = [
         {
           packageName: 'apple',
-          projectFolder: 'apps/apple',
+          projectFolder: '/apps/apple',
           projectRelativeFolder: 'apps/apple'
         } as RushConfigurationProject
       ];
@@ -294,8 +311,8 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subjectB: ProjectChangeAnalyzer = createTestSubject(projectsB, filesB);
 
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-      expect(await subjectA._tryGetProjectStateHashAsync('apple', terminal)).toEqual(
-        await subjectB._tryGetProjectStateHashAsync('apple', terminal)
+      expect(await subjectA._tryGetProjectStateHashAsync(projectsA[0], terminal)).toEqual(
+        await subjectB._tryGetProjectStateHashAsync(projectsB[0], terminal)
       );
     });
   });

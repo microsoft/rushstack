@@ -825,7 +825,7 @@
             {
               "kind": "EnumMember",
               "canonicalReference": "api-documenter-test!DocEnum.Two:member",
-              "docComment": "/**\n * These are some docs for Two\n */\n",
+              "docComment": "/**\n * These are some docs for Two.\n *\n * {@link DocEnum.One} is a direct link to another enum member.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",

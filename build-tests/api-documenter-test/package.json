@@ -6,14 +6,15 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "_phase:build": "node build.js"
   },
   "devDependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@microsoft/api-extractor": "workspace:*",
-    "@types/jest": "25.2.1",
+    "@types/jest": "27.4.0",
     "@types/node": "12.20.24",
     "fs-extra": "~7.0.1",
-    "typescript": "~4.4.2"
+    "typescript": "~4.5.2"
   }
 }

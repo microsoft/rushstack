@@ -1,6 +1,150 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Jan 2022 16:07:47 GMT and should not be manually modified.
+
+## 0.44.2
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.44.1
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.44.0
+Tue, 14 Dec 2021 19:27:51 GMT
+
+### Minor changes
+
+- Remove Jest-specific CLI arguments from Heft. These parameters have been moved to @rushstack/heft-jest-plugin.
+
+## 0.43.2
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.43.1
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.43.0
+Wed, 08 Dec 2021 19:05:08 GMT
+
+### Minor changes
+
+- Add support for TypeScript 4.5
+
+## 0.42.6
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.42.5
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
+
+## 0.42.4
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.42.3
+Mon, 29 Nov 2021 07:26:16 GMT
+
+### Patches
+
+- Remove an unused dependency.
+
+## 0.42.2
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.42.1
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 0.42.0
+Thu, 28 Oct 2021 00:08:22 GMT
+
+### Minor changes
+
+- Add environment variables for common heft test parameters
+
+## 0.41.8
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 0.41.7
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 0.41.6
+Fri, 08 Oct 2021 09:35:07 GMT
+
+### Patches
+
+- Fix reuse of TypeScript program to avoid breaking on older versions of @typescript-eslint/typescript-estree
+
+## 0.41.5
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.41.4
+Thu, 07 Oct 2021 23:43:12 GMT
+
+### Patches
+
+- Re-use the compiler TypeScript program when running ESLint to reduce overhead
+
+## 0.41.3
+Thu, 07 Oct 2021 07:13:35 GMT
+
+### Patches
+
+- Fix support for TypeScript 4.4 in --watch mode.
+
+## 0.41.2
+Wed, 06 Oct 2021 15:08:25 GMT
+
+### Patches
+
+- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. 
+
+## 0.41.1
+Wed, 06 Oct 2021 02:41:48 GMT
+
+### Patches
+
+- Replace ITerminal with Terminal in data structure values to preserve compatability with plugins written before ITerminal.
+
+## 0.41.0
+Tue, 05 Oct 2021 15:08:37 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+
+## 0.40.0
+Mon, 04 Oct 2021 15:10:18 GMT
+
+### Minor changes
+
+- Add register custom parameters feature to Heft.
+
+## 0.39.2
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
 
 ## 0.39.1
 Thu, 23 Sep 2021 00:10:40 GMT

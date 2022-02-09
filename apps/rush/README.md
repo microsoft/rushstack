@@ -69,6 +69,9 @@ For more details and support resources, please visit: https://rushjs.io
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/master/apps/rush/CHANGELOG.md) - Find
   out what's new in the latest version
+- [UPGRADING.md](
+  https://github.com/microsoft/rushstack/blob/master/apps/rush/UPGRADING.md) - Instructions
+  for migrating existing projects to use a newer version of Rush
 - [API Reference](https://rushstack.io/pages/api/rush-lib/)
 
 Rush is part of the [Rush Stack](https://rushstack.io/) family of projects.

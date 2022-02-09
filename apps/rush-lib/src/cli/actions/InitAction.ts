@@ -2,14 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
-import { FileSystem, NewlineKind, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  NewlineKind,
+  InternalError,
+  AlreadyReportedError,
+  FileSystemStats
+} from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+
 import { Rush } from '../../api/Rush';
 
 export class InitAction extends BaseConfiglessRushAction {
@@ -118,7 +124,7 @@ export class InitAction extends BaseConfiglessRushAction {
       return false;
     }
 
-    for (const itemName of FileSystem.readFolder(initFolder)) {
+    for (const itemName of FileSystem.readFolderItemNames(initFolder)) {
       if (itemName.substr(0, 1) === '.') {
         // Ignore any items that start with ".", for example ".git"
         continue;
@@ -126,7 +132,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
       const itemPath: string = path.join(initFolder, itemName);
 
-      const stats: fs.Stats = FileSystem.getStatistics(itemPath);
+      const stats: FileSystemStats = FileSystem.getStatistics(itemPath);
       // Ignore any loose files in the current folder, e.g. "README.md"
       // or "CONTRIBUTING.md"
       if (stats.isDirectory()) {
@@ -165,6 +171,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/experiments.json',
       'common/config/rush/.pnpmfile.cjs',
       'common/config/rush/version-policies.json',
+      'common/config/rush/rush-plugins.json',
       'common/git-hooks/commit-msg.sample'
     ];
 
@@ -218,14 +225,16 @@ export class InitAction extends BaseConfiglessRushAction {
   // A single-line section may appear inside a block section, in which case it will get
   // commented twice.
   private _copyTemplateFile(sourcePath: string, destinationPath: string): void {
+    const destinationFileExists: boolean = FileSystem.exists(destinationPath);
+
     if (!this._overwriteParameter.value) {
-      if (FileSystem.exists(destinationPath)) {
+      if (destinationFileExists) {
         console.log(colors.yellow('Not overwriting already existing file: ') + destinationPath);
         return;
       }
     }
 
-    if (FileSystem.exists(destinationPath)) {
+    if (destinationFileExists) {
       console.log(colors.yellow(`Overwriting: ${destinationPath}`));
     } else {
       console.log(`Generating: ${destinationPath}`);
@@ -340,7 +349,7 @@ export class InitAction extends BaseConfiglessRushAction {
     }
 
     // Write the output
-    FileSystem.writeFile(destinationPath, outputLines.join('\r\n'), {
+    FileSystem.writeFile(destinationPath, outputLines.join(os.EOL), {
       ensureFolderExists: true
     });
   }

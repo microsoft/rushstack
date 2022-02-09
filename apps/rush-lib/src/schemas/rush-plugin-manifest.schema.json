@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "Rush plugin package manifest",
+  "description": "This file declares what kind of plugins this package provided.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plugins"],
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pluginName", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "pluginName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "entryPoint": {
+            "description": "Specifies entry point path. This path is resolved relative to the package folder.",
+            "type": "string"
+          },
+          "optionsSchema": {
+            "description": "Specifies options schema file path. This path is resolved relative to the package folder.",
+            "type": "string"
+          },
+          "associatedCommands": {
+            "description": "Specifies associated commands with this plugin, plugin will be only installed when an associated command runs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "commandLineJsonFilePath": {
+            "description": "Specifies a command line config file path. The path is resolved relative to package folder. It defines custom command line commands, mostly same as command-line.json in Rush",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,15 +1,19 @@
 {
   "name": "@rushstack/node-core-library",
-  "version": "3.40.3",
+  "version": "3.45.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/node-core-library"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/node-core-library"
   },
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "dependencies": {
     "@types/node": "12.20.24",
@@ -20,18 +24,17 @@
     "resolve": "~1.17.0",
     "semver": "~7.3.0",
     "timsort": "~0.3.0",
-    "z-schema": "~3.18.3"
+    "z-schema": "~5.0.2"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.38.1",
-    "@rushstack/heft-node-rig": "1.2.13",
+    "@rushstack/heft": "0.44.2",
+    "@rushstack/heft-node-rig": "1.7.1",
     "@types/fs-extra": "7.0.0",
     "@types/heft-jest": "1.0.1",
     "@types/jju": "1.4.1",
     "@types/resolve": "1.17.1",
     "@types/semver": "7.3.5",
-    "@types/timsort": "0.3.0",
-    "@types/z-schema": "3.16.31"
+    "@types/timsort": "0.3.0"
   }
 }

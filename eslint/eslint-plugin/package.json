@@ -1,0 +1,47 @@
+{
+  "name": "@rushstack/eslint-plugin",
+  "version": "0.8.4",
+  "description": "An ESLint plugin providing supplementary rules for use with the @rushstack/eslint-config package",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "stack/eslint-plugin"
+  },
+  "homepage": "https://rushstack.io",
+  "keywords": [
+    "eslint",
+    "eslint-config",
+    "monorepo",
+    "rush",
+    "scalable",
+    "scale",
+    "typescript"
+  ],
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "dependencies": {
+    "@rushstack/tree-pattern": "workspace:*",
+    "@typescript-eslint/experimental-utils": "~5.6.0"
+  },
+  "peerDependencies": {
+    "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "0.44.2",
+    "@rushstack/heft-node-rig": "1.7.1",
+    "@types/eslint": "8.2.0",
+    "@types/estree": "0.0.50",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24",
+    "@typescript-eslint/parser": "~5.6.0",
+    "@typescript-eslint/typescript-estree": "~5.6.0",
+    "eslint": "~8.7.0",
+    "typescript": "~4.5.2"
+  }
+}

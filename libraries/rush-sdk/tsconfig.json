@@ -1,0 +1,9 @@
+{
+  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
+  "compilerOptions": {
+    "types": [
+      "heft-jest",
+      "webpack-env" // Use webpack-env here instead of node so we have __non_webpack_require__
+    ]
+  }
+}

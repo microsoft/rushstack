@@ -13,4 +13,16 @@ steps:
   - script: 'node common/scripts/install-run-rush.js install'
     displayName: 'Rush Install'
   - script: 'node common/scripts/install-run-rush.js rebuild --verbose --production'
-    displayName: 'Rush Rebuild'
+    displayName: 'Rush Rebuild (install-run-rush)'
+    env:
+      # Prevent time-based browserslist update warning
+      # See https://github.com/microsoft/rushstack/issues/2981
+      BROWSERSLIST_IGNORE_OLD_DATA: 1
+  - script: 'node apps/rush-lib/lib/start.js build --verbose --production'
+    displayName: 'Rush Build (rush-lib)'
+    env:
+      # Prevent time-based browserslist update warning
+      # See https://github.com/microsoft/rushstack/issues/2981
+      BROWSERSLIST_IGNORE_OLD_DATA: 1
+  - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
+    displayName: 'Ensure repo README is up-to-date'

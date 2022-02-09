@@ -10,13 +10,14 @@ import {
   TextAttribute,
   ConsoleColorCodes
 } from './Colors';
+import { ITerminal } from './ITerminal';
 
 /**
  * This class facilitates writing to a console.
  *
  * @beta
  */
-export class Terminal {
+export class Terminal implements ITerminal {
   private _providers: Set<ITerminalProvider>;
 
   public constructor(provider: ITerminalProvider) {
@@ -25,14 +26,14 @@ export class Terminal {
   }
 
   /**
-   * Subscribe a new terminal provider.
+   * {@inheritdoc ITerminal.registerProvider}
    */
   public registerProvider(provider: ITerminalProvider): void {
     this._providers.add(provider);
   }
 
   /**
-   * Unsubscribe a terminal provider. If the provider isn't subscribed, this function does nothing.
+   * {@inheritdoc ITerminal.unregisterProvider}
    */
   public unregisterProvider(provider: ITerminalProvider): void {
     if (this._providers.has(provider)) {
@@ -41,24 +42,21 @@ export class Terminal {
   }
 
   /**
-   * Write a generic message to the terminal
+   * {@inheritdoc ITerminal.write}
    */
   public write(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.log);
   }
 
   /**
-   * Write a generic message to the terminal, followed by a newline
+   * {@inheritdoc ITerminal.writeLine}
    */
   public writeLine(...messageParts: (string | IColorableSequence)[]): void {
     this.write(...messageParts, eolSequence);
   }
 
   /**
-   * Write a warning message to the console with yellow text.
-   *
-   * @remarks
-   * The yellow color takes precedence over any other foreground colors set.
+   * {@inheritdoc ITerminal.writeWarning}
    */
   public writeWarning(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
@@ -73,10 +71,7 @@ export class Terminal {
   }
 
   /**
-   * Write a warning message to the console with yellow text, followed by a newline.
-   *
-   * @remarks
-   * The yellow color takes precedence over any other foreground colors set.
+   * {@inheritdoc ITerminal.writeWarningLine}
    */
   public writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
@@ -94,10 +89,7 @@ export class Terminal {
   }
 
   /**
-   * Write an error message to the console with red text.
-   *
-   * @remarks
-   * The red color takes precedence over any other foreground colors set.
+   * {@inheritdoc ITerminal.writeError}
    */
   public writeError(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
@@ -112,10 +104,7 @@ export class Terminal {
   }
 
   /**
-   * Write an error message to the console with red text, followed by a newline.
-   *
-   * @remarks
-   * The red color takes precedence over any other foreground colors set.
+   * {@inheritdoc ITerminal.writeErrorLine}
    */
   public writeErrorLine(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
@@ -133,28 +122,28 @@ export class Terminal {
   }
 
   /**
-   * Write a verbose-level message.
+   * {@inheritdoc ITerminal.writeVerbose}
    */
   public writeVerbose(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.verbose);
   }
 
   /**
-   * Write a verbose-level message followed by a newline.
+   * {@inheritdoc ITerminal.writeVerboseLine}
    */
   public writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void {
     this.writeVerbose(...messageParts, eolSequence);
   }
 
   /**
-   * Write a debug-level message.
+   * {@inheritdoc ITerminal.writeDebug}
    */
   public writeDebug(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.debug);
   }
 
   /**
-   * Write a debug-level message followed by a newline.
+   * {@inheritdoc ITerminal.writeDebugLine}
    */
   public writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
     this.writeDebug(...messageParts, eolSequence);

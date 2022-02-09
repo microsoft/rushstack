@@ -56,7 +56,7 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(
   baseClass: TBaseClass
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): TBaseClass & (new (...args: any[]) => ApiStaticMixin) {
-  abstract class MixedClass extends baseClass implements ApiStaticMixin {
+  class MixedClass extends baseClass implements ApiStaticMixin {
     public [_isStatic]: boolean;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

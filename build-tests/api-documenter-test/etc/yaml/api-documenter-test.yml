@@ -25,12 +25,19 @@ interfaces:
 enums:
   - 'api-documenter-test!DocEnum:enum'
   - 'api-documenter-test!DocEnumNamespaceMerge:enum'
+typeAliases:
+  - 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+  - 'api-documenter-test!ExampleTypeAlias:type'
+  - 'api-documenter-test!ExampleUnionTypeAlias:type'
+  - 'api-documenter-test!GenericTypeAlias:type'
+  - 'api-documenter-test!TypeAlias:type'
 functions:
   - name: 'exampleFunction(x, y)'
     uid: 'api-documenter-test!exampleFunction:function(1)'
     package: api-documenter-test!
     summary: An exported function with hyperlinked parameters and return value.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -50,6 +57,7 @@ functions:
     package: api-documenter-test!
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

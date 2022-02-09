@@ -174,11 +174,11 @@
           "type": "string"
         },
         "versionBumpCommitMessage": {
-          "description": "The commit message to use when committing changes during \"rush publish\". Defaults to \"Applying package updates.\"",
+          "description": "The commit message to use when committing changes during \"rush publish\". Defaults to \"Bump versions [skip ci]\"",
           "type": "string"
         },
         "changeLogUpdateCommitMessage": {
-          "description": "The commit message to use when committing change log files \"rush version\". Defaults to \"Deleting change files and updating change logs for package updates.\"",
+          "description": "The commit message to use when committing change log files \"rush version\". Defaults to \"Update changelogs [skip ci]\"",
           "type": "string"
         },
         "tagSeparator": {
@@ -211,8 +211,15 @@
       "type": "object",
       "properties": {
         "url": {
-          "description": "The remote url of the repository. If a value is provided, \"rush change\" will use it to find the right remote to compare against.",
-          "type": "string"
+          "type": "string",
+          "description": "The remote url of the repository. If a value is provided, \"rush change\" will use it to find the right remote to compare against."
+        },
+        "urls": {
+          "description": "All allowed remote urls of the repository. If a value is provided, \"rush change\" will use one of these to find the right remote to compare against. Specifying multiple URLs is useful if a GitHub repository is renamed or for \"<projectName>.visualstudio.com\" vs \"dev.azure.com/<projectName>\" URLs.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "defaultBranch": {
           "description": "The default branch name. This tells \"rush change\" which remote branch to compare against. The default value is \"master\"",

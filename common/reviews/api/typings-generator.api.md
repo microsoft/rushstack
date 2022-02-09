@@ -4,7 +4,7 @@
 
 ```ts
 
-import { Terminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
 export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings | undefined> {
@@ -30,16 +30,20 @@ export interface IStringValueTypings {
 export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
     // (undocumented)
     fileExtensions: string[];
-    // (undocumented)
+    // @deprecated (undocumented)
     filesToIgnore?: string[];
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)
-    parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult | Promise<TTypingsResult>;
+    getAdditionalOutputFiles?: (relativePath: string) => string[];
+    // (undocumented)
+    globsToIgnore?: string[];
+    // (undocumented)
+    parseAndGenerateTypings: (fileContents: string, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
     // (undocumented)
     srcFolder: string;
     // (undocumented)
-    terminal?: Terminal;
+    terminal?: ITerminal;
 }
 
 // @public
@@ -53,12 +57,13 @@ export class TypingsGenerator {
     // (undocumented)
     generateTypingsAsync(): Promise<void>;
     // (undocumented)
+    getOutputFilePaths(relativePath: string): string[];
+    // (undocumented)
     protected _options: ITypingsGeneratorOptions;
-    registerDependency(target: string, dependency: string): void;
+    registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
-    }
-
+}
 
 // (No @packageDocumentation comment for this package)
 

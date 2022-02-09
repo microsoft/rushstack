@@ -1,6 +1,75 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Jan 2022 16:07:47 GMT and should not be manually modified.
+
+## 0.7.11
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.7.10
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.7.9
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.7.8
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 0.7.7
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.7.6
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.7.5
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 0.7.4
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 0.7.3
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 0.7.2
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.7.1
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.7.0
+Tue, 05 Oct 2021 15:08:37 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+
+## 0.6.8
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
 
 ## 0.6.7
 Thu, 23 Sep 2021 00:10:40 GMT

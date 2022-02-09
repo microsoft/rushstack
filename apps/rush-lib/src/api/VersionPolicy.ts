@@ -20,7 +20,7 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
  * Type of version bumps
- * @beta
+ * @public
  */
 export enum BumpType {
   // No version bump
@@ -39,7 +39,7 @@ export enum BumpType {
 
 /**
  * Version policy base type names
- * @beta
+ * @public
  */
 export enum VersionPolicyDefinitionName {
   'lockStepVersion',
@@ -48,7 +48,7 @@ export enum VersionPolicyDefinitionName {
 
 /**
  * This is the base class for version policy which controls how versions get bumped.
- * @beta
+ * @public
  */
 export abstract class VersionPolicy {
   private _policyName: string;
@@ -214,13 +214,13 @@ export abstract class VersionPolicy {
 
 /**
  * This policy indicates all related projects should use the same version.
- * @beta
+ * @public
  */
 export class LockStepVersionPolicy extends VersionPolicy {
   private _version: semver.SemVer;
   // nextBump is probably not needed. It can be prerelease only.
   // Other types of bumps can be passed in as a parameter to bump method, so can identifier.
-  private _nextBump: BumpType;
+  private _nextBump: BumpType | undefined;
   private _mainProject: string | undefined;
 
   /**
@@ -229,7 +229,10 @@ export class LockStepVersionPolicy extends VersionPolicy {
   public constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
-    this._nextBump = Enum.getValueByKey(BumpType, versionPolicyJson.nextBump);
+    this._nextBump =
+      versionPolicyJson.nextBump !== undefined
+        ? Enum.getValueByKey(BumpType, versionPolicyJson.nextBump)
+        : undefined;
     this._mainProject = versionPolicyJson.mainProject;
   }
 
@@ -243,7 +246,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   /**
    * The type of bump for next bump.
    */
-  public get nextBump(): BumpType {
+  public get nextBump(): BumpType | undefined {
     return this._nextBump;
   }
 
@@ -266,10 +269,12 @@ export class LockStepVersionPolicy extends VersionPolicy {
     const json: ILockStepVersionJson = {
       policyName: this.policyName,
       definitionName: VersionPolicyDefinitionName[this.definitionName],
-      version: this.version,
-      nextBump: BumpType[this.nextBump]
+      version: this.version
     };
-    if (this._mainProject) {
+    if (this._nextBump !== undefined) {
+      json.nextBump = BumpType[this._nextBump];
+    }
+    if (this._mainProject !== undefined) {
       json.mainProject = this._mainProject;
     }
     return json;
@@ -302,7 +307,14 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * @param identifier - Prerelease identifier if bump type is prerelease.
    */
   public bump(bumpType?: BumpType, identifier?: string): void {
-    this._version.inc(this._getReleaseType(bumpType || this.nextBump), identifier);
+    const nextBump: BumpType | undefined = bumpType ?? this.nextBump;
+
+    if (nextBump === undefined) {
+      // let change files drive version bump.
+      return;
+    }
+
+    this._version.inc(this._getReleaseType(nextBump), identifier);
   }
 
   /**
@@ -345,7 +357,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
 
 /**
  * This policy indicates all related projects get version bump driven by their own changes.
- * @beta
+ * @public
  */
 export class IndividualVersionPolicy extends VersionPolicy {
   private _lockedMajor: number | undefined;

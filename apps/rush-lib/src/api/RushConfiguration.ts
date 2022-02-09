@@ -4,7 +4,6 @@
 /* eslint max-lines: off */
 
 import * as path from 'path';
-import * as fs from 'fs';
 import * as semver from 'semver';
 import {
   JsonFile,
@@ -12,7 +11,8 @@ import {
   JsonNull,
   Path,
   FileSystem,
-  PackageNameParser
+  PackageNameParser,
+  FileSystemStats
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
@@ -34,6 +34,7 @@ import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { PackageJsonDependency } from './PackageJsonEditor';
+import { RushPluginsConfiguration } from './RushPluginsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -56,7 +57,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.repoStateFilename,
-  RushConstants.versionPoliciesFilename
+  RushConstants.versionPoliciesFilename,
+  RushConstants.rushPluginsConfigFilename
 ];
 
 /**
@@ -92,12 +94,7 @@ export interface IEventHooksJson {
 /**
  * Part of IRushConfigurationJson.
  */
-export interface IRushRepositoryJson {
-  /**
-   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
-   */
-  url?: string;
-
+export interface IRushRepositoryJsonBase {
   /**
    * The default branch name. This tells "rush change" which remote branch to compare against.
    */
@@ -109,6 +106,28 @@ export interface IRushRepositoryJson {
    */
   defaultRemote?: string;
 }
+
+export interface IRushRepositoryJsonSingleUrl extends IRushRepositoryJsonBase {
+  /**
+   * The remote url of the repository. If a value is provided,
+   * \"rush change\" will use it to find the right remote to compare against.
+   *
+   * @deprecated Use "urls" instead.
+   */
+  url?: string;
+}
+
+export interface IRushRepositoryJsonMultipleUrls extends IRushRepositoryJsonBase {
+  /**
+   * Remote url(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
+   * "dev.azure.com/<projectName>" URLs.
+   */
+  urls?: string[];
+}
+
+export type IRushRepositoryJson = IRushRepositoryJsonSingleUrl | IRushRepositoryJsonMultipleUrls;
 
 /**
  * This represents the available PNPM store options
@@ -437,7 +456,7 @@ export class RushConfiguration {
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
-  private _projectByRelativePath: LookupByPath<RushConfigurationProject>;
+  private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -453,7 +472,7 @@ export class RushConfiguration {
   private _hotfixChangeEnabled: boolean;
 
   // Repository info
-  private _repositoryUrl: string | undefined;
+  private _repositoryUrls: string[];
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
@@ -483,6 +502,8 @@ export class RushConfiguration {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
+
+  private __rushPluginsConfiguration: RushPluginsConfiguration;
 
   private readonly _rushConfigurationJson: IRushConfigurationJson;
 
@@ -544,6 +565,12 @@ export class RushConfiguration {
       RushConstants.experimentsFilename
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
+
+    const rushPluginsConfigFilename: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.rushPluginsConfigFilename
+    );
+    this.__rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(
@@ -684,9 +711,23 @@ export class RushConfiguration {
       rushConfigurationJson.repository = {};
     }
 
-    this._repositoryUrl = rushConfigurationJson.repository.url;
     this._repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || DEFAULT_BRANCH;
     this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
+    const repositoryFieldWithMultipleUrls: IRushRepositoryJsonMultipleUrls =
+      rushConfigurationJson.repository as IRushRepositoryJsonMultipleUrls;
+    const repositoryFieldWithSingleUrl: IRushRepositoryJsonSingleUrl =
+      rushConfigurationJson.repository as IRushRepositoryJsonSingleUrl;
+    if (repositoryFieldWithMultipleUrls.urls) {
+      if (repositoryFieldWithSingleUrl.url) {
+        throw new Error("The 'repository.url' field cannot be used when 'repository.urls' is present");
+      }
+
+      this._repositoryUrls = repositoryFieldWithMultipleUrls.urls;
+    } else if (repositoryFieldWithSingleUrl.url) {
+      this._repositoryUrls = [repositoryFieldWithSingleUrl.url];
+    } else {
+      this._repositoryUrls = [];
+    }
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
     this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
@@ -713,12 +754,7 @@ export class RushConfiguration {
       }
     }
 
-    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
-    for (const project of this.projects) {
-      const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
-      pathTree.setItem(relativePath, project);
-    }
-    this._projectByRelativePath = pathTree;
+    this._pathTrees = new Map();
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -732,26 +768,27 @@ export class RushConfiguration {
       a.packageName.localeCompare(b.packageName)
     );
 
-    const tempNamesByProject: Map<IRushConfigurationProjectJson, string> =
-      RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
+    const usedTempNames: Set<string> = new Set();
+    for (let i: number = 0, len: number = sortedProjectJsons.length; i < len; i++) {
+      const projectJson: IRushConfigurationProjectJson = sortedProjectJsons[i];
+      const tempProjectName: string | undefined = RushConfiguration._generateTempNameForProject(
+        projectJson,
+        usedTempNames
+      );
+      const project: RushConfigurationProject = new RushConfigurationProject({
+        projectJson,
+        rushConfiguration: this,
+        tempProjectName
+      });
 
-    for (const projectJson of sortedProjectJsons) {
-      const tempProjectName: string | undefined = tempNamesByProject.get(projectJson);
-      if (tempProjectName) {
-        const project: RushConfigurationProject = new RushConfigurationProject(
-          projectJson,
-          this,
-          tempProjectName
+      this._projects.push(project);
+      if (this._projectsByName.has(project.packageName)) {
+        throw new Error(
+          `The project name "${project.packageName}" was specified more than once` +
+            ` in the rush.json configuration file.`
         );
-        this._projects.push(project);
-        if (this._projectsByName.has(project.packageName)) {
-          throw new Error(
-            `The project name "${project.packageName}" was specified more than once` +
-              ` in the rush.json configuration file.`
-          );
-        }
-        this._projectsByName.set(project.packageName, project);
       }
+      this._projectsByName.set(project.packageName, project);
     }
 
     for (const project of this._projects) {
@@ -763,12 +800,9 @@ export class RushConfiguration {
           );
         }
       });
-
-      // Compute the downstream dependencies within the list of Rush projects.
-      this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
-      this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
-      this._populateDownstreamDependencies(project.packageJson.optionalDependencies, project.packageName);
       this._versionPolicyConfiguration.validate(this.projectsByName);
+
+      // Consumer relationships will be established the first time one is requested
     }
   }
 
@@ -844,6 +878,9 @@ export class RushConfiguration {
 
   /**
    * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
+   *
+   * @privateRemarks
+   * Keep this in sync with `findRushJsonLocation` in `rush-sdk/src/index.ts`.
    */
   public static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined {
     const optionsIn: ITryFindRushJsonLocationOptions = options || {};
@@ -882,33 +919,24 @@ export class RushConfiguration {
    * in the Rush common folder.
    * NOTE: sortedProjectJsons is sorted by the caller.
    */
-  private static _generateTempNamesForProjects(
-    sortedProjectJsons: IRushConfigurationProjectJson[]
-  ): Map<IRushConfigurationProjectJson, string> {
-    const tempNamesByProject: Map<IRushConfigurationProjectJson, string> = new Map<
-      IRushConfigurationProjectJson,
-      string
-    >();
-    const usedTempNames: Set<string> = new Set<string>();
+  private static _generateTempNameForProject(
+    projectJson: IRushConfigurationProjectJson,
+    usedTempNames: Set<string>
+  ): string {
+    // If the name is "@ms/MyProject", extract the "MyProject" part
+    const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
 
-    // NOTE: projectJsons was already sorted in alphabetical order by the caller.
-    for (const projectJson of sortedProjectJsons) {
-      // If the name is "@ms/MyProject", extract the "MyProject" part
-      const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
-
-      // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
-      // there is a naming conflict
-      let counter: number = 0;
-      let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
-      while (usedTempNames.has(tempProjectName)) {
-        ++counter;
-        tempProjectName = `${RushConstants.rushTempNpmScope}/${unscopedName}-${counter}`;
-      }
-      usedTempNames.add(tempProjectName);
-      tempNamesByProject.set(projectJson, tempProjectName);
+    // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
+    // there is a naming conflict
+    let counter: number = 0;
+    let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
+    while (usedTempNames.has(tempProjectName)) {
+      ++counter;
+      tempProjectName = `${RushConstants.rushTempNpmScope}/${unscopedName}-${counter}`;
     }
+    usedTempNames.add(tempProjectName);
 
-    return tempNamesByProject;
+    return tempProjectName;
   }
 
   /**
@@ -929,9 +957,9 @@ export class RushConfiguration {
       return;
     }
 
-    for (const filename of FileSystem.readFolder(commonRushConfigFolder)) {
+    for (const filename of FileSystem.readFolderItemNames(commonRushConfigFolder)) {
       // Ignore things that aren't actual files
-      const stat: fs.Stats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
+      const stat: FileSystemStats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
       if (!stat.isFile() && !stat.isSymbolicLink()) {
         continue;
       }
@@ -1080,6 +1108,14 @@ export class RushConfiguration {
    */
   public get commonAutoinstallersFolder(): string {
     return path.join(this._commonFolder, 'autoinstallers');
+  }
+
+  /**
+   * The folder where rush-plugin options json files are stored.
+   * Example: `C:\MyRepo\common\config\rush-plugins`
+   */
+  public get rushPluginOptionsFolder(): string {
+    return path.join(this._commonFolder, 'config', 'rush-plugins');
   }
 
   /**
@@ -1317,10 +1353,13 @@ export class RushConfiguration {
   }
 
   /**
-   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
+   * Remote URL(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
+   * "dev.azure.com/<projectName>" URLs.
    */
-  public get repositoryUrl(): string | undefined {
-    return this._repositoryUrl;
+  public get repositoryUrls(): string[] {
+    return this._repositoryUrls;
   }
 
   /**
@@ -1675,12 +1714,19 @@ export class RushConfiguration {
   }
 
   /**
-   * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
-   * The path is case-sensitive, so will only return a project if its projectRelativePath matches the casing.
-   * @returns The found project, or undefined if no match was found
+   * @returns An optimized lookup engine to find a project by its path relative to the specified root.
+   * @beta
    */
-  public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
-    return this._projectByRelativePath.findChildPath(posixRelativePath);
+  public getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject> {
+    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this._pathTrees.get(rootPath);
+    if (!pathTree) {
+      this._pathTrees.set(rootPath, (pathTree = new LookupByPath()));
+      for (const project of this.projects) {
+        const relativePath: string = path.relative(rootPath, project.projectFolder);
+        pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, path.sep), project);
+      }
+    }
+    return pathTree;
   }
 
   /**
@@ -1708,6 +1754,13 @@ export class RushConfiguration {
   }
 
   /**
+   * @internal
+   */
+  public get _rushPluginsConfiguration(): RushPluginsConfiguration {
+    return this.__rushPluginsConfiguration;
+  }
+
+  /**
    * Returns the project for which the specified path is underneath that project's folder.
    * If the path is not under any project's folder, returns undefined.
    */
@@ -1728,8 +1781,10 @@ export class RushConfiguration {
     variant: string | undefined
   ): void {
     const commonVersions: CommonVersionsConfiguration = this.getCommonVersions(variant);
-    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
-      commonVersions.allowedAlternativeVersions;
+    const allowedAlternativeVersions: Map<
+      string,
+      ReadonlyArray<string>
+    > = commonVersions.allowedAlternativeVersions;
 
     for (const dependency of dependencies) {
       const alternativesForThisDependency: ReadonlyArray<string> =
@@ -1772,22 +1827,6 @@ export class RushConfiguration {
         }
       }
     }
-  }
-
-  private _populateDownstreamDependencies(
-    dependencies: { [key: string]: string } | undefined,
-    packageName: string
-  ): void {
-    if (!dependencies) {
-      return;
-    }
-    Object.keys(dependencies).forEach((dependencyName) => {
-      const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
-
-      if (depProject) {
-        depProject._consumingProjectNames.add(packageName);
-      }
-    });
   }
 
   private _getVariantConfigFolderPath(variant?: string | undefined): string {

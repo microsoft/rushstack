@@ -82,6 +82,11 @@ export class HeftJestDataFile {
     return JsonFile.load(jsonFilePath);
   }
 
+  public static async loadForProjectAsync(projectFolder: string): Promise<IHeftJestDataFileJson> {
+    const jsonFilePath: string = HeftJestDataFile.getConfigFilePath(projectFolder);
+    return await JsonFile.loadAsync(jsonFilePath);
+  }
+
   /**
    * Get the absolute path to the heft-jest-data.json file
    */

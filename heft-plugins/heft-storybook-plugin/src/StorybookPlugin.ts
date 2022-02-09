@@ -15,6 +15,7 @@ import type {
   IBuildStageContext,
   IBundleSubstage,
   IHeftPlugin,
+  IHeftFlagParameter,
   IPreCompileSubstage,
   ScopedLogger
 } from '@rushstack/heft';
@@ -109,9 +110,15 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     }
     this._startupModulePath = options.startupModulePath;
 
+    const storybookParameters: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
+      associatedActionNames: ['start'],
+      parameterLongName: '--storybook',
+      description:
+        '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to launch Storybook.'
+    });
+
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      // TODO: Expose an API for custom CLI parameters similar to HeftSession.registerAction()
-      if (process.argv.indexOf('--storybook') < 0) {
+      if (!storybookParameters.actionAssociated || !storybookParameters.value) {
         this._logger.terminal.writeVerboseLine(
           'The command line does not include "--storybook", so bundling will proceed without Storybook'
         );
@@ -124,7 +131,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
 
       build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
         preCompile.hooks.run.tapPromise(PLUGIN_NAME, () => {
-          return this._onPreCompileAsync(heftSession, heftConfiguration);
+          return this._onPreCompileAsync(heftConfiguration);
         });
       });
 
@@ -144,10 +151,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     });
   }
 
-  private async _onPreCompileAsync(
-    heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration
-  ): Promise<void> {
+  private async _onPreCompileAsync(heftConfiguration: HeftConfiguration): Promise<void> {
     this._logger.terminal.writeVerboseLine(`Probing for "${this._storykitPackageName}"`);
 
     // Example: "/path/to/my-project/node_modules/my-storykit"

@@ -28,7 +28,7 @@
    */
   "pnpmVersion": "6.7.1",
 
-  /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "4.5.0",
+  /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "6.14.15",
   /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
 
   /**
@@ -110,7 +110,7 @@
      *
      * This option is experimental. The default value is false.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "useWorkspaces": true
+    "useWorkspaces": true
   },
 
   /**
@@ -124,7 +124,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0 || >=14.15.0 <15.0.0",
+  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0 || >=14.15.0 <15.0.0 || >=16.13.0 <17.0.0",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
@@ -266,7 +266,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    /*[LINE "DEMO"]*/ "versionBumpCommitMessage": "Applying package updates. [skip-ci]",
+    /*[LINE "DEMO"]*/ "versionBumpCommitMessage": "Bump versions [skip ci]",
 
     /**
      * The commit message to use when committing changes during 'rush version'.
@@ -275,7 +275,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    /*[LINE "DEMO"]*/ "changeLogUpdateCommitMessage": "Deleting change files and updating change logs for package updates. [skip-ci]"
+    /*[LINE "DEMO"]*/ "changeLogUpdateCommitMessage": "Update changelogs [skip ci]"
   },
 
   "repository": {

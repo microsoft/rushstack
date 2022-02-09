@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-
+import { LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { ChangeManager } from '../ChangeManager';
 import { PrereleaseToken } from '../PrereleaseToken';
@@ -40,6 +40,19 @@ describe('ChangeManager', () => {
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1');
     expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.1');
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual('1.0.1');
+  });
+
+  it('can update a project using lockStepVersion policy with no nextBump from changefiles', () => {
+    changeManager.load(path.join(__dirname, 'lockstepWithoutNextBump'));
+    changeManager.apply(false);
+
+    const policy: LockStepVersionPolicy = rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+      'lockStepWithoutNextBump'
+    ) as LockStepVersionPolicy;
+
+    expect(changeManager.allPackages.get('h')!.packageJson.version).toEqual('1.1.0');
+    expect(changeManager.allPackages.get('f')!.packageJson.peerDependencies!['h']).toEqual('^1.1.0');
+    expect(policy.version).toEqual('1.1.0');
   });
 
   it('can update explicit cyclic dependency', () => {

@@ -278,7 +278,7 @@ export class PublishAction extends BaseRushAction {
     );
 
     if (changeManager.hasChanges()) {
-      const orderedChanges: IChangeInfo[] = changeManager.changes;
+      const orderedChanges: IChangeInfo[] = changeManager.packageChanges;
       const tempBranchName: string = `publish-${Date.now()}`;
 
       // Make changes in temp branch.

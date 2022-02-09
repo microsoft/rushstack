@@ -15,8 +15,8 @@ proven turnkey solution for monorepo management, Rush is for you.
 
 Positional arguments:
   <command>
-    add                 Adds a dependency to the package.json and runs rush 
-                        upgrade.
+    add                 Adds one or more dependencies to the package.json and 
+                        runs rush upgrade.
     change              Records changes made to projects, indicating how the 
                         package version number should be bumped for the next 
                         publish.
@@ -54,13 +54,11 @@ Positional arguments:
                         (EXPERIMENTAL) Update the credentials used by the 
                         build cache provider.
     version             Manage package versions in the repo.
-    write-build-cache   Writes the current state of the current project to 
-                        the cache.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
                         changed since they were last built.
-    rebuild             Clean and rebuild the entire set of projects
+    rebuild             Clean and rebuild the entire set of projects.
     tab-complete        Provides tab completion.
 
 Optional arguments:
@@ -75,7 +73,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
 "usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [-s] [--all]
 
-Adds a specified package as a dependency of the current project (as 
+Adds specified package(s) to the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
 no version is specified, a version will be automatically detected (typically 
 either the latest version or a version that won't break the 
@@ -94,7 +92,9 @@ Optional arguments:
                         characters are usually interpreted by your shell, so 
                         it's recommended to use quotes. For example, write 
                         \\"rush add --package \\"example@^1.2.3\\"\\" instead of 
-                        \\"rush add --package example@^1.2.3\\".
+                        \\"rush add --package example@^1.2.3\\". To add multiple 
+                        packages, write \\"rush add --package foo --package 
+                        bar\\".
   --exact               If specified, the SemVer specifier added to the 
                         package.json will be an exact version (e.g. without 
                         tilde or caret).
@@ -260,11 +260,13 @@ that is exported. MINOR - these are changes that are backwards compatible
 (but not forwards compatible). Examples are: adding a new public API or 
 adding an optional parameter to a public API PATCH - these are changes that 
 are backwards and forwards compatible. Examples are: Modifying a private API 
-or fixing a bug in the logic of how an existing API works. HOTFIX 
-(EXPERIMENTAL) - these are changes that are hotfixes targeting a specific 
-older version of the package. When a hotfix change is added, other changes 
-will not be able to increment the version number. Enable this feature by 
-setting 'hotfixChangeEnabled' in your rush.json.
+or fixing a bug in the logic of how an existing API works. NONE - these are 
+changes that are backwards and forwards compatible and don't require an 
+immediate release. Examples are: Modifying dev tooling configuration like 
+eslint. HOTFIX (EXPERIMENTAL) - these are changes that are hotfixes targeting 
+a specific older version of the package. When a hotfix change is added, other 
+changes will not be able to increment the version number. Enable this feature 
+by setting 'hotfixChangeEnabled' in your rush.json.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -678,9 +680,10 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: list 1`] = `
-"usage: rush list [-h] [-v] [-p] [--full-path] [--json] [-t PROJECT]
-                 [-T PROJECT] [-f PROJECT] [-o PROJECT] [-i PROJECT]
-                 [-I PROJECT] [--to-version-policy VERSION_POLICY_NAME]
+"usage: rush list [-h] [-v] [-p] [--full-path] [--detailed] [--json]
+                 [-t PROJECT] [-T PROJECT] [-f PROJECT] [-o PROJECT]
+                 [-i PROJECT] [-I PROJECT]
+                 [--to-version-policy VERSION_POLICY_NAME]
                  [--from-version-policy VERSION_POLICY_NAME]
                  
 
@@ -695,6 +698,11 @@ Optional arguments:
                         displayed in a column along with the package name.
   --full-path           If this flag is specified, the project full path will 
                         be displayed in a column along with the package name.
+  --detailed            For the non --json view, if this flag is specified, 
+                        include path (-p), version (-v) columns along with 
+                        the project's applicable: versionPolicy, 
+                        versionPolicyName, shouldPublish, and reviewPolicy 
+                        fields.
   --json                If this flag is specified, output will be in JSON 
                         format.
   -t PROJECT, --to PROJECT
@@ -1225,20 +1233,5 @@ Optional arguments:
                         \\"--ensure-version-policy\\" is provided.
   --ignore-git-hooks    Skips execution of all git hooks. Make sure you know 
                         what you are skipping.
-"
-`;
-
-exports[`CommandLineHelp prints the help for each action: write-build-cache 1`] = `
-"usage: rush write-build-cache [-h] -c COMMAND [-v]
-
-(EXPERIMENTAL) If the build cache is configured, when this command is run in 
-the folder of a project, write the current state of the project to the cache.
-
-Optional arguments:
-  -h, --help            Show this help message and exit.
-  -c COMMAND, --command COMMAND
-                        (Required) The command run in the current project 
-                        that produced the current project state.
-  -v, --verbose         Display verbose log information.
 "
 `;

@@ -95,7 +95,7 @@ export function getProcessStartTime(pid: number): string | undefined {
     try {
       stat = FileSystem.readFile(`/proc/${pidString}/stat`);
     } catch (error) {
-      if (error.code !== 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
         throw error;
       }
       // Either no process with PID pid exists, or this version/configuration of linux is non-standard.
@@ -270,7 +270,7 @@ export class LockFile {
       let smallestBirthTimePid: string = pid.toString();
 
       // now, scan the directory for all lockfiles
-      const files: string[] = FileSystem.readFolder(resourceFolder);
+      const files: string[] = FileSystem.readFolderItemNames(resourceFolder);
 
       // look for anything ending with # then numbers and ".lock"
       const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;

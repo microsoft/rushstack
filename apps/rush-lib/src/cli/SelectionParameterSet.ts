@@ -1,19 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-
 import {
-  PackageName,
   AlreadyReportedError,
   PackageJsonLookup,
-  IPackageJson
+  IPackageJson,
+  ITerminal
 } from '@rushstack/node-core-library';
 import { CommandLineParameterProvider, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Selection } from '../logic/Selection';
+import type { ISelectorParser as ISelectorParser } from '../logic/selectors/ISelectorParser';
+import {
+  GitChangedProjectSelectorParser,
+  IGitSelectorParserOptions
+} from '../logic/selectors/GitChangedProjectSelectorParser';
+import { NamedProjectSelectorParser } from '../logic/selectors/NamedProjectSelectorParser';
+import { VersionPolicyProjectSelectorParser } from '../logic/selectors/VersionPolicyProjectSelectorParser';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -34,10 +39,35 @@ export class SelectionParameterSet {
   private readonly _fromVersionPolicy: CommandLineStringListParameter;
   private readonly _toVersionPolicy: CommandLineStringListParameter;
 
-  public constructor(rushConfiguration: RushConfiguration, action: CommandLineParameterProvider) {
+  private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
+
+  public constructor(
+    rushConfiguration: RushConfiguration,
+    action: CommandLineParameterProvider,
+    gitOptions: IGitSelectorParserOptions
+  ) {
     this._rushConfiguration = rushConfiguration;
 
-    const getProjectNames: () => Promise<string[]> = this._getProjectNames.bind(this);
+    const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
+      string,
+      ISelectorParser<RushConfigurationProject>
+    >();
+
+    selectorParsers.set('name', new NamedProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration, gitOptions));
+    selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+    this._selectorParserByScope = selectorParsers;
+
+    const getSpecifierCompletions: () => Promise<string[]> = async (): Promise<string[]> => {
+      const completions: string[] = ['.'];
+      for (const [prefix, selector] of selectorParsers) {
+        for (const completion of selector.getCompletions()) {
+          completions.push(`${prefix}:${completion}`);
+        }
+      }
+
+      return completions;
+    };
 
     this._toProject = action.defineStringListParameter({
       parameterLongName: '--to',
@@ -49,7 +79,7 @@ export class SelectionParameterSet {
         ' Each "--to" parameter expands this selection to include PROJECT and all its dependencies.' +
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getProjectNames
+      completions: getSpecifierCompletions
     });
     this._toExceptProject = action.defineStringListParameter({
       parameterLongName: '--to-except',
@@ -62,7 +92,7 @@ export class SelectionParameterSet {
         ' but not PROJECT itself.' +
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getProjectNames
+      completions: getSpecifierCompletions
     });
 
     this._fromProject = action.defineStringListParameter({
@@ -76,7 +106,7 @@ export class SelectionParameterSet {
         ' plus all dependencies of this set.' +
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getProjectNames
+      completions: getSpecifierCompletions
     });
     this._onlyProject = action.defineStringListParameter({
       parameterLongName: '--only',
@@ -89,7 +119,7 @@ export class SelectionParameterSet {
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getProjectNames
+      completions: getSpecifierCompletions
     });
 
     this._impactedByProject = action.defineStringListParameter({
@@ -104,7 +134,7 @@ export class SelectionParameterSet {
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getProjectNames
+      completions: getSpecifierCompletions
     });
 
     this._impactedByExceptProject = action.defineStringListParameter({
@@ -119,7 +149,7 @@ export class SelectionParameterSet {
         ' "." can be used as shorthand for the project in the current working directory.' +
         ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
         ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: getProjectNames
+      completions: getSpecifierCompletions
     });
 
     this._toVersionPolicy = action.defineStringListParameter({
@@ -149,62 +179,71 @@ export class SelectionParameterSet {
    *
    * If no parameters are specified, returns all projects in the Rush config file.
    */
-  public getSelectedProjects(): Set<RushConfigurationProject> {
-    // Check if any of the selection parameters have a value specified on the command line
-    const isSelectionSpecified: boolean = [
+  public async getSelectedProjectsAsync(terminal: ITerminal): Promise<Set<RushConfigurationProject>> {
+    // Hack out the old version-policy parameters
+    for (const value of this._fromVersionPolicy.values) {
+      (this._fromProject.values as string[]).push(`version-policy:${value}`);
+    }
+    for (const value of this._toVersionPolicy.values) {
+      (this._toProject.values as string[]).push(`version-policy:${value}`);
+    }
+
+    const selectors: CommandLineStringListParameter[] = [
       this._onlyProject,
       this._fromProject,
-      this._fromVersionPolicy,
       this._toProject,
-      this._toVersionPolicy,
       this._toExceptProject,
       this._impactedByProject,
       this._impactedByExceptProject
-    ].some((param: CommandLineStringListParameter) => param.values.length > 0);
+    ];
+
+    // Check if any of the selection parameters have a value specified on the command line
+    const isSelectionSpecified: boolean = selectors.some(
+      (param: CommandLineStringListParameter) => param.values.length > 0
+    );
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
       return new Set(this._rushConfiguration.projects);
     }
 
-    // Include exactly these projects (--only)
-    const onlyProjects: Iterable<RushConfigurationProject> = this._evaluateProjectParameter(
-      this._onlyProject
-    );
-
-    // Include all projects that depend on these projects, and all dependencies thereof
-    const fromProjects: Set<RushConfigurationProject> = Selection.union(
-      // --from
-      this._evaluateProjectParameter(this._fromProject),
-      // --from-version-policy
-      this._evaluateVersionPolicyProjects(this._fromVersionPolicy)
-    );
-
-    // Include dependencies of these projects
-    const toProjects: Set<RushConfigurationProject> = Selection.union(
+    const [
+      // Include exactly these projects (--only)
+      onlyProjects,
+      // Include all projects that depend on these projects, and all dependencies thereof
+      fromProjects,
       // --to
-      this._evaluateProjectParameter(this._toProject),
-      // --to-version-policy
-      this._evaluateVersionPolicyProjects(this._toVersionPolicy),
+      toRaw,
       // --to-except
-      Selection.directDependenciesOf(this._evaluateProjectParameter(this._toExceptProject)),
-      // --from / --from-version-policy
-      Selection.expandAllConsumers(fromProjects)
-    );
-
-    // These projects will not have their dependencies included
-    const impactedByProjects: Set<RushConfigurationProject> = Selection.union(
+      toExceptProjects,
       // --impacted-by
-      this._evaluateProjectParameter(this._impactedByProject),
+      impactedByProjects,
       // --impacted-by-except
-      Selection.directConsumersOf(this._evaluateProjectParameter(this._impactedByExceptProject))
+      impactedByExceptProjects
+    ] = await Promise.all(
+      selectors.map((param: CommandLineStringListParameter) => {
+        return this._evaluateProjectParameterAsync(param, terminal);
+      })
     );
 
     const selection: Set<RushConfigurationProject> = Selection.union(
+      // Safe command line options
+      Selection.expandAllDependencies(
+        Selection.union(
+          toRaw,
+          Selection.directDependenciesOf(toExceptProjects),
+          // --from / --from-version-policy
+          Selection.expandAllConsumers(fromProjects)
+        )
+      ),
+
+      // Unsafe command line option: --only
       onlyProjects,
-      Selection.expandAllDependencies(toProjects),
-      // Only dependents of these projects, not dependencies
-      Selection.expandAllConsumers(impactedByProjects)
+
+      // Unsafe command line options: --impacted-by, --impacted-by-except
+      Selection.expandAllConsumers(
+        Selection.union(impactedByProjects, Selection.directConsumersOf(impactedByExceptProjects))
+      )
     );
 
     return selection;
@@ -218,28 +257,24 @@ export class SelectionParameterSet {
    *
    * @see https://pnpm.js.org/en/filtering
    */
-  public getPnpmFilterArguments(): string[] {
+  public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<string[]> {
     const args: string[] = [];
 
     // Include exactly these projects (--only)
-    for (const project of this._evaluateProjectParameter(this._onlyProject)) {
+    for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
       args.push('--filter', project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
-      this._evaluateProjectParameter(this._fromProject),
-      // --from-version-policy
-      this._evaluateVersionPolicyProjects(this._fromVersionPolicy)
+      await this._evaluateProjectParameterAsync(this._fromProject, terminal)
     );
 
     // All specified projects and all projects that they depend on
     for (const project of Selection.union(
       // --to
-      this._evaluateProjectParameter(this._toProject),
-      // --to-version-policy
-      this._evaluateVersionPolicyProjects(this._toVersionPolicy),
+      await this._evaluateProjectParameterAsync(this._toProject, terminal),
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
@@ -248,19 +283,22 @@ export class SelectionParameterSet {
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
-    for (const project of this._evaluateProjectParameter(this._toExceptProject)) {
+    for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
       args.push('--filter', `${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
-    for (const project of this._evaluateProjectParameter(this._impactedByProject)) {
+    for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
       args.push('--filter', `...${project.packageName}`);
     }
 
     // --impacted-by-except
     // All projects that directly or indirectly declare the specified project as a dependency
-    for (const project of this._evaluateProjectParameter(this._impactedByExceptProject)) {
+    for (const project of await this._evaluateProjectParameterAsync(
+      this._impactedByExceptProject,
+      terminal
+    )) {
       args.push('--filter', `...^${project.packageName}`);
     }
 
@@ -288,13 +326,17 @@ export class SelectionParameterSet {
    * Computes the referents of parameters that accept a project identifier.
    * Handles '.', unscoped names, and scoped names.
    */
-  private *_evaluateProjectParameter(
-    projectsParameters: CommandLineStringListParameter
-  ): Iterable<RushConfigurationProject> {
-    const packageJsonLookup: PackageJsonLookup = PackageJsonLookup.instance;
+  private async _evaluateProjectParameterAsync(
+    listParameter: CommandLineStringListParameter,
+    terminal: ITerminal
+  ): Promise<Set<RushConfigurationProject>> {
+    const parameterName: string = listParameter.longName;
+    const selection: Set<RushConfigurationProject> = new Set();
 
-    for (const projectParameter of projectsParameters.values) {
-      if (projectParameter === '.') {
+    for (const rawSelector of listParameter.values) {
+      // Handle the special case of "current project" without a scope
+      if (rawSelector === '.') {
+        const packageJsonLookup: PackageJsonLookup = PackageJsonLookup.instance;
         const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
         if (packageJson) {
           const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
@@ -302,89 +344,52 @@ export class SelectionParameterSet {
           );
 
           if (project) {
-            yield project;
+            selection.add(project);
           } else {
-            console.log(
-              colors.red(
-                'Rush is not currently running in a project directory specified in rush.json. ' +
-                  `The "." value for the ${projectsParameters.longName} parameter is not allowed.`
-              )
+            terminal.writeErrorLine(
+              'Rush is not currently running in a project directory specified in rush.json. ' +
+                `The "." value for the ${parameterName} parameter is not allowed.`
             );
             throw new AlreadyReportedError();
           }
         } else {
-          console.log(
-            colors.red(
-              'Rush is not currently running in a project directory. ' +
-                `The "." value for the ${projectsParameters.longName} parameter is not allowed.`
-            )
+          terminal.writeErrorLine(
+            'Rush is not currently running in a project directory. ' +
+              `The "." value for the ${parameterName} parameter is not allowed.`
           );
           throw new AlreadyReportedError();
         }
-      } else {
-        const project: RushConfigurationProject | undefined =
-          this._rushConfiguration.findProjectByShorthandName(projectParameter);
-        if (!project) {
-          console.log(colors.red(`The project '${projectParameter}' does not exist in rush.json.`));
-          throw new AlreadyReportedError();
-        }
 
-        yield project;
+        continue;
       }
-    }
-  }
 
-  /**
-   * Computes the set of available project names, for use by tab completion.
-   */
-  private async _getProjectNames(): Promise<string[]> {
-    const unscopedNamesMap: Map<string, number> = new Map<string, number>();
+      const scopeIndex: number = rawSelector.indexOf(':');
 
-    const scopedNames: Set<string> = new Set();
+      const scope: string = scopeIndex < 0 ? 'name' : rawSelector.slice(0, scopeIndex);
+      const unscopedSelector: string = scopeIndex < 0 ? rawSelector : rawSelector.slice(scopeIndex + 1);
 
-    for (const project of this._rushConfiguration.rushConfigurationJson.projects) {
-      scopedNames.add(project.packageName);
-      const unscopedName: string = PackageName.getUnscopedName(project.packageName);
-      const count: number = unscopedNamesMap.get(unscopedName) || 0;
-      unscopedNamesMap.set(unscopedName, count + 1);
-    }
+      const handler: ISelectorParser<RushConfigurationProject> | undefined =
+        this._selectorParserByScope.get(scope);
+      if (!handler) {
+        terminal.writeErrorLine(
+          `Unsupported selector prefix "${scope}" passed to "${parameterName}": "${rawSelector}".` +
+            ` Supported prefixes: ${Array.from(
+              this._selectorParserByScope.keys(),
+              (scope: string) => `"${scope}:"`
+            ).join(', ')}`
+        );
+        throw new AlreadyReportedError();
+      }
 
-    const unscopedNames: string[] = [];
-
-    for (const [unscopedName, unscopedNameCount] of unscopedNamesMap) {
-      // don't suggest ambiguous unscoped names
-      if (unscopedNameCount === 1 && !scopedNames.has(unscopedName)) {
-        unscopedNames.push(unscopedName);
+      for (const project of await handler.evaluateSelectorAsync({
+        unscopedSelector,
+        terminal,
+        parameterName
+      })) {
+        selection.add(project);
       }
     }
 
-    return unscopedNames.sort().concat([...scopedNames].sort());
-  }
-
-  /**
-   * Computes the set of projects that have the specified version policy
-   */
-  private *_evaluateVersionPolicyProjects(
-    versionPoliciesParameters: CommandLineStringListParameter
-  ): Iterable<RushConfigurationProject> {
-    if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
-      const policyNames: Set<string> = new Set(versionPoliciesParameters.values);
-
-      for (const policyName of policyNames) {
-        if (!this._rushConfiguration.versionPolicyConfiguration.versionPolicies.has(policyName)) {
-          console.log(
-            colors.red(`The version policy '${policyName}' does not exist in version-policies.json.`)
-          );
-          throw new AlreadyReportedError();
-        }
-      }
-
-      for (const project of this._rushConfiguration.projects) {
-        const matches: boolean = !!project.versionPolicyName && policyNames.has(project.versionPolicyName);
-        if (matches) {
-          yield project;
-        }
-      }
-    }
+    return selection;
   }
 }

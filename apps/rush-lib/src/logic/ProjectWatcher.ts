@@ -4,7 +4,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import { once } from 'events';
-import { Path, Terminal } from '@rushstack/node-core-library';
+import { Path, ITerminal, FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -14,7 +14,8 @@ export interface IProjectWatcherOptions {
   debounceMilliseconds?: number;
   rushConfiguration: RushConfiguration;
   projectsToWatch: ReadonlySet<RushConfigurationProject>;
-  terminal: Terminal;
+  terminal: ITerminal;
+  initialState?: ProjectChangeAnalyzer | undefined;
 }
 
 export interface IProjectChangeResult {
@@ -42,18 +43,27 @@ export class ProjectWatcher {
   private readonly _debounceMilliseconds: number;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
-  private readonly _terminal: Terminal;
+  private readonly _terminal: ITerminal;
 
   private _initialState: ProjectChangeAnalyzer | undefined;
   private _previousState: ProjectChangeAnalyzer | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
-    const { debounceMilliseconds = 1000, rushConfiguration, projectsToWatch, terminal } = options;
+    const {
+      debounceMilliseconds = 1000,
+      rushConfiguration,
+      projectsToWatch,
+      terminal,
+      initialState
+    } = options;
 
     this._debounceMilliseconds = debounceMilliseconds;
     this._rushConfiguration = rushConfiguration;
     this._projectsToWatch = projectsToWatch;
     this._terminal = terminal;
+
+    this._initialState = initialState;
+    this._previousState = initialState;
   }
 
   /**
@@ -80,7 +90,7 @@ export class ProjectWatcher {
 
     for (const project of this._projectsToWatch) {
       const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
-        project.packageName,
+        project,
         this._terminal
       ))!;
       const projectFolder: string = project.projectRelativeFolder;
@@ -144,7 +154,7 @@ export class ProjectWatcher {
 
         const addWatcher = (
           watchedPath: string,
-          listener: (event: string, fileName: string | Buffer) => void
+          listener: (event: string, fileName: string) => void
         ): void => {
           const watcher: fs.FSWatcher = fs.watch(
             watchedPath,
@@ -161,7 +171,7 @@ export class ProjectWatcher {
           });
         };
 
-        const changeListener = (event: string, fileName: string | Buffer): void => {
+        const changeListener = (event: string, fileName: string): void => {
           try {
             if (terminated) {
               return;
@@ -174,7 +184,7 @@ export class ProjectWatcher {
 
               if (normalizedName && !watchers.has(normalizedName)) {
                 try {
-                  const stat: fs.Stats = fs.statSync(fileName);
+                  const stat: FileSystemStats = FileSystem.getStatistics(fileName);
                   if (stat.isDirectory()) {
                     addWatcher(normalizedName, changeListener);
                   }
@@ -242,14 +252,12 @@ export class ProjectWatcher {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
     for (const project of this._projectsToWatch) {
-      const { packageName } = project;
+      const [previous, current] = await Promise.all([
+        previousState._tryGetProjectDependenciesAsync(project, this._terminal),
+        state._tryGetProjectDependenciesAsync(project, this._terminal)
+      ]);
 
-      if (
-        ProjectWatcher._haveProjectDepsChanged(
-          (await previousState._tryGetProjectDependenciesAsync(packageName, this._terminal))!,
-          (await state._tryGetProjectDependenciesAsync(packageName, this._terminal))!
-        )
-      ) {
+      if (ProjectWatcher._haveProjectDepsChanged(previous!, current!)) {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json
         changedProjects.add(project);
       }

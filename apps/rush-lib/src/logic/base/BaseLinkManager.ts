@@ -2,11 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem, IFileSystemCreateLinkOptions, InternalError } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  FileSystemStats,
+  IFileSystemCreateLinkOptions,
+  InternalError
+} from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
@@ -40,7 +44,7 @@ export abstract class BaseLinkManager {
       targetPath = options.linkTargetPath;
     } else {
       // Link to the relative path, to avoid going outside containers such as a Docker image
-      targetPath = path.relative(fs.realpathSync(newLinkFolder), options.linkTargetPath);
+      targetPath = path.relative(FileSystem.getRealPath(newLinkFolder), options.linkTargetPath);
     }
 
     if (process.platform === 'win32') {
@@ -136,7 +140,7 @@ export abstract class BaseLinkManager {
       // If there are children, then we need to symlink each item in the folder individually
       Utilities.createFolderWithRetry(localPackage.folderPath);
 
-      for (const filename of FileSystem.readFolder(localPackage.symlinkTargetFolderPath)) {
+      for (const filename of FileSystem.readFolderItemNames(localPackage.symlinkTargetFolderPath)) {
         if (filename.toLowerCase() !== 'node_modules') {
           // Create the symlink
           let symlinkKind: SymlinkKind = SymlinkKind.File;
@@ -144,10 +148,10 @@ export abstract class BaseLinkManager {
           const linkSource: string = path.join(localPackage.folderPath, filename);
           let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
 
-          const linkStats: fs.Stats = FileSystem.getLinkStatistics(linkTarget);
+          const linkStats: FileSystemStats = FileSystem.getLinkStatistics(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
-            const targetStats: fs.Stats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
+            const targetStats: FileSystemStats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
             if (targetStats.isDirectory()) {
               // Neither a junction nor a directory-symlink can have a directory-symlink
               // as its target; instead, we must obtain the real physical path.

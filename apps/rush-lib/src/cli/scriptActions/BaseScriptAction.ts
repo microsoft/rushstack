@@ -3,15 +3,21 @@
 
 import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
-import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { Command, CommandLineConfiguration, Parameter } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 import type { ParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Constructor parameters for BaseScriptAction
  */
-export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
-  commandLineConfiguration: CommandLineConfiguration | undefined;
+export interface IBaseScriptActionOptions<TCommand extends Command> extends IBaseRushActionOptions {
+  commandLineConfiguration: CommandLineConfiguration;
+  command: TCommand;
+}
+
+export interface IRegisteredCustomParameter {
+  parameter: Parameter;
+  tsCommandLineParameter: CommandLineParameter;
 }
 
 /**
@@ -24,72 +30,66 @@ export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
  *
  * The two subclasses are BulkScriptAction and GlobalScriptAction.
  */
-export abstract class BaseScriptAction extends BaseRushAction {
-  protected readonly _commandLineConfiguration: CommandLineConfiguration | undefined;
-  protected readonly customParameters: CommandLineParameter[] = [];
+export abstract class BaseScriptAction<TCommand extends Command> extends BaseRushAction {
+  protected readonly commandLineConfiguration: CommandLineConfiguration;
+  protected readonly customParameters: IRegisteredCustomParameter[] = [];
+  protected readonly command: TCommand;
 
-  public constructor(options: IBaseScriptActionOptions) {
+  public constructor(options: IBaseScriptActionOptions<TCommand>) {
     super(options);
-    this._commandLineConfiguration = options.commandLineConfiguration;
+    this.commandLineConfiguration = options.commandLineConfiguration;
+    this.command = options.command;
   }
 
   protected defineScriptParameters(): void {
-    if (!this._commandLineConfiguration) {
+    if (!this.commandLineConfiguration) {
       return;
     }
 
     // Find any parameters that are associated with this command
-    for (const parameterJson of this._commandLineConfiguration.parameters) {
-      let associated: boolean = false;
-      for (const associatedCommand of parameterJson.associatedCommands) {
-        if (associatedCommand === this.actionName) {
-          associated = true;
-        }
+    for (const parameter of this.command.associatedParameters) {
+      let tsCommandLineParameter: CommandLineParameter | undefined;
+
+      switch (parameter.parameterKind) {
+        case 'flag':
+          tsCommandLineParameter = this.defineFlagParameter({
+            parameterShortName: parameter.shortName,
+            parameterLongName: parameter.longName,
+            description: parameter.description,
+            required: parameter.required
+          });
+          break;
+        case 'choice':
+          tsCommandLineParameter = this.defineChoiceParameter({
+            parameterShortName: parameter.shortName,
+            parameterLongName: parameter.longName,
+            description: parameter.description,
+            required: parameter.required,
+            alternatives: parameter.alternatives.map((x) => x.name),
+            defaultValue: parameter.defaultValue
+          });
+          break;
+        case 'string':
+          tsCommandLineParameter = this.defineStringParameter({
+            parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
+            description: parameter.description,
+            required: parameter.required,
+            argumentName: parameter.argumentName
+          });
+          break;
+        default:
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a parameter "${
+              (parameter as ParameterJson).longName
+            }" using an unsupported parameter kind "${(parameter as ParameterJson).parameterKind}"`
+          );
       }
 
-      if (associated) {
-        let customParameter: CommandLineParameter | undefined;
-
-        switch (parameterJson.parameterKind) {
-          case 'flag':
-            customParameter = this.defineFlagParameter({
-              parameterShortName: parameterJson.shortName,
-              parameterLongName: parameterJson.longName,
-              description: parameterJson.description,
-              required: parameterJson.required
-            });
-            break;
-          case 'choice':
-            customParameter = this.defineChoiceParameter({
-              parameterShortName: parameterJson.shortName,
-              parameterLongName: parameterJson.longName,
-              description: parameterJson.description,
-              required: parameterJson.required,
-              alternatives: parameterJson.alternatives.map((x) => x.name),
-              defaultValue: parameterJson.defaultValue
-            });
-            break;
-          case 'string':
-            customParameter = this.defineStringParameter({
-              parameterLongName: parameterJson.longName,
-              parameterShortName: parameterJson.shortName,
-              description: parameterJson.description,
-              required: parameterJson.required,
-              argumentName: parameterJson.argumentName
-            });
-            break;
-          default:
-            throw new Error(
-              `${RushConstants.commandLineFilename} defines a parameter "${
-                (parameterJson as ParameterJson).longName
-              }" using an unsupported parameter kind "${(parameterJson as ParameterJson).parameterKind}"`
-            );
-        }
-
-        if (customParameter) {
-          this.customParameters.push(customParameter);
-        }
-      }
+      this.customParameters.push({
+        parameter,
+        tsCommandLineParameter
+      });
     }
   }
 }

@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: Generic
 summary: Generic class.
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: class

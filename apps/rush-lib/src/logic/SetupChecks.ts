@@ -120,7 +120,7 @@ export class SetupChecks {
       const nodeModulesFolder: string = path.join(folder, RushConstants.nodeModulesFolderName);
       if (FileSystem.exists(nodeModulesFolder)) {
         // Collect the names of files/folders in that node_modules folder
-        const filenames: string[] = FileSystem.readFolder(nodeModulesFolder).filter(
+        const filenames: string[] = FileSystem.readFolderItemNames(nodeModulesFolder).filter(
           (x) => !x.startsWith('.')
         );
 

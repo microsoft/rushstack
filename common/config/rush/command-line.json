@@ -1,6 +1,6 @@
 /**
  * This configuration file defines custom commands for the "rush" command-line.
- * For full documentation, please see https://rushjs.io
+ * More documentation is available on the Rush website: https://rushjs.io
  */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
@@ -11,6 +11,11 @@
    * "rush my-global-command --help".
    */
   "commands": [
+    {
+      "commandKind": "phased",
+      "name": "build",
+      "phases": ["_phase:build", "_phase:test"]
+    },
     // {
     //   /**
     //    * (Required) Determines the type of custom command.
@@ -107,7 +112,23 @@
     //   /**
     //    * If true then this command will be incremental like the built-in "build" command
     //    */
-    //   "incremental": false
+    //   "incremental": false,
+    //
+    //   /**
+    //    * (EXPERIMENTAL) Normally Rush terminates after the command finishes. If this option is set to "true" Rush
+    //    * will instead enter a loop where it watches the file system for changes to the selected projects. Whenever a
+    //    * change is detected, the command will be invoked again for the changed project and any selected projects that
+    //    * directly or indirectly depend on it.
+    //    *
+    //    * For details, refer to the website article "Using watch mode".
+    //    */
+    //   "watchForChanges": false,
+    //
+    //   /**
+    //    * (EXPERIMENTAL) Disable cache for this action. This may be useful if this command affects state outside of
+    //    * projects' own folders.
+    //    */
+    //   "disableBuildCache": false
     // },
     //
     // {
@@ -174,6 +195,25 @@
       "shellCommand": "yo odspweb --skip-install",
 
       "safeForSimultaneousRushProcesses": true
+    }
+  ],
+
+  "phases": [
+    {
+      "name": "_phase:build",
+      "dependencies": {
+        "upstream": ["_phase:build"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:test",
+      "dependencies": {
+        "self": ["_phase:build"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
     }
   ],
 
@@ -306,12 +346,14 @@
       "longName": "--no-color",
       "parameterKind": "flag",
       "description": "disable colors in the build log, defaults to 'true'",
+      "associatedPhases": ["_phase:build", "_phase:test"],
       "associatedCommands": ["build", "rebuild"]
     },
     {
       "longName": "--production",
       "parameterKind": "flag",
       "description": "Perform a production build, including minification and localization steps",
+      "associatedPhases": ["_phase:build", "_phase:test"],
       "associatedCommands": ["build", "rebuild"]
     }
   ]
