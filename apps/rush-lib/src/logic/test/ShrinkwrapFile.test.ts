@@ -10,7 +10,7 @@ import { DependencySpecifier } from '../DependencySpecifier';
 import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile';
 
 describe(NpmShrinkwrapFile.name, () => {
-  const filename: string = path.resolve(path.join(__dirname, './shrinkwrapFile/npm-shrinkwrap.json'));
+  const filename: string = `${__dirname}/shrinkwrapFile/npm-shrinkwrap.json`;
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', {}, filename)!;
 
   it('verifies root-level dependency', () => {
@@ -44,9 +44,7 @@ describe(NpmShrinkwrapFile.name, () => {
 });
 
 describe(PnpmShrinkwrapFile.name, () => {
-  const filename: string = path.resolve(
-    path.join(__dirname, '../../../src/logic/test/shrinkwrapFile/pnpm-lock.yaml')
-  );
+  const filename: string = path.resolve(__dirname, '../../../src/logic/test/shrinkwrapFile/pnpm-lock.yaml');
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', {}, filename)!;
 
   it('verifies root-level dependency', () => {

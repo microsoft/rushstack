@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import { IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -77,12 +75,10 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     // "h" and "i" are lockstepped
 
     packagesRushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json')
+      `${__dirname}/packages/rush.json`
     );
 
-    repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'repo', 'rush.json')
-    );
+    repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(`${__dirname}/repo/rush.json`);
   });
 
   it('returns no changes in an empty change folder', () => {
@@ -90,7 +86,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'noChange'))
+      new ChangeFiles(`${__dirname}/noChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(0);
@@ -102,7 +98,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'leafChange'))
+      new ChangeFiles(`${__dirname}/leafChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(1);
@@ -117,7 +113,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
+      new ChangeFiles(`${__dirname}/rootPatchChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -150,7 +146,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+      new ChangeFiles(`${__dirname}/rootHotfixChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -181,7 +177,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
+      new ChangeFiles(`${__dirname}/rootMajorChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -214,7 +210,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'lockstepWithoutNextBump'))
+      new ChangeFiles(`${__dirname}/lockstepWithoutNextBump`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -247,7 +243,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
+      new ChangeFiles(`${__dirname}/cyclicDeps`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -280,7 +276,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
         PublishUtilities,
         allPackages,
         packagesRushConfiguration,
-        new ChangeFiles(path.join(__dirname, 'hotfixWithPatchChanges'))
+        new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
       )
     ).toThrow('Cannot apply hotfix alongside patch change on same package');
   });
@@ -295,7 +291,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
         PublishUtilities,
         allPackages,
         packagesRushConfiguration,
-        new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+        new ChangeFiles(`${__dirname}/rootHotfixChange`)
       )
     ).toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
@@ -305,7 +301,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleChanges'))
+      new ChangeFiles(`${__dirname}/multipleChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -338,7 +334,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'orderedChanges'))
+      new ChangeFiles(`${__dirname}/orderedChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -371,7 +367,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
+      new ChangeFiles(`${__dirname}/multipleHotfixChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -402,7 +398,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
+      new ChangeFiles(`${__dirname}/explicitVersionChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -433,7 +429,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       repoRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
+      new ChangeFiles(`${__dirname}/repo/changes`),
       false,
       undefined,
       new Set<string>(['a', 'b', 'e'])
@@ -465,9 +461,7 @@ describe(PublishUtilities.sortChangeRequests.name, () => {
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {
-    rushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json')
-    );
+    rushConfiguration = RushConfiguration.loadFromConfigurationFile(`${__dirname}/packages/rush.json`);
   });
 
   it('can return a sorted array of the change requests to be published in the correct order', () => {
@@ -475,7 +469,7 @@ describe(PublishUtilities.sortChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       rushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleChanges'))
+      new ChangeFiles(`${__dirname}/multipleChanges`)
     );
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges.packageChanges);
 
@@ -551,10 +545,10 @@ describe(PublishUtilities.findChangeRequests.name, () => {
 
   beforeEach(() => {
     packagesRushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'workspacePackages', 'rush.json')
+      `${__dirname}/workspacePackages/rush.json`
     );
     repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'workspaceRepo', 'rush.json')
+      `${__dirname}/workspaceRepo/rush.json`
     );
   });
 
@@ -563,7 +557,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'noChange'))
+      new ChangeFiles(`${__dirname}/noChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(0);
@@ -575,7 +569,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'leafChange'))
+      new ChangeFiles(`${__dirname}/leafChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(1);
@@ -590,7 +584,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
+      new ChangeFiles(`${__dirname}/rootPatchChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -623,7 +617,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+      new ChangeFiles(`${__dirname}/rootHotfixChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -654,7 +648,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
+      new ChangeFiles(`${__dirname}/rootMajorChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -687,7 +681,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
+      new ChangeFiles(`${__dirname}/cyclicDeps`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -720,7 +714,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
         PublishUtilities,
         allPackages,
         packagesRushConfiguration,
-        new ChangeFiles(path.join(__dirname, 'hotfixWithPatchChanges'))
+        new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
       )
     ).toThrow('Cannot apply hotfix alongside patch change on same package');
   });
@@ -735,7 +729,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
         PublishUtilities,
         allPackages,
         packagesRushConfiguration,
-        new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+        new ChangeFiles(`${__dirname}/rootHotfixChange`)
       )
     ).toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
@@ -745,7 +739,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleChanges'))
+      new ChangeFiles(`${__dirname}/multipleChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -778,7 +772,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'orderedChanges'))
+      new ChangeFiles(`${__dirname}/orderedChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -811,7 +805,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
+      new ChangeFiles(`${__dirname}/multipleHotfixChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -842,7 +836,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
+      new ChangeFiles(`${__dirname}/explicitVersionChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(2);
@@ -860,7 +854,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       repoRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
+      new ChangeFiles(`${__dirname}/repo/changes`),
       false,
       undefined,
       new Set<string>(['a', 'b', 'e'])

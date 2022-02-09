@@ -3,7 +3,6 @@
 
 import { AnsiEscape } from '@rushstack/node-core-library';
 import * as colorsPackage from 'colors';
-import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
@@ -20,7 +19,7 @@ describe('CommandLineHelp', () => {
     });
 
     oldCwd = process.cwd();
-    const localCwd: string = path.join(__dirname, 'repo');
+    const localCwd: string = `${__dirname}/repo`;
 
     process.chdir(localCwd);
 

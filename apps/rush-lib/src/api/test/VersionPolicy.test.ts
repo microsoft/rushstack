@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { IPackageJson } from '@rushstack/node-core-library';
 
 import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
@@ -9,7 +8,7 @@ import { VersionPolicy, LockStepVersionPolicy, IndividualVersionPolicy, BumpType
 
 describe(VersionPolicy.name, () => {
   describe(LockStepVersionPolicy.name, () => {
-    const filename: string = path.resolve(__dirname, 'jsonFiles', 'rushWithLockVersion.json');
+    const filename: string = `${__dirname}/jsonFiles/rushWithLockVersion.json`;
     const versionPolicyConfig: VersionPolicyConfiguration = new VersionPolicyConfiguration(filename);
     let versionPolicy1: VersionPolicy;
     let versionPolicy2: VersionPolicy;
@@ -117,7 +116,7 @@ describe(VersionPolicy.name, () => {
   });
 
   describe(IndividualVersionPolicy.name, () => {
-    const fileName: string = path.resolve(__dirname, 'jsonFiles', 'rushWithIndividualVersion.json');
+    const fileName: string = `${__dirname}/jsonFiles/rushWithIndividualVersion.json`;
     const versionPolicyConfig: VersionPolicyConfiguration = new VersionPolicyConfiguration(fileName);
     const versionPolicy: VersionPolicy = versionPolicyConfig.getVersionPolicy('testPolicy2');
 

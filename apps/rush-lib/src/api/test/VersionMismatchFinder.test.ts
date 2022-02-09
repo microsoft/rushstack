@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import { RushConfigurationProject } from '../RushConfigurationProject';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { PackageJsonEditor } from '../PackageJsonEditor';
@@ -432,7 +430,7 @@ describe(VersionMismatchFinder.name, () => {
       cyclicDependencyProjects: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderCommonVersions(
-      CommonVersionsConfiguration.loadFromFile(path.resolve(__dirname, 'jsonFiles', 'common-versions.json'))
+      CommonVersionsConfiguration.loadFromFile(`${__dirname}/jsonFiles/common-versions.json`)
     );
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);

@@ -3,8 +3,6 @@
 
 import '../../test/mockRushCommandLineParser';
 
-import * as path from 'path';
-
 import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { AddAction } from '../AddAction';
@@ -32,8 +30,8 @@ describe(AddAction.name, () => {
 
     describe(`'add' action`, () => {
       it(`adds a dependency to just one repo in the workspace`, async () => {
-        const startPath: string = path.resolve(__dirname, 'addRepo');
-        const aPath: string = path.resolve(__dirname, 'addRepo', 'a');
+        const startPath: string = `${__dirname}/addRepo`;
+        const aPath: string = `${__dirname}/addRepo/a`;
 
         // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
         // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
@@ -57,8 +55,8 @@ describe(AddAction.name, () => {
 
     describe(`'add' action with --all`, () => {
       it(`adds a dependency to all repos in the workspace`, async () => {
-        const startPath: string = path.resolve(__dirname, 'addRepo');
-        const aPath: string = path.resolve(__dirname, 'addRepo', 'a');
+        const startPath: string = `${__dirname}/addRepo`;
+        const aPath: string = `${__dirname}/addRepo/a`;
 
         // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
         // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test

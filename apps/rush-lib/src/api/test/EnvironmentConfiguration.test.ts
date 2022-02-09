@@ -99,7 +99,7 @@ describe(EnvironmentConfiguration.name, () => {
     });
 
     it('returns expected path from environment variable with normalization', () => {
-      const expectedValue: string = path.resolve(path.join(process.cwd(), 'temp'));
+      const expectedValue: string = path.resolve(process.cwd(), 'temp');
       const envVar: string = './temp';
       process.env[ENV_VAR] = envVar;
 

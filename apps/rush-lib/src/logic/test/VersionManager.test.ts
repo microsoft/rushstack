@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { IPackageJson } from '@rushstack/node-core-library';
 
 import { BumpType } from '../../api/VersionPolicy';
@@ -19,7 +18,7 @@ function _getChanges(changeFiles: Map<string, ChangeFile>, packageName: string):
 }
 
 describe(VersionManager.name, () => {
-  const rushJsonFile: string = path.resolve(__dirname, 'repo', 'rush.json');
+  const rushJsonFile: string = `${__dirname}/repo/rush.json`;
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
   let versionManager: VersionManager;
 
@@ -117,7 +116,7 @@ describe(VersionManager.name, () => {
 });
 
 describe(`${VersionManager.name} (workspace)`, () => {
-  const rushJsonFile: string = path.resolve(__dirname, 'workspaceRepo', 'rush.json');
+  const rushJsonFile: string = `${__dirname}/workspaceRepo/rush.json`;
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
   let versionManager: VersionManager;
 
