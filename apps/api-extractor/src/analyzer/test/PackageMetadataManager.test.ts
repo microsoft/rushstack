@@ -30,8 +30,8 @@ function firstArgument(mockFn: jest.Mock): any {
 
 /* eslint-disable @typescript-eslint/typedef */
 
-describe('PackageMetadataManager', () => {
-  describe('.writeTsdocMetadataFile()', () => {
+describe(PackageMetadataManager.name, () => {
+  describe(PackageMetadataManager.writeTsdocMetadataFile.name, () => {
     const originalWriteFile = FileSystem.writeFile;
     const mockWriteFile: jest.Mock = jest.fn();
     beforeAll(() => {
@@ -50,7 +50,7 @@ describe('PackageMetadataManager', () => {
     });
   });
 
-  describe('.resolveTsdocMetadataPath()', () => {
+  describe(PackageMetadataManager.resolveTsdocMetadataPath.name, () => {
     describe('when an empty tsdocMetadataPath is provided', () => {
       const tsdocMetadataPath: string = '';
       describe('given a package.json where the field "tsdocMetadata" is defined', () => {

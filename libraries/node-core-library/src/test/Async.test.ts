@@ -3,8 +3,8 @@
 
 import { Async } from '../Async';
 
-describe('Async', () => {
-  describe('mapAsync', () => {
+describe(Async.name, () => {
+  describe(Async.mapAsync.name, () => {
     it('handles an empty array correctly', async () => {
       const result = await Async.mapAsync([] as number[], async (item) => `result ${item}`);
       expect(result).toEqual([]);
@@ -128,7 +128,7 @@ describe('Async', () => {
     });
   });
 
-  describe('forEachAsync', () => {
+  describe(Async.forEachAsync.name, () => {
     it('handles an empty array correctly', async () => {
       let running: number = 0;
       let maxRunning: number = 0;

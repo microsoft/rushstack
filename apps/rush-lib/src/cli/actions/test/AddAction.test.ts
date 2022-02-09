@@ -8,7 +8,7 @@ import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { AddAction } from '../AddAction';
 
 describe(AddAction.name, () => {
-  describe(`basic "rush add" tests`, () => {
+  describe('basic "rush add" tests', () => {
     let doRushAddMock: jest.SpyInstance;
     let oldExitCode: number | undefined;
     let oldArgs: string[];
@@ -28,7 +28,7 @@ describe(AddAction.name, () => {
       process.argv = oldArgs;
     });
 
-    describe(`'add' action`, () => {
+    describe("'add' action", () => {
       it(`adds a dependency to just one repo in the workspace`, async () => {
         const startPath: string = `${__dirname}/addRepo`;
         const aPath: string = `${__dirname}/addRepo/a`;
@@ -53,7 +53,7 @@ describe(AddAction.name, () => {
       });
     });
 
-    describe(`'add' action with --all`, () => {
+    describe("'add' action with --all", () => {
       it(`adds a dependency to all repos in the workspace`, async () => {
         const startPath: string = `${__dirname}/addRepo`;
         const aPath: string = `${__dirname}/addRepo/a`;

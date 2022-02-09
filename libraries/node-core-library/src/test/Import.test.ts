@@ -6,10 +6,10 @@ import { Import } from '../Import';
 import { PackageJsonLookup } from '../PackageJsonLookup';
 import { Path } from '../Path';
 
-describe('Import', () => {
+describe(Import.name, () => {
   const packageRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
 
-  describe('resolveModule', () => {
+  describe(Import.resolveModule.name, () => {
     it('returns an absolute path as-is', () => {
       const absolutePaths: string[] = ['/var/test/path'];
 
@@ -135,7 +135,7 @@ describe('Import', () => {
     });
   });
 
-  describe('resolvePackage', () => {
+  describe(Import.resolvePackage.name, () => {
     it('resolves a dependency', () => {
       expect(
         Import.resolvePackage({ packageName: '@rushstack/heft', baseFolderPath: __dirname }).replace(

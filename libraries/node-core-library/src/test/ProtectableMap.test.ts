@@ -43,7 +43,7 @@ class ExampleApi {
   }
 }
 
-describe('ProtectableMap', () => {
+describe(ProtectableMap.name, () => {
   test('Protected operations', () => {
     const exampleApi: ExampleApi = new ExampleApi();
     exampleApi.studentAgesByName.clear();

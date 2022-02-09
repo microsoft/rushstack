@@ -10,8 +10,8 @@ import {
   CommandLineParameter,
   CommandLineParameterWithArgument
 } from '../parameters/BaseClasses';
+import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
 import { CommandLineAction } from './CommandLineAction';
-import { CommandLineChoiceParameter } from '..';
 import { CommandLineConstants } from '../Constants';
 
 const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';

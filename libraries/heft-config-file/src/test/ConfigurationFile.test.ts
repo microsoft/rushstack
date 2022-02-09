@@ -14,7 +14,7 @@ import {
 } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 
-describe('ConfigurationFile', () => {
+describe(ConfigurationFile.name, () => {
   const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
   let terminalProvider: StringBufferTerminalProvider;
   let terminal: Terminal;

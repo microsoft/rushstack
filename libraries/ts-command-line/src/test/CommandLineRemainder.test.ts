@@ -7,6 +7,7 @@ import { CommandLineAction } from '../providers/CommandLineAction';
 import { CommandLineParser } from '../providers/CommandLineParser';
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
+import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
@@ -39,7 +40,7 @@ function createParser(): DynamicCommandLineParser {
   return commandLineParser;
 }
 
-describe('CommandLineRemainder', () => {
+describe(CommandLineRemainder.name, () => {
   it('prints the global help', () => {
     const commandLineParser: CommandLineParser = createParser();
     const helpText: string = colors.stripColors(commandLineParser.renderHelpText());

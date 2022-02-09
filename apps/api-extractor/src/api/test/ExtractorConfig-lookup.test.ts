@@ -15,7 +15,7 @@ function expectEqualPaths(path1: string, path2: string): void {
 }
 
 // Tests for expanding the "<lookup>" token for the "projectFolder" setting in api-extractor.json
-describe('ExtractorConfig-lookup', () => {
+describe(`${ExtractorConfig.name}.${ExtractorConfig.loadFileAndPrepare.name}`, () => {
   it.only('config-lookup1: looks up ./api-extractor.json', () => {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
       path.join(testDataFolder, 'config-lookup1/api-extractor.json')

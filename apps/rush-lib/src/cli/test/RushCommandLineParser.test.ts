@@ -92,7 +92,7 @@ describe(RushCommandLineParser.name, () => {
     });
 
     describe('in basic repo', () => {
-      describe(`'build' action`, () => {
+      describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
@@ -124,7 +124,7 @@ describe(RushCommandLineParser.name, () => {
         });
       });
 
-      describe(`'rebuild' action`, () => {
+      describe("'rebuild' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
@@ -157,8 +157,8 @@ describe(RushCommandLineParser.name, () => {
       });
     });
 
-    describe(`in repo with 'rebuild' command overridden`, () => {
-      describe(`'build' action`, () => {
+    describe("in repo with 'rebuild' command overridden", () => {
+      describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideRebuildAndRunBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
@@ -190,7 +190,7 @@ describe(RushCommandLineParser.name, () => {
         });
       });
 
-      describe(`'rebuild' action`, () => {
+      describe("'rebuild' action", () => {
         it(`executes the package's 'rebuild' script`, async () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
@@ -223,8 +223,8 @@ describe(RushCommandLineParser.name, () => {
       });
     });
 
-    describe(`in repo with 'rebuild' or 'build' partially set`, () => {
-      describe(`'build' action`, () => {
+    describe("in repo with 'rebuild' or 'build' partially set", () => {
+      describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideAndDefaultBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
@@ -255,7 +255,7 @@ describe(RushCommandLineParser.name, () => {
         });
       });
 
-      describe(`'rebuild' action`, () => {
+      describe("'rebuild' action", () => {
         it(`executes the package's 'build' script`, async () => {
           // broken
           const repoName: string = 'overrideAndDefaultRebuildActionRepo';
@@ -288,7 +288,7 @@ describe(RushCommandLineParser.name, () => {
       });
     });
 
-    describe(`in repo with 'build' command overridden as a global command`, () => {
+    describe("in repo with 'build' command overridden as a global command", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildAsGlobalCommandRepo';
 
@@ -300,7 +300,7 @@ describe(RushCommandLineParser.name, () => {
       });
     });
 
-    describe(`in repo with 'rebuild' command overridden as a global command`, () => {
+    describe("in repo with 'rebuild' command overridden as a global command", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildAsGlobalCommandRepo';
 
@@ -312,7 +312,7 @@ describe(RushCommandLineParser.name, () => {
       });
     });
 
-    describe(`in repo with 'build' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
+    describe("in repo with 'build' command overridden with 'safeForSimultaneousRushProcesses=true'", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildWithSimultaneousProcessesRepo';
 
@@ -324,7 +324,7 @@ describe(RushCommandLineParser.name, () => {
       });
     });
 
-    describe(`in repo with 'rebuild' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
+    describe("in repo with 'rebuild' command overridden with 'safeForSimultaneousRushProcesses=true'", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildWithSimultaneousProcessesRepo';
 

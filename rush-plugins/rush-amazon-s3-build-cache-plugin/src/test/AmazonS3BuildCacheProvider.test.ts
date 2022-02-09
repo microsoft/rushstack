@@ -20,7 +20,7 @@ const rushSession = new RushSession({
   getIsDebugMode: () => false
 });
 
-describe('AmazonS3BuildCacheProvider', () => {
+describe(AmazonS3BuildCacheProvider.name, () => {
   beforeEach(() => {
     jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
     jest.spyOn(EnvironmentConfiguration, 'buildCacheEnabled', 'get').mockReturnValue(undefined);

@@ -5,7 +5,7 @@ import process from 'process';
 
 import { EnvironmentMap } from '../EnvironmentMap';
 
-describe('EnvironmentMap', () => {
+describe(EnvironmentMap.name, () => {
   test('_sanityCheck() throws', () => {
     const map = new EnvironmentMap();
     const environmentObject = { A: '123' };

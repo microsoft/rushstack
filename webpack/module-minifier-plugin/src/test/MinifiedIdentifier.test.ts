@@ -5,7 +5,7 @@ import {
 } from '../MinifiedIdentifier';
 
 describe('MinifiedIdentifier', () => {
-  describe('getIdentifierInternal', () => {
+  describe(getIdentifierInternal.name, () => {
     it('Round trips identifiers', () => {
       for (let i: number = 0; i < 100000; i++) {
         const actual: number = getOrdinalFromIdentifierInternal(getIdentifierInternal(i));
@@ -16,7 +16,7 @@ describe('MinifiedIdentifier', () => {
     });
   });
 
-  describe('getIdentifier', () => {
+  describe(getIdentifier.name, () => {
     it('Skips keywords', () => {
       let maxOrdinal: number = 0;
       const shortKeywords: Set<string> = new Set(['do', 'if', 'in']);

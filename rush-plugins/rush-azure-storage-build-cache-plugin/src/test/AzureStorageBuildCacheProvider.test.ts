@@ -6,7 +6,7 @@ import { CredentialCache, EnvironmentConfiguration, RushUserConfiguration } from
 
 import { AzureEnvironmentNames, AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
 
-describe('AzureStorageBuildCacheProvider', () => {
+describe(AzureStorageBuildCacheProvider.name, () => {
   beforeEach(() => {
     jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
     jest.spyOn(EnvironmentConfiguration, 'buildCacheEnabled', 'get').mockReturnValue(undefined);

@@ -5,8 +5,8 @@ import * as os from 'os';
 import * as path from 'path';
 import { Path } from '../Path';
 
-describe('Path', () => {
-  describe('isUnder', () => {
+describe(Path.name, () => {
+  describe(Path.isUnder.name, () => {
     if (os.platform() === 'win32') {
       test('Windows paths', () => {
         expect(Path.isUnder('C:\\a\\b.txt', 'C:\\a')).toEqual(true);
@@ -46,7 +46,7 @@ describe('Path', () => {
     });
   });
 
-  describe('isDownwardRelative', () => {
+  describe(Path.isDownwardRelative.name, () => {
     test('Positive cases', () => {
       expect(Path.isDownwardRelative('folder')).toEqual(true);
       expect(Path.isDownwardRelative('folder/')).toEqual(true);
@@ -88,7 +88,7 @@ describe('Path', () => {
       }
     });
   });
-  describe('formatConcisely', () => {
+  describe(Path.formatConcisely.name, () => {
     test('tests', () => {
       expect(
         Path.formatConcisely({ pathToConvert: '/folder1/folder2/folder3', baseFolder: '/folder1' })
