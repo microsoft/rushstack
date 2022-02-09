@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "change git tag to use passed in tag argument",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
