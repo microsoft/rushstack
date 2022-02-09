@@ -3,7 +3,7 @@
     {
       "packageName": "cyclic-dep-explicit-1",
       "type": "major",
-      "comment": "Patching cyclic dep"
+      "comment": "Major change to cyclic dep"
     }
   ]
 }
