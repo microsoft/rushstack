@@ -365,8 +365,8 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    const repoRoot = getRepoRoot(this.rushConfiguration.rushJsonFolder);
-    const relativeChangesFolder = path.relative(repoRoot, this.rushConfiguration.changesFolder);
+    const repoRoot: string = getRepoRoot(this.rushConfiguration.rushJsonFolder);
+    const relativeChangesFolder: string = path.relative(repoRoot, this.rushConfiguration.changesFolder);
     return this._git
       .getChangedFiles(this._targetBranch, this._terminal, true, relativeChangesFolder)
       .map((relativePath) => {
