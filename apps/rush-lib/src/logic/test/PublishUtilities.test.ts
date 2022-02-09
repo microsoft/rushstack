@@ -46,8 +46,12 @@ function generateChangeSnapshot(
 
 function generateVersionPolicySnapshot(allChanges: IChangeRequests): string {
   const lines: string[] = [];
-  for (const [versionPolicyName, newVersion] of allChanges.versionPolicyChanges) {
-    lines.push(`${versionPolicyName} - ${newVersion}`);
+  for (const versionPolicy of allChanges.versionPolicyChanges.values()) {
+    const versionPolicyName: string = versionPolicy.versionPolicyName;
+    const changeType: ChangeType | undefined = versionPolicy.changeType;
+    const changeTypeText: string = ChangeType[changeType as number];
+    const newVersion: string = versionPolicy.newVersion;
+    lines.push(`${versionPolicyName} - ${newVersion} (${changeTypeText} change)`);
   }
 
   return lines.join('\n');
@@ -58,9 +62,24 @@ describe('findChangeRequests', () => {
   let repoRushConfiguration: RushConfiguration;
 
   beforeEach(() => {
+    // The "packages" repo has the following structure (except for the cyclics)
+    //     a --------
+    //   / | \      |
+    //  /  |  \     |
+    // b   h   e    g
+    // |\  |
+    // | \ |
+    // c   f   i
+    // |       |
+    // |       |
+    // d       j
+    //
+    // "h" and "i" are lockstepped
+
     packagesRushConfiguration = RushConfiguration.loadFromConfigurationFile(
       path.resolve(__dirname, 'packages', 'rush.json')
     );
+
     repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(
       path.resolve(__dirname, 'repo', 'rush.json')
     );
@@ -102,12 +121,13 @@ describe('findChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (5) ==
+      "== Changed Projects (6) ==
       a - 1.0.0 -> 1.0.1 (patch change)
       b - 1.0.0 -> (same) (dependency change)
       e - 1.0.0 -> (same) (dependency change)
       g - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> (same) (dependency change)
+      i - 1.0.0 -> (same) (dependency change)
 
       == Unchanged Projects (8) ==
       c - 1.0.0
@@ -117,10 +137,12 @@ describe('findChangeRequests', () => {
       cyclic-dep-explicit-2 - 1.0.0
       d - 1.0.0
       f - 1.0.0
-      i - 1.0.0"
+      j - 1.0.0"
     `);
 
-    expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
+    expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
+      `"lockStepWithoutNextBump - 1.0.0 (dependency change)"`
+    );
   });
 
   it('returns 8 changes when hotfixing a root package', () => {
@@ -142,12 +164,13 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
       h - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
 
-      == Unchanged Projects (5) ==
+      == Unchanged Projects (6) ==
       cyclic-dep-1 - 1.0.0
       cyclic-dep-2 - 1.0.0
       cyclic-dep-explicit-1 - 1.0.0
       cyclic-dep-explicit-2 - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -162,7 +185,7 @@ describe('findChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -171,6 +194,7 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -181,7 +205,7 @@ describe('findChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -194,10 +218,11 @@ describe('findChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (3) ==
+      "== Changed Projects (4) ==
       f - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> 1.1.0 (minor change)
       i - 1.0.0 -> 1.1.0 (minor change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (10) ==
       a - 1.0.0
@@ -213,7 +238,7 @@ describe('findChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.1.0"`
+      `"lockStepWithoutNextBump - 1.1.0 (minor change)"`
     );
   });
 
@@ -230,7 +255,7 @@ describe('findChangeRequests', () => {
       cyclic-dep-1 - 1.0.0 -> 2.0.0 (major change)
       cyclic-dep-2 - 1.0.0 -> 1.0.1 (patch change)
 
-      == Unchanged Projects (11) ==
+      == Unchanged Projects (12) ==
       a - 1.0.0
       b - 1.0.0
       c - 1.0.0
@@ -241,7 +266,8 @@ describe('findChangeRequests', () => {
       f - 1.0.0
       g - 1.0.0
       h - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -283,7 +309,7 @@ describe('findChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -292,6 +318,7 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -302,7 +329,7 @@ describe('findChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -315,7 +342,7 @@ describe('findChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -324,6 +351,7 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -334,7 +362,7 @@ describe('findChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -357,12 +385,13 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
       h - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
 
-      == Unchanged Projects (5) ==
+      == Unchanged Projects (6) ==
       cyclic-dep-1 - 1.0.0
       cyclic-dep-2 - 1.0.0
       cyclic-dep-explicit-1 - 1.0.0
       cyclic-dep-explicit-2 - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -381,7 +410,7 @@ describe('findChangeRequests', () => {
       c - 1.0.0 -> 1.0.1 (patch change)
       d - 1.0.0 -> 1.0.1 (patch change)
 
-      == Unchanged Projects (11) ==
+      == Unchanged Projects (12) ==
       a - 1.0.0
       b - 1.0.0
       cyclic-dep-1 - 1.0.0
@@ -392,7 +421,8 @@ describe('findChangeRequests', () => {
       f - 1.0.0
       g - 1.0.0
       h - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -420,12 +450,13 @@ describe('findChangeRequests', () => {
       h - 1.2.3 -> 1.2.4 (patch change)
       i - 1.2.3 -> 1.2.4 (patch change)
 
-      == Unchanged Projects (1) ==
-      g - 0.0.1"
+      == Unchanged Projects (2) ==
+      g - 0.0.1
+      j - 1.2.3"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.2.4"`
+      `"lockStepWithoutNextBump - 1.2.4 (patch change)"`
     );
   });
 });
@@ -563,12 +594,13 @@ describe('findWorkspaceChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (5) ==
+      "== Changed Projects (6) ==
       a - 1.0.0 -> 1.0.1 (patch change)
       b - 1.0.0 -> (same) (dependency change)
       e - 1.0.0 -> (same) (dependency change)
       g - 1.0.0 -> 1.0.1 (patch change)
       h - 1.0.0 -> (same) (dependency change)
+      i - 1.0.0 -> (same) (dependency change)
 
       == Unchanged Projects (8) ==
       c - 1.0.0
@@ -578,10 +610,12 @@ describe('findWorkspaceChangeRequests', () => {
       cyclic-dep-explicit-2 - 1.0.0
       d - 1.0.0
       f - 1.0.0
-      i - 1.0.0"
+      j - 1.0.0"
     `);
 
-    expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
+    expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
+      `"lockStepWithoutNextBump - 1.0.0 (dependency change)"`
+    );
   });
 
   it('returns 8 changes when hotfixing a root package', () => {
@@ -603,12 +637,13 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
       h - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
 
-      == Unchanged Projects (5) ==
+      == Unchanged Projects (6) ==
       cyclic-dep-1 - 1.0.0
       cyclic-dep-2 - 1.0.0
       cyclic-dep-explicit-1 - 1.0.0
       cyclic-dep-explicit-2 - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -623,7 +658,7 @@ describe('findWorkspaceChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -632,6 +667,7 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.1 (patch change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -642,7 +678,7 @@ describe('findWorkspaceChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -659,7 +695,7 @@ describe('findWorkspaceChangeRequests', () => {
       cyclic-dep-1 - 1.0.0 -> 2.0.0 (major change)
       cyclic-dep-2 - 1.0.0 -> 1.0.1 (patch change)
 
-      == Unchanged Projects (11) ==
+      == Unchanged Projects (12) ==
       a - 1.0.0
       b - 1.0.0
       c - 1.0.0
@@ -670,7 +706,8 @@ describe('findWorkspaceChangeRequests', () => {
       f - 1.0.0
       g - 1.0.0
       h - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -712,7 +749,7 @@ describe('findWorkspaceChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -721,6 +758,7 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.1 (patch change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -731,7 +769,7 @@ describe('findWorkspaceChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -744,7 +782,7 @@ describe('findWorkspaceChangeRequests', () => {
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -753,6 +791,7 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.1 (patch change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -763,7 +802,7 @@ describe('findWorkspaceChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -786,12 +825,13 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
       h - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
 
-      == Unchanged Projects (5) ==
+      == Unchanged Projects (6) ==
       cyclic-dep-1 - 1.0.0
       cyclic-dep-2 - 1.0.0
       cyclic-dep-explicit-1 - 1.0.0
       cyclic-dep-explicit-2 - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -837,12 +877,13 @@ describe('findWorkspaceChangeRequests', () => {
       h - 1.2.3 -> 1.2.4 (patch change)
       i - 1.2.3 -> 1.2.4 (patch change)
 
-      == Unchanged Projects (1) ==
-      g - 0.0.1"
+      == Unchanged Projects (2) ==
+      g - 0.0.1
+      j - 1.2.3"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.2.4"`
+      `"lockStepWithoutNextBump - 1.2.4 (patch change)"`
     );
   });
 });
