@@ -19,6 +19,7 @@ import {
   ITerminal,
   ConsoleTerminalProvider
 } from '@rushstack/node-core-library';
+import { getRepoRoot } from '@rushstack/package-deps-hash';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -364,8 +365,10 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
+    const repoRoot = getRepoRoot(this.rushConfiguration.rushJsonFolder);
+    const relativeChangesFolder = path.relative(this.rushConfiguration.changesFolder, repoRoot);
     return this._git
-      .getChangedFiles(this._targetBranch, this._terminal, true, this.rushConfiguration.changesFolder)
+      .getChangedFiles(this._targetBranch, this._terminal, true, relativeChangesFolder)
       .map((relativePath) => {
         return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
       });
