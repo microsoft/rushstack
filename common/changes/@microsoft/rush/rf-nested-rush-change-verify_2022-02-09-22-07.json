@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix bug in `rush change --verify` for Rush repos not at the root of a git repo",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
