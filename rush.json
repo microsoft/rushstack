@@ -594,6 +594,18 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-web-rig-app-tutorial",
+      "projectFolder": "build-tests-samples/heft-web-rig-app-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-web-rig-library-tutorial",
+      "projectFolder": "build-tests-samples/heft-web-rig-library-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "packlets-tutorial",
       "projectFolder": "build-tests-samples/packlets-tutorial",
       "reviewCategory": "tests",
