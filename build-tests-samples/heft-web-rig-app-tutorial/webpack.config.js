@@ -9,6 +9,13 @@ module.exports = function createConfig(env, argv) {
     projectRoot: __dirname,
     // Documentation: https://webpack.js.org/configuration/
     configOverride: {
+      resolve: {
+        alias: {
+          // Use the bundled library
+          'heft-web-rig-library-tutorial':
+            'heft-web-rig-library-tutorial/dist/heft-web-rig-library-tutorial.js'
+        }
+      },
       performance: {
         hints: env.production ? 'error' : false
         // This specifies the bundle size limit that will trigger Webpack's warning saying:
