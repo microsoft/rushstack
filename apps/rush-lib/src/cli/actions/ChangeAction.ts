@@ -365,7 +365,7 @@ export class ChangeAction extends BaseRushAction {
 
   private _getChangeFiles(): string[] {
     return this._git
-      .getChangedFiles(this._targetBranch, this._terminal, true, `common/changes/`)
+      .getChangedFiles(this._targetBranch, this._terminal, true, this.rushConfiguration.changesFolder)
       .map((relativePath) => {
         return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
       });
