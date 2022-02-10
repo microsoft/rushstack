@@ -3,7 +3,8 @@
 
 import './mockRushCommandLineParser';
 
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import * as path from 'path';
+import { FileSystem, Path, IFileSystemMoveOptions } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
@@ -334,6 +335,31 @@ describe(RushCommandLineParser.name, () => {
           `"command-line.json defines a command \\"rebuild\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"rebuild\\"."`
         );
       });
+    });
+  });
+  jest.setTimeout(1000000);
+
+  describe('in repo enable build cache with local only provider', () => {
+    it('produces build cache locally', async () => {
+      const repoName: string = 'localOnlyBuildCacheAndRunBuildActionRepo';
+      const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
+
+      // Clear default build cache folder
+      FileSystem.deleteFolder(path.resolve(__dirname, `${repoName}/common/temp/build-cache`));
+
+      let isBuildCacheGenerated: boolean = false;
+      const originalMoveAsync = FileSystem.moveAsync;
+      jest.spyOn(FileSystem, 'moveAsync').mockImplementation(async (options: IFileSystemMoveOptions) => {
+        const { sourcePath } = options;
+        if (sourcePath.endsWith('.temp') && !FileSystem.exists(sourcePath)) {
+          isBuildCacheGenerated = true;
+          return;
+        }
+        return originalMoveAsync(options);
+      });
+
+      await expect(instance.parser.execute()).resolves.toEqual(true);
+      expect(isBuildCacheGenerated).toBe(true);
     });
   });
 });

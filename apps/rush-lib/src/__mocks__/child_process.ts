@@ -4,6 +4,7 @@
 /* eslint-disable */
 
 const EventEmitter = require('events');
+const { Writable } = require('stream');
 
 const childProcess: any = jest.genMockFromModule('child_process');
 const childProcessActual = jest.requireActual('child_process');
@@ -42,10 +43,13 @@ function spawn(file: string, args: string[], options: {}) {
   // are dynamically added by `spawn`.
   const cpEmitter = new EventEmitter();
   const cp = Object.assign({}, cpMock, {
-    stdin: new EventEmitter(),
+    stdin: new Writable({
+      write: () => {}
+    }),
     stdout: new EventEmitter(),
     stderr: new EventEmitter(),
     on: cpEmitter.on,
+    once: cpEmitter.once,
     emit: cpEmitter.emit
   });
 
@@ -57,6 +61,7 @@ function spawn(file: string, args: string[], options: {}) {
     }
 
     cp.emit('close', spawnMockConfig.returnCode);
+    cp.emit('exit', spawnMockConfig.returnCode);
   }, 0);
 
   return cp;
