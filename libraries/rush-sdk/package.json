@@ -19,6 +19,8 @@
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/stream-collator": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@types/node-fetch": "1.6.9",
     "tapable": "2.2.1"
   },
