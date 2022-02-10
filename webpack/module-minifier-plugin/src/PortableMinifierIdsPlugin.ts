@@ -12,7 +12,8 @@ import {
   _INormalModuleFactoryModuleData,
   IExtendedModule,
   IModuleMinifierPluginHooks,
-  _IWebpackCompilationData
+  _IWebpackCompilationData,
+  IPostProcessFragmentContext
 } from './ModuleMinifierPlugin.types';
 
 const PLUGIN_NAME: 'PortableMinifierModuleIdsPlugin' = 'PortableMinifierModuleIdsPlugin';
@@ -28,7 +29,8 @@ const TAP_AFTER: TapOptions<'sync'> = {
 };
 
 const STABLE_MODULE_ID_PREFIX: '__MODULEID_SHA_' = '__MODULEID_SHA_';
-const STABLE_MODULE_ID_REGEX: RegExp = /['"]?(__MODULEID_SHA_[0-9a-f]+)['"]?/g;
+// The negative lookback here is to ensure that this regex does not match an async import placeholder
+const STABLE_MODULE_ID_REGEX: RegExp = /(?<!C)['"]?(__MODULEID_SHA_[0-9a-f]+)['"]?/g;
 
 /**
  * Plugin responsible for converting the Webpack module ids (of whatever variety) to stable ids before code is handed to the minifier, then back again.
@@ -69,25 +71,33 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
       return id === undefined ? id : stableIdToFinalId.get(id);
     });
 
-    this._minifierHooks.postProcessCodeFragment.tap(PLUGIN_NAME, (source: ReplaceSource, context: string) => {
-      const code: string = source.original().source() as string;
+    this._minifierHooks.postProcessCodeFragment.tap(
+      PLUGIN_NAME,
+      (source: ReplaceSource, context: IPostProcessFragmentContext) => {
+        const code: string = source.original().source() as string;
 
-      STABLE_MODULE_ID_REGEX.lastIndex = -1;
-      // RegExp.exec uses null or an array as the return type, explicitly
-      let match: RegExpExecArray | null = null;
-      while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
-        const id: string = match[1];
-        const mapped: string | number | undefined = stableIdToFinalId.get(id);
+        STABLE_MODULE_ID_REGEX.lastIndex = -1;
+        // RegExp.exec uses null or an array as the return type, explicitly
+        let match: RegExpExecArray | null = null;
+        while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
+          const id: string = match[1];
+          const mapped: string | number | undefined = this._minifierHooks.finalModuleId.call(
+            id,
+            context.compilation
+          );
 
-        if (mapped === undefined) {
-          console.error(`Missing module id for ${id} in ${context}!`);
+          if (mapped === undefined) {
+            context.compilation.errors.push(
+              new Error(`Missing module id for ${id} in ${context.loggingName}!`)
+            );
+          }
+
+          source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, JSON.stringify(mapped));
         }
 
-        source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, JSON.stringify(mapped));
+        return source;
       }
-
-      return source;
-    });
+    );
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -136,30 +146,27 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
           for (const mod of compilation.modules) {
             const originalId: string | number = mod.id;
 
-            // Need to handle ConcatenatedModules, which don't have the resource property directly
-            const { resource } = mod.rootModule || mod;
+            // Need different cache keys for different sets of loaders, so can't use 'resource'
+            const identity: string = mod.identifier();
+            const hashId: string = createHash('sha256').update(identity).digest('hex');
 
-            if (resource) {
-              const hashId: string = createHash('sha256').update(resource).digest('hex');
+            // This is designed to be an easily regex-findable string
+            const stableId: string = `${STABLE_MODULE_ID_PREFIX}${hashId}`;
+            const existingResource: string | undefined = resourceById.get(stableId);
 
-              // This is designed to be an easily regex-findable string
-              const stableId: string = `${STABLE_MODULE_ID_PREFIX}${hashId}`;
-              const existingResource: string | undefined = resourceById.get(stableId);
-
-              if (existingResource) {
-                compilation.errors.push(
-                  new Error(
-                    `Module id collision for ${resource} with ${existingResource}.\n This means you are bundling multiple versions of the same module.`
-                  )
-                );
-              }
-
-              stableIdToFinalId.set(stableId, originalId);
-
-              // Record to detect collisions
-              resourceById.set(stableId, resource);
-              mod.id = stableId;
+            if (existingResource) {
+              compilation.errors.push(
+                new Error(
+                  `Module id collision for ${identity} with ${existingResource}.\n This means you are bundling multiple versions of the same module.`
+                )
+              );
             }
+
+            stableIdToFinalId.set(stableId, originalId);
+
+            // Record to detect collisions
+            resourceById.set(stableId, identity);
+            mod.id = stableId;
           }
         });
 
