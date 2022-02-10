@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "hotfix #3059",
+      "comment": "Fix an issue where the dependencies of lockstep-versioned projects aren't bumped when the lockstep-versioned projects' versions are bumped. This issue only arose in the scenario when the lockstep-versioned projects' version bumps are driven by the change type in the changefiles and not by the \"nextBump\" property in \"common/config/rush/version-policies.json\"",
       "type": "none"
     }
   ],
