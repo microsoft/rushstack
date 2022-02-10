@@ -5,6 +5,12 @@ import { PublishGit } from "../PublishGit";
 import { PublishUtilities } from '../PublishUtilities';
 
 describe('PublishGit Test', () => {
+  let gitPath: string
+  beforeAll(() => {
+    gitPath = '/usr/bin/git'
+    process.env.RUSH_GIT_BINARY_PATH = gitPath
+  })
+
   it('Test git with no command line arg tag', () => {
     const execCommand = jest.fn()
     PublishUtilities.execCommand = execCommand
@@ -24,7 +30,7 @@ describe('PublishGit Test', () => {
     expect(execCommand).toBeCalledTimes(1)
     expect(execCommand).toBeCalledWith(
       false,
-      '/usr/local/bin/git',
+      gitPath,
       [
         'tag',
         '-a',
@@ -53,7 +59,7 @@ describe('PublishGit Test', () => {
     expect(execCommand).toBeCalledTimes(1)
     expect(execCommand).toBeCalledWith(
       false,
-      '/usr/local/bin/git',
+      gitPath,
       [
         'tag',
         '-a',
