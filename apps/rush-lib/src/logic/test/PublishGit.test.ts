@@ -25,7 +25,7 @@ describe('PublishGit Test', () => {
       'project1',
       '2',
       undefined,
-      undefined // This is undefined to simulate `rush publish ...` without --tag
+      undefined // This is undefined to simulate `rush publish ...` without --prerelease-name
     )
     expect(execCommand).toBeCalledTimes(1)
     expect(execCommand).toBeCalledWith(
@@ -54,7 +54,7 @@ describe('PublishGit Test', () => {
       'project1',
       '2',
       undefined,
-      'new_version_tag' // Simulates `rush publish ... --tag new_version_tag`
+      'new_version_prerelease' // Simulates `rush publish ... --prerelease-name new_version_tag`
     )
     expect(execCommand).toBeCalledTimes(1)
     expect(execCommand).toBeCalledWith(

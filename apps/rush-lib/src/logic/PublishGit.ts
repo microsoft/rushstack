@@ -91,7 +91,7 @@ export class PublishGit {
     packageName: string,
     packageVersion: string,
     commitId: string | undefined,
-    npmTag?: string
+    preReleaseName?: string
   ): void {
     // Tagging only happens if we're publishing to real NPM and committing to git.
     const tagName: string = PublishUtilities.createTagname(
@@ -102,9 +102,9 @@ export class PublishGit {
     PublishUtilities.execCommand(!!this._targetBranch && shouldExecute, this._gitPath, [
       'tag',
       '-a',
-      npmTag ? `${tagName}-${npmTag}` : tagName,
+      preReleaseName ? `${tagName}-${preReleaseName}` : tagName,
       '-m',
-      npmTag ? `${packageName} v${packageVersion}-${npmTag}` : `${packageName} v${packageVersion}`,
+      preReleaseName ? `${packageName} v${packageVersion}-${preReleaseName}` : `${packageName} v${packageVersion}`,
       ...(commitId ? [commitId] : [])
     ]);
   }
