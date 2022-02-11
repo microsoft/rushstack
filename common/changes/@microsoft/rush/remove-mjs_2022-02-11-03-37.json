@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove the lib/index.mjs file from the @rushstack/rush-sdk package. This package must be CommonJS.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
