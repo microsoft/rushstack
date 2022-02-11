@@ -38,7 +38,12 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
           // processing as per a chosen source map style specified by the devtool option in webpack.config.js.
           // https://www.npmjs.com/package/source-map-loader
           test: /\.js$/,
-          include: [path.resolve(projectRoot, 'lib')],
+
+          // Include source maps from other library projects in the monorepo workspace,
+          // but exclude source maps for external NPM packages.  Webpack tests the fs.realPathSync() path,
+          // so external packages will be under "common/temp/node_modules/.pnpm/".
+          exclude: /[\\/]\.pnpm[\\/]/,
+
           enforce: 'pre',
           use: [
             {
