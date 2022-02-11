@@ -30,7 +30,7 @@ export interface ISassConfiguration {
   cssOutputFolders?: string[] | undefined;
 
   /**
-   * Determines if export values are wrapped in a default property, or not.
+   * Determines whether export values are wrapped in a default property, or not.
    * Defaults to true.
    */
   exportAsDefault?: boolean;
