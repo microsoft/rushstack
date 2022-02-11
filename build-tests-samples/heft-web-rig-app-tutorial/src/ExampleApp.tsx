@@ -9,17 +9,19 @@ export class ExampleApp extends React.Component {
     const appStyle: React.CSSProperties = {
       backgroundColor: '#ffffff',
       padding: '20px',
+      margin: '20px',
       borderRadius: '5px',
       width: '400px'
     };
 
     return (
-      <div style={{ padding: '20px' }}>
-        <div style={appStyle}>
-          <h2>Hello, world!</h2>
-          Here is an example control:
-          <ToggleSwitch leftColor={'#800000'} rightColor={'#008000'} onToggle={this._onToggle} />
-        </div>
+      <div style={appStyle}>
+        <h2>Hello, world!</h2>
+        <p>Here is an example control:</p>
+        <ToggleSwitch leftColor={'#800000'} rightColor={'#008000'} onToggle={this._onToggle} />
+
+        <p>Here is an example image:</p>
+        <img src={require('./example-image.png')} />
       </div>
     );
   }

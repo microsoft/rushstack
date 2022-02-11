@@ -193,8 +193,8 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
           test: /\.(jpeg|jpg|png|gif|svg|ico)$/,
           // Allows import/require() to be used with an asset file. The file will be copied to the output folder,
           // and the import statement will return its URL.
-          // https://www.npmjs.com/package/file-loader
-          loader: 'file-loader'
+          // https://webpack.js.org/guides/asset-modules/#resource-assets
+          type: 'asset/resource'
         }
       ]
     },
