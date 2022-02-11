@@ -1,0 +1,10 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugins.schema.json",
+  "plugins": [
+    {
+      "packageName": "rush-fake-build-cache-plugin",
+      "pluginName": "rush-fake-build-cache-plugin",
+      "autoinstallerName": "plugins"
+    }
+  ]
+}

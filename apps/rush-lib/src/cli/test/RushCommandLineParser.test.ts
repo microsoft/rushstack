@@ -7,6 +7,8 @@ import * as path from 'path';
 import { FileSystem, Path, IFileSystemMoveOptions } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { Autoinstaller } from '../../logic/Autoinstaller';
+import { ICloudBuildCacheProvider, IRushPlugin } from '../..';
 
 /**
  * See `__mocks__/child_process.js`.
@@ -75,6 +77,101 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
   return {
     parser,
     spawnMock
+  };
+}
+
+type IFakeBuildCacheProvider<T extends keyof ICloudBuildCacheProvider = keyof ICloudBuildCacheProvider> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [K in T]: ICloudBuildCacheProvider[K] extends (...args: any[]) => any
+    ? jest.Mock
+    : ICloudBuildCacheProvider[K];
+};
+
+interface IFakeBuildCachePlugin extends IRushPlugin {
+  // provider: Record<keyof ICloudBuildCacheProvider, jest.Mock>;
+  provider: IFakeBuildCacheProvider;
+}
+
+/**
+ * Interface definition for a test instance for the RushCommandLineParser.
+ */
+interface IParserBuildCacheTestInstance extends IParserTestInstance {
+  isTempBuildCacheGenerated: boolean;
+  fakeBuildCachePlugin: IFakeBuildCachePlugin | undefined;
+}
+
+/**
+ * Helper to set up a test instance for RushCommandLineParser.
+ */
+function getBuildCacheCommandLineParserInstance(
+  repoName: string,
+  taskName: string
+): IParserBuildCacheTestInstance {
+  const parserTestInstance = getCommandLineParserInstance(repoName, taskName);
+
+  // Clear default build cache folder
+  const buildCacheFolder: string = path.resolve(__dirname, `${repoName}/common/temp/build-cache`);
+  FileSystem.deleteFolder(buildCacheFolder);
+
+  // Mock output of the build command
+  const distIndexJsPath: string = path.resolve(__dirname, `${repoName}/a/dist/index.js`);
+  FileSystem.ensureFolder(path.dirname(distIndexJsPath));
+  FileSystem.writeFile(distIndexJsPath, `console.log('rush');`);
+
+  FileSystem.ensureFolder(path.resolve(__dirname, `${repoName}/a/.rush/temp`));
+
+  /**
+   * For local build cache, rush creates a temp build cache file first, so we need mock it.
+   */
+  let isTempBuildCacheGenerated: boolean = false;
+  const originalMoveAsync = FileSystem.moveAsync;
+  jest.spyOn(FileSystem, 'moveAsync').mockImplementation((options: IFileSystemMoveOptions) => {
+    const { sourcePath } = options;
+    if (sourcePath.endsWith('.temp') && !FileSystem.exists(sourcePath)) {
+      isTempBuildCacheGenerated = true;
+      return Promise.resolve();
+    }
+    return originalMoveAsync(options);
+  });
+
+  /**
+   * For cloud build cache, rush reads local build cache outputs first, so we need mock it.
+   */
+  const originalReadFileToBufferAsync = FileSystem.readFileToBufferAsync;
+  jest.spyOn(FileSystem, 'readFileToBufferAsync').mockImplementation((filepath: string) => {
+    if (filepath.startsWith(buildCacheFolder)) {
+      return Promise.resolve(Buffer.from('fake-build-cache-buffer'));
+    }
+    return originalReadFileToBufferAsync(filepath);
+  });
+
+  let fakeBuildCachePlugin: IFakeBuildCachePlugin | undefined;
+
+  /**
+   * For cloud build cache, a fake build cache plugin is used to mock the cloud build cache plugin.
+   */
+  try {
+    const rushFakeBuildCachePluginPath = path.join(
+      __dirname,
+      `${repoName}/common/autoinstallers/plugins/node_modules/rush-fake-build-cache-plugin`
+    );
+    FileSystem.copyFiles({
+      sourcePath: path.join(__dirname, `rush-fake-build-cache-plugin`),
+      destinationPath: rushFakeBuildCachePluginPath
+    });
+    fakeBuildCachePlugin = require(rushFakeBuildCachePluginPath);
+
+    jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async function () {});
+  } catch (e) {
+    /**
+     * If loading the plugin fails, it may be testing local build cache, so ignore error safely
+     */
+  }
+
+  return {
+    ...parserTestInstance,
+    isTempBuildCacheGenerated,
+    fakeBuildCachePlugin
   };
 }
 
@@ -337,7 +434,6 @@ describe(RushCommandLineParser.name, () => {
       });
     });
   });
-  jest.setTimeout(1000000);
 
   describe('in repo enable build cache with local only provider', () => {
     it('produces build cache locally', async () => {
@@ -360,6 +456,24 @@ describe(RushCommandLineParser.name, () => {
 
       await expect(instance.parser.execute()).resolves.toEqual(true);
       expect(isBuildCacheGenerated).toBe(true);
+    });
+  });
+
+  describe('in repo enable build cache and use cloud build cache provider', () => {
+    it('restores build cache from cloud build cache provider', async () => {
+      const repoName: string = 'cloudBuildCacheReadAndRunBuildActionRepo';
+      const instance: IParserBuildCacheTestInstance = getBuildCacheCommandLineParserInstance(
+        repoName,
+        'build'
+      );
+
+      instance.fakeBuildCachePlugin?.provider.tryGetCacheEntryBufferByIdAsync.mockImplementation(() =>
+        Buffer.from('fake-build-cache-entry-buffer')
+      );
+
+      await expect(instance.parser.execute()).resolves.toEqual(true);
+      expect(instance.fakeBuildCachePlugin?.provider.tryGetCacheEntryBufferByIdAsync).toHaveBeenCalled();
+      expect(instance.fakeBuildCachePlugin?.provider.trySetCacheEntryBufferAsync).not.toHaveBeenCalled();
     });
   });
 });

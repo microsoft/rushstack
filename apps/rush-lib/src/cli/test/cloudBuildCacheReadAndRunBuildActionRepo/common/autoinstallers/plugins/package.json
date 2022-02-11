@@ -1,0 +1,8 @@
+{
+  "name": "plugins",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "rush-fake-build-cache-plugin": "file:../../../../rush-fake-build-cache-plugin"
+  }
+}
