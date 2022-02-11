@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/loader-raw-script",
-  "version": "1.3.210",
+  "version": "1.3.211",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
