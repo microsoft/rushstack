@@ -69,7 +69,7 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
           //
           // COMPILATION STRATEGY
           //
-          // - Sass compilation:   handled by @rushstack/heft-sass-plugin, configured using config/sass.json
+          // - Sass compilation:   handled by Webpack
           // - .d.ts generation:   handled by @rushstack/heft-sass-plugin, configured using config/sass.json
           // - Autoprefixer:       handled by Webpack
           // - CSS modules:        handled by Webpack
@@ -175,6 +175,20 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
                         // https://www.npmjs.com/package/autoprefixer
                         autoprefixer
                       ]
+                    },
+
+                    sourceMap: !production
+                  }
+                },
+                {
+                  // Compiles SASS syntax into CSS
+                  // https://www.npmjs.com/package/sass-loader
+                  loader: require.resolve('sass-loader'),
+
+                  options: {
+                    implementation: sass,
+                    sassOptions: {
+                      includePaths: [path.resolve(__dirname, 'node_modules')]
                     },
 
                     sourceMap: !production

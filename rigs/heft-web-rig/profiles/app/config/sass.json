@@ -40,7 +40,7 @@
    *
    * Default value: undefined
    */
-  "cssOutputFolders": ["lib", "lib-commonjs"],
+  // "cssOutputFolders": ["lib", "lib-commonjs"],
 
   /**
    * Files with these extensions will pass through the Sass transpiler for typings generation.
