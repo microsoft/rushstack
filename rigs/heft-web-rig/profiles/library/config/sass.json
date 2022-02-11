@@ -1,47 +1,65 @@
 /**
- * Configures the Sass Typings plugin for the Heft build system.
+ * Configuration for @rushstack/heft-sass-plugin
  *
  * This optional additional file customizes Sass parsing, module resolution, and emitting of
- * typings files for the Typescript compiler.
+ * Typescript .d.ts files.
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/sass.schema.json"
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft-sass-plugin.schema.json",
 
   /**
-   * Source code root directory.
-   * This is where .css, .sass, and .scss files will be searched for to generate typings.
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
    */
-  // "srcFolder": "src",
+  // "extends": "base-project/config/serve-command.json",
+
+  /**
+   * The root directory for project source code.
+   *
+   * Default value: "src/"
+   */
+  // "srcFolder": "src/",
 
   /**
    * Output directory for generated Sass typings.
+   *
+   * Default value: "temp/sass-ts/"
    */
-  // "generatedTsFolder": "temp/sass-ts",
+  // "generatedTsFolder": "temp/sass-ts/",
 
   /**
-   * Determines if export values are wrapped in a default property, or not.
+   * Determines whether export values are wrapped in a default property, or not.
+   *
+   * Default value: true
    */
-  // "exportAsDefault": true,
+  // "exportAsDefault": false,
+
+  /**
+   * If specified, folders where compiled CSS files will be emitted to. They will be named by appending
+   * ".css" to the source file name for ease of reference translation.
+   *
+   * Default value: undefined
+   */
+  "cssOutputFolders": ["lib", "lib-commonjs"],
 
   /**
    * Files with these extensions will pass through the Sass transpiler for typings generation.
+   *
+   * Default value: [".sass", ".scss", ".css"]
    */
-  // "fileExtensions": [
-  //   ".sass",
-  //   ".scss",
-  //   ".css
-  // ],
+  "fileExtensions": [".sass", ".scss"]
 
   /**
-   * A list of paths used when resolving Sass imports.
+   * A list of paths used when resolving Sass imports.  The paths should be relative to the project root.
+   *
+   * Default value: ["node_modules", "src"]
    */
-  // "importIncludePaths": [
-  //   "node_modules",
-  //   "src"
-  // ],
+  // "importIncludePaths": ["node_modules", "src"],
 
   /**
    * A list of file paths relative to the "src" folder that should be excluded from typings generation.
+   *
+   * Default value: undefined
    */
   // "excludeFiles": []
 }

@@ -48,21 +48,31 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
         },
 
         {
-          // Recommendation for CSS styles:
+          // CSS/SASS INPUT FORMATS
           //
           // We recommend the newer .scss file format because its syntax is a proper superset of familiar CSS.
-          // The older .sass syntax is accepted for backwards compatibility.
+          // The older .sass syntax is also accepted for backwards compatibility.
           //
-          // Handling of formats:
-          // - *.scss:          sass, autoprefixer, modules  <--- recommended
-          // - *.global.scss:   sass, autoprefixer, NO modules
-          // - *.css:           NO sass, NO autoprefixer, NO modules
+          // The Sass documentation is here: https://sass-lang.com/documentation/syntax
           //
-          // If someone wants CSS with modules, they can simply use the .sass file extension, since SASS
-          // is essentially a superset of CSS. (There's a small performance penalty for applying SASS to
-          // a plain CSS file, but the extra syntax validation probably justifies that cost.)
+          // File extensions    Sass  Autoprefixer  CSS modules    .d.ts
+          // -----------------  ----  ------------  -------------  -----
+          // *.scss:            YES   YES           YES            YES     (recommended)
+          // *.sass:            YES   YES           YES            YES     (deprecated)
+          // *.global.scss:     YES   YES           NO             NO
+          // *.global.sass:     YES   YES           NO             NO      (deprecated)
+          // *.css:             NO    YES           NO             NO
           //
-          // The SASS docs are here: https://sass-lang.com/documentation/syntax
+          // If you want .css syntax but with CSS modules, use the .scss file extension; its syntax
+          // is a superset of CSS. (There's a small performance penalty for applying Sass to a CSS file,
+          // but the extra syntax validation justifies that cost.)
+          //
+          // COMPILATION STRATEGY
+          //
+          // - Sass compilation:   handled by @rushstack/heft-sass-plugin, configured using config/sass.json
+          // - .d.ts generation:   handled by @rushstack/heft-sass-plugin, configured using config/sass.json
+          // - Autoprefixer:       handled by Webpack
+          // - CSS modules:        handled by Webpack
           test: /\.(scss|sass|css)$/,
           exclude: /node_modules/,
           use: [
@@ -165,20 +175,6 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
                         // https://www.npmjs.com/package/autoprefixer
                         autoprefixer
                       ]
-                    },
-
-                    sourceMap: !production
-                  }
-                },
-                {
-                  // Compiles SASS syntax into CSS
-                  // https://www.npmjs.com/package/sass-loader
-                  loader: require.resolve('sass-loader'),
-
-                  options: {
-                    implementation: sass,
-                    sassOptions: {
-                      includePaths: [path.resolve(__dirname, 'node_modules')]
                     },
 
                     sourceMap: !production
