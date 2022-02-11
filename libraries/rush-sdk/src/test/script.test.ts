@@ -1,7 +1,8 @@
-import * as path from 'path';
-import { Executable } from '@rushstack/node-core-library';
+import { Executable, PackageJsonLookup } from '@rushstack/node-core-library';
 
-const rushSdkPath: string = path.join(__dirname, '../../lib/index.js');
+const rushSdkPackagePath: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
+const rushSdkPath: string = `${rushSdkPackagePath}/lib/index`;
+const rushSdkLoaderPath: string = `${rushSdkPackagePath}/loader`;
 const sandboxRepoPath: string = `${__dirname}/sandbox`;
 const mockPackageFolder: string = `${sandboxRepoPath}/mock-package`;
 const mockRushLibPath: string = `${__dirname}/fixture/mock-rush-lib.js`;
@@ -24,6 +25,8 @@ const mockResolveModule = (options) => {
   return originalResolveModule(options);
 }
 Import.resolveModule = mockResolveModule;
+const { RushSdkLoader } = require(${JSON.stringify(rushSdkLoaderPath)});
+RushSdkLoader.install();
 console.log(require(${JSON.stringify(rushSdkPath)}));
 `
       ],
@@ -32,6 +35,7 @@ console.log(require(${JSON.stringify(rushSdkPath)}));
       }
     );
     expect(result.status).toBe(0);
+    expect(result.stderr).toMatchInlineSnapshot(`""`);
     expect(result.stdout.trim()).toMatchInlineSnapshot(`"{ foo: [Getter] }"`);
   });
 });
