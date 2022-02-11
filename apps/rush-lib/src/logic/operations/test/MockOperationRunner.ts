@@ -3,11 +3,11 @@
 
 import type { CollatedTerminal } from '@rushstack/stream-collator';
 
-import { TaskStatus } from '../TaskStatus';
-import { ITaskRunner, ITaskRunnerContext } from '../ITaskRunner';
+import { OperationStatus } from '../OperationStatus';
+import { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 
-export class MockTaskRunner implements ITaskRunner {
-  private readonly _action: ((terminal: CollatedTerminal) => Promise<TaskStatus>) | undefined;
+export class MockOperationRunner implements IOperationRunner {
+  private readonly _action: ((terminal: CollatedTerminal) => Promise<OperationStatus>) | undefined;
   public readonly name: string;
   public readonly hadEmptyScript: boolean = false;
   public isSkipAllowed: boolean = false;
@@ -16,7 +16,7 @@ export class MockTaskRunner implements ITaskRunner {
 
   public constructor(
     name: string,
-    action?: (terminal: CollatedTerminal) => Promise<TaskStatus>,
+    action?: (terminal: CollatedTerminal) => Promise<OperationStatus>,
     warningsAreAllowed: boolean = false
   ) {
     this.name = name;
@@ -24,11 +24,11 @@ export class MockTaskRunner implements ITaskRunner {
     this.warningsAreAllowed = warningsAreAllowed;
   }
 
-  public async executeAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
-    let result: TaskStatus | undefined;
+  public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
+    let result: OperationStatus | undefined;
     if (this._action) {
       result = await this._action(context.collatedWriter.terminal);
     }
-    return result || TaskStatus.Success;
+    return result || OperationStatus.Success;
   }
 }

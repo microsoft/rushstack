@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.15.2",
+      "tag": "@microsoft/api-documenter_v7.15.2",
+      "date": "Wed, 09 Feb 2022 16:18:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Adding PowerPoint option to OfficeYamlDocumenter API set mapping"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.15.1",
       "tag": "@microsoft/api-documenter_v7.15.1",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",

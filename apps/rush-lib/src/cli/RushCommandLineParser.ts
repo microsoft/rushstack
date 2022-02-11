@@ -362,11 +362,13 @@ export class RushCommandLineParser extends CommandLineParser {
 
         enableParallelism: command.enableParallelism,
         incremental: command.incremental || false,
-        watchForChanges: command.watchForChanges || false,
         disableBuildCache: command.disableBuildCache || false,
 
-        actionPhases: command.phases,
-        phases: commandLineConfiguration.phases
+        initialPhases: command.phases,
+        watchPhases: command.watchPhases,
+        phases: commandLineConfiguration.phases,
+
+        alwaysWatch: command.alwaysWatch
       })
     );
   }

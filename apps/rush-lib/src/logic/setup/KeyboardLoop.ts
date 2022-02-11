@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import colors from 'colors/safe';
 import * as readline from 'readline';
 import * as process from 'process';
-import { InternalError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
 // TODO: Integrate these into the AnsiEscape API in @rushstack/node-core-library
 // As part of that work we should generalize the "Colors" API to support more general
@@ -33,11 +34,47 @@ export class KeyboardLoop {
       return;
     }
 
+    this._checkForTTY();
+
     this._readlineInterface = readline.createInterface({ input: this.stdin });
 
     readline.emitKeypressEvents(process.stdin);
-    this.stdin.setRawMode!(true);
+    this.stdin.setRawMode(true);
     this.stdin.addListener('keypress', this._onKeypress);
+  }
+
+  private _checkForTTY(): void {
+    if (this.stdin.isTTY && this.stdin.setRawMode) {
+      return;
+    }
+
+    if (process.platform === 'win32') {
+      const shell: string = process.env.SHELL ?? '';
+      if (shell.toUpperCase().endsWith('BASH.EXE')) {
+        // Git Bash has a known problem where the Node.js TTY is lost when invoked via an NPM binary script.
+        console.error(
+          colors.red(
+            'ERROR: It appears that Rush was invoked from Git Bash shell, which does not support the\n' +
+              'TTY mode for interactive input that is required by this feature.'
+          ) +
+            '\n\nKnown workarounds are:\n' +
+            '- Invoke Rush using "winpty rush.cmd" instead of "rush"\n' +
+            '- Or add this to your .bashrc:  alias rush="winpty rush.cmd"\n' +
+            '- Or create a Git Bash shortcut icon that launches\n' +
+            '  "C:\\Program Files\\Git\\bin\\bash.exe" instead of "git-bash.exe"\n\n' +
+            'For details, refer to https://github.com/microsoft/rushstack/issues/3217'
+        );
+        throw new AlreadyReportedError();
+      }
+    }
+
+    console.error(
+      colors.red(
+        'ERROR: Rush was invoked by a command whose STDIN does not support the TTY mode for\n' +
+          'interactive input that is required by this feature.'
+      ) + '\n\nTry invoking "rush" directly from your shell.'
+    );
+    throw new AlreadyReportedError();
   }
 
   private _uncaptureInput(): void {
@@ -46,7 +83,7 @@ export class KeyboardLoop {
     }
 
     this.stdin.removeListener('keypress', this._onKeypress);
-    this.stdin.setRawMode!(false);
+    this.stdin.setRawMode(false);
     this._readlineInterface.close();
     this._readlineInterface = undefined;
   }

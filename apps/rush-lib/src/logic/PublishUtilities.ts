@@ -12,7 +12,7 @@ import * as semver from 'semver';
 import { execSync } from 'child_process';
 import { IPackageJson, JsonFile, FileConstants, Text, Enum } from '@rushstack/node-core-library';
 
-import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
+import { IChangeInfo, ChangeType, IVersionPolicyChangeInfo } from '../api/ChangeManagement';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Utilities, IEnvironment } from '../utilities/Utilities';
 import { PrereleaseToken } from './PrereleaseToken';
@@ -21,11 +21,10 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
 import { LockStepVersionPolicy } from '../api/VersionPolicy';
-import { SemVer } from 'semver';
 
 export interface IChangeRequests {
   packageChanges: Map<string, IChangeInfo>;
-  versionPolicyChanges: Map<string, SemVer>;
+  versionPolicyChanges: Map<string, IVersionPolicyChangeInfo>;
 }
 
 export class PublishUtilities {
@@ -44,7 +43,7 @@ export class PublishUtilities {
   ): IChangeRequests {
     const allChanges: IChangeRequests = {
       packageChanges: new Map<string, IChangeInfo>(),
-      versionPolicyChanges: new Map<string, SemVer>()
+      versionPolicyChanges: new Map<string, IVersionPolicyChangeInfo>()
     };
 
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
@@ -72,22 +71,63 @@ export class PublishUtilities {
       }
     });
 
-    // For each requested package change, ensure downstream dependencies are also updated.
-    allChanges.packageChanges.forEach((change, packageName) => {
-      PublishUtilities._updateDownstreamDependencies(
-        change,
-        allChanges,
-        allPackages,
-        rushConfiguration,
-        prereleaseToken,
-        projectsToExclude
-      );
-    });
+    // keep resolving downstream dependency changes and version policy changes
+    // until no more changes are detected
+    let hasChanges: boolean;
+    do {
+      hasChanges = false;
+
+      // For each requested package change, ensure downstream dependencies are also updated.
+      allChanges.packageChanges.forEach((change, packageName) => {
+        hasChanges =
+          PublishUtilities._updateDownstreamDependencies(
+            change,
+            allChanges,
+            allPackages,
+            rushConfiguration,
+            prereleaseToken,
+            projectsToExclude
+          ) || hasChanges;
+      });
+
+      // Bump projects affected by the version policy changes.
+      allPackages.forEach((project) => {
+        const versionPolicyChange: IVersionPolicyChangeInfo | undefined =
+          project.versionPolicyName !== undefined
+            ? allChanges.versionPolicyChanges.get(project.versionPolicyName)
+            : undefined;
+
+        if (versionPolicyChange === undefined) {
+          return;
+        }
+
+        const projectHasChanged: boolean = this._addChange(
+          {
+            packageName: project.packageName,
+            changeType: versionPolicyChange.changeType,
+            newVersion: versionPolicyChange.newVersion // enforce the specific policy version
+          },
+          allChanges,
+          allPackages,
+          rushConfiguration,
+          prereleaseToken,
+          projectsToExclude
+        );
+
+        if (projectHasChanged) {
+          console.log(
+            `${EOL}* APPLYING: update ${project.packageName} to version ${versionPolicyChange.newVersion}`
+          );
+        }
+
+        hasChanges = projectHasChanged || hasChanges;
+      });
+    } while (hasChanges);
 
     // Update orders so that downstreams are marked to come after upstreams.
     allChanges.packageChanges.forEach((change, packageName) => {
       const project: RushConfigurationProject = allPackages.get(packageName)!;
-      const pkg: IPackageJson = project.packageJson;
+      const packageJson: IPackageJson = project.packageJson;
       const deps: Iterable<RushConfigurationProject> = project.consumingProjects;
 
       // Write the new version expected for the change.
@@ -97,15 +137,15 @@ export class PublishUtilities {
         projectsToExclude
       );
       if (skipVersionBump) {
-        change.newVersion = pkg.version;
+        change.newVersion = packageJson.version;
       } else {
         // For hotfix changes, do not re-write new version
         change.newVersion =
           change.changeType! >= ChangeType.patch
-            ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))!
+            ? semver.inc(packageJson.version, PublishUtilities._getReleaseType(change.changeType!))!
             : change.changeType === ChangeType.hotfix
             ? change.newVersion
-            : pkg.version;
+            : packageJson.version;
       }
 
       if (deps) {
@@ -115,44 +155,6 @@ export class PublishUtilities {
             depChange.order = Math.max(change.order! + 1, depChange.order!);
           }
         }
-      }
-    });
-
-    // Bump projects affected by the version policy changes.
-    allPackages.forEach((pkg) => {
-      const versionPolicyVersion: string | undefined =
-        pkg.versionPolicyName !== undefined
-          ? allChanges.versionPolicyChanges.get(pkg.versionPolicyName)?.format()
-          : undefined;
-
-      if (versionPolicyVersion === undefined) {
-        return;
-      }
-
-      const versionDiff: semver.ReleaseType | null = semver.diff(
-        pkg.packageJson.version,
-        versionPolicyVersion
-      );
-
-      if (versionDiff === null) {
-        return;
-      }
-
-      if (
-        this._addChange(
-          {
-            packageName: pkg.packageName,
-            changeType: this._getChangeTypeForSemverReleaseType(versionDiff),
-            newVersion: versionPolicyVersion // enforce the specific policy version
-          },
-          allChanges,
-          allPackages,
-          rushConfiguration,
-          prereleaseToken,
-          projectsToExclude
-        )
-      ) {
-        console.log(`${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyVersion}`);
       }
     });
 
@@ -381,13 +383,13 @@ export class PublishUtilities {
     projectsToExclude?: Set<string>
   ): IPackageJson {
     const project: RushConfigurationProject = allPackages.get(change.packageName)!;
-    const pkg: IPackageJson = project.packageJson;
+    const packageJson: IPackageJson = project.packageJson;
 
     const shouldSkipVersionBump: boolean =
       !project.shouldPublish || (!!projectsToExclude && projectsToExclude.has(change.packageName));
 
     const newVersion: string = shouldSkipVersionBump
-      ? pkg.version
+      ? packageJson.version
       : PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
     if (!shouldSkipVersionBump) {
@@ -403,12 +405,12 @@ export class PublishUtilities {
 
     const packagePath: string = path.join(project.projectFolder, FileConstants.PackageJson);
 
-    pkg.version = newVersion;
+    packageJson.version = newVersion;
 
     // Update the package's dependencies.
     PublishUtilities._updateDependencies(
-      pkg.name,
-      pkg.dependencies,
+      packageJson.name,
+      packageJson.dependencies,
       allChanges,
       allPackages,
       rushConfiguration,
@@ -417,8 +419,8 @@ export class PublishUtilities {
     );
     // Update the package's dev dependencies.
     PublishUtilities._updateDependencies(
-      pkg.name,
-      pkg.devDependencies,
+      packageJson.name,
+      packageJson.devDependencies,
       allChanges,
       allPackages,
       rushConfiguration,
@@ -427,8 +429,8 @@ export class PublishUtilities {
     );
     // Update the package's peer dependencies.
     PublishUtilities._updateDependencies(
-      pkg.name,
-      pkg.peerDependencies,
+      packageJson.name,
+      packageJson.peerDependencies,
       allChanges,
       allPackages,
       rushConfiguration,
@@ -443,9 +445,9 @@ export class PublishUtilities {
     });
 
     if (shouldCommit) {
-      JsonFile.save(pkg, packagePath, { updateExistingFile: true });
+      JsonFile.save(packageJson, packagePath, { updateExistingFile: true });
     }
-    return pkg;
+    return packageJson;
   }
 
   private static _isCyclicDependency(
@@ -565,7 +567,7 @@ export class PublishUtilities {
       return false;
     }
 
-    const pkg: IPackageJson = project.packageJson;
+    const packageJson: IPackageJson = project.packageJson;
 
     // If the given change does not have a changeType, derive it from the "type" string.
     if (change.changeType === undefined) {
@@ -615,17 +617,19 @@ export class PublishUtilities {
     );
 
     if (skipVersionBump) {
-      currentChange.newVersion = change.newVersion ?? pkg.version;
+      currentChange.newVersion = change.newVersion ?? packageJson.version;
       hasChanged = false;
       currentChange.changeType = ChangeType.none;
     } else {
       if (change.changeType === ChangeType.hotfix) {
-        const prereleaseComponents: ReadonlyArray<string | number> | null = semver.prerelease(pkg.version);
+        const prereleaseComponents: ReadonlyArray<string | number> | null = semver.prerelease(
+          packageJson.version
+        );
         if (!rushConfiguration.hotfixChangeEnabled) {
           throw new Error(`Cannot add hotfix change; hotfixChangeEnabled is false in configuration.`);
         }
 
-        currentChange.newVersion = change.newVersion ?? (pkg.version as string);
+        currentChange.newVersion = change.newVersion ?? (packageJson.version as string);
         if (!prereleaseComponents) {
           currentChange.newVersion += '-hotfix';
         }
@@ -633,39 +637,38 @@ export class PublishUtilities {
       } else {
         // When there are multiple changes of this package, the final value of new version
         // should not depend on the order of the changes.
-        let packageVersion: string = change.newVersion ?? pkg.version;
+        let packageVersion: string = change.newVersion ?? packageJson.version;
         if (currentChange.newVersion && semver.gt(currentChange.newVersion, packageVersion)) {
           packageVersion = currentChange.newVersion;
         }
 
-        const shouldBump: boolean = change.newVersion === undefined && change.changeType! >= ChangeType.patch;
+        const shouldBump: boolean =
+          change.newVersion === undefined && change.changeType! >= ChangeType.hotfix;
 
         currentChange.newVersion = shouldBump
           ? semver.inc(packageVersion, PublishUtilities._getReleaseType(currentChange.changeType!))!
           : packageVersion;
 
-        // set versionpolicy version to the current bumped version
+        // set versionpolicy version to the current version
         if (
           hasChanged &&
-          shouldBump &&
           project.versionPolicyName !== undefined &&
           project.versionPolicy !== undefined &&
           project.versionPolicy.isLockstepped
         ) {
           const projectVersionPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
-          const currentVersionPolicyChange: SemVer | undefined = allChanges.versionPolicyChanges.get(
-            project.versionPolicyName
-          );
+          const currentVersionPolicyChange: IVersionPolicyChangeInfo | undefined =
+            allChanges.versionPolicyChanges.get(project.versionPolicyName);
           if (
             projectVersionPolicy.nextBump === undefined &&
-            semver.gt(currentChange.newVersion, projectVersionPolicy.version) &&
             (currentVersionPolicyChange === undefined ||
-              semver.gt(currentChange.newVersion, currentVersionPolicyChange))
+              semver.gt(currentChange.newVersion, currentVersionPolicyChange.newVersion))
           ) {
-            allChanges.versionPolicyChanges.set(
-              project.versionPolicyName,
-              new SemVer(currentChange.newVersion)
-            );
+            allChanges.versionPolicyChanges.set(project.versionPolicyName, {
+              versionPolicyName: project.versionPolicyName,
+              changeType: currentChange.changeType!,
+              newVersion: currentChange.newVersion
+            });
           }
         }
       }
@@ -686,7 +689,8 @@ export class PublishUtilities {
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
-  ): void {
+  ): boolean {
+    let hasChanges: boolean = false;
     const packageName: string = change.packageName;
     const downstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.consumingProjects;
 
@@ -694,31 +698,36 @@ export class PublishUtilities {
     if (downstream) {
       if (change.changeType! >= ChangeType.hotfix || (prereleaseToken && prereleaseToken.hasValue)) {
         for (const dependency of downstream) {
-          const pkg: IPackageJson = dependency.packageJson;
+          const packageJson: IPackageJson = dependency.packageJson;
 
-          PublishUtilities._updateDownstreamDependency(
-            pkg.name,
-            pkg.dependencies,
-            change,
-            allChanges,
-            allPackages,
-            rushConfiguration,
-            prereleaseToken,
-            projectsToExclude
-          );
-          PublishUtilities._updateDownstreamDependency(
-            pkg.name,
-            pkg.devDependencies,
-            change,
-            allChanges,
-            allPackages,
-            rushConfiguration,
-            prereleaseToken,
-            projectsToExclude
-          );
+          hasChanges =
+            PublishUtilities._updateDownstreamDependency(
+              packageJson.name,
+              packageJson.dependencies,
+              change,
+              allChanges,
+              allPackages,
+              rushConfiguration,
+              prereleaseToken,
+              projectsToExclude
+            ) || hasChanges;
+
+          hasChanges =
+            PublishUtilities._updateDownstreamDependency(
+              packageJson.name,
+              packageJson.devDependencies,
+              change,
+              allChanges,
+              allPackages,
+              rushConfiguration,
+              prereleaseToken,
+              projectsToExclude
+            ) || hasChanges;
         }
       }
     }
+
+    return hasChanges;
   }
 
   private static _updateDownstreamDependency(
@@ -730,7 +739,8 @@ export class PublishUtilities {
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
-  ): void {
+  ): boolean {
+    let hasChanges: boolean = false;
     if (
       dependencies &&
       dependencies[change.packageName] &&
@@ -769,7 +779,7 @@ export class PublishUtilities {
           }
         }
 
-        const hasChanged: boolean = PublishUtilities._addChange(
+        hasChanges = PublishUtilities._addChange(
           {
             packageName: parentPackageName,
             changeType
@@ -781,20 +791,23 @@ export class PublishUtilities {
           projectsToExclude
         );
 
-        if (hasChanged || alwaysUpdate) {
+        if (hasChanges || alwaysUpdate) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
           // caused a version bump.
-          PublishUtilities._updateDownstreamDependencies(
-            allChanges.packageChanges.get(parentPackageName)!,
-            allChanges,
-            allPackages,
-            rushConfiguration,
-            prereleaseToken,
-            projectsToExclude
-          );
+          hasChanges =
+            PublishUtilities._updateDownstreamDependencies(
+              allChanges.packageChanges.get(parentPackageName)!,
+              allChanges,
+              allPackages,
+              rushConfiguration,
+              prereleaseToken,
+              projectsToExclude
+            ) || hasChanges;
         }
       }
     }
+
+    return hasChanges;
   }
 
   private static _updateDependencyVersion(
