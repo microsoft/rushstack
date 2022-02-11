@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.4.0",
+      "date": "Fri, 11 Feb 2022 10:30:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Change \"webpack\" to be a peer dependency instead of a regular dependency; this avoids a situation where Heft might import a different version of Webpack from the consuming project or its rig"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.32",
       "tag": "@rushstack/heft-webpack4-plugin_v0.3.32",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",

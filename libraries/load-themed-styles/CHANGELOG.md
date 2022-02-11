@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Feb 2022 10:30:25 GMT and should not be manually modified.
+
+## 1.10.246
+Fri, 11 Feb 2022 10:30:25 GMT
+
+### Patches
+
+- Enable importHelpers=true
 
 ## 1.10.245
 Tue, 25 Jan 2022 01:11:07 GMT

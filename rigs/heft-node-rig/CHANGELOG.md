@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Feb 2022 10:30:25 GMT and should not be manually modified.
+
+## 1.8.0
+Fri, 11 Feb 2022 10:30:25 GMT
+
+### Minor changes
+
+- Set useUnknownInCatchVariables=false in tsconfig.json, to work around https://github.com/microsoft/TypeScript/issues/42596
 
 ## 1.7.1
 Tue, 25 Jan 2022 01:11:07 GMT

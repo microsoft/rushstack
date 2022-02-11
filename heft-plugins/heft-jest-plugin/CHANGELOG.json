@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@rushstack/heft-jest-plugin_v0.2.3",
+      "date": "Fri, 11 Feb 2022 10:30:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update JSON schema documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@rushstack/heft-jest-plugin_v0.2.2",
       "date": "Wed, 05 Jan 2022 16:07:47 GMT",

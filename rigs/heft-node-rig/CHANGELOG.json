@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.8.0",
+      "tag": "@rushstack/heft-node-rig_v1.8.0",
+      "date": "Fri, 11 Feb 2022 10:30:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Set useUnknownInCatchVariables=false in tsconfig.json, to work around https://github.com/microsoft/TypeScript/issues/42596"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.2.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.1",
       "tag": "@rushstack/heft-node-rig_v1.7.1",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",

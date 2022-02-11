@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Feb 2022 10:30:25 GMT and should not be manually modified.
+
+## 0.5.0
+Fri, 11 Feb 2022 10:30:25 GMT
+
+### Minor changes
+
+- Upgrade to Webpack ~5.68.0
+- Change "webpack" to be a peer dependency instead of a regular dependency; this avoids a situation where Heft might import a different version of Webpack from the consuming project or its rig
 
 ## 0.4.32
 Tue, 25 Jan 2022 01:11:07 GMT

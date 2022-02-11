@@ -2,6 +2,32 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/heft-web-rig_v0.9.0",
+      "date": "Fri, 11 Feb 2022 10:30:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "A major overhaul of heft-web-rig; for details refer to https://github.com/microsoft/rushstack/pull/3204"
+          },
+          {
+            "comment": "Set useUnknownInCatchVariables=false in tsconfig.json, to work around https://github.com/microsoft/TypeScript/issues/42596"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.2",
       "tag": "@rushstack/heft-web-rig_v0.8.2",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",
