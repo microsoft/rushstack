@@ -33,7 +33,7 @@
     "@types/tapable": "1.0.6",
     "source-map": "~0.7.3",
     "tapable": "1.1.3",
-    "terser": "5.10.0"
+    "terser": "5.9.0"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

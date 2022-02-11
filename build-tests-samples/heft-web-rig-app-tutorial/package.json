@@ -1,0 +1,28 @@
+{
+  "name": "heft-web-rig-app-tutorial",
+  "description": "(Copy of sample project) Building this project is a regression test for Heft",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft start",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "dependencies": {
+    "heft-web-rig-library-tutorial": "workspace:*",
+    "react": "~16.13.1",
+    "react-dom": "~16.13.1",
+    "tslib": "~2.3.1"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-web-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/react-dom": "16.9.14",
+    "@types/react": "16.14.23",
+    "@types/webpack-env": "1.13.0",
+    "typescript": "~4.5.2"
+  }
+}

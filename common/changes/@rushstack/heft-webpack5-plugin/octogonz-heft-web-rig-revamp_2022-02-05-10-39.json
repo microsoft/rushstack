@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "comment": "Upgrade to Webpack ~5.68.0",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack5-plugin"
+}

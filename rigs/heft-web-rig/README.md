@@ -4,7 +4,11 @@ A rig package for web projects that build using [Heft](https://www.npmjs.com/pac
 build system.  To learn more about rig packages, consult the
 [@rushstack/rig-package](https://www.npmjs.com/package/@rushstack/rig-package) documentation.
 
-This rig contains a single profile: `library`
+This rig provides the following profiles:
+
+- [app](./profiles/app/): For applications that get bundled using Webpack.
+- [library](./profiles/library/): For creating library packages to be consumed by other web projects.  ***Also use this profile for a library meant to be used by both Node.js and web apps.***
+
 
 To enable it, add a **rig.json** file to your project, as shown below:
 

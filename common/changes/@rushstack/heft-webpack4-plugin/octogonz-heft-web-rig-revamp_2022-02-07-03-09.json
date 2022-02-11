@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "comment": "Change \"webpack\" to be a peer dependency instead of a regular dependency; this avoids a situation where Heft might import a different version of Webpack from the consuming project or its rig",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin"
+}

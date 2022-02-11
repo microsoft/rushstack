@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Enable importHelpers=true",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles"
+}
