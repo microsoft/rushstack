@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 10 Feb 2022 03:21:41 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Feb 2022 02:18:05 GMT and should not be manually modified.
+
+## 5.62.3
+Fri, 11 Feb 2022 02:18:05 GMT
+
+### Updates
+
+- Fix an issue where the git tag would not include the prerelease portion of the version, which will cause subsequent publishes of the same version to not be tagged.
 
 ## 5.62.2
 Thu, 10 Feb 2022 03:21:41 GMT
