@@ -2,74 +2,81 @@
 // See LICENSE in the project root for license information.
 
 import * as Webpack from 'webpack';
-import * as lodash from 'lodash';
+import { CachedSource, Source, ReplaceSource } from 'webpack-sources';
 
 import { Constants } from './utilities/Constants';
-import { ILocaleElementMap } from './interfaces';
-import { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
+import { LocalizationPlugin, IStringPlaceholder } from './LocalizationPlugin';
+import { ILocalizedWebpackChunk } from './webpackInterfaces';
 
-interface IReconstructionElement {
-  kind: 'static' | 'localized' | 'dynamic';
-}
-
-interface IStaticReconstructionElement extends IReconstructionElement {
-  kind: 'static';
-  staticString: string;
-}
-
-interface ILocalizedReconstructionElement extends IReconstructionElement {
+interface ILocalizedReconstructionElement {
   kind: 'localized';
-  values: ILocaleElementMap;
-  size: number;
+  values: Map<string, string>;
+  start: number;
+  end: number;
   stringName: string;
   escapedBackslash: string;
   locFilePath: string;
 }
 
-interface IDynamicReconstructionElement extends IReconstructionElement {
+interface IDynamicReconstructionElement {
   kind: 'dynamic';
   valueFn: (locale: string, token: string | undefined) => string;
-  size: number;
+  start: number;
+  end: number;
   escapedBackslash: string;
   token?: string;
 }
+
+type IReconstructionElement = ILocalizedReconstructionElement | IDynamicReconstructionElement;
 
 interface IParseResult {
   issues: string[];
   reconstructionSeries: IReconstructionElement[];
 }
 
-interface IReconstructedString {
-  source: string;
-  size: number;
-}
-
 interface ILocalizedReconstructionResult {
-  result: Map<string, IReconstructedString>;
+  result: ReplaceSource;
   issues: string[];
 }
 
 interface INonLocalizedReconstructionResult {
-  result: IReconstructedString;
+  result: ReplaceSource;
   issues: string[];
+}
+
+export interface IAssetPathOptions {
+  chunk: Webpack.compilation.Chunk;
+  contentHashType: string;
+  filename: string;
+  noChunkHash: boolean;
+  locale: string;
+}
+
+export interface IAssetManifest {
+  render: () => Source;
+  filenameTemplate: string;
+  pathOptions: IAssetPathOptions;
+  identifier: string;
+  hash: string;
 }
 
 export interface IProcessAssetOptionsBase {
   plugin: LocalizationPlugin;
   compilation: Webpack.compilation.Compilation;
-  assetName: string;
-  asset: IAsset;
   chunk: Webpack.compilation.Chunk;
-  noStringsLocaleName: string;
-  chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean;
+  source: Source;
 }
 
-export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBase {}
+export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBase {
+  fileName: string;
+  noStringsLocaleName: string;
+}
 
 export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase {
   locales: Set<string>;
   fillMissingTranslationStrings: boolean;
   defaultLocale: string;
+  filenameTemplate: string;
 }
 
 export interface IAsset {
@@ -82,290 +89,242 @@ export interface IProcessAssetResult {
   asset: IAsset;
 }
 
+export interface IExtendedCompilation extends Webpack.compilation.Compilation {
+  getPathWithInfo(
+    filenameTemplate: string,
+    data: {
+      chunk: Webpack.compilation.Chunk;
+      contentHashType: 'javascript';
+      locale: string;
+    }
+  ): { path: string; info: unknown };
+
+  emitAsset(file: string, source: Source, info: unknown): void;
+  updateAsset(file: string, source: Source, info: unknown): void;
+}
+
 export const PLACEHOLDER_REGEX: RegExp = new RegExp(
-  `${Constants.STRING_PLACEHOLDER_PREFIX}_(\\\\*)_([A-C])(\\+[^+]+\\+)?_(\\d+)`,
+  `${Constants.STRING_PLACEHOLDER_PREFIX}_(\\\\*)_([A-C])_(\\d+)`,
   'g'
 );
 
 export class AssetProcessor {
-  public static processLocalizedAsset(
-    options: IProcessLocalizedAssetOptions
-  ): Map<string, IProcessAssetResult> {
-    const assetSource: string = options.asset.source();
+  public static processLocalizedAsset(options: IProcessLocalizedAssetOptions): void {
+    const { compilation, source, chunk, filenameTemplate, locales } = options;
+
+    const rawSource: CachedSource = new CachedSource(source);
+    const assetSource: string = rawSource.source().toString();
 
     const parsedAsset: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
       options.plugin,
       assetSource,
-      this._getJsonpFunction(options.chunk, options.chunkHasLocalizedModules, options.noStringsLocaleName)
-    );
-    const reconstructedAsset: ILocalizedReconstructionResult = AssetProcessor._reconstructLocalized(
-      parsedAsset.reconstructionSeries,
-      options.locales,
-      options.fillMissingTranslationStrings,
-      options.defaultLocale,
-      options.asset.size()
+      (locale: string) => JSON.stringify(locale)
     );
 
-    const parsedAssetName: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
-      options.plugin,
-      options.assetName,
-      () => {
-        throw new Error('unsupported');
+    const issues: string[] = parsedAsset.issues;
+
+    const localizedFiles: Record<string, string> = {};
+    (chunk as ILocalizedWebpackChunk).localizedFiles = localizedFiles;
+
+    const existingFiles: Set<string> = new Set(chunk.files);
+    for (const locale of locales) {
+      const { issues: localeIssues, result: localeResult } = AssetProcessor._reconstructLocalized(
+        rawSource,
+        parsedAsset.reconstructionSeries,
+        locale,
+        options.fillMissingTranslationStrings,
+        options.defaultLocale
+      );
+
+      const { path: fileName, info } = (compilation as IExtendedCompilation).getPathWithInfo(
+        filenameTemplate,
+        {
+          chunk,
+          contentHashType: 'javascript',
+          // The locale property will get processed by the extension to the getAssetPath hook
+          locale
+        }
+      );
+
+      for (const issue of localeIssues) {
+        localeIssues.push(issue);
       }
-    );
-    const reconstructedAssetName: ILocalizedReconstructionResult = AssetProcessor._reconstructLocalized(
-      parsedAssetName.reconstructionSeries,
-      options.locales,
-      options.fillMissingTranslationStrings,
-      options.defaultLocale,
-      options.assetName.length
-    );
 
-    const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
-    for (const [locale, { source, size }] of reconstructedAsset.result) {
-      const newAsset: IAsset = lodash.clone(options.asset);
-      newAsset.source = () => source;
-      newAsset.size = () => size;
-
-      result.set(locale, {
-        filename: reconstructedAssetName.result.get(locale)!.source,
-        asset: newAsset
-      });
+      const wrapped: CachedSource = new CachedSource(localeResult);
+      localizedFiles[locale] = fileName;
+      if (existingFiles.has(fileName)) {
+        (compilation as IExtendedCompilation).updateAsset(fileName, wrapped, info);
+      } else {
+        (compilation as IExtendedCompilation).emitAsset(fileName, wrapped, info);
+        compilation.additionalChunkAssets.push(fileName);
+      }
     }
-
-    const issues: string[] = [
-      ...parsedAsset.issues,
-      ...reconstructedAsset.issues,
-      ...parsedAssetName.issues,
-      ...reconstructedAssetName.issues
-    ];
 
     if (issues.length > 0) {
-      options.compilation.errors.push(
-        Error(`localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`)
-      );
+      compilation.errors.push(Error(`localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`));
     }
-
-    return result;
   }
 
-  public static processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptions): IProcessAssetResult {
-    const assetSource: string = options.asset.source();
+  public static processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptions): void {
+    const { source, fileName, compilation } = options;
+
+    const rawSource: CachedSource = new CachedSource(source);
+    const assetSource: string = rawSource.source().toString();
 
     const parsedAsset: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
       options.plugin,
       assetSource,
-      this._getJsonpFunction(options.chunk, options.chunkHasLocalizedModules, options.noStringsLocaleName)
+      (locale: string) => JSON.stringify(locale)
     );
-    const reconstructedAsset: INonLocalizedReconstructionResult = AssetProcessor._reconstructNonLocalized(
+
+    const { issues } = parsedAsset;
+
+    const locale: string = options.noStringsLocaleName;
+    const { issues: localeIssues, result } = AssetProcessor._reconstructNonLocalized(
+      rawSource,
       parsedAsset.reconstructionSeries,
-      options.asset.size(),
-      options.noStringsLocaleName
+      locale
     );
 
-    const parsedAssetName: IParseResult = AssetProcessor._parseStringToReconstructionSequence(
-      options.plugin,
-      options.assetName,
-      () => {
-        throw new Error('unsupported');
-      }
-    );
-    const reconstructedAssetName: INonLocalizedReconstructionResult = AssetProcessor._reconstructNonLocalized(
-      parsedAssetName.reconstructionSeries,
-      options.assetName.length,
-      options.noStringsLocaleName
-    );
+    for (const issue of localeIssues) {
+      issues.push(issue);
+    }
 
-    const issues: string[] = [
-      ...parsedAsset.issues,
-      ...reconstructedAsset.issues,
-      ...parsedAssetName.issues,
-      ...reconstructedAssetName.issues
-    ];
+    const wrapped: CachedSource = new CachedSource(result);
+    (compilation as IExtendedCompilation).updateAsset(fileName, wrapped, {});
 
     if (issues.length > 0) {
       options.compilation.errors.push(
         Error(`localization:\n${issues.map((issue) => `  ${issue}`).join('\n')}`)
       );
     }
-
-    const newAsset: IAsset = lodash.clone(options.asset);
-    newAsset.source = () => reconstructedAsset.result.source;
-    newAsset.size = () => reconstructedAsset.result.size;
-    return {
-      filename: reconstructedAssetName.result.source,
-      asset: newAsset
-    };
   }
 
   private static _reconstructLocalized(
+    originalSource: Source,
     reconstructionSeries: IReconstructionElement[],
-    locales: Set<string>,
+    locale: string,
     fillMissingTranslationStrings: boolean,
-    defaultLocale: string,
-    initialSize: number
+    defaultLocale: string
   ): ILocalizedReconstructionResult {
-    const localizedResults: Map<string, IReconstructedString> = new Map<string, IReconstructedString>();
+    const result: ReplaceSource = new ReplaceSource(originalSource, locale);
+
     const issues: string[] = [];
 
-    for (const locale of locales) {
-      const reconstruction: string[] = [];
-
-      let sizeDiff: number = 0;
-      for (const element of reconstructionSeries) {
-        switch (element.kind) {
-          case 'static': {
-            reconstruction.push((element as IStaticReconstructionElement).staticString);
-            break;
-          }
-
-          case 'localized': {
-            const localizedElement: ILocalizedReconstructionElement =
-              element as ILocalizedReconstructionElement;
-            let newValue: string | undefined = localizedElement.values[locale];
-            if (!newValue) {
-              if (fillMissingTranslationStrings) {
-                newValue = localizedElement.values[defaultLocale];
-              } else {
-                issues.push(
-                  `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" is missing in ` +
-                    `the locale ${locale}`
-                );
-
-                newValue = '-- MISSING STRING --';
-              }
-            }
-
-            const escapedBackslash: string = localizedElement.escapedBackslash || '\\';
-
-            // Replace backslashes with the properly escaped backslash
-            newValue = newValue.replace(/\\/g, escapedBackslash);
-
-            // @todo: look into using JSON.parse(...) to get the escaping characters
-            const escapingCharacterSequence: string = escapedBackslash.substr(escapedBackslash.length / 2);
-
-            // Ensure the the quotemark, apostrophe, tab, and newline characters are properly escaped
-            newValue = newValue.replace(/\r/g, `${escapingCharacterSequence}r`);
-            newValue = newValue.replace(/\n/g, `${escapingCharacterSequence}n`);
-            newValue = newValue.replace(/\t/g, `${escapingCharacterSequence}t`);
-            newValue = newValue.replace(/\"/g, `${escapingCharacterSequence}u0022`);
-            newValue = newValue.replace(/\'/g, `${escapingCharacterSequence}u0027`);
-
-            reconstruction.push(newValue);
-            sizeDiff += newValue.length - localizedElement.size;
-            break;
-          }
-
-          case 'dynamic': {
-            const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
-            const newValue: string = dynamicElement.valueFn(locale, dynamicElement.token);
-            reconstruction.push(newValue);
-            sizeDiff += newValue.length - dynamicElement.size;
-            break;
-          }
-        }
-      }
-
-      const newAssetSource: string = reconstruction.join('');
-      localizedResults.set(locale, {
-        source: newAssetSource,
-        size: initialSize + sizeDiff
-      });
-    }
-
-    return {
-      issues,
-      result: localizedResults
-    };
-  }
-
-  private static _reconstructNonLocalized(
-    reconstructionSeries: IReconstructionElement[],
-    initialSize: number,
-    noStringsLocaleName: string
-  ): INonLocalizedReconstructionResult {
-    const issues: string[] = [];
-
-    const reconstruction: string[] = [];
-
-    let sizeDiff: number = 0;
     for (const element of reconstructionSeries) {
       switch (element.kind) {
-        case 'static': {
-          reconstruction.push((element as IStaticReconstructionElement).staticString);
-          break;
-        }
-
         case 'localized': {
-          const localizedElement: ILocalizedReconstructionElement =
-            element as ILocalizedReconstructionElement;
-          issues.push(
-            `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" appeared in an asset ` +
-              'that is not expected to contain localized resources.'
-          );
+          let newValue: string | undefined = element.values.get(locale);
+          if (!newValue) {
+            if (fillMissingTranslationStrings) {
+              newValue = element.values.get(defaultLocale)!;
+            } else {
+              issues.push(
+                `The string "${element.stringName}" in "${element.locFilePath}" is missing in ` +
+                  `the locale ${locale}`
+              );
 
-          const newValue: string = '-- NOT EXPECTED TO BE LOCALIZED --';
-          reconstruction.push(newValue);
-          sizeDiff += newValue.length - localizedElement.size;
+              newValue = '-- MISSING STRING --';
+            }
+          }
+
+          const escapedBackslash: string = element.escapedBackslash || '\\';
+
+          // Replace backslashes with the properly escaped backslash
+          newValue = newValue.replace(/\\/g, escapedBackslash);
+
+          // @todo: look into using JSON.parse(...) to get the escaping characters
+          const escapingCharacterSequence: string = escapedBackslash.slice(escapedBackslash.length / 2);
+
+          // Ensure the the quotemark, apostrophe, tab, and newline characters are properly escaped
+          newValue = newValue.replace(/\r/g, `${escapingCharacterSequence}r`);
+          newValue = newValue.replace(/\n/g, `${escapingCharacterSequence}n`);
+          newValue = newValue.replace(/\t/g, `${escapingCharacterSequence}t`);
+          newValue = newValue.replace(/\"/g, `${escapingCharacterSequence}u0022`);
+          newValue = newValue.replace(/\'/g, `${escapingCharacterSequence}u0027`);
+
+          result.replace(element.start, element.end - 1, newValue);
           break;
         }
 
         case 'dynamic': {
-          const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
-          const newValue: string = dynamicElement.valueFn(noStringsLocaleName, dynamicElement.token);
-          reconstruction.push(newValue);
-          sizeDiff += newValue.length - dynamicElement.size;
+          const newValue: string = element.valueFn(locale, element.token);
+          result.replace(element.start, element.end - 1, newValue);
           break;
         }
       }
     }
 
-    const newAssetSource: string = reconstruction.join('');
     return {
       issues,
-      result: {
-        source: newAssetSource,
-        size: initialSize + sizeDiff
+      result
+    };
+  }
+
+  private static _reconstructNonLocalized(
+    originalSource: Source,
+    reconstructionSeries: IReconstructionElement[],
+    noStringsLocaleName: string
+  ): INonLocalizedReconstructionResult {
+    const issues: string[] = [];
+
+    const result: ReplaceSource = new ReplaceSource(originalSource);
+
+    for (const element of reconstructionSeries) {
+      switch (element.kind) {
+        case 'localized': {
+          issues.push(
+            `The string "${element.stringName}" in "${element.locFilePath}" appeared in an asset ` +
+              'that is not expected to contain localized resources.'
+          );
+
+          const newValue: string = '-- NOT EXPECTED TO BE LOCALIZED --';
+          result.replace(element.start, element.end - 1, newValue);
+          break;
+        }
+
+        case 'dynamic': {
+          const newValue: string = element.valueFn(noStringsLocaleName, element.token);
+          result.replace(element.start, element.end - 1, newValue);
+          break;
+        }
       }
+    }
+
+    return {
+      issues,
+      result
     };
   }
 
   private static _parseStringToReconstructionSequence(
     plugin: LocalizationPlugin,
     source: string,
-    jsonpFunction: (locale: string, chunkIdToken: string | undefined) => string
+    jsonpFunction: (locale: string) => string
   ): IParseResult {
     const issues: string[] = [];
     const reconstructionSeries: IReconstructionElement[] = [];
 
-    let lastIndex: number = 0;
     let regexResult: RegExpExecArray | null;
     while ((regexResult = PLACEHOLDER_REGEX.exec(source))) {
-      // eslint-disable-line no-cond-assign
-      const staticElement: IStaticReconstructionElement = {
-        kind: 'static',
-        staticString: source.substring(lastIndex, regexResult.index)
-      };
-      reconstructionSeries.push(staticElement);
-
-      const [placeholder, escapedBackslash, elementLabel, token, placeholderSerialNumber] = regexResult;
+      const [placeholder, escapedBackslash, elementLabel, placeholderSerialNumber] = regexResult;
+      const start: number = regexResult.index;
+      const end: number = start + placeholder.length;
 
       let localizedReconstructionElement: IReconstructionElement;
       switch (elementLabel) {
         case Constants.STRING_PLACEHOLDER_LABEL: {
-          const stringData: IStringData | undefined = plugin.getDataForSerialNumber(placeholderSerialNumber);
+          const stringData: IStringPlaceholder | undefined =
+            plugin.getDataForSerialNumber(placeholderSerialNumber);
           if (!stringData) {
             issues.push(`Missing placeholder ${placeholder}`);
-            const brokenLocalizedElement: IStaticReconstructionElement = {
-              kind: 'static',
-              staticString: placeholder
-            };
-            localizedReconstructionElement = brokenLocalizedElement;
+            continue;
           } else {
             const localizedElement: ILocalizedReconstructionElement = {
               kind: 'localized',
+              start,
+              end,
               values: stringData.values,
-              size: placeholder.length,
               locFilePath: stringData.locFilePath,
               escapedBackslash: escapedBackslash,
               stringName: stringData.stringName
@@ -378,8 +337,9 @@ export class AssetProcessor {
         case Constants.LOCALE_NAME_PLACEHOLDER_LABEL: {
           const dynamicElement: IDynamicReconstructionElement = {
             kind: 'dynamic',
+            start,
+            end,
             valueFn: (locale: string) => locale,
-            size: placeholder.length,
             escapedBackslash: escapedBackslash
           };
           localizedReconstructionElement = dynamicElement;
@@ -389,10 +349,10 @@ export class AssetProcessor {
         case Constants.JSONP_PLACEHOLDER_LABEL: {
           const dynamicElement: IDynamicReconstructionElement = {
             kind: 'dynamic',
+            start,
+            end,
             valueFn: jsonpFunction,
-            size: placeholder.length,
-            escapedBackslash: escapedBackslash,
-            token: token.substring(1, token.length - 1)
+            escapedBackslash: escapedBackslash
           };
           localizedReconstructionElement = dynamicElement;
           break;
@@ -404,73 +364,11 @@ export class AssetProcessor {
       }
 
       reconstructionSeries.push(localizedReconstructionElement);
-      lastIndex = regexResult.index + placeholder.length;
     }
-
-    const lastElement: IStaticReconstructionElement = {
-      kind: 'static',
-      staticString: source.substr(lastIndex)
-    };
-    reconstructionSeries.push(lastElement);
 
     return {
       issues,
       reconstructionSeries
     };
-  }
-
-  private static _getJsonpFunction(
-    chunk: Webpack.compilation.Chunk,
-    chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean,
-    noStringsLocaleName: string
-  ): (locale: string, chunkIdToken: string | undefined) => string {
-    const idsWithStrings: Set<number | string> = new Set<number | string>();
-    const idsWithoutStrings: Set<number | string> = new Set<number | string>();
-
-    const asyncChunks: Set<Webpack.compilation.Chunk> = chunk.getAllAsyncChunks();
-    for (const asyncChunk of asyncChunks) {
-      const chunkId: number | string | null = asyncChunk.id;
-
-      if (chunkId === null || chunkId === undefined) {
-        throw new Error(`Chunk "${asyncChunk.name}"'s ID is null or undefined.`);
-      }
-
-      if (chunkHasLocalizedModules(asyncChunk)) {
-        idsWithStrings.add(chunkId);
-      } else {
-        idsWithoutStrings.add(chunkId);
-      }
-    }
-
-    if (idsWithStrings.size === 0) {
-      return () => JSON.stringify(noStringsLocaleName);
-    } else if (idsWithoutStrings.size === 0) {
-      return (locale: string) => JSON.stringify(locale);
-    } else {
-      // Generate an array [<locale>, <nostrings locale>] and an object that is used as an indexer into that
-      // object that maps chunk IDs to 0s for chunks with localized strings and 1s for chunks without localized
-      // strings
-      //
-      // This can be improved in the future. We can maybe sort the chunks such that the chunks below a certain ID
-      // number are localized and the those above are not.
-      const chunkMapping: { [chunkId: string]: number } = {};
-      for (const idWithStrings of idsWithStrings) {
-        chunkMapping[idWithStrings] = 0;
-      }
-
-      for (const idWithoutStrings of idsWithoutStrings) {
-        chunkMapping[idWithoutStrings] = 1;
-      }
-
-      return (locale: string, chunkIdToken: string | undefined) => {
-        if (!locale) {
-          throw new Error('Missing locale name.');
-        }
-
-        return `(${JSON.stringify([locale, noStringsLocaleName])})[${JSON.stringify(
-          chunkMapping
-        )}[${chunkIdToken}]]`;
-      };
-    }
   }
 }

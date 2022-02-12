@@ -36,8 +36,8 @@ function generateConfiguration(mode, outputFolderName) {
     },
     output: {
       path: path.join(__dirname, outputFolderName),
-      filename: '[name]_[locale]_[contenthash].js',
-      chunkFilename: '[id].[name]_[locale]_[contenthash].js'
+      filename: '[locale]/[name]_[contenthash].js',
+      chunkFilename: '[locale]/[id].[name]_[contenthash].js'
     },
     optimization: {
       minimizer: [
@@ -86,7 +86,8 @@ function generateConfiguration(mode, outputFolderName) {
         },
         localizationStats: {
           dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
-        }
+        },
+        runtimeLocaleExpression: 'window.__locale || "es-es"'
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,

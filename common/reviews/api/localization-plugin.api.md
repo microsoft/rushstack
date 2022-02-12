@@ -47,6 +47,7 @@ export interface ILocalizationPluginOptions {
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
+    runtimeLocaleExpression?: string;
     typingsOptions?: ITypingsGenerationOptions;
 }
 
@@ -86,7 +87,7 @@ export interface ILocalizedData {
     normalizeResxNewlines?: 'lf' | 'crlf';
     passthroughLocale?: IPassthroughLocaleOptions;
     pseudolocales?: IPseudolocalesOptions;
-    resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
+    resolveMissingTranslatedStrings?: (locales: string[], filePath: string, defaultLocaleModule: Webpack.compilation.Module) => IResolvedMissingTranslations;
     translatedStrings: ILocalizedStrings;
 }
 
@@ -163,9 +164,15 @@ export interface IResolvedMissingTranslations {
 // @internal (undocumented)
 export interface _IStringPlaceholder {
     // (undocumented)
+    locFilePath: string;
+    // (undocumented)
+    stringName: string;
+    // (undocumented)
     suffix: string;
     // (undocumented)
     value: string;
+    // (undocumented)
+    values: Map<string, string>;
 }
 
 // @public
@@ -197,15 +204,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // Warning: (ae-forgotten-export) The symbol "IAddDefaultLocFileResult" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
-    addDefaultLocFile(terminal: ITerminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile): IAddDefaultLocFileResult;
+    addDefaultLocFile(terminal: ITerminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile | ILocaleFileData, defaultLocaleModule: Webpack.compilation.Module): IAddDefaultLocFileResult;
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
-    // Warning: (ae-forgotten-export) The symbol "IStringSerialNumberData" needs to be exported by the entry point index.d.ts
-    //
     // @internal (undocumented)
-    getDataForSerialNumber(serialNumber: string): IStringSerialNumberData | undefined;
+    getDataForSerialNumber(serialNumber: string): _IStringPlaceholder | undefined;
     // @internal (undocumented)
-    stringKeys: Map<string, _IStringPlaceholder>;
+    getPlaceholder(localizedFileKey: string, stringName: string): _IStringPlaceholder | undefined;
 }
 
 // @internal (undocumented)

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Adds support for per-locale source map generation. Passes the current webpack Module to resolveMissingTranslatedStrings() in case the implementer needs more information that just the file path. Avoids deleting assets during compilation, and instead compiles targeting the default locale, then generates the remaining locales.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin"
+}

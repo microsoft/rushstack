@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as webpack from 'webpack';
+
 /**
  * Options for the passthrough locale.
  *
@@ -104,7 +106,11 @@ export interface ILocalizedData {
    * Use this parameter to specify a function used to load translations missing from
    * the {@link ILocalizedData.translatedStrings} parameter.
    */
-  resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
+  resolveMissingTranslatedStrings?: (
+    locales: string[],
+    filePath: string,
+    defaultLocaleModule: webpack.compilation.Module
+  ) => IResolvedMissingTranslations;
 
   /**
    * Options around including a passthrough locale.
@@ -162,6 +168,12 @@ export interface ILocalizationPluginOptions {
    * The value to replace the [locale] token with for chunks without localized strings. Defaults to "none"
    */
   noStringsLocaleName?: string;
+
+  /**
+   * A chunk of javascript to use to get the current locale at runtime. If specified, allows the runtime chunk
+   * to be non-localized even if it has async localized chunks, as long as it does not directly contain strings.
+   */
+  runtimeLocaleExpression?: string;
 
   /**
    * Options for how localization stats data should be produced.

@@ -128,7 +128,7 @@ const ASSET_NAME_TOKEN: string = '-ASSET-NAME-c0ef4f86-b570-44d3-b210-4428c5b782
 const ASSET_NAME_TOKEN_REGEX: RegExp = new RegExp(ASSET_NAME_TOKEN);
 
 function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&');
 }
 
 /**
@@ -220,15 +220,12 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
                   let escapedAssetFilename: string;
                   if (assetFilename.match(/\.map$/)) {
                     // Trim the ".map" extension
-                    escapedAssetFilename = assetFilename.substr(
-                      0,
-                      assetFilename.length - 4 /* '.map'.length */
-                    );
+                    escapedAssetFilename = assetFilename.slice(0, -4 /* '.map'.length */);
                     escapedAssetFilename = escapeRegExp(escapedAssetFilename);
                     // source in sourcemaps is JSON-encoded
                     escapedAssetFilename = JSON.stringify(escapedAssetFilename);
                     // Trim the quotes from the JSON encoding
-                    escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1);
+                    escapedAssetFilename = escapedAssetFilename.slice(1, -1);
                   } else {
                     escapedAssetFilename = escapeRegExp(assetFilename);
                   }

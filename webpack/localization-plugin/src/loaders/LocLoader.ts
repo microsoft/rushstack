@@ -4,11 +4,10 @@
 import { loader } from 'webpack';
 import { Terminal } from '@rushstack/node-core-library';
 
-import { LocalizationPlugin } from '../LocalizationPlugin';
+import { IStringPlaceholder, LocalizationPlugin } from '../LocalizationPlugin';
 import { ILocalizationFile } from '../interfaces';
 import { LocFileParser } from '../utilities/LocFileParser';
 import { loaderFactory, IBaseLoaderOptions } from './LoaderFactory';
-import { EntityMarker } from '../utilities/EntityMarker';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 
 export interface ILocLoaderOptions extends IBaseLoaderOptions {
@@ -29,11 +28,14 @@ export default loaderFactory(function (
     filePath: locFilePath,
     resxNewlineNormalization: options.resxNewlineNormalization
   });
+
   const { additionalLoadedFilePaths, errors } = pluginInstance.addDefaultLocFile(
     terminal,
     locFilePath,
-    locFileData
+    locFileData,
+    this._module
   );
+
   for (const additionalFile of additionalLoadedFilePaths) {
     this.dependency(additionalFile);
   }
@@ -45,15 +47,20 @@ export default loaderFactory(function (
   const resultObject: { [stringName: string]: string } = {};
   // eslint-disable-next-line guard-for-in
   for (const stringName in locFileData) {
-    const stringKey: string = `${locFilePath}?${stringName}`;
-    if (pluginInstance.stringKeys.has(stringKey)) {
-      resultObject[stringName] = pluginInstance.stringKeys.get(stringKey)!.value;
+    const placeholder: IStringPlaceholder | undefined = pluginInstance.getPlaceholder(
+      locFilePath,
+      stringName
+    );
+    if (placeholder) {
+      resultObject[stringName] = placeholder.value;
     } else {
-      throw new Error(`Unexpected - missing placeholder for string key "${stringKey}"`);
+      throw new Error(
+        `Unexpected - missing placeholder for string named "${stringName}" in file "${locFilePath}"`
+      );
     }
   }
 
-  EntityMarker.markEntity(this._module, true);
+  // Entity marking handled inside of addDefaultLocFile
 
   return resultObject;
 });
