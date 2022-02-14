@@ -1,8 +1,10 @@
 {
   "notifications": [
     {
-      "message": "test",
-      "timeStamp": "today"
+      "message": "test 1"
+    },
+    {
+      "message": "test 2"
     }
   ]
 }
