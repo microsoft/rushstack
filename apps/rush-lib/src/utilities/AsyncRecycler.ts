@@ -150,7 +150,7 @@ export class AsyncRecycler {
       args = [
         '/c',
         '"' +
-          'PowerShell.exe -Version 3.0 -NoLogo -NonInteractive -WindowStyle Hidden -Command' +
+          'PowerShell.exe -Version 3.0 -NoLogo -NonInteractive -NoProfile -WindowStyle Hidden -Command' +
           ` Get-ChildItem -Force '${escapedRecyclerFolder}'` +
           // The "^|" here prevents cmd.exe from interpreting the "|" symbol
           ` ^| ForEach ($_) { Remove-Item -ErrorAction Ignore -Force -Recurse "\\\\?\\$($_.FullName)" }` +
