@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { IPackageJson } from '@rushstack/node-core-library';
 
 import { BumpType } from '../../api/VersionPolicy';
@@ -18,8 +17,8 @@ function _getChanges(changeFiles: Map<string, ChangeFile>, packageName: string):
   return changeFile.getChanges(packageName);
 }
 
-describe('VersionManager', () => {
-  const rushJsonFile: string = path.resolve(__dirname, 'repo', 'rush.json');
+describe(VersionManager.name, () => {
+  const rushJsonFile: string = `${__dirname}/repo/rush.json`;
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
   let versionManager: VersionManager;
 
@@ -32,7 +31,7 @@ describe('VersionManager', () => {
   });
 
   /* eslint-disable dot-notation */
-  describe('ensure', () => {
+  describe(VersionManager.prototype.ensure.name, () => {
     it('fixes lock step versions', () => {
       versionManager.ensure('testPolicy1');
       versionManager.ensure('lockStepWithoutNextBump');
@@ -87,7 +86,7 @@ describe('VersionManager', () => {
     });
   });
 
-  describe('bump', () => {
+  describe(VersionManager.prototype.bumpAsync.name, () => {
     it('bumps a lockStepPolicy to prerelease version', async () => {
       await versionManager.bumpAsync('testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
@@ -116,8 +115,8 @@ describe('VersionManager', () => {
   /* eslint-enable dot-notation */
 });
 
-describe('WorkspaceVersionManager', () => {
-  const rushJsonFile: string = path.resolve(__dirname, 'workspaceRepo', 'rush.json');
+describe(`${VersionManager.name} (workspace)`, () => {
+  const rushJsonFile: string = `${__dirname}/workspaceRepo/rush.json`;
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
   let versionManager: VersionManager;
 
@@ -130,7 +129,7 @@ describe('WorkspaceVersionManager', () => {
   });
 
   /* eslint-disable dot-notation */
-  describe('ensure', () => {
+  describe(VersionManager.prototype.ensure.name, () => {
     it('fixes lock step versions', () => {
       versionManager.ensure('testPolicy1');
       versionManager.ensure('lockStepWithoutNextBump');
@@ -185,7 +184,7 @@ describe('WorkspaceVersionManager', () => {
     });
   });
 
-  describe('bump', () => {
+  describe(VersionManager.prototype.bumpAsync.name, () => {
     it('bumps to prerelease version', async () => {
       await versionManager.bumpAsync('testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;

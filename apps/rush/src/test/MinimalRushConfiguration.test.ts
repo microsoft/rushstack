@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import { MinimalRushConfiguration } from '../MinimalRushConfiguration';
 
-describe('MinimalRushConfiguration', () => {
+describe(MinimalRushConfiguration.name, () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });

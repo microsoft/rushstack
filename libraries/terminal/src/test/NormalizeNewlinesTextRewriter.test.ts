@@ -20,7 +20,7 @@ function testCase(input: string): void {
   expect(result).toEqual(Text.convertToLf(input));
 }
 
-describe('NormalizeNewlinesTextRewriter', () => {
+describe(NormalizeNewlinesTextRewriter.name, () => {
   it('should duplicate Text.convertToLf()', () => {
     testCase('');
     testCase('\n');

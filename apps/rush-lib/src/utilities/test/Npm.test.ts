@@ -6,7 +6,7 @@ import process from 'process';
 import { Npm } from '../Npm';
 import { Utilities } from '../Utilities';
 
-describe('npm', () => {
+describe(Npm.name, () => {
   const packageName: string = '@microsoft/rush-lib-never';
   let stub: jest.SpyInstance;
 

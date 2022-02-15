@@ -57,7 +57,7 @@ for (let i: number = 1000; i < 1010; i++) {
 
 const banner: string = `/* fnord */\n`;
 
-describe('rehydrateAsset', () => {
+describe(rehydrateAsset.name, () => {
   it('uses an object for non-numeric ids', () => {
     const asset: IAssetInfo = {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),

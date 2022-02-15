@@ -11,12 +11,12 @@ function setLockFileGetProcessStartTime(fn: (process: number) => string | undefi
   (LockFile as any)._getStartTime = fn;
 }
 
-describe('LockFile', () => {
+describe(LockFile.name, () => {
   afterEach(() => {
     setLockFileGetProcessStartTime(getProcessStartTime);
   });
 
-  describe('getLockFilePath', () => {
+  describe(LockFile.getLockFilePath.name, () => {
     test('only accepts alphabetical characters for resource name', () => {
       expect(() => {
         LockFile.getLockFilePath(process.cwd(), 'foo123');
@@ -49,7 +49,7 @@ describe('LockFile', () => {
     });
   });
 
-  describe('getProcessStartTimeFromProcStat', () => {
+  describe(getProcessStartTimeFromProcStat.name, () => {
     function createStatOutput(value2: string, n: number): string {
       let statOutput: string = `0 ${value2} S`;
       for (let i: number = 0; i < n; i++) {
@@ -97,7 +97,7 @@ describe('LockFile', () => {
 
   if (process.platform === 'darwin' || process.platform === 'linux') {
     describe('Linux and Mac', () => {
-      describe('getLockFilePath()', () => {
+      describe(LockFile.getLockFilePath.name, () => {
         test('returns a resolved path containing the pid', () => {
           expect(path.join(process.cwd(), `test#${process.pid}.lock`)).toEqual(
             LockFile.getLockFilePath('./', 'test')
@@ -171,7 +171,7 @@ describe('LockFile', () => {
   }
 
   if (process.platform === 'win32') {
-    describe('getLockFilePath()', () => {
+    describe(LockFile.getLockFilePath.name, () => {
       test("returns a resolved path that doesn't contain", () => {
         expect(path.join(process.cwd(), `test.lock`)).toEqual(LockFile.getLockFilePath('./', 'test'));
       });

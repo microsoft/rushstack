@@ -1,25 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
-import { LastInstallFlag } from '../LastInstallFlag';
 import { FileSystem } from '@rushstack/node-core-library';
 
-const TEMP_DIR: string = path.join(__dirname, 'temp');
+import { LastInstallFlag } from '../LastInstallFlag';
 
-describe('LastInstallFlag', () => {
+const TEMP_DIR_PATH: string = `${__dirname}/temp`;
+
+describe(LastInstallFlag.name, () => {
   beforeEach(() => {
-    FileSystem.ensureEmptyFolder(TEMP_DIR);
+    FileSystem.ensureEmptyFolder(TEMP_DIR_PATH);
   });
 
   afterEach(() => {
-    FileSystem.ensureEmptyFolder(TEMP_DIR);
+    FileSystem.ensureEmptyFolder(TEMP_DIR_PATH);
   });
 
   it('can create and remove a flag in an empty directory', () => {
     // preparation
-    const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR);
+    const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH);
     FileSystem.deleteFile(flag.path);
 
     // test state, should be invalid since the file doesn't exist
@@ -38,8 +37,8 @@ describe('LastInstallFlag', () => {
 
   it('can detect if the last flag was in a different state', () => {
     // preparation
-    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR, { node: '5.0.0' });
-    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR, { node: '8.9.4' });
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, { node: '5.0.0' });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, { node: '8.9.4' });
     FileSystem.deleteFile(flag1.path);
 
     // test state, should be invalid since the file doesn't exist
@@ -63,7 +62,7 @@ describe('LastInstallFlag', () => {
 
   it('can detect if the last flag was in a corrupted state', () => {
     // preparation, write non-json into flag file
-    const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR);
+    const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH);
     FileSystem.writeFile(flag.path, 'sdfjkaklfjksldajgfkld');
 
     // test state, should be invalid since the file is not JSON
@@ -72,13 +71,13 @@ describe('LastInstallFlag', () => {
   });
 
   it("throws an error if new storePath doesn't match the old one", () => {
-    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
-      storePath: path.join(TEMP_DIR, 'pnpm-store')
+      storePath: `${TEMP_DIR_PATH}/pnpm-store`
     });
-    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
-      storePath: path.join(TEMP_DIR, 'temp-store')
+      storePath: `${TEMP_DIR_PATH}/temp-store`
     });
 
     flag1.create();
@@ -88,11 +87,11 @@ describe('LastInstallFlag', () => {
   });
 
   it("doesn't throw an error if conditions for error aren't met", () => {
-    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
-      storePath: path.join(TEMP_DIR, 'pnpm-store')
+      storePath: `${TEMP_DIR_PATH}/pnpm-store`
     });
-    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR, {
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'npm'
     });
 

@@ -39,7 +39,7 @@ class TestTerminalProvider implements ITerminalProvider {
   }
 }
 
-describe('WatchManager', () => {
+describe(WatchManager.name, () => {
   test('handles an empty array correctly', async () => {
     const terminalProvider = new TestTerminalProvider();
     const manager: WatchManager = new WatchManager(terminalProvider);

@@ -6,12 +6,10 @@ import { ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ChangelogGenerator } from '../ChangelogGenerator';
-
-import * as path from 'path';
 import { IChangeRequests } from '../PublishUtilities';
 
-describe('updateIndividualChangelog', () => {
-  const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');
+describe(ChangelogGenerator.updateIndividualChangelog.name, () => {
+  const rushJsonFile: string = `${__dirname}/packages/rush.json`;
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {
@@ -79,7 +77,7 @@ describe('updateIndividualChangelog', () => {
           }
         ]
       },
-      path.resolve(__dirname, 'exampleChangelog'),
+      `${__dirname}/exampleChangelog`,
       false,
       rushConfiguration
     )!;
@@ -137,7 +135,7 @@ describe('updateIndividualChangelog', () => {
           }
         ]
       },
-      path.resolve(__dirname, 'exampleChangelog'),
+      `${__dirname}/exampleChangelog`,
       false,
       rushConfiguration
     )!;
@@ -160,7 +158,7 @@ describe('updateIndividualChangelog', () => {
           }
         ]
       },
-      path.resolve(__dirname, 'exampleChangelog'),
+      `${__dirname}/exampleChangelog`,
       false,
       rushConfiguration
     )!;
@@ -218,7 +216,7 @@ describe('updateIndividualChangelog', () => {
           }
         ]
       },
-      path.resolve(__dirname, 'exampleChangelog'),
+      `${__dirname}/exampleChangelog`,
       false,
       rushConfiguration
     )!;
@@ -254,8 +252,8 @@ describe('updateIndividualChangelog', () => {
   });
 });
 
-describe('updateChangelogs', () => {
-  const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');
+describe(ChangelogGenerator.updateChangelogs.name, () => {
+  const rushJsonFile: string = `${__dirname}/packages/rush.json`;
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {

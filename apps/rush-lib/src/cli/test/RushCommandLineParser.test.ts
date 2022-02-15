@@ -3,8 +3,7 @@
 
 import './mockRushCommandLineParser';
 
-import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, Path } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
@@ -51,12 +50,12 @@ function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
  */
 function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
   // Point to the test repo folder
-  const startPath: string = path.resolve(__dirname, repoName);
+  const startPath: string = `${__dirname}/${repoName}`;
 
   // The `build` task is hard-coded to be incremental. So delete the package-deps file folder in
   // the test repo to guarantee the test actually runs.
-  FileSystem.deleteFolder(path.resolve(__dirname, `${repoName}/a/.rush/temp`));
-  FileSystem.deleteFolder(path.resolve(__dirname, `${repoName}/b/.rush/temp`));
+  FileSystem.deleteFolder(`${startPath}/a/.rush/temp`);
+  FileSystem.deleteFolder(`${startPath}/b/.rush/temp`);
 
   // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
@@ -78,18 +77,22 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
   };
 }
 
+function pathEquals(actual: string, expected: string): void {
+  expect(Path.convertToSlashes(actual)).toEqual(Path.convertToSlashes(expected));
+}
+
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`
 const SPAWN_ARG_ARGS: number = 1;
 const SPAWN_ARG_OPTIONS: number = 2;
 
-describe('RushCommandLineParser', () => {
-  describe('execute', () => {
+describe(RushCommandLineParser.name, () => {
+  describe(RushCommandLineParser.prototype.execute.name, () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
 
     describe('in basic repo', () => {
-      describe(`'build' action`, () => {
+      describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
@@ -109,7 +112,7 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -117,11 +120,11 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
         });
       });
 
-      describe(`'rebuild' action`, () => {
+      describe("'rebuild' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
@@ -141,7 +144,7 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -149,13 +152,13 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
         });
       });
     });
 
-    describe(`in repo with 'rebuild' command overridden`, () => {
-      describe(`'build' action`, () => {
+    describe("in repo with 'rebuild' command overridden", () => {
+      describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideRebuildAndRunBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
@@ -175,7 +178,7 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -183,11 +186,11 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
         });
       });
 
-      describe(`'rebuild' action`, () => {
+      describe("'rebuild' action", () => {
         it(`executes the package's 'rebuild' script`, async () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
@@ -207,7 +210,7 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -215,13 +218,13 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
         });
       });
     });
 
-    describe(`in repo with 'rebuild' or 'build' partially set`, () => {
-      describe(`'build' action`, () => {
+    describe("in repo with 'rebuild' or 'build' partially set", () => {
+      describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideAndDefaultBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
@@ -240,7 +243,7 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -248,11 +251,11 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
         });
       });
 
-      describe(`'rebuild' action`, () => {
+      describe("'rebuild' action", () => {
         it(`executes the package's 'build' script`, async () => {
           // broken
           const repoName: string = 'overrideAndDefaultRebuildActionRepo';
@@ -272,7 +275,7 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -280,12 +283,12 @@ describe('RushCommandLineParser', () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
         });
       });
     });
 
-    describe(`in repo with 'build' command overridden as a global command`, () => {
+    describe("in repo with 'build' command overridden as a global command", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildAsGlobalCommandRepo';
 
@@ -297,7 +300,7 @@ describe('RushCommandLineParser', () => {
       });
     });
 
-    describe(`in repo with 'rebuild' command overridden as a global command`, () => {
+    describe("in repo with 'rebuild' command overridden as a global command", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildAsGlobalCommandRepo';
 
@@ -309,7 +312,7 @@ describe('RushCommandLineParser', () => {
       });
     });
 
-    describe(`in repo with 'build' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
+    describe("in repo with 'build' command overridden with 'safeForSimultaneousRushProcesses=true'", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildWithSimultaneousProcessesRepo';
 
@@ -321,7 +324,7 @@ describe('RushCommandLineParser', () => {
       });
     });
 
-    describe(`in repo with 'rebuild' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
+    describe("in repo with 'rebuild' command overridden with 'safeForSimultaneousRushProcesses=true'", () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildWithSimultaneousProcessesRepo';
 

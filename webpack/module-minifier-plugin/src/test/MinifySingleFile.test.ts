@@ -1,6 +1,6 @@
 import { minifySingleFile } from '../terser/MinifySingleFile';
 
-describe('minifySingleFile', () => {
+describe(minifySingleFile.name, () => {
   it('uses consistent identifiers for webpack vars', async () => {
     const code: string = `__MINIFY_MODULE__(function (module, __webpack_exports__, __webpack_require__) {});`;
 

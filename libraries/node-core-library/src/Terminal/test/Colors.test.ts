@@ -5,8 +5,9 @@ import { Terminal } from '../Terminal';
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
 import { createColorGrid } from './createColorGrid';
 import { AnsiEscape } from '../AnsiEscape';
+import { Colors } from '../Colors';
 
-describe('Colors', () => {
+describe(Colors.name, () => {
   let terminal: Terminal;
   let provider: StringBufferTerminalProvider;
 

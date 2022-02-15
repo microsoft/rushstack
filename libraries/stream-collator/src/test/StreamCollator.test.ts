@@ -9,7 +9,7 @@ import { CollatedWriter } from '../CollatedWriter';
 let collator: StreamCollator;
 const mockWritable: MockWritable = new MockWritable();
 
-describe('StreamCollator tests', () => {
+describe(StreamCollator.name, () => {
   // Reset task information before each test
   beforeEach(() => {
     mockWritable.reset();

@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
 
-describe('CommonVersionsConfiguration', () => {
+describe(CommonVersionsConfiguration.name, () => {
   it('can load the file', () => {
-    const filename: string = path.resolve(__dirname, 'jsonFiles', 'common-versions.json');
+    const filename: string = `${__dirname}/jsonFiles/common-versions.json`;
     const configuration: CommonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(filename);
 
     expect(configuration.preferredVersions.get('@scope/library-1')).toEqual('~3.2.1');

@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import { ChangeFile } from '../ChangeFile';
 import { RushConfiguration } from '../RushConfiguration';
 import { ChangeType } from '../ChangeManagement';
 
-describe('ChangeFile', () => {
+describe(ChangeFile.name, () => {
   it('can add a change', () => {
-    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
+    const rushFilename: string = `${__dirname}/repo/rush-npm.json`;
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     const changeFile: ChangeFile = new ChangeFile(
