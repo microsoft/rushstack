@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.247",
+      "tag": "@microsoft/load-themed-styles_v1.10.247",
+      "date": "Tue, 15 Feb 2022 01:39:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Do not import TS helpers."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.246",
       "tag": "@microsoft/load-themed-styles_v1.10.246",
       "date": "Fri, 11 Feb 2022 10:30:25 GMT",

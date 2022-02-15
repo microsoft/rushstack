@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.9.128",
+      "tag": "@microsoft/loader-load-themed-styles_v1.9.128",
+      "date": "Tue, 15 Feb 2022 01:39:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `1.10.247`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.9.127",
       "tag": "@microsoft/loader-load-themed-styles_v1.9.127",
       "date": "Fri, 11 Feb 2022 10:30:25 GMT",
