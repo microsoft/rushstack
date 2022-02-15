@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 11 Feb 2022 02:18:05 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Feb 2022 01:40:57 GMT and should not be manually modified.
+
+## 5.62.4
+Tue, 15 Feb 2022 01:40:57 GMT
+
+### Updates
+
+- Remove the lib/index.mjs file from the @rushstack/rush-sdk package. This package must be CommonJS.
+- Do not load the PowerShell User Profile for running the AsyncRecycler task
 
 ## 5.62.3
 Fri, 11 Feb 2022 02:18:05 GMT

@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.62.4",
+      "tag": "@microsoft/rush_v5.62.4",
+      "date": "Tue, 15 Feb 2022 01:40:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the lib/index.mjs file from the @rushstack/rush-sdk package. This package must be CommonJS."
+          },
+          {
+            "comment": "Do not load the PowerShell User Profile for running the AsyncRecycler task"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.62.3",
       "tag": "@microsoft/rush_v5.62.3",
       "date": "Fri, 11 Feb 2022 02:18:05 GMT",
