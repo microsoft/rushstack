@@ -13,3 +13,9 @@ notificationJson.notifications.forEach((annoucement) => {
 JsonFile.save(notificationJson, '../../common/config/notifications/notifications.json', {
   updateExistingFile: true
 });
+
+function setExpirationDate(date, days) {
+  var expirationDate = new Date(date);
+  expirationDate.setDate(result.getDate() + days);
+  return expirationDate;
+}
