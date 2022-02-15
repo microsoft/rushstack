@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Do not import TS helpers.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles"
+}
