@@ -1,5 +1,5 @@
 const execSync = require('child_process').execSync;
-const { JsonFile } = require('@rushstack/node-core-library');
+const { JsonFile, ConsoleTerminalProvider, Terminal } = require('@rushstack/node-core-library');
 
 const notificationResponse = execSync(
   'git cat-file blob refs/remotes/origin/zhas/cli-notification:common/config/notifications/notifications.json'
@@ -21,6 +21,15 @@ notificationJson.notifications.forEach((announcement) => {
   }
   index++;
 });
+
+const terminal = new Terminal(new ConsoleTerminalProvider());
+terminal.writeLine(`=====================================`);
+
+notificationJson.notifications.forEach((announcement) => {
+  terminal.writeLine(`${announcement.message}`);
+});
+
+terminal.writeLine(`=====================================`);
 
 JsonFile.save(notificationJson, '../../common/config/notifications/notifications.json', {
   updateExistingFile: true
