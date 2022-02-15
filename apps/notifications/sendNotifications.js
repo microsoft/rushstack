@@ -7,17 +7,19 @@ const notificationResponse = execSync(
 
 const notificationJson = JSON.parse(notificationResponse.toString('utf-8'));
 const currentDate = new Date();
-notificationJson.notifications.forEach((annoucement) => {
+let index = 0;
+notificationJson.notifications.forEach((announcement) => {
   // if time stamp is undefined, it means this is a new announcement
-  if (annoucement.timeStamp === undefined) {
+  if (announcement.timeStamp === undefined) {
     const expirationDate = setExpirationDate(currentDate, 3);
-    annoucement.timeStamp = expirationDate.toISOString();
+    announcement.timeStamp = expirationDate.toISOString();
   } else {
     // check if the announcement is expired, we remove it from queue
-    if (new Date(annoucement.timeStamp).getTime() < currentDate.getTime()) {
-      notificationJson.notifications.pop();
+    if (new Date(announcement.timeStamp).getTime() < currentDate.getTime()) {
+      notificationJson.notifications.splice(index);
     }
   }
+  index++;
 });
 
 JsonFile.save(notificationJson, '../../common/config/notifications/notifications.json', {
