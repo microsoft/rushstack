@@ -1,0 +1,11 @@
+{
+  "name": "@rushstack/notifications",
+  "description": "Send noptifications on dev's terminals about the announements",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@types/node": "12.20.24",
+    "fs-extra": "~7.0.1"
+  }
+}

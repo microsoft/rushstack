@@ -1,10 +1,6 @@
 {
   "notifications": [
-    {
-      "message": "test 1"
-    },
-    {
-      "message": "test 2"
-    }
+    { "message": "test 1", "timeStamp": "2022-02-14T22:57:04.460Z" },
+    { "message": "test 2", "timeStamp": "2022-02-14T22:57:04.460Z" }
   ]
 }
