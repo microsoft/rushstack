@@ -31,7 +31,7 @@ notificationJson.notifications.forEach((announcement) => {
 
 terminal.writeLine(`=====================================`);
 
-JsonFile.save(notificationJson, '../../common/config/notifications/notifications.json', {
+JsonFile.save(notificationJson, 'common/config/notifications/notifications.json', {
   updateExistingFile: true
 });
 
