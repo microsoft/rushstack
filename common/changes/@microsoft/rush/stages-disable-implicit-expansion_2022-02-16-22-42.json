@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Disable implicit expansion of phases listed in command-line.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

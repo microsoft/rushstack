@@ -182,7 +182,7 @@
             },
             "phases": {
               "title": "Phases",
-              "description": "List the phases associated with this command. Note that phases with dependencies will be implicitly included even if they aren't explicitly enumerated in this property.",
+              "description": "List *exactly* the phases that should be run in the primary execution of this command. Phases in this list may declare dependencies on phases that are not listed. If they do, the excluded phases will affect execution order but will be skipped during execution. This will cause any included phases that depend on them to not write cache entries, since Rush cannot guarantee build correctness.",
               "type": "array",
               "items": {
                 "type": "string"

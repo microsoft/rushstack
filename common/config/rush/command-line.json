@@ -16,6 +16,18 @@
       "name": "build",
       "phases": ["_phase:build", "_phase:test"]
     },
+    {
+      "commandKind": "phased",
+      "name": "test-only",
+      "summary": "Run only unit tests, skip building",
+      "description": "Runs only the \"test\" phase without ensuring projects have been built first. Failures are expected if projects were not previously built.",
+      "enableParallelism": true,
+      "incremental": true,
+      /**
+       * Even though `_phase:test` depends on `_phase:build`, skip `_phase:build`. This should mean that we run all tests in parallel.
+       */
+      "phases": ["_phase:test"]
+    },
     // {
     //   /**
     //    * (Required) Determines the type of custom command.

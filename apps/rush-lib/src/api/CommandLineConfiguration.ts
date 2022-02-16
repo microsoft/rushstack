@@ -273,25 +273,11 @@ export class CommandLineConfiguration {
               commandPhases.add(phase);
             }
 
-            // Apply implicit phase dependency expansion
-            // The equivalent of the "--to" operator used for projects
-            // Appending to the set while iterating it accomplishes a full breadth-first search
-            for (const phase of commandPhases) {
-              for (const dependency of phase.phaseDependencies.self) {
-                commandPhases.add(dependency);
-              }
-
-              for (const dependency of phase.phaseDependencies.upstream) {
-                commandPhases.add(dependency);
-              }
-            }
-
             const { watchOptions } = command;
 
             if (watchOptions) {
               normalizedCommand.alwaysWatch = watchOptions.alwaysWatch;
 
-              // No implicit phase dependency expansion for watch mode.
               for (const phaseName of watchOptions.watchPhases) {
                 const phase: IPhase | undefined = this.phases.get(phaseName);
                 if (!phase) {
