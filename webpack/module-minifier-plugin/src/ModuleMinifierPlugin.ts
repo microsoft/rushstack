@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash, Hash } from 'crypto';
+
 import {
   CachedSource,
   ConcatSource,
@@ -10,7 +12,8 @@ import {
   SourceMapSource
 } from 'webpack-sources';
 import * as webpack from 'webpack';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook, TapOptions } from 'tapable';
+import { AsyncSeriesWaterfallHook, SyncHook, SyncWaterfallHook, TapOptions } from 'tapable';
+
 import {
   CHUNK_MODULES_TOKEN,
   MODULE_WRAPPER_PREFIX,
@@ -20,6 +23,7 @@ import {
 } from './Constants';
 import { getIdentifier } from './MinifiedIdentifier';
 import {
+  IMinifierConnection,
   IModuleMinifier,
   IModuleMinifierPluginOptions,
   IModuleMinificationResult,
@@ -37,10 +41,13 @@ import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
 import { AsyncImportCompressionPlugin } from './AsyncImportCompressionPlugin';
 import { PortableMinifierModuleIdsPlugin } from './PortableMinifierIdsPlugin';
-import { createHash } from 'crypto';
 
 // The name of the plugin, for use in taps
 const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
+
+// Monotonically increasing identifier to be incremented any time the code generation logic changes
+// Will be applied to the webpack hash.
+const CODE_GENERATION_REVISION: number = 1;
 
 const TAP_BEFORE: TapOptions<'promise'> = {
   name: PLUGIN_NAME,
@@ -53,6 +60,7 @@ const TAP_AFTER: TapOptions<'sync'> = {
 
 interface IExtendedChunkTemplate {
   hooks: {
+    hashForChunk: SyncHook<Hash, webpack.compilation.Chunk>;
     modules: SyncWaterfallHook<Source, webpack.compilation.Chunk>;
   };
 }
@@ -65,6 +73,11 @@ interface IExtendedParser extends webpack.compilation.normalModuleFactory.Parser
 
 interface IExtendedModuleTemplate extends webpack.compilation.ModuleTemplate {
   render: (module: IExtendedModule, dependencyTemplates: unknown, options: unknown) => Source;
+}
+
+interface IOptionsForHash extends Omit<IModuleMinifierPluginOptions, 'minifier'> {
+  revision: number;
+  minifier: undefined;
 }
 
 /**
@@ -133,6 +146,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
   private readonly _enhancers: webpack.Plugin[];
   private readonly _sourceMap: boolean | undefined;
 
+  private readonly _optionsForHash: IOptionsForHash;
+
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
       rehydrateAssets: new AsyncSeriesWaterfallHook(['dehydratedContent', 'compilation']),
@@ -143,6 +158,12 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
     };
 
     const { minifier, sourceMap, usePortableModules = false, compressAsyncImports = false } = options;
+
+    this._optionsForHash = {
+      ...options,
+      minifier: undefined,
+      revision: CODE_GENERATION_REVISION
+    };
 
     this._enhancers = [];
 
@@ -175,6 +196,9 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
         : typeof devtool === 'string'
         ? devtool.endsWith('source-map')
         : mode === 'production' && devtool !== false;
+
+    this._optionsForHash.sourceMap = useSourceMaps;
+    const binaryConfig: Uint8Array = Buffer.from(JSON.stringify(this._optionsForHash), 'utf-8');
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -232,7 +256,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
         const { minifier } = this;
 
-        const cleanupMinifier: (() => Promise<void>) | undefined = minifier.ref?.();
+        let minifierConnection: IMinifierConnection | undefined;
 
         const requestShortener: webpack.compilation.RequestShortener =
           compilation.runtimeTemplate.requestShortener;
@@ -361,8 +385,10 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
           .javascript as IExtendedModuleTemplate;
         const innerRender: IExtendedModuleTemplate['render'] = jsTemplate.render.bind(jsTemplate);
 
-        // Reset cache if more processing is needed
-        compilation.hooks.seal.tap(PLUGIN_NAME, () => {
+        // The optimizeTree hook is the last async hook that occurs before chunk rendering
+        compilation.hooks.optimizeTree.tapPromise(PLUGIN_NAME, async () => {
+          minifierConnection = await minifier.connect();
+
           submittedModules.clear();
 
           const cache: WeakSet<IExtendedModule> = new WeakSet();
@@ -520,9 +546,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             }
 
             // Handle any error from the minifier.
-            if (cleanupMinifier) {
-              await cleanupMinifier();
-            }
+            await minifierConnection?.disconnect();
 
             // All assets and modules have been minified, hand them off to be rehydrated
             await this.hooks.rehydrateAssets.promise(
@@ -534,6 +558,22 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             );
           }
         );
+
+        function updateChunkHash(hash: Hash, chunk: webpack.compilation.Chunk): void {
+          // Apply the options hash
+          hash.update(binaryConfig);
+          // Apply the hash from the minifier
+          if (minifierConnection) {
+            hash.update(minifierConnection.configHash, 'utf8');
+          }
+        }
+
+        // Need to update chunk hashes with information from this plugin
+        (compilation.chunkTemplate as unknown as IExtendedChunkTemplate).hooks.hashForChunk.tap(
+          PLUGIN_NAME,
+          updateChunkHash
+        );
+        compilation.mainTemplate.hooks.hashForChunk.tap(PLUGIN_NAME, updateChunkHash);
 
         // This function is written twice because the parameter order is not the same between the two hooks
         (compilation.chunkTemplate as unknown as IExtendedChunkTemplate).hooks.modules.tap(

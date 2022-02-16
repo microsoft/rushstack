@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import type { RawSourceMap } from 'source-map';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook } from 'tapable';
-import * as webpack from 'webpack';
-import { ReplaceSource, Source } from 'webpack-sources';
+import type { AsyncSeriesWaterfallHook, SyncWaterfallHook } from 'tapable';
+import type * as webpack from 'webpack';
+import type { ReplaceSource, Source } from 'webpack-sources';
 
 /**
  * Request to the minifier
@@ -245,18 +245,36 @@ export interface IModuleMinifierFunction {
 }
 
 /**
+ * Metadata from the minifier for the plugin
+ * @public
+ */
+export interface IMinifierConnection {
+  /**
+   * Hash of the configuration of this minifier, to be applied to the webpack chunk and compilation hashes.
+   */
+  configHash: string;
+  /**
+   * Callback to be invoked when done with the minifier
+   */
+  disconnect(): Promise<void>;
+}
+
+/**
  * Object that can be invoked to minify code.
  * @public
  */
 export interface IModuleMinifier {
+  /**
+   * Asynchronously minify a module
+   */
   minify: IModuleMinifierFunction;
 
   /**
-   * Prevents the minifier from shutting down until the returned callback is invoked.
+   * Prevents the minifier from shutting down until the returned `disconnect()` callback is invoked.
    * The callback may be used to surface errors encountered by the minifier that may not be relevant to a specific file.
    * It should be called to allow the minifier to cleanup
    */
-  ref?(): () => Promise<void>;
+  connect(): Promise<IMinifierConnection>;
 }
 
 /**

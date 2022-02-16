@@ -1,14 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash } from 'crypto';
+import serialize from 'serialize-javascript';
+import type { MinifyOptions } from 'terser';
+
 import {
+  IMinifierConnection,
   IModuleMinificationCallback,
   IModuleMinificationRequest,
   IModuleMinificationResult,
   IModuleMinifier
 } from './ModuleMinifierPlugin.types';
 import { minifySingleFile } from './terser/MinifySingleFile';
-import { MinifyOptions } from 'terser';
 import './OverrideWebpackIdentifierAllocation';
 
 /**
@@ -27,6 +31,7 @@ export class LocalMinifier implements IModuleMinifier {
   private readonly _terserOptions: MinifyOptions;
 
   private readonly _resultCache: Map<string, IModuleMinificationResult>;
+  private readonly _configHash: string;
 
   public constructor(options: ILocalMinifierOptions) {
     const { terserOptions = {} } = options || {};
@@ -39,6 +44,11 @@ export class LocalMinifier implements IModuleMinifier {
           }
         : {}
     };
+
+    this._configHash = createHash('sha256')
+      .update(LocalMinifier.name, 'utf8')
+      .update(serialize(terserOptions))
+      .digest('base64');
 
     this._resultCache = new Map();
   }
@@ -70,5 +80,14 @@ export class LocalMinifier implements IModuleMinifier {
           hash
         });
       });
+  }
+
+  public async connect(): Promise<IMinifierConnection> {
+    return {
+      configHash: this._configHash,
+      disconnect: async () => {
+        // Do nothing.
+      }
+    };
   }
 }

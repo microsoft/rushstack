@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier-plugin",
+      "comment": "Include plugin state in webpack hash calculations, such that updating the plugin options changes the compilation and chunk hashes.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin"
+}
