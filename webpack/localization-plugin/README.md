@@ -186,6 +186,10 @@ clones on Windows can end up with CRLF newlines and clones on 'nix operating sys
 newlines. This option can be used to help make compilations run on different platforms produce the same
 result.
 
+#### `localizedData.ignoreMissingResxComments = true | false | undefined
+
+If set to true, do not warn on missing RESX <data> element comments.
+
 ### `globsToIgnore = [ ]`
 
 This option is used to specify `.resx` and `.loc.json` files that should not be processed by this plugin.

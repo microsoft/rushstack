@@ -24,10 +24,10 @@ export default loaderFactory(function (
   const { pluginInstance } = options;
   const terminal: Terminal = new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this));
   const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
+    ...options,
     content,
     terminal,
-    filePath: locFilePath,
-    resxNewlineNormalization: options.resxNewlineNormalization
+    filePath: locFilePath
   });
   const { additionalLoadedFilePaths, errors } = pluginInstance.addDefaultLocFile(
     terminal,
