@@ -1,6 +1,7 @@
 const execSync = require('child_process').execSync;
 const { JsonFile, ConsoleTerminalProvider, Terminal } = require('@rushstack/node-core-library');
 
+// the branch will be changed to main once pr is in
 const notificationResponse = execSync(
   'git cat-file blob refs/remotes/origin/zhas/cli-notification:common/config/notifications/notifications.json'
 );
