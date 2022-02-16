@@ -15,6 +15,7 @@ export interface IParseLocFileOptions {
   filePath: string;
   content: string;
   resxNewlineNormalization: NewlineKind | undefined;
+  ignoreMissingResxComments: boolean | undefined;
 }
 
 interface IParseCacheEntry {
@@ -42,7 +43,8 @@ export class LocFileParser {
       parsedFile = ResxReader.readResxAsLocFile(options.content, {
         terminal: options.terminal,
         resxFilePath: options.filePath,
-        newlineNormalization: options.resxNewlineNormalization
+        newlineNormalization: options.resxNewlineNormalization,
+        warnOnMissingComment: !options.ignoreMissingResxComments
       });
     } else {
       parsedFile = JsonFile.parseString(options.content);

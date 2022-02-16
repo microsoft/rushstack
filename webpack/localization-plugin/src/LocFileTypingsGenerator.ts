@@ -17,6 +17,7 @@ export interface ITypingsGeneratorOptions {
   exportAsDefault?: boolean;
   globsToIgnore?: string[];
   resxNewlineNormalization?: NewlineKind | undefined;
+  ignoreMissingResxComments?: boolean | undefined;
 }
 
 /**
@@ -34,7 +35,8 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
           filePath: filePath,
           content: fileContents,
           terminal: this._options.terminal!,
-          resxNewlineNormalization: options.resxNewlineNormalization
+          resxNewlineNormalization: options.resxNewlineNormalization,
+          ignoreMissingResxComments: options.ignoreMissingResxComments
         });
 
         const typings: IStringValueTyping[] = [];

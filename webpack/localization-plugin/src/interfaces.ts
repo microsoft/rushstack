@@ -120,6 +120,11 @@ export interface ILocalizedData {
    * Normalize newlines in RESX files to either CRLF (Windows-style) or LF ('nix style)
    */
   normalizeResxNewlines?: 'lf' | 'crlf';
+
+  /**
+   * If set to true, do not warn on missing RESX <data> element comments.
+   */
+  ignoreMissingResxComments?: boolean;
 }
 
 /**
@@ -182,14 +187,14 @@ export interface ILocalizationPluginOptions {
 }
 
 /**
- * @internal
+ * @public
  */
 export interface ILocalizationFile {
   [stringName: string]: ILocalizedString;
 }
 
 /**
- * @internal
+ * @public
  */
 export interface ILocalizedString {
   value: string;

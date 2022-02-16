@@ -16,10 +16,10 @@ export default loaderFactory(function (
   options: IBaseLoaderOptions
 ) {
   const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
+    ...options,
     content,
     filePath: locFilePath,
-    terminal: new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this)),
-    resxNewlineNormalization: options.resxNewlineNormalization
+    terminal: new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this))
   });
   const resultObject: { [stringName: string]: string } = {};
   for (const [stringName, stringValue] of Object.entries(locFileData)) {

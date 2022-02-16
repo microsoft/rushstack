@@ -8,14 +8,14 @@ export {
   ILocaleData,
   ILocaleElementMap,
   ILocaleFileData,
-  ILocalizationFile as _ILocalizationFile,
+  ILocalizationFile,
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocalizationStatsChunkGroup,
   ILocalizationStatsEntrypoint,
   ILocalizationStatsOptions,
   ILocalizedData,
-  ILocalizedString as _ILocalizedString,
+  ILocalizedString,
   ILocalizedStrings,
   IPassthroughLocaleOptions,
   IPseudolocaleOptions,
@@ -35,3 +35,5 @@ export {
   ITypingsGeneratorOptions,
   LocFileTypingsGenerator as TypingsGenerator
 } from './LocFileTypingsGenerator';
+
+export { ResxReader, IResxReaderOptions } from './utilities/ResxReader';
