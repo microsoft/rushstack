@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
+  IMinifierConnection,
   IModuleMinificationCallback,
   IModuleMinificationRequest,
   IModuleMinifier
@@ -37,5 +38,15 @@ export class NoopMinifier implements IModuleMinifier {
           }
         : undefined
     });
+  }
+
+  public async connect(): Promise<IMinifierConnection> {
+    return {
+      configHash: NoopMinifier.name,
+
+      disconnect: async () => {
+        // Do nothing.
+      }
+    };
   }
 }

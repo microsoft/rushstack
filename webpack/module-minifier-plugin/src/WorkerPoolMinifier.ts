@@ -1,15 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash } from 'crypto';
+import { cpus } from 'os';
+import serialize from 'serialize-javascript';
+import type { MinifyOptions } from 'terser';
+
 import {
+  IMinifierConnection,
   IModuleMinificationCallback,
   IModuleMinificationResult,
   IModuleMinificationRequest,
   IModuleMinifier
 } from './ModuleMinifierPlugin.types';
-import { MinifyOptions } from 'terser';
 import { WorkerPool } from './workerPool/WorkerPool';
-import { cpus } from 'os';
 
 import './OverrideWebpackIdentifierAllocation';
 
@@ -42,6 +46,7 @@ export interface IWorkerPoolMinifierOptions {
 export class WorkerPoolMinifier implements IModuleMinifier {
   private readonly _pool: WorkerPool;
   private readonly _verbose: boolean;
+  private readonly _configHash: string;
 
   private _refCount: number;
   private _deduped: number;
@@ -61,6 +66,11 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       workerData: terserOptions,
       workerScriptPath: require.resolve('./workerPool/MinifierWorker')
     });
+
+    this._configHash = createHash('sha256')
+      .update(WorkerPoolMinifier.name, 'utf8')
+      .update(serialize(terserOptions))
+      .digest('base64');
 
     this._activeRequests = activeRequests;
     this._refCount = 0;
@@ -138,21 +148,25 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       });
   }
 
-  public ref(): () => Promise<void> {
+  public async connect(): Promise<IMinifierConnection> {
     if (++this._refCount === 1) {
       this._pool.reset();
     }
 
-    return async () => {
-      if (--this._refCount === 0) {
-        if (this._verbose) {
-          console.log(`Shutting down minifier worker pool`);
-        }
-        await this._pool.finishAsync();
-        this._resultCache.clear();
-        this._activeRequests.clear();
-        if (this._verbose) {
-          console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
+    return {
+      configHash: this._configHash,
+
+      disconnect: async () => {
+        if (--this._refCount === 0) {
+          if (this._verbose) {
+            console.log(`Shutting down minifier worker pool`);
+          }
+          await this._pool.finishAsync();
+          this._resultCache.clear();
+          this._activeRequests.clear();
+          if (this._verbose) {
+            console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
+          }
         }
       }
     };

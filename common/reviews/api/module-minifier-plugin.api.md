@@ -4,14 +4,14 @@
 
 ```ts
 
-import { AsyncSeriesWaterfallHook } from 'tapable';
+import type { AsyncSeriesWaterfallHook } from 'tapable';
 import { Compiler } from 'webpack';
-import { MinifyOptions } from 'terser';
+import type { MinifyOptions } from 'terser';
 import { Plugin } from 'webpack';
 import type { RawSourceMap } from 'source-map';
-import { ReplaceSource } from 'webpack-sources';
+import type { ReplaceSource } from 'webpack-sources';
 import { Source } from 'webpack-sources';
-import { SyncWaterfallHook } from 'tapable';
+import type { SyncWaterfallHook } from 'tapable';
 import * as webpack from 'webpack';
 
 // @public
@@ -77,6 +77,12 @@ export interface ILocalMinifierOptions {
 }
 
 // @public
+export interface IMinifierConnection {
+    configHash: string;
+    disconnect(): Promise<void>;
+}
+
+// @public
 export interface IModuleInfo {
     module: IExtendedModule;
     source: Source;
@@ -120,9 +126,8 @@ export interface IModuleMinificationSuccessResult {
 
 // @public
 export interface IModuleMinifier {
-    // (undocumented)
+    connect(): Promise<IMinifierConnection>;
     minify: IModuleMinifierFunction;
-    ref?(): () => Promise<void>;
 }
 
 // @public
@@ -182,6 +187,8 @@ export interface IWorkerPoolMinifierOptions {
 // @public
 export class LocalMinifier implements IModuleMinifier {
     constructor(options: ILocalMinifierOptions);
+    // (undocumented)
+    connect(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
@@ -204,6 +211,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
 // @public
 export class NoopMinifier implements IModuleMinifier {
+    // (undocumented)
+    connect(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
@@ -227,11 +236,11 @@ export const STAGE_BEFORE: -100;
 export class WorkerPoolMinifier implements IModuleMinifier {
     constructor(options: IWorkerPoolMinifierOptions);
     // (undocumented)
+    connect(): Promise<IMinifierConnection>;
+    // (undocumented)
     get maxThreads(): number;
     set maxThreads(threads: number);
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-    // (undocumented)
-    ref(): () => Promise<void>;
 }
 
 // (No @packageDocumentation comment for this package)

@@ -555,6 +555,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "serialize-javascript",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "source-map",
       "allowedCategories": [ "libraries" ]
     },
