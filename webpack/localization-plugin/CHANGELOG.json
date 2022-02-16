@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@rushstack/localization-plugin_v0.10.0",
+      "date": "Wed, 16 Feb 2022 07:15:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an option to ignore missing RESX comments."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.15",
       "tag": "@rushstack/localization-plugin_v0.9.15",
       "date": "Fri, 11 Feb 2022 10:30:25 GMT",
