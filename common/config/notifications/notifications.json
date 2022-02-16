@@ -1,3 +1,7 @@
 {
-  "notifications": [{ "message": "test 3", "timeStamp": "2022-02-19T17:50:02.514Z" }]
+  "notifications": [
+    { "message": "test 3" },
+    { "message": "test 2", "timeStamp": "2022-02-15T18:56:25.322Z" },
+    { "message": "test 1", "timeStamp": "2022-02-15T18:56:25.322Z" }
+  ]
 }
