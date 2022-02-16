@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Add an option to ignore missing RESX comments.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin"
+}
