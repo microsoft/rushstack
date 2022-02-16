@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash, Hash } from 'crypto';
 import {
   CachedSource,
   ConcatSource,
@@ -10,7 +11,7 @@ import {
   SourceMapSource
 } from 'webpack-sources';
 import * as webpack from 'webpack';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook, TapOptions } from 'tapable';
+import { AsyncSeriesWaterfallHook, SyncHook, SyncWaterfallHook, TapOptions } from 'tapable';
 import {
   CHUNK_MODULES_TOKEN,
   MODULE_WRAPPER_PREFIX,
@@ -37,7 +38,8 @@ import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
 import { AsyncImportCompressionPlugin } from './AsyncImportCompressionPlugin';
 import { PortableMinifierModuleIdsPlugin } from './PortableMinifierIdsPlugin';
-import { createHash } from 'crypto';
+
+const { version: pluginVersion } = require('../package.json');
 
 // The name of the plugin, for use in taps
 const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
@@ -53,6 +55,7 @@ const TAP_AFTER: TapOptions<'sync'> = {
 
 interface IExtendedChunkTemplate {
   hooks: {
+    hashForChunk: SyncHook<Hash, webpack.compilation.Chunk>;
     modules: SyncWaterfallHook<Source, webpack.compilation.Chunk>;
   };
 }
@@ -133,6 +136,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
   private readonly _enhancers: webpack.Plugin[];
   private readonly _sourceMap: boolean | undefined;
 
+  private readonly _optionsForHash: Omit<IModuleMinifierPluginOptions, 'minifier' | 'sourceMap'>;
+
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
       rehydrateAssets: new AsyncSeriesWaterfallHook(['dehydratedContent', 'compilation']),
@@ -143,6 +148,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
     };
 
     const { minifier, sourceMap, usePortableModules = false, compressAsyncImports = false } = options;
+
+    this._optionsForHash = {
+      usePortableModules,
+      compressAsyncImports
+    };
 
     this._enhancers = [];
 
@@ -534,6 +544,29 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             );
           }
         );
+
+        const { usePortableModules, compressAsyncImports } = this._optionsForHash;
+
+        function updateChunkHash(hash: Hash, chunk: webpack.compilation.Chunk): void {
+          // For now, automatically assume that any change to this plugin will alter the hash.
+          hash.update(pluginVersion as string);
+          // Using vs. not using source maps might affect output
+          hash.update(`${useSourceMaps}`);
+          // Portable modules will affect output
+          hash.update(`${usePortableModules}`);
+          // Async import compression will affect output
+          hash.update(`${compressAsyncImports}`);
+
+          // Ideally should also include the configuration of the minifier itself, but that needs design to account for that
+          // the minifier config can include arbitrary JavaScript, e.g. the nth-identifier function.
+        }
+
+        // Need to update chunk hashes with information from this plugin
+        (compilation.chunkTemplate as unknown as IExtendedChunkTemplate).hooks.hashForChunk.tap(
+          PLUGIN_NAME,
+          updateChunkHash
+        );
+        compilation.mainTemplate.hooks.hashForChunk.tap(PLUGIN_NAME, updateChunkHash);
 
         // This function is written twice because the parameter order is not the same between the two hooks
         (compilation.chunkTemplate as unknown as IExtendedChunkTemplate).hooks.modules.tap(
