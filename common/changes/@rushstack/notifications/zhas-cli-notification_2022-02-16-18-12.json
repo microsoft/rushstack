@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/notifications",
+      "comment": "Create a new project to send out notifications once a new announcement comes in ",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/notifications"
+}
