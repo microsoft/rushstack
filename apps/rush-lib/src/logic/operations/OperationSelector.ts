@@ -3,15 +3,20 @@
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { Operation } from './Operation';
+import type { IOperationRunner } from './IOperationRunner';
+
+import { Operation } from './Operation';
+import { OperationStatus } from './OperationStatus';
+import { NullOperationRunner } from './NullOperationRunner';
 
 export interface IOperationSelectorOptions {
   phasesToRun: ReadonlySet<IPhase>;
 }
 
 export interface ICreateOperationsOptions {
+  phaseSelection: ReadonlySet<IPhase>;
   projectSelection: ReadonlySet<RushConfigurationProject>;
-  operationFactory: IOperationFactory;
+  operationFactory: IOperationRunnerFactory;
 }
 
 export interface IOperationOptions {
@@ -19,86 +24,51 @@ export interface IOperationOptions {
   phase: IPhase;
 }
 
-export interface IOperationFactory {
-  createTask(options: IOperationOptions): Operation;
-}
-
-interface IOperationDependencies {
-  operations: Set<Operation> | undefined;
-  isCacheWriteAllowed: boolean;
-}
-
-interface IOperationNode {
-  key: string;
-  phase: IPhase;
-  project: RushConfigurationProject;
-}
-
-interface ISelectedOperationNode extends IOperationNode {
-  operation: Operation;
+export interface IOperationRunnerFactory {
+  createOperationRunner(options: IOperationOptions): IOperationRunner;
 }
 
 /**
- * This class is responsible for transforming a set of selected phases and selected projects into an operation dependency graph.
+ * This function creates operations for the set of selected projects and phases, using the provided factory
  */
-export class OperationSelector {
-  private readonly _phasesToRun: ReadonlySet<IPhase>;
+export function createOperations(
+  existingOperations: Set<Operation>,
+  createOperationsOptions: ICreateOperationsOptions
+): Set<Operation> {
+  const { phaseSelection, projectSelection, operationFactory } = createOperationsOptions;
 
-  public constructor(options: IOperationSelectorOptions) {
-    this._phasesToRun = options.phasesToRun;
+  const operations: Map<string, Operation> = new Map();
+
+  // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key
+  function getOperationKey(phase: IPhase, project: RushConfigurationProject): string {
+    return `${project.packageName};${phase.name}`;
   }
 
-  public createOperations(createTasksOptions: ICreateOperationsOptions): Set<Operation> {
-    const { projectSelection, operationFactory: taskFactory } = createTasksOptions;
+  function getOperation(phase: IPhase, project: RushConfigurationProject): Operation {
+    const key: string = getOperationKey(phase, project);
+    let operation: Operation | undefined = operations.get(key);
+    if (!operation) {
+      const isIncluded: boolean = phaseSelection.has(phase) && projectSelection.has(project);
 
-    const selectedNodes: Map<string, ISelectedOperationNode> = new Map();
-    const selectedOperations: Set<Operation> = new Set();
+      const runner: IOperationRunner = isIncluded
+        ? operationFactory.createOperationRunner({
+            phase,
+            project
+          })
+        : new NullOperationRunner(key, OperationStatus.Skipped, true);
 
-    // Create tasks for selected phases and projects
-    for (const phase of this._phasesToRun) {
-      for (const project of projectSelection) {
-        const operation: Operation = taskFactory.createTask({
-          phase,
-          project
-        });
+      operation = new Operation(runner, project, phase);
+      operations.set(key, operation);
+      existingOperations.add(operation);
 
-        const key: string = getOperationKey(phase, project);
-
-        const record: ISelectedOperationNode = {
-          key,
-          phase,
-          project,
-          operation
-        };
-
-        selectedNodes.set(key, record);
-        selectedOperations.add(operation);
-      }
-    }
-
-    // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key
-    function getOperationKey(phase: IPhase, project: RushConfigurationProject): string {
-      return `${project.packageName};${phase.name}`;
-    }
-
-    /**
-     * Enumerates the declared dependencies
-     */
-    function* getRawDependencies(node: IOperationNode): Iterable<IOperationNode> {
       const {
-        phase: {
-          phaseDependencies: { self, upstream }
-        },
-        project
-      } = node;
+        phaseDependencies: { self, upstream }
+      } = phase;
+
+      const { dependencies } = operation;
 
       for (const depPhase of self) {
-        // Different phase, same project
-        yield {
-          key: getOperationKey(depPhase, project),
-          phase: depPhase,
-          project
-        };
+        dependencies.add(getOperation(depPhase, project));
       }
 
       if (upstream.size) {
@@ -106,73 +76,22 @@ export class OperationSelector {
         if (dependencyProjects.size) {
           for (const depPhase of upstream) {
             for (const dependencyProject of dependencyProjects) {
-              yield {
-                key: getOperationKey(depPhase, dependencyProject),
-                phase: depPhase,
-                project: dependencyProject
-              };
+              dependencies.add(getOperation(depPhase, dependencyProject));
             }
           }
         }
       }
     }
 
-    const filteredDependencyCache: Map<string, IOperationDependencies> = new Map();
-    function getFilteredDependencies(node: IOperationNode): IOperationDependencies {
-      const { key } = node;
-      const cached: IOperationDependencies | undefined = filteredDependencyCache.get(key);
-      if (cached) {
-        return cached;
-      }
-
-      const dependencies: IOperationDependencies = {
-        operations: undefined,
-        isCacheWriteAllowed: selectedNodes.has(key)
-      };
-
-      filteredDependencyCache.set(key, dependencies);
-
-      for (const dep of getRawDependencies(node)) {
-        const selectedRecord: ISelectedOperationNode | undefined = selectedNodes.get(dep.key);
-        if (selectedRecord) {
-          // This operation is part of the current execution
-          if (!dependencies.operations) {
-            dependencies.operations = new Set();
-          }
-          dependencies.operations.add(selectedRecord.operation);
-        } else {
-          // This operation is not part of the current execution, but may have dependencies that are
-          // Since an operation has been excluded, we cannot guarantee the results, so it is cache unsafe
-          dependencies.isCacheWriteAllowed = false;
-          const { operations: indirectDependencies }: IOperationDependencies = getFilteredDependencies(dep);
-          if (indirectDependencies) {
-            if (!dependencies.operations) {
-              dependencies.operations = new Set();
-            }
-
-            for (const indirectDep of indirectDependencies) {
-              dependencies.operations.add(indirectDep);
-            }
-          }
-        }
-      }
-
-      return dependencies;
-    }
-
-    // Add dependency relationships
-    for (const record of selectedNodes.values()) {
-      const deps: IOperationDependencies = getFilteredDependencies(record);
-      if (deps.operations) {
-        for (const dependencyOperation of deps.operations) {
-          record.operation.dependencies.add(dependencyOperation);
-          dependencyOperation.dependents.add(record.operation);
-        }
-      }
-
-      record.operation.runner.isCacheWriteAllowed = deps.isCacheWriteAllowed;
-    }
-
-    return selectedOperations;
+    return operation;
   }
+
+  // Create tasks for selected phases and projects
+  for (const phase of phaseSelection) {
+    for (const project of projectSelection) {
+      getOperation(phase, project);
+    }
+  }
+
+  return existingOperations;
 }

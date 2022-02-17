@@ -6,41 +6,41 @@ import { JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import { CommandLineConfiguration, IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
-import { IOperationOptions, IOperationFactory, OperationSelector } from '../OperationSelector';
+import { createOperations, IOperationOptions, IOperationRunnerFactory } from '../OperationSelector';
 import { Operation } from '../Operation';
 import { ICommandLineJson } from '../../../api/CommandLineJson';
 import { RushConstants } from '../../RushConstants';
-import { OperationStatus } from '../OperationStatus';
 import { MockOperationRunner } from './MockOperationRunner';
+import { IOperationRunner } from '../IOperationRunner';
 
 interface ISerializedOperation {
   name: string;
-  isCacheWriteAllowed: boolean;
+  silent: boolean;
   dependencies: string[];
 }
 
 function serializeOperation(operation: Operation): ISerializedOperation {
   return {
     name: operation.name,
-    isCacheWriteAllowed: operation.runner.isCacheWriteAllowed,
+    silent: operation.runner!.silent,
     dependencies: Array.from(operation.dependencies, (dep: Operation) => dep.name)
   };
 }
 
-describe(OperationSelector.name, () => {
+describe(createOperations.name, () => {
   const rushJsonFile: string = path.resolve(__dirname, `../../test/workspaceRepo/rush.json`);
   const commandLineJsonFile: string = path.resolve(
     __dirname,
     `../../test/workspaceRepo/common/config/rush/command-line.json`
   );
 
-  const operationFactory: IOperationFactory = {
-    createTask({ phase, project }: IOperationOptions): Operation {
+  const operationFactory: IOperationRunnerFactory = {
+    createOperationRunner({ phase, project }: IOperationOptions): IOperationRunner {
       const name: string = `${project.packageName} (${phase.name.slice(
         RushConstants.phaseNamePrefix.length
       )})`;
 
-      return new Operation(new MockOperationRunner(name), OperationStatus.Ready);
+      return new MockOperationRunner(name);
     }
   };
 
@@ -54,136 +54,103 @@ describe(OperationSelector.name, () => {
     commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
   });
 
-  describe(OperationSelector.prototype.createOperations.name, () => {
-    it('handles a full build', () => {
-      const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
-        'build'
-      )! as IPhasedCommandConfig;
+  it('handles a full build', () => {
+    const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get('build')! as IPhasedCommandConfig;
 
-      const selector: OperationSelector = new OperationSelector({
-        phasesToRun: buildCommand.phases
-      });
-
-      // All projects
-      expect(
-        Array.from(
-          selector.createOperations({
-            projectSelection: new Set(rushConfiguration.projects),
-            operationFactory: operationFactory
-          }),
-          serializeOperation
-        )
-      ).toMatchSnapshot();
+    const operations: Set<Operation> = new Set();
+    createOperations(operations, {
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set(rushConfiguration.projects),
+      operationFactory: operationFactory
     });
 
-    it('handles filtered projects', () => {
-      const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
-        'build'
-      )! as IPhasedCommandConfig;
+    // All projects
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+  });
 
-      const selector: OperationSelector = new OperationSelector({
-        phasesToRun: buildCommand.phases
-      });
+  it('handles filtered projects', () => {
+    const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get('build')! as IPhasedCommandConfig;
 
-      // Single project
-      expect(
-        Array.from(
-          selector.createOperations({
-            projectSelection: new Set([rushConfiguration.getProjectByName('g')!]),
-            operationFactory: operationFactory
-          }),
-          serializeOperation
-        )
-      ).toMatchSnapshot();
-
-      // Filtered projects
-      expect(
-        Array.from(
-          selector.createOperations({
-            projectSelection: new Set([
-              rushConfiguration.getProjectByName('f')!,
-              rushConfiguration.getProjectByName('a')!,
-              rushConfiguration.getProjectByName('c')!
-            ]),
-            operationFactory: operationFactory
-          }),
-          serializeOperation
-        )
-      ).toMatchSnapshot();
+    const operations: Set<Operation> = new Set();
+    createOperations(operations, {
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set([rushConfiguration.getProjectByName('g')!]),
+      operationFactory: operationFactory
     });
 
-    it('handles filtered phases', () => {
-      // Single phase with a missing dependency
-      expect(
-        Array.from(
-          new OperationSelector({
-            phasesToRun: new Set([commandLineConfiguration.phases.get('_phase:upstream-self')!])
-          }).createOperations({
-            projectSelection: new Set(rushConfiguration.projects),
-            operationFactory: operationFactory
-          }),
-          serializeOperation
-        )
-      ).toMatchSnapshot();
+    // Single project
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
 
-      // Two phases with a missing link
-      expect(
-        Array.from(
-          new OperationSelector({
-            phasesToRun: new Set([
-              commandLineConfiguration.phases.get('_phase:complex')!,
-              commandLineConfiguration.phases.get('_phase:upstream-3')!,
-              commandLineConfiguration.phases.get('_phase:upstream-1')!,
-              commandLineConfiguration.phases.get('_phase:no-deps')!
-            ])
-          }).createOperations({
-            projectSelection: new Set(rushConfiguration.projects),
-            operationFactory: operationFactory
-          }),
-          serializeOperation
-        )
-      ).toMatchSnapshot();
+    operations.clear();
+    createOperations(operations, {
+      phaseSelection: buildCommand.phases,
+      projectSelection: new Set([
+        rushConfiguration.getProjectByName('f')!,
+        rushConfiguration.getProjectByName('a')!,
+        rushConfiguration.getProjectByName('c')!
+      ]),
+      operationFactory: operationFactory
     });
 
-    it('handles filtered phases on filtered projects', () => {
-      // Single phase with a missing dependency
-      expect(
-        Array.from(
-          new OperationSelector({
-            phasesToRun: new Set([commandLineConfiguration.phases.get('_phase:upstream-2')!])
-          }).createOperations({
-            projectSelection: new Set([
-              rushConfiguration.getProjectByName('f')!,
-              rushConfiguration.getProjectByName('a')!,
-              rushConfiguration.getProjectByName('c')!
-            ]),
-            operationFactory: operationFactory
-          }),
-          serializeOperation
-        )
-      ).toMatchSnapshot();
+    // Filtered projects
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+  });
 
-      // Phases with missing links
-      expect(
-        Array.from(
-          new OperationSelector({
-            phasesToRun: new Set([
-              commandLineConfiguration.phases.get('_phase:complex')!,
-              commandLineConfiguration.phases.get('_phase:upstream-3')!,
-              commandLineConfiguration.phases.get('_phase:upstream-1')!,
-              commandLineConfiguration.phases.get('_phase:no-deps')!
-            ])
-          }).createOperations({
-            projectSelection: new Set([
-              rushConfiguration.getProjectByName('f')!,
-              rushConfiguration.getProjectByName('a')!,
-              rushConfiguration.getProjectByName('c')!
-            ]),
-            operationFactory: operationFactory
-          }),
-          serializeOperation
-        )
-      ).toMatchSnapshot();
+  it('handles filtered phases', () => {
+    // Single phase with a missing dependency
+    const operations: Set<Operation> = new Set();
+    createOperations(operations, {
+      phaseSelection: new Set([commandLineConfiguration.phases.get('_phase:upstream-self')!]),
+      projectSelection: new Set(rushConfiguration.projects),
+      operationFactory: operationFactory
     });
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+
+    // Two phases with a missing link
+    operations.clear();
+    createOperations(operations, {
+      phaseSelection: new Set([
+        commandLineConfiguration.phases.get('_phase:complex')!,
+        commandLineConfiguration.phases.get('_phase:upstream-3')!,
+        commandLineConfiguration.phases.get('_phase:upstream-1')!,
+        commandLineConfiguration.phases.get('_phase:no-deps')!
+      ]),
+      projectSelection: new Set(rushConfiguration.projects),
+      operationFactory: operationFactory
+    });
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+  });
+
+  it('handles filtered phases on filtered projects', () => {
+    // Single phase with a missing dependency
+    const operations: Set<Operation> = new Set();
+    createOperations(operations, {
+      phaseSelection: new Set([commandLineConfiguration.phases.get('_phase:upstream-2')!]),
+      projectSelection: new Set([
+        rushConfiguration.getProjectByName('f')!,
+        rushConfiguration.getProjectByName('a')!,
+        rushConfiguration.getProjectByName('c')!
+      ]),
+      operationFactory: operationFactory
+    });
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+
+    // Phases with missing links
+    operations.clear();
+    createOperations(operations, {
+      phaseSelection: new Set([
+        commandLineConfiguration.phases.get('_phase:complex')!,
+        commandLineConfiguration.phases.get('_phase:upstream-3')!,
+        commandLineConfiguration.phases.get('_phase:upstream-1')!,
+        commandLineConfiguration.phases.get('_phase:no-deps')!
+      ]),
+      projectSelection: new Set([
+        rushConfiguration.getProjectByName('f')!,
+        rushConfiguration.getProjectByName('a')!,
+        rushConfiguration.getProjectByName('c')!
+      ]),
+      operationFactory: operationFactory
+    });
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
   });
 });

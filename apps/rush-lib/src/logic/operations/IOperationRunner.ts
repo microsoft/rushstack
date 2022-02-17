@@ -5,20 +5,37 @@ import type { StdioSummarizer } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
-import type { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
+/**
+ * Information passed to the executing `IOperationRunner`
+ *
+ * @beta
+ */
 export interface IOperationRunnerContext {
-  repoCommandLineConfiguration: CommandLineConfiguration;
+  /**
+   * The writer into which this `IOperationRunner` should write its logs.
+   */
   collatedWriter: CollatedWriter;
-  stdioSummarizer: StdioSummarizer;
-  quietMode: boolean;
+  /**
+   * If Rush was invoked with `--debug`
+   */
   debugMode: boolean;
+  /**
+   * Defaults to `true`. Will be `false` if Rush was invoked with `--verbose`.
+   */
+  quietMode: boolean;
+  /**
+   * Object used to report a summary at the end of the Rush invocation.
+   */
+  stdioSummarizer: StdioSummarizer;
 }
 
 /**
  * The `Operation` class is a node in the dependency graph of work that needs to be scheduled by the
  * `OperationExecutionManager`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
  * implementation manages the actual process for running a single operation.
+ *
+ * @beta
  */
 export interface IOperationRunner {
   /**
@@ -32,10 +49,14 @@ export interface IOperationRunner {
   isSkipAllowed: boolean;
 
   /**
-   * Assigned by execute().  True if the script was an empty string.  Operationally an empty string is
-   * like a shell command that succeeds instantly, but e.g. it would be odd to report time statistics for it.
+   * Indicates that this runner's duration has meaning.
    */
-  hadEmptyScript: boolean;
+  reportTiming: boolean;
+
+  /**
+   * Indicates that this runner is architectural and should not be reported on.
+   */
+  silent: boolean;
 
   /**
    * If set to true, a warning result should not make Rush exit with a nonzero

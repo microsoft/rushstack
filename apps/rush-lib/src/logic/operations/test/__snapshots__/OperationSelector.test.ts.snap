@@ -1,95 +1,95 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OperationSelector createOperations handles a full build 1`] = `
+exports[`createOperations handles a full build 1`] = `
 Array [
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "a (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "b (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "c (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "d (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "e (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "f (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "g (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "h (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "i (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "j (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (no-deps)",
       "a (upstream-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (no-deps)",
       "b (upstream-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "d (no-deps)",
       "b (upstream-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "e (no-deps)",
       "c (upstream-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
@@ -97,445 +97,445 @@ Array [
       "a (upstream-self)",
       "h (upstream-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "h (no-deps)",
+      "a (upstream-self)",
+    ],
+    "name": "h (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "g (no-deps)",
       "a (upstream-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-self)",
-  },
-  Object {
-    "dependencies": Array [
-      "h (no-deps)",
-      "a (upstream-self)",
-    ],
-    "isCacheWriteAllowed": true,
-    "name": "h (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "i (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "i (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "j (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "j (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
       "h (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "h (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "i (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "j (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
       "h (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "h (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "i (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "j (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
       "h (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "h (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "i (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "j (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "d (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "e (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "f (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "g (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "h (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "h (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "i (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "i (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "j (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "j (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "d (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "e (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "f (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "g (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "h (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "h (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "i (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "i (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "j (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "j (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-1-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-1-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-1-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
       "h (upstream-1-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "h (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "i (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "j (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-3)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
@@ -543,8 +543,8 @@ Array [
       "a (upstream-1-self-upstream)",
       "a (upstream-2-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
@@ -552,8 +552,8 @@ Array [
       "b (upstream-1-self-upstream)",
       "b (upstream-2-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
@@ -561,8 +561,8 @@ Array [
       "b (upstream-1-self-upstream)",
       "b (upstream-2-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
@@ -570,8 +570,8 @@ Array [
       "c (upstream-1-self-upstream)",
       "c (upstream-2-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
@@ -581,8 +581,8 @@ Array [
       "a (upstream-2-self)",
       "h (upstream-2-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
@@ -590,8 +590,8 @@ Array [
       "a (upstream-1-self-upstream)",
       "a (upstream-2-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
@@ -599,690 +599,1131 @@ Array [
       "a (upstream-1-self-upstream)",
       "a (upstream-2-self)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "h (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "i (upstream-3)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "i (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "j (upstream-3)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "j (complex)",
+    "silent": false,
   },
 ]
 `;
 
-exports[`OperationSelector createOperations handles filtered phases 1`] = `
+exports[`createOperations handles filtered phases 1`] = `
 Array [
   Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "dependencies": Array [
+      "a;_phase:no-deps",
+    ],
     "name": "a (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a;_phase:no-deps",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
+      "b;_phase:no-deps",
       "a (upstream-self)",
     ],
-    "isCacheWriteAllowed": false,
     "name": "b (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "b;_phase:no-deps",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
+      "c;_phase:no-deps",
       "b (upstream-self)",
     ],
-    "isCacheWriteAllowed": false,
     "name": "c (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "c;_phase:no-deps",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
+      "d;_phase:no-deps",
       "b (upstream-self)",
     ],
-    "isCacheWriteAllowed": false,
     "name": "d (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "d;_phase:no-deps",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
+      "e;_phase:no-deps",
       "c (upstream-self)",
     ],
-    "isCacheWriteAllowed": false,
     "name": "e (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "e;_phase:no-deps",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
+      "f;_phase:no-deps",
       "a (upstream-self)",
       "h (upstream-self)",
     ],
-    "isCacheWriteAllowed": false,
     "name": "f (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "f;_phase:no-deps",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
+      "h;_phase:no-deps",
       "a (upstream-self)",
     ],
-    "isCacheWriteAllowed": false,
-    "name": "g (upstream-self)",
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-self)",
-    ],
-    "isCacheWriteAllowed": false,
     "name": "h (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "name": "h;_phase:no-deps",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "g;_phase:no-deps",
+      "a (upstream-self)",
+    ],
+    "name": "g (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "g;_phase:no-deps",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "i;_phase:no-deps",
+    ],
     "name": "i (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "name": "i;_phase:no-deps",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "j;_phase:no-deps",
+    ],
     "name": "j (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "j;_phase:no-deps",
+    "silent": true,
   },
 ]
 `;
 
-exports[`OperationSelector createOperations handles filtered phases 2`] = `
+exports[`createOperations handles filtered phases 2`] = `
 Array [
   Object {
     "dependencies": Array [
       "a (upstream-3)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-3)",
+      "a;_phase:upstream-1-self-upstream",
+      "a;_phase:upstream-2-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "b (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+    ],
+    "name": "b (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a;_phase:upstream-2",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+    ],
+    "name": "a;_phase:upstream-2-self",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "c (upstream-3)",
+      "b;_phase:upstream-1-self-upstream",
+      "b;_phase:upstream-2-self",
+    ],
+    "name": "c (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-2",
+    ],
+    "name": "c (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
       "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": false,
-    "name": "c (complex)",
+    "name": "b;_phase:upstream-2",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-1-self",
+    ],
+    "name": "b;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1)",
+    ],
+    "name": "a;_phase:upstream-1-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-2",
+    ],
+    "name": "b;_phase:upstream-2-self",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "d (upstream-3)",
-      "a (upstream-1)",
+      "b;_phase:upstream-1-self-upstream",
+      "b;_phase:upstream-2-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "d (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-2",
+    ],
+    "name": "d (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "e (upstream-3)",
-      "b (upstream-1)",
+      "c;_phase:upstream-1-self-upstream",
+      "c;_phase:upstream-2-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "e (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
-      "f (upstream-3)",
-      "a (upstream-1)",
+      "c;_phase:upstream-2",
     ],
-    "isCacheWriteAllowed": false,
-    "name": "f (complex)",
-  },
-  Object {
-    "dependencies": Array [
-      "g (upstream-3)",
-    ],
-    "isCacheWriteAllowed": false,
-    "name": "g (complex)",
-  },
-  Object {
-    "dependencies": Array [
-      "h (upstream-3)",
-    ],
-    "isCacheWriteAllowed": false,
-    "name": "h (complex)",
-  },
-  Object {
-    "dependencies": Array [
-      "i (upstream-3)",
-    ],
-    "isCacheWriteAllowed": true,
-    "name": "i (complex)",
-  },
-  Object {
-    "dependencies": Array [
-      "j (upstream-3)",
-    ],
-    "isCacheWriteAllowed": true,
-    "name": "j (complex)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "a (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
-    "name": "b (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "isCacheWriteAllowed": false,
-    "name": "c (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "isCacheWriteAllowed": false,
-    "name": "d (upstream-3)",
+    "name": "e (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (upstream-1)",
     ],
-    "isCacheWriteAllowed": false,
-    "name": "e (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "isCacheWriteAllowed": false,
-    "name": "f (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
-    "name": "g (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
-    "name": "h (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "i (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "j (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "a (upstream-1)",
+    "name": "c;_phase:upstream-2",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "b (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a (no-deps)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-1-self",
+    ],
+    "name": "c;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "b (upstream-1)",
+    ],
+    "name": "b;_phase:upstream-1-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "c;_phase:upstream-2",
+    ],
+    "name": "c;_phase:upstream-2-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "f (upstream-3)",
+      "a;_phase:upstream-1-self-upstream",
+      "h;_phase:upstream-1-self-upstream",
+      "a;_phase:upstream-2-self",
+      "h;_phase:upstream-2-self",
+    ],
+    "name": "f (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+      "h;_phase:upstream-2",
+    ],
+    "name": "f (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1)",
+    ],
+    "name": "h;_phase:upstream-2",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-1-self",
+    ],
+    "name": "h;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "h;_phase:upstream-2",
+    ],
+    "name": "h;_phase:upstream-2-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "g (upstream-3)",
+      "a;_phase:upstream-1-self-upstream",
+      "a;_phase:upstream-2-self",
+    ],
+    "name": "g (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+    ],
+    "name": "g (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "h (upstream-3)",
+      "a;_phase:upstream-1-self-upstream",
+      "a;_phase:upstream-2-self",
+    ],
+    "name": "h (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+    ],
+    "name": "h (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "i (upstream-3)",
+    ],
+    "name": "i (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "i (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "j (upstream-3)",
+    ],
+    "name": "j (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "j (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "b (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "b (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "d (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "e (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "c (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
       "h (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-1)",
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "isCacheWriteAllowed": true,
-    "name": "g (upstream-1)",
-  },
-  Object {
-    "dependencies": Array [
-      "a (no-deps)",
-    ],
-    "isCacheWriteAllowed": true,
-    "name": "h (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "i (upstream-1)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "j (upstream-1)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "a (no-deps)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "b (no-deps)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "c (no-deps)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "d (no-deps)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "e (no-deps)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "f (no-deps)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "g (no-deps)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "h (no-deps)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a (no-deps)",
+    ],
+    "name": "g (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a (no-deps)",
+    ],
+    "name": "h (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
+    "name": "i (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "j (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "d (no-deps)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "e (no-deps)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "f (no-deps)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "g (no-deps)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
     "name": "i (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "j (no-deps)",
+    "silent": false,
   },
 ]
 `;
 
-exports[`OperationSelector createOperations handles filtered phases on filtered projects 1`] = `
+exports[`createOperations handles filtered phases on filtered projects 1`] = `
 Array [
   Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "dependencies": Array [
+      "a;_phase:upstream-1",
+      "h;_phase:upstream-1",
+    ],
     "name": "f (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
+    "name": "a;_phase:upstream-1",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:no-deps",
+    ],
+    "name": "h;_phase:upstream-1",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a;_phase:no-deps",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
     "name": "a (upstream-2)",
+    "silent": false,
   },
   Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "dependencies": Array [
+      "b;_phase:upstream-1",
+    ],
     "name": "c (upstream-2)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:no-deps",
+    ],
+    "name": "b;_phase:upstream-1",
+    "silent": true,
   },
 ]
 `;
 
-exports[`OperationSelector createOperations handles filtered phases on filtered projects 2`] = `
+exports[`createOperations handles filtered phases on filtered projects 2`] = `
 Array [
   Object {
     "dependencies": Array [
       "f (upstream-3)",
+      "a;_phase:upstream-1-self-upstream",
+      "h;_phase:upstream-1-self-upstream",
+      "a;_phase:upstream-2-self",
+      "h;_phase:upstream-2-self",
+    ],
+    "name": "f (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+      "h;_phase:upstream-2",
+    ],
+    "name": "f (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a;_phase:upstream-2",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
       "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": false,
-    "name": "f (complex)",
+    "name": "h;_phase:upstream-2",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-1-self",
+    ],
+    "name": "h;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1)",
+    ],
+    "name": "a;_phase:upstream-1-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+    ],
+    "name": "a;_phase:upstream-2-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "h;_phase:upstream-2",
+    ],
+    "name": "h;_phase:upstream-2-self",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (upstream-3)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-3)",
-      "a (upstream-1)",
+      "b;_phase:upstream-1-self-upstream",
+      "b;_phase:upstream-2-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "c (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a (upstream-1)",
+      "b;_phase:upstream-2",
     ],
-    "isCacheWriteAllowed": false,
-    "name": "f (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "a (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [
-      "a (upstream-1)",
-    ],
-    "isCacheWriteAllowed": false,
     "name": "c (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1)",
+    ],
+    "name": "b;_phase:upstream-2",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-1-self",
+    ],
+    "name": "b;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-2",
+    ],
+    "name": "b;_phase:upstream-2-self",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
+      "h;_phase:no-deps",
     ],
-    "isCacheWriteAllowed": false,
     "name": "f (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "a (upstream-1)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
-    "name": "c (upstream-1)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "f (no-deps)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "a (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
+    "name": "h;_phase:no-deps",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:no-deps",
+    ],
+    "name": "c (upstream-1)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "b;_phase:no-deps",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "f (no-deps)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
     "name": "c (no-deps)",
+    "silent": false,
   },
 ]
 `;
 
-exports[`OperationSelector createOperations handles filtered projects 1`] = `
+exports[`createOperations handles filtered projects 1`] = `
 Array [
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "g (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "g (no-deps)",
+      "a;_phase:upstream-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "g (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:no-deps",
+    ],
+    "name": "a;_phase:upstream-self",
+    "silent": true,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "name": "a;_phase:no-deps",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:no-deps",
+    ],
     "name": "g (upstream-1)",
+    "silent": false,
   },
   Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "dependencies": Array [
+      "a;_phase:upstream-1",
+    ],
     "name": "g (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "name": "a;_phase:upstream-1",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+    ],
     "name": "g (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a;_phase:upstream-2",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "g (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "g (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "g (upstream-2-self)",
+    "silent": false,
   },
   Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "dependencies": Array [
+      "a;_phase:upstream-1-self",
+    ],
     "name": "g (upstream-1-self-upstream)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-1",
+    ],
+    "name": "a;_phase:upstream-1-self",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "g (upstream-3)",
+      "a;_phase:upstream-1-self-upstream",
+      "a;_phase:upstream-2-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "g (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "a;_phase:upstream-2",
+    ],
+    "name": "a;_phase:upstream-2-self",
+    "silent": true,
   },
 ]
 `;
 
-exports[`OperationSelector createOperations handles filtered projects 2`] = `
+exports[`createOperations handles filtered projects 2`] = `
 Array [
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "f (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "a (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "c (no-deps)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "f (no-deps)",
       "a (upstream-self)",
+      "h;_phase:upstream-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "f (upstream-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "h;_phase:no-deps",
+      "a (upstream-self)",
+    ],
+    "name": "h;_phase:upstream-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "h;_phase:no-deps",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "c (no-deps)",
+      "b;_phase:upstream-self",
+    ],
+    "name": "c (upstream-self)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:no-deps",
       "a (upstream-self)",
     ],
-    "isCacheWriteAllowed": false,
-    "name": "c (upstream-self)",
+    "name": "b;_phase:upstream-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "b;_phase:no-deps",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
+      "h;_phase:no-deps",
     ],
-    "isCacheWriteAllowed": false,
     "name": "f (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-1)",
+    "silent": false,
   },
   Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": false,
+    "dependencies": Array [
+      "b;_phase:no-deps",
+    ],
     "name": "c (upstream-1)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
-      "a (no-deps)",
+      "h;_phase:upstream-1",
     ],
-    "isCacheWriteAllowed": false,
     "name": "f (upstream-2)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "a (upstream-2)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (no-deps)",
     ],
-    "isCacheWriteAllowed": false,
+    "name": "h;_phase:upstream-1",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a (upstream-2)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-1",
+    ],
     "name": "c (upstream-2)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a (no-deps)",
+    ],
+    "name": "b;_phase:upstream-1",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
-      "a (upstream-1)",
+      "h;_phase:upstream-2",
     ],
-    "isCacheWriteAllowed": false,
     "name": "f (upstream-3)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "a (upstream-3)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": false,
+    "name": "h;_phase:upstream-2",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-2",
+    ],
     "name": "c (upstream-3)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1)",
+    ],
+    "name": "b;_phase:upstream-2",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "f (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-1)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-1-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "f (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "f (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-2)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "c (upstream-2-self)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "a (upstream-1-self)",
-      "a (no-deps)",
+      "h;_phase:upstream-1-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "f (upstream-1-self-upstream)",
-  },
-  Object {
-    "dependencies": Array [],
-    "isCacheWriteAllowed": true,
-    "name": "a (upstream-1-self-upstream)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
-      "a (no-deps)",
+      "h;_phase:upstream-1",
     ],
-    "isCacheWriteAllowed": false,
+    "name": "h;_phase:upstream-1-self",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [],
+    "name": "a (upstream-1-self-upstream)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-1-self",
+    ],
     "name": "c (upstream-1-self-upstream)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-1",
+    ],
+    "name": "b;_phase:upstream-1-self",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "f (upstream-3)",
       "a (upstream-1-self-upstream)",
-      "a (upstream-1-self)",
+      "h;_phase:upstream-1-self-upstream",
       "a (upstream-2-self)",
-      "a (upstream-1)",
+      "h;_phase:upstream-2-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "f (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1-self)",
+    ],
+    "name": "h;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "h;_phase:upstream-2",
+    ],
+    "name": "h;_phase:upstream-2-self",
+    "silent": true,
   },
   Object {
     "dependencies": Array [
       "a (upstream-3)",
     ],
-    "isCacheWriteAllowed": true,
     "name": "a (complex)",
+    "silent": false,
   },
   Object {
     "dependencies": Array [
       "c (upstream-3)",
-      "a (upstream-1-self)",
-      "a (upstream-1)",
+      "b;_phase:upstream-1-self-upstream",
+      "b;_phase:upstream-2-self",
     ],
-    "isCacheWriteAllowed": false,
     "name": "c (complex)",
+    "silent": false,
+  },
+  Object {
+    "dependencies": Array [
+      "a (upstream-1-self)",
+    ],
+    "name": "b;_phase:upstream-1-self-upstream",
+    "silent": true,
+  },
+  Object {
+    "dependencies": Array [
+      "b;_phase:upstream-2",
+    ],
+    "name": "b;_phase:upstream-2-self",
+    "silent": true,
   },
 ]
 `;

@@ -9,7 +9,8 @@ import { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 export class MockOperationRunner implements IOperationRunner {
   private readonly _action: ((terminal: CollatedTerminal) => Promise<OperationStatus>) | undefined;
   public readonly name: string;
-  public readonly hadEmptyScript: boolean = false;
+  public readonly reportTiming: boolean = true;
+  public readonly silent: boolean = false;
   public isSkipAllowed: boolean = false;
   public isCacheWriteAllowed: boolean = false;
   public readonly warningsAreAllowed: boolean;

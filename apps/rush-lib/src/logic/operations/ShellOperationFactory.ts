@@ -2,28 +2,28 @@
 // See LICENSE in the project root for license information.
 
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { CommandLineConfiguration, IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IRegisteredCustomParameter } from '../../cli/scriptActions/BaseScriptAction';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import type { IOperationOptions, IOperationFactory } from './OperationSelector';
+import type { IOperationOptions, IOperationRunnerFactory } from './OperationSelector';
 import { RushConstants } from '../RushConstants';
 import { IOperationRunner } from './IOperationRunner';
 import { NullOperationRunner } from './NullOperationRunner';
 import { convertSlashesForWindows, ShellOperationRunner } from './ShellOperationRunner';
-import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 
 export interface IOperationFactoryOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration?: BuildCacheConfiguration | undefined;
+  commandLineConfiguration: CommandLineConfiguration;
   isIncrementalBuildAllowed: boolean;
   customParameters: Iterable<IRegisteredCustomParameter>;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
 }
 
-export class OperationFactory implements IOperationFactory {
+export class OperationFactory implements IOperationRunnerFactory {
   private readonly _options: IOperationFactoryOptions;
   private readonly _customParametersByPhase: Map<IPhase, string[]>;
 
@@ -32,7 +32,7 @@ export class OperationFactory implements IOperationFactory {
     this._customParametersByPhase = new Map();
   }
 
-  public createTask(options: IOperationOptions): Operation {
+  public createOperationRunner(options: IOperationOptions): IOperationRunner {
     const { phase, project } = options;
 
     const factoryOptions: IOperationFactoryOptions = this._options;
@@ -59,16 +59,15 @@ export class OperationFactory implements IOperationFactory {
           displayName,
           rushConfiguration: factoryOptions.rushConfiguration,
           buildCacheConfiguration: factoryOptions.buildCacheConfiguration,
+          commandLineConfiguration: factoryOptions.commandLineConfiguration,
           commandToRun: commandToRun || '',
           isIncrementalBuildAllowed: factoryOptions.isIncrementalBuildAllowed,
           projectChangeAnalyzer: factoryOptions.projectChangeAnalyzer,
           phase
         })
-      : new NullOperationRunner(displayName, OperationStatus.FromCache);
+      : new NullOperationRunner(displayName, OperationStatus.FromCache, false);
 
-    const operation: Operation = new Operation(runner, OperationStatus.Ready);
-
-    return operation;
+    return runner;
   }
 
   private static _getScriptToRun(
