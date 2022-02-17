@@ -43,6 +43,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
 }
 
 interface IExecuteInternalOptions {
+  isWatch: boolean;
   operationSelector: OperationSelector;
   executionManagerOptions: IOperationExecutionManagerOptions;
   projectSelection: Set<RushConfigurationProject>;
@@ -154,6 +155,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
 
     const executeOptions: IExecuteInternalOptions = {
+      isWatch,
       operationSelector,
       executionManagerOptions,
       projectSelection,
@@ -242,6 +244,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       );
 
       const executeOptions: IExecuteInternalOptions = {
+        isWatch: true,
         operationSelector,
         projectSelection,
         operationFactoryOptions: {
@@ -332,7 +335,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
    * Runs a single invocation of the command
    */
   private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const { operationSelector, projectSelection, operationFactoryOptions } = options;
+    const { isWatch, operationSelector, projectSelection, operationFactoryOptions } = options;
 
     const operationFactory: OperationFactory = new OperationFactory(operationFactoryOptions);
 
@@ -375,7 +378,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       if (!ignoreHooks) {
         this._doAfterTask(stopwatch, false);
       }
-      throw new AlreadyReportedError();
+      if (!isWatch) {
+        throw new AlreadyReportedError();
+      }
     }
   }
 
