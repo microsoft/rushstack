@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/notifications",
-  "description": "Send noptifications on dev's terminals about the announements",
+  "description": "Provide repo maintainers with a mechanism to register announcements to repo contributors that will be surfaced as part of the day-to-day workflow.",
   "version": "1.0.0",
   "private": true,
   "devDependencies": {
