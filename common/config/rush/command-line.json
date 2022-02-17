@@ -16,6 +16,25 @@
       "name": "build",
       "phases": ["_phase:build", "_phase:test"]
     },
+
+    {
+      "commandKind": "phased",
+      "name": "start",
+      "summary": "Build all projects, then watch for changes, build and test.",
+      "description": "Build all projects, then watches for changes and builds and runs tests for affected projects.",
+      "safeForSimultaneousRushProcesses": false,
+
+      "enableParallelism": true,
+      "incremental": true,
+      // Initial execution only uses the build phase so that all dependencies of watch phases have been built
+      "phases": ["_phase:build"],
+      "watchOptions": {
+        // Act as though `--watch` is always passed. If false, adds support for passing `--watch`.
+        "alwaysWatch": true,
+        // During watch recompilation run both build and test for affected projects
+        "watchPhases": ["_phase:build", "_phase:test"]
+      }
+    },
     // {
     //   /**
     //    * (Required) Determines the type of custom command.
