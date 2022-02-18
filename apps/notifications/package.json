@@ -6,7 +6,6 @@
   "devDependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@types/node": "12.20.24",
-    "fs-extra": "~7.0.1",
     "inquirer": "~7.3.3"
   }
 }
