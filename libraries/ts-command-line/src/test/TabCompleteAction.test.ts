@@ -32,8 +32,8 @@ function getCommandLineParser(): DynamicCommandLineParser {
 
   const addAction: DynamicCommandLineAction = new DynamicCommandLineAction({
     actionName: 'add',
-    summary: 'Adds a dependency to the package.json and runs rush upgrade.',
-    documentation: 'Adds a dependency to the package.json and runs rush upgrade.'
+    summary: 'Adds a dependency to the package.json and runs rush update.',
+    documentation: 'Adds a dependency to the package.json and runs rush update.'
   });
   commandLineParser.addAction(addAction);
   addAction.defineStringParameter({

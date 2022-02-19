@@ -37,7 +37,7 @@ export class AddAction extends BaseRushAction {
     ];
     super({
       actionName: 'add',
-      summary: 'Adds one or more dependencies to the package.json and runs rush upgrade.',
+      summary: 'Adds one or more dependencies to the package.json and runs rush update.',
       documentation: documentation.join(os.EOL),
       safeForSimultaneousRushProcesses: false,
       parser
