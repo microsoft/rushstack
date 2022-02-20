@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/ts-command-line",
-      "comment": "fix a typo in rush add command summary",
-      "type": "patch"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/ts-command-line"
