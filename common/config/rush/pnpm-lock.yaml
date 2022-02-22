@@ -165,11 +165,21 @@ importers:
 
   ../../apps/notifications:
     specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/inquirer': 7.3.1
       '@types/node': 12.20.24
       inquirer: ~7.3.3
     devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@types/heft-jest': 1.0.1
+      '@types/inquirer': 7.3.1
       '@types/node': 12.20.24
       inquirer: 7.3.3
 

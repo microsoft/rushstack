@@ -3,9 +3,25 @@
   "description": "Provide repo maintainers with a mechanism to register announcements to repo contributors that will be surfaced as part of the day-to-day workflow.",
   "version": "1.0.0",
   "private": true,
+  "main": "lib/start.js",
+  "types": "dist/heft.d.ts",
+  "bin": {
+    "heft": "./bin/heft"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
   "devDependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
+    "@types/inquirer": "7.3.1",
     "inquirer": "~7.3.3"
   }
 }
