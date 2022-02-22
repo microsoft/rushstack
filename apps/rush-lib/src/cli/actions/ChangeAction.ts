@@ -370,7 +370,7 @@ export class ChangeAction extends BaseRushAction {
     return this._git
       .getChangedFiles(this._targetBranch, this._terminal, true, relativeChangesFolder)
       .map((relativePath) => {
-        return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
+        return path.join(repoRoot, relativePath);
       });
   }
 
