@@ -218,14 +218,23 @@ describe(AmazonS3Client.name, () => {
     }
 
     let realDate: typeof Date;
+    let realSetTimeout: typeof setTimeout;
     beforeEach(() => {
+      // mock date
       realDate = global.Date;
       global.Date = MockedDate as typeof Date;
+
+      // mock setTimeout
+      realSetTimeout = global.setTimeout;
+      global.setTimeout = ((callback: () => void, time: number) => {
+        return realSetTimeout(callback, 1);
+      }).bind(global) as typeof global.setTimeout;
     });
 
     afterEach(() => {
       jest.restoreAllMocks();
       global.Date = realDate;
+      global.setTimeout = realSetTimeout.bind(global);
     });
 
     async function makeS3ClientRequestAsync<TResponse>(
@@ -247,7 +256,11 @@ describe(AmazonS3Client.name, () => {
         error = e as Error;
       }
 
-      expect(spy).toHaveBeenCalledTimes(1);
+      if (error) {
+        expect(spy).toHaveBeenCalledTimes(4);
+      } else {
+        expect(spy).toHaveBeenCalledTimes(1);
+      }
       expect(spy.mock.calls[0]).toMatchSnapshot();
 
       if (error) {
@@ -332,6 +345,7 @@ describe(AmazonS3Client.name, () => {
         });
 
         it('Handles an unexpected error', async () => {
+          const spy = jest.spyOn(global, 'setTimeout');
           await runAndExpectErrorAsync(
             async () =>
               await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
@@ -341,6 +355,12 @@ describe(AmazonS3Client.name, () => {
                 }
               })
           );
+          expect(setTimeout).toHaveBeenCalledTimes(3);
+          expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 4000);
+          expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 8000);
+          expect(setTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 16000);
+          spy.mockReset();
+          spy.mockRestore();
         });
       }
 

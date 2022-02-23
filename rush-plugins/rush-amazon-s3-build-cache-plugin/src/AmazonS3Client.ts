@@ -32,6 +32,27 @@ interface IIsoDateString {
 const protocolRegex: RegExp = /^https?:\/\//;
 const portRegex: RegExp = /:(\d{1,5})$/;
 
+// Similar to https://docs.microsoft.com/en-us/javascript/api/@azure/storage-blob/storageretrypolicytype?view=azure-node-latest
+enum StorageRetryPolicyType {
+  EXPONENTIAL = 0,
+  FIXED = 1
+}
+
+// Similar to https://docs.microsoft.com/en-us/javascript/api/@azure/storage-blob/storageretryoptions?view=azure-node-latest
+interface IStorageRetryOptions {
+  maxRetryDelayInMs: number;
+  maxTries: number;
+  retryDelayInMs: number;
+  retryPolicyType: StorageRetryPolicyType;
+}
+
+const storageRetryOptions: IStorageRetryOptions = {
+  maxRetryDelayInMs: 120 * 1000,
+  maxTries: 4,
+  retryDelayInMs: 4 * 1000,
+  retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
+};
+
 /**
  * A helper for reading and updating objects on Amazon S3
  *
@@ -103,16 +124,20 @@ export class AmazonS3Client {
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
     this._writeDebugLine('Reading object from S3');
-    const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
-    if (response.ok) {
-      return await response.buffer();
-    } else if (response.status === 404) {
-      return undefined;
-    } else if (response.status === 403 && !this._credentials) {
-      return undefined;
-    } else {
-      this._throwS3Error(response, await this._safeReadResponseText(response));
-    }
+    const sendRequest: () => Promise<Buffer | undefined> = async (): Promise<Buffer | undefined> => {
+      const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
+      if (response.ok) {
+        return await response.buffer();
+      } else if (response.status === 404) {
+        return undefined;
+      } else if (response.status === 403 && !this._credentials) {
+        return undefined;
+      } else {
+        this._throwS3Error(response, await this._safeReadResponseText(response));
+      }
+    };
+
+    return this._sendCacheRequestWithRetries(sendRequest);
   }
 
   public async uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void> {
@@ -120,10 +145,14 @@ export class AmazonS3Client {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
-    const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
-    if (!response.ok) {
-      this._throwS3Error(response, await this._safeReadResponseText(response));
-    }
+    const sendRequest: () => Promise<void> = async (): Promise<void> => {
+      const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
+      if (!response.ok) {
+        this._throwS3Error(response, await this._safeReadResponseText(response));
+      }
+    };
+
+    return this._sendCacheRequestWithRetries(sendRequest);
   }
 
   private _writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
@@ -370,5 +399,71 @@ export class AmazonS3Client {
         'Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long'
       );
     }
+  }
+
+  private async _sendCacheRequestWithRetries<T>(sendRequest: () => Promise<T>): Promise<T> {
+    const terminal: ITerminal = this._terminal;
+
+    type TryResponse = { hasNetworkError: false; response: T } | { hasNetworkError: true; error: unknown };
+    const trySendRequest: () => Promise<TryResponse> = async (): Promise<TryResponse> => {
+      try {
+        const response: T = await sendRequest();
+        return {
+          response,
+          hasNetworkError: false
+        };
+      } catch (err) {
+        return {
+          hasNetworkError: true,
+          error: err
+        };
+      }
+    };
+
+    const response: TryResponse = await trySendRequest();
+
+    if (response.hasNetworkError) {
+      if (storageRetryOptions && storageRetryOptions.maxTries > 1) {
+        terminal.writeVerboseLine(
+          'Network request failed. Will retry request as specified in storageRetryOptions'
+        );
+        const { retryDelayInMs, retryPolicyType, maxTries, maxRetryDelayInMs } = storageRetryOptions;
+        async function retry(retryAttempt: number): Promise<T> {
+          let delay: number = retryDelayInMs;
+          if (retryPolicyType === StorageRetryPolicyType.EXPONENTIAL) {
+            delay = retryDelayInMs * Math.pow(2, retryAttempt - 1);
+          }
+          delay = Math.min(maxRetryDelayInMs, delay);
+
+          terminal.writeVerboseLine(`Will retry request in ${delay}s...`);
+          await new Promise<void>((resolve) => {
+            setTimeout(() => {
+              resolve();
+            }, delay);
+          });
+
+          const response: TryResponse = await trySendRequest();
+
+          if (response.hasNetworkError) {
+            if (retryAttempt < maxTries - 1) {
+              terminal.writeVerboseLine('The retried request failed, will try again');
+              return retry(retryAttempt + 1);
+            } else {
+              terminal.writeVerboseLine(
+                'The retried request failed and has reached the maxTries limit, the cloud service is not accessible'
+              );
+              throw response.error;
+            }
+          }
+
+          return response.response;
+        }
+        return retry(1);
+      } else {
+        terminal.writeVerboseLine('Network request failed and storageRetryOptions is not specified');
+        throw response.error;
+      }
+    }
+    return response.response;
   }
 }
