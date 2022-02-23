@@ -1,25 +1,12 @@
-const { ConsoleTerminalProvider, Terminal } = require('@rushstack/node-core-library');
-const spawnResult = Executable.spawnSync(
-  'git',
-  [
-    'cat-file',
-    'blob',
-    'refs/remotes/origin/zhas/cli-notification:common/config/notifications/notifications.json'
-  ],
-  {
-    currentWorkingDirectory: process.cwd()
-  }
-);
+const { ConsoleTerminalProvider, Encoding, FileSystem, Terminal } = require('@rushstack/node-core-library');
 
-if (spawnResult.status !== 0) {
-  throw new Error(`git cat-file exited with status ${spawnResult.status}: ${spawnResult.stderr}`);
-}
-
-const notificationJson = JSON.parse(spawnResult.stdout);
-let notifications = notificationJson.notifications;
-
+const pathToNotificationJson = 'common/config/notifications/notifications.json';
+const result = FileSystem.readFile(pathToNotificationJson, { encoding: Encoding.Utf8 });
+const notificationJson = JSON.parse(result);
+const notifications = notificationJson.notifications;
 // for display
 const terminal = new Terminal(new ConsoleTerminalProvider());
+const currentDate = new Date();
 terminal.writeLine(`=====================================`);
 
 notifications.forEach((announcement) => {
