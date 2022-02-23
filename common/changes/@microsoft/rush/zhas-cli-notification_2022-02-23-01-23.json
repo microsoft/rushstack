@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update notifications system",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
