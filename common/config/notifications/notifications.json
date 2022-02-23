@@ -1,12 +1,12 @@
 {
   "notifications": [
     {
-      "timeStamp": "2022-02-15T18:56:25.322Z",
-      "message": "test 1"
+      "message": "test 1",
+      "expiration": "2022-02-15T18:56:25.322Z"
     },
     {
-      "timeStamp": "2022-02-15T18:56:25.322Z",
-      "message": "test 2"
+      "message": "test 2",
+      "expiration": "2022-02-15T18:56:25.322Z"
     }
   ]
 }

@@ -4,10 +4,6 @@
   "version": "1.0.0",
   "private": true,
   "main": "lib/start.js",
-  "types": "dist/heft.d.ts",
-  "bin": {
-    "heft": "./bin/heft"
-  },
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",

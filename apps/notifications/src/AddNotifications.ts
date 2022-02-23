@@ -1,11 +1,7 @@
-import { JsonFile, Executable } from '@rushstack/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 import * as inquirer from 'inquirer';
-import { SpawnSyncReturns } from 'child_process';
-
-export interface IAnswers {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
+import * as path from 'path';
+import { IAnswers, INotificationJson } from './configurations';
 
 export class AddNotifications {
   public constructor() {}
@@ -22,29 +18,18 @@ export class AddNotifications {
         }
       ])
       .then((answers: IAnswers) => {
-        // the branch will be changed to main once pr is in
-        const spawnResult: SpawnSyncReturns<string> = Executable.spawnSync(
-          'git',
-          [
-            'cat-file',
-            'blob',
-            'refs/remotes/origin/zhas/cli-notification:common/config/notifications/notifications.json'
-          ],
-          {
-            currentWorkingDirectory: process.cwd()
-          }
+        const pathToJson: string = path.join(
+          process.cwd(),
+          '..',
+          '..',
+          'common/config/notifications/notifications.json'
         );
-
-        if (spawnResult.status !== 0) {
-          throw new Error(`git cat-file exited with status ${spawnResult.status}: ${spawnResult.stderr}`);
-        }
-
-        const notificationJson: IAnswers = JSON.parse(spawnResult.stdout);
+        const notificationJson: INotificationJson = JsonFile.load(pathToJson);
         const notifications: IAnswers[] = notificationJson.notifications;
 
         // insert new notification
         const currentDate: Date = new Date();
-        answers.timeStamp = this._setExpirationDate(currentDate, 3).toISOString();
+        answers.expiration = this._setExpirationDate(currentDate, 3).toISOString();
         notifications.splice(notifications.length, 0, answers);
 
         JsonFile.save(notificationJson, '../../common/config/notifications/notifications.json', {
