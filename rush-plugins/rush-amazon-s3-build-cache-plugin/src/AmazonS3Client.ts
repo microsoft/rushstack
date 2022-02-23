@@ -402,9 +402,8 @@ export class AmazonS3Client {
   }
 
   private async _sendCacheRequestWithRetries<T>(sendRequest: () => Promise<T>): Promise<T> {
-    const terminal: ITerminal = this._terminal;
-
     type TryResponse = { hasNetworkError: false; response: T } | { hasNetworkError: true; error: unknown };
+
     const trySendRequest: () => Promise<TryResponse> = async (): Promise<TryResponse> => {
       try {
         const response: T = await sendRequest();
@@ -422,20 +421,20 @@ export class AmazonS3Client {
 
     const response: TryResponse = await trySendRequest();
 
+    const log: (...messageParts: (string | IColorableSequence)[]) => void = this._writeDebugLine.bind(this);
+
     if (response.hasNetworkError) {
       if (storageRetryOptions && storageRetryOptions.maxTries > 1) {
-        terminal.writeVerboseLine(
-          'Network request failed. Will retry request as specified in storageRetryOptions'
-        );
-        const { retryDelayInMs, retryPolicyType, maxTries, maxRetryDelayInMs } = storageRetryOptions;
+        log('Network request failed. Will retry request as specified in storageRetryOptions');
         async function retry(retryAttempt: number): Promise<T> {
+          const { retryDelayInMs, retryPolicyType, maxTries, maxRetryDelayInMs } = storageRetryOptions;
           let delay: number = retryDelayInMs;
           if (retryPolicyType === StorageRetryPolicyType.EXPONENTIAL) {
             delay = retryDelayInMs * Math.pow(2, retryAttempt - 1);
           }
           delay = Math.min(maxRetryDelayInMs, delay);
 
-          terminal.writeVerboseLine(`Will retry request in ${delay}s...`);
+          log(`Will retry request in ${delay}s...`);
           await new Promise<void>((resolve) => {
             setTimeout(() => {
               resolve();
@@ -446,10 +445,10 @@ export class AmazonS3Client {
 
           if (response.hasNetworkError) {
             if (retryAttempt < maxTries - 1) {
-              terminal.writeVerboseLine('The retried request failed, will try again');
+              log('The retried request failed, will try again');
               return retry(retryAttempt + 1);
             } else {
-              terminal.writeVerboseLine(
+              log(
                 'The retried request failed and has reached the maxTries limit, the cloud service is not accessible'
               );
               throw response.error;
@@ -460,7 +459,7 @@ export class AmazonS3Client {
         }
         return retry(1);
       } else {
-        terminal.writeVerboseLine('Network request failed and storageRetryOptions is not specified');
+        log('Network request failed and storageRetryOptions is not specified');
         throw response.error;
       }
     }
