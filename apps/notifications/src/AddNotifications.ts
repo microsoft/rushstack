@@ -32,7 +32,7 @@ export class AddNotifications {
         answers.expiration = this._setExpirationDate(currentDate, 3).toISOString();
         notifications.splice(notifications.length, 0, answers);
 
-        JsonFile.save(notificationJson, '../../common/config/notifications/notifications.json', {
+        JsonFile.save(notificationJson, pathToJson, {
           updateExistingFile: true
         });
       });
