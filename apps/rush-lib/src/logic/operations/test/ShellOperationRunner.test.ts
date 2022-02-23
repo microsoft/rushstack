@@ -3,7 +3,7 @@
 
 import { convertSlashesForWindows } from '../ShellOperationRunner';
 
-describe('convertSlashesForWindows()', () => {
+describe(convertSlashesForWindows.name, () => {
   it('converted inputs', () => {
     expect(convertSlashesForWindows('./node_modules/.bin/tslint -c config/tslint.json')).toEqual(
       '.\\node_modules\\.bin\\tslint -c config/tslint.json'

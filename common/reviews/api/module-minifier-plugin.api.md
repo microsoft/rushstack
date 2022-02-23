@@ -4,14 +4,14 @@
 
 ```ts
 
-import { AsyncSeriesWaterfallHook } from 'tapable';
+import type { AsyncSeriesWaterfallHook } from 'tapable';
 import { Compiler } from 'webpack';
-import { MinifyOptions } from 'terser';
+import type { MinifyOptions } from 'terser';
 import { Plugin } from 'webpack';
 import type { RawSourceMap } from 'source-map';
-import { ReplaceSource } from 'webpack-sources';
+import type { ReplaceSource } from 'webpack-sources';
 import { Source } from 'webpack-sources';
-import { SyncWaterfallHook } from 'tapable';
+import type { SyncWaterfallHook } from 'tapable';
 import * as webpack from 'webpack';
 
 // @public
@@ -62,6 +62,7 @@ export const IDENTIFIER_TRAILING_DIGITS: string;
 // @public
 export interface IExtendedModule extends webpack.compilation.Module {
     external?: boolean;
+    hasDependencies(callback: (dep: webpack.compilation.Dependency) => boolean | void): boolean;
     id: string | number | null;
     identifier(): string;
     modules?: IExtendedModule[];
@@ -73,6 +74,12 @@ export interface IExtendedModule extends webpack.compilation.Module {
 export interface ILocalMinifierOptions {
     // (undocumented)
     terserOptions?: MinifyOptions;
+}
+
+// @public
+export interface IMinifierConnection {
+    configHash: string;
+    disconnect(): Promise<void>;
 }
 
 // @public
@@ -119,9 +126,8 @@ export interface IModuleMinificationSuccessResult {
 
 // @public
 export interface IModuleMinifier {
-    // (undocumented)
+    connect(): Promise<IMinifierConnection>;
     minify: IModuleMinifierFunction;
-    ref?(): () => Promise<void>;
 }
 
 // @public
@@ -132,13 +138,14 @@ export interface IModuleMinifierFunction {
 
 // @public
 export interface IModuleMinifierPluginHooks {
-    finalModuleId: SyncWaterfallHook<string | number | undefined>;
-    postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, string>;
+    finalModuleId: SyncWaterfallHook<string | number | undefined, webpack.compilation.Compilation>;
+    postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, IPostProcessFragmentContext>;
     rehydrateAssets: AsyncSeriesWaterfallHook<IDehydratedAssets, webpack.compilation.Compilation>;
 }
 
 // @public
 export interface IModuleMinifierPluginOptions {
+    compressAsyncImports?: boolean;
     minifier: IModuleMinifier;
     sourceMap?: boolean;
     usePortableModules?: boolean;
@@ -157,6 +164,13 @@ export interface _INormalModuleFactoryModuleData {
     };
 }
 
+// @public
+export interface IPostProcessFragmentContext {
+    compilation: webpack.compilation.Compilation;
+    loggingName: string;
+    module: webpack.compilation.Module | undefined;
+}
+
 // @internal
 export interface _IWebpackCompilationData {
     // (undocumented)
@@ -173,6 +187,8 @@ export interface IWorkerPoolMinifierOptions {
 // @public
 export class LocalMinifier implements IModuleMinifier {
     constructor(options: ILocalMinifierOptions);
+    // (undocumented)
+    connect(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
@@ -195,6 +211,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
 // @public
 export class NoopMinifier implements IModuleMinifier {
+    // (undocumented)
+    connect(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
@@ -218,11 +236,11 @@ export const STAGE_BEFORE: -100;
 export class WorkerPoolMinifier implements IModuleMinifier {
     constructor(options: IWorkerPoolMinifierOptions);
     // (undocumented)
+    connect(): Promise<IMinifierConnection>;
+    // (undocumented)
     get maxThreads(): number;
     set maxThreads(threads: number);
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-    // (undocumented)
-    ref(): () => Promise<void>;
 }
 
 // (No @packageDocumentation comment for this package)

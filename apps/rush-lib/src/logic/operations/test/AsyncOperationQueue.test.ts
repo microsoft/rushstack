@@ -14,7 +14,7 @@ function nullSort(a: Operation, b: Operation): number {
   return 0;
 }
 
-describe('AsyncOperationQueue', () => {
+describe(AsyncOperationQueue.name, () => {
   it('iterates operations in topological order', async () => {
     const operations = [
       new Operation(new MockOperationRunner('a')!, OperationStatus.Ready),

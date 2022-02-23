@@ -1,4 +1,5 @@
-import { DynamicCommandLineParser, DynamicCommandLineAction } from '..';
+import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
+import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { TabCompleteAction } from '../providers/TabCompletionAction';
 import { ICommandLineStringDefinition } from '../parameters/CommandLineDefinition';
 
@@ -31,8 +32,8 @@ function getCommandLineParser(): DynamicCommandLineParser {
 
   const addAction: DynamicCommandLineAction = new DynamicCommandLineAction({
     actionName: 'add',
-    summary: 'Adds a dependency to the package.json and runs rush upgrade.',
-    documentation: 'Adds a dependency to the package.json and runs rush upgrade.'
+    summary: 'Adds a dependency to the package.json and runs rush update.',
+    documentation: 'Adds a dependency to the package.json and runs rush update.'
   });
   commandLineParser.addAction(addAction);
   addAction.defineStringParameter({
@@ -211,7 +212,7 @@ function getCommandLineParser(): DynamicCommandLineParser {
 const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
 const tc: TabCompleteAction = new TabCompleteAction(commandLineParser.actions, commandLineParser.parameters);
 
-describe('Gets TabCompletion(s)', () => {
+describe(TabCompleteAction.name, () => {
   it(`gets completion(s) for rush <tab>`, async () => {
     const commandLine: string = 'rush ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
@@ -370,7 +371,7 @@ describe('Gets TabCompletion(s)', () => {
   });
 });
 
-describe(`Tokenize command line`, () => {
+describe(TabCompleteAction.prototype.tokenizeCommandLine.name, () => {
   it(`tokenizes "rush change -"`, () => {
     const commandLine: string = 'rush change -';
     const actual: string[] = tc.tokenizeCommandLine(commandLine.trim());

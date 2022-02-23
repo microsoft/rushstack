@@ -8,7 +8,7 @@ import { Utilities } from '../../utilities/Utilities';
 describe('CLI', () => {
   it('should not fail when there is no rush.json', () => {
     const workingDir: string = '/';
-    const startPath: string = path.resolve(path.join(__dirname, '../../../lib/start.js'));
+    const startPath: string = path.resolve(__dirname, '../../../lib/start.js');
 
     expect(() => {
       Utilities.executeCommand({
@@ -22,13 +22,13 @@ describe('CLI', () => {
 
   it('rushx should pass args to scripts', () => {
     // Invoke "rushx"
-    const startPath: string = path.resolve(path.join(__dirname, '../../../lib/startx.js'));
+    const startPath: string = path.resolve(__dirname, '../../../lib/startx.js');
 
     // Run "rushx show-args 1 2 -x" in the "repo/rushx-project" folder
     const output: string = Utilities.executeCommandAndCaptureOutput(
       'node',
       [startPath, 'show-args', '1', '2', '-x'],
-      path.join(__dirname, 'repo', 'rushx-project')
+      `${__dirname}/repo/rushx-project`
     );
     const lastLine: string =
       output
@@ -40,12 +40,12 @@ describe('CLI', () => {
 
   it('rushx should fail in un-rush project', () => {
     // Invoke "rushx"
-    const startPath: string = path.resolve(path.join(__dirname, '../../../lib/startx.js'));
+    const startPath: string = path.resolve(__dirname, '../../../lib/startx.js');
 
     const output = Utilities.executeCommandAndCaptureOutput(
       'node',
       [startPath, 'show-args', '1', '2', '-x'],
-      path.join(__dirname, 'repo', 'rushx-not-in-rush-project')
+      `${__dirname}/repo/rushx-not-in-rush-project`
     );
 
     console.log(output);

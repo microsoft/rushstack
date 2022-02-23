@@ -10,7 +10,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 import { RushXCommandLine } from '../RushXCommandLine';
 
-describe('RushXCommandLine', () => {
+describe(RushXCommandLine.name, () => {
   let $argv: string[];
   let $versions: NodeJS.ProcessVersions;
   let executeLifecycleCommandMock: jest.SpyInstance | undefined;
@@ -81,7 +81,7 @@ describe('RushXCommandLine', () => {
     jest.restoreAllMocks();
   });
 
-  describe('launchRushX', () => {
+  describe(RushXCommandLine.launchRushX.name, () => {
     it('prints usage info', () => {
       process.argv = ['node', 'startx.js', '--help'];
       executeLifecycleCommandMock!.mockReturnValue(0);

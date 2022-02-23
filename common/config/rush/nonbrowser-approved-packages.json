@@ -136,7 +136,7 @@
     },
     {
       "name": "@rushstack/heft-webpack5-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/localization-plugin",
@@ -276,7 +276,7 @@
     },
     {
       "name": "autoprefixer",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "babel-loader",
@@ -304,7 +304,11 @@
     },
     {
       "name": "css-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "css-minimizer-webpack-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "decache",
@@ -399,8 +403,16 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "html-webpack-plugin",
+      "name": "heft-web-rig-library-tutorial",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-webpack5-plugin",
+      "allowedCategories": []
+    },
+    {
+      "name": "html-webpack-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "https-proxy-agent",
@@ -475,6 +487,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "mini-css-extract-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "minimatch",
       "allowedCategories": [ "libraries" ]
     },
@@ -504,7 +520,7 @@
     },
     {
       "name": "postcss-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "postcss-modules",
@@ -527,12 +543,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "sass",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "sass-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "semver",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "serialize-javascript",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "source-map",
@@ -540,7 +564,7 @@
     },
     {
       "name": "source-map-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "ssri",
@@ -560,7 +584,7 @@
     },
     {
       "name": "style-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "sudo",
@@ -576,7 +600,11 @@
     },
     {
       "name": "terser",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "terser-webpack-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "timsort",
@@ -603,12 +631,16 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "url-loader",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "webpack",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "webpack-bundle-analyzer",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "webpack-cli",
@@ -617,6 +649,10 @@
     {
       "name": "webpack-dev-server",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "webpack-merge",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "webpack-sources",

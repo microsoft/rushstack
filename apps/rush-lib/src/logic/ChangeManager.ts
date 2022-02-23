@@ -96,10 +96,10 @@ export class ChangeManager {
     }
 
     // Update all the changed version policies
-    this._allChanges.versionPolicyChanges.forEach((newVersion, versionPolicyName) => {
+    this._allChanges.versionPolicyChanges.forEach((versionPolicyChange, versionPolicyName) => {
       this._rushConfiguration.versionPolicyConfiguration.update(
         versionPolicyName,
-        newVersion.format(),
+        versionPolicyChange.newVersion,
         shouldCommit
       );
     });

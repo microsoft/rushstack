@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createHash, Hash } from 'crypto';
+
 import {
   CachedSource,
   ConcatSource,
@@ -10,7 +12,8 @@ import {
   SourceMapSource
 } from 'webpack-sources';
 import * as webpack from 'webpack';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook, TapOptions } from 'tapable';
+import { AsyncSeriesWaterfallHook, SyncHook, SyncWaterfallHook, TapOptions } from 'tapable';
+
 import {
   CHUNK_MODULES_TOKEN,
   MODULE_WRAPPER_PREFIX,
@@ -20,6 +23,7 @@ import {
 } from './Constants';
 import { getIdentifier } from './MinifiedIdentifier';
 import {
+  IMinifierConnection,
   IModuleMinifier,
   IModuleMinifierPluginOptions,
   IModuleMinificationResult,
@@ -28,17 +32,22 @@ import {
   IAssetMap,
   IExtendedModule,
   IModuleMinifierPluginHooks,
+  IPostProcessFragmentContext,
   IDehydratedAssets,
   _IWebpackCompilationData,
   _IAcornComment
 } from './ModuleMinifierPlugin.types';
 import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
+import { AsyncImportCompressionPlugin } from './AsyncImportCompressionPlugin';
 import { PortableMinifierModuleIdsPlugin } from './PortableMinifierIdsPlugin';
-import { createHash } from 'crypto';
 
 // The name of the plugin, for use in taps
 const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
+
+// Monotonically increasing identifier to be incremented any time the code generation logic changes
+// Will be applied to the webpack hash.
+const CODE_GENERATION_REVISION: number = 1;
 
 const TAP_BEFORE: TapOptions<'promise'> = {
   name: PLUGIN_NAME,
@@ -51,6 +60,7 @@ const TAP_AFTER: TapOptions<'sync'> = {
 
 interface IExtendedChunkTemplate {
   hooks: {
+    hashForChunk: SyncHook<Hash, webpack.compilation.Chunk>;
     modules: SyncWaterfallHook<Source, webpack.compilation.Chunk>;
   };
 }
@@ -59,6 +69,15 @@ interface IExtendedParser extends webpack.compilation.normalModuleFactory.Parser
   state: {
     module: IExtendedModule;
   };
+}
+
+interface IExtendedModuleTemplate extends webpack.compilation.ModuleTemplate {
+  render: (module: IExtendedModule, dependencyTemplates: unknown, options: unknown) => Source;
+}
+
+interface IOptionsForHash extends Omit<IModuleMinifierPluginOptions, 'minifier'> {
+  revision: number;
+  minifier: undefined;
 }
 
 /**
@@ -124,8 +143,10 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
   public readonly hooks: IModuleMinifierPluginHooks;
   public minifier: IModuleMinifier;
 
-  private readonly _portableIdsPlugin: PortableMinifierModuleIdsPlugin | undefined;
+  private readonly _enhancers: webpack.Plugin[];
   private readonly _sourceMap: boolean | undefined;
+
+  private readonly _optionsForHash: IOptionsForHash;
 
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
@@ -136,10 +157,22 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
       postProcessCodeFragment: new SyncWaterfallHook(['code', 'context'])
     };
 
-    const { minifier, sourceMap, usePortableModules = false } = options;
+    const { minifier, sourceMap, usePortableModules = false, compressAsyncImports = false } = options;
+
+    this._optionsForHash = {
+      ...options,
+      minifier: undefined,
+      revision: CODE_GENERATION_REVISION
+    };
+
+    this._enhancers = [];
 
     if (usePortableModules) {
-      this._portableIdsPlugin = new PortableMinifierModuleIdsPlugin(this.hooks);
+      this._enhancers.push(new PortableMinifierModuleIdsPlugin(this.hooks));
+    }
+
+    if (compressAsyncImports) {
+      this._enhancers.push(new AsyncImportCompressionPlugin(this.hooks));
     }
 
     this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
@@ -149,7 +182,9 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
   }
 
   public apply(compiler: webpack.Compiler): void {
-    const { _portableIdsPlugin: stableIdsPlugin } = this;
+    for (const enhancer of this._enhancers) {
+      enhancer.apply(compiler);
+    }
 
     const {
       options: { devtool, mode }
@@ -162,9 +197,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
         ? devtool.endsWith('source-map')
         : mode === 'production' && devtool !== false;
 
-    if (stableIdsPlugin) {
-      stableIdsPlugin.apply(compiler);
-    }
+    this._optionsForHash.sourceMap = useSourceMaps;
+    const binaryConfig: Uint8Array = Buffer.from(JSON.stringify(this._optionsForHash), 'utf-8');
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -205,12 +239,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
         let resolveMinifyPromise: () => void;
 
         const getRealId: (id: number | string) => number | string | undefined = (id: number | string) =>
-          this.hooks.finalModuleId.call(id);
+          this.hooks.finalModuleId.call(id, compilation);
 
-        const postProcessCode: (code: ReplaceSource, context: string) => ReplaceSource = (
-          code: ReplaceSource,
-          context: string
-        ) => this.hooks.postProcessCodeFragment.call(code, context);
+        const postProcessCode: (code: ReplaceSource, context: IPostProcessFragmentContext) => ReplaceSource =
+          (code: ReplaceSource, context: IPostProcessFragmentContext) =>
+            this.hooks.postProcessCodeFragment.call(code, context);
 
         /**
          * Callback to invoke when a file has finished minifying.
@@ -223,7 +256,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
         const { minifier } = this;
 
-        const cleanupMinifier: (() => Promise<void>) | undefined = minifier.ref?.();
+        let minifierConnection: IMinifierConnection | undefined;
 
         const requestShortener: webpack.compilation.RequestShortener =
           compilation.runtimeTemplate.requestShortener;
@@ -302,7 +335,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                       unwrapped.replace(0, MODULE_WRAPPER_PREFIX.length - 1, '');
                       unwrapped.replace(len - MODULE_WRAPPER_SUFFIX.length, len - 1, '');
 
-                      const withIds: Source = postProcessCode(unwrapped, mod.identifier());
+                      const withIds: Source = postProcessCode(unwrapped, {
+                        compilation,
+                        module: mod,
+                        loggingName: mod.identifier()
+                      });
                       const cached: CachedSource = new CachedSource(withIds);
 
                       const minifiedSize: number = Buffer.byteLength(cached.source(), 'utf-8');
@@ -323,7 +360,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             } else {
               // Route any other modules straight through
               const cached: CachedSource = new CachedSource(
-                postProcessCode(new ReplaceSource(source), mod.identifier())
+                postProcessCode(new ReplaceSource(source), {
+                  compilation,
+                  module: mod,
+                  loggingName: mod.identifier()
+                })
               );
 
               const minifiedSize: number = Buffer.byteLength(cached.source(), 'utf-8');
@@ -340,8 +381,32 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
           return new RawSource('(function(){})');
         }
 
-        // During code generation, send the generated code to the minifier and replace with a placeholder
-        compilation.moduleTemplates.javascript.hooks.package.tap(TAP_AFTER, minifyModule);
+        const jsTemplate: IExtendedModuleTemplate = compilation.moduleTemplates
+          .javascript as IExtendedModuleTemplate;
+        const innerRender: IExtendedModuleTemplate['render'] = jsTemplate.render.bind(jsTemplate);
+
+        // The optimizeTree hook is the last async hook that occurs before chunk rendering
+        compilation.hooks.optimizeTree.tapPromise(PLUGIN_NAME, async () => {
+          minifierConnection = await minifier.connect();
+
+          submittedModules.clear();
+
+          const cache: WeakSet<IExtendedModule> = new WeakSet();
+          const defaultSource: Source = new RawSource('');
+
+          // During code generation, send the generated code to the minifier and replace with a placeholder
+          // Hacking this to avoid calling .source() on a concatenated module multiple times
+          jsTemplate.render = (module: IExtendedModule, dependencyTemplates, options) => {
+            if (!cache.has(module)) {
+              cache.add(module);
+              const rendered: Source = innerRender(module, dependencyTemplates, options);
+
+              minifyModule(rendered, module);
+            }
+
+            return defaultSource;
+          };
+        });
 
         // This should happen before any other tasks that operate during optimizeChunkAssets
         compilation.hooks.optimizeChunkAssets.tapPromise(
@@ -433,7 +498,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                               )
                             : new RawSource(minified);
 
-                          const withIds: Source = postProcessCode(new ReplaceSource(rawOutput), assetName);
+                          const withIds: Source = postProcessCode(new ReplaceSource(rawOutput), {
+                            compilation,
+                            module: undefined,
+                            loggingName: assetName
+                          });
 
                           minifiedAssets.set(assetName, {
                             source: new CachedSource(withIds),
@@ -454,7 +523,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                   // This isn't a JS asset. Don't try to minify the asset wrapper, though if it contains modules, those might still get replaced with minified versions.
                   minifiedAssets.set(assetName, {
                     // Still need to restore ids
-                    source: postProcessCode(new ReplaceSource(asset), assetName),
+                    source: postProcessCode(new ReplaceSource(asset), {
+                      compilation,
+                      module: undefined,
+                      loggingName: assetName
+                    }),
                     modules: chunkModules,
                     chunk,
                     fileName: assetName,
@@ -473,25 +546,34 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             }
 
             // Handle any error from the minifier.
-            if (cleanupMinifier) {
-              await cleanupMinifier();
-            }
+            await minifierConnection?.disconnect();
 
             // All assets and modules have been minified, hand them off to be rehydrated
-
-            // Clone the maps for safety, even though we won't be using them in the plugin anymore
-            const assets: IAssetMap = new Map(minifiedAssets);
-            const modules: IModuleMap = new Map(minifiedModules);
-
             await this.hooks.rehydrateAssets.promise(
               {
-                assets,
-                modules
+                assets: minifiedAssets,
+                modules: minifiedModules
               },
               compilation
             );
           }
         );
+
+        function updateChunkHash(hash: Hash, chunk: webpack.compilation.Chunk): void {
+          // Apply the options hash
+          hash.update(binaryConfig);
+          // Apply the hash from the minifier
+          if (minifierConnection) {
+            hash.update(minifierConnection.configHash, 'utf8');
+          }
+        }
+
+        // Need to update chunk hashes with information from this plugin
+        (compilation.chunkTemplate as unknown as IExtendedChunkTemplate).hooks.hashForChunk.tap(
+          PLUGIN_NAME,
+          updateChunkHash
+        );
+        compilation.mainTemplate.hooks.hashForChunk.tap(PLUGIN_NAME, updateChunkHash);
 
         // This function is written twice because the parameter order is not the same between the two hooks
         (compilation.chunkTemplate as unknown as IExtendedChunkTemplate).hooks.modules.tap(

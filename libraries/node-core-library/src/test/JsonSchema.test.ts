@@ -4,7 +4,7 @@
 import { JsonFile, JsonObject } from '../JsonFile';
 import { JsonSchema, IJsonSchemaErrorInfo } from '../JsonSchema';
 
-describe('JsonSchema', () => {
+describe(JsonSchema.name, () => {
   const schemaPath: string = `${__dirname}/test-data/test-schema.json`;
   const schema: JsonSchema = JsonSchema.fromFile(schemaPath);
 

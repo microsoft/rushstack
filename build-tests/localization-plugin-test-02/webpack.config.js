@@ -46,7 +46,8 @@ function generateConfiguration(mode, outputFolderName) {
             verbose: true
           }),
           sourceMap: true,
-          usePortableModules: true
+          usePortableModules: true,
+          compressAsyncImports: true
         })
       ]
     },

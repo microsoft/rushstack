@@ -111,6 +111,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     (str: string) => string
   >();
   private _resxNewlineNormalization: NewlineKind | undefined;
+  private _ignoreMissingResxComments: boolean | undefined;
 
   /**
    * The outermost map's keys are the locale names.
@@ -181,7 +182,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration: compiler.options,
       globsToIgnore: this._globsToIgnore,
       localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER,
-      resxNewlineNormalization: this._resxNewlineNormalization
+      resxNewlineNormalization: this._resxNewlineNormalization,
+      ignoreMissingResxComments: this._ignoreMissingResxComments
     };
 
     if (errors.length > 0 || warnings.length > 0) {
@@ -484,7 +486,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
           filePath: localizedData,
           content: FileSystem.readFile(localizedData),
           terminal: terminal,
-          resxNewlineNormalization: this._resxNewlineNormalization
+          resxNewlineNormalization: this._resxNewlineNormalization,
+          ignoreMissingResxComments: this._ignoreMissingResxComments
         });
 
         return this._convertLocalizationFileToLocData(localizationFile);
@@ -626,6 +629,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     // START options.localizedData
     if (this._options.localizedData) {
+      this._ignoreMissingResxComments = this._options.localizedData.ignoreMissingResxComments;
+
       // START options.localizedData.passthroughLocale
       if (this._options.localizedData.passthroughLocale) {
         const { usePassthroughLocale, passthroughLocaleName = 'passthrough' } =

@@ -2,6 +2,42 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/module-minifier-plugin_v0.8.0",
+      "date": "Thu, 17 Feb 2022 00:32:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include plugin state in webpack hash calculations, such that updating the plugin options changes the compilation and chunk hashes."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.1",
+      "tag": "@rushstack/module-minifier-plugin_v0.7.1",
+      "date": "Fri, 11 Feb 2022 10:30:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.0",
+      "tag": "@rushstack/module-minifier-plugin_v0.7.0",
+      "date": "Fri, 11 Feb 2022 01:12:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for `compressAsyncImports` flag. Modify `usePortableModules` option to use `module.identifier()` instead of `module.resource` so that loader configuration is accounted for during deduplication. Switch to overriding the render function on the JavaScript module template to deduplicate rendering across chunks."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.14",
       "tag": "@rushstack/module-minifier-plugin_v0.6.14",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",

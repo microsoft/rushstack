@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-sass-plugin",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Heft plugin for SASS",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/typings-generator": "workspace:*",
     "node-sass": "6.0.1",
-    "postcss": "7.0.32",
+    "postcss": "~8.4.6",
     "postcss-modules": "~1.5.0"
   },
   "devDependencies": {

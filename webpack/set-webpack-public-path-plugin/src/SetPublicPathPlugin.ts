@@ -3,8 +3,10 @@
 
 import { EOL } from 'os';
 import type * as Webpack from 'webpack';
-import type * as Webpack5 from 'webpack5';
 import type * as Tapable from 'tapable';
+
+// Workaround for https://github.com/pnpm/pnpm/issues/4301
+import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
 
 import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 

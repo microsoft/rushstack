@@ -2,6 +2,29 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.3.7",
+      "tag": "@rushstack/heft-sass-plugin_v0.3.7",
+      "date": "Fri, 11 Feb 2022 10:30:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade postcss"
+          },
+          {
+            "comment": "Update JSON schema documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.6",
       "tag": "@rushstack/heft-sass-plugin_v0.3.6",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",

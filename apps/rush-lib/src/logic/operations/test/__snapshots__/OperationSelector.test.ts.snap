@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OperationSelector #createOperations handles a full build 1`] = `
+exports[`OperationSelector createOperations handles a full build 1`] = `
 Array [
   Object {
     "dependencies": Array [],
@@ -46,6 +46,11 @@ Array [
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "i (no-deps)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "j (no-deps)",
   },
   Object {
     "dependencies": Array [
@@ -119,6 +124,13 @@ Array [
     "name": "i (upstream-self)",
   },
   Object {
+    "dependencies": Array [
+      "j (no-deps)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "j (upstream-self)",
+  },
+  Object {
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "a (upstream-1)",
@@ -177,6 +189,11 @@ Array [
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "i (upstream-1)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "j (upstream-1)",
   },
   Object {
     "dependencies": Array [],
@@ -241,6 +258,11 @@ Array [
   Object {
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
+    "name": "j (upstream-2)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
     "name": "a (upstream-3)",
   },
   Object {
@@ -297,6 +319,11 @@ Array [
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "i (upstream-3)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "j (upstream-3)",
   },
   Object {
     "dependencies": Array [
@@ -363,6 +390,13 @@ Array [
   },
   Object {
     "dependencies": Array [
+      "j (upstream-1)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "j (upstream-1-self)",
+  },
+  Object {
+    "dependencies": Array [
       "a (upstream-2)",
     ],
     "isCacheWriteAllowed": true,
@@ -425,6 +459,13 @@ Array [
     "name": "i (upstream-2-self)",
   },
   Object {
+    "dependencies": Array [
+      "j (upstream-2)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "j (upstream-2-self)",
+  },
+  Object {
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "a (upstream-1-self-upstream)",
@@ -483,6 +524,11 @@ Array [
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "i (upstream-1-self-upstream)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "j (upstream-1-self-upstream)",
   },
   Object {
     "dependencies": Array [
@@ -563,10 +609,17 @@ Array [
     "isCacheWriteAllowed": true,
     "name": "i (complex)",
   },
+  Object {
+    "dependencies": Array [
+      "j (upstream-3)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "j (complex)",
+  },
 ]
 `;
 
-exports[`OperationSelector #createOperations handles filtered phases 1`] = `
+exports[`OperationSelector createOperations handles filtered phases 1`] = `
 Array [
   Object {
     "dependencies": Array [],
@@ -628,10 +681,15 @@ Array [
     "isCacheWriteAllowed": false,
     "name": "i (upstream-self)",
   },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": false,
+    "name": "j (upstream-self)",
+  },
 ]
 `;
 
-exports[`OperationSelector #createOperations handles filtered phases 2`] = `
+exports[`OperationSelector createOperations handles filtered phases 2`] = `
 Array [
   Object {
     "dependencies": Array [
@@ -701,6 +759,13 @@ Array [
     "name": "i (complex)",
   },
   Object {
+    "dependencies": Array [
+      "j (upstream-3)",
+    ],
+    "isCacheWriteAllowed": true,
+    "name": "j (complex)",
+  },
+  Object {
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "a (upstream-3)",
@@ -752,6 +817,11 @@ Array [
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
     "name": "i (upstream-3)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "j (upstream-3)",
   },
   Object {
     "dependencies": Array [],
@@ -816,6 +886,11 @@ Array [
   Object {
     "dependencies": Array [],
     "isCacheWriteAllowed": true,
+    "name": "j (upstream-1)",
+  },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
     "name": "a (no-deps)",
   },
   Object {
@@ -858,10 +933,15 @@ Array [
     "isCacheWriteAllowed": true,
     "name": "i (no-deps)",
   },
+  Object {
+    "dependencies": Array [],
+    "isCacheWriteAllowed": true,
+    "name": "j (no-deps)",
+  },
 ]
 `;
 
-exports[`OperationSelector #createOperations handles filtered phases on filtered projects 1`] = `
+exports[`OperationSelector createOperations handles filtered phases on filtered projects 1`] = `
 Array [
   Object {
     "dependencies": Array [],
@@ -881,7 +961,7 @@ Array [
 ]
 `;
 
-exports[`OperationSelector #createOperations handles filtered phases on filtered projects 2`] = `
+exports[`OperationSelector createOperations handles filtered phases on filtered projects 2`] = `
 Array [
   Object {
     "dependencies": Array [
@@ -960,7 +1040,7 @@ Array [
 ]
 `;
 
-exports[`OperationSelector #createOperations handles filtered projects 1`] = `
+exports[`OperationSelector createOperations handles filtered projects 1`] = `
 Array [
   Object {
     "dependencies": Array [],
@@ -1018,7 +1098,7 @@ Array [
 ]
 `;
 
-exports[`OperationSelector #createOperations handles filtered projects 2`] = `
+exports[`OperationSelector createOperations handles filtered projects 2`] = `
 Array [
   Object {
     "dependencies": Array [],

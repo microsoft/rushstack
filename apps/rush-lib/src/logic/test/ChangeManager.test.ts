@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { ChangeManager } from '../ChangeManager';
 import { PrereleaseToken } from '../PrereleaseToken';
 
-describe('ChangeManager', () => {
-  const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');
+describe(ChangeManager.name, () => {
+  const rushJsonFile: string = `${__dirname}/packages/rush.json`;
   let rushConfiguration: RushConfiguration;
   let changeManager: ChangeManager;
 
@@ -19,7 +18,7 @@ describe('ChangeManager', () => {
 
   /* eslint-disable dot-notation */
   it('can apply changes to the package.json files in the dictionary', () => {
-    changeManager.load(path.join(__dirname, 'multipleChanges'));
+    changeManager.load(`${__dirname}/multipleChanges`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('2.0.0');
@@ -34,7 +33,7 @@ describe('ChangeManager', () => {
   });
 
   it('can update explicit version dependency', () => {
-    changeManager.load(path.join(__dirname, 'explicitVersionChange'));
+    changeManager.load(`${__dirname}/explicitVersionChange`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1');
@@ -43,7 +42,7 @@ describe('ChangeManager', () => {
   });
 
   it('can update a project using lockStepVersion policy with no nextBump from changefiles', () => {
-    changeManager.load(path.join(__dirname, 'lockstepWithoutNextBump'));
+    changeManager.load(`${__dirname}/lockstepWithoutNextBump`);
     changeManager.apply(false);
 
     const policy: LockStepVersionPolicy = rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
@@ -56,7 +55,7 @@ describe('ChangeManager', () => {
   });
 
   it('can update explicit cyclic dependency', () => {
-    changeManager.load(path.join(__dirname, 'cyclicDepsExplicit'));
+    changeManager.load(`${__dirname}/cyclicDepsExplicit`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.version).toEqual('2.0.0');
@@ -77,7 +76,7 @@ describe('ChangeManager', () => {
     const prereleaseName: string = 'alpha.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(path.join(__dirname, 'rootPatchChange'), prereleaseToken);
+    changeManager.load(`${__dirname}/rootPatchChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
@@ -96,7 +95,7 @@ describe('ChangeManager', () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(path.join(__dirname, 'explicitVersionChange'), prereleaseToken);
+    changeManager.load(`${__dirname}/explicitVersionChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -113,7 +112,7 @@ describe('ChangeManager', () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(path.join(__dirname, 'cyclicDeps'), prereleaseToken);
+    changeManager.load(`${__dirname}/cyclicDeps`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
@@ -134,7 +133,7 @@ describe('ChangeManager', () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(path.join(__dirname, 'rootPatchChange'), prereleaseToken);
+    changeManager.load(`${__dirname}/rootPatchChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -149,7 +148,7 @@ describe('ChangeManager', () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(path.join(__dirname, 'explicitVersionChange'), prereleaseToken);
+    changeManager.load(`${__dirname}/explicitVersionChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -164,7 +163,7 @@ describe('ChangeManager', () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(path.join(__dirname, 'cyclicDeps'), prereleaseToken);
+    changeManager.load(`${__dirname}/cyclicDeps`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -179,8 +178,8 @@ describe('ChangeManager', () => {
   /* eslint-enable dot-notation */
 });
 
-describe('WorkspaceChangeManager', () => {
-  const rushJsonFile: string = path.resolve(__dirname, 'workspacePackages', 'rush.json');
+describe(`${ChangeManager.name} (workspace)`, () => {
+  const rushJsonFile: string = `${__dirname}/workspacePackages/rush.json`;
   let rushConfiguration: RushConfiguration;
   let changeManager: ChangeManager;
 
@@ -191,7 +190,7 @@ describe('WorkspaceChangeManager', () => {
 
   /* eslint-disable dot-notation */
   it('can apply changes to the package.json files in the dictionary', () => {
-    changeManager.load(path.join(__dirname, 'multipleChanges'));
+    changeManager.load(`${__dirname}/multipleChanges`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('2.0.0');
@@ -214,7 +213,7 @@ describe('WorkspaceChangeManager', () => {
   });
 
   it('can update explicit version dependency', () => {
-    changeManager.load(path.join(__dirname, 'explicitVersionChange'));
+    changeManager.load(`${__dirname}/explicitVersionChange`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1');
@@ -223,7 +222,7 @@ describe('WorkspaceChangeManager', () => {
   });
 
   it('can update explicit cyclic dependency', () => {
-    changeManager.load(path.join(__dirname, 'cyclicDepsExplicit'));
+    changeManager.load(`${__dirname}/cyclicDepsExplicit`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.version).toEqual('2.0.0');
@@ -244,7 +243,7 @@ describe('WorkspaceChangeManager', () => {
     const prereleaseName: string = 'alpha.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(path.join(__dirname, 'rootPatchChange'), prereleaseToken);
+    changeManager.load(`${__dirname}/rootPatchChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
@@ -263,7 +262,7 @@ describe('WorkspaceChangeManager', () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(path.join(__dirname, 'explicitVersionChange'), prereleaseToken);
+    changeManager.load(`${__dirname}/explicitVersionChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -282,7 +281,7 @@ describe('WorkspaceChangeManager', () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(path.join(__dirname, 'cyclicDeps'), prereleaseToken);
+    changeManager.load(`${__dirname}/cyclicDeps`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
@@ -303,7 +302,7 @@ describe('WorkspaceChangeManager', () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(path.join(__dirname, 'rootPatchChange'), prereleaseToken);
+    changeManager.load(`${__dirname}/rootPatchChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -322,7 +321,7 @@ describe('WorkspaceChangeManager', () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(path.join(__dirname, 'explicitVersionChange'), prereleaseToken);
+    changeManager.load(`${__dirname}/explicitVersionChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -341,7 +340,7 @@ describe('WorkspaceChangeManager', () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(path.join(__dirname, 'cyclicDeps'), prereleaseToken);
+    changeManager.load(`${__dirname}/cyclicDeps`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual('1.0.0-' + suffix);

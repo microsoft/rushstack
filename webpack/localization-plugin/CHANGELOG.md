@@ -1,6 +1,18 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+This log was last generated on Wed, 16 Feb 2022 07:15:28 GMT and should not be manually modified.
+
+## 0.10.0
+Wed, 16 Feb 2022 07:15:28 GMT
+
+### Minor changes
+
+- Add an option to ignore missing RESX comments.
+
+## 0.9.15
+Fri, 11 Feb 2022 10:30:25 GMT
+
+_Version update only_
 
 ## 0.9.14
 Tue, 25 Jan 2022 01:11:07 GMT

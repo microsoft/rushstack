@@ -9,7 +9,7 @@ function wrapResult(result: string): string {
   exports;`;
 }
 
-describe('RawScriptLoader', () => {
+describe(RawScriptLoader.name, () => {
   it('follows the Webpack loader interface', () => {
     expect(RawScriptLoader).toBeDefined();
     expect(typeof RawScriptLoader).toEqual('function');

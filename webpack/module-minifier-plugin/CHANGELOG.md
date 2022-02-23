@@ -1,6 +1,25 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Feb 2022 00:32:30 GMT and should not be manually modified.
+
+## 0.8.0
+Thu, 17 Feb 2022 00:32:30 GMT
+
+### Minor changes
+
+- Include plugin state in webpack hash calculations, such that updating the plugin options changes the compilation and chunk hashes.
+
+## 0.7.1
+Fri, 11 Feb 2022 10:30:25 GMT
+
+_Version update only_
+
+## 0.7.0
+Fri, 11 Feb 2022 01:12:20 GMT
+
+### Minor changes
+
+- Add support for `compressAsyncImports` flag. Modify `usePortableModules` option to use `module.identifier()` instead of `module.resource` so that loader configuration is accounted for during deduplication. Switch to overriding the render function on the JavaScript module template to deduplicate rendering across chunks.
 
 ## 0.6.14
 Tue, 25 Jan 2022 01:11:07 GMT

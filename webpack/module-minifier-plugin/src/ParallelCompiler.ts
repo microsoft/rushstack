@@ -1,11 +1,17 @@
-import { MinifyOptions } from 'terser';
 import { cpus } from 'os';
 import { resolve } from 'path';
-import { Configuration } from 'webpack';
+import { Worker } from 'worker_threads';
+
+import type { MinifyOptions } from 'terser';
+import type { Configuration } from 'webpack';
+
 import { WorkerPoolMinifier } from './WorkerPoolMinifier';
 import { WorkerPool } from './workerPool/WorkerPool';
-import { Worker } from 'worker_threads';
-import { IModuleMinificationRequest, IModuleMinificationResult } from './ModuleMinifierPlugin.types';
+import type {
+  IMinifierConnection,
+  IModuleMinificationRequest,
+  IModuleMinificationResult
+} from './ModuleMinifierPlugin.types';
 
 export interface IParallelWebpackOptions {
   cacheDirectory?: string;
@@ -73,7 +79,7 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
     maxThreads: maxCompressionThreads
   });
 
-  const minifierCleanup: () => Promise<void> = minifier.ref();
+  const minifierConnection: IMinifierConnection = await minifier.connect();
 
   const webpackPool: WorkerPool = new WorkerPool({
     id: 'Webpack',
@@ -103,8 +109,13 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
     };
 
     const workerOnMessage: (message: IModuleMinificationRequest | number) => void = (
-      message: IModuleMinificationRequest | number
+      message: IModuleMinificationRequest | string | number
     ): void => {
+      if (message === 'getConfigHash') {
+        webpackWorker.postMessage(minifierConnection.configHash);
+        return;
+      }
+
       if (typeof message === 'object') {
         return minifier.minify(message, sendMinifierResult);
       }
@@ -124,5 +135,5 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
 
   await webpackPool.finishAsync();
 
-  await minifierCleanup();
+  await minifierConnection.disconnect();
 }

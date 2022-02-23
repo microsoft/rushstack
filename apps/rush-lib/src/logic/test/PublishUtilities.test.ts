@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import { IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -46,24 +44,41 @@ function generateChangeSnapshot(
 
 function generateVersionPolicySnapshot(allChanges: IChangeRequests): string {
   const lines: string[] = [];
-  for (const [versionPolicyName, newVersion] of allChanges.versionPolicyChanges) {
-    lines.push(`${versionPolicyName} - ${newVersion}`);
+  for (const versionPolicy of allChanges.versionPolicyChanges.values()) {
+    const versionPolicyName: string = versionPolicy.versionPolicyName;
+    const changeType: ChangeType | undefined = versionPolicy.changeType;
+    const changeTypeText: string = ChangeType[changeType as number];
+    const newVersion: string = versionPolicy.newVersion;
+    lines.push(`${versionPolicyName} - ${newVersion} (${changeTypeText} change)`);
   }
 
   return lines.join('\n');
 }
 
-describe('findChangeRequests', () => {
+describe(PublishUtilities.findChangeRequests.name, () => {
   let packagesRushConfiguration: RushConfiguration;
   let repoRushConfiguration: RushConfiguration;
 
   beforeEach(() => {
+    // The "packages" repo has the following structure (except for the cyclics)
+    //     a --------
+    //   / | \      |
+    //  /  |  \     |
+    // b   h   e    g
+    // |\  |
+    // | \ |
+    // c   f   i
+    // |       |
+    // |       |
+    // d       j
+    //
+    // "h" and "i" are lockstepped
+
     packagesRushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json')
+      `${__dirname}/packages/rush.json`
     );
-    repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'repo', 'rush.json')
-    );
+
+    repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(`${__dirname}/repo/rush.json`);
   });
 
   it('returns no changes in an empty change folder', () => {
@@ -71,7 +86,7 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'noChange'))
+      new ChangeFiles(`${__dirname}/noChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(0);
@@ -83,7 +98,7 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'leafChange'))
+      new ChangeFiles(`${__dirname}/leafChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(1);
@@ -93,21 +108,22 @@ describe('findChangeRequests', () => {
     expect(allChanges.packageChanges.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
-  it('returns 5 changes when patching a root package', () => {
+  it('returns 6 changes when patching a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
+      new ChangeFiles(`${__dirname}/rootPatchChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (5) ==
+      "== Changed Projects (6) ==
       a - 1.0.0 -> 1.0.1 (patch change)
       b - 1.0.0 -> (same) (dependency change)
       e - 1.0.0 -> (same) (dependency change)
       g - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> (same) (dependency change)
+      i - 1.0.0 -> (same) (dependency change)
 
       == Unchanged Projects (8) ==
       c - 1.0.0
@@ -117,10 +133,12 @@ describe('findChangeRequests', () => {
       cyclic-dep-explicit-2 - 1.0.0
       d - 1.0.0
       f - 1.0.0
-      i - 1.0.0"
+      j - 1.0.0"
     `);
 
-    expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
+    expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
+      `"lockStepWithoutNextBump - 1.0.0 (dependency change)"`
+    );
   });
 
   it('returns 8 changes when hotfixing a root package', () => {
@@ -128,7 +146,7 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+      new ChangeFiles(`${__dirname}/rootHotfixChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -142,27 +160,28 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
       h - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
 
-      == Unchanged Projects (5) ==
+      == Unchanged Projects (6) ==
       cyclic-dep-1 - 1.0.0
       cyclic-dep-2 - 1.0.0
       cyclic-dep-explicit-1 - 1.0.0
       cyclic-dep-explicit-2 - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('returns 8 changes when major bumping a root package', () => {
+  it('returns 9 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
+      new ChangeFiles(`${__dirname}/rootMajorChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -171,6 +190,7 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -181,7 +201,7 @@ describe('findChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -190,14 +210,15 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'lockstepWithoutNextBump'))
+      new ChangeFiles(`${__dirname}/lockstepWithoutNextBump`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (3) ==
+      "== Changed Projects (4) ==
       f - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> 1.1.0 (minor change)
       i - 1.0.0 -> 1.1.0 (minor change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (10) ==
       a - 1.0.0
@@ -213,7 +234,7 @@ describe('findChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.1.0"`
+      `"lockStepWithoutNextBump - 1.1.0 (minor change)"`
     );
   });
 
@@ -222,7 +243,7 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
+      new ChangeFiles(`${__dirname}/cyclicDeps`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -230,7 +251,7 @@ describe('findChangeRequests', () => {
       cyclic-dep-1 - 1.0.0 -> 2.0.0 (major change)
       cyclic-dep-2 - 1.0.0 -> 1.0.1 (patch change)
 
-      == Unchanged Projects (11) ==
+      == Unchanged Projects (12) ==
       a - 1.0.0
       b - 1.0.0
       c - 1.0.0
@@ -241,7 +262,8 @@ describe('findChangeRequests', () => {
       f - 1.0.0
       g - 1.0.0
       h - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -254,7 +276,7 @@ describe('findChangeRequests', () => {
         PublishUtilities,
         allPackages,
         packagesRushConfiguration,
-        new ChangeFiles(path.join(__dirname, 'hotfixWithPatchChanges'))
+        new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
       )
     ).toThrow('Cannot apply hotfix alongside patch change on same package');
   });
@@ -269,7 +291,7 @@ describe('findChangeRequests', () => {
         PublishUtilities,
         allPackages,
         packagesRushConfiguration,
-        new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+        new ChangeFiles(`${__dirname}/rootHotfixChange`)
       )
     ).toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
@@ -279,11 +301,11 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleChanges'))
+      new ChangeFiles(`${__dirname}/multipleChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -292,6 +314,7 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -302,7 +325,7 @@ describe('findChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -311,11 +334,11 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'orderedChanges'))
+      new ChangeFiles(`${__dirname}/orderedChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -324,6 +347,7 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> (same) (dependency change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -334,7 +358,7 @@ describe('findChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -343,7 +367,7 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
+      new ChangeFiles(`${__dirname}/multipleHotfixChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -357,12 +381,13 @@ describe('findChangeRequests', () => {
       g - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
       h - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
 
-      == Unchanged Projects (5) ==
+      == Unchanged Projects (6) ==
       cyclic-dep-1 - 1.0.0
       cyclic-dep-2 - 1.0.0
       cyclic-dep-explicit-1 - 1.0.0
       cyclic-dep-explicit-2 - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -373,7 +398,7 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
+      new ChangeFiles(`${__dirname}/explicitVersionChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -381,7 +406,7 @@ describe('findChangeRequests', () => {
       c - 1.0.0 -> 1.0.1 (patch change)
       d - 1.0.0 -> 1.0.1 (patch change)
 
-      == Unchanged Projects (11) ==
+      == Unchanged Projects (12) ==
       a - 1.0.0
       b - 1.0.0
       cyclic-dep-1 - 1.0.0
@@ -392,7 +417,8 @@ describe('findChangeRequests', () => {
       f - 1.0.0
       g - 1.0.0
       h - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -403,7 +429,7 @@ describe('findChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       repoRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
+      new ChangeFiles(`${__dirname}/repo/changes`),
       false,
       undefined,
       new Set<string>(['a', 'b', 'e'])
@@ -420,23 +446,22 @@ describe('findChangeRequests', () => {
       h - 1.2.3 -> 1.2.4 (patch change)
       i - 1.2.3 -> 1.2.4 (patch change)
 
-      == Unchanged Projects (1) ==
-      g - 0.0.1"
+      == Unchanged Projects (2) ==
+      g - 0.0.1
+      j - 1.2.3"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.2.4"`
+      `"lockStepWithoutNextBump - 1.2.4 (patch change)"`
     );
   });
 });
 
-describe('sortChangeRequests', () => {
+describe(PublishUtilities.sortChangeRequests.name, () => {
   let rushConfiguration: RushConfiguration;
 
   beforeEach(() => {
-    rushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'packages', 'rush.json')
-    );
+    rushConfiguration = RushConfiguration.loadFromConfigurationFile(`${__dirname}/packages/rush.json`);
   });
 
   it('can return a sorted array of the change requests to be published in the correct order', () => {
@@ -444,23 +469,24 @@ describe('sortChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       rushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleChanges'))
+      new ChangeFiles(`${__dirname}/multipleChanges`)
     );
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges.packageChanges);
 
-    expect(orderedChanges).toHaveLength(8);
+    expect(orderedChanges).toHaveLength(9);
     expect(orderedChanges[0].packageName).toEqual('a');
     expect(orderedChanges[1].packageName).toEqual('i');
     expect(orderedChanges[2].packageName).toEqual('b');
     expect(orderedChanges[3].packageName).toEqual('e');
     expect(orderedChanges[4].packageName).toEqual('g');
     expect(orderedChanges[5].packageName).toEqual('h');
-    expect(orderedChanges[6].packageName).toEqual('c');
-    expect(orderedChanges[7].packageName).toEqual('f');
+    expect(orderedChanges[6].packageName).toEqual('j');
+    expect(orderedChanges[7].packageName).toEqual('c');
+    expect(orderedChanges[8].packageName).toEqual('f');
   });
 });
 
-describe('isRangeDependency', () => {
+describe(PublishUtilities.isRangeDependency.name, () => {
   it('can test ranges', () => {
     expect(PublishUtilities.isRangeDependency('>=1.0.0 <2.0.0')).toEqual(true);
     expect(PublishUtilities.isRangeDependency('>=1.0.0-pr.1 <2.0.0')).toEqual(true);
@@ -470,7 +496,7 @@ describe('isRangeDependency', () => {
   });
 });
 
-describe('getNewDependencyVersion', () => {
+describe(PublishUtilities.getNewDependencyVersion.name, () => {
   it('can update dependency versions', () => {
     const dependencies: { [key: string]: string } = {
       a: '~1.0.0',
@@ -513,16 +539,16 @@ describe('getNewDependencyVersion', () => {
   });
 });
 
-describe('findWorkspaceChangeRequests', () => {
+describe(PublishUtilities.findChangeRequests.name, () => {
   let packagesRushConfiguration: RushConfiguration;
   let repoRushConfiguration: RushConfiguration;
 
   beforeEach(() => {
     packagesRushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'workspacePackages', 'rush.json')
+      `${__dirname}/workspacePackages/rush.json`
     );
     repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(
-      path.resolve(__dirname, 'workspaceRepo', 'rush.json')
+      `${__dirname}/workspaceRepo/rush.json`
     );
   });
 
@@ -531,7 +557,7 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'noChange'))
+      new ChangeFiles(`${__dirname}/noChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(0);
@@ -543,7 +569,7 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'leafChange'))
+      new ChangeFiles(`${__dirname}/leafChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(1);
@@ -553,21 +579,22 @@ describe('findWorkspaceChangeRequests', () => {
     expect(allChanges.packageChanges.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
-  it('returns 5 changes when patching a root package', () => {
+  it('returns 6 changes when patching a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
+      new ChangeFiles(`${__dirname}/rootPatchChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (5) ==
+      "== Changed Projects (6) ==
       a - 1.0.0 -> 1.0.1 (patch change)
       b - 1.0.0 -> (same) (dependency change)
       e - 1.0.0 -> (same) (dependency change)
       g - 1.0.0 -> 1.0.1 (patch change)
       h - 1.0.0 -> (same) (dependency change)
+      i - 1.0.0 -> (same) (dependency change)
 
       == Unchanged Projects (8) ==
       c - 1.0.0
@@ -577,10 +604,12 @@ describe('findWorkspaceChangeRequests', () => {
       cyclic-dep-explicit-2 - 1.0.0
       d - 1.0.0
       f - 1.0.0
-      i - 1.0.0"
+      j - 1.0.0"
     `);
 
-    expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
+    expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
+      `"lockStepWithoutNextBump - 1.0.0 (dependency change)"`
+    );
   });
 
   it('returns 8 changes when hotfixing a root package', () => {
@@ -588,7 +617,7 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+      new ChangeFiles(`${__dirname}/rootHotfixChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -602,27 +631,28 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
       h - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
 
-      == Unchanged Projects (5) ==
+      == Unchanged Projects (6) ==
       cyclic-dep-1 - 1.0.0
       cyclic-dep-2 - 1.0.0
       cyclic-dep-explicit-1 - 1.0.0
       cyclic-dep-explicit-2 - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('returns 8 changes when major bumping a root package', () => {
+  it('returns 9 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
+      new ChangeFiles(`${__dirname}/rootMajorChange`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -631,6 +661,7 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.1 (patch change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -641,7 +672,7 @@ describe('findWorkspaceChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -650,7 +681,7 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
+      new ChangeFiles(`${__dirname}/cyclicDeps`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -658,7 +689,7 @@ describe('findWorkspaceChangeRequests', () => {
       cyclic-dep-1 - 1.0.0 -> 2.0.0 (major change)
       cyclic-dep-2 - 1.0.0 -> 1.0.1 (patch change)
 
-      == Unchanged Projects (11) ==
+      == Unchanged Projects (12) ==
       a - 1.0.0
       b - 1.0.0
       c - 1.0.0
@@ -669,7 +700,8 @@ describe('findWorkspaceChangeRequests', () => {
       f - 1.0.0
       g - 1.0.0
       h - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -682,7 +714,7 @@ describe('findWorkspaceChangeRequests', () => {
         PublishUtilities,
         allPackages,
         packagesRushConfiguration,
-        new ChangeFiles(path.join(__dirname, 'hotfixWithPatchChanges'))
+        new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
       )
     ).toThrow('Cannot apply hotfix alongside patch change on same package');
   });
@@ -697,7 +729,7 @@ describe('findWorkspaceChangeRequests', () => {
         PublishUtilities,
         allPackages,
         packagesRushConfiguration,
-        new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+        new ChangeFiles(`${__dirname}/rootHotfixChange`)
       )
     ).toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
@@ -707,11 +739,11 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleChanges'))
+      new ChangeFiles(`${__dirname}/multipleChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -720,6 +752,7 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.1 (patch change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -730,7 +763,7 @@ describe('findWorkspaceChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -739,11 +772,11 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'orderedChanges'))
+      new ChangeFiles(`${__dirname}/orderedChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
-      "== Changed Projects (8) ==
+      "== Changed Projects (9) ==
       a - 1.0.0 -> 2.0.0 (major change)
       b - 1.0.0 -> 1.0.1 (patch change)
       c - 1.0.0 -> (same) (dependency change)
@@ -752,6 +785,7 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.1 (patch change)
       h - 1.0.0 -> 1.0.1 (patch change)
       i - 1.0.0 -> 1.0.1 (patch change)
+      j - 1.0.0 -> 1.0.1 (patch change)
 
       == Unchanged Projects (5) ==
       cyclic-dep-1 - 1.0.0
@@ -762,7 +796,7 @@ describe('findWorkspaceChangeRequests', () => {
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.0.1"`
+      `"lockStepWithoutNextBump - 1.0.1 (patch change)"`
     );
   });
 
@@ -771,7 +805,7 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
+      new ChangeFiles(`${__dirname}/multipleHotfixChanges`)
     );
 
     expect(generateChangeSnapshot(allPackages, allChanges)).toMatchInlineSnapshot(`
@@ -785,12 +819,13 @@ describe('findWorkspaceChangeRequests', () => {
       g - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
       h - 1.0.0 -> 1.0.0-hotfix.0 (hotfix change)
 
-      == Unchanged Projects (5) ==
+      == Unchanged Projects (6) ==
       cyclic-dep-1 - 1.0.0
       cyclic-dep-2 - 1.0.0
       cyclic-dep-explicit-1 - 1.0.0
       cyclic-dep-explicit-2 - 1.0.0
-      i - 1.0.0"
+      i - 1.0.0
+      j - 1.0.0"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
@@ -801,7 +836,7 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
+      new ChangeFiles(`${__dirname}/explicitVersionChange`)
     );
 
     expect(allChanges.packageChanges.size).toEqual(2);
@@ -819,7 +854,7 @@ describe('findWorkspaceChangeRequests', () => {
     const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       repoRushConfiguration,
-      new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
+      new ChangeFiles(`${__dirname}/repo/changes`),
       false,
       undefined,
       new Set<string>(['a', 'b', 'e'])
@@ -836,17 +871,18 @@ describe('findWorkspaceChangeRequests', () => {
       h - 1.2.3 -> 1.2.4 (patch change)
       i - 1.2.3 -> 1.2.4 (patch change)
 
-      == Unchanged Projects (1) ==
-      g - 0.0.1"
+      == Unchanged Projects (2) ==
+      g - 0.0.1
+      j - 1.2.3"
     `);
 
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(
-      `"lockStepWithoutNextBump - 1.2.4"`
+      `"lockStepWithoutNextBump - 1.2.4 (patch change)"`
     );
   });
 });
 
-describe('getNewWorkspaceDependencyVersion', () => {
+describe(PublishUtilities.getNewDependencyVersion.name, () => {
   it('can update dependency versions', () => {
     const dependencies: { [key: string]: string } = {
       a: 'workspace:~1.0.0',

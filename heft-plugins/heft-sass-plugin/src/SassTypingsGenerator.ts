@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { render, Result, SassError } from 'node-sass';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
 import { FileSystem } from '@rushstack/node-core-library';
 import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
@@ -30,7 +30,7 @@ export interface ISassConfiguration {
   cssOutputFolders?: string[] | undefined;
 
   /**
-   * Determines if export values are wrapped in a default property, or not.
+   * Determines whether export values are wrapped in a default property, or not.
    * Defaults to true.
    */
   exportAsDefault?: boolean;
@@ -65,13 +65,6 @@ export interface ISassTypingsGeneratorOptions {
 interface IClassMap {
   [className: string]: string;
 }
-
-interface ICssModulesOptions {
-  getJSON(cssFileName: string, json: IClassMap): void;
-  generateScopeName(name: string): string;
-}
-
-type TCssModules = (options: ICssModulesOptions) => TCssModules;
 
 /**
  * Generates type files (.d.ts) for Sass/SCSS/CSS files.
@@ -128,7 +121,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
         );
 
         let classMap: IClassMap = {};
-        const cssModulesClassMapPlugin: postcss.Plugin<TCssModules> = cssModules({
+        const cssModulesClassMapPlugin: postcss.Plugin = cssModules({
           getJSON: (cssFileName: string, json: IClassMap) => {
             // This callback will be invoked durint the promise evaluation of the postcss process() function.
             classMap = json;
@@ -137,7 +130,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
           generateScopedName: (name: string) => name
         });
 
-        await postcss([cssModulesClassMapPlugin]).process(css, { from: filePath });
+        await postcss.default([cssModulesClassMapPlugin]).process(css, { from: filePath });
 
         if (getCssPaths) {
           await Promise.all(

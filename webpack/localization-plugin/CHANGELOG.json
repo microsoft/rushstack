@@ -2,6 +2,39 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@rushstack/localization-plugin_v0.10.0",
+      "date": "Wed, 16 Feb 2022 07:15:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an option to ignore missing RESX comments."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.15",
+      "tag": "@rushstack/localization-plugin_v0.9.15",
+      "date": "Fri, 11 Feb 2022 10:30:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.15` to `^3.3.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.14",
       "tag": "@rushstack/localization-plugin_v0.9.14",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",

@@ -3,7 +3,11 @@
 
 import * as colors from 'colors';
 
-import { CommandLineAction, CommandLineParser, DynamicCommandLineParser, DynamicCommandLineAction } from '..';
+import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
+import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
+import { CommandLineParameter } from '../parameters/BaseClasses';
+import { CommandLineParser } from '../providers/CommandLineParser';
+import { CommandLineAction } from '../providers/CommandLineAction';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
@@ -147,7 +151,7 @@ const snapshotPropertyNames: string[] = [
   'values'
 ];
 
-describe('CommandLineParameter', () => {
+describe(CommandLineParameter.name, () => {
   it('prints the global help', () => {
     const commandLineParser: CommandLineParser = createParser();
     const helpText: string = colors.stripColors(commandLineParser.renderHelpText());

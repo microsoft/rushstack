@@ -13,12 +13,12 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",
     "@types/webpack-env": "1.13.0",
-    "html-webpack-plugin": "~4.5.0",
+    "html-webpack-plugin": "~4.5.2",
     "ts-loader": "6.0.0",
     "typescript": "~4.5.2",
-    "webpack": "~4.44.2",
-    "webpack-bundle-analyzer": "~3.6.0",
+    "webpack-bundle-analyzer": "~4.5.0",
     "webpack-cli": "~3.3.2",
-    "webpack-dev-server": "~3.11.0"
+    "webpack-dev-server": "~3.11.0",
+    "webpack": "~4.44.2"
   }
 }

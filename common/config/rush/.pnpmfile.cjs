@@ -27,50 +27,9 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  // schema-utils (dependency of webpack-dev-server) has an unfulfilled peer dependency
-  if (packageJson.name === 'schema-utils') {
-    if (!packageJson.dependencies) {
-      packageJson.dependencies = {};
-    }
-
-    packageJson.dependencies['ajv'] = '~6.12.5';
-  } else if (packageJson.name === '@types/webpack-dev-server') {
-    delete packageJson.dependencies['@types/webpack'];
-
-    if (!packageJson.peerDependencies) {
-      packageJson.peerDependencies = {};
-    }
-
-    switch (packageJson.version) {
-      case '3.11.3': {
-        // This is for heft-webpack4-plugin and the other projects that use Webpack 4
-        packageJson.peerDependencies['@types/webpack'] = '^4.0.0';
-        break;
-      }
-
-      case '4.0.0': {
-        // This is for heft-webpack5-plugin and the other projects that use Webpack 5.
-        // Webpack 5 brings its own typings
-        packageJson.peerDependencies['webpack'] = '^5.0.0';
-        break;
-      }
-
-      default: {
-        throw new Error(
-          `Unexpected version of @types/webpack-dev-server: "${packageJson.version}". ` +
-            'Update pnpmfile.js to add support for this version.'
-        );
-      }
-    }
-  } else if (
-    packageJson.name === '@typescript-eslint/types' ||
-    packageJson.name === 'tslint-microsoft-contrib'
-  ) {
-    // The `@typescript-eslint/types` check is a workaround for https://github.com/typescript-eslint/typescript-eslint/issues/3622.
+  if (packageJson.name === 'tslint-microsoft-contrib') {
     // The `tslint-microsoft-contrib` repo is archived so it can't be updated to TS 4.4+.
-    if (!packageJson.peerDependencies) {
-      packageJson.peerDependencies = {};
-    }
+    // unmet peer typescript@"^2.1.0 || ^3.0.0": found 4.5.5
     packageJson.peerDependencies['typescript'] = '*';
   }
 

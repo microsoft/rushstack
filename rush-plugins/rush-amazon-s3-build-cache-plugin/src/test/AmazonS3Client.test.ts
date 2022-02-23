@@ -38,7 +38,7 @@ class MockedDate extends Date {
   }
 }
 
-describe('AmazonS3Client', () => {
+describe(AmazonS3Client.name, () => {
   it('Rejects invalid S3 endpoint values', () => {
     expect(
       () =>
@@ -469,7 +469,8 @@ describe('AmazonS3Client', () => {
       });
     });
   });
-  describe('URIEncode', () => {
+
+  describe(AmazonS3Client.UriEncode.name, () => {
     it('can encode', () => {
       expect(
         AmazonS3Client.UriEncode(

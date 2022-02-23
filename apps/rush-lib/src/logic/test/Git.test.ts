@@ -3,8 +3,8 @@
 
 import { Git } from '../Git';
 
-describe('Git', () => {
-  describe('normalizeGitUrlToHttps', () => {
+describe(Git.name, () => {
+  describe(Git.normalizeGitUrlForComparison.name, () => {
     it('correctly normalizes URLs', () => {
       expect(Git.normalizeGitUrlForComparison('invalid.git')).toEqual('invalid');
       expect(Git.normalizeGitUrlForComparison('git@github.com:ExampleOrg/ExampleProject.git')).toEqual(

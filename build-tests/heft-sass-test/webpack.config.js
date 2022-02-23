@@ -3,7 +3,6 @@
 const path = require('path');
 const Autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const sass = require('node-sass');
 
 /**
  * If the "--production" command-line parameter is specified when invoking Heft, then the

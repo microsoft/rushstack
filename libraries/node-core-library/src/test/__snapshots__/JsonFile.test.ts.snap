@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`JsonFile adds a header comment 1`] = `
+"// header
+// comment
+{
+  \\"abc\\": 123
+}
+"
+`;
+
+exports[`JsonFile adds an empty header comment 1`] = `
+"{
+  \\"abc\\": 123
+}
+"
+`;
+
+exports[`JsonFile allows undefined values when asked 1`] = `
+"{}
+"
+`;
+
+exports[`JsonFile allows undefined values when asked 2`] = `
+"{}
+"
+`;
+
 exports[`JsonFile tests adds a header comment 1`] = `
 "// header
 // comment

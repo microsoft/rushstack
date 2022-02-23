@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
 import { Telemetry, ITelemetryData } from '../Telemetry';
 
-describe('Telemetry', () => {
+describe(Telemetry.name, () => {
   it('adds data to store if telemetry is enabled', () => {
-    const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
+    const filename: string = `${__dirname}/telemetry/telemetryEnabled.json`;
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
     const telemetry: Telemetry = new Telemetry(rushConfig);
     const logData1: ITelemetryData = {
@@ -36,7 +34,7 @@ describe('Telemetry', () => {
   });
 
   it('does not add data to store if telemetry is not enabled', () => {
-    const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryNotEnabled.json'));
+    const filename: string = `${__dirname}/telemetry/telemetryNotEnabled.json`;
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
     const telemetry: Telemetry = new Telemetry(rushConfig);
     const logData: ITelemetryData = {
@@ -53,7 +51,7 @@ describe('Telemetry', () => {
   });
 
   it('deletes data after flush', () => {
-    const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
+    const filename: string = `${__dirname}/telemetry/telemetryEnabled.json`;
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
     const telemetry: Telemetry = new Telemetry(rushConfig);
     const logData: ITelemetryData = {
@@ -78,7 +76,7 @@ describe('Telemetry', () => {
   });
 
   it('populates default fields', () => {
-    const filename: string = path.resolve(path.join(__dirname, './telemetry/telemetryEnabled.json'));
+    const filename: string = `${__dirname}/telemetry/telemetryEnabled.json`;
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
     const telemetry: Telemetry = new Telemetry(rushConfig);
     const logData: ITelemetryData = {

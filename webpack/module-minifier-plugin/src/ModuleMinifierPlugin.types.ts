@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import type { RawSourceMap } from 'source-map';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook } from 'tapable';
-import * as webpack from 'webpack';
-import { ReplaceSource, Source } from 'webpack-sources';
+import type { AsyncSeriesWaterfallHook, SyncWaterfallHook } from 'tapable';
+import type * as webpack from 'webpack';
+import type { ReplaceSource, Source } from 'webpack-sources';
 
 /**
  * Request to the minifier
@@ -150,6 +150,10 @@ export interface IExtendedModule extends webpack.compilation.Module {
    */
   modules?: IExtendedModule[];
   /**
+   * Recursively scan the dependencies of a module
+   */
+  hasDependencies(callback: (dep: webpack.compilation.Dependency) => boolean | void): boolean;
+  /**
    * Id for the module
    */
   // eslint-disable-next-line @rushstack/no-new-null
@@ -241,18 +245,36 @@ export interface IModuleMinifierFunction {
 }
 
 /**
+ * Metadata from the minifier for the plugin
+ * @public
+ */
+export interface IMinifierConnection {
+  /**
+   * Hash of the configuration of this minifier, to be applied to the webpack chunk and compilation hashes.
+   */
+  configHash: string;
+  /**
+   * Callback to be invoked when done with the minifier
+   */
+  disconnect(): Promise<void>;
+}
+
+/**
  * Object that can be invoked to minify code.
  * @public
  */
 export interface IModuleMinifier {
+  /**
+   * Asynchronously minify a module
+   */
   minify: IModuleMinifierFunction;
 
   /**
-   * Prevents the minifier from shutting down until the returned callback is invoked.
+   * Prevents the minifier from shutting down until the returned `disconnect()` callback is invoked.
    * The callback may be used to surface errors encountered by the minifier that may not be relevant to a specific file.
    * It should be called to allow the minifier to cleanup
    */
-  ref?(): () => Promise<void>;
+  connect(): Promise<IMinifierConnection>;
 }
 
 /**
@@ -275,6 +297,11 @@ export interface IModuleMinifierPluginOptions {
    * Instructs the plugin to alter the code of modules to maximize portability across compilations.
    */
   usePortableModules?: boolean;
+
+  /**
+   * Instructs the plugin to alter the code of async import statements to compress better and be portable across compilations.
+   */
+  compressAsyncImports?: boolean;
 }
 
 /**
@@ -294,6 +321,25 @@ export interface IDehydratedAssets {
 }
 
 /**
+ * Argument to the postProcessCodeFragment hook for the current execution context
+ * @public
+ */
+export interface IPostProcessFragmentContext {
+  /**
+   * The current webpack compilation, for error reporting
+   */
+  compilation: webpack.compilation.Compilation;
+  /**
+   * A name to use for logging
+   */
+  loggingName: string;
+  /**
+   * The current module being processed, or `undefined` if not in a module (e.g. the bootstrapper)
+   */
+  module: webpack.compilation.Module | undefined;
+}
+
+/**
  * Hooks provided by the ModuleMinifierPlugin
  * @public
  */
@@ -306,12 +352,12 @@ export interface IModuleMinifierPluginHooks {
   /**
    * Hook invoked on a module id to get the final rendered id.
    */
-  finalModuleId: SyncWaterfallHook<string | number | undefined>;
+  finalModuleId: SyncWaterfallHook<string | number | undefined, webpack.compilation.Compilation>;
 
   /**
    * Hook invoked on code after it has been returned from the minifier.
    */
-  postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, string>;
+  postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, IPostProcessFragmentContext>;
 }
 
 /**

@@ -3,7 +3,7 @@
 
 import { addThreeStars } from '..';
 
-describe('addThreeStars', () => {
+describe(addThreeStars.name, () => {
   it('adds three stars', () => {
     expect(addThreeStars('***Hello World')).toEqual('***Hello World***');
   });

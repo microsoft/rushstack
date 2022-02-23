@@ -13,7 +13,7 @@ const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');
 
-describe('parseGitFilename', () => {
+describe(parseGitFilename.name, () => {
   it('can parse backslash-escaped filenames', () => {
     expect(parseGitFilename('some/path/to/a/file name')).toEqual('some/path/to/a/file name');
     expect(parseGitFilename('"some/path/to/a/file?name"')).toEqual('some/path/to/a/file?name');
@@ -32,7 +32,7 @@ describe('parseGitFilename', () => {
   });
 });
 
-describe('parseGitLsTree', () => {
+describe(parseGitLsTree.name, () => {
   it('can handle a blob', () => {
     const filename: string = 'src/typings/tsd.d.ts';
     const hash: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
@@ -75,7 +75,7 @@ describe('parseGitLsTree', () => {
   });
 });
 
-describe('getPackageDeps', () => {
+describe(getPackageDeps.name, () => {
   it('can parse committed file', () => {
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     const expectedFiles: { [key: string]: string } = {

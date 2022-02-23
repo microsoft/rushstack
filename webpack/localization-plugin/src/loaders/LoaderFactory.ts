@@ -7,6 +7,7 @@ import { NewlineKind } from '@rushstack/node-core-library';
 
 export interface IBaseLoaderOptions {
   resxNewlineNormalization: NewlineKind | undefined;
+  ignoreMissingResxComments: boolean | undefined;
 }
 
 export interface ILoaderResult {

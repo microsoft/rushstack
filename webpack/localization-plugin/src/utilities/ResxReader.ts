@@ -8,10 +8,14 @@ import { ILocalizedString, ILocalizationFile } from '../interfaces';
 
 const STRING_NAME_RESX: RegExp = /^[A-z_$][A-z0-9_$]*$/;
 
+/**
+ * @public
+ */
 export interface IResxReaderOptions {
   resxFilePath: string;
   terminal: ITerminal;
   newlineNormalization: NewlineKind | undefined;
+  warnOnMissingComment: boolean;
 }
 
 interface ILoggingFunctions {
@@ -21,13 +25,14 @@ interface ILoggingFunctions {
   logFileWarning: (message: string, filePath: string, line?: number, position?: number) => void;
 }
 
-interface IResxReaderOptionsInternal {
-  resxFilePath: string;
+interface IResxReaderOptionsInternal extends Omit<IResxReaderOptions, 'terminal'> {
   resxContents: string;
   loggingFunctions: ILoggingFunctions;
-  newlineNormalization: NewlineKind | undefined;
 }
 
+/**
+ * @public
+ */
 export class ResxReader {
   public static readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile {
     const resxContents: string = FileSystem.readFile(options.resxFilePath);
@@ -49,10 +54,9 @@ export class ResxReader {
     };
 
     return this._readResxAsLocFileInternal({
-      resxFilePath: options.resxFilePath,
+      ...options,
       resxContents,
-      loggingFunctions,
-      newlineNormalization: options.newlineNormalization
+      loggingFunctions
     });
   }
 
@@ -218,7 +222,7 @@ export class ResxReader {
     if (!foundValueElement) {
       ResxReader._logErrorWithLocation(options, 'Missing string value in <data> element', dataElement);
     } else {
-      if (comment === undefined) {
+      if (comment === undefined && options.warnOnMissingComment) {
         ResxReader._logWarningWithLocation(options, 'Missing string comment in <data> element', dataElement);
       }
 

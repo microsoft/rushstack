@@ -3,7 +3,7 @@
     {
       "packageName": "a",
       "type": "major",
-      "comment": "Patch change to a"
+      "comment": "Major change to a"
     }
   ]
 }

@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 25 Jan 2022 01:11:07 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Feb 2022 10:30:25 GMT and should not be manually modified.
+
+## 0.9.0
+Fri, 11 Feb 2022 10:30:25 GMT
+
+### Minor changes
+
+- A major overhaul of heft-web-rig; for details refer to https://github.com/microsoft/rushstack/pull/3204
+- Set useUnknownInCatchVariables=false in tsconfig.json, to work around https://github.com/microsoft/TypeScript/issues/42596
 
 ## 0.8.2
 Tue, 25 Jan 2022 01:11:07 GMT

@@ -3,8 +3,8 @@
 
 import { SyntaxHelpers } from '../SyntaxHelpers';
 
-describe('SyntaxHelpers', () => {
-  test('.toAlphaNumericCamelCase()', () => {
+describe(SyntaxHelpers.name, () => {
+  it(SyntaxHelpers.makeCamelCaseIdentifier.name, () => {
     // prettier-ignore
     const inputs:string[] = [
       '',

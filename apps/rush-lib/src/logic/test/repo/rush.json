@@ -54,6 +54,11 @@
       "projectFolder": "i",
       "reviewCategory": "third-party",
       "versionPolicyName": "lockStepWithoutNextBump"
+    },
+    {
+      "packageName": "j",
+      "projectFolder": "j",
+      "reviewCategory": "third-party"
     }
   ]
 }

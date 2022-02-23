@@ -15,7 +15,7 @@ function relativeCaseInsensitive(from: string, to: string) {
   return toPosixPath(Path['_relativeCaseInsensitive'](toNativePath(from), toNativePath(to)));
 }
 
-describe('Path', () => {
+describe(Path.name, () => {
   test('_detectCaseSensitive()', () => {
     // NOTE: To ensure these tests are deterministic, only use absolute paths
     expect(relativeCaseInsensitive('/', '/')).toEqual('');

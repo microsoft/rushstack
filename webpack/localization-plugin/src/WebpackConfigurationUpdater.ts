@@ -19,6 +19,7 @@ export interface IWebpackConfigurationUpdaterOptions {
   globsToIgnore: string[] | undefined;
   localeNameOrPlaceholder: string;
   resxNewlineNormalization: NewlineKind | undefined;
+  ignoreMissingResxComments: boolean | undefined;
 }
 
 const FILE_TOKEN_REGEX: RegExp = new RegExp(lodash.escapeRegExp('[file]'));
@@ -28,7 +29,8 @@ export class WebpackConfigurationUpdater {
     const loader: string = path.resolve(__dirname, 'loaders', 'LocLoader.js');
     const loaderOptions: ILocLoaderOptions = {
       pluginInstance: options.pluginInstance,
-      resxNewlineNormalization: options.resxNewlineNormalization
+      resxNewlineNormalization: options.resxNewlineNormalization,
+      ignoreMissingResxComments: options.ignoreMissingResxComments
     };
 
     WebpackConfigurationUpdater._addLoadersForLocFiles(options, loader, loaderOptions);
@@ -43,7 +45,8 @@ export class WebpackConfigurationUpdater {
   ): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
     const loaderOptions: IBaseLoaderOptions = {
-      resxNewlineNormalization: options.resxNewlineNormalization
+      resxNewlineNormalization: options.resxNewlineNormalization,
+      ignoreMissingResxComments: options.ignoreMissingResxComments
     };
 
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [

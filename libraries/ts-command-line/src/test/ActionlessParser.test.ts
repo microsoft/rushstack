@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParser, CommandLineFlagParameter } from '..';
+import { CommandLineParser } from '../providers/CommandLineParser';
+import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 
 class TestCommandLine extends CommandLineParser {
   public flag!: CommandLineFlagParameter;
@@ -21,7 +22,7 @@ class TestCommandLine extends CommandLineParser {
   }
 }
 
-describe('Actionless CommandLineParser', () => {
+describe(`Actionless ${CommandLineParser.name}`, () => {
   it('parses a flag', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 

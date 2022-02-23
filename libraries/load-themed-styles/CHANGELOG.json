@@ -2,6 +2,35 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.247",
+      "tag": "@microsoft/load-themed-styles_v1.10.247",
+      "date": "Tue, 15 Feb 2022 01:39:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Do not import TS helpers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.246",
+      "tag": "@microsoft/load-themed-styles_v1.10.246",
+      "date": "Fri, 11 Feb 2022 10:30:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enable importHelpers=true"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.245",
       "tag": "@microsoft/load-themed-styles_v1.10.245",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",

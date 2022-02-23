@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 
-describe('EnvironmentConfiguration', () => {
+describe(EnvironmentConfiguration.name, () => {
   let _oldEnv: typeof process.env;
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('EnvironmentConfiguration', () => {
     process.env = _oldEnv;
   });
 
-  describe('validate', () => {
+  describe(EnvironmentConfiguration.validate.name, () => {
     it('correctly allows no environment variables', () => {
       expect(EnvironmentConfiguration.validate).not.toThrow();
     });
@@ -99,7 +99,7 @@ describe('EnvironmentConfiguration', () => {
     });
 
     it('returns expected path from environment variable with normalization', () => {
-      const expectedValue: string = path.resolve(path.join(process.cwd(), 'temp'));
+      const expectedValue: string = path.resolve(process.cwd(), 'temp');
       const envVar: string = './temp';
       process.env[ENV_VAR] = envVar;
 

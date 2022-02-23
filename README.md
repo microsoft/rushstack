@@ -91,6 +91,8 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests-samples/heft-node-rig-tutorial](./build-tests-samples/heft-node-rig-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-storybook-react-tutorial](./build-tests-samples/heft-storybook-react-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-storybook-react-tutorial-storykit](./build-tests-samples/heft-storybook-react-tutorial-storykit/) | Storybook build dependencies for heft-storybook-react-tutorial |
+| [/build-tests-samples/heft-web-rig-app-tutorial](./build-tests-samples/heft-web-rig-app-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
+| [/build-tests-samples/heft-web-rig-library-tutorial](./build-tests-samples/heft-web-rig-library-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-webpack-basic-tutorial](./build-tests-samples/heft-webpack-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/packlets-tutorial](./build-tests-samples/packlets-tutorial/) | (Copy of sample project) Building this project is a regression test for @rushstack/eslint-plugin-packlets |
 | [/build-tests/api-documenter-test](./build-tests/api-documenter-test/) | Building this project is a regression test for api-documenter |

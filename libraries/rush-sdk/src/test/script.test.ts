@@ -31,7 +31,8 @@ console.log(require(${JSON.stringify(rushSdkPath)}));
         currentWorkingDirectory: mockPackageFolder
       }
     );
-    expect(result.status).toBe(0);
+    expect(result.stderr.trim()).toMatchInlineSnapshot(`""`);
     expect(result.stdout.trim()).toMatchInlineSnapshot(`"{ foo: [Getter] }"`);
+    expect(result.status).toBe(0);
   });
 });
