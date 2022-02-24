@@ -3,12 +3,18 @@ import { SpawnSyncReturns } from 'child_process';
 import { IAnswers, INotificationJson } from './configurations';
 
 // the branch will be changed to main once pr is in
+const DEFAULT_BRANCH: string = 'master';
+const DEFAULT_REMOTE: string = 'origin';
+
+const remoteBranch: string =
+  process.argv[2] === null ? `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}` : process.argv[2];
+
 const spawnResult: SpawnSyncReturns<string> = Executable.spawnSync(
   'git',
   [
     'cat-file',
     'blob',
-    'refs/remotes/origin/zhas/cli-notification:common/config/notifications/notifications.json'
+    `refs/remotes/${remoteBranch}/cli-notification:common/config/notifications/notifications.json`
   ],
   {
     currentWorkingDirectory: process.cwd()
