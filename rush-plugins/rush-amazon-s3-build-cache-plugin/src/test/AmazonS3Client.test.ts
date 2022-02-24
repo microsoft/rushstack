@@ -362,6 +362,44 @@ describe(AmazonS3Client.name, () => {
           spy.mockReset();
           spy.mockRestore();
         });
+
+        it('Retries on 400 error', async () => {
+          const spy = jest.spyOn(global, 'setTimeout');
+          await runAndExpectErrorAsync(
+            async () =>
+              await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
+                responseInit: {
+                  status: 400,
+                  statusText: 'Bad Request'
+                }
+              })
+          );
+          expect(setTimeout).toHaveBeenCalledTimes(3);
+          expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 4000);
+          expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 8000);
+          expect(setTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 16000);
+          spy.mockReset();
+          spy.mockRestore();
+        });
+
+        it('Retries on 401 error', async () => {
+          const spy = jest.spyOn(global, 'setTimeout');
+          await runAndExpectErrorAsync(
+            async () =>
+              await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
+                responseInit: {
+                  status: 401,
+                  statusText: 'Unauthorized'
+                }
+              })
+          );
+          expect(setTimeout).toHaveBeenCalledTimes(3);
+          expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 4000);
+          expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 8000);
+          expect(setTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 16000);
+          spy.mockReset();
+          spy.mockRestore();
+        });
       }
 
       describe('Without credentials', () => {
