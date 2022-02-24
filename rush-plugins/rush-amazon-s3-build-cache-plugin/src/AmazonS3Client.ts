@@ -29,6 +29,16 @@ interface IIsoDateString {
   dateTime: string;
 }
 
+type RetriableRequestResponse<T> =
+  | {
+      hasNetworkError: true;
+      error: unknown;
+    }
+  | {
+      hasNetworkError: false;
+      response: T;
+    };
+
 const protocolRegex: RegExp = /^https?:\/\//;
 const portRegex: RegExp = /:(\d{1,5})$/;
 
@@ -124,20 +134,36 @@ export class AmazonS3Client {
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
     this._writeDebugLine('Reading object from S3');
-    const sendRequest: () => Promise<Buffer | undefined> = async (): Promise<Buffer | undefined> => {
+    type Response = RetriableRequestResponse<Buffer | undefined>;
+    const sendRequest: () => Promise<Response> = async (): Promise<Response> => {
       const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
       if (response.ok) {
-        return await response.buffer();
+        return {
+          hasNetworkError: false,
+          response: await response.buffer()
+        };
       } else if (response.status === 404) {
-        return undefined;
+        return {
+          hasNetworkError: false,
+          response: undefined
+        };
       } else if (response.status === 403 && !this._credentials) {
-        return undefined;
-      } else {
+        return {
+          hasNetworkError: false,
+          response: undefined
+        };
+      } else if (response.status === 400 || response.status === 401 || response.status === 403) {
         this._throwS3Error(response, await this._safeReadResponseText(response));
+      } else {
+        const error: Error = this._getS3Error(response, await this._safeReadResponseText(response));
+        return {
+          hasNetworkError: true,
+          error
+        };
       }
     };
 
-    return this._sendCacheRequestWithRetries(sendRequest);
+    return await this._sendCacheRequestWithRetries(sendRequest);
   }
 
   public async uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void> {
@@ -145,14 +171,23 @@ export class AmazonS3Client {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
-    const sendRequest: () => Promise<void> = async (): Promise<void> => {
+    type Response = RetriableRequestResponse<void>;
+
+    const sendRequest: () => Promise<Response> = async (): Promise<Response> => {
       const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
       if (!response.ok) {
-        this._throwS3Error(response, await this._safeReadResponseText(response));
+        return {
+          hasNetworkError: true,
+          error: this._getS3Error(response, await this._safeReadResponseText(response))
+        };
       }
+      return {
+        hasNetworkError: false,
+        response: undefined
+      };
     };
 
-    return this._sendCacheRequestWithRetries(sendRequest);
+    await this._sendCacheRequestWithRetries(sendRequest);
   }
 
   private _writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
@@ -334,12 +369,16 @@ export class AmazonS3Client {
     return undefined;
   }
 
-  private _throwS3Error(response: fetch.Response, text: string | undefined): never {
-    throw new Error(
+  private _getS3Error(response: fetch.Response, text: string | undefined): Error {
+    return new Error(
       `Amazon S3 responded with status code ${response.status} (${response.statusText})${
         text ? `\n${text}` : ''
       }`
     );
+  }
+
+  private _throwS3Error(response: fetch.Response, text: string | undefined): never {
+    throw this._getS3Error(response, text);
   }
 
   /**
@@ -401,25 +440,10 @@ export class AmazonS3Client {
     }
   }
 
-  private async _sendCacheRequestWithRetries<T>(sendRequest: () => Promise<T>): Promise<T> {
-    type TryResponse = { hasNetworkError: false; response: T } | { hasNetworkError: true; error: unknown };
-
-    const trySendRequest: () => Promise<TryResponse> = async (): Promise<TryResponse> => {
-      try {
-        const response: T = await sendRequest();
-        return {
-          response,
-          hasNetworkError: false
-        };
-      } catch (err) {
-        return {
-          hasNetworkError: true,
-          error: err
-        };
-      }
-    };
-
-    const response: TryResponse = await trySendRequest();
+  private async _sendCacheRequestWithRetries<T>(
+    sendRequest: () => Promise<RetriableRequestResponse<T>>
+  ): Promise<T> {
+    const response: RetriableRequestResponse<T> = await sendRequest();
 
     const log: (...messageParts: (string | IColorableSequence)[]) => void = this._writeDebugLine.bind(this);
 
@@ -441,7 +465,7 @@ export class AmazonS3Client {
             }, delay);
           });
 
-          const response: TryResponse = await trySendRequest();
+          const response: RetriableRequestResponse<T> = await sendRequest();
 
           if (response.hasNetworkError) {
             if (retryAttempt < maxTries - 1) {

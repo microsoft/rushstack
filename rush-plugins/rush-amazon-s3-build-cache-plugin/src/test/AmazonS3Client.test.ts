@@ -28,6 +28,10 @@ const terminal = new Terminal(
   })
 );
 
+interface ITestOptions {
+  shouldRetry: boolean;
+}
+
 class MockedDate extends Date {
   public constructor() {
     super(2020, 3, 18, 12, 32, 42, 493);
@@ -241,7 +245,8 @@ describe(AmazonS3Client.name, () => {
       credentials: IAmazonS3Credentials | undefined,
       options: IAmazonS3BuildCacheProviderOptionsAdvanced,
       request: (s3Client: AmazonS3Client) => Promise<TResponse>,
-      response: IResponseOptions
+      response: IResponseOptions,
+      testOptions: ITestOptions
     ): Promise<TResponse> {
       const spy: jest.SpyInstance = jest
         .spyOn(WebClient.prototype, 'fetchAsync')
@@ -256,7 +261,7 @@ describe(AmazonS3Client.name, () => {
         error = e as Error;
       }
 
-      if (error) {
+      if (testOptions.shouldRetry) {
         expect(spy).toHaveBeenCalledTimes(4);
       } else {
         expect(spy).toHaveBeenCalledTimes(1);
@@ -290,7 +295,8 @@ describe(AmazonS3Client.name, () => {
         credentials: IAmazonS3Credentials | undefined,
         options: IAmazonS3BuildCacheProviderOptionsAdvanced,
         objectName: string,
-        response: IResponseOptions
+        response: IResponseOptions,
+        testOptions: ITestOptions
       ): Promise<Buffer | undefined> {
         return await makeS3ClientRequestAsync(
           credentials,
@@ -298,7 +304,8 @@ describe(AmazonS3Client.name, () => {
           async (s3Client) => {
             return await s3Client.getObjectAsync(objectName);
           },
-          response
+          response,
+          testOptions
         );
       }
 
@@ -306,12 +313,20 @@ describe(AmazonS3Client.name, () => {
         it('Can get an object', async () => {
           const expectedContents: string = 'abc123-contents';
 
-          const result: Buffer | undefined = await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-            body: expectedContents,
-            responseInit: {
-              status: 200
+          const result: Buffer | undefined = await makeGetRequestAsync(
+            credentials,
+            DUMMY_OPTIONS,
+            'abc123',
+            {
+              body: expectedContents,
+              responseInit: {
+                status: 200
+              }
+            },
+            {
+              shouldRetry: false
             }
-          });
+          );
           expect(result).toBeDefined();
           expect(result?.toString()).toBe(expectedContents);
         });
@@ -328,19 +343,28 @@ describe(AmazonS3Client.name, () => {
               responseInit: {
                 status: 200
               }
-            }
+            },
+            { shouldRetry: false }
           );
           expect(result).toBeDefined();
           expect(result?.toString()).toBe(expectedContents);
         });
 
         it('Handles a missing object', async () => {
-          const result: Buffer | undefined = await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-            responseInit: {
-              status: 404,
-              statusText: 'Not Found'
+          const result: Buffer | undefined = await makeGetRequestAsync(
+            credentials,
+            DUMMY_OPTIONS,
+            'abc123',
+            {
+              responseInit: {
+                status: 404,
+                statusText: 'Not Found'
+              }
+            },
+            {
+              shouldRetry: false
             }
-          });
+          );
           expect(result).toBeUndefined();
         });
 
@@ -348,12 +372,20 @@ describe(AmazonS3Client.name, () => {
           const spy = jest.spyOn(global, 'setTimeout');
           await runAndExpectErrorAsync(
             async () =>
-              await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-                responseInit: {
-                  status: 500,
-                  statusText: 'Server Error'
+              await makeGetRequestAsync(
+                credentials,
+                DUMMY_OPTIONS,
+                'abc123',
+                {
+                  responseInit: {
+                    status: 500,
+                    statusText: 'Server Error'
+                  }
+                },
+                {
+                  shouldRetry: true
                 }
-              })
+              )
           );
           expect(setTimeout).toHaveBeenCalledTimes(3);
           expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 4000);
@@ -363,40 +395,50 @@ describe(AmazonS3Client.name, () => {
           spy.mockRestore();
         });
 
-        it('Retries on 400 error', async () => {
+        it('should not retry on 400 error', async () => {
           const spy = jest.spyOn(global, 'setTimeout');
           await runAndExpectErrorAsync(
             async () =>
-              await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-                responseInit: {
-                  status: 400,
-                  statusText: 'Bad Request'
+              await makeGetRequestAsync(
+                credentials,
+                DUMMY_OPTIONS,
+                'abc123',
+                {
+                  responseInit: {
+                    status: 400,
+                    statusText: 'Bad Request'
+                  }
+                },
+                {
+                  shouldRetry: false
                 }
-              })
+              )
           );
-          expect(setTimeout).toHaveBeenCalledTimes(3);
-          expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 4000);
-          expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 8000);
-          expect(setTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 16000);
+          expect(setTimeout).toHaveBeenCalledTimes(0);
           spy.mockReset();
           spy.mockRestore();
         });
 
-        it('Retries on 401 error', async () => {
+        it('should not retry on 401 error', async () => {
           const spy = jest.spyOn(global, 'setTimeout');
           await runAndExpectErrorAsync(
             async () =>
-              await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-                responseInit: {
-                  status: 401,
-                  statusText: 'Unauthorized'
+              await makeGetRequestAsync(
+                credentials,
+                DUMMY_OPTIONS,
+                'abc123',
+                {
+                  responseInit: {
+                    status: 401,
+                    statusText: 'Unauthorized'
+                  }
+                },
+                {
+                  shouldRetry: false
                 }
-              })
+              )
           );
-          expect(setTimeout).toHaveBeenCalledTimes(3);
-          expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 4000);
-          expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 8000);
-          expect(setTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 16000);
+          expect(setTimeout).toHaveBeenCalledTimes(0);
           spy.mockReset();
           spy.mockRestore();
         });
@@ -406,12 +448,20 @@ describe(AmazonS3Client.name, () => {
         registerGetTests(undefined);
 
         it('Handles missing credentials object', async () => {
-          const result: Buffer | undefined = await makeGetRequestAsync(undefined, DUMMY_OPTIONS, 'abc123', {
-            responseInit: {
-              status: 403,
-              statusText: 'Unauthorized'
+          const result: Buffer | undefined = await makeGetRequestAsync(
+            undefined,
+            DUMMY_OPTIONS,
+            'abc123',
+            {
+              responseInit: {
+                status: 403,
+                statusText: 'Unauthorized'
+              }
+            },
+            {
+              shouldRetry: false
             }
-          });
+          );
           expect(result).toBeUndefined();
         });
       });
@@ -422,12 +472,20 @@ describe(AmazonS3Client.name, () => {
         it('Handles a 403 error', async () => {
           await runAndExpectErrorAsync(
             async () =>
-              await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-                responseInit: {
-                  status: 403,
-                  statusText: 'Unauthorized'
+              await makeGetRequestAsync(
+                credentials,
+                DUMMY_OPTIONS,
+                'abc123',
+                {
+                  responseInit: {
+                    status: 403,
+                    statusText: 'Unauthorized'
+                  }
+                },
+                {
+                  shouldRetry: false
                 }
-              })
+              )
           );
         });
       }
@@ -455,7 +513,8 @@ describe(AmazonS3Client.name, () => {
         options: IAmazonS3BuildCacheProviderOptionsAdvanced,
         objectName: string,
         objectContents: string,
-        response: IResponseOptions
+        response: IResponseOptions,
+        testOptions: ITestOptions
       ): Promise<void> {
         return await makeS3ClientRequestAsync(
           credentials,
@@ -463,24 +522,34 @@ describe(AmazonS3Client.name, () => {
           async (s3Client) => {
             return await s3Client.uploadObjectAsync(objectName, Buffer.from(objectContents));
           },
-          response
+          response,
+          testOptions
         );
       }
 
       it('Throws an error if credentials are not provided', async () => {
         await runAndExpectErrorAsync(
           async () =>
-            await makeUploadRequestAsync(undefined, DUMMY_OPTIONS, 'abc123', 'abc123-contents', undefined!)
+            await makeUploadRequestAsync(undefined, DUMMY_OPTIONS, 'abc123', 'abc123-contents', undefined!, {
+              shouldRetry: false
+            })
         );
       });
 
       function registerUploadTests(credentials: IAmazonS3Credentials): void {
         it('Uploads an object', async () => {
-          await makeUploadRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', 'abc123-contents', {
-            responseInit: {
-              status: 200
-            }
-          });
+          await makeUploadRequestAsync(
+            credentials,
+            DUMMY_OPTIONS,
+            'abc123',
+            'abc123-contents',
+            {
+              responseInit: {
+                status: 200
+              }
+            },
+            { shouldRetry: false }
+          );
         });
 
         it('Uploads an object to a different region', async () => {
@@ -493,19 +562,27 @@ describe(AmazonS3Client.name, () => {
               responseInit: {
                 status: 200
               }
-            }
+            },
+            { shouldRetry: false }
           );
         });
 
         it('Handles an unexpected error code', async () => {
           await runAndExpectErrorAsync(
             async () =>
-              await makeUploadRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', 'abc123-contents', {
-                responseInit: {
-                  status: 500,
-                  statusText: 'Server Error'
-                }
-              })
+              await makeUploadRequestAsync(
+                credentials,
+                DUMMY_OPTIONS,
+                'abc123',
+                'abc123-contents',
+                {
+                  responseInit: {
+                    status: 500,
+                    statusText: 'Server Error'
+                  }
+                },
+                { shouldRetry: true }
+              )
           );
         });
       }
