@@ -1,5 +1,5 @@
 {
-  "name": "@rushstack/notifications",
+  "name": "@rushstack/cli-notifications",
   "description": "Provide repo maintainers with a mechanism to register announcements to repo contributors that will be surfaced as part of the day-to-day workflow.",
   "version": "1.0.0",
   "private": true,

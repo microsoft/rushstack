@@ -1,12 +1,11 @@
 import { JsonFile } from '@rushstack/node-core-library';
 import * as inquirer from 'inquirer';
-import * as path from 'path';
 import { IAnswers, INotificationJson } from './configurations';
 
 export class AddNotifications {
   public constructor() {}
 
-  public async addNotification(): Promise<void> {
+  public async addNotification(configFilePath: string): Promise<void> {
     await inquirer
       .prompt([
         {
@@ -18,13 +17,7 @@ export class AddNotifications {
         }
       ])
       .then((answers: IAnswers) => {
-        const pathToJson: string = path.join(
-          process.cwd(),
-          '..',
-          '..',
-          'common/config/notifications/notifications.json'
-        );
-        const notificationJson: INotificationJson = JsonFile.load(pathToJson);
+        const notificationJson: INotificationJson = JsonFile.load(configFilePath);
         const notifications: IAnswers[] = notificationJson.notifications;
 
         // insert new notification
@@ -32,7 +25,7 @@ export class AddNotifications {
         answers.expiration = this._setExpirationDate(currentDate, 3).toISOString();
         notifications.splice(notifications.length, 0, answers);
 
-        JsonFile.save(notificationJson, pathToJson, {
+        JsonFile.save(notificationJson, configFilePath, {
           updateExistingFile: true
         });
       });

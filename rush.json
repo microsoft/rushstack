@@ -470,8 +470,8 @@
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
-      "packageName": "@rushstack/notifications",
-      "projectFolder": "apps/notifications",
+      "packageName": "@rushstack/cli-notifications",
+      "projectFolder": "apps/cli-notifications",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
