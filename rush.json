@@ -324,7 +324,7 @@
     /**
      * The list of shell commands to run after the Rush build command finishes
      */
-    "postRushBuild": ["node apps/notifications/lib/DisplayNotifications.js"]
+    "postRushBuild": []
   },
 
   /**
