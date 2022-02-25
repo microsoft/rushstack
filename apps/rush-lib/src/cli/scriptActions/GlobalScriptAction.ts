@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
+import colors from 'colors/safe';
+import type { AsyncSeriesHook } from 'tapable';
 
 import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError, Text } from '@rushstack/node-core-library';
+
+import { IGlobalScriptAction } from '../../pluginFramework/RushLifeCycle';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Autoinstaller } from '../../logic/Autoinstaller';
@@ -87,6 +90,19 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommand> {
   }
 
   public async runAsync(): Promise<void> {
+    const { hooks: sessionHooks } = this.rushSession;
+    if (sessionHooks.runAnyGlobalScriptCommand.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.runAnyGlobalScriptCommand.promise(this);
+    }
+
+    const specificHook: AsyncSeriesHook<IGlobalScriptAction> | undefined =
+      sessionHooks.runGlobalScriptCommand.get(this.actionName);
+    if (specificHook) {
+      // Run the more specific hook for a command with this name after the general hook
+      await specificHook.promise(this);
+    }
+
     const additionalPathFolders: string[] =
       this.commandLineConfiguration?.additionalPathFolders.slice() || [];
 

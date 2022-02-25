@@ -3,10 +3,12 @@
 
 import * as os from 'os';
 import colors from 'colors/safe';
+import type { AsyncSeriesHook } from 'tapable';
 
 import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
+import type { IPhasedScriptAction } from '../../pluginFramework/RushLifeCycle';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
@@ -105,6 +107,19 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
+
+    const { hooks: sessionHooks } = this.rushSession;
+    if (sessionHooks.runAnyPhasedScriptCommand.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.runAnyPhasedScriptCommand.promise(this);
+    }
+
+    const specificHook: AsyncSeriesHook<IPhasedScriptAction> | undefined =
+      sessionHooks.runPhasedScriptCommand.get(this.actionName);
+    if (specificHook) {
+      // Run the more specific hook for a command with this name after the general hook
+      await specificHook.promise(this);
+    }
 
     const isQuietMode: boolean = !this._verboseParameter.value;
 

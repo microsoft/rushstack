@@ -129,7 +129,11 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
 
     this._throwPluginErrorIfNeed();
 
-    await this.rushSession.hooks.initialize.promise();
+    const { hooks: sessionHooks } = this.rushSession;
+    if (sessionHooks.initialize.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.initialize.promise(this);
+    }
 
     return super.onExecute();
   }
