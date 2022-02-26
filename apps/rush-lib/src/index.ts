@@ -78,9 +78,9 @@ export {
 } from './pluginFramework/RushSession';
 
 export {
-  IRushAction,
-  IGlobalScriptAction,
-  IPhasedScriptAction,
+  IRushCommand,
+  IGlobalCommand,
+  IPhasedCommand,
   RushLifecycleHooks
 } from './pluginFramework/RushLifeCycle';
 

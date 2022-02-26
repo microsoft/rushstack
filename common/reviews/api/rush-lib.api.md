@@ -268,7 +268,7 @@ export interface IGetChangedProjectsOptions {
 }
 
 // @beta
-export interface IGlobalScriptAction extends IRushAction {
+export interface IGlobalCommand extends IRushCommand {
 }
 
 // @public
@@ -311,7 +311,7 @@ export interface IPackageManagerOptionsJsonBase {
 }
 
 // @beta
-export interface IPhasedScriptAction extends IRushAction {
+export interface IPhasedCommand extends IRushCommand {
 }
 
 // @internal
@@ -323,7 +323,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @beta
-export interface IRushAction {
+export interface IRushCommand {
     readonly actionName: string;
 }
 
@@ -694,11 +694,11 @@ export class _RushGlobalFolder {
 
 // @beta
 export class RushLifecycleHooks {
-    initialize: AsyncSeriesHook<IRushAction>;
-    runAnyGlobalScriptCommand: AsyncSeriesHook<IGlobalScriptAction>;
-    runAnyPhasedScriptCommand: AsyncSeriesHook<IPhasedScriptAction>;
-    runGlobalScriptCommand: HookMap<AsyncSeriesHook<IGlobalScriptAction>>;
-    runPhasedScriptCommand: HookMap<AsyncSeriesHook<IPhasedScriptAction>>;
+    initialize: AsyncSeriesHook<IRushCommand>;
+    runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
+    runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;
+    runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>>;
+    runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>>;
 }
 
 // @beta (undocumented)

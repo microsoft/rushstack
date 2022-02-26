@@ -4,29 +4,29 @@
 import { AsyncSeriesHook, HookMap } from 'tapable';
 
 /**
- * Information about the currently executing action provided to plugins.
+ * Information about the currently executing command provided to plugins.
  * @beta
  */
-export interface IRushAction {
+export interface IRushCommand {
   /**
-   * The name of this action, as seen on the command line
+   * The name of this command, as seen on the command line
    */
   readonly actionName: string;
 }
 
 /**
- * Information about the currently executing global script action (as defined in command-line.json) provided to plugins.
+ * Information about the currently executing global script command (as defined in command-line.json) provided to plugins.
  * @beta
  */
-export interface IGlobalScriptAction extends IRushAction {
+export interface IGlobalCommand extends IRushCommand {
   // Nothing added.
 }
 
 /**
- * Information about the currently executing phased script action (as defined in command-line.json, or default "build" or "rebuild") provided to plugins.
+ * Information about the currently executing phased script command (as defined in command-line.json, or default "build" or "rebuild") provided to plugins.
  * @beta
  */
-export interface IPhasedScriptAction extends IRushAction {
+export interface IPhasedCommand extends IRushCommand {
   // Will add hooks once the API surface is finalized
 }
 
@@ -39,40 +39,38 @@ export class RushLifecycleHooks {
   /**
    * The hook to run before executing any Rush CLI Command.
    */
-  public initialize: AsyncSeriesHook<IRushAction> = new AsyncSeriesHook<IRushAction>(
-    ['action'],
+  public initialize: AsyncSeriesHook<IRushCommand> = new AsyncSeriesHook<IRushCommand>(
+    ['command'],
     'initialize'
   );
 
   /**
-   * The hook to run before executing any global Rush CLI Command (as defined in command-line.json).
+   * The hook to run before executing any global Rush CLI Command (defined in command-line.json).
    */
-  public runAnyGlobalScriptCommand: AsyncSeriesHook<IGlobalScriptAction> =
-    new AsyncSeriesHook<IGlobalScriptAction>(['action'], 'runAnyGlobalScriptCommand');
-
-  /**
-   * A hook map to allow plugins to hook specific named global script commands before execution.
-   */
-  public runGlobalScriptCommand: HookMap<AsyncSeriesHook<IGlobalScriptAction>> = new HookMap(
-    (key: string) => {
-      return new AsyncSeriesHook<IGlobalScriptAction>(['action'], key);
-    },
-    'runGlobalScriptCommand'
+  public runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand> = new AsyncSeriesHook<IGlobalCommand>(
+    ['command'],
+    'runAnyGlobalCustomCommand'
   );
 
   /**
-   * The hook to run before executing any phased Rush CLI Command (as defined in command-line.json, or the default "build" or "rebuild").
+   * A hook map to allow plugins to hook specific named global commands (defined in command-line.json) before execution.
    */
-  public runAnyPhasedScriptCommand: AsyncSeriesHook<IPhasedScriptAction> =
-    new AsyncSeriesHook<IPhasedScriptAction>(['action'], 'runAnyPhasedScriptCommand');
+  public runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>> = new HookMap((key: string) => {
+    return new AsyncSeriesHook<IGlobalCommand>(['command'], key);
+  }, 'runGlobalCustomCommand');
 
   /**
-   * A hook map to allow plugins to hook specific named phased script commands before execution.
+   * The hook to run before executing any phased Rush CLI Command (defined in command-line.json, or the default "build" or "rebuild").
    */
-  public runPhasedScriptCommand: HookMap<AsyncSeriesHook<IPhasedScriptAction>> = new HookMap(
-    (key: string) => {
-      return new AsyncSeriesHook<IPhasedScriptAction>(['action'], key);
-    },
-    'runPhasedScriptCommand'
+  public runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand> = new AsyncSeriesHook<IPhasedCommand>(
+    ['command'],
+    'runAnyPhasedCommand'
   );
+
+  /**
+   * A hook map to allow plugins to hook specific named phased commands (defined in command-line.json) before execution.
+   */
+  public runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>> = new HookMap((key: string) => {
+    return new AsyncSeriesHook<IPhasedCommand>(['command'], key);
+  }, 'runPhasedCommand');
 }

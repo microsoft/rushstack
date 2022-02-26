@@ -56,7 +56,8 @@ export interface IPhase extends IPhaseJson {
 export interface ICommandWithParameters {
   associatedParameters: Set<Parameter>;
 }
-export interface IPhasedCommand extends IPhasedCommandWithoutPhasesJson, ICommandWithParameters {
+
+export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, ICommandWithParameters {
   /**
    * If set to "true," then this phased command was generated from a bulk command, and
    * was not explicitly defined in the command-line.json file.
@@ -76,9 +77,9 @@ export interface IPhasedCommand extends IPhasedCommandWithoutPhasesJson, IComman
   watchPhases: Set<IPhase>;
 }
 
-export interface IGlobalCommand extends IGlobalCommandJson, ICommandWithParameters {}
+export interface IGlobalCommandConfig extends IGlobalCommandJson, ICommandWithParameters {}
 
-export type Command = IGlobalCommand | IPhasedCommand;
+export type Command = IGlobalCommandConfig | IPhasedCommandConfig;
 
 export type Parameter = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
 
@@ -364,7 +365,7 @@ export class CommandLineConfiguration {
           throw new Error(`Phases for the "${RushConstants.buildCommandName}" were not found.`);
         }
 
-        const rebuildCommand: IPhasedCommand = {
+        const rebuildCommand: IPhasedCommandConfig = {
           ...DEFAULT_REBUILD_COMMAND_JSON,
           commandKind: RushConstants.phasedCommandKind,
           isSynthetic: true,
@@ -614,7 +615,7 @@ export class CommandLineConfiguration {
     return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
   }
 
-  private _translateBulkCommandToPhasedCommand(command: IBulkCommandJson): IPhasedCommand {
+  private _translateBulkCommandToPhasedCommand(command: IBulkCommandJson): IPhasedCommandConfig {
     const phaseName: string = command.name;
     const phase: IPhase = {
       name: phaseName,
@@ -643,7 +644,7 @@ export class CommandLineConfiguration {
 
     const phases: Set<IPhase> = new Set([phase]);
 
-    const translatedCommand: IPhasedCommand = {
+    const translatedCommand: IPhasedCommandConfig = {
       ...command,
       commandKind: 'phased',
       isSynthetic: true,

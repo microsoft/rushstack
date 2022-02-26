@@ -5,7 +5,7 @@ import path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
-import { CommandLineConfiguration, IPhasedCommand } from '../../../api/CommandLineConfiguration';
+import { CommandLineConfiguration, IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
 import { IOperationOptions, IOperationFactory, OperationSelector } from '../OperationSelector';
 import { Operation } from '../Operation';
 import { ICommandLineJson } from '../../../api/CommandLineJson';
@@ -56,7 +56,9 @@ describe(OperationSelector.name, () => {
 
   describe(OperationSelector.prototype.createOperations.name, () => {
     it('handles a full build', () => {
-      const buildCommand: IPhasedCommand = commandLineConfiguration.commands.get('build')! as IPhasedCommand;
+      const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
+        'build'
+      )! as IPhasedCommandConfig;
 
       const selector: OperationSelector = new OperationSelector({
         phasesToRun: buildCommand.phases
@@ -75,7 +77,9 @@ describe(OperationSelector.name, () => {
     });
 
     it('handles filtered projects', () => {
-      const buildCommand: IPhasedCommand = commandLineConfiguration.commands.get('build')! as IPhasedCommand;
+      const buildCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
+        'build'
+      )! as IPhasedCommandConfig;
 
       const selector: OperationSelector = new OperationSelector({
         phasesToRun: buildCommand.phases
