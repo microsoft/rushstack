@@ -72,11 +72,6 @@ export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
-// Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
-//
-// @beta (undocumented)
-export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
-
 // @public
 export class CommonVersionsConfiguration {
     get allowedAlternativeVersions(): Map<string, ReadonlyArray<string>>;
@@ -214,6 +209,11 @@ export interface ICloudBuildCacheProvider {
     updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
+//
+// @beta (undocumented)
+export type ICloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
+
 // @public
 export interface IConfigurationEnvironment {
     [environmentVariableName: string]: IConfigurationEnvironmentVariable;
@@ -223,6 +223,12 @@ export interface IConfigurationEnvironment {
 export interface IConfigurationEnvironmentVariable {
     override?: boolean;
     value: string;
+}
+
+// @beta (undocumented)
+export interface IContributeAPIForBuildCacheProvider {
+    // (undocumented)
+    registerCloudBuildCacheProviderFactory: (cacheProviderName: string, factory: ICloudBuildCacheProviderFactory) => void;
 }
 
 // @beta (undocumented)
@@ -705,13 +711,19 @@ export class RushLifecycleHooks {
 export class RushSession {
     constructor(options: IRushSessionOptions);
     // (undocumented)
-    getCloudBuildCacheProviderFactory(cacheProviderName: string): CloudBuildCacheProviderFactory | undefined;
+    protected readonly _cloudBuildCacheProviderFactories: Map<string, ICloudBuildCacheProviderFactory>;
+    // (undocumented)
+    getCloudBuildCacheProviderFactory(cacheProviderName: string): ICloudBuildCacheProviderFactory | undefined;
+    // (undocumented)
+    getContributeAPIForBuildCacheProvider(): IContributeAPIForBuildCacheProvider;
     // (undocumented)
     getLogger(name: string): ILogger;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
     // (undocumented)
-    registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: CloudBuildCacheProviderFactory): void;
+    get options(): IRushSessionOptions;
+    // @deprecated (undocumented)
+    registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: ICloudBuildCacheProviderFactory): void;
     // (undocumented)
     get terminalProvider(): ITerminalProvider;
 }

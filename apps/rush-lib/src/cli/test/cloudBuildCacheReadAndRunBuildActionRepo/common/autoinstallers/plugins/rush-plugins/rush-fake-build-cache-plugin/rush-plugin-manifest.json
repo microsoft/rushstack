@@ -1,10 +1,10 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugin-manifest.schema.json",
   "plugins": [
     {
       "pluginName": "rush-fake-build-cache-plugin",
       "description": "Rush plugin for testing cloud build cache",
-      "entryPoint": "index.js"
+      "entryPoint": "index.js",
+      "contributes": ["build-cache-provider"]
     }
   ]
 }

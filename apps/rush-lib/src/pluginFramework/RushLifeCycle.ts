@@ -76,7 +76,7 @@ export class RushLifecycleHooks {
 }
 
 export class PluginManagerLifecycleHooks {
-  public initializeFeatureKind: HookMap<AsyncSeriesHook<void>> = new HookMap(
+  public initializeContributionPoints: HookMap<AsyncSeriesHook<void>> = new HookMap(
     (key: string) => new AsyncSeriesHook<void>()
   );
 }

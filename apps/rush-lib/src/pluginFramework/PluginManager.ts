@@ -11,7 +11,8 @@ import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoa
 import { RushSession } from './RushSession';
 import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
 import { PluginManagerLifecycleHooks } from './RushLifeCycle';
-import { FeatureKind } from './FeatureKind';
+import { ContributionPoint } from './ContributionPoint';
+import { RushSessionForPlugin } from './RushSessionForPlugin';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -33,6 +34,10 @@ export class PluginManager {
   private readonly _autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
   private readonly _installedAutoinstallerNames: Set<string>;
   private readonly _loadedPluginNames: Set<string> = new Set<string>();
+  private _pluginNameToRushSessionForPlugin: Map<string, RushSessionForPlugin | undefined> = new Map<
+    string,
+    RushSessionForPlugin
+  >();
 
   private _error: Error | undefined;
 
@@ -92,7 +97,7 @@ export class PluginManager {
       });
     });
 
-    this._setupInitializeFeatureKinds();
+    this._setupInitializeContributions();
   }
 
   /**
@@ -143,7 +148,14 @@ export class PluginManager {
       const builtInPluginLoaders: BuiltInPluginLoader[] = this._getEagerPluginLoaders(
         this._builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
+      const targetPluginLoaders: PluginLoaderBase[] = [
+        ...builtInPluginLoaders,
+        ...autoinstallerPluginLoaders
+      ];
+      this._initializePlugins(targetPluginLoaders);
+      for (const { pluginName } of targetPluginLoaders) {
+        this._pluginNameToRushSessionForPlugin.set(pluginName, undefined);
+      }
     } catch (e) {
       this._error = e as Error;
     }
@@ -160,7 +172,14 @@ export class PluginManager {
         commandName,
         this._builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
+      const targetPluginLoaders: PluginLoaderBase[] = [
+        ...builtInPluginLoaders,
+        ...autoinstallerPluginLoaders
+      ];
+      this._initializePlugins(targetPluginLoaders);
+      for (const { pluginName } of targetPluginLoaders) {
+        this._pluginNameToRushSessionForPlugin.set(pluginName, undefined);
+      }
     } catch (e) {
       this._error = e as Error;
     }
@@ -181,14 +200,20 @@ export class PluginManager {
     return commandLineConfigurationInfos;
   }
 
+  public async initializeContributeToBuildCacheProviderPluginsAsync(): Promise<void> {
+    await this.hooks.initializeContributionPoints.get(ContributionPoint.buildCacheProvider)?.promise();
+  }
+
   private _initializePlugins(
     pluginLoaders: PluginLoaderBase[],
-    { notThrowSamePluginName }: { notThrowSamePluginName: boolean } = { notThrowSamePluginName: false }
+    { doNotThrowSamePluginName }: { doNotThrowSamePluginName: boolean } = {
+      doNotThrowSamePluginName: false
+    }
   ): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
       if (this._loadedPluginNames.has(pluginName)) {
-        if (notThrowSamePluginName) {
+        if (doNotThrowSamePluginName) {
           // No need to apply same plugin name twice
           return;
         }
@@ -197,7 +222,7 @@ export class PluginManager {
       const plugin: IRushPlugin | undefined = pluginLoader.load();
       this._loadedPluginNames.add(pluginName);
       if (plugin) {
-        this._applyPlugin(plugin, pluginName);
+        this._applyPlugin(plugin, pluginLoader);
       }
     }
   }
@@ -206,7 +231,7 @@ export class PluginManager {
     pluginLoaders: T[]
   ): T[] {
     return pluginLoaders.filter((pluginLoader) => {
-      return !pluginLoader.pluginManifest.associatedCommands && !pluginLoader.pluginManifest.featureKinds;
+      return !pluginLoader.pluginManifest.associatedCommands && !pluginLoader.pluginManifest.contributes;
     });
   }
 
@@ -219,28 +244,46 @@ export class PluginManager {
     });
   }
 
-  private _applyPlugin(plugin: IRushPlugin, pluginName: string): void {
+  private _applyPlugin(plugin: IRushPlugin, pluginLoader: PluginLoaderBase): void {
     try {
-      plugin.apply(this._rushSession, this._rushConfiguration);
+      const rushSessionForPlugin: RushSessionForPlugin = new RushSessionForPlugin(
+        this._rushSession,
+        pluginLoader.pluginManifest
+      );
+      plugin.apply(rushSessionForPlugin, this._rushConfiguration);
+      /**
+       * rushSessionForPlugin maybe used later, but we don't want to keep it
+       * in memory after the plugin is initialized successfully
+       */
+      this._pluginNameToRushSessionForPlugin.set(pluginLoader.pluginName, rushSessionForPlugin);
     } catch (e) {
-      throw new InternalError(`Error applying "${pluginName}": ${e}`);
+      throw new InternalError(`Error applying "${pluginLoader.pluginName}": ${e}`);
     }
   }
 
-  private _setupInitializeFeatureKinds(): void {
+  private _setupInitializeContributions(): void {
     for (const pluginLoader of [...this._builtInPluginLoaders, ...this._autoinstallerPluginLoaders]) {
-      if (Array.isArray(pluginLoader.pluginManifest.featureKinds)) {
+      if (Array.isArray(pluginLoader.pluginManifest.contributes)) {
         const { pluginName } = pluginLoader;
-        for (const featureKind of pluginLoader.pluginManifest.featureKinds) {
-          switch (featureKind) {
-            case FeatureKind.buildCacheProvider: {
-              this.hooks.initializeFeatureKind
-                .for(FeatureKind.buildCacheProvider)
+        for (const contribute of pluginLoader.pluginManifest.contributes) {
+          switch (contribute) {
+            case ContributionPoint.buildCacheProvider: {
+              this.hooks.initializeContributionPoints
+                .for(ContributionPoint.buildCacheProvider)
                 .tapPromise(pluginName, async () => {
                   if (pluginLoader instanceof AutoinstallerPluginLoader) {
                     await this._preparePluginAutoinstallersAsync([pluginLoader]);
                   }
-                  this._initializePlugins([pluginLoader], { notThrowSamePluginName: true });
+                  this._initializePlugins([pluginLoader], { doNotThrowSamePluginName: true });
+                  const rushSessionForPlugin: RushSessionForPlugin | undefined =
+                    this._pluginNameToRushSessionForPlugin.get(pluginName);
+                  if (rushSessionForPlugin) {
+                    // Trigger initialize life cycle for the plugin, because it is lazily loaded
+                    await rushSessionForPlugin.hooks.initialize.promise();
+                    // Set the rushSession has been initialized
+                    rushSessionForPlugin.initialized();
+                  }
+                  this._pluginNameToRushSessionForPlugin.set(pluginName, undefined);
                 });
               break;
             }

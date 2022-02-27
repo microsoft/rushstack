@@ -38,8 +38,8 @@
               "type": "string"
             }
           },
-          "featureKinds": {
-            "description": "Specifies feature kinds with this plugin, plugin will be lazy installed and loaded when any feature kinds runs.",
+          "contributes": {
+            "description": "Specifies how this plugin registers contribution points to extend various functionalities with Rush.js, plugin will be lazy installed and loaded when any contribution point runs.",
             "type": "array",
             "items": {
               "type": "string"

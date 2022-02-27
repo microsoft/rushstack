@@ -14,6 +14,7 @@ import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
+import { ContributionPoint } from '../ContributionPoint';
 import { IRushPlugin } from '../IRushPlugin';
 import { RushSdk } from './RushSdk';
 
@@ -23,7 +24,7 @@ export interface IRushPluginManifest {
   entryPoint?: string;
   optionsSchema?: string;
   associatedCommands?: string[];
-  featureKinds?: string[];
+  contributes?: ContributionPoint[];
   commandLineJsonFilePath?: string;
 }
 

@@ -36,7 +36,6 @@ import {
 import { Selection } from '../../logic/Selection';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
-import { FeatureKind } from '../../pluginFramework/FeatureKind';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -149,9 +148,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
     if (!this._disableBuildCache) {
-      await this.parser.pluginManager.hooks.initializeFeatureKind
-        .get(FeatureKind.buildCacheProvider)
-        ?.promise();
+      await this.parser.pluginManager.initializeContributeToBuildCacheProviderPluginsAsync();
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
         terminal,
         this.rushConfiguration,
