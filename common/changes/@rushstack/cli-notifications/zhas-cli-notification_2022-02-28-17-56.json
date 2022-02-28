@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/cli-notifications",
+      "comment": "create wrapper classto read customized inputs",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/cli-notifications"
+}
