@@ -1,6 +1,6 @@
 import { ConsoleTerminalProvider, Terminal, Executable } from '@rushstack/node-core-library';
 import { SpawnSyncReturns } from 'child_process';
-import { IAnswers, INotificationJson } from './configurations';
+import { INotificationJson, IAnnouncement } from './configurations';
 
 export interface IDisplayOptions {
   sourceBranch: string;
@@ -21,7 +21,7 @@ export function displayNotifications(options: IDisplayOptions): void {
     throw new Error(`git cat-file exited with status ${spawnResult.status}: ${spawnResult.stderr}`);
   }
   const notificationJson: INotificationJson = JSON.parse(spawnResult.stdout);
-  const notifications: IAnswers[] = notificationJson.notifications;
+  const notifications: IAnnouncement[] = notificationJson.notifications;
 
   // for display
   const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
