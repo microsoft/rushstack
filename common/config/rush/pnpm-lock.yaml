@@ -104,6 +104,27 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
 
+  ../../apps/cli-notifications:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/inquirer': 7.3.1
+      '@types/node': 12.20.24
+      inquirer: ~7.3.3
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      inquirer: 7.3.3
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/inquirer': 7.3.1
+      '@types/node': 12.20.24
+
   ../../apps/heft:
     specifiers:
       '@microsoft/api-extractor': workspace:*
@@ -162,27 +183,6 @@ importers:
       colors: 1.2.5
       tslint: 5.20.1_typescript@4.5.5
       typescript: 4.5.5
-
-  ../../apps/notifications:
-    specifiers:
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
-      '@rushstack/node-core-library': workspace:*
-      '@types/heft-jest': 1.0.1
-      '@types/inquirer': 7.3.1
-      '@types/node': 12.20.24
-      inquirer: ~7.3.3
-    dependencies:
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-      inquirer: 7.3.3
-    devDependencies:
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@types/heft-jest': 1.0.1
-      '@types/inquirer': 7.3.1
-      '@types/node': 12.20.24
 
   ../../apps/rundown:
     specifiers:
