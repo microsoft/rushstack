@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import { AsyncSeriesHook } from 'tapable';
+import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
@@ -266,6 +267,10 @@ export interface IGetChangedProjectsOptions {
     terminal: ITerminal;
 }
 
+// @beta
+export interface IGlobalCommand extends IRushCommand {
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -305,12 +310,21 @@ export interface IPackageManagerOptionsJsonBase {
     environmentVariables?: IConfigurationEnvironment;
 }
 
+// @beta
+export interface IPhasedCommand extends IRushCommand {
+}
+
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
     useWorkspaces?: boolean;
+}
+
+// @beta
+export interface IRushCommand {
+    readonly actionName: string;
 }
 
 // @beta (undocumented)
@@ -678,9 +692,13 @@ export class _RushGlobalFolder {
     get path(): string;
 }
 
-// @beta (undocumented)
+// @beta
 export class RushLifecycleHooks {
-    initialize: AsyncSeriesHook<void>;
+    initialize: AsyncSeriesHook<IRushCommand>;
+    runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
+    runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;
+    runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>>;
+    runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>>;
 }
 
 // @beta (undocumented)

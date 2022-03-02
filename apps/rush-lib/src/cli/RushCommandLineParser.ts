@@ -19,8 +19,8 @@ import { RushConstants } from '../logic/RushConstants';
 import {
   Command,
   CommandLineConfiguration,
-  IGlobalCommand,
-  IPhasedCommand
+  IGlobalCommandConfig,
+  IPhasedCommandConfig
 } from '../api/CommandLineConfiguration';
 import { Utilities } from '../utilities/Utilities';
 
@@ -321,7 +321,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _addGlobalScriptAction(
     commandLineConfiguration: CommandLineConfiguration,
-    command: IGlobalCommand
+    command: IGlobalCommandConfig
   ): void {
     if (
       command.name === RushConstants.buildCommandName ||
@@ -334,7 +334,7 @@ export class RushCommandLineParser extends CommandLineParser {
       );
     }
 
-    const sharedCommandOptions: IBaseScriptActionOptions<IGlobalCommand> =
+    const sharedCommandOptions: IBaseScriptActionOptions<IGlobalCommandConfig> =
       this._getSharedCommandActionOptions(commandLineConfiguration, command);
 
     this.addAction(
@@ -349,12 +349,10 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _addPhasedCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration,
-    command: IPhasedCommand
+    command: IPhasedCommandConfig
   ): void {
-    const baseCommandOptions: IBaseScriptActionOptions<IPhasedCommand> = this._getSharedCommandActionOptions(
-      commandLineConfiguration,
-      command
-    );
+    const baseCommandOptions: IBaseScriptActionOptions<IPhasedCommandConfig> =
+      this._getSharedCommandActionOptions(commandLineConfiguration, command);
 
     this.addAction(
       new PhasedScriptAction({

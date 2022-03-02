@@ -14,6 +14,7 @@ import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { RushSession } from '../../pluginFramework/RushSession';
+import type { IRushCommand } from '../../pluginFramework/RushLifeCycle';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -35,7 +36,7 @@ export interface IBaseRushActionOptions extends ICommandLineActionOptions {
  * The base class for a few specialized Rush command-line actions that
  * can be used without a rush.json configuration.
  */
-export abstract class BaseConfiglessRushAction extends CommandLineAction {
+export abstract class BaseConfiglessRushAction extends CommandLineAction implements IRushCommand {
   private _parser: RushCommandLineParser;
   private _safeForSimultaneousRushProcesses: boolean;
 
@@ -129,7 +130,11 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
 
     this._throwPluginErrorIfNeed();
 
-    await this.rushSession.hooks.initialize.promise();
+    const { hooks: sessionHooks } = this.rushSession;
+    if (sessionHooks.initialize.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.initialize.promise(this);
+    }
 
     return super.onExecute();
   }

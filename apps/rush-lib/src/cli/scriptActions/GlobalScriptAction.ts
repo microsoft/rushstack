@@ -1,20 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
+import colors from 'colors/safe';
+import type { AsyncSeriesHook } from 'tapable';
 
 import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError, Text } from '@rushstack/node-core-library';
+
+import type { IGlobalCommand } from '../../pluginFramework/RushLifeCycle';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Autoinstaller } from '../../logic/Autoinstaller';
-import { IGlobalCommand, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
+import type { IGlobalCommandConfig, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
 
 /**
  * Constructor parameters for GlobalScriptAction.
  */
-export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions<IGlobalCommand> {
+export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions<IGlobalCommandConfig> {
   shellCommand: string;
   autoinstallerName: string | undefined;
 }
@@ -29,7 +32,7 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions<IGl
  * and "rebuild" commands are also modeled as bulk commands, because they essentially just
  * invoke scripts from package.json in the same way as a custom command.
  */
-export class GlobalScriptAction extends BaseScriptAction<IGlobalCommand> {
+export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
   private readonly _shellCommand: string;
   private readonly _autoinstallerName: string;
   private readonly _autoinstallerFullPath: string;
@@ -87,6 +90,20 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommand> {
   }
 
   public async runAsync(): Promise<void> {
+    const { hooks: sessionHooks } = this.rushSession;
+    if (sessionHooks.runAnyGlobalCustomCommand.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.runAnyGlobalCustomCommand.promise(this);
+    }
+
+    const hookForAction: AsyncSeriesHook<IGlobalCommand> | undefined = sessionHooks.runGlobalCustomCommand.get(
+      this.actionName
+    );
+    if (hookForAction) {
+      // Run the more specific hook for a command with this name after the general hook
+      await hookForAction.promise(this);
+    }
+
     const additionalPathFolders: string[] =
       this.commandLineConfiguration?.additionalPathFolders.slice() || [];
 

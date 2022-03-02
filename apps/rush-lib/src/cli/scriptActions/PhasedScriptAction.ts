@@ -3,10 +3,12 @@
 
 import * as os from 'os';
 import colors from 'colors/safe';
+import type { AsyncSeriesHook } from 'tapable';
 
 import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
+import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
@@ -20,7 +22,11 @@ import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
-import type { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
+import type {
+  CommandLineConfiguration,
+  IPhase,
+  IPhasedCommandConfig
+} from '../../api/CommandLineConfiguration';
 import { OperationSelector } from '../../logic/operations/OperationSelector';
 import { Selection } from '../../logic/Selection';
 import { IOperationFactoryOptions, OperationFactory } from '../../logic/operations/ShellOperationFactory';
@@ -30,7 +36,7 @@ import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 /**
  * Constructor parameters for BulkScriptAction.
  */
-export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPhasedCommand> {
+export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPhasedCommandConfig> {
   enableParallelism: boolean;
   incremental: boolean;
   disableBuildCache: boolean;
@@ -62,7 +68,7 @@ interface IExecuteInternalOptions {
  * and "rebuild" commands are also modeled as phased commands with a single phase that invokes the npm
  * "build" script for each project.
  */
-export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
+export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _disableBuildCache: boolean;
@@ -105,6 +111,20 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
+
+    const { hooks: sessionHooks } = this.rushSession;
+    if (sessionHooks.runAnyPhasedCommand.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.runAnyPhasedCommand.promise(this);
+    }
+
+    const hookForAction: AsyncSeriesHook<IPhasedCommand> | undefined = sessionHooks.runPhasedCommand.get(
+      this.actionName
+    );
+    if (hookForAction) {
+      // Run the more specific hook for a command with this name after the general hook
+      await hookForAction.promise(this);
+    }
 
     const isQuietMode: boolean = !this._verboseParameter.value;
 
