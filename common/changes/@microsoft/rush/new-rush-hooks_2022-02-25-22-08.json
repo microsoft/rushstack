@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add plugin hooks for specific command kinds (phased, global) and allow to tap command execution by command name. Pass executing command to hook so that plugins can access it.",
+      "comment": "Add plugin hooks for global and phased commands and allow plugins to tap into command execution by command name, or into the execution of any command by command kind.",
       "type": "none"
     }
   ],

@@ -118,12 +118,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       await sessionHooks.runAnyPhasedCommand.promise(this);
     }
 
-    const specificHook: AsyncSeriesHook<IPhasedCommand> | undefined = sessionHooks.runPhasedCommand.get(
+    const hookForAction: AsyncSeriesHook<IPhasedCommand> | undefined = sessionHooks.runPhasedCommand.get(
       this.actionName
     );
-    if (specificHook) {
+    if (hookForAction) {
       // Run the more specific hook for a command with this name after the general hook
-      await specificHook.promise(this);
+      await hookForAction.promise(this);
     }
 
     const isQuietMode: boolean = !this._verboseParameter.value;

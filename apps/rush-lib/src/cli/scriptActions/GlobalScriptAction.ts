@@ -96,12 +96,12 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
       await sessionHooks.runAnyGlobalCustomCommand.promise(this);
     }
 
-    const specificHook: AsyncSeriesHook<IGlobalCommand> | undefined = sessionHooks.runGlobalCustomCommand.get(
+    const hookForAction: AsyncSeriesHook<IGlobalCommand> | undefined = sessionHooks.runGlobalCustomCommand.get(
       this.actionName
     );
-    if (specificHook) {
+    if (hookForAction) {
       // Run the more specific hook for a command with this name after the general hook
-      await specificHook.promise(this);
+      await hookForAction.promise(this);
     }
 
     const additionalPathFolders: string[] =
