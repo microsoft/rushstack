@@ -147,7 +147,12 @@ export class AmazonS3Client {
           hasNetworkError: false,
           response: undefined
         };
-      } else if (response.status === 403 && !this._credentials) {
+      } else if (
+        (response.status === 400 || response.status === 401 || response.status === 403) &&
+        !this._credentials
+      ) {
+        // unauthorized due to not providing credentials,
+        // silence error for better DX when e.g. running locally without credentials
         return {
           hasNetworkError: false,
           response: undefined

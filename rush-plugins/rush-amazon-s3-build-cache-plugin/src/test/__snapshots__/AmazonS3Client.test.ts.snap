@@ -425,7 +425,7 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object Without credentials Handles an unexpected error 2`] = `[Error: Amazon S3 responded with status code 500 (Server Error)]`;
 
-exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object 1`] = `
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 400 1`] = `
 Array [
   "http://localhost:9000/abc123",
   Object {
@@ -444,7 +444,7 @@ Array [
 ]
 `;
 
-exports[`AmazonS3Client Making requests Getting an object Without credentials should not retry on 400 error 1`] = `
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 401 1`] = `
 Array [
   "http://localhost:9000/abc123",
   Object {
@@ -463,9 +463,7 @@ Array [
 ]
 `;
 
-exports[`AmazonS3Client Making requests Getting an object Without credentials should not retry on 400 error 2`] = `[Error: Amazon S3 responded with status code 400 (Bad Request)]`;
-
-exports[`AmazonS3Client Making requests Getting an object Without credentials should not retry on 401 error 1`] = `
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 403 1`] = `
 Array [
   "http://localhost:9000/abc123",
   Object {
@@ -483,8 +481,6 @@ Array [
   },
 ]
 `;
-
-exports[`AmazonS3Client Making requests Getting an object Without credentials should not retry on 401 error 2`] = `[Error: Amazon S3 responded with status code 401 (Unauthorized)]`;
 
 exports[`AmazonS3Client Making requests Uploading an object Throws an error if credentials are not provided 1`] = `[TypeError: Cannot read properties of undefined (reading 'body')]`;
 

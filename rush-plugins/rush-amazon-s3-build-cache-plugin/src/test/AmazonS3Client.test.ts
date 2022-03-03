@@ -267,6 +267,7 @@ describe(AmazonS3Client.name, () => {
         expect(spy).toHaveBeenCalledTimes(1);
       }
       expect(spy.mock.calls[0]).toMatchSnapshot();
+      spy.mockRestore();
 
       if (error) {
         throw error;
@@ -278,7 +279,7 @@ describe(AmazonS3Client.name, () => {
     async function runAndExpectErrorAsync(fnAsync: () => Promise<unknown>): Promise<void> {
       try {
         await fnAsync();
-        fail('Expected an error to be thrown');
+        throw new Error('Expected an error to be thrown');
       } catch (e) {
         // The way an error is formatted changed in Node 16. Normalize, so snapshots match.
         (e as Error).message = (e as Error).message.replace(
@@ -395,75 +396,79 @@ describe(AmazonS3Client.name, () => {
           spy.mockRestore();
         });
 
-        it('should not retry on 400 error', async () => {
-          const spy = jest.spyOn(global, 'setTimeout');
-          await runAndExpectErrorAsync(
-            async () =>
-              await makeGetRequestAsync(
-                credentials,
-                DUMMY_OPTIONS,
-                'abc123',
-                {
-                  responseInit: {
-                    status: 400,
-                    statusText: 'Bad Request'
+        if (credentials) {
+          it('should not retry on 400 error', async () => {
+            const spy = jest.spyOn(global, 'setTimeout');
+            await runAndExpectErrorAsync(
+              async () =>
+                await makeGetRequestAsync(
+                  credentials,
+                  DUMMY_OPTIONS,
+                  'abc123',
+                  {
+                    responseInit: {
+                      status: 400,
+                      statusText: 'Bad Request'
+                    }
+                  },
+                  {
+                    shouldRetry: false
                   }
-                },
-                {
-                  shouldRetry: false
-                }
-              )
-          );
-          expect(setTimeout).toHaveBeenCalledTimes(0);
-          spy.mockReset();
-          spy.mockRestore();
-        });
+                )
+            );
+            expect(setTimeout).toHaveBeenCalledTimes(0);
+            spy.mockReset();
+            spy.mockRestore();
+          });
 
-        it('should not retry on 401 error', async () => {
-          const spy = jest.spyOn(global, 'setTimeout');
-          await runAndExpectErrorAsync(
-            async () =>
-              await makeGetRequestAsync(
-                credentials,
-                DUMMY_OPTIONS,
-                'abc123',
-                {
-                  responseInit: {
-                    status: 401,
-                    statusText: 'Unauthorized'
+          it('should not retry on 401 error', async () => {
+            const spy = jest.spyOn(global, 'setTimeout');
+            await runAndExpectErrorAsync(
+              async () =>
+                await makeGetRequestAsync(
+                  credentials,
+                  DUMMY_OPTIONS,
+                  'abc123',
+                  {
+                    responseInit: {
+                      status: 401,
+                      statusText: 'Unauthorized'
+                    }
+                  },
+                  {
+                    shouldRetry: false
                   }
-                },
-                {
-                  shouldRetry: false
-                }
-              )
-          );
-          expect(setTimeout).toHaveBeenCalledTimes(0);
-          spy.mockReset();
-          spy.mockRestore();
-        });
+                )
+            );
+            expect(setTimeout).toHaveBeenCalledTimes(0);
+            spy.mockReset();
+            spy.mockRestore();
+          });
+        }
       }
 
       describe('Without credentials', () => {
         registerGetTests(undefined);
 
-        it('Handles missing credentials object', async () => {
-          const result: Buffer | undefined = await makeGetRequestAsync(
-            undefined,
-            DUMMY_OPTIONS,
-            'abc123',
-            {
-              responseInit: {
-                status: 403,
-                statusText: 'Unauthorized'
+        for (const code of [400, 401, 403]) {
+          it(`Handles missing credentials object when ${code}`, async () => {
+            const result: Buffer | undefined = await makeGetRequestAsync(
+              undefined,
+              DUMMY_OPTIONS,
+              'abc123',
+              {
+                responseInit: {
+                  status: code,
+                  statusText: 'Unauthorized'
+                }
+              },
+              {
+                shouldRetry: false
               }
-            },
-            {
-              shouldRetry: false
-            }
-          );
-          expect(result).toBeUndefined();
-        });
+            );
+            expect(result).toBeUndefined();
+          });
+        }
       });
 
       function registerGetWithCredentialsTests(credentials: IAmazonS3Credentials): void {
