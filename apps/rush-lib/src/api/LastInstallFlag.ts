@@ -137,7 +137,8 @@ export class LastInstallFlagFactory {
     const currentState: JsonObject = {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion
+      packageManagerVersion: rushConfiguration.packageManagerToolVersion,
+      rushJsonFolder: rushConfiguration.rushJsonFolder
     };
 
     if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {

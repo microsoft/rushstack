@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Reinstall automatically if monorepo folder is moved",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

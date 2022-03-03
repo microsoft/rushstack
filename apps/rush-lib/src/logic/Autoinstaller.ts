@@ -95,7 +95,8 @@ export class Autoinstaller {
       node: process.versions.node,
       packageManager: this._rushConfiguration.packageManager,
       packageManagerVersion: this._rushConfiguration.packageManagerToolVersion,
-      packageJson: packageJson
+      packageJson: packageJson,
+      rushJsonFolder: this._rushConfiguration.rushJsonFolder
     });
 
     if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
