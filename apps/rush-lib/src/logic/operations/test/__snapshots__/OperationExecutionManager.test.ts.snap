@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OperationExecutionManager Constructor throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of 'tequila', expected a number or 'max'"`;
+exports[`OperationExecutionManager Constructor throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of 'tequila', expected a number, a percentage, or 'max'"`;
 
 exports[`OperationExecutionManager Error logging printedStderrAfterError 1`] = `"An error occurred."`;
 

@@ -78,6 +78,22 @@ describe(OperationExecutionManager.name, () => {
     });
   });
 
+  describe('Constructor', () => {
+    it('createsWithPercentageBasedParallelism', () => {
+      expect(
+        () =>
+          new OperationExecutionManager(new Set(), {
+            quietMode: false,
+            debugMode: false,
+            parallelism: '50%',
+            changedProjectsOnly: false,
+            destination: mockWritable,
+            repoCommandLineConfiguration: undefined!
+          })
+      ).toBeInstanceOf(Function);
+    });
+  });
+
   describe('Error logging', () => {
     beforeEach(() => {
       executionManagerOptions = {

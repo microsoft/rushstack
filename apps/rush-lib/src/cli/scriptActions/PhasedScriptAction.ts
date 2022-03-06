@@ -342,9 +342,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
         description:
           'Specifies the maximum number of concurrent processes to launch during a build.' +
-          ' The COUNT should be a positive integer or else the word "max" to specify a count that is equal to' +
-          ' the number of CPU cores. If this parameter is omitted, then the default value depends on the' +
-          ' operating system and number of CPU cores.'
+          ' The COUNT should be a positive integer, a percentage value (eg. "50%") or the word "max"' +
+          ' to specify a count that is equal to the number of CPU cores. If this parameter is omitted,' +
+          ' then the default value depends on the operating system and number of CPU cores.'
       });
       this._timelineParameter = this.defineFlagParameter({
         parameterLongName: '--timeline',
