@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colors, IColorableSequence, ITerminal } from '@rushstack/node-core-library';
+import { Async, Colors, IColorableSequence, ITerminal } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
 
@@ -29,10 +29,10 @@ interface IIsoDateString {
   dateTime: string;
 }
 
-type RetriableRequestResponse<T> =
+type RetryableRequestResponse<T> =
   | {
       hasNetworkError: true;
-      error: unknown;
+      error: Error;
     }
   | {
       hasNetworkError: false;
@@ -134,8 +134,7 @@ export class AmazonS3Client {
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
     this._writeDebugLine('Reading object from S3');
-    type Response = RetriableRequestResponse<Buffer | undefined>;
-    const sendRequest: () => Promise<Response> = async (): Promise<Response> => {
+    return await this._sendCacheRequestWithRetries(async () => {
       const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
       if (response.ok) {
         return {
@@ -158,17 +157,15 @@ export class AmazonS3Client {
           response: undefined
         };
       } else if (response.status === 400 || response.status === 401 || response.status === 403) {
-        this._throwS3Error(response, await this._safeReadResponseText(response));
+        throw await this._getS3ErrorAsync(response);
       } else {
-        const error: Error = this._getS3Error(response, await this._safeReadResponseText(response));
+        const error: Error = await this._getS3ErrorAsync(response);
         return {
           hasNetworkError: true,
           error
         };
       }
-    };
-
-    return await this._sendCacheRequestWithRetries(sendRequest);
+    });
   }
 
   public async uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void> {
@@ -176,23 +173,19 @@ export class AmazonS3Client {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
-    type Response = RetriableRequestResponse<void>;
-
-    const sendRequest: () => Promise<Response> = async (): Promise<Response> => {
+    await this._sendCacheRequestWithRetries(async () => {
       const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
       if (!response.ok) {
         return {
           hasNetworkError: true,
-          error: this._getS3Error(response, await this._safeReadResponseText(response))
+          error: await this._getS3ErrorAsync(response)
         };
       }
       return {
         hasNetworkError: false,
         response: undefined
       };
-    };
-
-    await this._sendCacheRequestWithRetries(sendRequest);
+    });
   }
 
   private _writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
@@ -374,16 +367,13 @@ export class AmazonS3Client {
     return undefined;
   }
 
-  private _getS3Error(response: fetch.Response, text: string | undefined): Error {
+  private async _getS3ErrorAsync(response: fetch.Response): Promise<Error> {
+    const text: string | undefined = await this._safeReadResponseText(response);
     return new Error(
       `Amazon S3 responded with status code ${response.status} (${response.statusText})${
         text ? `\n${text}` : ''
       }`
     );
-  }
-
-  private _throwS3Error(response: fetch.Response, text: string | undefined): never {
-    throw this._getS3Error(response, text);
   }
 
   /**
@@ -446,9 +436,9 @@ export class AmazonS3Client {
   }
 
   private async _sendCacheRequestWithRetries<T>(
-    sendRequest: () => Promise<RetriableRequestResponse<T>>
+    sendRequest: () => Promise<RetryableRequestResponse<T>>
   ): Promise<T> {
-    const response: RetriableRequestResponse<T> = await sendRequest();
+    const response: RetryableRequestResponse<T> = await sendRequest();
 
     const log: (...messageParts: (string | IColorableSequence)[]) => void = this._writeDebugLine.bind(this);
 
@@ -464,22 +454,15 @@ export class AmazonS3Client {
           delay = Math.min(maxRetryDelayInMs, delay);
 
           log(`Will retry request in ${delay}s...`);
-          await new Promise<void>((resolve) => {
-            setTimeout(() => {
-              resolve();
-            }, delay);
-          });
-
-          const response: RetriableRequestResponse<T> = await sendRequest();
+          await Async.sleep(delay);
+          const response: RetryableRequestResponse<T> = await sendRequest();
 
           if (response.hasNetworkError) {
             if (retryAttempt < maxTries - 1) {
               log('The retried request failed, will try again');
               return retry(retryAttempt + 1);
             } else {
-              log(
-                'The retried request failed and has reached the maxTries limit, the cloud service is not accessible'
-              );
+              log('The retried request failed and has reached the maxTries limit');
               throw response.error;
             }
           }
@@ -492,6 +475,7 @@ export class AmazonS3Client {
         throw response.error;
       }
     }
+
     return response.response;
   }
 }
