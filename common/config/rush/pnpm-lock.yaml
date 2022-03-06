@@ -643,6 +643,34 @@ importers:
       eslint: 7.30.0
       typescript: 4.6.3
 
+  ../../build-tests/hashed-folder-copy-plugin-test:
+    specifiers:
+      '@rushstack/hashed-folder-copy-plugin': workspace:*
+      '@rushstack/module-minifier-plugin': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/set-webpack-public-path-plugin': workspace:*
+      '@types/webpack-env': 1.13.0
+      html-webpack-plugin: ~4.5.2
+      ts-loader: 6.0.0
+      typescript: ~4.6.3
+      webpack: ~4.44.2
+      webpack-bundle-analyzer: ~4.5.0
+      webpack-cli: ~3.3.2
+      webpack-dev-server: ~3.11.0
+    dependencies:
+      '@rushstack/hashed-folder-copy-plugin': link:../../webpack/hashed-folder-copy-plugin
+      '@rushstack/module-minifier-plugin': link:../../webpack/module-minifier-plugin
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
+      '@types/webpack-env': 1.13.0
+      html-webpack-plugin: 4.5.2_webpack@4.44.2
+      ts-loader: 6.0.0_typescript@4.6.3
+      typescript: 4.6.3
+      webpack: 4.44.2_webpack-cli@3.3.12
+      webpack-bundle-analyzer: 4.5.0
+      webpack-cli: 3.3.12_webpack@4.44.2
+      webpack-dev-server: 3.11.3_93ca2875a658e9d1552850624e6b91c7
+
   ../../build-tests/heft-action-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -2137,6 +2165,7 @@ importers:
       '@types/node': 12.20.24
       '@types/webpack': 4.41.24
       glob: ~7.0.5
+      webpack: ~4.44.2
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       glob: 7.0.6
@@ -2149,6 +2178,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/webpack': 4.41.24
+      webpack: 4.44.2
 
   ../../webpack/loader-load-themed-styles:
     specifiers:

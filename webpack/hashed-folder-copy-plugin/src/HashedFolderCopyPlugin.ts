@@ -5,13 +5,15 @@ import * as path from 'path';
 import * as glob from 'glob';
 import crypto from 'crypto';
 import type * as webpack from 'webpack';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, Import } from '@rushstack/node-core-library';
 import type * as EnhancedResolve from 'enhanced-resolve';
 
 interface IParserHelpers {
   evaluateToString: (type: string) => () => void;
   toConstantDependency: (parser: webpack.compilation.normalModuleFactory.Parser, type: string) => () => void;
 }
+
+const ParserHelpers: IParserHelpers = require('webpack/lib/ParserHelpers');
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 interface ConstDependency {
@@ -21,9 +23,6 @@ interface ConstDependency {
 interface IConstDependencyType {
   new (expression: string, range: unknown, requireWebpackRequire: boolean): ConstDependency;
 }
-
-const ParserHelpers: IParserHelpers = require('webpack/lib/ParserHelpers');
-const ConstDependency: IConstDependencyType = require('webpack/lib/dependencies/ConstDependency');
 
 const PLUGIN_NAME: string = 'hashed-folder-copy-plugin';
 
@@ -113,10 +112,36 @@ interface IExtendedNormalModuleFactory extends webpack.compilation.NormalModuleF
   getResolver(type: 'normal', options: { useSyncFileSystemCalls: boolean }): IResolver;
 }
 
+const WEBPACK_CONST_DEPENDENCY_MODULE_PATH: string = 'webpack/lib/dependencies/ConstDependency';
+
 /**
  * @public
  */
 export class HashedFolderCopyPlugin implements webpack.Plugin {
+  private readonly _ConstDependency: IConstDependencyType;
+
+  public constructor() {
+    // Try to resolve webpack relative to that module that loaded this plugin.
+    // Dependency templates are looked up by their constructor instance, so this
+    // must be able to resolve the same `ConstDependency` module that the
+    // project is using for compilation.
+    let constDependencyModulePath: string | undefined;
+    const parentModulePath: string | undefined = module.parent?.parent?.path;
+    if (parentModulePath) {
+      try {
+        constDependencyModulePath = Import.resolveModule({
+          modulePath: WEBPACK_CONST_DEPENDENCY_MODULE_PATH,
+          baseFolderPath: parentModulePath
+        });
+      } catch (e) {
+        // Ignore
+      }
+    }
+
+    // Failing that, resolve relative to this module.
+    this._ConstDependency = require(constDependencyModulePath || WEBPACK_CONST_DEPENDENCY_MODULE_PATH);
+  }
+
   public apply(compiler: webpack.Compiler): void {
     compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
       const normalResolver: IResolver = (normalModuleFactory as IExtendedNormalModuleFactory).getResolver(
@@ -181,7 +206,7 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
             });
           }
 
-          const errorDependency: ConstDependency = new ConstDependency(
+          const errorDependency: ConstDependency = new this._ConstDependency(
             `/* ${EXPRESSION_NAME} */ ${dependencyText}`,
             expression.range,
             false

@@ -750,6 +750,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "hashed-folder-copy-plugin-test",
+      "projectFolder": "build-tests/hashed-folder-copy-plugin-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     {
       "packageName": "install-test-workspace",

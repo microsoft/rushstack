@@ -99,6 +99,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/hashed-folder-copy-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft",
       "allowedCategories": [ "libraries", "tests" ]
     },

@@ -8,6 +8,7 @@ import type * as webpack from 'webpack';
 
 // @public (undocumented)
 export class HashedFolderCopyPlugin implements webpack.Plugin {
+    constructor();
     // (undocumented)
     apply(compiler: webpack.Compiler): void;
 }
