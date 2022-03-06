@@ -21,7 +21,7 @@ export interface IRequireFolderOptions {
 
 // @public
 export interface IRequireFolderSource {
-    globPaths: string[];
+    globPatterns: string[];
     globsBase: string;
 }
 

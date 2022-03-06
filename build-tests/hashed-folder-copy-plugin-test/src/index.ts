@@ -7,7 +7,7 @@ const ASSETS_BASE_URL: string = requireFolder({
   sources: [
     {
       globsBase: '../assets',
-      globPaths: ['**/*']
+      globPatterns: ['**/*']
     }
   ]
 });

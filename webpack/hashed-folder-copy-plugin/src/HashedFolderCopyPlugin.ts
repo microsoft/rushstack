@@ -42,7 +42,7 @@ export interface IRequireFolderSource {
   /**
    * Glob patterns matching assets to be copied
    */
-  globPaths: string[];
+  globPatterns: string[];
 }
 
 /**
@@ -179,12 +179,12 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
                   if (!source.globsBase || typeof source.globsBase !== 'string') {
                     errorMessage = 'Each "sources" element must have a string "globsBase" property';
                   } else if (
-                    !source.globPaths ||
-                    !Array.isArray(source.globPaths) ||
-                    source.globPaths.some((globPath) => !globPath || typeof globPath !== 'string')
+                    !source.globPatterns ||
+                    !Array.isArray(source.globPatterns) ||
+                    source.globPatterns.some((globPattern) => !globPattern || typeof globPattern !== 'string')
                   ) {
                     errorMessage =
-                      'Each "sources" element must have a "globPaths" property that is an array of glob strings';
+                      'Each "sources" element must have a "globPatterns" property that is an array of glob strings';
                   }
                 }
               }
@@ -236,7 +236,7 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
     const assetsToAdd: Map<string, IAsset> = new Map<string, IAsset>();
 
     for (const source of requireFolderOptions.sources) {
-      const { globsBase, globPaths } = source;
+      const { globsBase, globPatterns } = source;
 
       let resolvedGlobsBase: string;
       if (globsBase.startsWith('.')) {
@@ -282,8 +282,8 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
         resolvedGlobsBase = path.join(packagePath, pathInsidePackage);
       }
 
-      for (const globPath of globPaths) {
-        const globResults: string[] = glob.sync(globPath, { cwd: resolvedGlobsBase });
+      for (const globPattern of globPatterns) {
+        const globResults: string[] = glob.sync(globPattern, { cwd: resolvedGlobsBase });
         for (const globResult of globResults) {
           const globResultFullPath: string = path.resolve(resolvedGlobsBase, globResult);
 
