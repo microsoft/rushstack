@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "comment": "Initial project publish.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin"
+}
