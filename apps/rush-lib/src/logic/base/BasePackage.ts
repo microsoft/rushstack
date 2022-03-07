@@ -186,12 +186,12 @@ export class BasePackage {
     if (child.parent) {
       throw new Error('Child already has a parent');
     }
-    if (this._childrenByName.has(child.name)) {
-      throw new Error('Child already exists');
+    if (this._childrenByName.has(child.installedName)) {
+      throw new Error(`Child already exists: ${child.installedName}`);
     }
     child.parent = this;
     this.children.push(child);
-    this._childrenByName.set(child.name, child);
+    this._childrenByName.set(child.installedName, child);
   }
 
   public getChildByName(childPackageName: string): BasePackage | undefined {
