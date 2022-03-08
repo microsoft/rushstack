@@ -140,12 +140,13 @@ Optional arguments:
   -p COUNT, --parallelism COUNT
                         Specifies the maximum number of concurrent processes 
                         to launch during a build. The COUNT should be a 
-                        positive integer or else the word \\"max\\" to specify a 
-                        count that is equal to the number of CPU cores. If 
-                        this parameter is omitted, then the default value 
-                        depends on the operating system and number of CPU 
-                        cores. This parameter may alternatively be specified 
-                        via the RUSH_PARALLELISM environment variable.
+                        positive integer, a percentage value (eg. \\"50%\\") or 
+                        the word \\"max\\" to specify a count that is equal to 
+                        the number of CPU cores. If this parameter is omitted,
+                         then the default value depends on the operating 
+                        system and number of CPU cores. This parameter may 
+                        alternatively be specified via the RUSH_PARALLELISM 
+                        environment variable.
   --timeline            After the build is complete, print additional 
                         statistics and CPU usage information, including an 
                         ASCII chart of the start and stop times for each 
@@ -383,12 +384,13 @@ Optional arguments:
   -p COUNT, --parallelism COUNT
                         Specifies the maximum number of concurrent processes 
                         to launch during a build. The COUNT should be a 
-                        positive integer or else the word \\"max\\" to specify a 
-                        count that is equal to the number of CPU cores. If 
-                        this parameter is omitted, then the default value 
-                        depends on the operating system and number of CPU 
-                        cores. This parameter may alternatively be specified 
-                        via the RUSH_PARALLELISM environment variable.
+                        positive integer, a percentage value (eg. \\"50%\\") or 
+                        the word \\"max\\" to specify a count that is equal to 
+                        the number of CPU cores. If this parameter is omitted,
+                         then the default value depends on the operating 
+                        system and number of CPU cores. This parameter may 
+                        alternatively be specified via the RUSH_PARALLELISM 
+                        environment variable.
   --timeline            After the build is complete, print additional 
                         statistics and CPU usage information, including an 
                         ASCII chart of the start and stop times for each 
@@ -933,12 +935,13 @@ Optional arguments:
   -p COUNT, --parallelism COUNT
                         Specifies the maximum number of concurrent processes 
                         to launch during a build. The COUNT should be a 
-                        positive integer or else the word \\"max\\" to specify a 
-                        count that is equal to the number of CPU cores. If 
-                        this parameter is omitted, then the default value 
-                        depends on the operating system and number of CPU 
-                        cores. This parameter may alternatively be specified 
-                        via the RUSH_PARALLELISM environment variable.
+                        positive integer, a percentage value (eg. \\"50%\\") or 
+                        the word \\"max\\" to specify a count that is equal to 
+                        the number of CPU cores. If this parameter is omitted,
+                         then the default value depends on the operating 
+                        system and number of CPU cores. This parameter may 
+                        alternatively be specified via the RUSH_PARALLELISM 
+                        environment variable.
   --timeline            After the build is complete, print additional 
                         statistics and CPU usage information, including an 
                         ASCII chart of the start and stop times for each 

@@ -159,22 +159,21 @@ export class OperationExecutionManager {
       } else {
         const parsed: number = parseInt(parallelism, 10);
 
-        if (isNaN(parsed)) {
+        let parallelismInt: number = parsed > 0 ? parsed : 1;
+
+        if (typeof parallelism === 'string' && parallelism.trim().endsWith('%')) {
+          if (parsed <= 0 || parsed > 100) {
+            throw new Error(
+              `Invalid percentage value of '${parallelism}', value cannot be less than '0%' or more than '100%'`
+            );
+          }
+
+          const workers: number = Math.floor((parsed / 100) * numberOfCores);
+          parallelismInt = Math.max(workers, 1);
+        } else if (isNaN(parsed)) {
           throw new Error(
             `Invalid parallelism value of '${parallelism}', expected a number, a percentage, or 'max'`
           );
-        }
-
-        let parallelismInt: number = parsed > 0 ? parsed : 1;
-
-        if (
-          typeof parallelism === 'string' &&
-          parallelism.trim().endsWith('%') &&
-          parsed > 0 &&
-          parsed <= 100
-        ) {
-          const workers: number = Math.floor((parsed / 100) * numberOfCores);
-          parallelismInt = Math.max(workers, 1);
         }
 
         this._parallelism = parallelismInt;

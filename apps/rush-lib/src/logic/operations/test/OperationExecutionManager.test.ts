@@ -76,9 +76,7 @@ describe(OperationExecutionManager.name, () => {
           })
       ).toThrowErrorMatchingSnapshot();
     });
-  });
 
-  describe('Constructor', () => {
     it('createsWithPercentageBasedParallelism', () => {
       expect(
         () =>
@@ -86,11 +84,25 @@ describe(OperationExecutionManager.name, () => {
             quietMode: false,
             debugMode: false,
             parallelism: '50%',
+            showTimeline: false,
             changedProjectsOnly: false,
-            destination: mockWritable,
-            repoCommandLineConfiguration: undefined!
+            destination: mockWritable
           })
       ).toBeInstanceOf(Function);
+    });
+
+    it('throwsErrorOnInvalidParallelismPercentage', () => {
+      expect(
+        () =>
+          new OperationExecutionManager(new Set(), {
+            quietMode: false,
+            debugMode: false,
+            parallelism: '200%',
+            showTimeline: false,
+            changedProjectsOnly: false,
+            destination: mockWritable
+          })
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 

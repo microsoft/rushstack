@@ -2,6 +2,8 @@
 
 exports[`OperationExecutionManager Constructor throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of 'tequila', expected a number, a percentage, or 'max'"`;
 
+exports[`OperationExecutionManager Constructor throwsErrorOnInvalidParallelismPercentage 1`] = `"Invalid percentage value of '200%', value cannot be less than '0%' or more than '100%'"`;
+
 exports[`OperationExecutionManager Error logging printedStderrAfterError 1`] = `"An error occurred."`;
 
 exports[`OperationExecutionManager Error logging printedStderrAfterError 2`] = `
