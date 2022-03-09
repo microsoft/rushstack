@@ -69,7 +69,8 @@ export class AsyncOperationQueue
       } else if (operation.dependencies.size === 0) {
         // This task is ready to process, hand it to the iterator.
         queue.splice(i, 1);
-        waitingIterators.pop()!({
+        // Needs to have queue semantics, otherwise tools that iterate it get confused
+        waitingIterators.shift()!({
           value: operation,
           done: false
         });

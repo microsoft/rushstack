@@ -10,13 +10,12 @@ import {
   TextRewriterTransform
 } from '@rushstack/terminal';
 import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { AlreadyReportedError, NewlineKind, InternalError, Sort } from '@rushstack/node-core-library';
+import { AlreadyReportedError, NewlineKind, InternalError, Sort, Async } from '@rushstack/node-core-library';
 
 import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
-import { OperationError } from './OperationError';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -205,18 +204,22 @@ export class OperationExecutionManager {
     };
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(this._executionRecords, prioritySort);
 
-    // Iterate in parallel with maxParallelism concurrent lanes
-    await Promise.all(
-      Array.from({ length: maxParallelism }, async (unused: undefined, index: number): Promise<void> => {
-        // laneId can be used in logging to examine concurrency
-        const laneId: number = index + 1;
-        // The executionQueue is a singular async iterable that stalls until an operation is available, and marks itself
-        // done when the queue is empty.
-        for await (const operations of executionQueue) {
-          // Take an operation, execute it, wait for it to finish, wait for a new operations
-          await this._executeOperationAsync(operations, laneId);
-        }
-      })
+    // This function is a callback because it may write to the collatedWriter before
+    // operation.executeAsync returns (and cleans up the writer)
+    const onOperationComplete: (record: OperationExecutionRecord) => void = (
+      record: OperationExecutionRecord
+    ) => {
+      this._onOperationComplete(record);
+    };
+
+    await Async.forEachAsync(
+      executionQueue,
+      async (operation: OperationExecutionRecord) => {
+        await operation.executeAsync(onOperationComplete);
+      },
+      {
+        concurrency: maxParallelism
+      }
     );
 
     this._printOperationStatus();
@@ -230,40 +233,18 @@ export class OperationExecutionManager {
     }
   }
 
-  private async _executeOperationAsync(operation: OperationExecutionRecord, tid: number): Promise<void> {
-    let result: OperationStatus = (operation.status = OperationStatus.Executing);
-    operation.stopwatch.start();
-
-    try {
-      result = await operation.runner.executeAsync(operation);
-
-      // Only perform global state updates. Internal state updates are handled by Operation itself.
-      this._handleOperationResult(operation, result);
-    } catch (error) {
-      const status: OperationStatus = OperationStatus.Failure;
-      operation.error = error as OperationError;
-      this._handleOperationResult(operation, status);
-    } finally {
-      // Delegate cleanup.
-      // Calling `operation.collatedWriter` creates it if it didn't exist.
-      operation.finish();
-    }
-  }
-
   /**
-   * Applies the new status to an OperationExecutionRecord and propagates any relevant effects.
+   * Handles the result of the operation and propagates any relevant effects.
    */
-  private _handleOperationResult(record: OperationExecutionRecord, result: OperationStatus): void {
-    record.status = result;
-
-    const { runner, name } = record;
+  private _onOperationComplete(record: OperationExecutionRecord): void {
+    const { runner, name, status } = record;
 
     let blockCacheWrite: boolean = !runner.isCacheWriteAllowed;
     let blockSkip: boolean = !runner.isSkipAllowed;
 
     const silent: boolean = runner.silent;
 
-    switch (result) {
+    switch (status) {
       /**
        * This operation failed. Mark it as such and all reachable dependents as blocked.
        */

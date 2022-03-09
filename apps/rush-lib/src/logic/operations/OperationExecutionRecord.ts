@@ -111,9 +111,23 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._collatedWriter;
   }
 
-  public finish(): void {
-    this._collatedWriter?.close();
-    this.stdioSummarizer.close();
-    this.stopwatch.stop();
+  public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {
+    this.status = OperationStatus.Executing;
+    this.stopwatch.start();
+
+    try {
+      this.status = await this.runner.executeAsync(this);
+      // Delegate global state reporting
+      onResult(this);
+    } catch (error) {
+      this.status = OperationStatus.Failure;
+      this.error = error as OperationError;
+      // Delegate global state reporting
+      onResult(this);
+    } finally {
+      this._collatedWriter?.close();
+      this.stdioSummarizer.close();
+      this.stopwatch.stop();
+    }
   }
 }
