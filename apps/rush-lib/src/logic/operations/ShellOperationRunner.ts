@@ -49,6 +49,7 @@ export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  commandLineConfiguration: CommandLineConfiguration;
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
@@ -78,15 +79,17 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
 export class ShellOperationRunner implements IOperationRunner {
   public readonly name: string;
 
-  public readonly isSkipAllowed: boolean;
-  public hadEmptyScript: boolean = false;
-  public readonly warningsAreAllowed: boolean;
   public isCacheWriteAllowed: boolean = false;
+  public isSkipAllowed: boolean;
+  public readonly reportTiming: boolean = true;
+  public readonly silent: boolean = false;
+  public readonly warningsAreAllowed: boolean;
 
   private readonly _rushProject: RushConfigurationProject;
   private readonly _phase: IPhase;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  private readonly _commandLineConfiguration: CommandLineConfiguration;
   private readonly _commandName: string;
   private readonly _commandToRun: string;
   private readonly _isCacheReadAllowed: boolean;
@@ -108,6 +111,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this._phase = phase;
     this._rushConfiguration = options.rushConfiguration;
     this._buildCacheConfiguration = options.buildCacheConfiguration;
+    this._commandLineConfiguration = options.commandLineConfiguration;
     this._commandName = phase.name;
     this._commandToRun = options.commandToRun;
     this._isCacheReadAllowed = options.isIncrementalBuildAllowed;
@@ -121,9 +125,6 @@ export class ShellOperationRunner implements IOperationRunner {
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     try {
-      if (!this._commandToRun) {
-        this.hadEmptyScript = true;
-      }
       return await this._executeAsync(context);
     } catch (error) {
       throw new OperationError('executing', (error as Error).message);
@@ -260,8 +261,7 @@ export class ShellOperationRunner implements IOperationRunner {
       if (this._isCacheReadAllowed) {
         const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
           terminal,
-          trackedFiles,
-          context.repoCommandLineConfiguration
+          trackedFiles
         );
 
         buildCacheReadAttempted = !!projectBuildCache;
@@ -369,13 +369,9 @@ export class ShellOperationRunner implements IOperationRunner {
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
         const setCacheEntryPromise: Promise<boolean> | undefined = this.isCacheWriteAllowed
-          ? (
-              await this._tryGetProjectBuildCacheAsync(
-                terminal,
-                trackedFiles,
-                context.repoCommandLineConfiguration
-              )
-            )?.trySetCacheEntryAsync(terminal)
+          ? (await this._tryGetProjectBuildCacheAsync(terminal, trackedFiles))?.trySetCacheEntryAsync(
+              terminal
+            )
           : undefined;
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
@@ -403,8 +399,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
   private async _tryGetProjectBuildCacheAsync(
     terminal: ITerminal,
-    trackedProjectFiles: string[] | undefined,
-    commandLineConfiguration: CommandLineConfiguration
+    trackedProjectFiles: string[] | undefined
   ): Promise<ProjectBuildCache | undefined> {
     if (this._projectBuildCache === UNINITIALIZED) {
       this._projectBuildCache = undefined;
@@ -413,7 +408,7 @@ export class ShellOperationRunner implements IOperationRunner {
         const projectConfiguration: RushProjectConfiguration | undefined =
           await RushProjectConfiguration.tryLoadForProjectAsync(
             this._rushProject,
-            commandLineConfiguration,
+            this._commandLineConfiguration,
             terminal
           );
         if (projectConfiguration) {

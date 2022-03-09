@@ -1,30 +1,52 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { OperationStatus } from './OperationStatus';
-import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import type { OperationStatus } from './OperationStatus';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+
+/**
+ *
+ */
+export interface INullOperationRunnerParams {
+  /**
+   * The name to report in logs.
+   */
+  name: string;
+  /**
+   * The result to report from the runner.
+   */
+  result: OperationStatus;
+  /**
+   * If true, the operation will not log anything or be tracked in statistics.
+   */
+  silent: boolean;
+}
 
 /**
  * Implementation of `IOperationRunner` for operations that require no work, such as empty scripts,
- * or operations that are skipped by filters.
+ * skipped operations, or blocked operations.
  */
 export class NullOperationRunner implements IOperationRunner {
-  private readonly _result: OperationStatus;
   public readonly name: string;
-  public readonly hadEmptyScript: boolean = true;
-  // The operation may never be skipped; it doesn't do anything anyway
-  public isSkipAllowed: boolean = false;
-  // The operation is a no-op, so skip writing an empty cache entry
-  public isCacheWriteAllowed: boolean = false;
+  // This operation does nothing, so timing is meaningless
+  public readonly reportTiming: boolean = false;
+  public readonly silent: boolean;
+  // The operation may be skipped; it doesn't do anything anyway
+  public isSkipAllowed: boolean = true;
+  // The operation is a no-op, so is cacheable.
+  public isCacheWriteAllowed: boolean = true;
   // Nothing will get logged, no point allowing warnings
   public readonly warningsAreAllowed: boolean = false;
 
-  public constructor(name: string, result: OperationStatus) {
+  public readonly result: OperationStatus;
+
+  public constructor({ name, result, silent }: INullOperationRunnerParams) {
     this.name = name;
-    this._result = result;
+    this.result = result;
+    this.silent = silent;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    return this._result;
+    return this.result;
   }
 }

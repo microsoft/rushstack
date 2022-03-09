@@ -2,26 +2,29 @@
 // See LICENSE in the project root for license information.
 
 import { Operation } from '../Operation';
-import { OperationStatus } from '../OperationStatus';
+import { IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
 import { MockOperationRunner } from './MockOperationRunner';
 import { AsyncOperationQueue, IOperationSortFunction } from '../AsyncOperationQueue';
 
-function addDependency(dependent: Operation, dependency: Operation): void {
-  dependent.dependencies.add(dependency);
+function addDependency(consumer: OperationExecutionRecord, dependency: OperationExecutionRecord): void {
+  consumer.dependencies.add(dependency);
+  dependency.consumers.add(consumer);
 }
 
-function nullSort(a: Operation, b: Operation): number {
+function nullSort(a: OperationExecutionRecord, b: OperationExecutionRecord): number {
   return 0;
+}
+
+function createRecord(name: string): OperationExecutionRecord {
+  return new OperationExecutionRecord(
+    new Operation(new MockOperationRunner(name)),
+    {} as unknown as IOperationExecutionRecordContext
+  );
 }
 
 describe(AsyncOperationQueue.name, () => {
   it('iterates operations in topological order', async () => {
-    const operations = [
-      new Operation(new MockOperationRunner('a')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('b')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('c')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('d')!, OperationStatus.Ready)
-    ];
+    const operations = [createRecord('a'), createRecord('b'), createRecord('c'), createRecord('d')];
 
     addDependency(operations[0], operations[2]);
     addDependency(operations[3], operations[1]);
@@ -32,8 +35,8 @@ describe(AsyncOperationQueue.name, () => {
     const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
     for await (const operation of queue) {
       actualOrder.push(operation);
-      for (const dependent of operation.dependents) {
-        dependent.dependencies.delete(operation);
+      for (const consumer of operation.consumers) {
+        consumer.dependencies.delete(operation);
       }
     }
 
@@ -41,24 +44,22 @@ describe(AsyncOperationQueue.name, () => {
   });
 
   it('respects the sort predicate', async () => {
-    const operations = [
-      new Operation(new MockOperationRunner('a')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('b')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('c')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('d')!, OperationStatus.Ready)
-    ];
+    const operations = [createRecord('a'), createRecord('b'), createRecord('c'), createRecord('d')];
 
     const expectedOrder = [operations[2], operations[0], operations[1], operations[3]];
     const actualOrder = [];
-    const customSort: IOperationSortFunction = (a: Operation, b: Operation): number => {
+    const customSort: IOperationSortFunction = (
+      a: OperationExecutionRecord,
+      b: OperationExecutionRecord
+    ): number => {
       return expectedOrder.indexOf(b) - expectedOrder.indexOf(a);
     };
 
     const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, customSort);
     for await (const operation of queue) {
       actualOrder.push(operation);
-      for (const dependent of operation.dependents) {
-        dependent.dependencies.delete(operation);
+      for (const consumer of operation.consumers) {
+        consumer.dependencies.delete(operation);
       }
     }
 
@@ -66,12 +67,7 @@ describe(AsyncOperationQueue.name, () => {
   });
 
   it('detects cyles', async () => {
-    const operations = [
-      new Operation(new MockOperationRunner('a')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('b')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('c')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('d')!, OperationStatus.Ready)
-    ];
+    const operations = [createRecord('a'), createRecord('b'), createRecord('c'), createRecord('d')];
 
     addDependency(operations[0], operations[2]);
     addDependency(operations[2], operations[3]);
@@ -85,11 +81,11 @@ describe(AsyncOperationQueue.name, () => {
 
   it('handles concurrent iteration', async () => {
     const operations = [
-      new Operation(new MockOperationRunner('a')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('b')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('c')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('d')!, OperationStatus.Ready),
-      new Operation(new MockOperationRunner('e')!, OperationStatus.Ready)
+      createRecord('a'),
+      createRecord('b'),
+      createRecord('c'),
+      createRecord('d'),
+      createRecord('e')
     ];
 
     // Set up to allow (0,1) -> (2) -> (3,4)
@@ -106,7 +102,7 @@ describe(AsyncOperationQueue.name, () => {
       [operations[4], 2]
     ]);
 
-    const actualConcurrency: Map<Operation, number> = new Map();
+    const actualConcurrency: Map<OperationExecutionRecord, number> = new Map();
     const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
     let concurrency: number = 0;
 
@@ -121,8 +117,8 @@ describe(AsyncOperationQueue.name, () => {
 
           await Promise.resolve();
 
-          for (const dependent of operation.dependents) {
-            dependent.dependencies.delete(operation);
+          for (const consumer of operation.consumers) {
+            consumer.dependencies.delete(operation);
           }
 
           --concurrency;

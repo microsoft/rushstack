@@ -2,44 +2,44 @@
 // See LICENSE in the project root for license information.
 
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { CommandLineConfiguration, IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IRegisteredCustomParameter } from '../../cli/scriptActions/BaseScriptAction';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import type { IOperationOptions, IOperationFactory } from './OperationSelector';
+import type { IOperationOptions, IOperationRunnerFactory } from './OperationSelector';
 import { RushConstants } from '../RushConstants';
 import { IOperationRunner } from './IOperationRunner';
 import { NullOperationRunner } from './NullOperationRunner';
 import { convertSlashesForWindows, ShellOperationRunner } from './ShellOperationRunner';
-import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 
-export interface IOperationFactoryOptions {
+export interface IShellOperationRunnerFactoryOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration?: BuildCacheConfiguration | undefined;
+  commandLineConfiguration: CommandLineConfiguration;
   isIncrementalBuildAllowed: boolean;
   customParameters: Iterable<IRegisteredCustomParameter>;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
 }
 
-export class OperationFactory implements IOperationFactory {
-  private readonly _options: IOperationFactoryOptions;
+export class ShellOperationRunnerFactory implements IOperationRunnerFactory {
+  private readonly _options: IShellOperationRunnerFactoryOptions;
   private readonly _customParametersByPhase: Map<IPhase, string[]>;
 
-  public constructor(options: IOperationFactoryOptions) {
+  public constructor(options: IShellOperationRunnerFactoryOptions) {
     this._options = options;
     this._customParametersByPhase = new Map();
   }
 
-  public createTask(options: IOperationOptions): Operation {
+  public createOperationRunner(options: IOperationOptions): IOperationRunner {
     const { phase, project } = options;
 
-    const factoryOptions: IOperationFactoryOptions = this._options;
+    const factoryOptions: IShellOperationRunnerFactoryOptions = this._options;
 
     const customParameterValues: ReadonlyArray<string> = this._getCustomParameterValuesForPhase(phase);
 
-    const commandToRun: string | undefined = OperationFactory._getScriptToRun(
+    const commandToRun: string | undefined = ShellOperationRunnerFactory._getScriptToRun(
       project,
       phase.name,
       customParameterValues
@@ -50,7 +50,7 @@ export class OperationFactory implements IOperationFactory {
       );
     }
 
-    const displayName: string = OperationFactory._getDisplayName(phase, project);
+    const displayName: string = ShellOperationRunnerFactory._getDisplayName(phase, project);
 
     // Empty build script indicates a no-op, so use a no-op runner
     const runner: IOperationRunner = commandToRun
@@ -59,16 +59,15 @@ export class OperationFactory implements IOperationFactory {
           displayName,
           rushConfiguration: factoryOptions.rushConfiguration,
           buildCacheConfiguration: factoryOptions.buildCacheConfiguration,
+          commandLineConfiguration: factoryOptions.commandLineConfiguration,
           commandToRun: commandToRun || '',
           isIncrementalBuildAllowed: factoryOptions.isIncrementalBuildAllowed,
           projectChangeAnalyzer: factoryOptions.projectChangeAnalyzer,
           phase
         })
-      : new NullOperationRunner(displayName, OperationStatus.FromCache);
+      : new NullOperationRunner({ name: displayName, result: OperationStatus.FromCache, silent: false });
 
-    const operation: Operation = new Operation(runner, OperationStatus.Ready);
-
-    return operation;
+    return runner;
   }
 
   private static _getScriptToRun(

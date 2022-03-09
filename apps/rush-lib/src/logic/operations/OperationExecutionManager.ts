@@ -4,29 +4,24 @@
 import * as os from 'os';
 import colors from 'colors/safe';
 import {
-  StdioSummarizer,
   TerminalWritable,
   StdioWritable,
   TerminalChunkKind,
   TextRewriterTransform
 } from '@rushstack/terminal';
 import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { AlreadyReportedError, NewlineKind, InternalError, Sort } from '@rushstack/node-core-library';
+import { AlreadyReportedError, NewlineKind, InternalError, Sort, Async } from '@rushstack/node-core-library';
 
-import { Stopwatch } from '../../utilities/Stopwatch';
 import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
-import { IOperationRunnerContext } from './IOperationRunner';
-import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
-import { OperationError } from './OperationError';
+import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
-  repoCommandLineConfiguration: CommandLineConfiguration;
   destination?: TerminalWritable;
 }
 
@@ -42,12 +37,10 @@ const ASCII_HEADER_WIDTH: number = 79;
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
-  private readonly _operations: Set<Operation>;
   private readonly _changedProjectsOnly: boolean;
+  private readonly _executionRecords: Set<OperationExecutionRecord>;
   private readonly _quietMode: boolean;
-  private readonly _debugMode: boolean;
   private readonly _parallelism: number;
-  private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
   private readonly _totalOperations: number;
 
   private readonly _outputWritable: TerminalWritable;
@@ -62,22 +55,18 @@ export class OperationExecutionManager {
   private _completedOperations: number;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
-    const { quietMode, debugMode, parallelism, changedProjectsOnly, repoCommandLineConfiguration } = options;
-    this._operations = operations;
+    const { quietMode, debugMode, parallelism, changedProjectsOnly } = options;
     this._completedOperations = 0;
-    this._totalOperations = operations.size;
     this._quietMode = quietMode;
-    this._debugMode = debugMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._repoCommandLineConfiguration = repoCommandLineConfiguration;
 
     // TERMINAL PIPELINE:
     //
     // streamCollator --> colorsNewlinesTransform --> StdioWritable
     //
-    this._outputWritable = options.destination ? options.destination : StdioWritable.instance;
+    this._outputWritable = options.destination || StdioWritable.instance;
     this._colorsNewlinesTransform = new TextRewriterTransform({
       destination: this._outputWritable,
       normalizeNewlines: NewlineKind.OsDefault,
@@ -88,6 +77,38 @@ export class OperationExecutionManager {
       onWriterActive: this._streamCollator_onWriterActive
     });
     this._terminal = this._streamCollator.terminal;
+
+    // Convert the developer graph to the mutable execution graph
+    const executionRecordContext: IOperationExecutionRecordContext = {
+      streamCollator: this._streamCollator,
+      debugMode,
+      quietMode
+    };
+
+    let totalOperations: number = 0;
+    const executionRecords: Map<Operation, OperationExecutionRecord> = new Map();
+    for (const operation of operations) {
+      executionRecords.set(operation, new OperationExecutionRecord(operation, executionRecordContext));
+      if (!operation.runner.silent) {
+        // Only count non-silent operations
+        totalOperations++;
+      }
+    }
+    this._totalOperations = totalOperations;
+
+    for (const [operation, consumer] of executionRecords) {
+      for (const dependency of operation.dependencies) {
+        const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
+        if (!dependencyRecord) {
+          throw new Error(
+            `Operation "${consumer.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
+          );
+        }
+        consumer.dependencies.add(dependencyRecord);
+        dependencyRecord.consumers.add(consumer);
+      }
+    }
+    this._executionRecords = new Set(executionRecords.values());
 
     const numberOfCores: number = os.cpus().length;
 
@@ -159,13 +180,13 @@ export class OperationExecutionManager {
    */
   public async executeAsync(): Promise<void> {
     this._completedOperations = 0;
-    const totalTasks: number = this._totalOperations;
+    const totalOperations: number = this._totalOperations;
 
     if (!this._quietMode) {
-      const plural: string = totalTasks === 1 ? '' : 's';
-      this._terminal.writeStdoutLine(`Selected ${totalTasks} project${plural}:`);
+      const plural: string = totalOperations === 1 ? '' : 's';
+      this._terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
       this._terminal.writeStdoutLine(
-        Array.from(this._operations, (x) => `  ${x.name}`)
+        Array.from(this._executionRecords, (x) => `  ${x.name}`)
           .sort()
           .join('\n')
       );
@@ -174,216 +195,153 @@ export class OperationExecutionManager {
 
     this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
-    const maxParallelism: number = Math.min(totalTasks, this._parallelism);
-    const prioritySort: IOperationSortFunction = (a: Operation, b: Operation): number => {
-      let diff: number = a.criticalPathLength! - b.criticalPathLength!;
-      if (diff) {
-        return diff;
-      }
-
-      diff = a.dependents.size - b.dependents.size;
-      if (diff) {
-        return diff;
-      }
-
-      // No further default considerations.
-      return 0;
+    const maxParallelism: number = Math.min(totalOperations, this._parallelism);
+    const prioritySort: IOperationSortFunction = (
+      a: OperationExecutionRecord,
+      b: OperationExecutionRecord
+    ): number => {
+      return a.criticalPathLength! - b.criticalPathLength!;
     };
-    const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(this._operations, prioritySort);
+    const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(this._executionRecords, prioritySort);
 
-    // Iterate in parallel with maxParallelism concurrent lanes
-    await Promise.all(
-      Array.from({ length: maxParallelism }, async (unused: undefined, index: number): Promise<void> => {
-        // laneId can be used in logging to examine concurrency
-        const laneId: number = index + 1;
-        // The executionQueue is a singular async iterable that stalls until an operation is available, and marks itself
-        // done when the queue is empty.
-        for await (const operations of executionQueue) {
-          // Take an operation, execute it, wait for it to finish, wait for a new operations
-          await this._executeOperationAsync(operations, laneId);
-        }
-      })
+    // This function is a callback because it may write to the collatedWriter before
+    // operation.executeAsync returns (and cleans up the writer)
+    const onOperationComplete: (record: OperationExecutionRecord) => void = (
+      record: OperationExecutionRecord
+    ) => {
+      this._onOperationComplete(record);
+    };
+
+    await Async.forEachAsync(
+      executionQueue,
+      async (operation: OperationExecutionRecord) => {
+        await operation.executeAsync(onOperationComplete);
+      },
+      {
+        concurrency: maxParallelism
+      }
     );
 
     this._printOperationStatus();
 
     if (this._hasAnyFailures) {
-      this._terminal.writeStderrLine(colors.red('Projects failed to build.') + '\n');
+      this._terminal.writeStderrLine(colors.red('Operations failed.') + '\n');
       throw new AlreadyReportedError();
     } else if (this._hasAnyNonAllowedWarnings) {
-      this._terminal.writeStderrLine(colors.yellow('Projects succeeded with warnings.') + '\n');
+      this._terminal.writeStderrLine(colors.yellow('Operations succeeded with warnings.') + '\n');
       throw new AlreadyReportedError();
     }
   }
 
-  private async _executeOperationAsync(operation: Operation, tid: number): Promise<void> {
-    operation.status = OperationStatus.Executing;
-    operation.stopwatch = Stopwatch.start();
-    operation.collatedWriter = this._streamCollator.registerTask(operation.name);
-    operation.stdioSummarizer = new StdioSummarizer();
+  /**
+   * Handles the result of the operation and propagates any relevant effects.
+   */
+  private _onOperationComplete(record: OperationExecutionRecord): void {
+    const { runner, name, status } = record;
 
-    const context: IOperationRunnerContext = {
-      repoCommandLineConfiguration: this._repoCommandLineConfiguration,
-      stdioSummarizer: operation.stdioSummarizer,
-      collatedWriter: operation.collatedWriter,
-      quietMode: this._quietMode,
-      debugMode: this._debugMode
-    };
+    let blockCacheWrite: boolean = !runner.isCacheWriteAllowed;
+    let blockSkip: boolean = !runner.isSkipAllowed;
 
-    try {
-      const result: OperationStatus = await operation.runner.executeAsync(context);
+    const silent: boolean = runner.silent;
 
-      operation.stopwatch.stop();
-      operation.stdioSummarizer.close();
+    switch (status) {
+      /**
+       * This operation failed. Mark it as such and all reachable dependents as blocked.
+       */
+      case OperationStatus.Failure:
+        // Failed operations get reported, even if silent.
+        // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
+        const message: string | undefined = record.error?.message;
+        // This creates the writer, so don't do this globally
+        const { terminal } = record.collatedWriter;
+        if (message) {
+          terminal.writeStderrLine(message);
+        }
+        terminal.writeStderrLine(colors.red(`"${name}" failed to build.`));
+        const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
+        for (const blockedRecord of blockedQueue) {
+          if (blockedRecord.status === OperationStatus.Ready) {
+            this._completedOperations++;
 
-      switch (result) {
-        case OperationStatus.Success:
-          this._markAsSuccess(operation);
-          break;
-        case OperationStatus.SuccessWithWarning:
-          this._hasAnyNonAllowedWarnings =
-            this._hasAnyNonAllowedWarnings || !operation.runner.warningsAreAllowed;
-          this._markAsSuccessWithWarning(operation);
-          break;
-        case OperationStatus.FromCache:
-          this._markAsFromCache(operation);
-          break;
-        case OperationStatus.Skipped:
-          this._markAsSkipped(operation);
-          break;
-        case OperationStatus.Failure:
-          this._hasAnyFailures = true;
-          this._markAsFailed(operation);
-          break;
+            // Now that we have the concept of architectural no-ops, we could implement this by replacing
+            // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
+            // operations. However, the existing behavior is a bit simpler, so keeping that for now.
+            if (!blockedRecord.runner.silent) {
+              terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
+            }
+            blockedRecord.status = OperationStatus.Blocked;
+
+            for (const dependent of blockedRecord.consumers) {
+              blockedQueue.add(dependent);
+            }
+          }
+        }
+        this._hasAnyFailures = true;
+        break;
+      /**
+       * This operation was restored from the build cache.
+       */
+      case OperationStatus.FromCache:
+        if (!silent) {
+          record.collatedWriter.terminal.writeStdoutLine(
+            colors.green(`"${name}" was restored from the build cache.`)
+          );
+        }
+        break;
+      /**
+       * This operation was skipped via legacy change detection.
+       */
+      case OperationStatus.Skipped:
+        if (!silent) {
+          record.collatedWriter.terminal.writeStdoutLine(colors.green(`"${name}" was skipped.`));
+        }
+        // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
+        blockCacheWrite = true;
+        break;
+      case OperationStatus.Success:
+        if (!silent) {
+          record.collatedWriter.terminal.writeStdoutLine(
+            colors.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
+          );
+        }
+        // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
+        blockSkip ||= !this._changedProjectsOnly;
+        break;
+      case OperationStatus.SuccessWithWarning:
+        if (!silent) {
+          record.collatedWriter.terminal.writeStderrLine(
+            colors.yellow(`"${name}" completed with warnings in ${record.stopwatch.toString()}.`)
+          );
+        }
+        // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
+        blockSkip ||= !this._changedProjectsOnly;
+        this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;
+        break;
+    }
+
+    // Apply status changes to direct dependents
+    for (const item of record.consumers) {
+      if (blockCacheWrite) {
+        item.runner.isCacheWriteAllowed = false;
       }
-    } catch (error) {
-      operation.stdioSummarizer.close();
 
-      this._hasAnyFailures = true;
-
-      // eslint-disable-next-line require-atomic-updates
-      operation.error = error as OperationError;
-
-      this._markAsFailed(operation);
-    }
-
-    operation.collatedWriter.close();
-  }
-
-  /**
-   * Marks an operation as having failed and marks each of its dependents as blocked
-   */
-  private _markAsFailed(operation: Operation): void {
-    if (operation.error) {
-      operation.collatedWriter.terminal.writeStderrLine(operation.error.message);
-    }
-    operation.collatedWriter.terminal.writeStderrLine(colors.red(`"${operation.name}" failed to build.`));
-    operation.status = OperationStatus.Failure;
-    operation.dependents.forEach((dependent: Operation) => {
-      this._markAsBlocked(dependent, operation);
-    });
-  }
-
-  /**
-   * Marks an operation and all its dependents as blocked
-   */
-  private _markAsBlocked(blockedOperation: Operation, failedOperation: Operation): void {
-    if (blockedOperation.status === OperationStatus.Ready) {
-      this._completedOperations++;
-
-      // Note: We cannot write to blockedOperation.collatedWriter because "blockedOperation" will be skipped
-      failedOperation.collatedWriter.terminal.writeStdoutLine(
-        `"${blockedOperation.name}" is blocked by "${failedOperation.name}".`
-      );
-      blockedOperation.status = OperationStatus.Blocked;
-      blockedOperation.dependents.forEach((dependent: Operation) => {
-        this._markAsBlocked(dependent, failedOperation);
-      });
-    }
-  }
-
-  /**
-   * Marks an operation as being completed, and removes it from the dependencies list of all its dependents
-   */
-  private _markAsSuccess(operation: Operation): void {
-    if (operation.runner.hadEmptyScript) {
-      operation.collatedWriter.terminal.writeStdoutLine(
-        colors.green(`"${operation.name}" had an empty script.`)
-      );
-    } else {
-      operation.collatedWriter.terminal.writeStdoutLine(
-        colors.green(`"${operation.name}" completed successfully in ${operation.stopwatch.toString()}.`)
-      );
-    }
-    operation.status = OperationStatus.Success;
-
-    operation.dependents.forEach((dependent: Operation) => {
-      if (!this._changedProjectsOnly) {
-        dependent.runner.isSkipAllowed = false;
+      if (blockSkip) {
+        item.runner.isSkipAllowed = false;
       }
-      dependent.dependencies.delete(operation);
-    });
-  }
 
-  /**
-   * Marks an operation as being completed, but with warnings written to stderr, and removes it from the dependencies
-   * list of all its dependents
-   */
-  private _markAsSuccessWithWarning(operation: Operation): void {
-    operation.collatedWriter.terminal.writeStderrLine(
-      colors.yellow(`"${operation.name}" completed with warnings in ${operation.stopwatch.toString()}.`)
-    );
-    operation.status = OperationStatus.SuccessWithWarning;
-    operation.dependents.forEach((dependent: Operation) => {
-      if (!this._changedProjectsOnly) {
-        dependent.runner.isSkipAllowed = false;
-      }
-      dependent.dependencies.delete(operation);
-    });
-  }
-
-  /**
-   * Marks an operation as skipped.
-   */
-  private _markAsSkipped(operation: Operation): void {
-    operation.collatedWriter.terminal.writeStdoutLine(colors.green(`${operation.name} was skipped.`));
-    operation.status = OperationStatus.Skipped;
-    operation.dependents.forEach((dependent: Operation) => {
-      dependent.dependencies.delete(operation);
-    });
-
-    const invalidationQueue: Set<Operation> = new Set(operation.dependents);
-    for (const consumer of invalidationQueue) {
-      // If an operation is skipped, state is not guaranteed in downstream tasks, so block cache write
-      consumer.runner.isCacheWriteAllowed = false;
-
-      // Propagate through the entire build queue applying cache write prevention.
-      for (const indirectConsumer of consumer.dependents) {
-        invalidationQueue.add(indirectConsumer);
-      }
+      // Remove this operation from the dependencies, to unblock the scheduler
+      item.dependencies.delete(record);
     }
-  }
-
-  /**
-   * Marks an operation as provided by cache.
-   */
-  private _markAsFromCache(operation: Operation): void {
-    operation.collatedWriter.terminal.writeStdoutLine(
-      colors.green(`${operation.name} was restored from the build cache.`)
-    );
-    operation.status = OperationStatus.FromCache;
-    operation.dependents.forEach((dependent: Operation) => {
-      dependent.dependencies.delete(operation);
-    });
   }
 
   /**
    * Prints out a report of the status of each project
    */
   private _printOperationStatus(): void {
-    const operationsByStatus: Record<string, Operation[]> = {};
-    for (const operation of this._operations) {
-      switch (operation.status) {
+    const operationsByStatus: Map<OperationStatus, OperationExecutionRecord[]> = new Map();
+    for (const operation of this._executionRecords) {
+      const { status } = operation;
+      switch (status) {
         // These are the sections that we will report below
         case OperationStatus.Skipped:
         case OperationStatus.FromCache:
@@ -394,13 +352,19 @@ export class OperationExecutionManager {
           break;
         default:
           // This should never happen
-          throw new InternalError('Unexpected task status: ' + operation.status);
+          throw new InternalError(`Unexpected operation status: ${status}`);
       }
 
-      if (operationsByStatus[operation.status]) {
-        operationsByStatus[operation.status].push(operation);
+      if (operation.runner.silent) {
+        // Don't report silenced operations
+        continue;
+      }
+
+      const collection: OperationExecutionRecord[] | undefined = operationsByStatus.get(status);
+      if (collection) {
+        collection.push(operation);
       } else {
-        operationsByStatus[operation.status] = [operation];
+        operationsByStatus.set(status, [operation]);
       }
     }
 
@@ -414,21 +378,21 @@ export class OperationExecutionManager {
       OperationStatus.Skipped,
       operationsByStatus,
       colors.green,
-      'These projects were already up to date:'
+      'These operations were already up to date:'
     );
 
     this._writeCondensedSummary(
       OperationStatus.FromCache,
       operationsByStatus,
       colors.green,
-      'These projects were restored from the build cache:'
+      'These operations were restored from the build cache:'
     );
 
     this._writeCondensedSummary(
       OperationStatus.Success,
       operationsByStatus,
       colors.green,
-      'These projects completed successfully:'
+      'These operations completed successfully:'
     );
 
     this._writeDetailedSummary(
@@ -442,7 +406,7 @@ export class OperationExecutionManager {
       OperationStatus.Blocked,
       operationsByStatus,
       colors.white,
-      'These projects were blocked by dependencies that failed:'
+      'These operations were blocked by dependencies that failed:'
     );
 
     this._writeDetailedSummary(OperationStatus.Failure, operationsByStatus, colors.red);
@@ -452,7 +416,7 @@ export class OperationExecutionManager {
 
   private _writeCondensedSummary(
     status: OperationStatus,
-    operationsByStatus: Record<string, Operation[]>,
+    recordsByStatus: Map<OperationStatus, OperationExecutionRecord[]>,
     headingColor: (text: string) => string,
     preamble: string
   ): void {
@@ -465,7 +429,7 @@ export class OperationExecutionManager {
     //   e
     //   k
 
-    const operations: Operation[] | undefined = operationsByStatus[status];
+    const operations: OperationExecutionRecord[] | undefined = recordsByStatus.get(status);
     if (!operations || operations.length === 0) {
       return;
     }
@@ -478,8 +442,8 @@ export class OperationExecutionManager {
 
     for (const operation of operations) {
       if (
-        operation.stopwatch &&
-        !operation.runner.hadEmptyScript &&
+        operation.stopwatch.duration !== 0 &&
+        operation.runner.reportTiming &&
         operation.status !== OperationStatus.Skipped
       ) {
         const time: string = operation.stopwatch.toString();
@@ -494,7 +458,7 @@ export class OperationExecutionManager {
 
   private _writeDetailedSummary(
     status: OperationStatus,
-    operationsByStatus: Record<string, Operation[]>,
+    recordsByStatus: Map<OperationStatus, OperationExecutionRecord[]>,
     headingColor: (text: string) => string,
     shortStatusName?: string
   ): void {
@@ -506,7 +470,7 @@ export class OperationExecutionManager {
     //
     // [eslint] Warning: src/logic/operations/OperationsExecutionManager.ts:393:3 ...
 
-    const operations: Operation[] | undefined = operationsByStatus[status];
+    const operations: OperationExecutionRecord[] | undefined = recordsByStatus.get(status);
     if (!operations || operations.length === 0) {
       return;
     }
@@ -556,18 +520,18 @@ export class OperationExecutionManager {
 
   private _writeSummaryHeader(
     status: OperationStatus,
-    operations: Operation[],
+    records: OperationExecutionRecord[],
     headingColor: (text: string) => string
   ): void {
     // Format a header like this
     //
-    // ==[ FAILED: 2 projects ]================================================
+    // ==[ FAILED: 2 operations ]================================================
 
-    // "2 projects"
-    const projectsText: string = `${operations.length}${operations.length === 1 ? ' project' : ' projects'}`;
+    // "2 operations"
+    const projectsText: string = `${records.length}${records.length === 1 ? ' operation' : ' operations'}`;
     const headingText: string = `${status}: ${projectsText}`;
 
-    // leftPart: "==[ FAILED: 2 projects "
+    // leftPart: "==[ FAILED: 2 operations "
     const leftPart: string = `${colors.gray('==[')} ${headingColor(headingText)} `;
     const leftPartLength: number = 3 + 1 + headingText.length + 1;
 
