@@ -185,11 +185,16 @@ export class OperationExecutionManager {
     if (!this._quietMode) {
       const plural: string = totalOperations === 1 ? '' : 's';
       this._terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
-      this._terminal.writeStdoutLine(
-        Array.from(this._executionRecords, (x) => `  ${x.name}`)
-          .sort()
-          .join('\n')
-      );
+      const nonSilentOperations: string[] = [];
+      for (const record of this._executionRecords) {
+        if (!record.runner.silent) {
+          nonSilentOperations.push(record.name);
+        }
+      }
+      nonSilentOperations.sort();
+      for (const name of nonSilentOperations) {
+        this._terminal.writeStdoutLine(`  ${name}`);
+      }
       this._terminal.writeStdoutLine('');
     }
 
