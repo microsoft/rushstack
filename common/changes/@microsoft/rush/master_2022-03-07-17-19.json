@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow adding of aliased child packages.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
