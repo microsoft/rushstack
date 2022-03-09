@@ -110,4 +110,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     }
     return this._collatedWriter;
   }
+
+  public finish(): void {
+    this._collatedWriter?.close();
+    this.stdioSummarizer.close();
+    this.stopwatch.stop();
+  }
 }

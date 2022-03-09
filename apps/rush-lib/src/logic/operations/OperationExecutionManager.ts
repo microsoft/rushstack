@@ -244,9 +244,9 @@ export class OperationExecutionManager {
       operation.error = error as OperationError;
       this._handleOperationResult(operation, status);
     } finally {
-      operation.collatedWriter.close();
-      operation.stdioSummarizer.close();
-      operation.stopwatch.stop();
+      // Delegate cleanup.
+      // Calling `operation.collatedWriter` creates it if it didn't exist.
+      operation.finish();
     }
   }
 
@@ -256,11 +256,7 @@ export class OperationExecutionManager {
   private _handleOperationResult(record: OperationExecutionRecord, result: OperationStatus): void {
     record.status = result;
 
-    const {
-      collatedWriter: { terminal },
-      runner,
-      name
-    } = record;
+    const { runner, name } = record;
 
     let blockCacheWrite: boolean = !runner.isCacheWriteAllowed;
     let blockSkip: boolean = !runner.isSkipAllowed;
@@ -275,6 +271,8 @@ export class OperationExecutionManager {
         // Failed operations get reported, even if silent.
         // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
         const message: string | undefined = record.error?.message;
+        // This creates the writer, so don't do this globally
+        const { terminal } = record.collatedWriter;
         if (message) {
           terminal.writeStderrLine(message);
         }
@@ -284,8 +282,12 @@ export class OperationExecutionManager {
           if (blockedRecord.status === OperationStatus.Ready) {
             this._completedOperations++;
 
-            //
-            terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
+            // Now that we have the concept of architectural no-ops, we could implement this by replacing
+            // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
+            // operations. However, the existing behavior is a bit simpler, so keeping that for now.
+            if (!blockedRecord.runner.silent) {
+              terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
+            }
             blockedRecord.status = OperationStatus.Blocked;
 
             for (const dependent of blockedRecord.consumers) {
@@ -300,7 +302,9 @@ export class OperationExecutionManager {
        */
       case OperationStatus.FromCache:
         if (!silent) {
-          terminal.writeStdoutLine(colors.green(`"${name}" was restored from the build cache.`));
+          record.collatedWriter.terminal.writeStdoutLine(
+            colors.green(`"${name}" was restored from the build cache.`)
+          );
         }
         break;
       /**
@@ -308,14 +312,14 @@ export class OperationExecutionManager {
        */
       case OperationStatus.Skipped:
         if (!silent) {
-          terminal.writeStdoutLine(colors.green(`"${name}" was skipped.`));
+          record.collatedWriter.terminal.writeStdoutLine(colors.green(`"${name}" was skipped.`));
         }
         // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
         blockCacheWrite = true;
         break;
       case OperationStatus.Success:
         if (!silent) {
-          terminal.writeStdoutLine(
+          record.collatedWriter.terminal.writeStdoutLine(
             colors.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
           );
         }
@@ -324,7 +328,7 @@ export class OperationExecutionManager {
         break;
       case OperationStatus.SuccessWithWarning:
         if (!silent) {
-          terminal.writeStderrLine(
+          record.collatedWriter.terminal.writeStderrLine(
             colors.yellow(`"${name}" completed with warnings in ${record.stopwatch.toString()}.`)
           );
         }
@@ -367,7 +371,7 @@ export class OperationExecutionManager {
           break;
         default:
           // This should never happen
-          throw new InternalError(`Unexpected task status: ${status}`);
+          throw new InternalError(`Unexpected operation status: ${status}`);
       }
 
       if (operation.runner.silent) {

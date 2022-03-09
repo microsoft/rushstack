@@ -44,7 +44,7 @@ export function createOperations(
     return `${project.packageName};${phase.name}`;
   }
 
-  function getOperation(phase: IPhase, project: RushConfigurationProject): Operation {
+  function getOrCreateOperation(phase: IPhase, project: RushConfigurationProject): Operation {
     const key: string = getOperationKey(phase, project);
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
@@ -55,7 +55,7 @@ export function createOperations(
             phase,
             project
           })
-        : new NullOperationRunner(key, OperationStatus.Skipped, true);
+        : new NullOperationRunner({ name: key, result: OperationStatus.Skipped, silent: true });
 
       operation = new Operation(runner, project, phase);
       operations.set(key, operation);
@@ -68,7 +68,7 @@ export function createOperations(
       const { dependencies } = operation;
 
       for (const depPhase of self) {
-        dependencies.add(getOperation(depPhase, project));
+        dependencies.add(getOrCreateOperation(depPhase, project));
       }
 
       if (upstream.size) {
@@ -76,7 +76,7 @@ export function createOperations(
         if (dependencyProjects.size) {
           for (const depPhase of upstream) {
             for (const dependencyProject of dependencyProjects) {
-              dependencies.add(getOperation(depPhase, dependencyProject));
+              dependencies.add(getOrCreateOperation(depPhase, dependencyProject));
             }
           }
         }
@@ -89,7 +89,7 @@ export function createOperations(
   // Create tasks for selected phases and projects
   for (const phase of phaseSelection) {
     for (const project of projectSelection) {
-      getOperation(phase, project);
+      getOrCreateOperation(phase, project);
     }
   }
 

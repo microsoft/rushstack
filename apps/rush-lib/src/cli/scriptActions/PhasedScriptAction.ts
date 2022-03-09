@@ -22,10 +22,17 @@ import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
-import type { CommandLineConfiguration, IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
+import type {
+  CommandLineConfiguration,
+  IPhase,
+  IPhasedCommandConfig
+} from '../../api/CommandLineConfiguration';
 import { createOperations } from '../../logic/operations/OperationSelector';
 import { Operation } from '../../logic/operations/Operation';
-import { IOperationFactoryOptions, OperationFactory } from '../../logic/operations/ShellOperationFactory';
+import {
+  IShellOperationRunnerFactoryOptions,
+  ShellOperationRunnerFactory
+} from '../../logic/operations/ShellOperationRunnerFactory';
 import { Selection } from '../../logic/Selection';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
@@ -48,7 +55,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
 interface IExecuteInternalOptions {
   executionManagerOptions: IOperationExecutionManagerOptions;
   isWatch: boolean;
-  operationFactoryOptions: IOperationFactoryOptions;
+  operationFactoryOptions: IShellOperationRunnerFactoryOptions;
   projectSelection: ReadonlySet<RushConfigurationProject>;
   stopwatch: Stopwatch;
   terminal: Terminal;
@@ -59,7 +66,7 @@ interface IExecutionOperationsOptions {
   ignoreHooks: boolean;
   operations: Set<Operation>;
   stopwatch: Stopwatch;
-  suppressErrors: boolean;
+  isWatch: boolean;
   terminal: Terminal;
 }
 
@@ -156,7 +163,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       return;
     }
 
-    const operationFactoryOptions: IOperationFactoryOptions = {
+    const operationFactoryOptions: IShellOperationRunnerFactoryOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       commandLineConfiguration: this._repoCommandLineConfiguration,
@@ -205,7 +212,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       terminal
     } = options;
 
-    const operationFactory: OperationFactory = new OperationFactory(operationFactoryOptions);
+    const operationFactory: ShellOperationRunnerFactory = new ShellOperationRunnerFactory(
+      operationFactoryOptions
+    );
 
     const operations: Set<Operation> = createOperations(new Set(), {
       operationFactory,
@@ -217,7 +226,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       ignoreHooks: false,
       operations,
       stopwatch,
-      suppressErrors: isWatch,
+      isWatch,
       executionManagerOptions,
       terminal
     };
@@ -291,7 +300,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         projectsToWatch
       );
 
-      const operationFactory: OperationFactory = new OperationFactory({
+      const operationFactory: ShellOperationRunnerFactory = new ShellOperationRunnerFactory({
         ...operationFactoryOptions,
         projectChangeAnalyzer: state
       });
@@ -307,7 +316,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         ignoreHooks: true,
         operations,
         stopwatch,
-        suppressErrors: true,
+        isWatch: true,
         executionManagerOptions,
         terminal
       };
@@ -389,7 +398,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    * Runs a set of operations and reports the results.
    */
   private async _executeOperations(options: IExecutionOperationsOptions): Promise<void> {
-    const { executionManagerOptions, ignoreHooks, operations, stopwatch, suppressErrors, terminal } = options;
+    const { executionManagerOptions, ignoreHooks, operations, stopwatch, isWatch, terminal } = options;
 
     const executionManager: OperationExecutionManager = new OperationExecutionManager(
       operations,
@@ -426,7 +435,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         this._doAfterTask(stopwatch, false);
       }
 
-      if (!suppressErrors) {
+      if (!isWatch) {
         throw new AlreadyReportedError();
       }
     }
@@ -437,7 +446,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       this.actionName !== RushConstants.buildCommandName &&
       this.actionName !== RushConstants.rebuildCommandName
     ) {
-      // Only collects information for built-in actions like build or rebuild.
+      // Only collects information for built-in commands like build or rebuild.
       return;
     }
 
@@ -451,7 +460,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       this.actionName !== RushConstants.buildCommandName &&
       this.actionName !== RushConstants.rebuildCommandName
     ) {
-      // Only collects information for built-in actions like build or rebuild.
+      // Only collects information for built-in commands like build or rebuild.
       return;
     }
     this._collectTelemetry(stopwatch, success);

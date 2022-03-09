@@ -5,6 +5,24 @@ import type { OperationStatus } from './OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 
 /**
+ *
+ */
+export interface INullOperationRunnerParams {
+  /**
+   * The name to report in logs.
+   */
+  name: string;
+  /**
+   * The result to report from the runner.
+   */
+  result: OperationStatus;
+  /**
+   * If true, the operation will not log anything or be tracked in statistics.
+   */
+  silent: boolean;
+}
+
+/**
  * Implementation of `IOperationRunner` for operations that require no work, such as empty scripts,
  * skipped operations, or blocked operations.
  */
@@ -22,7 +40,7 @@ export class NullOperationRunner implements IOperationRunner {
 
   public readonly result: OperationStatus;
 
-  public constructor(name: string, result: OperationStatus, silent: boolean) {
+  public constructor({ name, result, silent }: INullOperationRunnerParams) {
     this.name = name;
     this.result = result;
     this.silent = silent;

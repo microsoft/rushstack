@@ -14,7 +14,7 @@ import { NullOperationRunner } from './NullOperationRunner';
 import { convertSlashesForWindows, ShellOperationRunner } from './ShellOperationRunner';
 import { OperationStatus } from './OperationStatus';
 
-export interface IOperationFactoryOptions {
+export interface IShellOperationRunnerFactoryOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration?: BuildCacheConfiguration | undefined;
   commandLineConfiguration: CommandLineConfiguration;
@@ -23,11 +23,11 @@ export interface IOperationFactoryOptions {
   projectChangeAnalyzer: ProjectChangeAnalyzer;
 }
 
-export class OperationFactory implements IOperationRunnerFactory {
-  private readonly _options: IOperationFactoryOptions;
+export class ShellOperationRunnerFactory implements IOperationRunnerFactory {
+  private readonly _options: IShellOperationRunnerFactoryOptions;
   private readonly _customParametersByPhase: Map<IPhase, string[]>;
 
-  public constructor(options: IOperationFactoryOptions) {
+  public constructor(options: IShellOperationRunnerFactoryOptions) {
     this._options = options;
     this._customParametersByPhase = new Map();
   }
@@ -35,11 +35,11 @@ export class OperationFactory implements IOperationRunnerFactory {
   public createOperationRunner(options: IOperationOptions): IOperationRunner {
     const { phase, project } = options;
 
-    const factoryOptions: IOperationFactoryOptions = this._options;
+    const factoryOptions: IShellOperationRunnerFactoryOptions = this._options;
 
     const customParameterValues: ReadonlyArray<string> = this._getCustomParameterValuesForPhase(phase);
 
-    const commandToRun: string | undefined = OperationFactory._getScriptToRun(
+    const commandToRun: string | undefined = ShellOperationRunnerFactory._getScriptToRun(
       project,
       phase.name,
       customParameterValues
@@ -50,7 +50,7 @@ export class OperationFactory implements IOperationRunnerFactory {
       );
     }
 
-    const displayName: string = OperationFactory._getDisplayName(phase, project);
+    const displayName: string = ShellOperationRunnerFactory._getDisplayName(phase, project);
 
     // Empty build script indicates a no-op, so use a no-op runner
     const runner: IOperationRunner = commandToRun
@@ -65,7 +65,7 @@ export class OperationFactory implements IOperationRunnerFactory {
           projectChangeAnalyzer: factoryOptions.projectChangeAnalyzer,
           phase
         })
-      : new NullOperationRunner(displayName, OperationStatus.FromCache, false);
+      : new NullOperationRunner({ name: displayName, result: OperationStatus.FromCache, silent: false });
 
     return runner;
   }
