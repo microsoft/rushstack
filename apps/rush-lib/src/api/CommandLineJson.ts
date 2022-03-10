@@ -61,57 +61,136 @@ export interface IGlobalCommandJson extends IBaseCommandJson {
 
 export type CommandJson = IBulkCommandJson | IGlobalCommandJson | IPhasedCommandJson;
 
+/**
+ * The dependencies of a phase.
+ * @alpha
+ */
 export interface IPhaseDependencies {
+  /**
+   * Dependency phases within the same project.
+   */
   self?: string[];
+  /**
+   * Dependency phases in upstream projects.
+   */
   upstream?: string[];
 }
 
+/**
+ * A phase, used in the phased command feature.
+ * @alpha
+ */
 export interface IPhaseJson {
+  /**
+   * The name of the phase. Note that this value must start with the \"_phase:\" prefix.
+   */
   name: string;
+  /**
+   * The dependencies of this phase.
+   */
   dependencies?: IPhaseDependencies;
+  /**
+   * Normally Rush requires that each project's package.json has a \"scripts\" entry matching the phase name. To disable this check, set \"ignoreMissingScript\" to true.
+   */
   ignoreMissingScript?: boolean;
+  /**
+   * By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.
+   */
   allowWarningsOnSuccess?: boolean;
 }
 
 /**
  * "baseParameter" from command-line.schema.json
+ * @public
  */
 export interface IBaseParameterJson {
+  /**
+   * Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\".
+   */
   parameterKind: 'flag' | 'choice' | 'string';
+  /**
+   * The name of the parameter (e.g. \"--verbose\").  This is a required field.
+   */
   longName: string;
+  /**
+   * An optional short form of the parameter (e.g. \"-v\" instead of \"--verbose\").
+   */
   shortName?: string;
+  /**
+   * A detailed description of the parameter, which appears when requesting help for the command (e.g. \"rush --help my-command\").
+   */
   description: string;
+  /**
+   * A list of custom commands and/or built-in Rush commands that this parameter may be used with, by name.
+   */
   associatedCommands?: string[];
+  /**
+   * A list of the names of the phases that this command-line parameter should be provided to.
+   */
   associatedPhases?: string[];
+  /**
+   * If true, then this parameter must be included on the command line.
+   */
   required?: boolean;
 }
 
 /**
- * "flagParameter" from command-line.schema.json
+ * A custom command-line parameter whose presence acts as an on/off switch.
+ * @public
  */
 export interface IFlagParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a flag (boolean) parameter.
+   */
   parameterKind: 'flag';
 }
 
 /**
  * Part of "choiceParameter" from command-line.schema.json
+ * @public
  */
 export interface IChoiceParameterAlternativeJson {
+  /**
+   * A token that is one of the alternatives that can be used with the choice parameter, e.g. \"vanilla\" in \"--flavor vanilla\".
+   */
   name: string;
+  /**
+   * A detailed description for the alternative that will be shown in the command-line help.
+   */
   description: string;
 }
 
 /**
- * "choiceParameter" from command-line.schema.json
+ * A custom command-line parameter whose argument must be chosen from a list of allowable alternatives.
+ * @public
  */
 export interface IChoiceParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a choice parameter.
+   */
   parameterKind: 'choice';
+  /**
+   * A list of alternative argument values that can be chosen for this parameter.
+   */
   alternatives: IChoiceParameterAlternativeJson[];
+  /**
+   * If the parameter is omitted from the command line, this value will be inserted by default.
+   */
   defaultValue?: string;
 }
 
+/**
+ * A custom command-line parameter whose value is interpreted as a string.
+ * @public
+ */
 export interface IStringParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a string parameter.
+   */
   parameterKind: 'string';
+  /**
+   * The name of the argument for this parameter.
+   */
   argumentName: string;
 }
 

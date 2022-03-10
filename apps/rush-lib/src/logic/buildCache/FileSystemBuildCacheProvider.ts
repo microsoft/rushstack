@@ -14,6 +14,9 @@ export interface IFileSystemBuildCacheProviderOptions {
 
 const DEFAULT_BUILD_CACHE_FOLDER_NAME: string = 'build-cache';
 
+/**
+ * @internal
+ */
 export class FileSystemBuildCacheProvider {
   private readonly _cacheFolderPath: string;
 

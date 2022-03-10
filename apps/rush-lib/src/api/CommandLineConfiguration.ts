@@ -21,6 +21,10 @@ export interface IShellCommandTokenContext {
   packageFolder: string;
 }
 
+/**
+ * Metadata about a phase.
+ * @alpha
+ */
 export interface IPhase extends IPhaseJson {
   /**
    * If set to "true," this this phase was generated from a bulk command, and
@@ -35,14 +39,10 @@ export interface IPhase extends IPhaseJson {
    */
   logFilenameIdentifier: string;
 
-  associatedParameters: Set<Parameter>;
-
   /**
-   * The index of the phase in the CommandLineConfiguration's phases map.
-   * Will be used to generate a unique numeric ID for each [RushConfigurationProject, IPhase] pair
-   * during command invocation for use as a map key.
+   * The set of custom command line parameters that are relevant to this phase.
    */
-  index: number;
+  associatedParameters: Set<Parameter>;
 
   /**
    * The resolved dependencies of the phase
@@ -81,6 +81,10 @@ export interface IGlobalCommandConfig extends IGlobalCommandJson, ICommandWithPa
 
 export type Command = IGlobalCommandConfig | IPhasedCommandConfig;
 
+/**
+ * Metadata about a custom parameter defined in command-line.json
+ * @alpha
+ */
 export type Parameter = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
 
 const DEFAULT_BUILD_COMMAND_JSON: IBulkCommandJson = {
@@ -188,7 +192,6 @@ export class CommandLineConfiguration {
           isSynthetic: false,
           logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name),
           associatedParameters: new Set(),
-          index: -1,
           phaseDependencies: {
             self: new Set(),
             upstream: new Set()
@@ -471,12 +474,6 @@ export class CommandLineConfiguration {
         }
       }
     }
-
-    let phaseIndex: number = 0;
-    for (const phase of this.phases.values()) {
-      phase.index = phaseIndex;
-      phaseIndex++;
-    }
   }
 
   /**
@@ -627,8 +624,6 @@ export class CommandLineConfiguration {
       allowWarningsOnSuccess: command.allowWarningsInSuccessfulBuild,
       logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name),
       associatedParameters: new Set(),
-      // This gets set to the correct value at the end of the constructor
-      index: -1,
       phaseDependencies: {
         self: new Set(),
         upstream: new Set()
