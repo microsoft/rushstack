@@ -7,12 +7,17 @@
 /// <reference types="node" />
 
 import { AsyncSeriesHook } from 'tapable';
+import { AsyncSeriesWaterfallHook } from 'tapable';
+import type { CollatedWriter } from '@rushstack/stream-collator';
+import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import type { StdioSummarizer } from '@rushstack/terminal';
+import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
 
 // @public
@@ -49,6 +54,21 @@ export class ApprovedPackagesPolicy {
     get ignoredNpmScopes(): Set<string>;
     get nonbrowserApprovedPackages(): ApprovedPackagesConfiguration;
     get reviewCategories(): Set<string>;
+}
+
+// @beta
+export class BuildCacheConfiguration {
+    readonly buildCacheEnabled: boolean;
+    cacheWriteEnabled: boolean;
+    readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
+    // (undocumented)
+    static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string;
+    // Warning: (ae-forgotten-export) The symbol "GetCacheEntryIdFunction" needs to be exported by the entry point index.d.ts
+    readonly getCacheEntryId: GetCacheEntryIdFunction;
+    static loadAndRequireEnabledAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration>;
+    // Warning: (ae-forgotten-export) The symbol "FileSystemBuildCacheProvider" needs to be exported by the entry point index.d.ts
+    readonly localCacheProvider: FileSystemBuildCacheProvider;
+    static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration | undefined>;
 }
 
 // @public
@@ -192,10 +212,34 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
+// @public
+export interface IBaseParameterJson {
+    associatedCommands?: string[];
+    associatedPhases?: string[];
+    description: string;
+    longName: string;
+    parameterKind: 'flag' | 'choice' | 'string';
+    required?: boolean;
+    shortName?: string;
+}
+
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
     // (undocumented)
     pluginPackageFolder: string;
+}
+
+// @public
+export interface IChoiceParameterAlternativeJson {
+    description: string;
+    name: string;
+}
+
+// @public
+export interface IChoiceParameterJson extends IBaseParameterJson {
+    alternatives: IChoiceParameterAlternativeJson[];
+    defaultValue?: string;
+    parameterKind: 'choice';
 }
 
 // @beta (undocumented)
@@ -223,6 +267,19 @@ export interface IConfigurationEnvironment {
 export interface IConfigurationEnvironmentVariable {
     override?: boolean;
     value: string;
+}
+
+// @alpha
+export interface ICreateOperationsContext {
+    buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    customParameters: Map<Parameter, CommandLineParameter>;
+    isIncrementalBuildAllowed: boolean;
+    isInitial: boolean;
+    isWatch: boolean;
+    phaseSelection: ReadonlySet<IPhase>;
+    projectChangeAnalyzer: ProjectChangeAnalyzer;
+    projectSelection: ReadonlySet<RushConfigurationProject>;
+    rushConfiguration: RushConfiguration;
 }
 
 // @beta (undocumented)
@@ -253,6 +310,11 @@ export interface IExperimentsJson {
     phasedCommands?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
+}
+
+// @public
+export interface IFlagParameterJson extends IBaseParameterJson {
+    parameterKind: 'flag';
 }
 
 // @beta (undocumented)
@@ -305,13 +367,59 @@ export class IndividualVersionPolicy extends VersionPolicy {
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
+// @beta
+export interface IOperationRunner {
+    executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+    isCacheWriteAllowed: boolean;
+    isSkipAllowed: boolean;
+    readonly name: string;
+    reportTiming: boolean;
+    silent: boolean;
+    warningsAreAllowed: boolean;
+}
+
+// @beta
+export interface IOperationRunnerContext {
+    collatedWriter: CollatedWriter;
+    debugMode: boolean;
+    quietMode: boolean;
+    stdioSummarizer: StdioSummarizer;
+}
+
 // @public
 export interface IPackageManagerOptionsJsonBase {
     environmentVariables?: IConfigurationEnvironment;
 }
 
+// @alpha
+export interface IPhase extends IPhaseJson {
+    associatedParameters: Set<Parameter>;
+    isSynthetic: boolean;
+    logFilenameIdentifier: string;
+    phaseDependencies: {
+        self: Set<IPhase>;
+        upstream: Set<IPhase>;
+    };
+}
+
 // @beta
 export interface IPhasedCommand extends IRushCommand {
+    // @alpha
+    readonly hooks: PhasedCommandHooks;
+}
+
+// @alpha
+export interface IPhaseDependencies {
+    self?: string[];
+    upstream?: string[];
+}
+
+// @alpha
+export interface IPhaseJson {
+    allowWarningsOnSuccess?: boolean;
+    dependencies?: IPhaseDependencies;
+    ignoreMissingScript?: boolean;
+    name: string;
 }
 
 // @internal
@@ -347,6 +455,12 @@ export interface IRushSessionOptions {
     getIsDebugMode: () => boolean;
     // (undocumented)
     terminalProvider: ITerminalProvider;
+}
+
+// @public
+export interface IStringParameterJson extends IBaseParameterJson {
+    argumentName: string;
+    parameterKind: 'string';
 }
 
 // @public
@@ -403,6 +517,29 @@ export class LookupByPath<TItem> {
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
     constructor(json: _INpmOptionsJson);
+}
+
+// @alpha
+export class Operation {
+    constructor(project?: RushConfigurationProject | undefined, phase?: IPhase | undefined);
+    readonly associatedPhase: IPhase | undefined;
+    readonly associatedProject: RushConfigurationProject | undefined;
+    readonly dependencies: Set<Operation>;
+    get name(): string | undefined;
+    runner: IOperationRunner | undefined;
+    weight: number;
+}
+
+// @beta
+export enum OperationStatus {
+    Blocked = "BLOCKED",
+    Executing = "EXECUTING",
+    Failure = "FAILURE",
+    FromCache = "FROM CACHE",
+    Ready = "READY",
+    Skipped = "SKIPPED",
+    Success = "SUCCESS",
+    SuccessWithWarning = "SUCCESS WITH WARNINGS"
 }
 
 // @public (undocumented)
@@ -463,6 +600,15 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
     // @internal
     protected constructor(json: IPackageManagerOptionsJsonBase);
     readonly environmentVariables?: IConfigurationEnvironment;
+}
+
+// @alpha
+export type Parameter = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
+
+// @alpha
+export class PhasedCommandHooks {
+    readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
+    readonly waitingForChanges: SyncHook<void>;
 }
 
 // @public

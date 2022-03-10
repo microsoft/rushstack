@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Expose plugin hooks for phased command execution: the \"createOperations\" hook allows customizing the set of operations to execute, and the \"waitingForChanges\" hook gives plugins an opportunity to display data to the console while output is paused.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

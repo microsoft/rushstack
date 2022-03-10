@@ -24,6 +24,20 @@ export {
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
 
+export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
+
+export { IPhase, Parameter } from './api/CommandLineConfiguration';
+
+export {
+  IBaseParameterJson,
+  IChoiceParameterAlternativeJson,
+  IChoiceParameterJson,
+  IFlagParameterJson,
+  IPhaseDependencies,
+  IPhaseJson,
+  IStringParameterJson
+} from './api/CommandLineJson';
+
 export {
   EnvironmentConfiguration,
   EnvironmentVariableNames,
@@ -71,6 +85,10 @@ export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsCon
 
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 
+export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
+export { Operation } from './logic/operations/Operation';
+export { OperationStatus } from './logic/operations/OperationStatus';
+
 export {
   RushSession,
   IRushSessionOptions,
@@ -83,6 +101,8 @@ export {
   IPhasedCommand,
   RushLifecycleHooks
 } from './pluginFramework/RushLifeCycle';
+
+export { ICreateOperationsContext, PhasedCommandHooks } from './pluginFramework/PhasedCommandHooks';
 
 export { IRushPlugin } from './pluginFramework/IRushPlugin';
 export { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader';
