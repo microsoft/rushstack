@@ -36,7 +36,7 @@ import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import type { CommandLineConfiguration, IPhase } from '../../api/CommandLineConfiguration';
+import type { IPhase } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../RushConstants';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
@@ -49,12 +49,15 @@ export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
-  commandLineConfiguration: CommandLineConfiguration;
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   displayName: string;
   phase: IPhase;
+  /**
+   * The set of phases being executed in the current command, for validation of rush-project.json
+   */
+  selectedPhases: Iterable<IPhase>;
 }
 
 function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
@@ -90,13 +93,13 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _phase: IPhase;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
-  private readonly _commandLineConfiguration: CommandLineConfiguration;
   private readonly _commandName: string;
   private readonly _commandToRun: string;
   private readonly _isCacheReadAllowed: boolean;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
   private readonly _logFilenameIdentifier: string;
+  private readonly _selectedPhases: Iterable<IPhase>;
 
   /**
    * UNINITIALIZED === we haven't tried to initialize yet
@@ -112,7 +115,6 @@ export class ShellOperationRunner implements IOperationRunner {
     this._phase = phase;
     this._rushConfiguration = options.rushConfiguration;
     this._buildCacheConfiguration = options.buildCacheConfiguration;
-    this._commandLineConfiguration = options.commandLineConfiguration;
     this._commandName = phase.name;
     this._commandToRun = options.commandToRun;
     this._isCacheReadAllowed = options.isIncrementalBuildAllowed;
@@ -122,6 +124,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
     this._logFilenameIdentifier = phase.logFilenameIdentifier;
+    this._selectedPhases = options.selectedPhases;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -407,15 +410,13 @@ export class ShellOperationRunner implements IOperationRunner {
 
       if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
         const projectConfiguration: RushProjectConfiguration | undefined =
-          await RushProjectConfiguration.tryLoadForProjectAsync(
-            this._rushProject,
-            this._commandLineConfiguration,
-            terminal
-          );
+          await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
         if (projectConfiguration) {
           if (projectConfiguration.disableBuildCacheForProject) {
             terminal.writeVerboseLine('Caching has been disabled for this project.');
           } else {
+            projectConfiguration.validatePhaseConfiguration(this._selectedPhases, terminal);
+
             const operationSettings: IOperationSettings | undefined =
               projectConfiguration.operationSettingsByOperationName.get(this._commandName);
             if (operationSettings?.disableBuildCacheForOperation) {

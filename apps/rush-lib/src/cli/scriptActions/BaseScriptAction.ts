@@ -15,11 +15,6 @@ export interface IBaseScriptActionOptions<TCommand extends Command> extends IBas
   command: TCommand;
 }
 
-export interface IRegisteredCustomParameter {
-  parameter: Parameter;
-  tsCommandLineParameter: CommandLineParameter;
-}
-
 /**
  * Base class for command-line actions that are implemented using user-defined scripts.
  *
@@ -32,7 +27,7 @@ export interface IRegisteredCustomParameter {
  */
 export abstract class BaseScriptAction<TCommand extends Command> extends BaseRushAction {
   protected readonly commandLineConfiguration: CommandLineConfiguration;
-  protected readonly customParameters: IRegisteredCustomParameter[] = [];
+  protected readonly customParameters: Map<Parameter, CommandLineParameter> = new Map();
   protected readonly command: TCommand;
 
   public constructor(options: IBaseScriptActionOptions<TCommand>) {
@@ -86,10 +81,7 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
           );
       }
 
-      this.customParameters.push({
-        parameter,
-        tsCommandLineParameter
-      });
+      this.customParameters.set(parameter, tsCommandLineParameter);
     }
   }
 }

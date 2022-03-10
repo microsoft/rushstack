@@ -8,7 +8,7 @@ import { RigConfig } from '@rushstack/rig-package';
 
 import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
-import { CommandLineConfiguration } from './CommandLineConfiguration';
+import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 
 /**
@@ -189,11 +189,62 @@ export class RushProjectConfiguration {
   }
 
   /**
+   * Validates that the requested phases are compatible.
+   */
+  public validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void {
+    const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> = new OverlappingPathAnalyzer<string>();
+
+    const { operationSettingsByOperationName, project } = this;
+
+    let hasErrors: boolean = false;
+
+    for (const phase of phases) {
+      const operationName: string = phase.name;
+      const operationSettings: IOperationSettings | undefined =
+        operationSettingsByOperationName.get(operationName);
+      if (operationSettings) {
+        if (operationSettings.outputFolderNames) {
+          for (const outputFolderName of operationSettings.outputFolderNames) {
+            const overlappingOperationNames: string[] | undefined =
+              overlappingPathAnalyzer.addPathAndGetFirstEncounteredLabels(outputFolderName, operationName);
+            if (overlappingOperationNames) {
+              const overlapsWithOwnOperation: boolean = overlappingOperationNames?.includes(operationName);
+              if (overlapsWithOwnOperation) {
+                terminal.writeErrorLine(
+                  `The project "${project.packageName}" has a ` +
+                    `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines an ` +
+                    `operation with overlapping paths in the "outputFolderNames" list. The operation is ` +
+                    `"${operationName}", and the conflicting path is "${outputFolderName}".`
+                );
+              } else {
+                terminal.writeErrorLine(
+                  `The project "${project.packageName}" has a ` +
+                    `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines ` +
+                    'two operations in the same command whose "outputFolderNames" would overlap. ' +
+                    'Operations outputs in the same command must be disjoint so that they can be independently cached.' +
+                    `\n\n` +
+                    `The "${outputFolderName}" path overlaps between these operations: ` +
+                    overlappingOperationNames.map((operationName) => `"${operationName}"`).join(', ')
+                );
+              }
+
+              hasErrors = true;
+            }
+          }
+        }
+      }
+    }
+
+    if (hasErrors) {
+      throw new AlreadyReportedError();
+    }
+  }
+
+  /**
    * Loads the rush-project.json data for the specified project.
    */
   public static async tryLoadForProjectAsync(
     project: RushConfigurationProject,
-    repoCommandLineConfiguration: CommandLineConfiguration,
     terminal: ITerminal
   ): Promise<RushProjectConfiguration | undefined> {
     // false is a signal that the project config does not exist
@@ -212,7 +263,6 @@ export class RushProjectConfiguration {
       const result: RushProjectConfiguration = RushProjectConfiguration._getRushProjectConfiguration(
         project,
         rushProjectJson,
-        repoCommandLineConfiguration,
         terminal
       );
       RushProjectConfiguration._configCache.set(project, result);
@@ -290,13 +340,15 @@ export class RushProjectConfiguration {
   private static _getRushProjectConfiguration(
     project: RushConfigurationProject,
     rushProjectJson: IRushProjectJson,
-    repoCommandLineConfiguration: CommandLineConfiguration,
     terminal: ITerminal
   ): RushProjectConfiguration {
     const operationSettingsByOperationName: Map<string, IOperationSettings> = new Map<
       string,
       IOperationSettings
     >();
+
+    let hasErrors: boolean = false;
+
     if (rushProjectJson.operationSettings) {
       for (const operationSettings of rushProjectJson.operationSettings) {
         const operationName: string = operationSettings.operationName;
@@ -307,6 +359,7 @@ export class RushProjectConfiguration {
             RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(existingOperationSettings);
           const operationSettingsJsonPath: string | undefined =
             RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(operationSettings);
+          hasErrors = true;
           let errorMessage: string =
             `The operation "${operationName}" appears multiple times in the "${project.packageName}" project's ` +
             `${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file's ` +
@@ -330,55 +383,10 @@ export class RushProjectConfiguration {
           operationSettingsByOperationName.set(operationName, operationSettings);
         }
       }
+    }
 
-      // For each phased command, check if any of its phases' output folders overlap.
-      for (const command of repoCommandLineConfiguration.commands.values()) {
-        if (command.commandKind === 'phased') {
-          const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> =
-            new OverlappingPathAnalyzer<string>();
-
-          for (const phase of command.phases) {
-            const operationName: string = phase.name;
-            const operationSettings: IOperationSettings | undefined =
-              operationSettingsByOperationName.get(operationName);
-            if (operationSettings) {
-              if (operationSettings.outputFolderNames) {
-                for (const outputFolderName of operationSettings.outputFolderNames) {
-                  const overlappingOperationNames: string[] | undefined =
-                    overlappingPathAnalyzer.addPathAndGetFirstEncounteredLabels(
-                      outputFolderName,
-                      operationName
-                    );
-                  if (overlappingOperationNames) {
-                    const overlapsWithOwnOperation: boolean =
-                      overlappingOperationNames?.includes(operationName);
-                    if (overlapsWithOwnOperation) {
-                      terminal.writeErrorLine(
-                        `The project "${project.packageName}" has a ` +
-                          `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines an ` +
-                          `operation with overlapping paths in the "outputFolderNames" list. The operation is ` +
-                          `"${operationName}", and the conflicting path is "${outputFolderName}".`
-                      );
-                    } else {
-                      terminal.writeErrorLine(
-                        `The project "${project.packageName}" has a ` +
-                          `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines ` +
-                          'two potentially simultaneous operations whose "outputFolderNames" would overlap. ' +
-                          "Simultaneous operations should not delete each other's output." +
-                          `\n\n` +
-                          `The "${outputFolderName}" path overlaps between these operations: ` +
-                          overlappingOperationNames.map((operationName) => `"${operationName}"`).join(', ')
-                      );
-                    }
-
-                    throw new AlreadyReportedError();
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    if (hasErrors) {
+      throw new AlreadyReportedError();
     }
 
     return new RushProjectConfiguration(project, rushProjectJson, operationSettingsByOperationName);

@@ -12,7 +12,7 @@ import { IOperationRunner } from './IOperationRunner';
  *
  * The graph of `Operation` instances will be cloned into a separate execution graph after processing.
  *
- * @beta
+ * @alpha
  */
 export class Operation {
   /**
@@ -34,7 +34,7 @@ export class Operation {
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
    * running the operation.
    */
-  public runner: IOperationRunner;
+  public runner: IOperationRunner | undefined = undefined;
 
   /**
    * The weight for this operation. This scalar is the contribution of this operation to the
@@ -49,17 +49,15 @@ export class Operation {
    */
   public weight: number = 1;
 
-  public constructor(
-    runner: IOperationRunner,
-    project?: RushConfigurationProject | undefined,
-    phase?: IPhase | undefined
-  ) {
-    this.runner = runner;
+  public constructor(project?: RushConfigurationProject | undefined, phase?: IPhase | undefined) {
     this.associatedPhase = phase;
     this.associatedProject = project;
   }
 
-  public get name(): string {
-    return this.runner.name;
+  /**
+   * The name of this operation, for logging.
+   */
+  public get name(): string | undefined {
+    return this.runner?.name;
   }
 }
