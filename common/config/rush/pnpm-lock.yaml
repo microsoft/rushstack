@@ -1746,6 +1746,9 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
+      '@rushstack/stream-collator': workspace:*
+      '@rushstack/terminal': workspace:*
+      '@rushstack/ts-command-line': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node-fetch': 1.6.9
       '@types/semver': 7.3.5
@@ -1760,6 +1763,9 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/stream-collator': link:../stream-collator
+      '@rushstack/terminal': link:../terminal
+      '@rushstack/ts-command-line': link:../ts-command-line
       '@types/heft-jest': 1.0.1
       '@types/semver': 7.3.5
       '@types/webpack-env': 1.13.0
