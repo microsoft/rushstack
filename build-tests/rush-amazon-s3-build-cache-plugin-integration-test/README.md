@@ -17,7 +17,7 @@ In this folder run `docker-compose down`
 rushx read-s3-object
 ```
 
-# Test retries
+# Testing retries
 
 To test that requests can be retried start the proxy server which will fail every second request:
 

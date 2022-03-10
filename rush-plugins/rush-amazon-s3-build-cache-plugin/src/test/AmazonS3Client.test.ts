@@ -452,10 +452,15 @@ describe(AmazonS3Client.name, () => {
 
         for (const code of [400, 401, 403]) {
           it(`Handles missing credentials object when ${code}`, async () => {
-            const result: Buffer | undefined = await makeGetRequestAsync(
+            let warningSpy: jest.SpyInstance<any, unknown[]> | undefined;
+            const result: Buffer | undefined = await makeS3ClientRequestAsync(
               undefined,
               DUMMY_OPTIONS,
-              'abc123',
+              async (s3Client) => {
+                (s3Client as any)._writeWarningLine = () => {};
+                warningSpy = jest.spyOn(s3Client as any, '_writeWarningLine');
+                return await s3Client.getObjectAsync('abc123');
+              },
               {
                 responseInit: {
                   status: code,
@@ -467,6 +472,13 @@ describe(AmazonS3Client.name, () => {
               }
             );
             expect(result).toBeUndefined();
+            expect(warningSpy).toHaveBeenNthCalledWith(
+              1,
+              `No credentials found and received a ${code}`,
+              ' response code from the cloud storage.',
+              ' Maybe run rush update-cloud-credentials',
+              ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
+            );
           });
         }
       });

@@ -152,6 +152,12 @@ export class AmazonS3Client {
       ) {
         // unauthorized due to not providing credentials,
         // silence error for better DX when e.g. running locally without credentials
+        this._writeWarningLine(
+          `No credentials found and received a ${response.status}`,
+          ' response code from the cloud storage.',
+          ' Maybe run rush update-cloud-credentials',
+          ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
+        );
         return {
           hasNetworkError: false,
           response: undefined
@@ -193,7 +199,16 @@ export class AmazonS3Client {
     try {
       this._terminal.writeDebugLine(...messageParts);
     } catch (err) {
-      //
+      // ignore error
+    }
+  }
+
+  private _writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
+    // if the terminal has been closed then don't bother sending a warning message
+    try {
+      this._terminal.writeWarningLine(...messageParts);
+    } catch (err) {
+      // ignore error
     }
   }
 
