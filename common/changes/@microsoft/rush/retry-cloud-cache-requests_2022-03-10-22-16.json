@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "fix transient errors in the aws s3 cloud cache plugin",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
