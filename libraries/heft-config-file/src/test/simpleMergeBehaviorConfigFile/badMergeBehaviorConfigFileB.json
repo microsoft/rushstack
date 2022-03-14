@@ -1,0 +1,10 @@
+{
+  "$schema": "http://schema.net/",
+
+  "extends": "./simpleMergeBehaviorConfigFileA.json",
+
+  "$c.mergeBehavior": "append",
+  "c": {
+    "d": [{ "e": "B" }]
+  }
+}

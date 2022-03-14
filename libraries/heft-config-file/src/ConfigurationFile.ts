@@ -22,9 +22,16 @@ interface IConfigurationJson {
  */
 export enum InheritanceType {
   /**
-   * Append additional elements after elements from the parent file's property
+   * Append additional elements after elements from the parent file's property. Only applicable
+   * for arrays.
    */
   append = 'append',
+
+  /**
+   * Perform a shallow merge of additional elements after elements from the parent file's property.
+   * Only applicable for objects.
+   */
+  merge = 'merge',
 
   /**
    * Discard elements from the parent file's property
@@ -63,6 +70,7 @@ export enum PathResolutionMethod {
   custom
 }
 
+const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.mergeBehavior$/;
 const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol('configuration-file-field-annotation');
 
 interface IAnnotatedField<TField> {
@@ -125,7 +133,7 @@ export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritanc
  */
 export type IPropertiesInheritance<TConfigurationFile> = {
   [propertyName in keyof TConfigurationFile]?:
-    | IPropertyInheritance<InheritanceType.append | InheritanceType.replace>
+    | IPropertyInheritance<InheritanceType.append | InheritanceType.merge | InheritanceType.replace>
     | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
 };
 
@@ -371,8 +379,6 @@ export class ConfigurationFile<TConfigurationFile> {
       throw new Error(`In config file "${resolvedConfigurationFilePathForLogging}": ${e}`);
     }
 
-    this._schema.validateObject(configurationJson, resolvedConfigurationFilePathForLogging);
-
     this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
 
     for (const [jsonPath, metadata] of Object.entries(this._jsonPathMetadata)) {
@@ -395,7 +401,7 @@ export class ConfigurationFile<TConfigurationFile> {
       });
     }
 
-    let parentConfiguration: Partial<TConfigurationFile> = {};
+    let parentConfiguration: TConfigurationFile | undefined;
     if (configurationJson.extends) {
       try {
         const resolvedParentConfigPath: string = Import.resolveModule({
@@ -420,128 +426,11 @@ export class ConfigurationFile<TConfigurationFile> {
       }
     }
 
-    const propertyNames: Set<string> = new Set<string>([
-      ...Object.keys(parentConfiguration),
-      ...Object.keys(configurationJson)
-    ]);
-
-    const resultAnnotation: IConfigurationFileFieldAnnotation<TConfigurationFile> = {
-      configurationFilePath: resolvedConfigurationFilePath,
-      originalValues: {} as TConfigurationFile
-    };
-    const result: TConfigurationFile = {
-      [CONFIGURATION_FILE_FIELD_ANNOTATION]: resultAnnotation
-    } as unknown as TConfigurationFile;
-    for (const propertyName of propertyNames) {
-      if (propertyName === '$schema' || propertyName === 'extends') {
-        continue;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const propertyValue: unknown | undefined = (configurationJson as any)[propertyName];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const parentPropertyValue: unknown | undefined = (parentConfiguration as any)[propertyName];
-
-      const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
-      const defaultInheritanceType: IPropertyInheritance<InheritanceType> = bothAreArrays
-        ? { inheritanceType: InheritanceType.append }
-        : { inheritanceType: InheritanceType.replace };
-      const propertyInheritance: IPropertyInheritance<InheritanceType> =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this._propertyInheritanceTypes as any)[propertyName] !== undefined
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (this._propertyInheritanceTypes as any)[propertyName]
-          : defaultInheritanceType;
-
-      let newValue: unknown;
-      const usePropertyValue: () => void = () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (resultAnnotation.originalValues as any)[propertyName] = this.getPropertyOriginalValue<any, any>({
-          parentObject: configurationJson,
-          propertyName: propertyName
-        });
-        newValue = propertyValue;
-      };
-      const useParentPropertyValue: () => void = () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (resultAnnotation.originalValues as any)[propertyName] = this.getPropertyOriginalValue<any, any>({
-          parentObject: parentConfiguration,
-          propertyName: propertyName
-        });
-        newValue = parentPropertyValue;
-      };
-
-      if (propertyValue !== undefined && parentPropertyValue === undefined) {
-        usePropertyValue();
-      } else if (parentPropertyValue !== undefined && propertyValue === undefined) {
-        useParentPropertyValue();
-      } else {
-        switch (propertyInheritance.inheritanceType) {
-          case InheritanceType.replace: {
-            if (propertyValue !== undefined) {
-              usePropertyValue();
-            } else {
-              useParentPropertyValue();
-            }
-
-            break;
-          }
-
-          case InheritanceType.append: {
-            if (propertyValue !== undefined && parentPropertyValue === undefined) {
-              usePropertyValue();
-            } else if (propertyValue === undefined && parentPropertyValue !== undefined) {
-              useParentPropertyValue();
-            } else {
-              if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
-                throw new Error(
-                  `Issue in processing configuration file property "${propertyName}". ` +
-                    `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
-                );
-              }
-
-              newValue = [...parentPropertyValue, ...propertyValue];
-              (newValue as unknown as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
-                configurationFilePath: undefined,
-                originalValues: {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  ...(parentPropertyValue as any)[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  ...(propertyValue as any)[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
-                }
-              };
-            }
-
-            break;
-          }
-
-          case InheritanceType.custom: {
-            const customInheritance: ICustomPropertyInheritance<unknown> =
-              propertyInheritance as ICustomPropertyInheritance<unknown>;
-            if (
-              !customInheritance.inheritanceFunction ||
-              typeof customInheritance.inheritanceFunction !== 'function'
-            ) {
-              throw new Error(
-                'For property inheritance type "InheritanceType.custom", an inheritanceFunction must be provided.'
-              );
-            }
-
-            newValue = customInheritance.inheritanceFunction(propertyValue, parentPropertyValue);
-
-            break;
-          }
-
-          default: {
-            throw new Error(`Unknown inheritance type "${propertyInheritance}"`);
-          }
-        }
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (result as any)[propertyName] = newValue;
-    }
-
+    const result: TConfigurationFile = this._mergeConfigurationFiles(
+      parentConfiguration,
+      configurationJson,
+      resolvedConfigurationFilePath
+    );
     try {
       this._schema.validateObject(result, resolvedConfigurationFilePathForLogging);
     } catch (e) {
@@ -666,6 +555,248 @@ export class ConfigurationFile<TConfigurationFile> {
         );
       }
     }
+  }
+
+  private _mergeConfigurationFiles(
+    parentConfiguration: TConfigurationFile | undefined,
+    configurationJson: IConfigurationJson & TConfigurationFile,
+    resolvedConfigurationFilePath: string
+  ): TConfigurationFile {
+    const ignoreProperties: Set<string> = new Set(['extends', '$schema']);
+    return this._mergeObjects(
+      parentConfiguration,
+      configurationJson,
+      resolvedConfigurationFilePath,
+      this._propertyInheritanceTypes,
+      ignoreProperties
+    );
+  }
+
+  private _mergeObjects<TField>(
+    parentObject: TField | undefined,
+    currentObject: TField | undefined,
+    resolvedConfigurationFilePath: string,
+    configuredPropertyInheritance?: IPropertiesInheritance<TField>,
+    ignoreProperties?: Set<string>
+  ): TField {
+    const resultAnnotation: IConfigurationFileFieldAnnotation<TField> = {
+      configurationFilePath: resolvedConfigurationFilePath,
+      originalValues: {} as TField
+    };
+    const result: TField = {
+      [CONFIGURATION_FILE_FIELD_ANNOTATION]: resultAnnotation
+    } as unknown as TField;
+
+    // Do a first pass to gather and strip the merge behavior annotations from the merging object
+    const currentObjectPropertyNames: Set<string> = new Set(Object.keys(currentObject || {}));
+    const filteredObjectPropertyNames: string[] = [];
+    const mergeBehaviorMap: Map<string, IPropertyInheritance<InheritanceType>> = new Map();
+    for (const propertyName of currentObjectPropertyNames) {
+      if (ignoreProperties && ignoreProperties.has(propertyName)) {
+        continue;
+      }
+      const mergeBehaviorMatches: RegExpMatchArray | null = propertyName.match(
+        CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX
+      );
+      if (mergeBehaviorMatches && mergeBehaviorMatches.length === 2) {
+        const mergeTargetPropertyName: string = mergeBehaviorMatches[1];
+        const mergeBehaviorRaw: unknown | undefined = (currentObject || {})[propertyName];
+        if (!currentObjectPropertyNames.has(mergeTargetPropertyName)) {
+          throw new Error(
+            `Issue in processing configuration file property "${propertyName}". ` +
+              `A merge behavior was provided but no matching property was found`
+          );
+        } else if (typeof mergeBehaviorRaw !== 'string') {
+          throw new Error(
+            `Issue in processing configuration file property "${propertyName}". ` +
+              `An unsupported merge behavior was provided: ${JSON.stringify(mergeBehaviorRaw)}`
+          );
+        } else if (typeof (currentObject || {})[mergeTargetPropertyName] !== 'object') {
+          throw new Error(
+            `Issue in processing configuration file property "${propertyName}". ` +
+              `A merge behavior was provided for a property that is not an object`
+          );
+        }
+        switch (mergeBehaviorRaw.toLowerCase()) {
+          case 'append':
+            mergeBehaviorMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.append });
+            break;
+          case 'merge':
+            mergeBehaviorMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.merge });
+            break;
+          case 'replace':
+            mergeBehaviorMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.replace });
+            break;
+          default:
+            throw new Error(
+              `Issue in processing configuration file property "${propertyName}". ` +
+                `An unsupported merge behavior was provided: "${mergeBehaviorRaw}"`
+            );
+        }
+      } else {
+        filteredObjectPropertyNames.push(propertyName);
+      }
+    }
+
+    // We only filter the currentObject because the parent object should already be filtered
+    const propertyNames: Set<string> = new Set<string>([
+      ...Object.keys(parentObject || {}),
+      ...filteredObjectPropertyNames
+    ]);
+
+    // Cycle through properties and merge them
+    for (const propertyName of propertyNames) {
+      const propertyValue: unknown | undefined = (currentObject || {})[propertyName];
+      const parentPropertyValue: unknown | undefined = (parentObject || {})[propertyName];
+
+      // If the property is a merge behavior annotation, use it. Fallback to the configuration file inheritance
+      // behavior, and if one isn't specified, use the default.
+      let propertyInheritance: IPropertyInheritance<InheritanceType> | undefined =
+        mergeBehaviorMap.get(propertyName);
+      if (!propertyInheritance) {
+        const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
+        const defaultInheritanceType: IPropertyInheritance<InheritanceType> = bothAreArrays
+          ? { inheritanceType: InheritanceType.append }
+          : { inheritanceType: InheritanceType.replace };
+        propertyInheritance =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          configuredPropertyInheritance && (configuredPropertyInheritance as any)[propertyName] !== undefined
+            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (configuredPropertyInheritance as any)[propertyName]
+            : defaultInheritanceType;
+      }
+
+      let newValue: unknown;
+      const usePropertyValue: () => void = () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (resultAnnotation.originalValues as any)[propertyName] = this.getPropertyOriginalValue<any, any>({
+          parentObject: currentObject,
+          propertyName: propertyName
+        });
+        newValue = propertyValue;
+      };
+      const useParentPropertyValue: () => void = () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (resultAnnotation.originalValues as any)[propertyName] = this.getPropertyOriginalValue<any, any>({
+          parentObject: parentObject,
+          propertyName: propertyName
+        });
+        newValue = parentPropertyValue;
+      };
+
+      if (propertyValue !== undefined && parentPropertyValue === undefined) {
+        usePropertyValue();
+      } else if (parentPropertyValue !== undefined && propertyValue === undefined) {
+        useParentPropertyValue();
+      } else {
+        switch (propertyInheritance!.inheritanceType) {
+          case InheritanceType.replace: {
+            if (propertyValue !== undefined) {
+              usePropertyValue();
+            } else {
+              useParentPropertyValue();
+            }
+
+            break;
+          }
+
+          case InheritanceType.append: {
+            if (propertyValue !== undefined && parentPropertyValue === undefined) {
+              usePropertyValue();
+            } else if (propertyValue === undefined && parentPropertyValue !== undefined) {
+              useParentPropertyValue();
+            } else {
+              if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
+                throw new Error(
+                  `Issue in processing configuration file property "${propertyName}". ` +
+                    `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
+                );
+              }
+
+              newValue = [...parentPropertyValue, ...propertyValue];
+              (newValue as unknown as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+                configurationFilePath: undefined,
+                originalValues: {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ...(parentPropertyValue as any)[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ...(propertyValue as any)[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
+                }
+              };
+            }
+
+            break;
+          }
+
+          case InheritanceType.merge: {
+            if (parentPropertyValue === null || propertyValue === null) {
+              throw new Error(
+                `Issue in processing configuration file property "${propertyName}". ` +
+                  `Null values cannot be used when the inheritance type is set as "${InheritanceType.merge}"`
+              );
+            }
+
+            if (propertyValue !== undefined && parentPropertyValue === undefined) {
+              usePropertyValue();
+            } else if (propertyValue === undefined && parentPropertyValue !== undefined) {
+              useParentPropertyValue();
+            } else {
+              if (
+                (propertyValue && typeof propertyValue !== 'object') ||
+                (parentPropertyValue && typeof parentPropertyValue !== 'object')
+              ) {
+                throw new Error(
+                  `Issue in processing configuration file property "${propertyName}". ` +
+                    `Primitive types cannot be provided when the inheritance type is set as "${InheritanceType.merge}"`
+                );
+              }
+              if (Array.isArray(propertyValue) || Array.isArray(parentPropertyValue)) {
+                throw new Error(
+                  `Issue in processing configuration file property "${propertyName}". ` +
+                    `Property is not a keyed object, but the inheritance type is set as "${InheritanceType.merge}"`
+                );
+              }
+
+              // Recursively merge the parent and child objects. Don't pass the configuredPropertyInheritance or
+              // ignoreProperties because we are no longer at the top level of the configuration file.
+              newValue = this._mergeObjects(
+                parentPropertyValue as object | undefined,
+                propertyValue as object | undefined,
+                resolvedConfigurationFilePath
+              );
+            }
+
+            break;
+          }
+
+          case InheritanceType.custom: {
+            const customInheritance: ICustomPropertyInheritance<unknown> =
+              propertyInheritance as ICustomPropertyInheritance<unknown>;
+            if (
+              !customInheritance.inheritanceFunction ||
+              typeof customInheritance.inheritanceFunction !== 'function'
+            ) {
+              throw new Error(
+                'For property inheritance type "InheritanceType.custom", an inheritanceFunction must be provided.'
+              );
+            }
+
+            newValue = customInheritance.inheritanceFunction(propertyValue, parentPropertyValue);
+
+            break;
+          }
+
+          default: {
+            throw new Error(`Unknown inheritance type "${propertyInheritance}"`);
+          }
+        }
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (result as any)[propertyName] = newValue;
+    }
+
+    return result;
   }
 
   private _getConfigurationFilePathForProject(projectPath: string): string {

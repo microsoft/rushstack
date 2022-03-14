@@ -120,8 +120,88 @@ Object {
 }
 `;
 
+exports[`ConfigurationFile a complex file with merge behavior annotations Correctly loads a complex config file with a single merge behavior annotation 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations Correctly loads a complex config file with merge behavior annotations 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when a keyed object uses the 'append' merge behavior 1`] = `"Issue in processing configuration file property \\"c\\". Property is not an array, but the inheritance type is set as \\"append\\""`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when a keyed object uses the 'append' merge behavior 2`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when a merge behavior is specified for an unspecified property 1`] = `"Issue in processing configuration file property \\"$c.mergeBehavior\\". A merge behavior was provided but no matching property was found"`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when a merge behavior is specified for an unspecified property 2`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when a non-object property uses a merge behavior 1`] = `"Issue in processing configuration file property \\"$l.mergeBehavior\\". A merge behavior was provided for a property that is not an object"`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when a non-object property uses a merge behavior 2`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when an array uses the 'merge' merge behavior 1`] = `"Issue in processing configuration file property \\"a\\". Property is not a keyed object, but the inheritance type is set as \\"merge\\""`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when an array uses the 'merge' merge behavior 2`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when an unsupported merge behavior is specified 1`] = `"Issue in processing configuration file property \\"$a.mergeBehavior\\". An unsupported merge behavior was provided: \\"custom\\""`;
+
+exports[`ConfigurationFile a complex file with merge behavior annotations throws an error when an unsupported merge behavior is specified 2`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
 exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema 1`] = `
-"JSON validation failed:
+"Resolved configuration object does not match schema: Error: JSON validation failed:
 <project root>/src/test/errorCases/invalidType/config.json
 
 Error: #/filePaths

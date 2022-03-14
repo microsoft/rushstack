@@ -1,0 +1,43 @@
+{
+  "$schema": "http://schema.net/",
+
+  "extends": "./mergeBehaviorConfigFileA.json",
+
+  "$b.mergeBehavior": "append",
+  "b": [
+    {
+      "c": "B"
+    }
+  ],
+
+  "$d.mergeBehavior": "merge",
+  "d": {
+    "f": "B",
+
+    "$g.mergeBehavior": "append",
+    "g": [{ "h": "B" }],
+
+    "$i.mergeBehavior": "replace",
+    "i": [{ "j": "B" }],
+
+    "$k.mergeBehavior": "merge",
+    "k": {
+      "$m.mergeBehavior": "append",
+      "m": [{ "n": "B" }],
+      "z": "B"
+    },
+
+    "$o.mergeBehavior": "replace",
+    "o": {
+      "p": [{ "q": "B" }]
+    },
+
+    "y": {
+      "z": "B"
+    }
+  },
+
+  "y": {
+    "z": "B"
+  }
+}

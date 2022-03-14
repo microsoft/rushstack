@@ -1,0 +1,8 @@
+{
+  "$schema": "http://schema.net/",
+
+  "extends": "./simpleMergeBehaviorConfigFileA.json",
+
+  "$l.mergeBehavior": "replace",
+  "l": "B"
+}

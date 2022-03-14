@@ -421,6 +421,279 @@ describe(ConfigurationFile.name, () => {
     });
   });
 
+  describe('a complex file with merge behavior annotations', () => {
+    interface IMergeBehaviorConfigFile {
+      a: string;
+      b: { c: string }[];
+      d: {
+        e: string;
+        f: string;
+        g: { h: string }[];
+        i: { j: string }[];
+        k: {
+          l: string;
+          m: { n: string }[];
+          z?: string;
+        };
+        o: {
+          p: { q: string }[];
+        };
+        r: {
+          s: string;
+        };
+        y?: {
+          z: string;
+        };
+      };
+      y?: {
+        z: string;
+      };
+    }
+
+    interface ISimpleMergeBehaviorConfigFile {
+      a: { b: string }[];
+      c: {
+        d: { e: string }[];
+      };
+      f: {
+        g: { h: string }[];
+        i: {
+          j: { k: string }[];
+        };
+      };
+      l: string;
+    }
+
+    it('Correctly loads a complex config file with merge behavior annotations', async () => {
+      const projectRelativeFilePath: string = 'mergeBehaviorConfigFile/mergeBehaviorConfigFileB.json';
+      const rootConfigFilePath: string = nodeJsPath.resolve(
+        __dirname,
+        'mergeBehaviorConfigFile',
+        'mergeBehaviorConfigFileA.json'
+      );
+      const secondConfigFilePath: string = nodeJsPath.resolve(
+        __dirname,
+        'mergeBehaviorConfigFile',
+        'mergeBehaviorConfigFileB.json'
+      );
+      const schemaPath: string = nodeJsPath.resolve(
+        __dirname,
+        'mergeBehaviorConfigFile',
+        'mergeBehaviorConfigFile.schema.json'
+      );
+
+      const configFileLoader: ConfigurationFile<IMergeBehaviorConfigFile> =
+        new ConfigurationFile<IMergeBehaviorConfigFile>({
+          projectRelativeFilePath: projectRelativeFilePath,
+          jsonSchemaPath: schemaPath
+        });
+      const loadedConfigFile: IMergeBehaviorConfigFile =
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
+      const expectedConfigFile: IMergeBehaviorConfigFile = {
+        a: 'A',
+        // "$b.mergeBehavior": "append"
+        b: [{ c: 'A' }, { c: 'B' }],
+        // "$d.mergeBehavior": "merge"
+        d: {
+          e: 'A',
+          f: 'B',
+          // "$g.mergeBehavior": "append"
+          g: [{ h: 'A' }, { h: 'B' }],
+          // "$i.mergeBehavior": "replace"
+          i: [{ j: 'B' }],
+          // "$k.mergeBehavior": "merge"
+          k: {
+            l: 'A',
+            m: [{ n: 'A' }, { n: 'B' }],
+            z: 'B'
+          },
+          // "$o.mergeBehavior": "replace"
+          o: {
+            p: [{ q: 'B' }]
+          },
+          r: {
+            s: 'A'
+          },
+          y: {
+            z: 'B'
+          }
+        },
+        y: {
+          z: 'B'
+        }
+      };
+
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.b[0])).toEqual(rootConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.b[1])).toEqual(secondConfigFilePath);
+
+      // loadedConfigFile.d source path is the second config file since it was merged into the first
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d)).toEqual(secondConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.g[0])).toEqual(rootConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.g[1])).toEqual(secondConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.i[0])).toEqual(secondConfigFilePath);
+
+      // loadedConfigFile.d.k source path is the second config file since it was merged into the first
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.k)).toEqual(secondConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.k.m[0])).toEqual(rootConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.k.m[1])).toEqual(
+        secondConfigFilePath
+      );
+
+      // loadedConfigFile.d.o source path is the second config file since it replaced the first
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.o)).toEqual(secondConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.o.p[0])).toEqual(
+        secondConfigFilePath
+      );
+
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.r)).toEqual(rootConfigFilePath);
+
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.d.y!)).toEqual(secondConfigFilePath);
+
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.y!)).toEqual(secondConfigFilePath);
+    });
+
+    it('Correctly loads a complex config file with a single merge behavior annotation', async () => {
+      const projectRelativeFilePath: string =
+        'simpleMergeBehaviorConfigFile/simpleMergeBehaviorConfigFileB.json';
+      const rootConfigFilePath: string = nodeJsPath.resolve(
+        __dirname,
+        'simpleMergeBehaviorConfigFile',
+        'simpleMergeBehaviorConfigFileA.json'
+      );
+      const secondConfigFilePath: string = nodeJsPath.resolve(
+        __dirname,
+        'simpleMergeBehaviorConfigFile',
+        'simpleMergeBehaviorConfigFileB.json'
+      );
+      const schemaPath: string = nodeJsPath.resolve(
+        __dirname,
+        'simpleMergeBehaviorConfigFile',
+        'simpleMergeBehaviorConfigFile.schema.json'
+      );
+
+      const configFileLoader: ConfigurationFile<ISimpleMergeBehaviorConfigFile> =
+        new ConfigurationFile<ISimpleMergeBehaviorConfigFile>({
+          projectRelativeFilePath: projectRelativeFilePath,
+          jsonSchemaPath: schemaPath
+        });
+      const loadedConfigFile: ISimpleMergeBehaviorConfigFile =
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
+      const expectedConfigFile: ISimpleMergeBehaviorConfigFile = {
+        a: [{ b: 'A' }, { b: 'B' }],
+        c: {
+          d: [{ e: 'B' }]
+        },
+        // "$f.mergeBehavior": "merge"
+        f: {
+          g: [{ h: 'A' }, { h: 'B' }],
+          i: {
+            j: [{ k: 'B' }]
+          }
+        },
+        l: 'A'
+      };
+
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.a[0])).toEqual(rootConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.a[1])).toEqual(secondConfigFilePath);
+
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.c)).toEqual(secondConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.c.d[0])).toEqual(secondConfigFilePath);
+
+      // loadedConfigFile.f source path is the second config file since it was merged into the first
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.f)).toEqual(secondConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.f.g[0])).toEqual(rootConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.f.g[1])).toEqual(secondConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.f.i)).toEqual(secondConfigFilePath);
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.f.i.j[0])).toEqual(
+        secondConfigFilePath
+      );
+    });
+
+    it("throws an error when an array uses the 'merge' merge behavior", async () => {
+      const schemaPath: string = nodeJsPath.resolve(
+        __dirname,
+        'simpleMergeBehaviorConfigFile',
+        'simpleMergeBehaviorConfigFile.schema.json'
+      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileA.json',
+        jsonSchemaPath: schemaPath
+      });
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it("throws an error when a keyed object uses the 'append' merge behavior", async () => {
+      const schemaPath: string = nodeJsPath.resolve(
+        __dirname,
+        'simpleMergeBehaviorConfigFile',
+        'simpleMergeBehaviorConfigFile.schema.json'
+      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileB.json',
+        jsonSchemaPath: schemaPath
+      });
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('throws an error when a non-object property uses a merge behavior', async () => {
+      const schemaPath: string = nodeJsPath.resolve(
+        __dirname,
+        'simpleMergeBehaviorConfigFile',
+        'simpleMergeBehaviorConfigFile.schema.json'
+      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileC.json',
+        jsonSchemaPath: schemaPath
+      });
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('throws an error when a merge behavior is specified for an unspecified property', async () => {
+      const schemaPath: string = nodeJsPath.resolve(
+        __dirname,
+        'simpleMergeBehaviorConfigFile',
+        'simpleMergeBehaviorConfigFile.schema.json'
+      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileD.json',
+        jsonSchemaPath: schemaPath
+      });
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('throws an error when an unsupported merge behavior is specified', async () => {
+      const schemaPath: string = nodeJsPath.resolve(
+        __dirname,
+        'simpleMergeBehaviorConfigFile',
+        'simpleMergeBehaviorConfigFile.schema.json'
+      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileE.json',
+        jsonSchemaPath: schemaPath
+      });
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+  });
+
   describe('loading a rig', () => {
     const projectFolder: string = nodeJsPath.resolve(__dirname, 'project-referencing-rig');
     const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: projectFolder });
