@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Add inline \"inheritanceType\" property support. This feature allows for configuration files to specify how object and array properties are inherited, overriding the default inheritance behavior provided by the configuration file class.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}
