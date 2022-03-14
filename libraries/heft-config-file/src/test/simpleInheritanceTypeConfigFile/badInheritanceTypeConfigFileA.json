@@ -1,0 +1,12 @@
+{
+  "$schema": "http://schema.net/",
+
+  "extends": "./simpleInheritanceTypeConfigFileA.json",
+
+  "$a.inheritanceType": "merge",
+  "a": [
+    {
+      "b": "B"
+    }
+  ]
+}

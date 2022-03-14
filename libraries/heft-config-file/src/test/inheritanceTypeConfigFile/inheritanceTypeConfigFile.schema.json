@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Merge Behavior Configuration",
-  "description": "Defines an arbitrary configration file used to test merge behavior",
+  "title": "Inheritance Type Configuration",
+  "description": "Defines an arbitrary configration file used to test inheritance",
   "type": "object",
 
   "additionalProperties": false,

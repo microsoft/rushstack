@@ -1,7 +1,7 @@
 {
   "$schema": "http://schema.net/",
 
-  "extends": "./simpleMergeBehaviorConfigFileA.json",
+  "extends": "./simpleInheritanceTypeConfigFileA.json",
 
   "a": [
     {
@@ -13,7 +13,7 @@
     "d": [{ "e": "B" }]
   },
 
-  "$f.mergeBehavior": "merge",
+  "$f.inheritanceType": "merge",
   "f": {
     "g": [{ "h": "B" }],
 

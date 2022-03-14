@@ -70,7 +70,7 @@ export enum PathResolutionMethod {
   custom
 }
 
-const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.mergeBehavior$/;
+const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.inheritanceType$/;
 const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol('configuration-file-field-annotation');
 
 interface IAnnotatedField<TField> {
@@ -587,50 +587,50 @@ export class ConfigurationFile<TConfigurationFile> {
       [CONFIGURATION_FILE_FIELD_ANNOTATION]: resultAnnotation
     } as unknown as TField;
 
-    // Do a first pass to gather and strip the merge behavior annotations from the merging object
+    // Do a first pass to gather and strip the inheritance type annotations from the merging object
     const currentObjectPropertyNames: Set<string> = new Set(Object.keys(currentObject || {}));
     const filteredObjectPropertyNames: string[] = [];
-    const mergeBehaviorMap: Map<string, IPropertyInheritance<InheritanceType>> = new Map();
+    const inheritanceTypeMap: Map<string, IPropertyInheritance<InheritanceType>> = new Map();
     for (const propertyName of currentObjectPropertyNames) {
       if (ignoreProperties && ignoreProperties.has(propertyName)) {
         continue;
       }
-      const mergeBehaviorMatches: RegExpMatchArray | null = propertyName.match(
+      const inheritanceTypeMatches: RegExpMatchArray | null = propertyName.match(
         CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX
       );
-      if (mergeBehaviorMatches && mergeBehaviorMatches.length === 2) {
-        const mergeTargetPropertyName: string = mergeBehaviorMatches[1];
-        const mergeBehaviorRaw: unknown | undefined = (currentObject || {})[propertyName];
+      if (inheritanceTypeMatches && inheritanceTypeMatches.length === 2) {
+        const mergeTargetPropertyName: string = inheritanceTypeMatches[1];
+        const inheritanceTypeRaw: unknown | undefined = (currentObject || {})[propertyName];
         if (!currentObjectPropertyNames.has(mergeTargetPropertyName)) {
           throw new Error(
             `Issue in processing configuration file property "${propertyName}". ` +
-              `A merge behavior was provided but no matching property was found`
+              `An inheritance type was provided but no matching property was found`
           );
-        } else if (typeof mergeBehaviorRaw !== 'string') {
+        } else if (typeof inheritanceTypeRaw !== 'string') {
           throw new Error(
             `Issue in processing configuration file property "${propertyName}". ` +
-              `An unsupported merge behavior was provided: ${JSON.stringify(mergeBehaviorRaw)}`
+              `An unsupported inheritance type was provided: ${JSON.stringify(inheritanceTypeRaw)}`
           );
         } else if (typeof (currentObject || {})[mergeTargetPropertyName] !== 'object') {
           throw new Error(
             `Issue in processing configuration file property "${propertyName}". ` +
-              `A merge behavior was provided for a property that is not an object`
+              `An inheritance type was provided for a property that is not an object`
           );
         }
-        switch (mergeBehaviorRaw.toLowerCase()) {
+        switch (inheritanceTypeRaw.toLowerCase()) {
           case 'append':
-            mergeBehaviorMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.append });
+            inheritanceTypeMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.append });
             break;
           case 'merge':
-            mergeBehaviorMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.merge });
+            inheritanceTypeMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.merge });
             break;
           case 'replace':
-            mergeBehaviorMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.replace });
+            inheritanceTypeMap.set(mergeTargetPropertyName, { inheritanceType: InheritanceType.replace });
             break;
           default:
             throw new Error(
               `Issue in processing configuration file property "${propertyName}". ` +
-                `An unsupported merge behavior was provided: "${mergeBehaviorRaw}"`
+                `An unsupported inheritance type was provided: "${inheritanceTypeRaw}"`
             );
         }
       } else {
@@ -649,10 +649,10 @@ export class ConfigurationFile<TConfigurationFile> {
       const propertyValue: unknown | undefined = (currentObject || {})[propertyName];
       const parentPropertyValue: unknown | undefined = (parentObject || {})[propertyName];
 
-      // If the property is a merge behavior annotation, use it. Fallback to the configuration file inheritance
+      // If the property is an inheritance type annotation, use it. Fallback to the configuration file inheritance
       // behavior, and if one isn't specified, use the default.
       let propertyInheritance: IPropertyInheritance<InheritanceType> | undefined =
-        mergeBehaviorMap.get(propertyName);
+        inheritanceTypeMap.get(propertyName);
       if (!propertyInheritance) {
         const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
         const defaultInheritanceType: IPropertyInheritance<InheritanceType> = bothAreArrays

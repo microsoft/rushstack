@@ -421,8 +421,8 @@ describe(ConfigurationFile.name, () => {
     });
   });
 
-  describe('a complex file with merge behavior annotations', () => {
-    interface IMergeBehaviorConfigFile {
+  describe('a complex file with inheritance type annotations', () => {
+    interface IInheritanceTypeConfigFile {
       a: string;
       b: { c: string }[];
       d: {
@@ -450,7 +450,7 @@ describe(ConfigurationFile.name, () => {
       };
     }
 
-    interface ISimpleMergeBehaviorConfigFile {
+    interface ISimpleInheritanceTypeConfigFile {
       a: { b: string }[];
       c: {
         d: { e: string }[];
@@ -464,50 +464,50 @@ describe(ConfigurationFile.name, () => {
       l: string;
     }
 
-    it('Correctly loads a complex config file with merge behavior annotations', async () => {
-      const projectRelativeFilePath: string = 'mergeBehaviorConfigFile/mergeBehaviorConfigFileB.json';
+    it('Correctly loads a complex config file with inheritance type annotations', async () => {
+      const projectRelativeFilePath: string = 'inheritanceTypeConfigFile/inheritanceTypeConfigFileB.json';
       const rootConfigFilePath: string = nodeJsPath.resolve(
         __dirname,
-        'mergeBehaviorConfigFile',
-        'mergeBehaviorConfigFileA.json'
+        'inheritanceTypeConfigFile',
+        'inheritanceTypeConfigFileA.json'
       );
       const secondConfigFilePath: string = nodeJsPath.resolve(
         __dirname,
-        'mergeBehaviorConfigFile',
-        'mergeBehaviorConfigFileB.json'
+        'inheritanceTypeConfigFile',
+        'inheritanceTypeConfigFileB.json'
       );
       const schemaPath: string = nodeJsPath.resolve(
         __dirname,
-        'mergeBehaviorConfigFile',
-        'mergeBehaviorConfigFile.schema.json'
+        'inheritanceTypeConfigFile',
+        'inheritanceTypeConfigFile.schema.json'
       );
 
-      const configFileLoader: ConfigurationFile<IMergeBehaviorConfigFile> =
-        new ConfigurationFile<IMergeBehaviorConfigFile>({
+      const configFileLoader: ConfigurationFile<IInheritanceTypeConfigFile> =
+        new ConfigurationFile<IInheritanceTypeConfigFile>({
           projectRelativeFilePath: projectRelativeFilePath,
           jsonSchemaPath: schemaPath
         });
-      const loadedConfigFile: IMergeBehaviorConfigFile =
+      const loadedConfigFile: IInheritanceTypeConfigFile =
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-      const expectedConfigFile: IMergeBehaviorConfigFile = {
+      const expectedConfigFile: IInheritanceTypeConfigFile = {
         a: 'A',
-        // "$b.mergeBehavior": "append"
+        // "$b.inheritanceType": "append"
         b: [{ c: 'A' }, { c: 'B' }],
-        // "$d.mergeBehavior": "merge"
+        // "$d.inheritanceType": "merge"
         d: {
           e: 'A',
           f: 'B',
-          // "$g.mergeBehavior": "append"
+          // "$g.inheritanceType": "append"
           g: [{ h: 'A' }, { h: 'B' }],
-          // "$i.mergeBehavior": "replace"
+          // "$i.inheritanceType": "replace"
           i: [{ j: 'B' }],
-          // "$k.mergeBehavior": "merge"
+          // "$k.inheritanceType": "merge"
           k: {
             l: 'A',
             m: [{ n: 'A' }, { n: 'B' }],
             z: 'B'
           },
-          // "$o.mergeBehavior": "replace"
+          // "$o.inheritanceType": "replace"
           o: {
             p: [{ q: 'B' }]
           },
@@ -554,38 +554,38 @@ describe(ConfigurationFile.name, () => {
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.y!)).toEqual(secondConfigFilePath);
     });
 
-    it('Correctly loads a complex config file with a single merge behavior annotation', async () => {
+    it('Correctly loads a complex config file with a single inheritance type annotation', async () => {
       const projectRelativeFilePath: string =
-        'simpleMergeBehaviorConfigFile/simpleMergeBehaviorConfigFileB.json';
+        'simpleInheritanceTypeConfigFile/simpleInheritanceTypeConfigFileB.json';
       const rootConfigFilePath: string = nodeJsPath.resolve(
         __dirname,
-        'simpleMergeBehaviorConfigFile',
-        'simpleMergeBehaviorConfigFileA.json'
+        'simpleInheritanceTypeConfigFile',
+        'simpleInheritanceTypeConfigFileA.json'
       );
       const secondConfigFilePath: string = nodeJsPath.resolve(
         __dirname,
-        'simpleMergeBehaviorConfigFile',
-        'simpleMergeBehaviorConfigFileB.json'
+        'simpleInheritanceTypeConfigFile',
+        'simpleInheritanceTypeConfigFileB.json'
       );
       const schemaPath: string = nodeJsPath.resolve(
         __dirname,
-        'simpleMergeBehaviorConfigFile',
-        'simpleMergeBehaviorConfigFile.schema.json'
+        'simpleInheritanceTypeConfigFile',
+        'simpleInheritanceTypeConfigFile.schema.json'
       );
 
-      const configFileLoader: ConfigurationFile<ISimpleMergeBehaviorConfigFile> =
-        new ConfigurationFile<ISimpleMergeBehaviorConfigFile>({
+      const configFileLoader: ConfigurationFile<ISimpleInheritanceTypeConfigFile> =
+        new ConfigurationFile<ISimpleInheritanceTypeConfigFile>({
           projectRelativeFilePath: projectRelativeFilePath,
           jsonSchemaPath: schemaPath
         });
-      const loadedConfigFile: ISimpleMergeBehaviorConfigFile =
+      const loadedConfigFile: ISimpleInheritanceTypeConfigFile =
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-      const expectedConfigFile: ISimpleMergeBehaviorConfigFile = {
+      const expectedConfigFile: ISimpleInheritanceTypeConfigFile = {
         a: [{ b: 'A' }, { b: 'B' }],
         c: {
           d: [{ e: 'B' }]
         },
-        // "$f.mergeBehavior": "merge"
+        // "$f.inheritanceType": "merge"
         f: {
           g: [{ h: 'A' }, { h: 'B' }],
           i: {
@@ -613,14 +613,14 @@ describe(ConfigurationFile.name, () => {
       );
     });
 
-    it("throws an error when an array uses the 'merge' merge behavior", async () => {
+    it("throws an error when an array uses the 'merge' inheritance type", async () => {
       const schemaPath: string = nodeJsPath.resolve(
         __dirname,
-        'simpleMergeBehaviorConfigFile',
-        'simpleMergeBehaviorConfigFile.schema.json'
+        'simpleInheritanceTypeConfigFile',
+        'simpleInheritanceTypeConfigFile.schema.json'
       );
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
-        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileA.json',
+        projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileA.json',
         jsonSchemaPath: schemaPath
       });
 
@@ -629,14 +629,14 @@ describe(ConfigurationFile.name, () => {
       ).rejects.toThrowErrorMatchingSnapshot();
     });
 
-    it("throws an error when a keyed object uses the 'append' merge behavior", async () => {
+    it("throws an error when a keyed object uses the 'append' inheritance type", async () => {
       const schemaPath: string = nodeJsPath.resolve(
         __dirname,
-        'simpleMergeBehaviorConfigFile',
-        'simpleMergeBehaviorConfigFile.schema.json'
+        'simpleInheritanceTypeConfigFile',
+        'simpleInheritanceTypeConfigFile.schema.json'
       );
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
-        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileB.json',
+        projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileB.json',
         jsonSchemaPath: schemaPath
       });
 
@@ -645,14 +645,14 @@ describe(ConfigurationFile.name, () => {
       ).rejects.toThrowErrorMatchingSnapshot();
     });
 
-    it('throws an error when a non-object property uses a merge behavior', async () => {
+    it('throws an error when a non-object property uses an inheritance type', async () => {
       const schemaPath: string = nodeJsPath.resolve(
         __dirname,
-        'simpleMergeBehaviorConfigFile',
-        'simpleMergeBehaviorConfigFile.schema.json'
+        'simpleInheritanceTypeConfigFile',
+        'simpleInheritanceTypeConfigFile.schema.json'
       );
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
-        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileC.json',
+        projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileC.json',
         jsonSchemaPath: schemaPath
       });
 
@@ -661,14 +661,14 @@ describe(ConfigurationFile.name, () => {
       ).rejects.toThrowErrorMatchingSnapshot();
     });
 
-    it('throws an error when a merge behavior is specified for an unspecified property', async () => {
+    it('throws an error when an inheritance type is specified for an unspecified property', async () => {
       const schemaPath: string = nodeJsPath.resolve(
         __dirname,
-        'simpleMergeBehaviorConfigFile',
-        'simpleMergeBehaviorConfigFile.schema.json'
+        'simpleInheritanceTypeConfigFile',
+        'simpleInheritanceTypeConfigFile.schema.json'
       );
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
-        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileD.json',
+        projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileD.json',
         jsonSchemaPath: schemaPath
       });
 
@@ -677,14 +677,14 @@ describe(ConfigurationFile.name, () => {
       ).rejects.toThrowErrorMatchingSnapshot();
     });
 
-    it('throws an error when an unsupported merge behavior is specified', async () => {
+    it('throws an error when an unsupported inheritance type is specified', async () => {
       const schemaPath: string = nodeJsPath.resolve(
         __dirname,
-        'simpleMergeBehaviorConfigFile',
-        'simpleMergeBehaviorConfigFile.schema.json'
+        'simpleInheritanceTypeConfigFile',
+        'simpleInheritanceTypeConfigFile.schema.json'
       );
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
-        projectRelativeFilePath: 'simpleMergeBehaviorConfigFile/badMergeBehaviorConfigFileE.json',
+        projectRelativeFilePath: 'simpleInheritanceTypeConfigFile/badInheritanceTypeConfigFileE.json',
         jsonSchemaPath: schemaPath
       });
 
