@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Fri, 05 Nov 2021 15:09:18 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Mar 2022 19:15:53 GMT and should not be manually modified.
+
+## 1.1.1
+Tue, 15 Mar 2022 19:15:53 GMT
+
+### Patches
+
+- Fix the path in the package.json "directory" field.
 
 ## 1.1.0
 Fri, 05 Nov 2021 15:09:18 GMT

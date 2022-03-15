@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Mar 2022 19:15:53 GMT and should not be manually modified.
+
+## 2.5.2
+Tue, 15 Mar 2022 19:15:53 GMT
+
+### Patches
+
+- Fix the path in the package.json "directory" field.
 
 ## 2.5.1
 Mon, 27 Dec 2021 16:10:40 GMT

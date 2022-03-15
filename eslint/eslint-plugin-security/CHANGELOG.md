@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin-security
 
-This log was last generated on Mon, 06 Dec 2021 16:08:32 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Mar 2022 19:15:53 GMT and should not be manually modified.
+
+## 0.2.5
+Tue, 15 Mar 2022 19:15:53 GMT
+
+### Patches
+
+- Fix the path in the package.json "directory" field.
 
 ## 0.2.4
 Mon, 06 Dec 2021 16:08:32 GMT

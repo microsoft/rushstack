@@ -2,6 +2,32 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.5.2",
+      "tag": "@rushstack/eslint-config_v2.5.2",
+      "date": "Tue, 15 Mar 2022 19:15:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the path in the package.json \"directory\" field."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.1",
       "tag": "@rushstack/eslint-config_v2.5.1",
       "date": "Mon, 27 Dec 2021 16:10:40 GMT",

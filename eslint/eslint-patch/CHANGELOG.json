@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.1.1",
+      "tag": "@rushstack/eslint-patch_v1.1.1",
+      "date": "Tue, 15 Mar 2022 19:15:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the path in the package.json \"directory\" field."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.0",
       "tag": "@rushstack/eslint-patch_v1.1.0",
       "date": "Fri, 05 Nov 2021 15:09:18 GMT",

@@ -2,6 +2,39 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.3.8",
+      "tag": "@rushstack/heft-sass-plugin_v0.3.8",
+      "date": "Tue, 15 Mar 2022 19:15:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.44.2` to `^0.44.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.7",
       "tag": "@rushstack/heft-sass-plugin_v0.3.7",
       "date": "Fri, 11 Feb 2022 10:30:25 GMT",

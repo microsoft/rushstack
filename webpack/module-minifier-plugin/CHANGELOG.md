@@ -1,6 +1,11 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Thu, 17 Feb 2022 00:32:30 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Mar 2022 19:15:54 GMT and should not be manually modified.
+
+## 0.8.1
+Tue, 15 Mar 2022 19:15:54 GMT
+
+_Version update only_
 
 ## 0.8.0
 Thu, 17 Feb 2022 00:32:30 GMT

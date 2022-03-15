@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin-packlets",
   "entries": [
     {
+      "version": "0.3.5",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.3.5",
+      "date": "Tue, 15 Mar 2022 19:15:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the path in the package.json \"directory\" field."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.4",
       "tag": "@rushstack/eslint-plugin-packlets_v0.3.4",
       "date": "Mon, 06 Dec 2021 16:08:32 GMT",
