@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix the path in the package.json \"directory\" field.",
+      "type": "patch",
+      "packageName": "@rushstack/eslint-plugin"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
