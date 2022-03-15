@@ -13,13 +13,13 @@ might interfere with the globally installed Rush).
 The **@microsoft/rush** version number is always exactly equal
 to the **@microsoft/rush-lib** version number that it depends on.
 
-API documentation for this package: https://rushstack.io/pages/api/rush-lib/
+API documentation for this package: https://rushjs.io/pages/advanced/api/
 
 ## Links
 
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/master/apps/rush/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/rush-lib/)
+- [API Reference](https://api.rushstack.io/pages/rush-lib/)
 
 Rush is part of the [Rush Stack](https://rushstack.io/) family of projects.
