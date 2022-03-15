@@ -7,7 +7,7 @@
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
-    "directory": "stack/eslint-patch"
+    "directory": "eslint/eslint-patch"
   },
   "homepage": "https://rushstack.io",
   "scripts": {
