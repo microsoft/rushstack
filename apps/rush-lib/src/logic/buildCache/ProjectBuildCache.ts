@@ -52,7 +52,7 @@ export class ProjectBuildCache {
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     const { buildCacheConfiguration, projectConfiguration, projectOutputFolderNames } = options;
     this._project = projectConfiguration.project;
-    this._localBuildCacheProvider = buildCacheConfiguration.localCacheProvider;
+    this._localBuildCacheProvider = buildCacheConfiguration._localCacheProvider;
     this._cloudBuildCacheProvider = buildCacheConfiguration.cloudCacheProvider;
     this._buildCacheEnabled = buildCacheConfiguration.buildCacheEnabled;
     this._cacheWriteEnabled = buildCacheConfiguration.cacheWriteEnabled;
@@ -499,7 +499,7 @@ export class ProjectBuildCache {
 
     const projectStateHash: string = hash.digest('hex');
 
-    return options.buildCacheConfiguration.getCacheEntryId({
+    return options.buildCacheConfiguration._getCacheEntryId({
       projectName: options.projectConfiguration.project.packageName,
       projectStateHash,
       phaseName: options.phaseName

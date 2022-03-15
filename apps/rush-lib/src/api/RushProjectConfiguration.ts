@@ -177,6 +177,8 @@ export class RushProjectConfiguration {
 
   public readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
 
+  private readonly _validationCache: WeakSet<object> = new WeakSet();
+
   private constructor(
     project: RushConfigurationProject,
     rushProjectJson: IRushProjectJson,
@@ -192,6 +194,11 @@ export class RushProjectConfiguration {
    * Validates that the requested phases are compatible.
    */
   public validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void {
+    // Don't repeatedly validate the same set of phases for the same project.
+    if (this._validationCache.has(phases)) {
+      return;
+    }
+
     const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> = new OverlappingPathAnalyzer<string>();
 
     const { operationSettingsByOperationName, project } = this;
@@ -234,6 +241,8 @@ export class RushProjectConfiguration {
         }
       }
     }
+
+    this._validationCache.add(phases);
 
     if (hasErrors) {
       throw new AlreadyReportedError();

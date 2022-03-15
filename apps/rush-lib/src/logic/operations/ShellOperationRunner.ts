@@ -412,11 +412,10 @@ export class ShellOperationRunner implements IOperationRunner {
         const projectConfiguration: RushProjectConfiguration | undefined =
           await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
         if (projectConfiguration) {
+          projectConfiguration.validatePhaseConfiguration(this._selectedPhases, terminal);
           if (projectConfiguration.disableBuildCacheForProject) {
             terminal.writeVerboseLine('Caching has been disabled for this project.');
           } else {
-            projectConfiguration.validatePhaseConfiguration(this._selectedPhases, terminal);
-
             const operationSettings: IOperationSettings | undefined =
               projectConfiguration.operationSettingsByOperationName.get(this._commandName);
             if (operationSettings?.disableBuildCacheForOperation) {

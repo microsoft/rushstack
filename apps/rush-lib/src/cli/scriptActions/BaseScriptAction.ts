@@ -3,7 +3,7 @@
 
 import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
-import { Command, CommandLineConfiguration, Parameter } from '../../api/CommandLineConfiguration';
+import { Command, CommandLineConfiguration, IParameterJson } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 import type { ParameterJson } from '../../api/CommandLineJson';
 
@@ -27,7 +27,7 @@ export interface IBaseScriptActionOptions<TCommand extends Command> extends IBas
  */
 export abstract class BaseScriptAction<TCommand extends Command> extends BaseRushAction {
   protected readonly commandLineConfiguration: CommandLineConfiguration;
-  protected readonly customParameters: Map<Parameter, CommandLineParameter> = new Map();
+  protected readonly customParameters: Map<IParameterJson, CommandLineParameter> = new Map();
   protected readonly command: TCommand;
 
   public constructor(options: IBaseScriptActionOptions<TCommand>) {

@@ -16,9 +16,12 @@ function nullSort(a: OperationExecutionRecord, b: OperationExecutionRecord): num
 }
 
 function createRecord(name: string): OperationExecutionRecord {
-  const operation: Operation = new Operation();
-  operation.runner = new MockOperationRunner(name);
-  return new OperationExecutionRecord(operation, {} as unknown as IOperationExecutionRecordContext);
+  return new OperationExecutionRecord(
+    new Operation({
+      runner: new MockOperationRunner(name)
+    }),
+    {} as unknown as IOperationExecutionRecordContext
+  );
 }
 
 describe(AsyncOperationQueue.name, () => {

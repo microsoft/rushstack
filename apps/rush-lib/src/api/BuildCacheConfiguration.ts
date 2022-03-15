@@ -78,12 +78,14 @@ export class BuildCacheConfiguration {
   public cacheWriteEnabled: boolean;
   /**
    * Method to calculate the cache entry id for a project, phase, and project state.
+   * @internal
    */
-  public readonly getCacheEntryId: GetCacheEntryIdFunction;
+  public readonly _getCacheEntryId: GetCacheEntryIdFunction;
   /**
    * The provider for interacting with the local build cache.
+   * @internal
    */
-  public readonly localCacheProvider: FileSystemBuildCacheProvider;
+  public readonly _localCacheProvider: FileSystemBuildCacheProvider;
   /**
    * The provider for interacting with the cloud build cache, if configured.
    */
@@ -95,8 +97,8 @@ export class BuildCacheConfiguration {
     this.cacheWriteEnabled =
       !!this.buildCacheEnabled && EnvironmentConfiguration.buildCacheWriteAllowed !== false;
 
-    this.getCacheEntryId = options.getCacheEntryId;
-    this.localCacheProvider = new FileSystemBuildCacheProvider({
+    this._getCacheEntryId = options.getCacheEntryId;
+    this._localCacheProvider = new FileSystemBuildCacheProvider({
       rushUserConfiguration: options.rushUserConfiguration,
       rushConfiguration: options.rushConfiguration
     });
@@ -164,6 +166,9 @@ export class BuildCacheConfiguration {
     return buildCacheConfiguration;
   }
 
+  /**
+   * Gets the absolute path to the build-cache.json file in the specified rush workspace.
+   */
   public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
     return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename);
   }

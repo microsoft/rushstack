@@ -3,12 +3,12 @@
 
 import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
+import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import { RushConstants } from '../logic/RushConstants';
 import type {
   CommandJson,
   ICommandLineJson,
-  IPhaseJson,
   IBulkCommandJson,
   IGlobalCommandJson,
   IFlagParameterJson,
@@ -25,7 +25,12 @@ export interface IShellCommandTokenContext {
  * Metadata about a phase.
  * @alpha
  */
-export interface IPhase extends IPhaseJson {
+export interface IPhase {
+  /**
+   * The name of this phase.
+   */
+  name: string;
+
   /**
    * If set to "true," this this phase was generated from a bulk command, and
    * was not explicitly defined in the command-line.json file.
@@ -42,19 +47,29 @@ export interface IPhase extends IPhaseJson {
   /**
    * The set of custom command line parameters that are relevant to this phase.
    */
-  associatedParameters: Set<Parameter>;
+  associatedParameters: Set<CommandLineParameter>;
 
   /**
    * The resolved dependencies of the phase
    */
-  phaseDependencies: {
+  dependencies: {
     self: Set<IPhase>;
     upstream: Set<IPhase>;
   };
+
+  /**
+   * Normally Rush requires that each project's package.json has a \"scripts\" entry matching the phase name. To disable this check, set \"ignoreMissingScript\" to true.
+   */
+  ignoreMissingScript: boolean;
+
+  /**
+   * By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.
+   */
+  allowWarningsOnSuccess: boolean;
 }
 
 export interface ICommandWithParameters {
-  associatedParameters: Set<Parameter>;
+  associatedParameters: Set<IParameterJson>;
 }
 
 export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, ICommandWithParameters {
@@ -85,7 +100,7 @@ export type Command = IGlobalCommandConfig | IPhasedCommandConfig;
  * Metadata about a custom parameter defined in command-line.json
  * @alpha
  */
-export type Parameter = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
+export type IParameterJson = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
 
 const DEFAULT_BUILD_COMMAND_JSON: IBulkCommandJson = {
   commandKind: RushConstants.bulkCommandKind,
@@ -139,7 +154,7 @@ export class CommandLineConfiguration {
 
   public readonly commands: Map<string, Command> = new Map();
   public readonly phases: Map<string, IPhase> = new Map();
-  public readonly parameters: Parameter[] = [];
+  public readonly parameters: IParameterJson[] = [];
 
   /**
    * shellCommand from plugin custom command line configuration needs to be expanded with tokens
@@ -165,11 +180,12 @@ export class CommandLineConfiguration {
     commandLineJson: ICommandLineJson | undefined,
     options: ICommandLineConfigurationOptions = {}
   ) {
-    if (commandLineJson?.phases) {
+    const phasesJson: ICommandLineJson['phases'] = commandLineJson?.phases;
+    if (phasesJson) {
       const phaseNameRegexp: RegExp = new RegExp(
         `^${RushConstants.phaseNamePrefix}[a-z][a-z0-9]*([-][a-z0-9]+)*$`
       );
-      for (const phase of commandLineJson.phases) {
+      for (const phase of phasesJson) {
         if (this.phases.has(phase.name)) {
           throw new Error(
             `In ${RushConstants.commandLineFilename}, the phase "${phase.name}" is specified ` +
@@ -187,62 +203,71 @@ export class CommandLineConfiguration {
           );
         }
 
+        // This is a completely fresh object. Avoid use of the `...` operator in its construction
+        // to guarantee monomorphism.
         const processedPhase: IPhase = {
-          ...phase,
+          name: phase.name,
           isSynthetic: false,
           logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name),
           associatedParameters: new Set(),
-          phaseDependencies: {
+          dependencies: {
             self: new Set(),
             upstream: new Set()
-          }
+          },
+          ignoreMissingScript: !!phase.ignoreMissingScript,
+          allowWarningsOnSuccess: !!phase.allowWarningsOnSuccess
         };
 
         this.phases.set(phase.name, processedPhase);
       }
-    }
 
-    // Resolve phase names to the underlying objects
-    for (const phase of this.phases.values()) {
-      const selfDependencies: string[] | undefined = phase.dependencies?.self;
-      const upstreamDependencies: string[] | undefined = phase.dependencies?.upstream;
+      // Resolve phase names to the underlying objects
+      for (const rawPhase of phasesJson) {
+        // The named phase not existing was already handled in the loop above
+        const phase: IPhase = this.phases.get(rawPhase.name)!;
 
-      if (selfDependencies) {
-        for (const dependencyName of selfDependencies) {
-          const dependency: IPhase | undefined = this.phases.get(dependencyName);
-          if (!dependency) {
-            throw new Error(
-              `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", the self ` +
-                `dependency phase "${dependencyName}" does not exist.`
-            );
+        const selfDependencies: string[] | undefined = rawPhase.dependencies?.self;
+        const upstreamDependencies: string[] | undefined = rawPhase.dependencies?.upstream;
+
+        if (selfDependencies) {
+          for (const dependencyName of selfDependencies) {
+            const dependency: IPhase | undefined = this.phases.get(dependencyName);
+            if (!dependency) {
+              throw new Error(
+                `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", the self ` +
+                  `dependency phase "${dependencyName}" does not exist.`
+              );
+            }
+            phase.dependencies.self.add(dependency);
           }
-          phase.phaseDependencies.self.add(dependency);
+        }
+
+        if (upstreamDependencies) {
+          for (const dependencyName of upstreamDependencies) {
+            const dependency: IPhase | undefined = this.phases.get(dependencyName);
+            if (!dependency) {
+              throw new Error(
+                `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", ` +
+                  `the upstream dependency phase "${dependencyName}" does not exist.`
+              );
+            }
+            phase.dependencies.upstream.add(dependency);
+          }
         }
       }
 
-      if (upstreamDependencies) {
-        for (const dependencyName of upstreamDependencies) {
-          const dependency: IPhase | undefined = this.phases.get(dependencyName);
-          if (!dependency) {
-            throw new Error(
-              `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", ` +
-                `the upstream dependency phase "${dependencyName}" does not exist.`
-            );
-          }
-          phase.phaseDependencies.upstream.add(dependency);
-        }
+      // Do the recursive stuff after the dependencies have been converted
+      const safePhases: Set<IPhase> = new Set();
+      const cycleDetector: Set<IPhase> = new Set();
+      for (const phase of this.phases.values()) {
+        this._checkForPhaseSelfCycles(phase, cycleDetector, safePhases);
       }
     }
 
-    // Do the recursive stuff after the dependencies have been converted
-    const safePhases: Set<IPhase> = new Set();
-    for (const phase of this.phases.values()) {
-      this._checkForPhaseSelfCycles(phase, new Set(), safePhases);
-    }
-
-    let buildCommandPhases: Set<IPhase> | undefined;
-    if (commandLineJson?.commands) {
-      for (const command of commandLineJson.commands) {
+    const commandsJson: ICommandLineJson['commands'] = commandLineJson?.commands;
+    let buildCommandPhases: IPhasedCommandConfig['phases'] | undefined;
+    if (commandsJson) {
+      for (const command of commandsJson) {
         if (this.commands.has(command.name)) {
           throw new Error(
             `In ${RushConstants.commandLineFilename}, the command "${command.name}" is specified ` +
@@ -259,7 +284,7 @@ export class CommandLineConfiguration {
             normalizedCommand = {
               ...command,
               isSynthetic: false,
-              associatedParameters: new Set<Parameter>(),
+              associatedParameters: new Set<IParameterJson>(),
               phases: commandPhases,
               watchPhases,
               alwaysWatch: false
@@ -281,11 +306,11 @@ export class CommandLineConfiguration {
             // The equivalent of the "--to" operator used for projects
             // Appending to the set while iterating it accomplishes a full breadth-first search
             for (const phase of commandPhases) {
-              for (const dependency of phase.phaseDependencies.self) {
+              for (const dependency of phase.dependencies.self) {
                 commandPhases.add(dependency);
               }
 
-              for (const dependency of phase.phaseDependencies.upstream) {
+              for (const dependency of phase.dependencies.upstream) {
                 commandPhases.add(dependency);
               }
             }
@@ -315,7 +340,7 @@ export class CommandLineConfiguration {
           case RushConstants.globalCommandKind: {
             normalizedCommand = {
               ...command,
-              associatedParameters: new Set<Parameter>()
+              associatedParameters: new Set<IParameterJson>()
             };
             break;
           }
@@ -382,9 +407,10 @@ export class CommandLineConfiguration {
       }
     }
 
-    if (commandLineJson?.parameters) {
-      for (const parameter of commandLineJson.parameters) {
-        const normalizedParameter: Parameter = {
+    const parametersJson: ICommandLineJson['parameters'] = commandLineJson?.parameters;
+    if (parametersJson) {
+      for (const parameter of parametersJson) {
+        const normalizedParameter: IParameterJson = {
           ...parameter,
           associatedPhases: parameter.associatedPhases ? [...parameter.associatedPhases] : [],
           associatedCommands: parameter.associatedCommands ? [...parameter.associatedCommands] : []
@@ -453,7 +479,7 @@ export class CommandLineConfiguration {
                   `that is associated with a phase "${associatedPhaseName}" that does not exist.`
               );
             } else {
-              associatedPhase.associatedParameters.add(normalizedParameter);
+              // Defer association to PhasedScriptAction so that it can map to the ts-command-line object
               parameterHasAssociatedPhases = true;
             }
           }
@@ -493,7 +519,7 @@ export class CommandLineConfiguration {
       return;
     }
 
-    for (const dependency of phase.phaseDependencies.self) {
+    for (const dependency of phase.dependencies.self) {
       if (phasesInPath.has(dependency)) {
         throw new Error(
           `In ${RushConstants.commandLineFilename}, there exists a cycle within the ` +
@@ -617,21 +643,18 @@ export class CommandLineConfiguration {
     const phase: IPhase = {
       name: phaseName,
       isSynthetic: true,
-      dependencies: {
-        upstream: command.ignoreDependencyOrder ? undefined : [phaseName]
-      },
-      ignoreMissingScript: command.ignoreMissingScript,
-      allowWarningsOnSuccess: command.allowWarningsInSuccessfulBuild,
       logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name),
       associatedParameters: new Set(),
-      phaseDependencies: {
+      dependencies: {
         self: new Set(),
         upstream: new Set()
-      }
+      },
+      ignoreMissingScript: !!command.ignoreMissingScript,
+      allowWarningsOnSuccess: !!command.allowWarningsInSuccessfulBuild
     };
 
     if (!command.ignoreDependencyOrder) {
-      phase.phaseDependencies.upstream.add(phase);
+      phase.dependencies.upstream.add(phase);
     }
 
     this.phases.set(phaseName, phase);
@@ -643,7 +666,7 @@ export class CommandLineConfiguration {
       ...command,
       commandKind: 'phased',
       isSynthetic: true,
-      associatedParameters: new Set<Parameter>(),
+      associatedParameters: new Set<IParameterJson>(),
       phases,
       // Bulk commands used the same phases for watch as for regular execution. Preserve behavior.
       watchPhases: command.watchForChanges ? phases : new Set(),

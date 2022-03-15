@@ -5,8 +5,12 @@ import * as os from 'os';
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { AlreadyReportedError, InternalError, Terminal } from '@rushstack/node-core-library';
+import {
+  CommandLineFlagParameter,
+  CommandLineParameter,
+  CommandLineStringParameter
+} from '@rushstack/ts-command-line';
 
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
 import { PhasedCommandHooks, ICreateOperationsContext } from '../../pluginFramework/PhasedCommandHooks';
@@ -46,7 +50,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   alwaysWatch: boolean;
 }
 
-interface IExecuteInternalOptions {
+interface IRunPhasesOptions {
   initialCreateOperationsContext: ICreateOperationsContext;
   executionManagerOptions: IOperationExecutionManagerOptions;
   stopwatch: Stopwatch;
@@ -80,6 +84,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _alwaysWatch: boolean;
+  private readonly _knownPhases: ReadonlyMap<string, IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -96,6 +101,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._alwaysWatch = options.alwaysWatch;
+    this._knownPhases = options.phases;
 
     this.hooks = new PhasedCommandHooks();
 
@@ -164,9 +170,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
 
+    const customParametersByName: Map<string, CommandLineParameter> = new Map();
+    for (const [configParameter, parserParameter] of this.customParameters) {
+      customParametersByName.set(configParameter.longName, parserParameter);
+    }
+
     const initialCreateOperationsContext: ICreateOperationsContext = {
       buildCacheConfiguration,
-      customParameters: this.customParameters,
+      customParameters: customParametersByName,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       isInitial: true,
       isWatch,
@@ -183,7 +194,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       changedProjectsOnly
     };
 
-    const internalOptions: IExecuteInternalOptions = {
+    const internalOptions: IRunPhasesOptions = {
       initialCreateOperationsContext,
       executionManagerOptions,
       stopwatch,
@@ -202,20 +213,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
   }
 
-  private async _runInitialPhases(options: IExecuteInternalOptions): Promise<void> {
-    const {
-      initialCreateOperationsContext: createOperationsContext,
-      executionManagerOptions,
-      stopwatch,
-      terminal
-    } = options;
+  private async _runInitialPhases(options: IRunPhasesOptions): Promise<void> {
+    const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
 
     const operations: Set<Operation> = await this.hooks.createOperations.promise(
       new Set(),
-      createOperationsContext
+      initialCreateOperationsContext
     );
 
-    const { isWatch } = createOperationsContext;
+    const { isWatch } = initialCreateOperationsContext;
 
     const initialOptions: IExecutionOperationsOptions = {
       ignoreHooks: false,
@@ -236,18 +242,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    *    Uses the same algorithm as --impacted-by
    * 3) Goto (1)
    */
-  private async _runWatchPhases(options: IExecuteInternalOptions): Promise<void> {
-    const {
-      initialCreateOperationsContext: createOperationsContext,
-      executionManagerOptions,
-      stopwatch,
-      terminal
-    } = options;
+  private async _runWatchPhases(options: IRunPhasesOptions): Promise<void> {
+    const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
 
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
     const { projectChangeAnalyzer: initialState, projectSelection: projectsToWatch } =
-      createOperationsContext;
+      initialCreateOperationsContext;
 
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
@@ -299,7 +300,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
 
       const operations: Set<Operation> = await this.hooks.createOperations.promise(new Set(), {
-        ...createOperationsContext,
+        ...initialCreateOperationsContext,
         isInitial: false,
         projectChangeAnalyzer: state,
         projectSelection,
@@ -387,6 +388,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     this.defineScriptParameters();
+
+    for (const [{ associatedPhases }, tsCommandLineParameter] of this.customParameters) {
+      if (associatedPhases) {
+        for (const phaseName of associatedPhases) {
+          const phase: IPhase | undefined = this._knownPhases.get(phaseName);
+          if (!phase) {
+            throw new InternalError(`Could not find a phase matching ${phaseName}.`);
+          }
+          phase.associatedParameters.add(tsCommandLineParameter);
+        }
+      }
+    }
   }
 
   /**

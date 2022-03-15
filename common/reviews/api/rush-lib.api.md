@@ -61,13 +61,16 @@ export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
     cacheWriteEnabled: boolean;
     readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
-    // (undocumented)
     static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string;
     // Warning: (ae-forgotten-export) The symbol "GetCacheEntryIdFunction" needs to be exported by the entry point index.d.ts
-    readonly getCacheEntryId: GetCacheEntryIdFunction;
+    //
+    // @internal
+    readonly _getCacheEntryId: GetCacheEntryIdFunction;
     static loadAndRequireEnabledAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration>;
     // Warning: (ae-forgotten-export) The symbol "FileSystemBuildCacheProvider" needs to be exported by the entry point index.d.ts
-    readonly localCacheProvider: FileSystemBuildCacheProvider;
+    //
+    // @internal
+    readonly _localCacheProvider: FileSystemBuildCacheProvider;
     static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration | undefined>;
 }
 
@@ -212,34 +215,10 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
-// @public
-export interface IBaseParameterJson {
-    associatedCommands?: string[];
-    associatedPhases?: string[];
-    description: string;
-    longName: string;
-    parameterKind: 'flag' | 'choice' | 'string';
-    required?: boolean;
-    shortName?: string;
-}
-
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
     // (undocumented)
     pluginPackageFolder: string;
-}
-
-// @public
-export interface IChoiceParameterAlternativeJson {
-    description: string;
-    name: string;
-}
-
-// @public
-export interface IChoiceParameterJson extends IBaseParameterJson {
-    alternatives: IChoiceParameterAlternativeJson[];
-    defaultValue?: string;
-    parameterKind: 'choice';
 }
 
 // @beta (undocumented)
@@ -271,15 +250,15 @@ export interface IConfigurationEnvironmentVariable {
 
 // @alpha
 export interface ICreateOperationsContext {
-    buildCacheConfiguration: BuildCacheConfiguration | undefined;
-    customParameters: Map<Parameter, CommandLineParameter>;
-    isIncrementalBuildAllowed: boolean;
-    isInitial: boolean;
-    isWatch: boolean;
-    phaseSelection: ReadonlySet<IPhase>;
-    projectChangeAnalyzer: ProjectChangeAnalyzer;
-    projectSelection: ReadonlySet<RushConfigurationProject>;
-    rushConfiguration: RushConfiguration;
+    readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+    readonly isIncrementalBuildAllowed: boolean;
+    readonly isInitial: boolean;
+    readonly isWatch: boolean;
+    readonly phaseSelection: ReadonlySet<IPhase>;
+    readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
+    readonly projectSelection: ReadonlySet<RushConfigurationProject>;
+    readonly rushConfiguration: RushConfiguration;
 }
 
 // @beta (undocumented)
@@ -310,11 +289,6 @@ export interface IExperimentsJson {
     phasedCommands?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
-}
-
-// @public
-export interface IFlagParameterJson extends IBaseParameterJson {
-    parameterKind: 'flag';
 }
 
 // @beta (undocumented)
@@ -367,6 +341,13 @@ export class IndividualVersionPolicy extends VersionPolicy {
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
+// @alpha
+export interface IOperationOptions {
+    phase?: IPhase | undefined;
+    project?: RushConfigurationProject | undefined;
+    runner?: IOperationRunner | undefined;
+}
+
 // @beta
 export interface IOperationRunner {
     executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
@@ -392,34 +373,23 @@ export interface IPackageManagerOptionsJsonBase {
 }
 
 // @alpha
-export interface IPhase extends IPhaseJson {
-    associatedParameters: Set<Parameter>;
-    isSynthetic: boolean;
-    logFilenameIdentifier: string;
-    phaseDependencies: {
+export interface IPhase {
+    allowWarningsOnSuccess: boolean;
+    associatedParameters: Set<CommandLineParameter>;
+    dependencies: {
         self: Set<IPhase>;
         upstream: Set<IPhase>;
     };
+    ignoreMissingScript: boolean;
+    isSynthetic: boolean;
+    logFilenameIdentifier: string;
+    name: string;
 }
 
 // @beta
 export interface IPhasedCommand extends IRushCommand {
     // @alpha
     readonly hooks: PhasedCommandHooks;
-}
-
-// @alpha
-export interface IPhaseDependencies {
-    self?: string[];
-    upstream?: string[];
-}
-
-// @alpha
-export interface IPhaseJson {
-    allowWarningsOnSuccess?: boolean;
-    dependencies?: IPhaseDependencies;
-    ignoreMissingScript?: boolean;
-    name: string;
 }
 
 // @internal
@@ -455,12 +425,6 @@ export interface IRushSessionOptions {
     getIsDebugMode: () => boolean;
     // (undocumented)
     terminalProvider: ITerminalProvider;
-}
-
-// @public
-export interface IStringParameterJson extends IBaseParameterJson {
-    argumentName: string;
-    parameterKind: 'string';
 }
 
 // @public
@@ -521,7 +485,7 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 
 // @alpha
 export class Operation {
-    constructor(project?: RushConfigurationProject | undefined, phase?: IPhase | undefined);
+    constructor(options?: IOperationOptions);
     readonly associatedPhase: IPhase | undefined;
     readonly associatedProject: RushConfigurationProject | undefined;
     readonly dependencies: Set<Operation>;
@@ -601,9 +565,6 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
     protected constructor(json: IPackageManagerOptionsJsonBase);
     readonly environmentVariables?: IConfigurationEnvironment;
 }
-
-// @alpha
-export type Parameter = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
 
 // @alpha
 export class PhasedCommandHooks {

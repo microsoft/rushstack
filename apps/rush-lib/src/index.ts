@@ -26,17 +26,7 @@ export {
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
 
-export { IPhase, Parameter } from './api/CommandLineConfiguration';
-
-export {
-  IBaseParameterJson,
-  IChoiceParameterAlternativeJson,
-  IChoiceParameterJson,
-  IFlagParameterJson,
-  IPhaseDependencies,
-  IPhaseJson,
-  IStringParameterJson
-} from './api/CommandLineJson';
+export { IPhase } from './api/CommandLineConfiguration';
 
 export {
   EnvironmentConfiguration,
@@ -86,7 +76,7 @@ export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsCon
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 
 export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
-export { Operation } from './logic/operations/Operation';
+export { IOperationOptions, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
 
 export {
