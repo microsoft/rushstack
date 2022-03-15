@@ -6,7 +6,7 @@
   "repository": {
     "url": "https://github.com/microsoft/rushstack.git",
     "type": "git",
-    "directory": "stack/eslint-plugin"
+    "directory": "eslint/eslint-plugin"
   },
   "homepage": "https://rushstack.io",
   "keywords": [
