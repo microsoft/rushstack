@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 15 Feb 2022 01:40:57 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Mar 2022 19:18:12 GMT and should not be manually modified.
+
+## 5.63.0
+Tue, 15 Mar 2022 19:18:12 GMT
+
+### Updates
+
+- Reinstall automatically if monorepo folder is moved
+- Fix resolution of change file paths when rush.json is not in the root of the Git repository.
+- Fix the "selected operations" logging for commands that skipped projects to only display the operations that will be executed.
+- For watch mode commands, allow the command to continue even if the initial build fails.
+- Allow adding of aliased child packages.
+- Add plugin hooks for global and phased commands and allow plugins to tap into command execution by command name, or into the execution of any command by command kind.
+- Fix a typo in the "rush add" command-line help.
 
 ## 5.62.4
 Tue, 15 Feb 2022 01:40:57 GMT

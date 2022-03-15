@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.63.0",
+      "tag": "@microsoft/rush_v5.63.0",
+      "date": "Tue, 15 Mar 2022 19:18:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Reinstall automatically if monorepo folder is moved"
+          },
+          {
+            "comment": "Fix resolution of change file paths when rush.json is not in the root of the Git repository."
+          },
+          {
+            "comment": "Fix the \"selected operations\" logging for commands that skipped projects to only display the operations that will be executed."
+          },
+          {
+            "comment": "For watch mode commands, allow the command to continue even if the initial build fails."
+          },
+          {
+            "comment": "Allow adding of aliased child packages."
+          },
+          {
+            "comment": "Add plugin hooks for global and phased commands and allow plugins to tap into command execution by command name, or into the execution of any command by command kind."
+          },
+          {
+            "comment": "Fix a typo in the \"rush add\" command-line help."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.62.4",
       "tag": "@microsoft/rush_v5.62.4",
       "date": "Tue, 15 Feb 2022 01:40:57 GMT",
