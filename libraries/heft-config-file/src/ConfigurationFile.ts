@@ -605,6 +605,13 @@ export class ConfigurationFile<TConfigurationFile> {
       if (ignoreProperties && ignoreProperties.has(propertyName)) {
         continue;
       }
+
+      // Try to get the inheritance type annotation from the merging object using the regex.
+      // Note: since this regex matches a specific style of property name, we should not need to
+      // allow for any escaping of $-prefixed properties. If this ever changes (eg. to allow for
+      // `"$propertyName": { ... }` options), then we'll likely need to handle that error case,
+      // as well as allow escaping $-prefixed properties that developers want to be serialized,
+      // possibly by using the form `$$propertyName` to escape `$propertyName`.
       const inheritanceTypeMatches: RegExpMatchArray | null = propertyName.match(
         CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX
       );
