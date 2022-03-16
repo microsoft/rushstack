@@ -630,10 +630,10 @@ export class ConfigurationFile<TConfigurationFile> {
             `Issue in processing configuration file property "${propertyName}". ` +
               `An unsupported inheritance type was provided: ${JSON.stringify(inheritanceTypeRaw)}`
           );
-        } else if (typeof (currentObject || {})[mergeTargetPropertyName] !== 'object') {
+        } else if (typeof currentObject[mergeTargetPropertyName] !== 'object') {
           throw new Error(
             `Issue in processing configuration file property "${propertyName}". ` +
-              `An inheritance type was provided for a property that is not an object or array.`
+              `An inheritance type was provided for a property that is not a keyed object or array.`
           );
         }
         switch (inheritanceTypeRaw.toLowerCase()) {
@@ -737,8 +737,7 @@ export class ConfigurationFile<TConfigurationFile> {
                 `Issue in processing configuration file property "${propertyName}". ` +
                   `Null values cannot be used when the inheritance type is set as "${InheritanceType.merge}"`
               );
-            }
-            if (
+            } else if (
               (propertyValue && typeof propertyValue !== 'object') ||
               (parentPropertyValue && typeof parentPropertyValue !== 'object')
             ) {
@@ -746,8 +745,7 @@ export class ConfigurationFile<TConfigurationFile> {
                 `Issue in processing configuration file property "${propertyName}". ` +
                   `Primitive types cannot be provided when the inheritance type is set as "${InheritanceType.merge}"`
               );
-            }
-            if (Array.isArray(propertyValue) || Array.isArray(parentPropertyValue)) {
+            } else if (Array.isArray(propertyValue) || Array.isArray(parentPropertyValue)) {
               throw new Error(
                 `Issue in processing configuration file property "${propertyName}". ` +
                   `Property is not a keyed object, but the inheritance type is set as "${InheritanceType.merge}"`
