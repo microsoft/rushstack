@@ -55,7 +55,7 @@ export enum InheritanceType {
 // @beta (undocumented)
 export interface IOriginalValueOptions<TParentProperty> {
     // (undocumented)
-    parentObject: TParentProperty;
+    parentObject: Partial<TParentProperty>;
     // (undocumented)
     propertyName: keyof TParentProperty;
 }
