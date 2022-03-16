@@ -827,6 +827,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-serverless-stack-plugin",
+      "projectFolder": "heft-plugins/heft-serverless-stack-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-storybook-plugin",
       "projectFolder": "heft-plugins/heft-storybook-plugin",
       "reviewCategory": "libraries",
