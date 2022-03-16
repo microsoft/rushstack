@@ -623,7 +623,7 @@ export class ConfigurationFile<TConfigurationFile> {
         if (!currentObjectPropertyNames.has(mergeTargetPropertyName)) {
           throw new Error(
             `Issue in processing configuration file property "${propertyName}". ` +
-              `An inheritance type was provided but no matching property was found`
+              `An inheritance type was provided but no matching property was found in the parent.`
           );
         } else if (typeof inheritanceTypeRaw !== 'string') {
           throw new Error(
@@ -633,7 +633,7 @@ export class ConfigurationFile<TConfigurationFile> {
         } else if (typeof (currentObject || {})[mergeTargetPropertyName] !== 'object') {
           throw new Error(
             `Issue in processing configuration file property "${propertyName}". ` +
-              `An inheritance type was provided for a property that is not an object`
+              `An inheritance type was provided for a property that is not an object or array.`
           );
         }
         switch (inheritanceTypeRaw.toLowerCase()) {
