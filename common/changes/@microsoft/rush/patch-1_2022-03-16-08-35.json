@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix broken links for the rush-lib documentation and api reference.",
+      "comment": "Fix broken README links for @microsoft/rush-lib documentation and API reference.",
       "type": "none"
     }
   ],
