@@ -1,0 +1,27 @@
+{
+  "name": "heft-serverless-stack-tutorial",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "sst test",
+    "start": "sst start",
+    "build": "sst build",
+    "deploy": "sst deploy",
+    "remove": "sst remove"
+  },
+  "eslintConfig": {
+    "extends": [
+      "serverless-stack"
+    ]
+  },
+  "devDependencies": {
+    "@tsconfig/node14": "^1.0.1",
+    "@types/aws-lambda": "^8.10.70",
+    "@types/node": "<15.0.0",
+    "typescript": "4.4.4",
+    "@serverless-stack/cli": "0.69.0",
+    "@serverless-stack/resources": "0.69.0",
+    "aws-cdk-lib": "2.15.0"
+  },
+  "dependencies": {}
+}
