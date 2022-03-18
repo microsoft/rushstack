@@ -163,7 +163,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
         parameterObjects.push({
           parameterName: parameter.name,
           parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange,
-          isOptional: parameter.isOptional,
+          isOptional: parameter.isOptional
         });
       }
 
