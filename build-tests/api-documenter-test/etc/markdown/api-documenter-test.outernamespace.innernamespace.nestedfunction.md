@@ -14,9 +14,9 @@ function nestedFunction(x: number): number;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  x | number |  |
+|  Parameter | Type | Optional | Description |
+|  --- | --- | --- | --- |
+|  x | number |  |  |
 
 <b>Returns:</b>
 

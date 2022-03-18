@@ -14,7 +14,7 @@ constructor(x: number);
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  x | number |  |
+|  Parameter | Type | Optional | Description |
+|  --- | --- | --- | --- |
+|  x | number |  |  |
 

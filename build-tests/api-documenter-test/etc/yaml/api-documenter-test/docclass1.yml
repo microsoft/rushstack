@@ -133,6 +133,24 @@ methods:
       return:
         type: void
         description: ''
+  - name: optionalParamFunction(x)
+    uid: 'api-documenter-test!DocClass1#optionalParamFunction:member(1)'
+    package: api-documenter-test!
+    fullName: optionalParamFunction(x)
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'optionalParamFunction(x?: number): void;'
+      parameters:
+        - id: x
+          description: ''
+          type: number
+      return:
+        type: void
+        description: ''
   - name: 'sumWithExample(x, y)'
     uid: 'api-documenter-test!DocClass1.sumWithExample:member(1)'
     package: api-documenter-test!

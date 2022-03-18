@@ -12,9 +12,9 @@ genericReferenceMethod<T>(x: T): T;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  x | T |  |
+|  Parameter | Type | Optional | Description |
+|  --- | --- | --- | --- |
+|  x | T |  |  |
 
 <b>Returns:</b>
 

@@ -10,6 +10,8 @@ export abstract class AbstractClass {
 export class SimpleClass {
   public member(): void {}
 
+  public optionalParamMethod(x?: number): void {}
+
   public get readonlyProperty(): string {
     return 'hello';
   }

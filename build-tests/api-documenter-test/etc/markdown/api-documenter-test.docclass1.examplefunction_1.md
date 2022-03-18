@@ -14,9 +14,9 @@ exampleFunction(x: number): number;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  x | number | the number |
+|  Parameter | Type | Optional | Description |
+|  --- | --- | --- | --- |
+|  x | number |  | the number |
 
 <b>Returns:</b>
 

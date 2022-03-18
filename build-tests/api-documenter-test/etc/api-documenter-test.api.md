@@ -32,6 +32,8 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     // @eventProperty
     readonly modifiedEvent: SystemEvent;
     // (undocumented)
+    optionalParamFunction(x?: number): void;
+    // (undocumented)
     get readonlyProperty(): string;
     regularProperty: SystemEvent;
     static sumWithExample(x: number, y: number): number;
@@ -175,6 +177,5 @@ export type TypeAlias = number;
 
 // @public (undocumented)
 export function yamlReferenceUniquenessTest(): IDocInterface1;
-
 
 ```
