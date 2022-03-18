@@ -836,7 +836,7 @@ export class MarkdownDocumenter {
 
     const parametersTable: DocTable = new DocTable({
       configuration,
-      headerTitles: ['Parameter', 'Type', 'Description']
+      headerTitles: ['Parameter', 'Type', 'Optional', 'Description']
     });
     for (const apiParameter of apiParameterListMixin.parameters) {
       const parameterDescription: DocSection = new DocSection({ configuration });
@@ -853,6 +853,11 @@ export class MarkdownDocumenter {
           ]),
           new DocTableCell({ configuration }, [
             this._createParagraphForTypeExcerpt(apiParameter.parameterTypeExcerpt)
+          ]),
+          new DocTableCell({ configuration }, [
+            new DocParagraph({ configuration }, [
+              new DocPlainText({ configuration, text: apiParameter.isOptional ? 'Yes' : '' })
+            ])
           ]),
           new DocTableCell({ configuration }, parameterDescription.nodes)
         ])
