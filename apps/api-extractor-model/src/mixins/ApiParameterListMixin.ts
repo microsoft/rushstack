@@ -15,6 +15,7 @@ import { DeserializerContext } from '../model/DeserializerContext';
 export interface IApiParameterOptions {
   parameterName: string;
   parameterTypeTokenRange: IExcerptTokenRange;
+  isOptional: boolean;
 }
 
 /**
@@ -119,6 +120,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
             const parameter: Parameter = new Parameter({
               name: parameterOptions.parameterName,
               parameterTypeExcerpt: this.buildExcerpt(parameterOptions.parameterTypeTokenRange),
+              isOptional: parameterOptions.isOptional,
               parent: this
             });
 
@@ -160,7 +162,8 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
       for (const parameter of this.parameters) {
         parameterObjects.push({
           parameterName: parameter.name,
-          parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange
+          parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange,
+          isOptional: parameter.isOptional,
         });
       }
 

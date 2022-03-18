@@ -14,6 +14,7 @@ import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 export interface IParameterOptions {
   name: string;
   parameterTypeExcerpt: Excerpt;
+  isOptional: boolean;
   parent: ApiParameterListMixin;
 }
 
@@ -45,11 +46,17 @@ export class Parameter {
    */
   public name: string;
 
+  /**
+   * Whether the parameter is optional.
+   */
+  public isOptional: boolean;
+
   private _parent: ApiParameterListMixin;
 
   public constructor(options: IParameterOptions) {
     this.name = options.name;
     this.parameterTypeExcerpt = options.parameterTypeExcerpt;
+    this.isOptional = options.isOptional;
     this._parent = options.parent;
   }
 
