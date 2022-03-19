@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Add --yaml-format flag for `api-documenter yaml` command, which allows for choosing between UDP (DocFX 2.x) and SDP (DocFX 3.x)",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}
