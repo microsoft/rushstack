@@ -1,0 +1,8 @@
+{
+  "$schema": "http://schema.net/",
+
+  "extends": "./simpleInheritanceTypeConfigFileA.json",
+
+  "$l.inheritanceType": "replace",
+  "l": "B"
+}
