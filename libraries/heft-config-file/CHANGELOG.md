@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Tue, 15 Mar 2022 19:15:53 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Mar 2022 08:05:37 GMT and should not be manually modified.
+
+## 0.8.0
+Sat, 19 Mar 2022 08:05:37 GMT
+
+### Minor changes
+
+- Add support for an inline "$<propertyName>.inheritanceType" property. This feature allows for configuration files to specify how object and array properties are inherited, overriding the default inheritance behavior provided by the configuration file class.
 
 ## 0.7.12
 Tue, 15 Mar 2022 19:15:53 GMT

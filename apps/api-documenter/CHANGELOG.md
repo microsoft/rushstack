@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 15 Mar 2022 19:15:53 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Mar 2022 08:05:37 GMT and should not be manually modified.
+
+## 7.16.0
+Sat, 19 Mar 2022 08:05:37 GMT
+
+### Minor changes
+
+- Add --yaml-format flag for `api-documenter yaml` command, which allows for choosing between UDP (DocFX 2.x) and SDP (DocFX 3.x)
 
 ## 7.15.4
 Tue, 15 Mar 2022 19:15:53 GMT
