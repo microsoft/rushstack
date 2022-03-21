@@ -75,7 +75,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
       }
     }
 
-    if (!Utilities.shouldRestrictConsoleOutput()) {
+    if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
       console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
     }
     return this.runAsync();
