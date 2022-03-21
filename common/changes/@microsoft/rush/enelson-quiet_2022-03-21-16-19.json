@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for -q/--quiet to install-run-rush scripts",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
