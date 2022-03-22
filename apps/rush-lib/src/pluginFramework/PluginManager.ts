@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Import, InternalError, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, Import, ITerminal } from '@rushstack/node-core-library';
 
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -10,9 +10,10 @@ import { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
 import { RushSession } from './RushSession';
 import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
-import { PluginManagerLifecycleHooks } from './RushLifeCycle';
+import { IGlobalCommand, IPhasedCommand, PluginManagerLifecycleHooks } from './RushLifeCycle';
 import { ContributionPoint } from './ContributionPoint';
-import { RushSessionForPlugin } from './RushSessionForPlugin';
+import { getRushSessionForPlugin, IRushSessionForPlugin } from './RushSessionForPlugin';
+import { AsyncSeriesHook } from 'tapable';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -26,6 +27,27 @@ export interface ICustomCommandLineConfigurationInfo {
   pluginLoader: PluginLoaderBase;
 }
 
+export enum CommandKind {
+  global = 'global',
+  phase = 'phase'
+}
+
+interface IInitializePluginOptions {
+  /**
+   * For plugins that has multiple contribution points, maybe loaded multiple times.
+   */
+  doNotThrowSamePluginName: boolean;
+  /**
+   * For plugins that specifies both associated commands and contributes, rush session is different.
+   */
+  proxyRushSessionIfContributes: boolean;
+}
+
+const defaultInitializePluginOptions: IInitializePluginOptions = {
+  doNotThrowSamePluginName: false,
+  proxyRushSessionIfContributes: false
+};
+
 export class PluginManager {
   private readonly _terminal: ITerminal;
   private readonly _rushConfiguration: RushConfiguration;
@@ -34,9 +56,11 @@ export class PluginManager {
   private readonly _autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
   private readonly _installedAutoinstallerNames: Set<string>;
   private readonly _loadedPluginNames: Set<string> = new Set<string>();
-  private _pluginNameToRushSessionForPlugin: Map<string, RushSessionForPlugin | undefined> = new Map<
+  private _actionName: string = '';
+  private _commandKind: CommandKind | undefined;
+  private _pluginNameToRushSessionForPlugin: Map<string, RushSession | undefined> = new Map<
     string,
-    RushSessionForPlugin
+    RushSession
   >();
 
   private _error: Error | undefined;
@@ -153,9 +177,6 @@ export class PluginManager {
         ...autoinstallerPluginLoaders
       ];
       this._initializePlugins(targetPluginLoaders);
-      for (const { pluginName } of targetPluginLoaders) {
-        this._pluginNameToRushSessionForPlugin.set(pluginName, undefined);
-      }
     } catch (e) {
       this._error = e as Error;
     }
@@ -177,9 +198,6 @@ export class PluginManager {
         ...autoinstallerPluginLoaders
       ];
       this._initializePlugins(targetPluginLoaders);
-      for (const { pluginName } of targetPluginLoaders) {
-        this._pluginNameToRushSessionForPlugin.set(pluginName, undefined);
-      }
     } catch (e) {
       this._error = e as Error;
     }
@@ -206,9 +224,10 @@ export class PluginManager {
 
   private _initializePlugins(
     pluginLoaders: PluginLoaderBase[],
-    { doNotThrowSamePluginName }: { doNotThrowSamePluginName: boolean } = {
-      doNotThrowSamePluginName: false
-    }
+    {
+      doNotThrowSamePluginName,
+      proxyRushSessionIfContributes
+    }: IInitializePluginOptions = defaultInitializePluginOptions
   ): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
@@ -222,7 +241,7 @@ export class PluginManager {
       const plugin: IRushPlugin | undefined = pluginLoader.load();
       this._loadedPluginNames.add(pluginName);
       if (plugin) {
-        this._applyPlugin(plugin, pluginLoader);
+        this._applyPlugin(plugin, pluginLoader, proxyRushSessionIfContributes);
       }
     }
   }
@@ -244,20 +263,23 @@ export class PluginManager {
     });
   }
 
-  private _applyPlugin(plugin: IRushPlugin, pluginLoader: PluginLoaderBase): void {
+  private _applyPlugin(
+    plugin: IRushPlugin,
+    pluginLoader: PluginLoaderBase,
+    proxyRushSessionIfContributes: boolean
+  ): void {
     try {
-      const rushSessionForPlugin: RushSessionForPlugin = new RushSessionForPlugin(
-        this._rushSession,
-        pluginLoader.pluginManifest
-      );
+      let rushSessionForPlugin: RushSession | IRushSessionForPlugin = this._rushSession;
+      if (proxyRushSessionIfContributes) {
+        rushSessionForPlugin = getRushSessionForPlugin(this._rushSession, pluginLoader.pluginManifest);
+      }
       plugin.apply(rushSessionForPlugin, this._rushConfiguration);
-      /**
-       * rushSessionForPlugin maybe used later, but we don't want to keep it
-       * in memory after the plugin is initialized successfully
-       */
-      this._pluginNameToRushSessionForPlugin.set(pluginLoader.pluginName, rushSessionForPlugin);
+      if ('validateContributesAPIUsage' in rushSessionForPlugin) {
+        rushSessionForPlugin.validateContributesAPIUsage();
+        this._pluginNameToRushSessionForPlugin.set(pluginLoader.pluginName, rushSessionForPlugin);
+      }
     } catch (e) {
-      throw new InternalError(`Error applying "${pluginLoader.pluginName}": ${e}`);
+      throw new Error(`Error applying "${pluginLoader.pluginName}": ${e}`);
     }
   }
 
@@ -271,17 +293,38 @@ export class PluginManager {
               this.hooks.initializeContributionPoints
                 .for(ContributionPoint.buildCacheProvider)
                 .tapPromise(pluginName, async () => {
+                  if (this._loadedPluginNames.has(pluginName)) {
+                    return;
+                  }
                   if (pluginLoader instanceof AutoinstallerPluginLoader) {
                     await this._preparePluginAutoinstallersAsync([pluginLoader]);
                   }
-                  this._initializePlugins([pluginLoader], { doNotThrowSamePluginName: true });
-                  const rushSessionForPlugin: RushSessionForPlugin | undefined =
+                  this._initializePlugins([pluginLoader], {
+                    doNotThrowSamePluginName: true,
+                    proxyRushSessionIfContributes: true
+                  });
+                  const rushSessionForPlugin: RushSession | undefined =
                     this._pluginNameToRushSessionForPlugin.get(pluginName);
                   if (rushSessionForPlugin) {
-                    // Trigger initialize life cycle for the plugin, because it is lazily loaded
-                    await rushSessionForPlugin.hooks.initialize.promise();
-                    // Set the rushSession has been initialized
-                    rushSessionForPlugin.initialized();
+                    // Trigger life cycles for the plugin, because it is lazily loaded
+                    await this.runHooksForAllCommandAsync(rushSessionForPlugin);
+
+                    if (this._commandKind) {
+                      switch (this._commandKind) {
+                        case CommandKind.global: {
+                          await this.runHooksForGlobalCommandAsync(rushSessionForPlugin);
+                          break;
+                        }
+                        case CommandKind.phase: {
+                          await this.runHooksForPhaseCommandAsync(rushSessionForPlugin);
+                          break;
+                        }
+                        default: {
+                          const _neverCommandKind: never = this._commandKind;
+                          throw new Error('Unhandled command kind: ' + _neverCommandKind);
+                        }
+                      }
+                    }
                   }
                   this._pluginNameToRushSessionForPlugin.set(pluginName, undefined);
                 });
@@ -293,6 +336,71 @@ export class PluginManager {
           }
         }
       }
+    }
+  }
+
+  public set commandKind(commandKind: CommandKind | undefined) {
+    this._commandKind = commandKind;
+  }
+
+  public get commandKind(): CommandKind | undefined {
+    return this._commandKind;
+  }
+
+  public set actionName(actionName: string) {
+    this._actionName = actionName;
+  }
+
+  public get actionName(): string {
+    return this._actionName;
+  }
+
+  public async runHooksForAllCommandAsync(rushSession: RushSession): Promise<void> {
+    const { hooks: sessionHooks } = rushSession;
+    if (sessionHooks.initialize.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.initialize.promise({
+        actionName: this._actionName
+      });
+    }
+  }
+
+  public async runHooksForGlobalCommandAsync(rushSession: RushSession): Promise<void> {
+    const { hooks: sessionHooks } = rushSession;
+    if (sessionHooks.runAnyGlobalCustomCommand.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.runAnyGlobalCustomCommand.promise({
+        actionName: this._actionName
+      });
+    }
+
+    const hookForAction: AsyncSeriesHook<IGlobalCommand> | undefined =
+      sessionHooks.runGlobalCustomCommand.get(this.actionName);
+    if (hookForAction) {
+      // Run the more specific hook for a command with this name after the general hook
+      await hookForAction.promise({
+        actionName: this._actionName
+      });
+    }
+  }
+
+  public async runHooksForPhaseCommandAsync(rushSession: RushSession): Promise<void> {
+    const { hooks: sessionHooks } = rushSession;
+    if (sessionHooks.runAnyPhasedCommand.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.runAnyPhasedCommand.promise({
+        actionName: this._actionName
+      });
+    }
+
+    const hookForAction: AsyncSeriesHook<IPhasedCommand> | undefined = sessionHooks.runPhasedCommand.get(
+      this.actionName
+    );
+    if (hookForAction) {
+      // Run the more specific hook for a command with this name after the general hook
+      await hookForAction.promise({
+        actionName: this._actionName
+      });
     }
   }
 }

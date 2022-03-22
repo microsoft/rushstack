@@ -8,7 +8,8 @@ import { FileSystem, Path, IFileSystemMoveOptions } from '@rushstack/node-core-l
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { Autoinstaller } from '../../logic/Autoinstaller';
-import { ICloudBuildCacheProvider, IRushPlugin } from '../..';
+import { ICloudBuildCacheProvider } from '../../logic/buildCache/ICloudBuildCacheProvider';
+import { IRushPlugin } from '../../pluginFramework/IRushPlugin';
 
 /**
  * See `__mocks__/child_process.js`.
@@ -435,7 +436,7 @@ describe(RushCommandLineParser.name, () => {
     });
   });
 
-  describe('in repo enable build cache with local only provider', () => {
+  describe.skip('in repo enable build cache with local only provider', () => {
     it('produces build cache locally', async () => {
       const repoName: string = 'localOnlyBuildCacheAndRunBuildActionRepo';
       const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
@@ -459,7 +460,7 @@ describe(RushCommandLineParser.name, () => {
     });
   });
 
-  describe('in repo enable build cache and use cloud build cache provider', () => {
+  describe.skip('in repo enable build cache and use cloud build cache provider', () => {
     it('restores build cache from cloud build cache provider', async () => {
       const repoName: string = 'cloudBuildCacheReadAndRunBuildActionRepo';
       const instance: IParserBuildCacheTestInstance = getBuildCacheCommandLineParserInstance(

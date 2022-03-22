@@ -3,12 +3,10 @@
 
 import * as os from 'os';
 import colors from 'colors/safe';
-import type { AsyncSeriesHook } from 'tapable';
 
 import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
@@ -36,6 +34,7 @@ import {
 import { Selection } from '../../logic/Selection';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
+import { CommandKind } from '../../pluginFramework/PluginManager';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -123,19 +122,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const { hooks: sessionHooks } = this.rushSession;
-    if (sessionHooks.runAnyPhasedCommand.isUsed()) {
-      // Avoid the cost of compiling the hook if it wasn't tapped.
-      await sessionHooks.runAnyPhasedCommand.promise(this);
-    }
+    this.parser.pluginManager.commandKind = CommandKind.phase;
 
-    const hookForAction: AsyncSeriesHook<IPhasedCommand> | undefined = sessionHooks.runPhasedCommand.get(
-      this.actionName
-    );
-    if (hookForAction) {
-      // Run the more specific hook for a command with this name after the general hook
-      await hookForAction.promise(this);
-    }
+    await this.parser.pluginManager.runHooksForPhaseCommandAsync(this.rushSession);
 
     const isQuietMode: boolean = !this._verboseParameter.value;
 

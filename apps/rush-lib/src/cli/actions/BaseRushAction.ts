@@ -124,17 +124,15 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
       throw Utilities.getRushConfigNotFoundError();
     }
 
+    this.parser.pluginManager.actionName = this.actionName;
+
     this._throwPluginErrorIfNeed();
 
     await this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName);
 
     this._throwPluginErrorIfNeed();
 
-    const { hooks: sessionHooks } = this.rushSession;
-    if (sessionHooks.initialize.isUsed()) {
-      // Avoid the cost of compiling the hook if it wasn't tapped.
-      await sessionHooks.initialize.promise(this);
-    }
+    await this.parser.pluginManager.runHooksForAllCommandAsync(this.rushSession);
 
     return super.onExecute();
   }
