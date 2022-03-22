@@ -167,6 +167,18 @@ export interface IDocInterface7 {
     optionalUndocumentedField?: boolean;
 }
 
+// @public (undocumented)
+export type MyType = {
+    name: string;
+};
+
+// @public (undocumented)
+export type MyUnionType = {
+    name: string;
+} | {
+    bar: number;
+};
+
 // @public
 export namespace OuterNamespace {
     export namespace InnerNamespace {

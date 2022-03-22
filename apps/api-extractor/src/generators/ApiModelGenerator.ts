@@ -934,7 +934,13 @@ export class ApiModelGenerator {
 
       parentApiItem.addMember(apiTypeAlias);
     }
-    this._processChildDeclarations(astDeclaration, exportedName, apiTypeAlias);
+
+    if (
+      ts.isTypeAliasDeclaration(astDeclaration.declaration) &&
+      ts.isTypeLiteralNode(astDeclaration.declaration.type)
+    ) {
+      this._processChildDeclarations(astDeclaration, exportedName, apiTypeAlias);
+    }
   }
 
   private _processApiVariable(

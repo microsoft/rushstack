@@ -2291,6 +2291,85 @@
           "extendsTokenRanges": []
         },
         {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!MyType:type",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type MyType = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    name: string;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "MyType",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!MyType#name:member",
+              "docComment": "/**\n * A name example\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "name: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "name",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!MyUnionType:type",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type MyUnionType = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    name: string;\n} | {\n    bar: number;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "MyUnionType",
+          "members": [],
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
           "kind": "Namespace",
           "canonicalReference": "api-documenter-test!OuterNamespace:namespace",
           "docComment": "/**\n * A top-level namespace\n *\n * @public\n */\n",

@@ -272,6 +272,16 @@ declare const locallyExportedCustomSymbol: unique symbol;
 
 export { MAX_UNSIGNED_VALUE }
 
+/**
+ * @public
+ */
+export declare type MyType = {
+    /**
+     * A name example
+     */
+    name: string;
+};
+
 /** @public */
 export declare namespace NamespaceContainingVariable {
     /** @internal */

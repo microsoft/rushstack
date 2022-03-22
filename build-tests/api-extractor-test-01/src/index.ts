@@ -109,6 +109,8 @@ export declare class UseLong {
 
 export { ClassWithSymbols, fullyExportedCustomSymbol } from './EcmaScriptSymbols';
 
+export { MyType } from './TypeLiteral';
+
 export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
 export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
 export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3';
