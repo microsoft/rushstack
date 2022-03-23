@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncSeriesHook, HookMap } from 'tapable';
+import { AsyncParallelHook, AsyncSeriesHook, HookMap } from 'tapable';
+import type { ITelemetryData } from '../logic/Telemetry';
 
 /**
  * Information about the currently executing command provided to plugins.
@@ -73,4 +74,12 @@ export class RushLifecycleHooks {
   public runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>> = new HookMap((key: string) => {
     return new AsyncSeriesHook<IPhasedCommand>(['command'], key);
   }, 'runPhasedCommand');
+
+  /**
+   * A hook to allow plugins to hook custom logic to process telemetry data.
+   */
+  public flushTelemetry: AsyncParallelHook<[ITelemetryData[]]> = new AsyncParallelHook(
+    ['telemetryData'],
+    'flushTelemetry'
+  );
 }

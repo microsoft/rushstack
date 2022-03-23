@@ -22,6 +22,7 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import { SelectionParameterSet } from '../SelectionParameterSet';
+import { TelemetryResult } from '../../logic/Telemetry';
 
 const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = Import.lazy(
   '../../logic/InstallManagerFactory',
@@ -198,7 +199,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       this.parser.telemetry.log({
         name: 'install',
         duration: stopwatch.duration,
-        result: success ? 'Succeeded' : 'Failed',
+        result: success ? TelemetryResult.Succeeded : TelemetryResult.Failed,
         extraData
       });
     }

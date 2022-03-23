@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "packageName": "rush-mock-flush-telemetry-plugin",
+      "pluginName": "rush-mock-flush-telemetry-plugin",
+      "autoinstallerName": "plugins"
+    }
+  ]
+}

@@ -3,9 +3,12 @@
 
 import './mockRushCommandLineParser';
 
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import * as path from 'path';
+import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { Autoinstaller } from '../../logic/Autoinstaller';
+import { ITelemetryData } from '../../logic/Telemetry';
 
 /**
  * See `__mocks__/child_process.js`.
@@ -333,6 +336,40 @@ describe(RushCommandLineParser.name, () => {
         }).toThrowErrorMatchingInlineSnapshot(
           `"command-line.json defines a command \\"rebuild\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"rebuild\\"."`
         );
+      });
+    });
+
+    describe('in repo plugin custom flushTelemetry', () => {
+      it('creates a custom telemetry file', async () => {
+        const repoName: string = 'tapFlushTelemetryAndRunBuildActionRepo';
+        const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
+        const telemetryFilePath: string = `${instance.parser.rushConfiguration.commonTempFolder}/test-telemetry.json`;
+        FileSystem.deleteFile(telemetryFilePath);
+
+        /**
+         * Mimic autoinstaller behavior
+         */
+        const pluginPackageName: string = 'rush-mock-flush-telemetry-plugin';
+        const pluginInstallPath: string = path.join(
+          __dirname,
+          `${repoName}/common/autoinstallers/plugins/node_modules/${pluginPackageName}`
+        );
+        FileSystem.copyFiles({
+          sourcePath: path.join(__dirname, pluginPackageName),
+          destinationPath: pluginInstallPath
+        });
+
+        jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async function () {});
+
+        await expect(instance.parser.execute()).resolves.toEqual(true);
+
+        expect(FileSystem.exists(telemetryFilePath)).toEqual(true);
+
+        let telemetryStore: ITelemetryData[] = [];
+        expect(() => {
+          telemetryStore = JsonFile.load(telemetryFilePath);
+        }).not.toThrowError();
+        expect(telemetryStore?.[0].name).toEqual('build');
       });
     });
   });
