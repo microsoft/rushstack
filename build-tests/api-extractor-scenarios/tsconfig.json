@@ -10,7 +10,13 @@
     "strictNullChecks": true,
     "types": ["node", "jest"],
     "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
-    "outDir": "lib"
+    "outDir": "lib",
+
+    // These properties are used for the pathMappings/ test scenario.
+    "baseUrl": ".",
+    "paths": {
+      "apiItemKinds/*": ["lib/apiItemKinds/*"],
+    }
   },
   "include": ["src/**/*.ts", "typings/tsd.d.ts"]
 }
