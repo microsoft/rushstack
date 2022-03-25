@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix build cache write eligibility.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
