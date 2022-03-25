@@ -576,6 +576,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-serverless-stack-tutorial",
+      "projectFolder": "build-tests-samples/heft-serverless-stack-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-storybook-react-tutorial",
       "projectFolder": "build-tests-samples/heft-storybook-react-tutorial",
       "reviewCategory": "tests",

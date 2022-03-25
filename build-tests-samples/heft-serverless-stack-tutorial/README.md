@@ -1,45 +1,13 @@
-# Getting Started with Serverless Stack (SST)
+# heft-serverless-stack-tutorial
 
-This project was bootstrapped with [Create Serverless Stack](https://docs.serverless-stack.com/packages/create-serverless-stack).
+This project illustrates usage of the
+[@rushstack/heft-serverless-stack-plugin](https://www.npmjs.com/package/@rushstack/heft-serverless-stack-plugin)
+plugin.
 
-Start by installing the dependencies.
+## Running the demo
 
-```bash
-$ npm install
-```
+1. [Create an AWS account](https://serverless-stack.com/chapters/create-an-aws-account.html) if you don't already have one.
 
-## Commands
+2. Follow the Serverless Stack [setup instructions](https://serverless-stack.com/chapters/create-an-iam-user.html) to create an IAM User and provide your access key to `aws configure`
 
-### `npm run start`
-
-Starts the local Lambda development environment.
-
-### `npm run build`
-
-Build your app and synthesize your stacks.
-
-Generates a `.build/` directory with the compiled files and a `.build/cdk.out/` directory with the synthesized CloudFormation stacks.
-
-### `npm run deploy [stack]`
-
-Deploy all your stacks to AWS. Or optionally deploy a specific stack.
-
-### `npm run remove [stack]`
-
-Remove all your stacks and all of their resources from AWS. Or optionally remove a specific stack.
-
-### `npm run test`
-
-Runs your tests using Jest. Takes all the [Jest CLI options](https://jestjs.io/docs/en/cli).
-
-## Documentation
-
-Learn more about the Serverless Stack.
-
-- [Docs](https://docs.serverless-stack.com)
-- [@serverless-stack/cli](https://docs.serverless-stack.com/packages/cli)
-- [@serverless-stack/resources](https://docs.serverless-stack.com/packages/resources)
-
-## Community
-
-[Follow us on Twitter](https://twitter.com/ServerlessStack) or [post on our forums](https://discourse.serverless-stack.com).
+3. Build the project: `rushx build`
