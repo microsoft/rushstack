@@ -2,21 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, FileSystemStats, Import } from '@rushstack/node-core-library';
+import { FileSystem, FileSystemStats } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
 import { RushSession } from '../pluginFramework/RushSession';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
-
-/**
- * @beta
- */
-export enum TelemetryResult {
-  Succeeded = 'Succeeded',
-  Failed = 'Failed'
-}
 
 /**
  * @beta
@@ -26,31 +16,31 @@ export interface ITelemetryData {
    * Command name
    * @example 'build'
    */
-  name: string;
+  readonly name: string;
   /**
    * Duration in seconds
    */
-  duration: number;
+  readonly duration: number;
   /**
    * The result of the command
    */
-  result: TelemetryResult;
+  readonly result: 'Succeeded' | 'Failed';
   /**
    * The timestamp of the telemetry logging
    * @example 1648001893024
    */
-  timestamp?: number;
+  readonly timestamp?: number;
   /**
    * The platform the command was executed on, reads from process.platform
    * @example darwin, win32, linux...
    */
-  platform?: string;
+  readonly platform?: string;
   /**
    * The rush version
    * @example 5.63.0
    */
-  rushVersion?: string;
-  extraData?: { [key: string]: string };
+  readonly rushVersion?: string;
+  readonly extraData?: { [key: string]: string };
 }
 
 const MAX_FILE_COUNT: number = 100;
@@ -78,10 +68,12 @@ export class Telemetry {
     if (!this._enabled) {
       return;
     }
-    const data: ITelemetryData = lodash.cloneDeep(telemetryData);
-    data.timestamp = data.timestamp || new Date().getTime();
-    data.platform = data.platform || process.platform;
-    data.rushVersion = data.rushVersion || Rush.version;
+    const data: ITelemetryData = {
+      ...telemetryData,
+      timestamp: telemetryData.timestamp || new Date().getTime(),
+      platform: telemetryData.platform || process.platform,
+      rushVersion: telemetryData.rushVersion || Rush.version
+    };
     this._store.push(data);
   }
 
@@ -101,7 +93,7 @@ export class Telemetry {
       const asyncTaskId: number = this._asyncTaskId++;
       this._asyncTasks.set(
         asyncTaskId,
-        this._rushSession.hooks.flushTelemetry.promise(this._store.slice()).then(
+        this._rushSession.hooks.flushTelemetry.promise(this._store).then(
           () => {
             this._asyncTasks.delete(asyncTaskId);
           },

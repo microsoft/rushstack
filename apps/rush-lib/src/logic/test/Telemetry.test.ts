@@ -3,7 +3,7 @@
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
-import { Telemetry, ITelemetryData, TelemetryResult } from '../Telemetry';
+import { Telemetry, ITelemetryData } from '../Telemetry';
 import { RushSession } from '../../pluginFramework/RushSession';
 import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
@@ -19,7 +19,7 @@ describe(Telemetry.name, () => {
     const logData1: ITelemetryData = {
       name: 'testData1',
       duration: 100,
-      result: TelemetryResult.Succeeded,
+      result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version
@@ -28,7 +28,7 @@ describe(Telemetry.name, () => {
     const logData2: ITelemetryData = {
       name: 'testData2',
       duration: 100,
-      result: TelemetryResult.Failed,
+      result: 'Failed',
       timestamp: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version
@@ -50,7 +50,7 @@ describe(Telemetry.name, () => {
     const logData: ITelemetryData = {
       name: 'testData',
       duration: 100,
-      result: TelemetryResult.Succeeded,
+      result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version
@@ -71,7 +71,7 @@ describe(Telemetry.name, () => {
     const logData: ITelemetryData = {
       name: 'testData1',
       duration: 100,
-      result: TelemetryResult.Succeeded,
+      result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version
@@ -100,7 +100,7 @@ describe(Telemetry.name, () => {
     const logData: ITelemetryData = {
       name: 'testData1',
       duration: 100,
-      result: TelemetryResult.Succeeded
+      result: 'Succeeded'
     };
 
     telemetry.log(logData);
@@ -123,12 +123,45 @@ describe(Telemetry.name, () => {
     const logData: ITelemetryData = {
       name: 'testData1',
       duration: 100,
-      result: TelemetryResult.Succeeded
+      result: 'Succeeded'
     };
 
     telemetry.log(logData);
     telemetry.flush();
     expect(customFlushTelemetry).toHaveBeenCalledTimes(1);
     expect(customFlushTelemetry.mock.calls[0][0][0]).toEqual(expect.objectContaining(logData));
+  });
+
+  it('calls custom flush telemetry twice', () => {
+    const filename: string = `${__dirname}/telemetry/telemetryEnabled.json`;
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
+    const rushSession: RushSession = new RushSession({
+      terminalProvider: new ConsoleTerminalProvider(),
+      getIsDebugMode: () => false
+    });
+    const customFlushTelemetry: jest.Mock = jest.fn();
+    rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
+    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    const logData: ITelemetryData = {
+      name: 'testData1',
+      duration: 100,
+      result: 'Succeeded'
+    };
+
+    telemetry.log(logData);
+    telemetry.flush();
+    expect(customFlushTelemetry).toHaveBeenCalledTimes(1);
+    expect(customFlushTelemetry.mock.calls[0][0][0]).toEqual(expect.objectContaining(logData));
+
+    const logData2: ITelemetryData = {
+      name: 'testData2',
+      duration: 200,
+      result: 'Failed'
+    };
+
+    telemetry.log(logData2);
+    telemetry.flush();
+    expect(customFlushTelemetry).toHaveBeenCalledTimes(2);
+    expect(customFlushTelemetry.mock.calls[1][0][0]).toEqual(expect.objectContaining(logData2));
   });
 });

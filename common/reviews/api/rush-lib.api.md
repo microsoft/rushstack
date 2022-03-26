@@ -352,16 +352,16 @@ export interface IRushSessionOptions {
 
 // @beta (undocumented)
 export interface ITelemetryData {
-    duration: number;
+    readonly duration: number;
     // (undocumented)
-    extraData?: {
+    readonly extraData?: {
         [key: string]: string;
     };
-    name: string;
-    platform?: string;
-    result: TelemetryResult;
-    rushVersion?: string;
-    timestamp?: number;
+    readonly name: string;
+    readonly platform?: string;
+    readonly result: 'Succeeded' | 'Failed';
+    readonly rushVersion?: string;
+    readonly timestamp?: number;
 }
 
 // @public
@@ -739,14 +739,6 @@ export class RushUserConfiguration {
     static getRushUserFolderPath(): string;
     // (undocumented)
     static initializeAsync(): Promise<RushUserConfiguration>;
-}
-
-// @beta (undocumented)
-export enum TelemetryResult {
-    // (undocumented)
-    Failed = "Failed",
-    // (undocumented)
-    Succeeded = "Succeeded"
 }
 
 // @public
