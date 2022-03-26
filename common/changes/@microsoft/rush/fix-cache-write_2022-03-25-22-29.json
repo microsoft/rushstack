@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix build cache write eligibility.",
+      "comment": "Fix an issue where the build cache is never written to.",
       "type": "patch"
     }
   ],
