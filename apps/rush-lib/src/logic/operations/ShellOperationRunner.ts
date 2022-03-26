@@ -79,7 +79,8 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
 export class ShellOperationRunner implements IOperationRunner {
   public readonly name: string;
 
-  public isCacheWriteAllowed: boolean = false;
+  // This runner supports cache writes by default.
+  public isCacheWriteAllowed: boolean = true;
   public isSkipAllowed: boolean;
   public readonly reportTiming: boolean = true;
   public readonly silent: boolean = false;
