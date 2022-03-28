@@ -155,8 +155,11 @@ export class RushCommandLineParser extends CommandLineParser {
    * Used during Rush startup.
    */
   public static peekIsQuiet(): boolean {
-    const flags: string[] = process.argv.slice(2);
-    return flags.includes('-q') || flags.includes('--quiet');
+    for (let i = 2; i < process.argv.length; i++) {
+      const arg = process.argv[i];
+      if (arg === '-q' || arg === '--quiet') return true;
+    }
+    return false;
   }
 
   /**
