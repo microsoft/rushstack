@@ -123,6 +123,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-serverless-stack-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-storybook-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -195,6 +199,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@serverless-stack/cli",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@serverless-stack/resources",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@storybook/addon-actions",
       "allowedCategories": [ "tests" ]
     },
@@ -224,6 +236,10 @@
     },
     {
       "name": "@storybook/theming",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@tsconfig/node14",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -279,6 +295,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "aws-cdk-lib",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "babel-loader",
       "allowedCategories": [ "tests" ]
     },
@@ -301,6 +321,10 @@
     {
       "name": "colors",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "constructs",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "css-loader",
