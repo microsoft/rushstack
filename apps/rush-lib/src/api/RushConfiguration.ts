@@ -494,6 +494,9 @@ export class RushConfiguration {
   // Lazily loaded when the projectsByName() getter is called.
   private _projectsByName: Map<string, RushConfigurationProject> | undefined;
 
+  // Lazily loaded when the projectsByTag() getter is called.
+  private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
+
   // variant -> common-versions configuration
   private _commonVersionsConfigurations: Map<string, CommonVersionsConfiguration> | undefined;
   // variant -> map of package name -> implicitly preferred version
@@ -1429,6 +1432,27 @@ export class RushConfiguration {
     }
 
     return this._projectsByName!;
+  }
+
+  /**
+   * Obtains the mapping from custom tags to projects.
+   * @beta
+   */
+  public get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> {
+    if (!this._projectsByTag) {
+      const projectsByTag: Map<string, Set<RushConfigurationProject>> = new Map();
+      for (const project of this.projects) {
+        for (const tag of project.tags) {
+          let collection: Set<RushConfigurationProject> | undefined = projectsByTag.get(tag);
+          if (!collection) {
+            projectsByTag.set(tag, (collection = new Set()));
+          }
+          collection.add(project);
+        }
+      }
+      this._projectsByTag = projectsByTag;
+    }
+    return this._projectsByTag;
   }
 
   /**

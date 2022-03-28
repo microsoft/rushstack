@@ -276,6 +276,14 @@
           "publishFolder": {
             "description": "Facilitates postprocessing of a project's files prior to publishing. If specified, the \"publishFolder\" is the relative path to a subfolder of the project folder. The \"rush publish\" command will publish the subfolder instead of the project folder. The subfolder must contain its own package.json file, which is typically a build output.",
             "type": "string"
+          },
+          "tags": {
+            "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\".",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_@/.$-]+$"
+            }
           }
         },
         "additionalProperties": false,

@@ -567,6 +567,8 @@ export class RushConfiguration {
     get projects(): RushConfigurationProject[];
     // (undocumented)
     get projectsByName(): Map<string, RushConfigurationProject>;
+    // @beta
+    get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
     get repositoryDefaultBranch(): string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
     get repositoryDefaultRemote(): string;
@@ -628,6 +630,8 @@ export class RushConfigurationProject {
     get rushConfiguration(): RushConfiguration;
     get shouldPublish(): boolean;
     get skipRushCheck(): boolean;
+    // @beta
+    get tags(): ReadonlySet<string>;
     get tempProjectName(): string;
     get unscopedTempProjectName(): string;
     // @beta

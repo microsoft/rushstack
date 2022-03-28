@@ -24,6 +24,7 @@ export interface IRushConfigurationProjectJson {
   shouldPublish?: boolean;
   skipRushCheck?: boolean;
   publishFolder?: string;
+  tags?: string[];
 }
 
 /**
@@ -66,6 +67,7 @@ export class RushConfigurationProject {
   private readonly _skipRushCheck: boolean;
   private readonly _publishFolder: string;
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _tags: Set<string>;
 
   private _versionPolicy: VersionPolicy | undefined = undefined;
   private _dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
@@ -165,6 +167,8 @@ export class RushConfigurationProject {
     if (projectJson.publishFolder) {
       this._publishFolder = path.join(this._publishFolder, projectJson.publishFolder);
     }
+
+    this._tags = new Set(projectJson.tags);
   }
 
   /**
@@ -441,5 +445,13 @@ export class RushConfigurationProject {
       }
     }
     return isMain;
+  }
+
+  /**
+   * The set of tags applied to this project.
+   * @beta
+   */
+  public get tags(): ReadonlySet<string> {
+    return this._tags;
   }
 }
