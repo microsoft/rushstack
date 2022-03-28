@@ -52,7 +52,7 @@
     "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
-    "tar": "~5.0.10",
+    "tar": "~6.1.11",
     "true-case-path": "~2.2.1"
   },
   "devDependencies": {
@@ -74,7 +74,7 @@
     "@types/semver": "7.3.5",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
-    "@types/tar": "4.0.3"
+    "@types/tar": "6.1.1"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
