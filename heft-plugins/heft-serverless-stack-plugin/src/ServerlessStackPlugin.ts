@@ -84,13 +84,15 @@ export class ServerlessStackPlugin implements IHeftPlugin<IServerlessStackPlugin
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.configureWebpack.tap(
-          { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-          (webpackConfiguration: unknown) => {
-            // Discard Webpack's configuration to prevent Webpack from running
-            return null;
-          }
-        );
+        if (!sstParameter.value) {
+          bundle.hooks.configureWebpack.tap(
+            { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
+            (webpackConfiguration: unknown) => {
+              // Discard Webpack's configuration to prevent Webpack from running
+              return null;
+            }
+          );
+        }
 
         bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           if (!sstParameter.value) {
