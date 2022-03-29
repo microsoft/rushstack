@@ -421,8 +421,13 @@ importers:
       react-dom: ~16.13.1
       source-map-loader: ~1.1.3
       style-loader: ~2.0.0
+      tslib: ~2.3.1
       typescript: ~4.5.2
       webpack: ~4.44.2
+    dependencies:
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+      tslib: 2.3.1
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -437,8 +442,6 @@ importers:
       eslint: 8.7.0
       heft-storybook-react-tutorial-storykit: link:../heft-storybook-react-tutorial-storykit
       html-webpack-plugin: 4.5.2_webpack@4.44.2
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
       source-map-loader: 1.1.3_webpack@4.44.2
       style-loader: 2.0.0_webpack@4.44.2
       typescript: 4.5.5
@@ -565,8 +568,13 @@ importers:
       react-dom: ~16.13.1
       source-map-loader: ~3.0.1
       style-loader: ~3.3.1
+      tslib: ~2.3.1
       typescript: ~4.5.2
       webpack: ~5.68.0
+    dependencies:
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+      tslib: 2.3.1
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -579,8 +587,6 @@ importers:
       css-loader: 6.6.0_webpack@5.68.0
       eslint: 8.7.0
       html-webpack-plugin: 5.5.0_webpack@5.68.0
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
       source-map-loader: 3.0.1_webpack@5.68.0
       style-loader: 3.3.1_webpack@5.68.0
       typescript: 4.5.5
@@ -2303,6 +2309,9 @@ packages:
   /@aws-cdk/cloud-assembly-schema/2.7.0:
     resolution: {integrity: sha512-vKTKLMPvzUhsYo3c4/EbMJq+bwIgHkwK0lV9fc5mQlnTUTyHe6nGIvyzmWWMd5BVEkgNzw+QdecxeeYJNu/doA==}
     engines: {node: '>= 14.15.0'}
+    dependencies:
+      jsonschema: 1.4.0
+      semver: 7.3.5
     dev: true
     bundledDependencies:
       - jsonschema
@@ -2326,6 +2335,7 @@ packages:
     engines: {node: '>= 14.15.0'}
     dependencies:
       '@aws-cdk/cloud-assembly-schema': 2.7.0
+      semver: 7.3.5
     dev: true
     bundledDependencies:
       - semver
@@ -3865,6 +3875,10 @@ packages:
     dependencies:
       '@babel/helper-validator-identifier': 7.16.7
       to-fast-properties: 2.0.0
+
+  /@balena/dockerignore/1.0.2:
+    resolution: {integrity: sha512-wMue2Sy4GAVTk6Ic4tJVcnfdau+gx2EnG7S+uAEe+TWJFqE4YoWN4/H8MSLj4eYJKxGg26lZwboEniNiNwZQ6Q==}
+    dev: true
 
   /@base2/pretty-print-object/1.0.1:
     resolution: {integrity: sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==}
@@ -8767,7 +8781,16 @@ packages:
     peerDependencies:
       constructs: ^10.0.0
     dependencies:
+      '@balena/dockerignore': 1.0.2
+      case: 1.6.3
       constructs: 10.0.99
+      fs-extra: 9.1.0
+      ignore: 5.2.0
+      jsonschema: 1.4.0
+      minimatch: 3.1.2
+      punycode: 2.1.1
+      semver: 7.3.5
+      yaml: 1.10.2
     dev: true
     bundledDependencies:
       - '@balena/dockerignore'
@@ -9539,6 +9562,11 @@ packages:
   /case-sensitive-paths-webpack-plugin/2.4.0:
     resolution: {integrity: sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==}
     engines: {node: '>=4'}
+    dev: true
+
+  /case/1.6.3:
+    resolution: {integrity: sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==}
+    engines: {node: '>= 0.8.0'}
     dev: true
 
   /caseless/0.12.0:
@@ -15132,6 +15160,10 @@ packages:
   /jsonpath-plus/4.0.0:
     resolution: {integrity: sha512-e0Jtg4KAzDJKKwzbLaUtinCn0RZseWBVRTRGihSpvFlM3wTR7ExSp+PTdeTsDrLNJUe7L7JYJe8mblHX5SCT6A==}
     engines: {node: '>=10.0'}
+
+  /jsonschema/1.4.0:
+    resolution: {integrity: sha512-/YgW6pRMr6M7C+4o8kS+B/2myEpHCrxO4PEWnqJNBFMjn7EWXqlQ4tGwL6xTHeRplwuZmcAncdvfOad1nT2yMw==}
+    dev: true
 
   /jsprim/1.4.2:
     resolution: {integrity: sha512-P2bSOMAc/ciLz6DzgjVlGJP9+BrJWu5UDGK70C2iweC5QBIeFf0ZXRvGjEj2uYgrY2MkAAhsSWHDWlFtEroZWw==}
