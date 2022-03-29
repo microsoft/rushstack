@@ -5,14 +5,7 @@ class RushMockFlushTelemetryPlugin {
   apply(rushSession, rushConfiguration) {
     const flushTelemetry = (data) => {
       const targetPath = path.resolve(rushConfiguration.commonTempFolder, 'test-telemetry.json');
-      return new Promise((resolve, reject) => {
-        fs.writeFile(targetPath, JSON.stringify(data), (err) => {
-          if (err) {
-            reject(err);
-          }
-          resolve();
-        });
-      });
+      return fs.promises.writeFile(targetPath, JSON.stringify(data), 'utf-8');
     };
     rushSession.hooks.flushTelemetry.tapPromise('RushMockFlushTelemetryPlugin', flushTelemetry);
   }

@@ -709,7 +709,7 @@ export class _RushGlobalFolder {
 
 // @beta
 export class RushLifecycleHooks {
-    flushTelemetry: AsyncParallelHook<[ITelemetryData[]]>;
+    flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
     initialize: AsyncSeriesHook<IRushCommand>;
     runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
     runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;
