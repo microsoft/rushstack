@@ -9,6 +9,7 @@ import type {
   HeftSession,
   IBuildStageContext,
   IBundleSubstage,
+  IHeftFlagParameter,
   IHeftPlugin,
   IHeftStringParameter,
   ScopedLogger
@@ -40,6 +41,14 @@ export class ServerlessStackPlugin implements IHeftPlugin<IServerlessStackPlugin
     options: IServerlessStackPluginOptions
   ): void {
     this._logger = heftSession.requestScopedLogger(TASK_NAME);
+
+    const sstParameter: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
+      associatedActionNames: ['test', 'build', 'start'],
+      parameterLongName: '--sst',
+      // Once https://github.com/serverless-stack/serverless-stack/issues/1537 is fixed, we may be
+      // eliminate the need for this parameter.
+      description: 'Invokes the SST postprocessing - requires AWS credentials'
+    });
 
     const sstStageParameter: IHeftStringParameter = heftSession.commandLine.registerStringParameter({
       associatedActionNames: ['test', 'build', 'start'],
@@ -84,14 +93,20 @@ export class ServerlessStackPlugin implements IHeftPlugin<IServerlessStackPlugin
         );
 
         bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._onBundleRunAsync({
-            heftSession,
-            heftConfiguration,
-            serveMode: build.properties.serveMode,
-            sstCliEntryPoint,
-            sstCliPackagePath,
-            sstStageParameter
-          });
+          if (!sstParameter.value) {
+            this._logger.terminal.writeLine(
+              'Skipping SST operations because the "--sst" command-line parameter was not specified.'
+            );
+          } else {
+            await this._onBundleRunAsync({
+              heftSession,
+              heftConfiguration,
+              serveMode: build.properties.serveMode,
+              sstCliEntryPoint,
+              sstCliPackagePath,
+              sstStageParameter
+            });
+          }
         });
       });
     });

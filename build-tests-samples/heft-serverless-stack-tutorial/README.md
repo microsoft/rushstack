@@ -10,4 +10,15 @@ plugin.
 
 2. Follow the Serverless Stack [setup instructions](https://serverless-stack.com/chapters/create-an-iam-user.html) to create an IAM User and provide your access key to `aws configure`
 
-3. Build the project: `rushx build`
+3. Build the project using the `--sst` switch:
+
+```shell
+# Build the project
+$ heft build --sst
+
+# Watch mode
+$ heft build --sst watch
+
+# Run the tests
+$ heft test
+```
