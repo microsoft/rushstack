@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "test": "heft test --clean",
-    "start": "sst start",
+    "start": "heft start --sst",
     "build": "heft build --clean",
     "deploy": "sst deploy",
     "remove": "sst remove",
@@ -17,6 +17,7 @@
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-serverless-stack-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@serverless-stack/aws-lambda-ric": "^2.0.12",
     "@serverless-stack/cli": "0.67.0",
     "@serverless-stack/resources": "0.67.0",
     "@types/aws-lambda": "8.10.93",

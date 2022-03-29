@@ -199,6 +199,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@serverless-stack/aws-lambda-ric",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@serverless-stack/cli",
       "allowedCategories": [ "tests" ]
     },

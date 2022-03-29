@@ -378,6 +378,7 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       '@rushstack/heft-serverless-stack-plugin': workspace:*
+      '@serverless-stack/aws-lambda-ric': ^2.0.12
       '@serverless-stack/cli': 0.67.0
       '@serverless-stack/resources': 0.67.0
       '@types/aws-lambda': 8.10.93
@@ -392,6 +393,7 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-serverless-stack-plugin': link:../../heft-plugins/heft-serverless-stack-plugin
+      '@serverless-stack/aws-lambda-ric': 2.0.12
       '@serverless-stack/cli': 0.67.0_constructs@10.0.99
       '@serverless-stack/resources': 0.67.0
       '@types/aws-lambda': 8.10.93
@@ -21587,7 +21589,7 @@ packages:
   /wide-align/1.1.5:
     resolution: {integrity: sha512-eDMORYaPNZ4sQIuuYPDHdQvf4gyCF9rEEV/yPxGfwPkRodwEgiMUUXTx/dex+Me0wxx53S+NgUHaP7y3MGlDmg==}
     dependencies:
-      string-width: 1.0.2
+      string-width: 4.2.3
 
   /widest-line/3.1.0:
     resolution: {integrity: sha512-NsmoXalsWVDMGupxZ5R08ka9flZjjiLvHVAWYOKtiKM8ujtZWr9cRffak+uSE48+Ob8ObalXpwyeUiyDD6QFgg==}
