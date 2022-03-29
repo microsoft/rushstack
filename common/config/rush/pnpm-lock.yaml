@@ -383,7 +383,7 @@ importers:
       '@types/aws-lambda': 8.10.93
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
-      aws-cdk-lib: 2.15.0
+      aws-cdk-lib: 2.7.0
       constructs: ~10.0.98
       eslint: ~8.7.0
       typescript: ~4.5.5
@@ -397,7 +397,7 @@ importers:
       '@types/aws-lambda': 8.10.93
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
-      aws-cdk-lib: 2.15.0_constructs@10.0.99
+      aws-cdk-lib: 2.7.0_constructs@10.0.99
       constructs: 10.0.99
       eslint: 8.7.0
       typescript: 4.5.5
@@ -2307,6 +2307,9 @@ packages:
   /@aws-cdk/cloud-assembly-schema/2.7.0:
     resolution: {integrity: sha512-vKTKLMPvzUhsYo3c4/EbMJq+bwIgHkwK0lV9fc5mQlnTUTyHe6nGIvyzmWWMd5BVEkgNzw+QdecxeeYJNu/doA==}
     engines: {node: '>= 14.15.0'}
+    dependencies:
+      jsonschema: 1.4.0
+      semver: 7.3.5
     dev: true
     bundledDependencies:
       - jsonschema
@@ -2330,6 +2333,7 @@ packages:
     engines: {node: '>= 14.15.0'}
     dependencies:
       '@aws-cdk/cloud-assembly-schema': 2.7.0
+      semver: 7.3.5
     dev: true
     bundledDependencies:
       - semver
@@ -8765,25 +8769,6 @@ packages:
       - supports-color
     dev: false
 
-  /aws-cdk-lib/2.15.0_constructs@10.0.99:
-    resolution: {integrity: sha512-QyxP4GM8bgwIdvE93V9WgE7y/yutFrY8pRxveCy6uY6E29Na2Lbes+4NT4xxcmLuj8h4bgcimbOreRw01OWcFA==}
-    engines: {node: '>= 14.15.0'}
-    peerDependencies:
-      constructs: ^10.0.0
-    dependencies:
-      constructs: 10.0.99
-    dev: true
-    bundledDependencies:
-      - '@balena/dockerignore'
-      - case
-      - fs-extra
-      - ignore
-      - jsonschema
-      - minimatch
-      - punycode
-      - semver
-      - yaml
-
   /aws-cdk-lib/2.7.0_constructs@10.0.99:
     resolution: {integrity: sha512-9mxm9WD5rioZxTCQ6FqMzkZ0NH5+4oBFtlNL10duXJ+P+7Zcs82mHHycX7wjD689Gnl6hZla/DOlUV04HQvNhw==}
     engines: {node: '>= 14.15.0'}
@@ -15155,6 +15140,10 @@ packages:
   /jsonpath-plus/4.0.0:
     resolution: {integrity: sha512-e0Jtg4KAzDJKKwzbLaUtinCn0RZseWBVRTRGihSpvFlM3wTR7ExSp+PTdeTsDrLNJUe7L7JYJe8mblHX5SCT6A==}
     engines: {node: '>=10.0'}
+
+  /jsonschema/1.4.0:
+    resolution: {integrity: sha512-/YgW6pRMr6M7C+4o8kS+B/2myEpHCrxO4PEWnqJNBFMjn7EWXqlQ4tGwL6xTHeRplwuZmcAncdvfOad1nT2yMw==}
+    dev: true
 
   /jsprim/1.4.2:
     resolution: {integrity: sha512-P2bSOMAc/ciLz6DzgjVlGJP9+BrJWu5UDGK70C2iweC5QBIeFf0ZXRvGjEj2uYgrY2MkAAhsSWHDWlFtEroZWw==}
