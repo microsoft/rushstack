@@ -150,27 +150,21 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   /**
-   * Peek at the -q/--quiet mode flag, before the command line parser is executed.
-   *
-   * Used during Rush startup.
-   */
-  public static peekIsQuiet(): boolean {
-    for (let i: number = 2; i < process.argv.length; i++) {
-      const arg: string = process.argv[i];
-      if (arg === '-q' || arg === '--quiet') return true;
-    }
-    return false;
-  }
-
-  /**
    * Utility to determine if the app should restrict writing to the console.
    */
   public static shouldRestrictConsoleOutput(): boolean {
-    return (
-      CommandLineHelper.isTabCompletionActionRequest(process.argv) ||
-      RushCommandLineParser.peekIsQuiet() ||
-      process.argv.indexOf('--json') !== -1
-    );
+    if (CommandLineHelper.isTabCompletionActionRequest(process.argv)) {
+      return true;
+    }
+
+    for (let i: number = 2; i < process.argv.length; i++) {
+      const arg: string = process.argv[i];
+      if (arg === '-q' || arg === '--quiet' || arg === '--json') {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public flushTelemetry(): void {
