@@ -28,7 +28,7 @@
       /**
        * Glob patterns to be deleted. The paths are resolved relative to the project folder.
        */
-      "globsToDelete": ["dist", "lib", "temp"]
+      "globsToDelete": ["dist", "lib", "temp", ".build"]
     }
   ],
 
