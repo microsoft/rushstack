@@ -1,5 +1,6 @@
 {
   "name": "heft-serverless-stack-tutorial",
+  "description": "(Copy of sample project) Building this project is a regression test for Heft",
   "version": "0.1.0",
   "private": true,
   "scripts": {
