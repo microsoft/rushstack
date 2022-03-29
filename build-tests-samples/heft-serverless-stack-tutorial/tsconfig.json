@@ -13,7 +13,7 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "types": ["heft-jest", "node"],
 
     "module": "commonjs",
