@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Inheritance Type Configuration",
+  "description": "Defines an arbitrary configration file used to test inheritance",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "required": ["a", "c", "f", "l"],
+
+  "properties": {
+    "a": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["b"],
+        "properties": {
+          "b": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "c": {
+      "type": "object",
+      "required": ["d"],
+      "properties": {
+        "d": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["e"],
+            "properties": {
+              "e": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "f": {
+      "type": "object",
+      "required": ["g", "i"],
+      "properties": {
+        "g": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["h"],
+            "properties": {
+              "h": {
+                "type": "string"
+              }
+            }
+          }
+        },
+
+        "i": {
+          "type": "object",
+          "properties": {
+            "j": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["k"],
+                "properties": {
+                  "k": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "l": {
+      "type": "string"
+    }
+  }
+}

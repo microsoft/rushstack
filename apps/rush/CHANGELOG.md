@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 15 Mar 2022 19:18:12 GMT and should not be manually modified.
+This log was last generated on Sat, 26 Mar 2022 00:47:39 GMT and should not be manually modified.
+
+## 5.63.1
+Sat, 26 Mar 2022 00:47:39 GMT
+
+### Patches
+
+- Fix an issue where the build cache is never written to.
+
+### Updates
+
+- Fix broken README links for @microsoft/rush-lib documentation and API reference.
 
 ## 5.63.0
 Tue, 15 Mar 2022 19:18:12 GMT
