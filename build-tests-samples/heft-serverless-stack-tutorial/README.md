@@ -2,7 +2,7 @@
 
 This project illustrates usage of the
 [@rushstack/heft-serverless-stack-plugin](https://www.npmjs.com/package/@rushstack/heft-serverless-stack-plugin)
-plugin.
+plugin.  See that documentation for details.
 
 ## Running the demo
 
@@ -16,9 +16,9 @@ plugin.
 # Build the project
 $ heft build --sst
 
-# Watch mode
-$ heft build --sst watch
+# Deploy the stub lambda and launch the local development client
+$ heft start --sst
 
-# Run the tests
+# Jest tests are run in the usual way
 $ heft test
 ```
