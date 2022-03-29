@@ -12,8 +12,13 @@
     "declarationMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
+    "strict": true,
+    "useUnknownInCatchVariables": false,
+    "esModuleInterop": true,
+    "noEmitOnError": false,
+    "allowUnreachableCode": false,
+    "importHelpers": true,
+
     "types": ["heft-jest", "webpack-env"],
 
     "module": "esnext",
