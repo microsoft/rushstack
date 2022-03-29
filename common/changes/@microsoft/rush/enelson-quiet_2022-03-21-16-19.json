@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support for -q/--quiet to install-run-rush scripts",
+      "comment": "Add support for suppressing startup information to invocations of `rush`, `rushx`, and the `install-run-rush` scripts.",
       "type": "none"
     }
   ],
