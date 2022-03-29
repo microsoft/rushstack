@@ -7,6 +7,7 @@ export default function main(app: sst.App): void {
     runtime: 'nodejs14.x'
   });
 
+  // eslint-disable-next-line
   new MyStack(app, 'my-stack');
 
   // Add more stacks

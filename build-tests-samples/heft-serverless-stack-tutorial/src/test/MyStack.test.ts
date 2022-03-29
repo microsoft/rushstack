@@ -5,7 +5,7 @@ import MyStack from '../stacks/MyStack';
 test('Test Stack', () => {
   const app = new sst.App();
   // WHEN
-  const stack = new MyStack(app, 'test-stack');
+  const stack: MyStack = new MyStack(app, 'test-stack');
   // THEN
   const template = Template.fromStack(stack);
   template.resourceCountIs('AWS::Lambda::Function', 1);
