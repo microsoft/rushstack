@@ -574,7 +574,7 @@
             {
               "kind": "Method",
               "canonicalReference": "api-documenter-test!DocClass1#optionalParamFunction:member(1)",
-              "docComment": "",
+              "docComment": "/**\n * This is a function with an optional parameter.\n *\n * @param x - the number\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",

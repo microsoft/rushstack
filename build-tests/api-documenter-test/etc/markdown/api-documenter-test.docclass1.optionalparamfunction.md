@@ -4,6 +4,8 @@
 
 ## DocClass1.optionalParamFunction() method
 
+This is a function with an optional parameter.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,7 +16,7 @@ optionalParamFunction(x?: number): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  x | number | <i>(Optional)</i> |
+|  x | number | <i>(Optional)</i> the number |
 
 <b>Returns:</b>
 

@@ -137,7 +137,7 @@ methods:
     uid: 'api-documenter-test!DocClass1#optionalParamFunction:member(1)'
     package: api-documenter-test!
     fullName: optionalParamFunction(x)
-    summary: ''
+    summary: This is a function with an optional parameter.
     remarks: ''
     example: []
     isPreview: false
@@ -146,7 +146,7 @@ methods:
       content: 'optionalParamFunction(x?: number): void;'
       parameters:
         - id: x
-          description: ''
+          description: the number
           type: number
       return:
         type: void
