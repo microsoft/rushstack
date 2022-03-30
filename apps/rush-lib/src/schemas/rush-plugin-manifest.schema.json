@@ -32,7 +32,14 @@
             "type": "string"
           },
           "associatedCommands": {
-            "description": "Specifies associated commands with this plugin, plugin will be only installed when an associated command runs.",
+            "description": "Specifies associated commands with this plugin, plugin will be lazy installed and loaded when any associated commands runs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contributes": {
+            "description": "Specifies how this plugin registers contribution points to extend various functionalities with Rush.js, plugin will be lazy installed and loaded when any contribution point runs.",
             "type": "array",
             "items": {
               "type": "string"

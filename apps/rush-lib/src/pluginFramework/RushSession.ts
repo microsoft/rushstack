@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { InternalError, ITerminalProvider } from '@rushstack/node-core-library';
-import { IBuildCacheJson } from '../api/BuildCacheConfiguration';
-import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
+import { ICloudBuildCacheProviderFactory, IContributeAPIForBuildCacheProvider } from './ContributionPoint';
 import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
 import { RushLifecycleHooks } from './RushLifeCycle';
 
@@ -18,21 +17,21 @@ export interface IRushSessionOptions {
 /**
  * @beta
  */
-export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
-
-/**
- * @beta
- */
 export class RushSession {
   private readonly _options: IRushSessionOptions;
-  private readonly _cloudBuildCacheProviderFactories: Map<string, CloudBuildCacheProviderFactory> = new Map();
+  protected readonly _cloudBuildCacheProviderFactories: Map<string, ICloudBuildCacheProviderFactory>;
 
   public readonly hooks: RushLifecycleHooks;
 
   public constructor(options: IRushSessionOptions) {
     this._options = options;
+    this._cloudBuildCacheProviderFactories = new Map<string, ICloudBuildCacheProviderFactory>();
 
     this.hooks = new RushLifecycleHooks();
+  }
+
+  public get options(): IRushSessionOptions {
+    return this._options;
   }
 
   public getLogger(name: string): ILogger {
@@ -53,9 +52,30 @@ export class RushSession {
     return this._options.terminalProvider;
   }
 
+  public getContributeAPIForBuildCacheProvider(): IContributeAPIForBuildCacheProvider {
+    return {
+      registerCloudBuildCacheProviderFactory: (
+        cacheProviderName: string,
+        factory: ICloudBuildCacheProviderFactory
+      ): void => {
+        if (this._cloudBuildCacheProviderFactories.has(cacheProviderName)) {
+          throw new Error(
+            `A build cache provider factory for ${cacheProviderName} has already been registered`
+          );
+        }
+        this._cloudBuildCacheProviderFactories.set(cacheProviderName, factory);
+      }
+    };
+  }
+
+  /**
+   * @deprecated
+   *
+   * Use `rushSession.getContributeAPIForBuildCacheProvider().registerCloudBuildCacheProviderFactory`
+   */
   public registerCloudBuildCacheProviderFactory(
     cacheProviderName: string,
-    factory: CloudBuildCacheProviderFactory
+    factory: ICloudBuildCacheProviderFactory
   ): void {
     if (this._cloudBuildCacheProviderFactories.has(cacheProviderName)) {
       throw new Error(`A build cache provider factory for ${cacheProviderName} has already been registered`);
@@ -65,7 +85,7 @@ export class RushSession {
 
   public getCloudBuildCacheProviderFactory(
     cacheProviderName: string
-  ): CloudBuildCacheProviderFactory | undefined {
+  ): ICloudBuildCacheProviderFactory | undefined {
     return this._cloudBuildCacheProviderFactories.get(cacheProviderName);
   }
 }

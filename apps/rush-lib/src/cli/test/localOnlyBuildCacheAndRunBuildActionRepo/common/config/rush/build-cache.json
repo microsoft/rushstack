@@ -1,0 +1,6 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/build-cache.schema.json",
+  "buildCacheEnabled": true,
+  "cacheProvider": "local-only",
+  "cacheEntryNamePattern": "[projectName:normalize]-[phaseName:normalize]-[hash]"
+}

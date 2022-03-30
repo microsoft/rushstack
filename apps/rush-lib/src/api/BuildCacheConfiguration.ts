@@ -18,7 +18,8 @@ import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCachePr
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
-import type { CloudBuildCacheProviderFactory, RushSession } from '../pluginFramework/RushSession';
+import type { RushSession } from '../pluginFramework/RushSession';
+import type { ICloudBuildCacheProviderFactory } from '../pluginFramework/ContributionPoint';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
@@ -93,7 +94,7 @@ export class BuildCacheConfiguration {
     const { buildCacheJson } = options;
     // Don't configure a cloud cache provider if local-only
     if (buildCacheJson.cacheProvider !== 'local-only') {
-      const cloudCacheProviderFactory: CloudBuildCacheProviderFactory | undefined =
+      const cloudCacheProviderFactory: ICloudBuildCacheProviderFactory | undefined =
         options.rushSession.getCloudBuildCacheProviderFactory(buildCacheJson.cacheProvider);
       if (!cloudCacheProviderFactory) {
         throw new Error(`Unexpected cache provider: ${buildCacheJson.cacheProvider}`);

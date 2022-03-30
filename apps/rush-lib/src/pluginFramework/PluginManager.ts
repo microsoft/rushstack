@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Import, InternalError, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, Import, ITerminal } from '@rushstack/node-core-library';
 
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -10,6 +10,10 @@ import { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
 import { RushSession } from './RushSession';
 import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
+import { IGlobalCommand, IPhasedCommand, PluginManagerLifecycleHooks } from './RushLifeCycle';
+import { ContributionPoint } from './ContributionPoint';
+import { getRushSessionForPlugin, IRushSessionForPlugin } from './RushSessionForPlugin';
+import { AsyncSeriesHook } from 'tapable';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -23,6 +27,27 @@ export interface ICustomCommandLineConfigurationInfo {
   pluginLoader: PluginLoaderBase;
 }
 
+export enum CommandKind {
+  global = 'global',
+  phase = 'phase'
+}
+
+interface IInitializePluginOptions {
+  /**
+   * For plugins that has multiple contribution points, maybe loaded multiple times.
+   */
+  doNotThrowSamePluginName: boolean;
+  /**
+   * For plugins that specifies both associated commands and contributes, rush session is different.
+   */
+  proxyRushSessionIfContributes: boolean;
+}
+
+const defaultInitializePluginOptions: IInitializePluginOptions = {
+  doNotThrowSamePluginName: false,
+  proxyRushSessionIfContributes: false
+};
+
 export class PluginManager {
   private readonly _terminal: ITerminal;
   private readonly _rushConfiguration: RushConfiguration;
@@ -31,8 +56,16 @@ export class PluginManager {
   private readonly _autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
   private readonly _installedAutoinstallerNames: Set<string>;
   private readonly _loadedPluginNames: Set<string> = new Set<string>();
+  private _actionName: string = '';
+  private _commandKind: CommandKind | undefined;
+  private _pluginNameToRushSessionForPlugin: Map<string, RushSession | undefined> = new Map<
+    string,
+    RushSession
+  >();
 
   private _error: Error | undefined;
+
+  public hooks: PluginManagerLifecycleHooks = new PluginManagerLifecycleHooks();
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
@@ -87,6 +120,8 @@ export class PluginManager {
         terminal: this._terminal
       });
     });
+
+    this._setupInitializeContributions();
   }
 
   /**
@@ -115,7 +150,7 @@ export class PluginManager {
 
   public async reinitializeAllPluginsForCommandAsync(commandName: string): Promise<void> {
     this._error = undefined;
-    await this.tryInitializeUnassociatedPluginsAsync();
+    await this.tryInitializeEagerPluginsAsync();
     await this.tryInitializeAssociatedCommandPluginsAsync(commandName);
   }
 
@@ -128,16 +163,20 @@ export class PluginManager {
     }
   }
 
-  public async tryInitializeUnassociatedPluginsAsync(): Promise<void> {
+  public async tryInitializeEagerPluginsAsync(): Promise<void> {
     try {
-      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getUnassociatedPluginLoaders(
+      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getEagerPluginLoaders(
         this._autoinstallerPluginLoaders
       );
       await this._preparePluginAutoinstallersAsync(autoinstallerPluginLoaders);
-      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getUnassociatedPluginLoaders(
+      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getEagerPluginLoaders(
         this._builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
+      const targetPluginLoaders: PluginLoaderBase[] = [
+        ...builtInPluginLoaders,
+        ...autoinstallerPluginLoaders
+      ];
+      this._initializePlugins(targetPluginLoaders);
     } catch (e) {
       this._error = e as Error;
     }
@@ -154,7 +193,11 @@ export class PluginManager {
         commandName,
         this._builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
+      const targetPluginLoaders: PluginLoaderBase[] = [
+        ...builtInPluginLoaders,
+        ...autoinstallerPluginLoaders
+      ];
+      this._initializePlugins(targetPluginLoaders);
     } catch (e) {
       this._error = e as Error;
     }
@@ -175,25 +218,39 @@ export class PluginManager {
     return commandLineConfigurationInfos;
   }
 
-  private _initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
+  public async initializeContributeToBuildCacheProviderPluginsAsync(): Promise<void> {
+    await this.hooks.initializeContributionPoints.get(ContributionPoint.buildCacheProvider)?.promise();
+  }
+
+  private _initializePlugins(
+    pluginLoaders: PluginLoaderBase[],
+    {
+      doNotThrowSamePluginName,
+      proxyRushSessionIfContributes
+    }: IInitializePluginOptions = defaultInitializePluginOptions
+  ): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
       if (this._loadedPluginNames.has(pluginName)) {
+        if (doNotThrowSamePluginName) {
+          // No need to apply same plugin name twice
+          return;
+        }
         throw new Error(`Error applying plugin: A plugin with name "${pluginName}" has already been applied`);
       }
       const plugin: IRushPlugin | undefined = pluginLoader.load();
       this._loadedPluginNames.add(pluginName);
       if (plugin) {
-        this._applyPlugin(plugin, pluginName);
+        this._applyPlugin(plugin, pluginLoader, proxyRushSessionIfContributes);
       }
     }
   }
 
-  private _getUnassociatedPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
+  private _getEagerPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
     pluginLoaders: T[]
   ): T[] {
     return pluginLoaders.filter((pluginLoader) => {
-      return !pluginLoader.pluginManifest.associatedCommands;
+      return !pluginLoader.pluginManifest.associatedCommands && !pluginLoader.pluginManifest.contributes;
     });
   }
 
@@ -206,11 +263,144 @@ export class PluginManager {
     });
   }
 
-  private _applyPlugin(plugin: IRushPlugin, pluginName: string): void {
+  private _applyPlugin(
+    plugin: IRushPlugin,
+    pluginLoader: PluginLoaderBase,
+    proxyRushSessionIfContributes: boolean
+  ): void {
     try {
-      plugin.apply(this._rushSession, this._rushConfiguration);
+      let rushSessionForPlugin: RushSession | IRushSessionForPlugin = this._rushSession;
+      if (proxyRushSessionIfContributes) {
+        rushSessionForPlugin = getRushSessionForPlugin(this._rushSession, pluginLoader.pluginManifest);
+      }
+      plugin.apply(rushSessionForPlugin, this._rushConfiguration);
+      if ('validateContributesAPIUsage' in rushSessionForPlugin) {
+        rushSessionForPlugin.validateContributesAPIUsage();
+        this._pluginNameToRushSessionForPlugin.set(pluginLoader.pluginName, rushSessionForPlugin);
+      }
     } catch (e) {
-      throw new InternalError(`Error applying "${pluginName}": ${e}`);
+      throw new Error(`Error applying "${pluginLoader.pluginName}": ${e}`);
+    }
+  }
+
+  private _setupInitializeContributions(): void {
+    for (const pluginLoader of [...this._builtInPluginLoaders, ...this._autoinstallerPluginLoaders]) {
+      if (Array.isArray(pluginLoader.pluginManifest.contributes)) {
+        const { pluginName } = pluginLoader;
+        for (const contribute of pluginLoader.pluginManifest.contributes) {
+          switch (contribute) {
+            case ContributionPoint.buildCacheProvider: {
+              this.hooks.initializeContributionPoints
+                .for(ContributionPoint.buildCacheProvider)
+                .tapPromise(pluginName, async () => {
+                  if (this._loadedPluginNames.has(pluginName)) {
+                    return;
+                  }
+                  if (pluginLoader instanceof AutoinstallerPluginLoader) {
+                    await this._preparePluginAutoinstallersAsync([pluginLoader]);
+                  }
+                  this._initializePlugins([pluginLoader], {
+                    doNotThrowSamePluginName: true,
+                    proxyRushSessionIfContributes: true
+                  });
+                  const rushSessionForPlugin: RushSession | undefined =
+                    this._pluginNameToRushSessionForPlugin.get(pluginName);
+                  if (rushSessionForPlugin) {
+                    // Trigger life cycles for the plugin, because it is lazily loaded
+                    await this.runHooksForAllCommandAsync(rushSessionForPlugin);
+
+                    if (this._commandKind) {
+                      switch (this._commandKind) {
+                        case CommandKind.global: {
+                          await this.runHooksForGlobalCommandAsync(rushSessionForPlugin);
+                          break;
+                        }
+                        case CommandKind.phase: {
+                          await this.runHooksForPhaseCommandAsync(rushSessionForPlugin);
+                          break;
+                        }
+                        default: {
+                          const _neverCommandKind: never = this._commandKind;
+                          throw new Error('Unhandled command kind: ' + _neverCommandKind);
+                        }
+                      }
+                    }
+                  }
+                  this._pluginNameToRushSessionForPlugin.set(pluginName, undefined);
+                });
+              break;
+            }
+            default: {
+              // no-default
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public set commandKind(commandKind: CommandKind | undefined) {
+    this._commandKind = commandKind;
+  }
+
+  public get commandKind(): CommandKind | undefined {
+    return this._commandKind;
+  }
+
+  public set actionName(actionName: string) {
+    this._actionName = actionName;
+  }
+
+  public get actionName(): string {
+    return this._actionName;
+  }
+
+  public async runHooksForAllCommandAsync(rushSession: RushSession): Promise<void> {
+    const { hooks: sessionHooks } = rushSession;
+    if (sessionHooks.initialize.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.initialize.promise({
+        actionName: this._actionName
+      });
+    }
+  }
+
+  public async runHooksForGlobalCommandAsync(rushSession: RushSession): Promise<void> {
+    const { hooks: sessionHooks } = rushSession;
+    if (sessionHooks.runAnyGlobalCustomCommand.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.runAnyGlobalCustomCommand.promise({
+        actionName: this._actionName
+      });
+    }
+
+    const hookForAction: AsyncSeriesHook<IGlobalCommand> | undefined =
+      sessionHooks.runGlobalCustomCommand.get(this.actionName);
+    if (hookForAction) {
+      // Run the more specific hook for a command with this name after the general hook
+      await hookForAction.promise({
+        actionName: this._actionName
+      });
+    }
+  }
+
+  public async runHooksForPhaseCommandAsync(rushSession: RushSession): Promise<void> {
+    const { hooks: sessionHooks } = rushSession;
+    if (sessionHooks.runAnyPhasedCommand.isUsed()) {
+      // Avoid the cost of compiling the hook if it wasn't tapped.
+      await sessionHooks.runAnyPhasedCommand.promise({
+        actionName: this._actionName
+      });
+    }
+
+    const hookForAction: AsyncSeriesHook<IPhasedCommand> | undefined = sessionHooks.runPhasedCommand.get(
+      this.actionName
+    );
+    if (hookForAction) {
+      // Run the more specific hook for a command with this name after the general hook
+      await hookForAction.promise({
+        actionName: this._actionName
+      });
     }
   }
 }

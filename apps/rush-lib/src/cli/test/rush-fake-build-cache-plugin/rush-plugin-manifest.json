@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    {
+      "pluginName": "rush-fake-build-cache-plugin",
+      "description": "Rush plugin for testing cloud build cache",
+      "entryPoint": "index.js",
+      "contributes": ["build-cache-provider"]
+    }
+  ]
+}

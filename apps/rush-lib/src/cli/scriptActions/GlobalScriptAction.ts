@@ -4,15 +4,14 @@
 import * as os from 'os';
 import * as path from 'path';
 import colors from 'colors/safe';
-import type { AsyncSeriesHook } from 'tapable';
 
 import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 
-import type { IGlobalCommand } from '../../pluginFramework/RushLifeCycle';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { IGlobalCommandConfig, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
+import { CommandKind } from '../../pluginFramework/PluginManager';
 
 /**
  * Constructor parameters for GlobalScriptAction.
@@ -90,19 +89,9 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
   }
 
   public async runAsync(): Promise<void> {
-    const { hooks: sessionHooks } = this.rushSession;
-    if (sessionHooks.runAnyGlobalCustomCommand.isUsed()) {
-      // Avoid the cost of compiling the hook if it wasn't tapped.
-      await sessionHooks.runAnyGlobalCustomCommand.promise(this);
-    }
+    this.parser.pluginManager.commandKind = CommandKind.global;
 
-    const hookForAction: AsyncSeriesHook<IGlobalCommand> | undefined = sessionHooks.runGlobalCustomCommand.get(
-      this.actionName
-    );
-    if (hookForAction) {
-      // Run the more specific hook for a command with this name after the general hook
-      await hookForAction.promise(this);
-    }
+    await this.parser.pluginManager.runHooksForGlobalCommandAsync(this.rushSession);
 
     const additionalPathFolders: string[] =
       this.commandLineConfiguration?.additionalPathFolders.slice() || [];
