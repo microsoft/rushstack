@@ -192,6 +192,10 @@ export class RushProjectConfiguration {
 
   /**
    * Validates that the requested phases are compatible.
+   * Deferral of this logic to its own method means that Rush no longer eagerly validates
+   * all defined commands in command-line.json. As such, while validation will be run for a given
+   * command upon invoking that command, defining overlapping phases in "rush custom-command"
+   * that are not used by "rush build" will not cause "rush build" to exit with an error.
    */
   public validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void {
     // Don't repeatedly validate the same set of phases for the same project.

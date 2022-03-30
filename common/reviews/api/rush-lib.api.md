@@ -62,15 +62,9 @@ export class BuildCacheConfiguration {
     cacheWriteEnabled: boolean;
     readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
     static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string;
-    // Warning: (ae-forgotten-export) The symbol "GetCacheEntryIdFunction" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    readonly _getCacheEntryId: GetCacheEntryIdFunction;
+    readonly getCacheEntryId: GetCacheEntryIdFunction;
     static loadAndRequireEnabledAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration>;
-    // Warning: (ae-forgotten-export) The symbol "FileSystemBuildCacheProvider" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    readonly _localCacheProvider: FileSystemBuildCacheProvider;
+    readonly localCacheProvider: FileSystemBuildCacheProvider;
     static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration | undefined>;
 }
 
@@ -215,6 +209,17 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
+// @beta
+export class FileSystemBuildCacheProvider {
+    constructor(options: IFileSystemBuildCacheProviderOptions);
+    getCacheEntryPath(cacheId: string): string;
+    tryGetCacheEntryPathByIdAsync(terminal: ITerminal, cacheId: string): Promise<string | undefined>;
+    trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<string>;
+}
+
+// @beta
+export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
+
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
     // (undocumented)
@@ -289,6 +294,19 @@ export interface IExperimentsJson {
     phasedCommands?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
+}
+
+// @beta
+export interface IFileSystemBuildCacheProviderOptions {
+    rushConfiguration: RushConfiguration;
+    rushUserConfiguration: RushUserConfiguration;
+}
+
+// @beta
+export interface IGenerateCacheEntryIdOptions {
+    phaseName: string;
+    projectName: string;
+    projectStateHash: string;
 }
 
 // @beta (undocumented)

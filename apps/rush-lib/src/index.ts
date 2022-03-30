@@ -25,6 +25,11 @@ export {
 } from './api/RushConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
+export { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from './logic/buildCache/CacheEntryId';
+export {
+  FileSystemBuildCacheProvider,
+  IFileSystemBuildCacheProviderOptions
+} from './logic/buildCache/FileSystemBuildCacheProvider';
 
 export { IPhase } from './api/CommandLineConfiguration';
 

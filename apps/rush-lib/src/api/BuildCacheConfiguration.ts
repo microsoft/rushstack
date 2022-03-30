@@ -78,14 +78,12 @@ export class BuildCacheConfiguration {
   public cacheWriteEnabled: boolean;
   /**
    * Method to calculate the cache entry id for a project, phase, and project state.
-   * @internal
    */
-  public readonly _getCacheEntryId: GetCacheEntryIdFunction;
+  public readonly getCacheEntryId: GetCacheEntryIdFunction;
   /**
    * The provider for interacting with the local build cache.
-   * @internal
    */
-  public readonly _localCacheProvider: FileSystemBuildCacheProvider;
+  public readonly localCacheProvider: FileSystemBuildCacheProvider;
   /**
    * The provider for interacting with the cloud build cache, if configured.
    */
@@ -97,8 +95,8 @@ export class BuildCacheConfiguration {
     this.cacheWriteEnabled =
       !!this.buildCacheEnabled && EnvironmentConfiguration.buildCacheWriteAllowed !== false;
 
-    this._getCacheEntryId = options.getCacheEntryId;
-    this._localCacheProvider = new FileSystemBuildCacheProvider({
+    this.getCacheEntryId = options.getCacheEntryId;
+    this.localCacheProvider = new FileSystemBuildCacheProvider({
       rushUserConfiguration: options.rushUserConfiguration,
       rushConfiguration: options.rushConfiguration
     });

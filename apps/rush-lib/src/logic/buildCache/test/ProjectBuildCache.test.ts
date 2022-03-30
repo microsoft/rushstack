@@ -28,9 +28,9 @@ describe(ProjectBuildCache.name, () => {
     const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
-        _getCacheEntryId: (options: IGenerateCacheEntryIdOptions) =>
+        getCacheEntryId: (options: IGenerateCacheEntryIdOptions) =>
           `${options.projectName}/${options.projectStateHash}`,
-        _localCacheProvider: undefined as unknown as FileSystemBuildCacheProvider,
+        localCacheProvider: undefined as unknown as FileSystemBuildCacheProvider,
         cloudCacheProvider: {
           isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false
         }
