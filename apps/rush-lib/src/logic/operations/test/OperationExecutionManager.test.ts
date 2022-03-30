@@ -68,6 +68,7 @@ describe(OperationExecutionManager.name, () => {
             quietMode: false,
             debugMode: false,
             parallelism: 'tequila',
+            showTimeline: false,
             changedProjectsOnly: false,
             destination: mockWritable
           })
@@ -81,6 +82,7 @@ describe(OperationExecutionManager.name, () => {
         quietMode: false,
         debugMode: false,
         parallelism: '1',
+        showTimeline: false,
         changedProjectsOnly: false,
         destination: mockWritable
       };
@@ -137,6 +139,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: '1',
+          showTimeline: false,
           changedProjectsOnly: false,
           destination: mockWritable
         };
@@ -171,6 +174,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: '1',
+          showTimeline: false,
           changedProjectsOnly: false,
           destination: mockWritable
         };

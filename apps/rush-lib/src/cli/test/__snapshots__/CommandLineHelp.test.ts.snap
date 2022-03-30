@@ -115,8 +115,8 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: build 1`] = `
-"usage: rush build [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
-                  [-o PROJECT] [-i PROJECT] [-I PROJECT]
+"usage: rush build [-h] [-p COUNT] [--timeline] [-t PROJECT] [-T PROJECT]
+                  [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
                   [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
                   [--ignore-hooks] [-s] [-m]
@@ -145,6 +145,10 @@ Optional arguments:
                         depends on the operating system and number of CPU 
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
+  --timeline            After the build is complete, print additional 
+                        statistics and CPU usage information, including an 
+                        ASCII chart of the start and stop times for each 
+                        operation.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
                         processed; adding this parameter will instead select 
@@ -358,8 +362,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
-"usage: rush import-strings [-h] [-p COUNT] [-t PROJECT] [-T PROJECT]
-                           [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
+"usage: rush import-strings [-h] [-p COUNT] [--timeline] [-t PROJECT]
+                           [-T PROJECT] [-f PROJECT] [-o PROJECT] [-i PROJECT]
+                           [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
                            [--from-version-policy VERSION_POLICY_NAME] [-v]
                            [--ignore-hooks]
@@ -380,6 +385,10 @@ Optional arguments:
                         depends on the operating system and number of CPU 
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
+  --timeline            After the build is complete, print additional 
+                        statistics and CPU usage information, including an 
+                        ASCII chart of the start and stop times for each 
+                        operation.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
                         processed; adding this parameter will instead select 
@@ -899,8 +908,8 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
-"usage: rush rebuild [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
-                    [-o PROJECT] [-i PROJECT] [-I PROJECT]
+"usage: rush rebuild [-h] [-p COUNT] [--timeline] [-t PROJECT] [-T PROJECT]
+                    [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [-v]
                     [--ignore-hooks] [-s] [-m]
@@ -926,6 +935,10 @@ Optional arguments:
                         depends on the operating system and number of CPU 
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
+  --timeline            After the build is complete, print additional 
+                        statistics and CPU usage information, including an 
+                        ASCII chart of the start and stop times for each 
+                        operation.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
                         processed; adding this parameter will instead select 

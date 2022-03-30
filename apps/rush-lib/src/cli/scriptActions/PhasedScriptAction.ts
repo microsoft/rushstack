@@ -94,6 +94,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _watchParameter: CommandLineFlagParameter | undefined;
+  private _timelineParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -143,6 +144,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // if parallelism is not enabled, then restrict to 1 core
     const parallelism: string | undefined = this._enableParallelism ? this._parallelismParameter!.value : '1';
 
+    const showTimeline: boolean = this._timelineParameter ? this._timelineParameter.value : false;
+
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
@@ -175,7 +178,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const executionManagerOptions: IOperationExecutionManagerOptions = {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
-      parallelism: parallelism,
+      parallelism,
+      showTimeline,
       changedProjectsOnly
     };
 
@@ -345,6 +349,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           ' The COUNT should be a positive integer or else the word "max" to specify a count that is equal to' +
           ' the number of CPU cores. If this parameter is omitted, then the default value depends on the' +
           ' operating system and number of CPU cores.'
+      });
+      this._timelineParameter = this.defineFlagParameter({
+        parameterLongName: '--timeline',
+        description:
+          'After the build is complete, print additional statistics and CPU usage information,' +
+          ' including an ASCII chart of the start and stop times for each operation.'
       });
     }
 
