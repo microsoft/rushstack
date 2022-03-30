@@ -1029,7 +1029,7 @@ export class ApiModelGenerator {
       parameters.push({
         parameterName: parameter.name.getText().trim(),
         parameterTypeTokenRange,
-        isOptional: this._collector.typeChecker.isOptionalParameter(parameter),
+        isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
       });
     }
     return parameters;
