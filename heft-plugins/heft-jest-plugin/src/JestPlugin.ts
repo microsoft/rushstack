@@ -70,6 +70,7 @@ export interface IJestPluginOptions {
   findRelatedTests?: ReadonlyArray<string>;
   maxWorkers?: string;
   passWithNoTests?: boolean;
+  runInBand?: boolean;
   silent?: boolean;
   testNamePattern?: string;
   testPathPattern?: ReadonlyArray<string>;
@@ -176,7 +177,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       watch: testStageProperties.watchMode,
 
       // In debug mode, avoid forking separate processes that are difficult to debug
-      runInBand: debugMode,
+      runInBand: debugMode || options?.runInBand,
       debug: debugMode,
       detectOpenHandles: options?.detectOpenHandles || false,
 
@@ -648,6 +649,15 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     });
     */
 
+    const runInBandFlag: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
+      associatedActionNames: ['test'],
+      parameterLongName: '--run-in-band',
+      environmentVariable: 'HEFT_JEST_RUN_IN_BAND',
+      description:
+        'Run tests in serial using a single process.' +
+        ' This corresponds to the "--runInBand" parameter in Jest\'s documentation.'
+    });
+
     const silent: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
       associatedActionNames: ['test'],
       parameterLongName: '--silent',
@@ -708,6 +718,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         maxWorkers: maxWorkers.value,
         // Temporary workaround for https://github.com/microsoft/rushstack/issues/2759
         passWithNoTests: true, // this._passWithNoTests.value,
+        runInBand: runInBandFlag.value,
         silent: silent.value,
         testNamePattern: testNamePattern.value,
         testPathPattern: testPathPattern.value,
