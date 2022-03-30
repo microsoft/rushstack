@@ -836,12 +836,22 @@ export class MarkdownDocumenter {
 
     const parametersTable: DocTable = new DocTable({
       configuration,
-      headerTitles: ['Parameter', 'Type', 'Optional', 'Description']
+      headerTitles: ['Parameter', 'Type', 'Description']
     });
     for (const apiParameter of apiParameterListMixin.parameters) {
       const parameterDescription: DocSection = new DocSection({ configuration });
+
+      if (apiParameter.isOptional) {
+        parameterDescription.appendNodesInParagraph([
+          new DocEmphasisSpan({ configuration, italic: true }, [
+            new DocPlainText({ configuration, text: '(Optional)' })
+          ]),
+          new DocPlainText({ configuration, text: ' ' })
+        ]);
+      }
+
       if (apiParameter.tsdocParamBlock) {
-        this._appendSection(parameterDescription, apiParameter.tsdocParamBlock.content);
+        this._appendAndMergeSection(parameterDescription, apiParameter.tsdocParamBlock.content);
       }
 
       parametersTable.addRow(
@@ -853,11 +863,6 @@ export class MarkdownDocumenter {
           ]),
           new DocTableCell({ configuration }, [
             this._createParagraphForTypeExcerpt(apiParameter.parameterTypeExcerpt)
-          ]),
-          new DocTableCell({ configuration }, [
-            new DocParagraph({ configuration }, [
-              new DocPlainText({ configuration, text: apiParameter.isOptional ? 'Yes' : '' })
-            ])
           ]),
           new DocTableCell({ configuration }, parameterDescription.nodes)
         ])

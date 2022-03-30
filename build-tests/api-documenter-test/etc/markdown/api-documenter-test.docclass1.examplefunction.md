@@ -14,10 +14,10 @@ exampleFunction(a: string, b: string): string;
 
 ## Parameters
 
-|  Parameter | Type | Optional | Description |
-|  --- | --- | --- | --- |
-|  a | string |  | the first string |
-|  b | string |  | the second string |
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  a | string | the first string |
+|  b | string | the second string |
 
 <b>Returns:</b>
 

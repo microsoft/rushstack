@@ -14,9 +14,9 @@ addHandler(handler: () => void): void;
 
 ## Parameters
 
-|  Parameter | Type | Optional | Description |
-|  --- | --- | --- | --- |
-|  handler | () =&gt; void |  |  |
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  handler | () =&gt; void |  |
 
 <b>Returns:</b>
 

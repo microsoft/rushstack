@@ -12,9 +12,9 @@ optionalParamFunction(x?: number): void;
 
 ## Parameters
 
-|  Parameter | Type | Optional | Description |
-|  --- | --- | --- | --- |
-|  x | number | Yes |  |
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  x | number | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

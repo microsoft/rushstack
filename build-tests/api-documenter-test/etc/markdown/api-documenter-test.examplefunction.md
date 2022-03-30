@@ -14,10 +14,10 @@ export declare function exampleFunction(x: ExampleTypeAlias, y: number): IDocInt
 
 ## Parameters
 
-|  Parameter | Type | Optional | Description |
-|  --- | --- | --- | --- |
-|  x | [ExampleTypeAlias](./api-documenter-test.exampletypealias.md) |  | an API item that should get hyperlinked |
-|  y | number |  | a system type that should NOT get hyperlinked |
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  x | [ExampleTypeAlias](./api-documenter-test.exampletypealias.md) | an API item that should get hyperlinked |
+|  y | number | a system type that should NOT get hyperlinked |
 
 <b>Returns:</b>
 
