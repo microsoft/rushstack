@@ -15,12 +15,12 @@ export enum ApiJsonSchemaVersion {
   V_1001 = 1001,
 
   /**
-   * Remove "canonicalReference" field.  This field was for diagnostic purposes only and was never deserialized.
+   * Remove `canonicalReference` field.  This field was for diagnostic purposes only and was never deserialized.
    */
   V_1002 = 1002,
 
   /**
-   * Reintroduce the "canonicalReference" field using the experimental new TSDoc declaration reference notation.
+   * Reintroduce the `canonicalReference` field using the experimental new TSDoc declaration reference notation.
    *
    * This is not a breaking change because this field is never deserialized; it is provided for informational
    * purposes only.
@@ -28,7 +28,7 @@ export enum ApiJsonSchemaVersion {
   V_1003 = 1003,
 
   /**
-   * Add a "tsdocConfig" field that tracks the TSDoc configuration for parsing doc comments.
+   * Add a `tsdocConfig` field that tracks the TSDoc configuration for parsing doc comments.
    *
    * This is not a breaking change because an older implementation will still work correctly.  The
    * custom tags will be skipped over by the parser.
@@ -36,12 +36,19 @@ export enum ApiJsonSchemaVersion {
   V_1004 = 1004,
 
   /**
+   * Add an `isOptional` field to `IApiParameterOptions` to track whether a function parameter is optional.
+   *
+   * When loading older JSON files, the value defaults to `false`.
+   */
+  V_1005 = 1005,
+
+  /**
    * The current latest .api.json schema version.
    *
    * IMPORTANT: When incrementing this number, consider whether `OLDEST_SUPPORTED` or `OLDEST_FORWARDS_COMPATIBLE`
    * should be updated.
    */
-  LATEST = V_1004,
+  LATEST = V_1005,
 
   /**
    * The oldest .api.json schema version that is still supported for backwards compatibility.

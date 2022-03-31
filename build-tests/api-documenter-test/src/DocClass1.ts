@@ -179,6 +179,12 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     return x;
   }
 
+  /**
+   * This is a function with an optional parameter.
+   * @param x - the number
+   */
+  public optionalParamFunction(x?: number): void {}
+
   public get readonlyProperty(): string {
     return 'hello';
   }

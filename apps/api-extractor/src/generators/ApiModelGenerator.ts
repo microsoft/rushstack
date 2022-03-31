@@ -1028,7 +1028,8 @@ export class ApiModelGenerator {
       nodesToCapture.push({ node: parameter.type, tokenRange: parameterTypeTokenRange });
       parameters.push({
         parameterName: parameter.name.getText().trim(),
-        parameterTypeTokenRange
+        parameterTypeTokenRange,
+        isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
       });
     }
     return parameters;

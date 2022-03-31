@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Updated api-extractor-model to store whether a parameter is optional.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}

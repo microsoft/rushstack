@@ -768,6 +768,8 @@ export interface IApiParameterListMixinOptions extends IApiItemOptions {
 // @public
 export interface IApiParameterOptions {
     // (undocumented)
+    isOptional: boolean;
+    // (undocumented)
     parameterName: string;
     // (undocumented)
     parameterTypeTokenRange: IExcerptTokenRange;
@@ -852,6 +854,8 @@ export interface IExcerptTokenRange {
 // @public
 export interface IParameterOptions {
     // (undocumented)
+    isOptional: boolean;
+    // (undocumented)
     name: string;
     // (undocumented)
     parameterTypeExcerpt: Excerpt;
@@ -880,6 +884,7 @@ export interface ITypeParameterOptions {
 // @public
 export class Parameter {
     constructor(options: IParameterOptions);
+    isOptional: boolean;
     name: string;
     readonly parameterTypeExcerpt: Excerpt;
     get tsdocParamBlock(): tsdoc.DocParamBlock | undefined;

@@ -840,8 +840,18 @@ export class MarkdownDocumenter {
     });
     for (const apiParameter of apiParameterListMixin.parameters) {
       const parameterDescription: DocSection = new DocSection({ configuration });
+
+      if (apiParameter.isOptional) {
+        parameterDescription.appendNodesInParagraph([
+          new DocEmphasisSpan({ configuration, italic: true }, [
+            new DocPlainText({ configuration, text: '(Optional)' })
+          ]),
+          new DocPlainText({ configuration, text: ' ' })
+        ]);
+      }
+
       if (apiParameter.tsdocParamBlock) {
-        this._appendSection(parameterDescription, apiParameter.tsdocParamBlock.content);
+        this._appendAndMergeSection(parameterDescription, apiParameter.tsdocParamBlock.content);
       }
 
       parametersTable.addRow(

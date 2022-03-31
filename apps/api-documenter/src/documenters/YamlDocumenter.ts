@@ -640,7 +640,8 @@ export class YamlDocumenter {
       parameters.push({
         id: apiParameter.name,
         description: parameterDescription,
-        type: [this._renderType(uid, apiParameter.parameterTypeExcerpt)]
+        type: [this._renderType(uid, apiParameter.parameterTypeExcerpt)],
+        optional: apiParameter.isOptional
       } as IYamlParameter);
     }
 
