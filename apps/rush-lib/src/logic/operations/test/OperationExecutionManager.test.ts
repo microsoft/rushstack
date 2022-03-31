@@ -32,7 +32,9 @@ function createExecutionManager(
   executionManagerOptions: IOperationExecutionManagerOptions,
   operationRunner: IOperationRunner
 ): OperationExecutionManager {
-  const operation: Operation = new Operation(operationRunner);
+  const operation: Operation = new Operation({
+    runner: operationRunner
+  });
 
   return new OperationExecutionManager(new Set([operation]), executionManagerOptions);
 }

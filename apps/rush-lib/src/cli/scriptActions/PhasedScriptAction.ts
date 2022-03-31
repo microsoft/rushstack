@@ -5,10 +5,15 @@ import * as os from 'os';
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { AlreadyReportedError, InternalError, Terminal } from '@rushstack/node-core-library';
+import {
+  CommandLineFlagParameter,
+  CommandLineParameter,
+  CommandLineStringParameter
+} from '@rushstack/ts-command-line';
 
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
+import { PhasedCommandHooks, ICreateOperationsContext } from '../../pluginFramework/PhasedCommandHooks';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
@@ -22,17 +27,10 @@ import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
-import type {
-  CommandLineConfiguration,
-  IPhase,
-  IPhasedCommandConfig
-} from '../../api/CommandLineConfiguration';
-import { createOperations } from '../../logic/operations/OperationSelector';
+import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
 import { Operation } from '../../logic/operations/Operation';
-import {
-  IShellOperationRunnerFactoryOptions,
-  ShellOperationRunnerFactory
-} from '../../logic/operations/ShellOperationRunnerFactory';
+import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
+import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Selection } from '../../logic/Selection';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
@@ -52,11 +50,9 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   alwaysWatch: boolean;
 }
 
-interface IExecuteInternalOptions {
+interface IRunPhasesOptions {
+  initialCreateOperationsContext: ICreateOperationsContext;
   executionManagerOptions: IOperationExecutionManagerOptions;
-  isWatch: boolean;
-  operationFactoryOptions: IShellOperationRunnerFactoryOptions;
-  projectSelection: ReadonlySet<RushConfigurationProject>;
   stopwatch: Stopwatch;
   terminal: Terminal;
 }
@@ -80,13 +76,15 @@ interface IExecutionOperationsOptions {
  * "build" script for each project.
  */
 export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
+  public readonly hooks: PhasedCommandHooks;
+
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _disableBuildCache: boolean;
-  private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _alwaysWatch: boolean;
+  private readonly _knownPhases: ReadonlyMap<string, IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -100,10 +98,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._enableParallelism = options.enableParallelism;
     this._isIncrementalBuildAllowed = options.incremental;
     this._disableBuildCache = options.disableBuildCache;
-    this._repoCommandLineConfiguration = options.commandLineConfiguration;
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._alwaysWatch = options.alwaysWatch;
+    this._knownPhases = options.phases;
+
+    this.hooks = new PhasedCommandHooks();
+
+    // Generates the default operation graph
+    new PhasedOperationPlugin().apply(this.hooks);
+    // Applies the Shell Operation Runner to selected operations
+    new ShellOperationRunnerPlugin().apply(this.hooks);
   }
 
   public async runAsync(): Promise<void> {
@@ -163,13 +168,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       return;
     }
 
-    const operationFactoryOptions: IShellOperationRunnerFactoryOptions = {
-      rushConfiguration: this.rushConfiguration,
+    const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
+
+    const customParametersByName: Map<string, CommandLineParameter> = new Map();
+    for (const [configParameter, parserParameter] of this.customParameters) {
+      customParametersByName.set(configParameter.longName, parserParameter);
+    }
+
+    const initialCreateOperationsContext: ICreateOperationsContext = {
       buildCacheConfiguration,
-      commandLineConfiguration: this._repoCommandLineConfiguration,
+      customParameters: customParametersByName,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
-      customParameters: this.customParameters,
-      projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration)
+      isInitial: true,
+      isWatch,
+      rushConfiguration: this.rushConfiguration,
+      phaseSelection: new Set(this._initialPhases),
+      projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration),
+      projectSelection
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
@@ -179,14 +194,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       changedProjectsOnly
     };
 
-    const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
-
-    const internalOptions: IExecuteInternalOptions = {
+    const internalOptions: IRunPhasesOptions = {
+      initialCreateOperationsContext,
       executionManagerOptions,
-      isWatch,
-      projectSelection,
       stopwatch,
-      operationFactoryOptions,
       terminal
     };
 
@@ -202,25 +213,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
   }
 
-  private async _runInitialPhases(options: IExecuteInternalOptions): Promise<void> {
-    const {
-      executionManagerOptions,
-      isWatch,
-      operationFactoryOptions,
-      projectSelection,
-      stopwatch,
-      terminal
-    } = options;
+  private async _runInitialPhases(options: IRunPhasesOptions): Promise<void> {
+    const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
 
-    const operationFactory: ShellOperationRunnerFactory = new ShellOperationRunnerFactory(
-      operationFactoryOptions
+    const operations: Set<Operation> = await this.hooks.createOperations.promise(
+      new Set(),
+      initialCreateOperationsContext
     );
 
-    const operations: Set<Operation> = createOperations(new Set(), {
-      operationFactory,
-      phaseSelection: new Set(this._initialPhases),
-      projectSelection
-    });
+    const { isWatch } = initialCreateOperationsContext;
 
     const initialOptions: IExecutionOperationsOptions = {
       ignoreHooks: false,
@@ -241,18 +242,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    *    Uses the same algorithm as --impacted-by
    * 3) Goto (1)
    */
-  private async _runWatchPhases(options: IExecuteInternalOptions): Promise<void> {
-    const {
-      executionManagerOptions,
-      operationFactoryOptions,
-      projectSelection: projectsToWatch,
-      stopwatch,
-      terminal
-    } = options;
+  private async _runWatchPhases(options: IRunPhasesOptions): Promise<void> {
+    const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
 
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
-    const { projectChangeAnalyzer: initialState } = operationFactoryOptions;
+    const { projectChangeAnalyzer: initialState, projectSelection: projectsToWatch } =
+      initialCreateOperationsContext;
 
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
@@ -265,7 +261,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       initialState
     });
 
-    const onWatchingFiles = (): void => {
+    const onWaitingForChanges = (): void => {
+      // Allow plugins to display their own messages when waiting for changes.
+      this.hooks.waitingForChanges.call();
+
       // Report so that the developer can always see that it is in watch mode as the latest console line.
       terminal.writeLine(
         `Watching for changes to ${projectsToWatch.size} ${
@@ -278,7 +277,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, state } = await projectWatcher.waitForChange(onWatchingFiles);
+      const { changedProjects, state } = await projectWatcher.waitForChange(onWaitingForChanges);
 
       if (stopwatch.state === StopwatchState.Stopped) {
         // Clear and reset the stopwatch so that we only report time from a single execution at a time
@@ -300,15 +299,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         projectsToWatch
       );
 
-      const operationFactory: ShellOperationRunnerFactory = new ShellOperationRunnerFactory({
-        ...operationFactoryOptions,
-        projectChangeAnalyzer: state
-      });
-
-      const operations: Set<Operation> = createOperations(new Set(), {
-        phaseSelection,
+      const operations: Set<Operation> = await this.hooks.createOperations.promise(new Set(), {
+        ...initialCreateOperationsContext,
+        isInitial: false,
+        projectChangeAnalyzer: state,
         projectSelection,
-        operationFactory
+        phaseSelection
       });
 
       const executeOptions: IExecutionOperationsOptions = {
@@ -392,6 +388,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     this.defineScriptParameters();
+
+    for (const [{ associatedPhases }, tsCommandLineParameter] of this.customParameters) {
+      if (associatedPhases) {
+        for (const phaseName of associatedPhases) {
+          const phase: IPhase | undefined = this._knownPhases.get(phaseName);
+          if (!phase) {
+            throw new InternalError(`Could not find a phase matching ${phaseName}.`);
+          }
+          phase.associatedParameters.add(tsCommandLineParameter);
+        }
+      }
+    }
   }
 
   /**

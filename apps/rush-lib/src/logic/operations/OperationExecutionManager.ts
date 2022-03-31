@@ -88,8 +88,13 @@ export class OperationExecutionManager {
     let totalOperations: number = 0;
     const executionRecords: Map<Operation, OperationExecutionRecord> = new Map();
     for (const operation of operations) {
-      executionRecords.set(operation, new OperationExecutionRecord(operation, executionRecordContext));
-      if (!operation.runner.silent) {
+      const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
+        operation,
+        executionRecordContext
+      );
+
+      executionRecords.set(operation, executionRecord);
+      if (!executionRecord.runner.silent) {
         // Only count non-silent operations
         totalOperations++;
       }

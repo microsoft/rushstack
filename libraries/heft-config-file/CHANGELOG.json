@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/heft-config-file_v0.8.0",
+      "date": "Sat, 19 Mar 2022 08:05:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for an inline \"$<propertyName>.inheritanceType\" property. This feature allows for configuration files to specify how object and array properties are inherited, overriding the default inheritance behavior provided by the configuration file class."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.12",
       "tag": "@rushstack/heft-config-file_v0.7.12",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",

@@ -89,15 +89,17 @@ interface INameOptions {
  */
 export class YamlDocumenter {
   protected readonly newDocfxNamespaces: boolean;
+  private readonly _yamlFormat: string;
   private readonly _apiModel: ApiModel;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
 
   private _apiItemsByCanonicalReference: Map<string, ApiItem>;
   private _yamlReferences: IYamlReferences | undefined;
 
-  public constructor(apiModel: ApiModel, newDocfxNamespaces: boolean = false) {
+  public constructor(apiModel: ApiModel, newDocfxNamespaces: boolean = false, yamlFormat: string = 'sdp') {
     this._apiModel = apiModel;
     this.newDocfxNamespaces = newDocfxNamespaces;
+    this._yamlFormat = yamlFormat;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
 
@@ -114,7 +116,9 @@ export class YamlDocumenter {
       this._visitApiItems(outputFolder, apiPackage, undefined);
     }
 
-    convertUDPYamlToSDP(outputFolder);
+    if (this._yamlFormat === 'sdp') {
+      convertUDPYamlToSDP(outputFolder);
+    }
 
     this._writeTocFile(outputFolder, this._apiModel.packages);
   }

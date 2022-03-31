@@ -1,0 +1,43 @@
+{
+  "$schema": "http://schema.net/",
+
+  "extends": "./inheritanceTypeConfigFileA.json",
+
+  "$b.inheritanceType": "append",
+  "b": [
+    {
+      "c": "B"
+    }
+  ],
+
+  "$d.inheritanceType": "merge",
+  "d": {
+    "f": "B",
+
+    "$g.inheritanceType": "append",
+    "g": [{ "h": "B" }],
+
+    "$i.inheritanceType": "replace",
+    "i": [{ "j": "B" }],
+
+    "$k.inheritanceType": "merge",
+    "k": {
+      "$m.inheritanceType": "append",
+      "m": [{ "n": "B" }],
+      "z": "B"
+    },
+
+    "$o.inheritanceType": "replace",
+    "o": {
+      "p": [{ "q": "B" }]
+    },
+
+    "y": {
+      "z": "B"
+    }
+  },
+
+  "y": {
+    "z": "B"
+  }
+}

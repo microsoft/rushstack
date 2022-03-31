@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { RushConstants } from '../../logic/RushConstants';
-import { Command, CommandLineConfiguration, Parameter } from '../CommandLineConfiguration';
+import { Command, CommandLineConfiguration, IParameterJson } from '../CommandLineConfiguration';
 
 describe(CommandLineConfiguration.name, () => {
   it('Forbids a misnamed phase', () => {
@@ -152,7 +152,7 @@ describe(CommandLineConfiguration.name, () => {
       function validateCommandByName(commandName: string): void {
         const command: Command | undefined = commandLineConfiguration.commands.get(commandName);
         expect(command).toBeDefined();
-        const parametersArray: Parameter[] = Array.from(command!.associatedParameters);
+        const parametersArray: IParameterJson[] = Array.from(command!.associatedParameters);
         expect(parametersArray).toHaveLength(1);
         expect(parametersArray[0].longName).toEqual('--flag');
       }
@@ -184,7 +184,7 @@ describe(CommandLineConfiguration.name, () => {
 
       const command: Command | undefined = commandLineConfiguration.commands.get('custom-bulk');
       expect(command).toBeDefined();
-      const parametersArray: Parameter[] = Array.from(command!.associatedParameters);
+      const parametersArray: IParameterJson[] = Array.from(command!.associatedParameters);
       expect(parametersArray).toHaveLength(1);
       expect(parametersArray[0].longName).toEqual('--flag');
     });
@@ -219,7 +219,7 @@ describe(CommandLineConfiguration.name, () => {
 
       const command: Command | undefined = commandLineConfiguration.commands.get('custom-phased');
       expect(command).toBeDefined();
-      const parametersArray: Parameter[] = Array.from(command!.associatedParameters);
+      const parametersArray: IParameterJson[] = Array.from(command!.associatedParameters);
       expect(parametersArray).toHaveLength(1);
       expect(parametersArray[0].longName).toEqual('--flag');
     });
