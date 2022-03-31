@@ -594,14 +594,32 @@ export class OperationExecutionManager {
    */
   private _printTimeline(): void {
     //
-    // Gather the operation records we'll be displaying
+    // Gather the operation records we'll be displaying. Do some inline max()
+    // finding to reduce the number of times we need to loop through operations.
     //
 
     const operations: OperationExecutionRecord[] = [];
+    let longestNameLength: number = 0;
+    let longestDurationLength: number = 0;
+    let allEnd: number = 0;
 
     for (const operation of this._executionRecords) {
       if (operation.stopwatch.startTime && operation.stopwatch.endTime) {
         operations.push(operation);
+
+        const nameLength: number = operation.name.length;
+        if (nameLength > longestNameLength) {
+          longestNameLength = nameLength;
+        }
+
+        const durationLength: number = operation.stopwatch.duration.toFixed(1).length + 1;
+        if (durationLength > longestDurationLength) {
+          longestDurationLength = durationLength;
+        }
+
+        if (operation.stopwatch.endTime! > allEnd) {
+          allEnd = operation.stopwatch.endTime!;
+        }
       }
     }
 
@@ -612,7 +630,6 @@ export class OperationExecutionManager {
     //
 
     const allStart: number = operations[0].stopwatch.startTime!;
-    const allEnd: number = Math.max(...operations.map((operation) => operation.stopwatch.endTime!));
     const allDuration: number = allEnd - allStart;
     const workDuration: number = operations
       .map((operation) => operation.stopwatch.duration)
@@ -622,23 +639,17 @@ export class OperationExecutionManager {
     // Do some calculations to determine what size timeline chart we need.
     //
 
-    const maxNameLength: number = Math.max(...operations.map((operation) => operation.name.length));
-    const maxDurationLength: number = Math.max(
-      ...operations.map((operation) => operation.stopwatch.duration.toFixed(1).length + 1)
-    );
-    const chartWidth: number = TIMELINE_WIDTH - maxNameLength - maxDurationLength - 3;
+    const chartWidth: number = TIMELINE_WIDTH - longestNameLength - longestDurationLength - 3;
     //
     // Loop through all operations, assembling some statistics about operations and
     // phases, if applicable.
     //
 
-    const output: string[] = [];
-
     const durationByPhase: Map<string, number> = new Map();
 
     const busyCpus: number[] = Array(this._parallelism).fill(-1);
 
-    output.push('='.repeat(TIMELINE_WIDTH));
+    this._terminal.writeStdoutLine('='.repeat(TIMELINE_WIDTH));
 
     for (const operation of operations) {
       // Track time by phase
@@ -668,16 +679,16 @@ export class OperationExecutionManager {
         colors.gray('-'.repeat(startIdx)) +
         TIMELINE_CHART_COLORIZER[operation.status](TIMELINE_CHART_SYMBOLS[operation.status].repeat(length)) +
         colors.gray('-'.repeat(chartWidth - endIdx));
-      output.push(
-        colors.cyan(operation.name.padEnd(maxNameLength)) +
+      this._terminal.writeStdoutLine(
+        colors.cyan(operation.name.padEnd(longestNameLength)) +
           ' ' +
           chart +
           ' ' +
-          colors.white((operation.stopwatch.duration.toFixed(1) + 's').padStart(maxDurationLength))
+          colors.white((operation.stopwatch.duration.toFixed(1) + 's').padStart(longestDurationLength))
       );
     }
 
-    output.push('='.repeat(TIMELINE_WIDTH));
+    this._terminal.writeStdoutLine('='.repeat(TIMELINE_WIDTH));
 
     //
     // Format legend and summary areas
@@ -693,26 +704,26 @@ export class OperationExecutionManager {
       `Parallelism Used: ${usedCpus}/${this._parallelism}`
     ];
 
-    output.push(legend[0] + summary[0].padStart(TIMELINE_WIDTH - legend[0].length));
-    output.push(legend[1] + summary[1].padStart(TIMELINE_WIDTH - legend[1].length));
-    output.push(summary[2].padStart(TIMELINE_WIDTH));
+    this._terminal.writeStdoutLine(legend[0] + summary[0].padStart(TIMELINE_WIDTH - legend[0].length));
+    this._terminal.writeStdoutLine(legend[1] + summary[1].padStart(TIMELINE_WIDTH - legend[1].length));
+    this._terminal.writeStdoutLine(summary[2].padStart(TIMELINE_WIDTH));
 
     //
     // Include time-by-phase, if phases are enabled
     //
 
     if (durationByPhase.size > 0) {
-      output.push('BY PHASE:');
+      this._terminal.writeStdoutLine('BY PHASE:');
 
       const maxPhaseName: number = Math.max(16, ...[...durationByPhase.keys()].map((name) => name.length));
 
       for (const [phase, duration] of durationByPhase.entries()) {
-        output.push('  ' + colors.cyan(phase.padEnd(maxPhaseName)) + duration.toFixed(1).padStart(8) + 's');
+        this._terminal.writeStdoutLine(
+          '  ' + colors.cyan(phase.padEnd(maxPhaseName)) + duration.toFixed(1).padStart(8) + 's'
+        );
       }
     }
 
-    output.push('');
-
-    this._terminal.writeStdoutLine(output.join('\n'));
+    this._terminal.writeStdoutLine('');
   }
 }
