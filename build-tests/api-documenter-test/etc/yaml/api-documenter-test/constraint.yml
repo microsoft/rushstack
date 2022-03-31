@@ -1,0 +1,11 @@
+### YamlMime:TSType
+name: Constraint
+uid: 'api-documenter-test!Constraint:interface'
+package: api-documenter-test!
+fullName: Constraint
+summary: Type parameter constraint used by test case below.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: interface

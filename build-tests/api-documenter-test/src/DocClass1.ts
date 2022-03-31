@@ -138,6 +138,18 @@ export interface IDocInterface4 {
 }
 
 /**
+ * Type parameter constraint used by test case below.
+ * @public
+ */
+export interface Constraint {}
+
+/**
+ * Type parameter default type used by test case below.
+ * @public
+ */
+export interface DefaultType {}
+
+/**
  * This is an example class.
  *
  * @remarks
@@ -261,6 +273,12 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public static sumWithExample(x: number, y: number): number {
     return x + y;
   }
+
+  /**
+   * This is a method with a complex type parameter.
+   * @param x - some generic parameter.
+   */
+  public genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T) {}
 }
 
 /**

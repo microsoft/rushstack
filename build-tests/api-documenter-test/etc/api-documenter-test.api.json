@@ -180,6 +180,21 @@
       "name": "",
       "members": [
         {
+          "kind": "Interface",
+          "canonicalReference": "api-documenter-test!Constraint:interface",
+          "docComment": "/**\n * Type parameter constraint used by test case below.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface Constraint "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Constraint",
+          "members": [],
+          "extendsTokenRanges": []
+        },
+        {
           "kind": "Variable",
           "canonicalReference": "api-documenter-test!constVariable:var",
           "docComment": "/**\n * An exported variable declaration.\n *\n * @public\n */\n",
@@ -243,6 +258,21 @@
             }
           ],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "api-documenter-test!DefaultType:interface",
+          "docComment": "/**\n * Type parameter default type used by test case below.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface DefaultType "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "DefaultType",
+          "members": [],
+          "extendsTokenRanges": []
         },
         {
           "kind": "Class",
@@ -485,6 +515,87 @@
                 }
               ],
               "name": "exampleFunction"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#genericWithConstraintAndDefault:member(1)",
+              "docComment": "/**\n * This is a method with a complex type parameter.\n *\n * @param x - some generic parameter.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "genericWithConstraintAndDefault<T extends "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Constraint",
+                  "canonicalReference": "api-documenter-test!Constraint:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " "
+                },
+                {
+                  "kind": "Content",
+                  "text": "= "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DefaultType",
+                  "canonicalReference": "api-documenter-test!DefaultType:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(x: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 8,
+                "endIndex": 9
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 7
+                  },
+                  "isOptional": false
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "T",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 5
+                  }
+                }
+              ],
+              "name": "genericWithConstraintAndDefault"
             },
             {
               "kind": "Method",
