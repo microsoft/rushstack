@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 15 Mar 2022 19:15:53 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Mar 2022 02:06:05 GMT and should not be manually modified.
+
+## 7.20.0
+Thu, 31 Mar 2022 02:06:05 GMT
+
+### Minor changes
+
+- Updated api-extractor to extract whether a parameter is optional.
 
 ## 7.19.5
 Tue, 15 Mar 2022 19:15:53 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.16.0",
+      "tag": "@microsoft/api-extractor-model_v7.16.0",
+      "date": "Thu, 31 Mar 2022 02:06:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Updated api-extractor-model to store whether a parameter is optional."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.15.4",
       "tag": "@microsoft/api-extractor-model_v7.15.4",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",

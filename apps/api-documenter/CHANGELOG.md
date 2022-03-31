@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sat, 19 Mar 2022 08:05:37 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Mar 2022 02:06:05 GMT and should not be manually modified.
+
+## 7.17.0
+Thu, 31 Mar 2022 02:06:05 GMT
+
+### Minor changes
+
+- Updated api-documenter to surface whether a parameter is optional.
 
 ## 7.16.0
 Sat, 19 Mar 2022 08:05:37 GMT
