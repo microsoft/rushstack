@@ -120,7 +120,8 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(
             const parameter: Parameter = new Parameter({
               name: parameterOptions.parameterName,
               parameterTypeExcerpt: this.buildExcerpt(parameterOptions.parameterTypeTokenRange),
-              isOptional: parameterOptions.isOptional,
+              // Prior to ApiJsonSchemaVersion.V_1005 this input will be undefined
+              isOptional: !!parameterOptions.isOptional,
               parent: this
             });
 
