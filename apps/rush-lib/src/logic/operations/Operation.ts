@@ -6,13 +6,33 @@ import { IPhase } from '../../api/CommandLineConfiguration';
 import { IOperationRunner } from './IOperationRunner';
 
 /**
+ * Options for constructing a new Operation.
+ * @alpha
+ */
+export interface IOperationOptions {
+  /**
+   * The Rush phase associated with this Operation, if any
+   */
+  phase?: IPhase | undefined;
+  /**
+   * The Rush project associated with this Operation, if any
+   */
+  project?: RushConfigurationProject | undefined;
+  /**
+   * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
+   * running the operation.
+   */
+  runner?: IOperationRunner | undefined;
+}
+
+/**
  * The `Operation` class is a node in the dependency graph of work that needs to be scheduled by the
  * `OperationExecutionManager`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
  * implementation manages the actual process of running a single operation.
  *
  * The graph of `Operation` instances will be cloned into a separate execution graph after processing.
  *
- * @beta
+ * @alpha
  */
 export class Operation {
   /**
@@ -34,7 +54,7 @@ export class Operation {
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
    * running the operation.
    */
-  public runner: IOperationRunner;
+  public runner: IOperationRunner | undefined = undefined;
 
   /**
    * The weight for this operation. This scalar is the contribution of this operation to the
@@ -49,17 +69,16 @@ export class Operation {
    */
   public weight: number = 1;
 
-  public constructor(
-    runner: IOperationRunner,
-    project?: RushConfigurationProject | undefined,
-    phase?: IPhase | undefined
-  ) {
-    this.runner = runner;
-    this.associatedPhase = phase;
-    this.associatedProject = project;
+  public constructor(options?: IOperationOptions) {
+    this.associatedPhase = options?.phase;
+    this.associatedProject = options?.project;
+    this.runner = options?.runner;
   }
 
-  public get name(): string {
-    return this.runner.name;
+  /**
+   * The name of this operation, for logging.
+   */
+  public get name(): string | undefined {
+    return this.runner?.name;
   }
 }

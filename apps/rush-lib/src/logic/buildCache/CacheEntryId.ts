@@ -3,12 +3,29 @@
 
 const OPTIONS_ARGUMENT_NAME: string = 'options';
 
+/**
+ * Options for generating the cache id for an operation.
+ * @beta
+ */
 export interface IGenerateCacheEntryIdOptions {
+  /**
+   * The name of the project
+   */
   projectName: string;
+  /**
+   * The name of the phase
+   */
   phaseName: string;
+  /**
+   * A hash of the input files
+   */
   projectStateHash: string;
 }
 
+/**
+ * Calculates the cache entry id string for an operation.
+ * @beta
+ */
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
 const HASH_TOKEN_NAME: string = 'hash';

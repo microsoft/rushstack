@@ -96,9 +96,8 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
       await sessionHooks.runAnyGlobalCustomCommand.promise(this);
     }
 
-    const hookForAction: AsyncSeriesHook<IGlobalCommand> | undefined = sessionHooks.runGlobalCustomCommand.get(
-      this.actionName
-    );
+    const hookForAction: AsyncSeriesHook<IGlobalCommand> | undefined =
+      sessionHooks.runGlobalCustomCommand.get(this.actionName);
     if (hookForAction) {
       // Run the more specific hook for a command with this name after the general hook
       await hookForAction.promise(this);
@@ -116,7 +115,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
 
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
-    for (const { tsCommandLineParameter } of this.customParameters) {
+    for (const tsCommandLineParameter of this.customParameters.values()) {
       tsCommandLineParameter.appendToArgList(customParameterValues);
     }
 
