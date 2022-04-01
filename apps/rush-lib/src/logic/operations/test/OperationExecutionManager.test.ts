@@ -70,6 +70,7 @@ describe(OperationExecutionManager.name, () => {
             quietMode: false,
             debugMode: false,
             parallelism: 'tequila',
+            showTimeline: false,
             changedProjectsOnly: false,
             destination: mockWritable
           })
@@ -83,6 +84,7 @@ describe(OperationExecutionManager.name, () => {
         quietMode: false,
         debugMode: false,
         parallelism: '1',
+        showTimeline: false,
         changedProjectsOnly: false,
         destination: mockWritable
       };
@@ -139,6 +141,7 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: '1',
+          showTimeline: false,
           changedProjectsOnly: false,
           destination: mockWritable
         };
@@ -173,12 +176,36 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: '1',
+          showTimeline: false,
           changedProjectsOnly: false,
           destination: mockWritable
         };
       });
 
       it('Logs warnings correctly', async () => {
+        executionManager = createExecutionManager(
+          executionManagerOptions,
+          new MockOperationRunner(
+            'success with warnings (success)',
+            async (terminal: CollatedTerminal) => {
+              terminal.writeStdoutLine('Build step 1' + EOL);
+              terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+              return OperationStatus.SuccessWithWarning;
+            },
+            /* warningsAreAllowed */ true
+          )
+        );
+
+        await executionManager.executeAsync();
+        const allMessages: string = mockWritable.getAllOutput();
+        expect(allMessages).toContain('Build step 1');
+        expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
+        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+      });
+
+      it('logs warnings correctly with --timeline option', async () => {
+        executionManagerOptions.showTimeline = true;
+
         executionManager = createExecutionManager(
           executionManagerOptions,
           new MockOperationRunner(

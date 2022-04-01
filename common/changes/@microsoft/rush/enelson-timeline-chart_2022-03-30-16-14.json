@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add --timeline option for more detail generated at end of rush build",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

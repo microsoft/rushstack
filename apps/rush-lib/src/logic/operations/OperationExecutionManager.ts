@@ -21,6 +21,7 @@ export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: string | undefined;
+  showTimeline: boolean;
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
 }
@@ -29,6 +30,39 @@ export interface IOperationExecutionManagerOptions {
  * Format "======" lines for a shell window with classic 80 columns
  */
 const ASCII_HEADER_WIDTH: number = 79;
+
+/**
+ * Timeline - a wider column width for printing the timeline summary
+ */
+const TIMELINE_WIDTH: number = 109;
+
+/**
+ * Timeline - symbols representing each operation status
+ */
+const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
+  [OperationStatus.Ready]: '?',
+  [OperationStatus.Executing]: '?',
+  [OperationStatus.Success]: '#',
+  [OperationStatus.SuccessWithWarning]: '!',
+  [OperationStatus.Failure]: '!',
+  [OperationStatus.Blocked]: '.',
+  [OperationStatus.Skipped]: '%',
+  [OperationStatus.FromCache]: '%'
+};
+
+/**
+ * Timeline - colorizer for each operation status
+ */
+const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => string> = {
+  [OperationStatus.Ready]: colors.yellow,
+  [OperationStatus.Executing]: colors.yellow,
+  [OperationStatus.Success]: colors.green,
+  [OperationStatus.SuccessWithWarning]: colors.yellow,
+  [OperationStatus.Failure]: colors.red,
+  [OperationStatus.Blocked]: colors.red,
+  [OperationStatus.Skipped]: colors.green,
+  [OperationStatus.FromCache]: colors.green
+};
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
@@ -41,6 +75,7 @@ export class OperationExecutionManager {
   private readonly _executionRecords: Set<OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
+  private readonly _showTimeline: boolean;
   private readonly _totalOperations: number;
 
   private readonly _outputWritable: TerminalWritable;
@@ -55,9 +90,10 @@ export class OperationExecutionManager {
   private _completedOperations: number;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
-    const { quietMode, debugMode, parallelism, changedProjectsOnly } = options;
+    const { quietMode, debugMode, parallelism, showTimeline, changedProjectsOnly } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
+    this._showTimeline = showTimeline;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
@@ -233,6 +269,10 @@ export class OperationExecutionManager {
     );
 
     this._printOperationStatus();
+
+    if (this._showTimeline) {
+      this._printTimeline();
+    }
 
     if (this._hasAnyFailures) {
       this._terminal.writeStderrLine(colors.red('Operations failed.') + '\n');
@@ -551,6 +591,144 @@ export class OperationExecutionManager {
     const rightPart: string = colors.gray(`]${'='.repeat(rightPartLengthMinusBracket)}`);
 
     this._terminal.writeStdoutLine(leftPart + rightPart);
+    this._terminal.writeStdoutLine('');
+  }
+
+  /**
+   * Print a more detailed timeline and analysis of CPU usage for the build.
+   */
+  private _printTimeline(): void {
+    //
+    // Gather the operation records we'll be displaying. Do some inline max()
+    // finding to reduce the number of times we need to loop through operations.
+    //
+
+    const operations: OperationExecutionRecord[] = [];
+    let longestNameLength: number = 0;
+    let longestDurationLength: number = 0;
+    let allEnd: number = 0;
+
+    for (const operation of this._executionRecords) {
+      if (operation.stopwatch.startTime && operation.stopwatch.endTime) {
+        operations.push(operation);
+
+        const nameLength: number = operation.name.length;
+        if (nameLength > longestNameLength) {
+          longestNameLength = nameLength;
+        }
+
+        const durationLength: number = operation.stopwatch.duration.toFixed(1).length + 1;
+        if (durationLength > longestDurationLength) {
+          longestDurationLength = durationLength;
+        }
+
+        if (operation.stopwatch.endTime! > allEnd) {
+          allEnd = operation.stopwatch.endTime!;
+        }
+      }
+    }
+
+    operations.sort((a, b) => a.stopwatch.startTime! - b.stopwatch.startTime!);
+
+    //
+    // Determine timing for all tasks (wall clock and execution times)
+    //
+
+    const allStart: number = operations[0].stopwatch.startTime!;
+    const allDuration: number = allEnd - allStart;
+    const workDuration: number = operations
+      .map((operation) => operation.stopwatch.duration)
+      .reduce((sum, value) => sum + value);
+
+    //
+    // Do some calculations to determine what size timeline chart we need.
+    //
+
+    const chartWidth: number = TIMELINE_WIDTH - longestNameLength - longestDurationLength - 3;
+    //
+    // Loop through all operations, assembling some statistics about operations and
+    // phases, if applicable.
+    //
+
+    const durationByPhase: Map<string, number> = new Map();
+
+    const busyCpus: number[] = Array(this._parallelism).fill(-1);
+
+    this._terminal.writeStdoutLine('='.repeat(TIMELINE_WIDTH));
+
+    for (const operation of operations) {
+      // Track time by phase
+      const phaseMatch: RegExpMatchArray | null = operation.name.match(/\((.+)\)$/);
+      if (phaseMatch) {
+        durationByPhase.set(
+          phaseMatch[1],
+          (durationByPhase.get(phaseMatch[1]) || 0) + operation.stopwatch.duration
+        );
+      }
+
+      // Track busy CPUs
+      const openCpu: number = busyCpus.findIndex((end) => end === -1 || end < operation.stopwatch.startTime!);
+      busyCpus[openCpu] = operation.stopwatch.endTime!;
+
+      // Build timeline chart
+
+      const startIdx: number = Math.floor(
+        ((operation.stopwatch.startTime! - allStart) * chartWidth) / allDuration
+      );
+      const endIdx: number = Math.floor(
+        ((operation.stopwatch.endTime! - allStart) * chartWidth) / allDuration
+      );
+      const length: number = endIdx - startIdx + 1;
+
+      const chart: string =
+        colors.gray('-'.repeat(startIdx)) +
+        TIMELINE_CHART_COLORIZER[operation.status](TIMELINE_CHART_SYMBOLS[operation.status].repeat(length)) +
+        colors.gray('-'.repeat(chartWidth - endIdx));
+      this._terminal.writeStdoutLine(
+        colors.cyan(operation.name.padEnd(longestNameLength)) +
+          ' ' +
+          chart +
+          ' ' +
+          colors.white((operation.stopwatch.duration.toFixed(1) + 's').padStart(longestDurationLength))
+      );
+    }
+
+    this._terminal.writeStdoutLine('='.repeat(TIMELINE_WIDTH));
+
+    //
+    // Format legend and summary areas
+    //
+
+    const usedCpus: number = busyCpus.filter((cpu) => cpu !== -1).length;
+
+    const legend: string[] = ['LEGEND:', '  [#] Success  [!] Failed/warnings  [%] Skipped/cached'];
+
+    const summary: string[] = [
+      'Total Work: ' + workDuration.toFixed(1) + 's',
+      'Wall Clock: ' + (allDuration / 1000).toFixed(1) + 's',
+      `Parallelism Used: ${usedCpus}/${this._parallelism}`
+    ];
+
+    this._terminal.writeStdoutLine(legend[0] + summary[0].padStart(TIMELINE_WIDTH - legend[0].length));
+    this._terminal.writeStdoutLine(legend[1] + summary[1].padStart(TIMELINE_WIDTH - legend[1].length));
+    this._terminal.writeStdoutLine(summary[2].padStart(TIMELINE_WIDTH));
+
+    //
+    // Include time-by-phase, if phases are enabled
+    //
+
+    if (durationByPhase.size > 0) {
+      this._terminal.writeStdoutLine('BY PHASE:');
+
+      const maxPhaseName: number = Math.max(16, ...[...durationByPhase.keys()].map((name) => name.length));
+
+      for (const [phase, duration] of durationByPhase.entries()) {
+        this._terminal.writeStdoutLine(
+          '  ' + colors.cyan(phase.padEnd(maxPhaseName)) + duration.toFixed(1).padStart(8) + 's'
+        );
+      }
+    }
+
     this._terminal.writeStdoutLine('');
   }
 }

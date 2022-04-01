@@ -102,4 +102,18 @@ export class Stopwatch {
 
     return (curTime - this._startTime) / 1000.0;
   }
+
+  /**
+   * Return the start time of the most recent stopwatch run.
+   */
+  public get startTime(): number | undefined {
+    return this._startTime;
+  }
+
+  /**
+   * Return the end time of the most recent stopwatch run.
+   */
+  public get endTime(): number | undefined {
+    return this._endTime;
+  }
 }
