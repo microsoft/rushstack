@@ -24,6 +24,11 @@ const INSTALLED_FLAG_FILENAME: string = 'installed.flag';
 const NODE_MODULES_FOLDER_NAME: string = 'node_modules';
 const PACKAGE_JSON_FILENAME: string = 'package.json';
 
+export interface ILogger {
+  info: (string: string) => void;
+  error: (string: string) => void;
+}
+
 /**
  * Parse a package specifier (in the form of name\@version) into name and version parts.
  */
@@ -64,9 +69,9 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
  *
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities.copyAndTrimNpmrcFile()
  */
-function _copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
-  console.log(`Transforming ${sourceNpmrcPath}`); // Verbose
-  console.log(`  --> "${targetNpmrcPath}"`);
+function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetNpmrcPath: string): void {
+  logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
+  logger.info(`  --> "${targetNpmrcPath}"`);
   let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
   const resultLines: string[] = [];
@@ -117,7 +122,12 @@ function _copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string)
  *
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
  */
-function _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string, useNpmrcPublish?: boolean): void {
+function _syncNpmrc(
+  logger: ILogger,
+  sourceNpmrcFolder: string,
+  targetNpmrcFolder: string,
+  useNpmrcPublish?: boolean
+): void {
   const sourceNpmrcPath: string = path.join(
     sourceNpmrcFolder,
     !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
@@ -125,10 +135,10 @@ function _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string, useNpm
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
     if (fs.existsSync(sourceNpmrcPath)) {
-      _copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
+      _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath);
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
-      console.log(`Deleting ${targetNpmrcPath}`); // Verbose
+      logger.info(`Deleting ${targetNpmrcPath}`); // Verbose
       fs.unlinkSync(targetNpmrcPath);
     }
   } catch (e) {
@@ -220,7 +230,11 @@ export interface IPackageSpecifier {
 /**
  * Resolve a package specifier to a static version
  */
-function _resolvePackageVersion(rushCommonFolder: string, { name, version }: IPackageSpecifier): string {
+function _resolvePackageVersion(
+  logger: ILogger,
+  rushCommonFolder: string,
+  { name, version }: IPackageSpecifier
+): string {
   if (!version) {
     version = '*'; // If no version is specified, use the latest version
   }
@@ -235,7 +249,7 @@ function _resolvePackageVersion(rushCommonFolder: string, { name, version }: IPa
       const rushTempFolder: string = _getRushTempFolder(rushCommonFolder);
       const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
 
-      _syncNpmrc(sourceNpmrcFolder, rushTempFolder);
+      _syncNpmrc(logger, sourceNpmrcFolder, rushTempFolder);
 
       const npmPath: string = getNpmPath();
 
@@ -372,9 +386,9 @@ function _createPackageJson(packageInstallFolder: string, name: string, version:
 /**
  * Run "npm install" in the package install folder.
  */
-function _installPackage(packageInstallFolder: string, name: string, version: string): void {
+function _installPackage(logger: ILogger, packageInstallFolder: string, name: string, version: string): void {
   try {
-    console.log(`Installing ${name}...`);
+    logger.info(`Installing ${name}...`);
     const npmPath: string = getNpmPath();
     const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(npmPath, ['install'], {
       stdio: 'inherit',
@@ -386,7 +400,7 @@ function _installPackage(packageInstallFolder: string, name: string, version: st
       throw new Error('"npm install" encountered an error');
     }
 
-    console.log(`Successfully installed ${name}@${version}`);
+    logger.info(`Successfully installed ${name}@${version}`);
   } catch (e) {
     throw new Error(`Unable to install package: ${e}`);
   }
@@ -414,6 +428,7 @@ function _writeFlagFile(packageInstallFolder: string): void {
 }
 
 export function installAndRun(
+  logger: ILogger,
   packageName: string,
   packageVersion: string,
   packageBinName: string,
@@ -433,16 +448,16 @@ export function installAndRun(
     _cleanInstallFolder(rushTempFolder, packageInstallFolder);
 
     const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
-    _syncNpmrc(sourceNpmrcFolder, packageInstallFolder);
+    _syncNpmrc(logger, sourceNpmrcFolder, packageInstallFolder);
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);
-    _installPackage(packageInstallFolder, packageName, packageVersion);
+    _installPackage(logger, packageInstallFolder, packageName, packageVersion);
     _writeFlagFile(packageInstallFolder);
   }
 
   const statusMessage: string = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
   const statusMessageLine: string = new Array(statusMessage.length + 1).join('-');
-  console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
+  logger.info(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
 
   const binPath: string = _getBinPath(packageInstallFolder, packageBinName);
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
@@ -475,14 +490,14 @@ export function installAndRun(
   }
 }
 
-export function runWithErrorAndStatusCode(fn: () => number): void {
+export function runWithErrorAndStatusCode(logger: ILogger, fn: () => number): void {
   process.exitCode = 1;
 
   try {
     const exitCode: number = fn();
     process.exitCode = exitCode;
   } catch (e) {
-    console.error(os.EOL + os.EOL + (e as Error).toString() + os.EOL + os.EOL);
+    logger.error(os.EOL + os.EOL + (e as Error).toString() + os.EOL + os.EOL);
   }
 }
 
@@ -512,19 +527,21 @@ function _run(): void {
     process.exit(1);
   }
 
-  runWithErrorAndStatusCode(() => {
+  const logger: ILogger = { info: console.log, error: console.error };
+
+  runWithErrorAndStatusCode(logger, () => {
     const rushJsonFolder: string = findRushJsonFolder();
     const rushCommonFolder: string = _ensureAndJoinPath(rushJsonFolder, 'common');
 
     const packageSpecifier: IPackageSpecifier = _parsePackageSpecifier(rawPackageSpecifier);
     const name: string = packageSpecifier.name;
-    const version: string = _resolvePackageVersion(rushCommonFolder, packageSpecifier);
+    const version: string = _resolvePackageVersion(logger, rushCommonFolder, packageSpecifier);
 
     if (packageSpecifier.version !== version) {
       console.log(`Resolved to ${name}@${version}`);
     }
 
-    return installAndRun(name, version, packageBinName, packageBinArgs);
+    return installAndRun(logger, name, version, packageBinName, packageBinArgs);
   });
 }
 

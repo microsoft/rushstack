@@ -7,7 +7,6 @@ import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushStartupBanner } from '../cli/RushStartupBanner';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
-import { Utilities } from '../utilities/Utilities';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 
@@ -62,7 +61,7 @@ export class Rush {
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
-    if (!Utilities.shouldRestrictConsoleOutput()) {
+    if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
       RushStartupBanner.logBanner(Rush.version, options.isManaged);
     }
 

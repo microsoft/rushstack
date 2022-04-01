@@ -12,7 +12,6 @@ import {
   FileSystemStats
 } from '@rushstack/node-core-library';
 import type * as stream from 'stream';
-import { CommandLineHelper } from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 
@@ -424,15 +423,6 @@ export class Utilities {
     options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
     return Utilities._executeLifecycleCommandInternal(command, child_process.spawn, options);
-  }
-
-  /**
-   * Utility to determine if the app should restrict writing to the console.
-   */
-  public static shouldRestrictConsoleOutput(): boolean {
-    return (
-      CommandLineHelper.isTabCompletionActionRequest(process.argv) || process.argv.indexOf('--json') !== -1
-    );
   }
 
   /**
