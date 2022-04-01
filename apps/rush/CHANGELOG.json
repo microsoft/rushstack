@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.64.0",
+      "tag": "@microsoft/rush_v5.64.0",
+      "date": "Fri, 01 Apr 2022 04:51:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for suppressing startup information to invocations of `rush`, `rushx`, and the `install-run-rush` scripts."
+          },
+          {
+            "comment": "Add --timeline option for more detail generated at end of rush build"
+          },
+          {
+            "comment": "Expose plugin hooks for phased command execution: the \"createOperations\" hook allows customizing the set of operations to execute, and the \"waitingForChanges\" hook gives plugins an opportunity to display data to the console while output is paused."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.63.1",
       "tag": "@microsoft/rush_v5.63.1",
       "date": "Sat, 26 Mar 2022 00:47:39 GMT",

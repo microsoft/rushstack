@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 26 Mar 2022 00:47:39 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Apr 2022 04:51:31 GMT and should not be manually modified.
+
+## 5.64.0
+Fri, 01 Apr 2022 04:51:31 GMT
+
+### Updates
+
+- Add support for suppressing startup information to invocations of `rush`, `rushx`, and the `install-run-rush` scripts.
+- Add --timeline option for more detail generated at end of rush build
+- Expose plugin hooks for phased command execution: the "createOperations" hook allows customizing the set of operations to execute, and the "waitingForChanges" hook gives plugins an opportunity to display data to the console while output is paused.
 
 ## 5.63.1
 Sat, 26 Mar 2022 00:47:39 GMT
