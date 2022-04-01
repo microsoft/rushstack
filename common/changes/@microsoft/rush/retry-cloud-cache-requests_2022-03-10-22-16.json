@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "fix transient errors in the aws s3 cloud cache plugin",
+      "comment": "Improve retry logic in the Amazon S3 cloud cache plugin and improve reporting when the user is not authenticated.",
       "type": "none"
     }
   ],
