@@ -75,7 +75,7 @@ export class ChangeFiles {
           'The following projects have been changed and require change descriptions, but change descriptions were not ' +
             'detected for them:',
           ...projectsMissingChangeDescriptionsArray.map((projectName) => `- ${projectName}`),
-          'To resolve this error, run "rush change." This will generate change description files that must be ' +
+          'To resolve this error, run "rush change". This will generate change description files that must be ' +
             'committed to source control.'
         ].join(EOL)
       );
