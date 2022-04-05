@@ -28,6 +28,21 @@ export const enum SemVerStyle {
   Passthrough = 'passthrough'
 }
 
+export interface IRushAddPackage {
+  packageName: string;
+
+  /**
+   * The style of range that should be used if the version is automatically detected.
+   */
+  rangeStyle: SemVerStyle;
+
+  /**
+   * If not undefined, the latest version will be used (that doesn't break ensureConsistentVersions).
+   * If specified, the latest version meeting the SemVer specifier will be used as the basis.
+   */
+  version?: string;
+}
+
 /**
  * Options for adding a dependency to a particular project.
  */
@@ -37,15 +52,9 @@ export interface IPackageJsonUpdaterRushAddOptions {
    */
   projects: RushConfigurationProject[];
   /**
-   * The name list of the dependencies to be added
+   * The dependencies to be added.
    */
-  packageNames: string[];
-  /**
-   * The initial version specifier mapped by package name.
-   * If undefined, the latest version will be used (that doesn't break ensureConsistentVersions).
-   * If specified, the latest version meeting the SemVer specifier will be used as the basis.
-   */
-  initialVersions: Map<string, string | undefined>;
+  packagesToAdd: IRushAddPackage[];
   /**
    * Whether or not this dependency should be added as a devDependency or a regular dependency.
    */
@@ -62,11 +71,6 @@ export interface IPackageJsonUpdaterRushAddOptions {
    * If specified, "rush update" will be run in debug mode.
    */
   debugInstall: boolean;
-  /**
-   * The map contains the style of range that should be used if the version is automatically detected.
-   * which are indexed by package name
-   */
-  rangeStyles: Map<string, SemVerStyle>;
   /**
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
@@ -111,17 +115,8 @@ export class PackageJsonUpdater {
    * Adds a dependency to a particular project. The core business logic for "rush add".
    */
   public async doRushAdd(options: IPackageJsonUpdaterRushAddOptions): Promise<void> {
-    const {
-      projects,
-      packageNames,
-      initialVersions,
-      devDependency,
-      updateOtherPackages,
-      skipUpdate,
-      debugInstall,
-      rangeStyles,
-      variant
-    } = options;
+    const { projects, packagesToAdd, devDependency, updateOtherPackages, skipUpdate, debugInstall, variant } =
+      options;
 
     const implicitlyPinned: Map<string, string> =
       this._rushConfiguration.getImplicitlyPreferredVersions(variant);
@@ -149,9 +144,7 @@ export class PackageJsonUpdater {
 
     console.log();
     const updatePackages: Record<string, string> = {};
-    for (const packageName of packageNames) {
-      const initialVersion: string | undefined = initialVersions.get(packageName);
-      const rangeStyle: SemVerStyle = rangeStyles.get(packageName)!;
+    for (const { packageName, version: initialVersion, rangeStyle } of packagesToAdd) {
       const version: string = await this._getNormalizedVersionSpec(
         projects,
         installManager,
@@ -203,9 +196,8 @@ export class PackageJsonUpdater {
 
           // otherwise we need to go update a bunch of other projects
           for (const [packageName, version] of Object.entries(updatePackages)) {
-            const mismatchedVersions: string[] | undefined = mismatchFinder.getVersionsOfMismatch(
-              packageName
-            );
+            const mismatchedVersions: string[] | undefined =
+              mismatchFinder.getVersionsOfMismatch(packageName);
             if (mismatchedVersions) {
               for (const mismatchedVersion of mismatchedVersions) {
                 for (const consumer of mismatchFinder.getConsumersOfMismatch(
