@@ -16,3 +16,32 @@ In this folder run `docker-compose down`
 # build the code: rushx build
 rushx read-s3-object
 ```
+
+# Testing retries
+
+To test that requests can be retried start the proxy server which will fail every second request:
+
+```bash
+rushx start-proxy-server
+```
+
+Update the build-cache.json file:
+```json
+{
+  "cacheProvider": "amazon-s3",
+  "amazonS3Configuration": {
+    "s3Endpoint": "http://localhost:9002",
+    "s3Region": "us-east-1",
+    "s3Prefix": "rush-build-cache/test",
+    "isCacheWriteAllowed": true
+  }
+}
+```
+
+Run the rush rebuild command
+
+```bash
+cd apps
+cd rush
+RUSH_BUILD_CACHE_CREDENTIAL="minio:minio123" node lib/start-dev.js --debug rebuild --verbose
+```

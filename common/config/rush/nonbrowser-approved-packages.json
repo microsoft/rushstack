@@ -443,6 +443,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "http-proxy",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "https-proxy-agent",
       "allowedCategories": [ "libraries" ]
     },

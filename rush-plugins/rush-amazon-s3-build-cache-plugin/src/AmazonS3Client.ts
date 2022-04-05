@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colors, IColorableSequence, ITerminal } from '@rushstack/node-core-library';
+import { Async, Colors, IColorableSequence, ITerminal } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
 
@@ -29,8 +29,39 @@ interface IIsoDateString {
   dateTime: string;
 }
 
+type RetryableRequestResponse<T> =
+  | {
+      hasNetworkError: true;
+      error: Error;
+    }
+  | {
+      hasNetworkError: false;
+      response: T;
+    };
+
 const protocolRegex: RegExp = /^https?:\/\//;
 const portRegex: RegExp = /:(\d{1,5})$/;
+
+// Similar to https://docs.microsoft.com/en-us/javascript/api/@azure/storage-blob/storageretrypolicytype?view=azure-node-latest
+enum StorageRetryPolicyType {
+  EXPONENTIAL = 0,
+  FIXED = 1
+}
+
+// Similar to https://docs.microsoft.com/en-us/javascript/api/@azure/storage-blob/storageretryoptions?view=azure-node-latest
+interface IStorageRetryOptions {
+  maxRetryDelayInMs: number;
+  maxTries: number;
+  retryDelayInMs: number;
+  retryPolicyType: StorageRetryPolicyType;
+}
+
+const storageRetryOptions: IStorageRetryOptions = {
+  maxRetryDelayInMs: 120 * 1000,
+  maxTries: 4,
+  retryDelayInMs: 4 * 1000,
+  retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
+};
 
 /**
  * A helper for reading and updating objects on Amazon S3
@@ -103,16 +134,44 @@ export class AmazonS3Client {
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
     this._writeDebugLine('Reading object from S3');
-    const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
-    if (response.ok) {
-      return await response.buffer();
-    } else if (response.status === 404) {
-      return undefined;
-    } else if (response.status === 403 && !this._credentials) {
-      return undefined;
-    } else {
-      this._throwS3Error(response, await this._safeReadResponseText(response));
-    }
+    return await this._sendCacheRequestWithRetries(async () => {
+      const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
+      if (response.ok) {
+        return {
+          hasNetworkError: false,
+          response: await response.buffer()
+        };
+      } else if (response.status === 404) {
+        return {
+          hasNetworkError: false,
+          response: undefined
+        };
+      } else if (
+        (response.status === 400 || response.status === 401 || response.status === 403) &&
+        !this._credentials
+      ) {
+        // unauthorized due to not providing credentials,
+        // silence error for better DX when e.g. running locally without credentials
+        this._writeWarningLine(
+          `No credentials found and received a ${response.status}`,
+          ' response code from the cloud storage.',
+          ' Maybe run rush update-cloud-credentials',
+          ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
+        );
+        return {
+          hasNetworkError: false,
+          response: undefined
+        };
+      } else if (response.status === 400 || response.status === 401 || response.status === 403) {
+        throw await this._getS3ErrorAsync(response);
+      } else {
+        const error: Error = await this._getS3ErrorAsync(response);
+        return {
+          hasNetworkError: true,
+          error
+        };
+      }
+    });
   }
 
   public async uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void> {
@@ -120,10 +179,19 @@ export class AmazonS3Client {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
-    const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
-    if (!response.ok) {
-      this._throwS3Error(response, await this._safeReadResponseText(response));
-    }
+    await this._sendCacheRequestWithRetries(async () => {
+      const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
+      if (!response.ok) {
+        return {
+          hasNetworkError: true,
+          error: await this._getS3ErrorAsync(response)
+        };
+      }
+      return {
+        hasNetworkError: false,
+        response: undefined
+      };
+    });
   }
 
   private _writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
@@ -131,7 +199,16 @@ export class AmazonS3Client {
     try {
       this._terminal.writeDebugLine(...messageParts);
     } catch (err) {
-      //
+      // ignore error
+    }
+  }
+
+  private _writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
+    // if the terminal has been closed then don't bother sending a warning message
+    try {
+      this._terminal.writeWarningLine(...messageParts);
+    } catch (err) {
+      // ignore error
     }
   }
 
@@ -305,8 +382,9 @@ export class AmazonS3Client {
     return undefined;
   }
 
-  private _throwS3Error(response: fetch.Response, text: string | undefined): never {
-    throw new Error(
+  private async _getS3ErrorAsync(response: fetch.Response): Promise<Error> {
+    const text: string | undefined = await this._safeReadResponseText(response);
+    return new Error(
       `Amazon S3 responded with status code ${response.status} (${response.statusText})${
         text ? `\n${text}` : ''
       }`
@@ -370,5 +448,49 @@ export class AmazonS3Client {
         'Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long'
       );
     }
+  }
+
+  private async _sendCacheRequestWithRetries<T>(
+    sendRequest: () => Promise<RetryableRequestResponse<T>>
+  ): Promise<T> {
+    const response: RetryableRequestResponse<T> = await sendRequest();
+
+    const log: (...messageParts: (string | IColorableSequence)[]) => void = this._writeDebugLine.bind(this);
+
+    if (response.hasNetworkError) {
+      if (storageRetryOptions && storageRetryOptions.maxTries > 1) {
+        log('Network request failed. Will retry request as specified in storageRetryOptions');
+        async function retry(retryAttempt: number): Promise<T> {
+          const { retryDelayInMs, retryPolicyType, maxTries, maxRetryDelayInMs } = storageRetryOptions;
+          let delay: number = retryDelayInMs;
+          if (retryPolicyType === StorageRetryPolicyType.EXPONENTIAL) {
+            delay = retryDelayInMs * Math.pow(2, retryAttempt - 1);
+          }
+          delay = Math.min(maxRetryDelayInMs, delay);
+
+          log(`Will retry request in ${delay}s...`);
+          await Async.sleep(delay);
+          const response: RetryableRequestResponse<T> = await sendRequest();
+
+          if (response.hasNetworkError) {
+            if (retryAttempt < maxTries - 1) {
+              log('The retried request failed, will try again');
+              return retry(retryAttempt + 1);
+            } else {
+              log('The retried request failed and has reached the maxTries limit');
+              throw response.error;
+            }
+          }
+
+          return response.response;
+        }
+        return retry(1);
+      } else {
+        log('Network request failed and storageRetryOptions is not specified');
+        throw response.error;
+      }
+    }
+
+    return response.response;
   }
 }
