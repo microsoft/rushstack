@@ -36,11 +36,7 @@
 
           "immutable": {
             "type": "boolean",
-            "description": "Enables or disables the `immutable` directive in the `Cache-Control` resoponse header. See (https://expressjs.com/en/4x/api.html#express.static).",
-            "items": {
-              "type": "string"
-            },
-            "uniqueItems": true
+            "description": "Enables or disables the `immutable` directive in the `Cache-Control` resoponse header. See (https://expressjs.com/en/4x/api.html#express.static)."
           }
         }
       }
