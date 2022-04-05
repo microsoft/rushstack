@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 31 Mar 2022 02:06:05 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Apr 2022 15:12:22 GMT and should not be manually modified.
+
+## 7.17.1
+Tue, 05 Apr 2022 15:12:22 GMT
+
+### Patches
+
+- Update requirement set links in OfficeYamlDocumenter
 
 ## 7.17.0
 Thu, 31 Mar 2022 02:06:05 GMT
