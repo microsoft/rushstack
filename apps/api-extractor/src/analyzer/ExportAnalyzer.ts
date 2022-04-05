@@ -279,6 +279,10 @@ export class ExportAnalyzer {
       return false;
     }
 
+    if (this.hasPathMappingMatch(moduleSpecifier)) {
+      return false;
+    }
+
     const match: RegExpExecArray | null = ExportAnalyzer._modulePathRegExp.exec(moduleSpecifier);
     if (match) {
       // Extract "@my-scope/my-package" from "@my-scope/my-package/path/module"
@@ -289,6 +293,33 @@ export class ExportAnalyzer {
     }
 
     return true;
+  }
+
+  /**
+   * Returns true if the module specifier matches a path mapping entry in the tsconfig `paths` map.
+   *
+   * @remarks
+   * Handles two types of path mappings:
+   *
+   * - Simple path-like strings: `some/path/to/import`
+   * - Paths with wildcards at the end: `some/path/to/*`
+   */
+  private hasPathMappingMatch(moduleSpecifier: string): boolean {
+    const pathKeys: string[] = Object.keys(this._program.getCompilerOptions().paths || {});
+    for (const pathKey of pathKeys) {
+      if (pathKey.endsWith('*')) {
+        const pathPrefix: string = pathKey.slice(0, -1);
+        if (moduleSpecifier.startsWith(pathPrefix)) {
+          return true;
+        }
+      } else {
+        if (pathKey === moduleSpecifier) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**

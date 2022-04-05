@@ -12,10 +12,11 @@
     "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
     "outDir": "lib",
 
-    // These properties are used for the pathMappings/ test scenario.
+    // These properties are only used by the pathMappings/ test scenario.
     "baseUrl": ".",
     "paths": {
-      "apiItemKinds/*": ["lib/apiItemKinds/*"],
+      "path-mapping": ["src/apiItemKinds"],
+      "wildcard-path-mapping/*": ["src/*"]
     }
   },
   "include": ["src/**/*.ts", "typings/tsd.d.ts"]
