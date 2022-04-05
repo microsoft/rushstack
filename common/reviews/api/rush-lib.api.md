@@ -656,6 +656,8 @@ export class RushConfiguration {
     get experimentsConfiguration(): ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
+    // @internal (undocumented)
+    _getAllDependencyVersions(variant?: string | undefined): Map<string, Set<string>>;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
