@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a typo in output of `rush change -v`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
