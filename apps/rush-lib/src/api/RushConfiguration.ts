@@ -246,6 +246,7 @@ export interface IRushConfigurationJson {
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
+  allowedProjectTags?: string[];
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
@@ -493,6 +494,9 @@ export class RushConfiguration {
 
   // Lazily loaded when the projectsByName() getter is called.
   private _projectsByName: Map<string, RushConfigurationProject> | undefined;
+
+  // Lazily loaded when the projectsByTag() getter is called.
+  private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
 
   // variant -> common-versions configuration
   private _commonVersionsConfigurations: Map<string, CommonVersionsConfiguration> | undefined;
@@ -768,6 +772,9 @@ export class RushConfiguration {
       a.packageName.localeCompare(b.packageName)
     );
 
+    const allowedProjectTags: Set<string> | undefined = this._rushConfigurationJson.allowedProjectTags
+      ? new Set(this._rushConfigurationJson.allowedProjectTags)
+      : undefined;
     const usedTempNames: Set<string> = new Set();
     for (let i: number = 0, len: number = sortedProjectJsons.length; i < len; i++) {
       const projectJson: IRushConfigurationProjectJson = sortedProjectJsons[i];
@@ -778,7 +785,8 @@ export class RushConfiguration {
       const project: RushConfigurationProject = new RushConfigurationProject({
         projectJson,
         rushConfiguration: this,
-        tempProjectName
+        tempProjectName,
+        allowedProjectTags
       });
 
       this._projects.push(project);
@@ -1429,6 +1437,27 @@ export class RushConfiguration {
     }
 
     return this._projectsByName!;
+  }
+
+  /**
+   * Obtains the mapping from custom tags to projects.
+   * @beta
+   */
+  public get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> {
+    if (!this._projectsByTag) {
+      const projectsByTag: Map<string, Set<RushConfigurationProject>> = new Map();
+      for (const project of this.projects) {
+        for (const tag of project.tags) {
+          let collection: Set<RushConfigurationProject> | undefined = projectsByTag.get(tag);
+          if (!collection) {
+            projectsByTag.set(tag, (collection = new Set()));
+          }
+          collection.add(project);
+        }
+      }
+      this._projectsByTag = projectsByTag;
+    }
+    return this._projectsByTag;
   }
 
   /**
