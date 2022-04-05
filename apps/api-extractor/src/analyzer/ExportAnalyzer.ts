@@ -273,13 +273,15 @@ export class ExportAnalyzer {
    * - NO:  `./file1`
    * - YES: `library1/path/path`
    * - YES: `@my-scope/my-package`
+   * - NO:  `@my-scope/my-package` (if present in tsconfig `paths` mapping).
    */
   private _isExternalModulePath(moduleSpecifier: string): boolean {
     if (ts.isExternalModuleNameRelative(moduleSpecifier)) {
       return false;
     }
 
-    if (this.hasPathMappingMatch(moduleSpecifier)) {
+    // Any module specifiers that match a path mapping entry are considered part of the current package.
+    if (this._hasPathMappingMatch(moduleSpecifier)) {
       return false;
     }
 
@@ -304,7 +306,7 @@ export class ExportAnalyzer {
    * - Simple path-like strings: `some/path/to/import`
    * - Paths with wildcards at the end: `some/path/to/*`
    */
-  private hasPathMappingMatch(moduleSpecifier: string): boolean {
+  private _hasPathMappingMatch(moduleSpecifier: string): boolean {
     const pathKeys: string[] = Object.keys(this._program.getCompilerOptions().paths || {});
     for (const pathKey of pathKeys) {
       if (pathKey.endsWith('*')) {
