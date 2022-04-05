@@ -387,6 +387,13 @@
   /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
+    * This is an optional, but recommended, list of available tags that can be applied
+    * to projects. If this property is not specified, any tag is allowed. This
+    * list is useful in preventing typos when specifying tags for projects.
+    */
+  /*[LINE "HYPOTHETICAL"]*/ "allowedProjectTags": [ "apps", "Web", "tools" ],
+
+  /**
    * (Required) This is the inventory of projects to be managed by Rush.
    *
    * Rush does not automatically scan for projects using wildcards, for a few reasons:

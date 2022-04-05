@@ -246,6 +246,7 @@ export interface IRushConfigurationJson {
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
+  allowedProjectTags?: string[];
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
@@ -771,6 +772,9 @@ export class RushConfiguration {
       a.packageName.localeCompare(b.packageName)
     );
 
+    const allowedProjectTags: Set<string> | undefined = this._rushConfigurationJson.allowedProjectTags
+      ? new Set(this._rushConfigurationJson.allowedProjectTags)
+      : undefined;
     const usedTempNames: Set<string> = new Set();
     for (let i: number = 0, len: number = sortedProjectJsons.length; i < len; i++) {
       const projectJson: IRushConfigurationProjectJson = sortedProjectJsons[i];
@@ -781,7 +785,8 @@ export class RushConfiguration {
       const project: RushConfigurationProject = new RushConfigurationProject({
         projectJson,
         rushConfiguration: this,
-        tempProjectName
+        tempProjectName,
+        allowedProjectTags
       });
 
       this._projects.push(project);

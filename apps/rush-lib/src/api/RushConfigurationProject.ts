@@ -43,6 +43,10 @@ export interface IRushConfigurationProjectOptions {
    * A unique string name for this project
    */
   tempProjectName: string;
+  /**
+   * If specified, validate project tags against this list.
+   */
+  allowedProjectTags: Set<string> | undefined;
 }
 
 /**
@@ -75,7 +79,7 @@ export class RushConfigurationProject {
 
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
-    const { projectJson, rushConfiguration, tempProjectName } = options;
+    const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
     this._rushConfiguration = rushConfiguration;
     this._packageName = projectJson.packageName;
     this._projectRelativeFolder = projectJson.projectFolder;
@@ -168,7 +172,21 @@ export class RushConfigurationProject {
       this._publishFolder = path.join(this._publishFolder, projectJson.publishFolder);
     }
 
-    this._tags = new Set(projectJson.tags);
+    if (allowedProjectTags && projectJson.tags) {
+      this._tags = new Set();
+      for (const tag of projectJson.tags) {
+        if (!allowedProjectTags.has(tag)) {
+          throw new Error(
+            `The tag "${tag}" specified for project "${this._packageName}" is not listed in the ` +
+              `allowedProjectTags field in rush.json.`
+          );
+        } else {
+          this._tags.add(tag);
+        }
+      }
+    } else {
+      this._tags = new Set(projectJson.tags);
+    }
   }
 
   /**

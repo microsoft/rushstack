@@ -236,6 +236,14 @@
       "description": "Indicates whether telemetry data should be collected and stored in the Rush temp folder during Rush runs.",
       "type": "boolean"
     },
+    "allowedProjectTags": {
+      "description": "This is an optional, but recommended, list of available tags that can be applied to projects. If this property is not specified, any tag is allowed. This list is useful in preventing typos when specifying tags for projects.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_@/.$-]+$"
+      }
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",
