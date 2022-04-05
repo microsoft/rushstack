@@ -31,6 +31,7 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     malformedEvent: SystemEvent;
     // @eventProperty
     readonly modifiedEvent: SystemEvent;
+    optionalParamFunction(x?: number): void;
     // (undocumented)
     get readonlyProperty(): string;
     regularProperty: SystemEvent;
@@ -175,6 +176,5 @@ export type TypeAlias = number;
 
 // @public (undocumented)
 export function yamlReferenceUniquenessTest(): IDocInterface1;
-
 
 ```

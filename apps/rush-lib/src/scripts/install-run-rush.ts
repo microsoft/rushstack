@@ -19,16 +19,17 @@ import {
   installAndRun,
   findRushJsonFolder,
   RUSH_JSON_FILENAME,
-  runWithErrorAndStatusCode
+  runWithErrorAndStatusCode,
+  ILogger
 } from './install-run';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
 
-function _getRushVersion(): string {
+function _getRushVersion(logger: ILogger): string {
   const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION];
   if (rushPreviewVersion !== undefined) {
-    console.log(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
+    logger.info(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
     return rushPreviewVersion;
   }
 
@@ -66,7 +67,29 @@ function _run(): void {
     throw new Error('Unexpected exception: could not detect node path or script path');
   }
 
-  if (process.argv.length < 3) {
+  let commandFound: boolean = false;
+  let logger: ILogger = { info: console.log, error: console.error };
+
+  for (const arg of packageBinArgs) {
+    if (arg === '-q' || arg === '--quiet') {
+      // The -q/--quiet flag is supported by both `rush` and `rushx`, and will suppress
+      // any normal informational/diagnostic information printed during startup.
+      //
+      // To maintain the same user experience, the install-run* scripts pass along this
+      // flag but also use it to suppress any diagnostic information normally printed
+      // to stdout.
+      logger = {
+        info: () => {},
+        error: console.error
+      };
+    }
+    if (!arg.startsWith('-')) {
+      commandFound = true;
+      break;
+    }
+  }
+
+  if (!commandFound) {
     console.log(`Usage: ${scriptName} <command> [args...]`);
     if (scriptName === 'install-run-rush.js') {
       console.log(`Example: ${scriptName} build --to myproject`);
@@ -76,11 +99,11 @@ function _run(): void {
     process.exit(1);
   }
 
-  runWithErrorAndStatusCode(() => {
-    const version: string = _getRushVersion();
-    console.log(`The rush.json configuration requests Rush version ${version}`);
+  runWithErrorAndStatusCode(logger, () => {
+    const version: string = _getRushVersion(logger);
+    logger.info(`The rush.json configuration requests Rush version ${version}`);
 
-    return installAndRun(PACKAGE_NAME, version, bin, packageBinArgs);
+    return installAndRun(logger, PACKAGE_NAME, version, bin, packageBinArgs);
   });
 }
 

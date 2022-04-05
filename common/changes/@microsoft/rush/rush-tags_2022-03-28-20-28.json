@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a \"tags\" field to project definitions in rush.json. These may be used to select projects, for example, \"rush list --only tag:my-custom-tag\".",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

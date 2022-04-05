@@ -33,5 +33,10 @@ function readPackage(packageJson, context) {
     packageJson.peerDependencies['typescript'] = '*';
   }
 
+  if (packageJson.name === '@serverless-stack/core') {
+    delete packageJson.dependencies['@typescript-eslint/eslint-plugin'];
+    delete packageJson.dependencies['eslint-config-serverless-stack'];
+  }
+
   return packageJson;
 }

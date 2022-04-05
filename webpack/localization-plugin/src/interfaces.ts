@@ -122,7 +122,7 @@ export interface ILocalizedData {
   normalizeResxNewlines?: 'lf' | 'crlf';
 
   /**
-   * If set to true, do not warn on missing RESX <data> element comments.
+   * If set to true, do not warn on missing RESX `<data>` element comments.
    */
   ignoreMissingResxComments?: boolean;
 }

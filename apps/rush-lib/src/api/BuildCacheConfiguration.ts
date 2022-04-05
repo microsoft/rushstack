@@ -23,7 +23,7 @@ import type { CloudBuildCacheProviderFactory, RushSession } from '../pluginFrame
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
-interface IBaseBuildCacheJson {
+export interface IBaseBuildCacheJson {
   buildCacheEnabled: boolean;
   cacheProvider: string;
   cacheEntryNamePattern?: string;
@@ -60,7 +60,7 @@ interface IBuildCacheConfigurationOptions {
 /**
  * Use this class to load and save the "common/config/rush/build-cache.json" config file.
  * This file provides configuration options for cached project build output.
- * @public
+ * @beta
  */
 export class BuildCacheConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -72,10 +72,21 @@ export class BuildCacheConfiguration {
    * Typically it is enabled in the build-cache.json config file.
    */
   public readonly buildCacheEnabled: boolean;
+  /**
+   * Indicates whether or not writing to the cache is enabled.
+   */
   public cacheWriteEnabled: boolean;
-
+  /**
+   * Method to calculate the cache entry id for a project, phase, and project state.
+   */
   public readonly getCacheEntryId: GetCacheEntryIdFunction;
+  /**
+   * The provider for interacting with the local build cache.
+   */
   public readonly localCacheProvider: FileSystemBuildCacheProvider;
+  /**
+   * The provider for interacting with the cloud build cache, if configured.
+   */
   public readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
@@ -153,6 +164,13 @@ export class BuildCacheConfiguration {
     return buildCacheConfiguration;
   }
 
+  /**
+   * Gets the absolute path to the build-cache.json file in the specified rush workspace.
+   */
+  public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
+    return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename);
+  }
+
   private static async _loadAsync(
     jsonFilePath: string,
     terminal: ITerminal,
@@ -182,9 +200,5 @@ export class BuildCacheConfiguration {
       rushUserConfiguration,
       rushSession
     });
-  }
-
-  public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
-    return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename);
   }
 }

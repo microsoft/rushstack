@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix broken README links for @microsoft/rush-lib documentation and API reference.",
+      "comment": "Fix a typo in output of `rush change -v`",
       "type": "none"
     }
   ],

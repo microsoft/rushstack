@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { StdioSummarizer } from '@rushstack/terminal';
+import { InternalError } from '@rushstack/node-core-library';
 import { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus } from './OperationStatus';
@@ -86,7 +87,15 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   private _collatedWriter: CollatedWriter | undefined = undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
-    this.runner = operation.runner;
+    const { runner } = operation;
+
+    if (!runner) {
+      throw new InternalError(
+        `Operation for phase '${operation.associatedPhase?.name}' and project '${operation.associatedProject?.packageName}' has no runner.`
+      );
+    }
+
+    this.runner = runner;
     this.weight = operation.weight;
     this._context = context;
   }

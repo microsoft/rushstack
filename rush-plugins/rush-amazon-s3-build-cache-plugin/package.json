@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
-  "version": "5.63.0",
+  "version": "5.64.0",
   "description": "Rush plugin for Amazon S3 cloud build cache",
   "repository": {
     "type": "git",
@@ -13,6 +13,7 @@
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
+    "test": "heft test",
     "_phase:build": "heft build --clean",
     "_phase:test": "heft test --no-build"
   },

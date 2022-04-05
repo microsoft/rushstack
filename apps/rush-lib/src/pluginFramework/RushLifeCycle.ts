@@ -3,6 +3,8 @@
 
 import { AsyncSeriesHook, HookMap } from 'tapable';
 
+import type { PhasedCommandHooks } from './PhasedCommandHooks';
+
 /**
  * Information about the currently executing command provided to plugins.
  * @beta
@@ -27,7 +29,11 @@ export interface IGlobalCommand extends IRushCommand {
  * @beta
  */
 export interface IPhasedCommand extends IRushCommand {
-  // Will add hooks once the API surface is finalized
+  /**
+   * Hooks into the execution of the current phased command
+   * @alpha
+   */
+  readonly hooks: PhasedCommandHooks;
 }
 
 /**

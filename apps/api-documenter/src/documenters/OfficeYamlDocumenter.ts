@@ -32,12 +32,12 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   // Hash set of API Set URLs based on product.
   private _apiSetUrls: Record<string, string> = {
-    Excel: '/office/dev/add-ins/reference/requirement-sets/excel-api-requirement-sets',
-    OneNote: '/office/dev/add-ins/reference/requirement-sets/onenote-api-requirement-sets',
-    Outlook: '/office/dev/add-ins/reference/requirement-sets/outlook-api-requirement-sets',
-    PowerPoint: '/office/dev/add-ins/reference/requirement-sets/powerpoint-api-requirement-sets',
+    Excel: '/javascript/api/requirement-sets/excel/excel-api-requirement-sets',
+    OneNote: '/javascript/api/requirement-sets/onenote/onenote-api-requirement-sets',
+    Outlook: '/javascript/api/requirement-sets/outlook/outlook-api-requirement-sets',
+    PowerPoint: '/javascript/api/requirement-sets/powerpoint/powerpoint-api-requirement-sets',
     Visio: '/office/dev/add-ins/reference/overview/visio-javascript-reference-overview',
-    Word: '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
+    Word: '/javascript/api/requirement-sets/word/word-api-requirement-sets'
   };
 
   public constructor(apiModel: ApiModel, inputFolder: string, newDocfxNamespaces?: boolean) {
@@ -68,7 +68,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     // override
     return {
       name: 'API reference',
-      href: '~/docs-ref-autogen/overview/office.md',
+      href: 'overview.md',
       items: []
     };
   }
@@ -119,7 +119,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     return markup.replace(/\\\[(API set:[^\]]+)\\\]/, '\\[ [$1](' + this._getApiSetUrl(uid) + ') \\]');
   }
 
-  // Gets the link to the API set based on product context. Seeks a case-insensitve match in the hash set.
+  // Gets the link to the API set based on product context. Seeks a case-insensitive match in the hash set.
   private _getApiSetUrl(uid: string): string {
     for (const key of Object.keys(this._apiSetUrls)) {
       const regexp: RegExp = new RegExp(key, 'i');

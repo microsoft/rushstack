@@ -236,6 +236,14 @@
       "description": "Indicates whether telemetry data should be collected and stored in the Rush temp folder during Rush runs.",
       "type": "boolean"
     },
+    "allowedProjectTags": {
+      "description": "This is an optional, but recommended, list of available tags that can be applied to projects. If this property is not specified, any tag is allowed. This list is useful in preventing typos when specifying tags for projects.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_@/.$-]+$"
+      }
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",
@@ -276,6 +284,14 @@
           "publishFolder": {
             "description": "Facilitates postprocessing of a project's files prior to publishing. If specified, the \"publishFolder\" is the relative path to a subfolder of the project folder. The \"rush publish\" command will publish the subfolder instead of the project folder. The subfolder must contain its own package.json file, which is typically a build output.",
             "type": "string"
+          },
+          "tags": {
+            "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\".",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_@/.$-]+$"
+            }
           }
         },
         "additionalProperties": false,

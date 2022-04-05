@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
-import { CommandLineParser, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { CommandLineParser, CommandLineFlagParameter, CommandLineHelper } from '@rushstack/ts-command-line';
 import {
   InternalError,
   AlreadyReportedError,
@@ -22,7 +22,6 @@ import {
   IGlobalCommandConfig,
   IPhasedCommandConfig
 } from '../api/CommandLineConfiguration';
-import { Utilities } from '../utilities/Utilities';
 
 import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
@@ -72,6 +71,7 @@ export class RushCommandLineParser extends CommandLineParser {
   public readonly pluginManager: PluginManager;
 
   private _debugParameter!: CommandLineFlagParameter;
+  private _quietParameter!: CommandLineFlagParameter;
   private readonly _rushOptions: IRushCommandLineParserOptions;
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
@@ -98,7 +98,7 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: this._rushOptions.cwd,
-        showVerbose: !Utilities.shouldRestrictConsoleOutput()
+        showVerbose: !RushCommandLineParser.shouldRestrictConsoleOutput()
       });
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
@@ -145,6 +145,28 @@ export class RushCommandLineParser extends CommandLineParser {
     return this._debugParameter.value;
   }
 
+  public get isQuiet(): boolean {
+    return this._quietParameter.value;
+  }
+
+  /**
+   * Utility to determine if the app should restrict writing to the console.
+   */
+  public static shouldRestrictConsoleOutput(): boolean {
+    if (CommandLineHelper.isTabCompletionActionRequest(process.argv)) {
+      return true;
+    }
+
+    for (let i: number = 2; i < process.argv.length; i++) {
+      const arg: string = process.argv[i];
+      if (arg === '-q' || arg === '--quiet' || arg === '--json') {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public flushTelemetry(): void {
     if (this.telemetry) {
       this.telemetry.flush();
@@ -164,6 +186,12 @@ export class RushCommandLineParser extends CommandLineParser {
       parameterLongName: '--debug',
       parameterShortName: '-d',
       description: 'Show the full call stack if an error occurs while executing the tool'
+    });
+
+    this._quietParameter = this.defineFlagParameter({
+      parameterLongName: '--quiet',
+      parameterShortName: '-q',
+      description: 'Hide rush startup information'
     });
   }
 

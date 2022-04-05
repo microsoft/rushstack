@@ -18,6 +18,7 @@ import {
   IGitSelectorParserOptions
 } from '../logic/selectors/GitChangedProjectSelectorParser';
 import { NamedProjectSelectorParser } from '../logic/selectors/NamedProjectSelectorParser';
+import { TagProjectSelectorParser } from '../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../logic/selectors/VersionPolicyProjectSelectorParser';
 
 /**
@@ -53,9 +54,12 @@ export class SelectionParameterSet {
       ISelectorParser<RushConfigurationProject>
     >();
 
-    selectorParsers.set('name', new NamedProjectSelectorParser(rushConfiguration));
+    const nameSelectorParser: NamedProjectSelectorParser = new NamedProjectSelectorParser(rushConfiguration);
+    selectorParsers.set('name', nameSelectorParser);
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration, gitOptions));
+    selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+
     this._selectorParserByScope = selectorParsers;
 
     const getSpecifierCompletions: () => Promise<string[]> = async (): Promise<string[]> => {
@@ -64,6 +68,11 @@ export class SelectionParameterSet {
         for (const completion of selector.getCompletions()) {
           completions.push(`${prefix}:${completion}`);
         }
+      }
+
+      // Include completions from the name parser without a scope
+      for (const completion of nameSelectorParser.getCompletions()) {
+        completions.push(completion);
       }
 
       return completions;

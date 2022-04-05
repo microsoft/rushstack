@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.20.0",
+      "tag": "@microsoft/api-extractor_v7.20.0",
+      "date": "Thu, 31 Mar 2022 02:06:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Updated api-extractor to extract whether a parameter is optional."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.16.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.19.5",
       "tag": "@microsoft/api-extractor_v7.19.5",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",

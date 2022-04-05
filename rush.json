@@ -576,6 +576,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-serverless-stack-tutorial",
+      "projectFolder": "build-tests-samples/heft-serverless-stack-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-storybook-react-tutorial",
       "projectFolder": "build-tests-samples/heft-storybook-react-tutorial",
       "reviewCategory": "tests",
@@ -823,6 +829,12 @@
     {
       "packageName": "@rushstack/heft-sass-plugin",
       "projectFolder": "heft-plugins/heft-sass-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-serverless-stack-plugin",
+      "projectFolder": "heft-plugins/heft-serverless-stack-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

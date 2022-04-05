@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 15 Mar 2022 19:15:53 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Mar 2022 02:06:05 GMT and should not be manually modified.
+
+## 7.16.0
+Thu, 31 Mar 2022 02:06:05 GMT
+
+### Minor changes
+
+- Updated api-extractor-model to store whether a parameter is optional.
 
 ## 7.15.4
 Tue, 15 Mar 2022 19:15:53 GMT
