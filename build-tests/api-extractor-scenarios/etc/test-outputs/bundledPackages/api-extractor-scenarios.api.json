@@ -310,7 +310,7 @@
           ],
           "extendsTokenRange": {
             "startIndex": 1,
-            "endIndex": 3
+            "endIndex": 2
           },
           "implementsTokenRanges": []
         }
