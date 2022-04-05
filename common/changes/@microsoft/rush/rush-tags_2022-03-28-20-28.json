@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Support \"tags\" field in project definitions in rush.json. These may be used to select projects with, for example, \"rush list --only tag:my-custom-tag\".",
+      "comment": "Add a \"tags\" field to project definitions in rush.json. These may be used to select projects, for example, \"rush list --only tag:my-custom-tag\".",
       "type": "none"
     }
   ],

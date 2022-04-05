@@ -23,7 +23,7 @@ export class TagProjectSelectorParser implements ISelectorParser<RushConfigurati
       this._rushConfiguration.projectsByTag.get(unscopedSelector);
     if (!selection) {
       terminal.writeErrorLine(
-        `The tag "${unscopedSelector}" passed to "${parameterName}" does not exist in rush.json.`
+        `The tag "${unscopedSelector}" passed to "${parameterName}" is not specified for any projects in rush.json.`
       );
       throw new AlreadyReportedError();
     }
