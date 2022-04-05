@@ -11,18 +11,21 @@ import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
 
-export interface IVersionMismatchFinderRushCheckOptions {
+const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
+
+export interface IVersionMismatchFinderOptions {
   variant?: string | undefined;
+}
+
+export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
   printAsJson?: boolean | undefined;
+  truncateLongPackageNameLists?: boolean | undefined;
 }
 
-export interface IVersionMismatchFinderEnsureConsistentVersionsOptions {
-  variant?: string | undefined;
-}
+export interface IVersionMismatchFinderEnsureConsistentVersionsOptions
+  extends IVersionMismatchFinderOptions {}
 
-export interface IVersionMismatchFinderGetMismatchesOptions {
-  variant?: string | undefined;
-}
+export interface IVersionMismatchFinderGetMismatchesOptions extends IVersionMismatchFinderOptions {}
 
 export interface IMismatchDependency {
   dependencyName: string;
@@ -76,7 +79,8 @@ export class VersionMismatchFinder {
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
-      isRushCheckCommand: false
+      isRushCheckCommand: false,
+      truncateLongPackageNameLists: true
     });
   }
 
@@ -86,7 +90,7 @@ export class VersionMismatchFinder {
    */
   public static getMismatches(
     rushConfiguration: RushConfiguration,
-    options: IVersionMismatchFinderRushCheckOptions = {}
+    options: IVersionMismatchFinderOptions = {}
   ): VersionMismatchFinder {
     const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(options.variant);
 
@@ -107,6 +111,7 @@ export class VersionMismatchFinder {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
       printAsJson?: boolean | undefined;
+      truncateLongPackageNameLists?: boolean | undefined;
     }
   ): void {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
@@ -118,7 +123,7 @@ export class VersionMismatchFinder {
       if (options.printAsJson) {
         mismatchFinder.printAsJson();
       } else {
-        mismatchFinder.print();
+        mismatchFinder.print(options.truncateLongPackageNameLists);
 
         if (mismatchFinder.numberOfMismatches > 0) {
           console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
@@ -188,15 +193,34 @@ export class VersionMismatchFinder {
     console.log(JSON.stringify(output, undefined, 2));
   }
 
-  public print(): void {
+  public print(truncateLongPackageNameLists: boolean = false): void {
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     this.getMismatches().forEach((dependency: string) => {
       console.log(colors.yellow(dependency));
       this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
         console.log(`  ${version}`);
-        this.getConsumersOfMismatch(dependency, version)!.forEach((project: VersionMismatchFinderEntity) => {
-          console.log(`   - ${project.friendlyName}`);
-        });
+        const consumersOfMismatch: VersionMismatchFinderEntity[] = this.getConsumersOfMismatch(
+          dependency,
+          version
+        )!;
+
+        let numberToPrint: number = truncateLongPackageNameLists
+          ? TRUNCATE_AFTER_PACKAGE_NAME_COUNT
+          : consumersOfMismatch.length;
+        let numberRemaining: number = consumersOfMismatch.length;
+        for (const { friendlyName } of consumersOfMismatch) {
+          if (numberToPrint-- === 0) {
+            break;
+          }
+
+          numberRemaining--;
+
+          console.log(`   - ${friendlyName}`);
+        }
+
+        if (numberRemaining > 0) {
+          console.log(`   (and ${numberRemaining} others)`);
+        }
       });
       console.log();
     });
