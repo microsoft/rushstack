@@ -94,13 +94,16 @@ export class VersionMismatchFinder {
   ): VersionMismatchFinder {
     const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(options.variant);
 
-    const projects: VersionMismatchFinderEntity[] = rushConfiguration.projects.map((project) => {
-      return new VersionMismatchFinderProject(project);
-    });
+    const projects: VersionMismatchFinderEntity[] = [];
 
     // Create an object for the purposes of reporting conflicts with preferredVersions
     // or xstitchPreferredVersions from common-versions.json
+    // Make sure this one is first so it doesn't get truncated when a long list is printed
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
+
+    for (const project of rushConfiguration.projects) {
+      projects.push(new VersionMismatchFinderProject(project));
+    }
 
     return new VersionMismatchFinder(projects, commonVersions.allowedAlternativeVersions);
   }
