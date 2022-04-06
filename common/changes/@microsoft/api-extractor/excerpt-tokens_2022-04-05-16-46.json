@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Addressing excerptToken off by one bug",
+      "comment": "Fix an issue where .api.json excerpt text included extra whitespace (GitHub #3316)",
       "type": "patch"
     }
   ],
