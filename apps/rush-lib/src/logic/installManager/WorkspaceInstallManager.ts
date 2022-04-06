@@ -389,7 +389,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         async (project) => {
           await tempShrinkwrapFile.getProjectShrinkwrap(project)?.updateProjectShrinkwrapAsync();
         },
-        { concurrency: 30 }
+        { concurrency: 10 }
       );
     } else if (
       this.rushConfiguration.packageManager === 'pnpm' &&
@@ -402,7 +402,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         async (project) => {
           await BaseProjectShrinkwrapFile.saveEmptyProjectShrinkwrapFileAsync(project);
         },
-        { concurrency: 30 }
+        { concurrency: 10 }
       );
     } else {
       // This is an unexpected case
