@@ -12,6 +12,7 @@ import { Variants } from '../../api/Variants';
 export class CheckAction extends BaseRushAction {
   private _variant!: CommandLineStringParameter;
   private _jsonFlag!: CommandLineFlagParameter;
+  private _verboseFlag!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -33,6 +34,12 @@ export class CheckAction extends BaseRushAction {
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
     });
+    this._verboseFlag = this.defineFlagParameter({
+      parameterLongName: '--verbose',
+      description:
+        'If this flag is specified, long lists of package names will not be truncated. ' +
+        `This has no effect if the ${this._jsonFlag.longName} flag is also specified.`
+    });
   }
 
   protected async runAsync(): Promise<void> {
@@ -49,7 +56,8 @@ export class CheckAction extends BaseRushAction {
 
     VersionMismatchFinder.rushCheck(this.rushConfiguration, {
       variant: this._variant.value,
-      printAsJson: this._jsonFlag.value
+      printAsJson: this._jsonFlag.value,
+      truncateLongPackageNameLists: !this._verboseFlag.value
     });
   }
 }
