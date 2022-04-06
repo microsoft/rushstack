@@ -130,6 +130,13 @@ export class VersionMismatchFinder {
 
         if (mismatchFinder.numberOfMismatches > 0) {
           console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+          if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
+            // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
+            console.log(
+              'For more detailed reporting about these version mismatches, use the "rush check --verbose" command.'
+            );
+          }
+
           throw new AlreadyReportedError();
         } else {
           if (options.isRushCheckCommand) {
