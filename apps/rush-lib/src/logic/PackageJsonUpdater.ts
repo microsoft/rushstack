@@ -17,7 +17,7 @@ import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFi
 import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
 import { RushConstants } from './RushConstants';
 import { InstallHelpers } from './installManager/InstallHelpers';
-import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import type { DependencyAnalyzer, IDependencyAnalysis } from './DependencyAnalyzer';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -115,26 +115,28 @@ export class PackageJsonUpdater {
   /**
    * Adds a dependency to a particular project. The core business logic for "rush add".
    */
-  public async doRushAdd(options: IPackageJsonUpdaterRushAddOptions): Promise<void> {
+  public async doRushAddAsync(options: IPackageJsonUpdaterRushAddOptions): Promise<void> {
     const { projects, packagesToAdd, devDependency, updateOtherPackages, skipUpdate, debugInstall, variant } =
       options;
 
-    const allDependencyVersions: Map<string, Set<string>> = this._rushConfiguration._getAllDependencyVersions(
-      variant
+    const { DependencyAnalyzer } = await import('./DependencyAnalyzer');
+    const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
+      this._rushConfiguration
     );
+    const {
+      allVersionsByPackageName,
+      implicitlyPreferredVersionByPackageName,
+      commonVersionsConfiguration
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(variant);
 
     console.log();
-    const commonVersions: CommonVersionsConfiguration = this._rushConfiguration.getCommonVersions(variant);
     const dependenciesToAddOrUpdate: Record<string, string> = {};
     for (const { packageName, version: initialVersion, rangeStyle } of packagesToAdd) {
-      const existingSpecifiedVersions: Set<string> | undefined = allDependencyVersions.get(packageName);
-      let implicitlyPreferredVersion: string | undefined;
-      if (existingSpecifiedVersions?.size === 1) {
-        implicitlyPreferredVersion = Array.from(existingSpecifiedVersions)[0];
-      }
+      const implicitlyPreferredVersion: string | undefined =
+        implicitlyPreferredVersionByPackageName.get(packageName);
 
       const explicitlyPreferredVersion: string | undefined =
-        commonVersions.preferredVersions.get(packageName);
+        commonVersionsConfiguration.preferredVersions.get(packageName);
 
       const version: string = await this._getNormalizedVersionSpec(
         projects,
@@ -149,6 +151,7 @@ export class PackageJsonUpdater {
       console.log(colors.green(`Updating projects to use `) + packageName + '@' + colors.cyan(version));
       console.log();
 
+      const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(packageName);
       if (
         existingSpecifiedVersions &&
         !existingSpecifiedVersions.has(version) &&

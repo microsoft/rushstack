@@ -15,7 +15,7 @@ describe(AddAction.name, () => {
 
     beforeEach(() => {
       doRushAddMock = jest
-        .spyOn(PackageJsonUpdater.prototype, 'doRushAdd')
+        .spyOn(PackageJsonUpdater.prototype, 'doRushAddAsync')
         .mockImplementation(() => Promise.resolve());
       jest.spyOn(process, 'exit').mockImplementation();
       oldExitCode = process.exitCode;
