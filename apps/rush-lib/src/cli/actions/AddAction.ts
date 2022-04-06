@@ -115,7 +115,7 @@ export class AddAction extends BaseRushAction {
     const packageJsonUpdater: typeof PackageJsonUpdaterType = await import('../../logic/PackageJsonUpdater');
 
     const specifiedPackageNameList: ReadonlyArray<string> = this._packageNameList.values!;
-    const packagesToAdd: PackageJsonUpdaterType.IRushAddPackage[] = [];
+    const packagesToAdd: PackageJsonUpdaterType.IPackageForRushAdd[] = [];
 
     for (const specifiedPackageName of specifiedPackageNameList) {
       /**

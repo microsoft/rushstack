@@ -29,7 +29,7 @@ export const enum SemVerStyle {
   Passthrough = 'passthrough'
 }
 
-export interface IRushAddPackage {
+export interface IPackageForRushAdd {
   packageName: string;
 
   /**
@@ -55,7 +55,7 @@ export interface IPackageJsonUpdaterRushAddOptions {
   /**
    * The dependencies to be added.
    */
-  packagesToAdd: IRushAddPackage[];
+  packagesToAdd: IPackageForRushAdd[];
   /**
    * Whether or not this dependency should be added as a devDependency or a regular dependency.
    */
@@ -130,7 +130,7 @@ export class PackageJsonUpdater {
       const existingSpecifiedVersions: Set<string> | undefined = allDependencyVersions.get(packageName);
       let implicitlyPreferredVersion: string | undefined;
       if (existingSpecifiedVersions?.size === 1) {
-        implicitlyPreferredVersion = existingSpecifiedVersions.values().next().value;
+        implicitlyPreferredVersion = Array.from(existingSpecifiedVersions)[0];
       }
 
       const explicitlyPreferredVersion: string | undefined =
