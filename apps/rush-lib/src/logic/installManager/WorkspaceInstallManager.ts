@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, FileConstants, AlreadyReportedError } from '@rushstack/node-core-library';
+import { FileSystem, FileConstants, AlreadyReportedError, Async } from '@rushstack/node-core-library';
 
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
@@ -21,6 +21,7 @@ import { RepoStateFile } from '../RepoStateFile';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
+import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -373,18 +374,43 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   protected async postInstallAsync(): Promise<void> {
     // Grab the temp shrinkwrap, as this was the most recently completed install. It may also be
     // more up-to-date than the checked-in shrinkwrap since filtered installs are not written back.
-    const tempShrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+    // Note that if there are no projects, or if we're in PNPM workspace mode and there are no
+    // projects with dependencies, a lockfile won't be generated.
+    const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
       this.rushConfiguration.packageManager,
       this.rushConfiguration.pnpmOptions,
       this.rushConfiguration.tempShrinkwrapFilename
-    )!;
-
-    // Write or delete all project shrinkwraps related to the install
-    await Promise.all(
-      this.rushConfiguration.projects.map(async (project) => {
-        await tempShrinkwrapFile.getProjectShrinkwrap(project)?.updateProjectShrinkwrapAsync();
-      })
     );
+
+    if (tempShrinkwrapFile) {
+      // Write or delete all project shrinkwraps related to the install
+      await Async.forEachAsync(
+        this.rushConfiguration.projects,
+        async (project) => {
+          await tempShrinkwrapFile.getProjectShrinkwrap(project)?.updateProjectShrinkwrapAsync();
+        },
+        { concurrency: 30 }
+      );
+    } else if (
+      this.rushConfiguration.packageManager === 'pnpm' &&
+      this.rushConfiguration.pnpmOptions?.useWorkspaces
+    ) {
+      // If we're in PNPM workspace mode and PNPM didn't create a shrinkwrap file,
+      // there are no dependencies. Generate empty shrinkwrap files for all projects.
+      await Async.forEachAsync(
+        this.rushConfiguration.projects,
+        async (project) => {
+          await BaseProjectShrinkwrapFile.saveEmptyProjectShrinkwrapFileAsync(project);
+        },
+        { concurrency: 30 }
+      );
+    } else {
+      // This is an unexpected case
+      throw new Error(
+        'A shrinkwrap file does not exist after after successful installation. This probably indicates a ' +
+          'bug in the package manager.'
+      );
+    }
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
