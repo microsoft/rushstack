@@ -34,6 +34,7 @@
     "inconsistentReleaseTags",
     "internationalCharacters",
     "namedDefaultImport",
+    "pathMappings",
     "preapproved",
     "spanSorting",
     "typeOf",
