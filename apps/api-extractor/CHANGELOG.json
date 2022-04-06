@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.20.1",
+      "tag": "@microsoft/api-extractor_v7.20.1",
+      "date": "Wed, 06 Apr 2022 22:35:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where .api.json excerpt text included extra whitespace (GitHub #3316)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.20.0",
       "tag": "@microsoft/api-extractor_v7.20.0",
       "date": "Thu, 31 Mar 2022 02:06:05 GMT",

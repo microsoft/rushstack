@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 31 Mar 2022 02:06:05 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Apr 2022 22:35:23 GMT and should not be manually modified.
+
+## 7.20.1
+Wed, 06 Apr 2022 22:35:23 GMT
+
+### Patches
+
+- Fix an issue where .api.json excerpt text included extra whitespace (GitHub #3316)
 
 ## 7.20.0
 Thu, 31 Mar 2022 02:06:05 GMT
