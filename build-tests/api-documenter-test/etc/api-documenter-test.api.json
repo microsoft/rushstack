@@ -797,7 +797,7 @@
           ],
           "extendsTokenRange": {
             "startIndex": 1,
-            "endIndex": 3
+            "endIndex": 2
           },
           "implementsTokenRanges": [
             {
@@ -806,7 +806,7 @@
             },
             {
               "startIndex": 6,
-              "endIndex": 8
+              "endIndex": 7
             }
           ]
         },
@@ -1378,7 +1378,7 @@
           "extendsTokenRanges": [
             {
               "startIndex": 1,
-              "endIndex": 3
+              "endIndex": 2
             }
           ]
         },
