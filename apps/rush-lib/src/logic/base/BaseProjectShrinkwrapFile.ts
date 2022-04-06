@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
@@ -24,6 +24,14 @@ export abstract class BaseProjectShrinkwrapFile {
     this.projectShrinkwrapFilePath = BaseProjectShrinkwrapFile.getFilePathForProject(this.project);
 
     this._shrinkwrapFile = shrinkwrapFile;
+  }
+
+  /**
+   * Save an empty project shrinkwrap file. This is used in repos with no dependencies.
+   */
+  public static async saveEmptyProjectShrinkwrapFileAsync(project: RushConfigurationProject): Promise<void> {
+    const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
+    await JsonFile.saveAsync({}, projectShrinkwrapFilePath, { ensureFolderExists: true });
   }
 
   /**
