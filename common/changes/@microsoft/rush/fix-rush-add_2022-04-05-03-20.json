@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix some issues with \"rush add\"'s ability to determine which version to use when adding a dependency that is already present in the repo.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

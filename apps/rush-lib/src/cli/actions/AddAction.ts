@@ -3,7 +3,6 @@
 
 import * as os from 'os';
 import * as semver from 'semver';
-import { Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -11,11 +10,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { DependencySpecifier } from '../../logic/DependencySpecifier';
 
-import type * as PackageJsonUpdaterTypes from '../../logic/PackageJsonUpdater';
-const packageJsonUpdaterModule: typeof PackageJsonUpdaterTypes = Import.lazy(
-  '../../logic/PackageJsonUpdater',
-  require
-);
+import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 
 export class AddAction extends BaseRushAction {
   private _allFlag!: CommandLineFlagParameter;
@@ -117,10 +112,10 @@ export class AddAction extends BaseRushAction {
       );
     }
 
+    const packageJsonUpdater: typeof PackageJsonUpdaterType = await import('../../logic/PackageJsonUpdater');
+
     const specifiedPackageNameList: ReadonlyArray<string> = this._packageNameList.values!;
-    const packageNames: string[] = [];
-    const initialVersions: Map<string, string | undefined> = new Map();
-    const rangeStyles: Map<string, PackageJsonUpdaterTypes.SemVerStyle> = new Map();
+    const packagesToAdd: PackageJsonUpdaterType.IPackageForRushAdd[] = [];
 
     for (const specifiedPackageName of specifiedPackageNameList) {
       /**
@@ -149,13 +144,11 @@ export class AddAction extends BaseRushAction {
           throw new Error(`The SemVer specifier "${version}" is not valid.`);
         }
       }
-      packageNames.push(packageName);
-      initialVersions.set(packageName, version);
 
       /**
        * RangeStyle
        */
-      let rangeStyle: PackageJsonUpdaterTypes.SemVerStyle;
+      let rangeStyle: PackageJsonUpdaterType.SemVerStyle;
       if (version && version !== 'latest') {
         if (this._exactFlag.value || this._caretFlag.value) {
           throw new Error(
@@ -164,29 +157,30 @@ export class AddAction extends BaseRushAction {
           );
         }
 
-        rangeStyle = packageJsonUpdaterModule.SemVerStyle.Passthrough;
+        rangeStyle = packageJsonUpdater.SemVerStyle.Passthrough;
       } else {
         rangeStyle = this._caretFlag.value
-          ? packageJsonUpdaterModule.SemVerStyle.Caret
+          ? packageJsonUpdater.SemVerStyle.Caret
           : this._exactFlag.value
-          ? packageJsonUpdaterModule.SemVerStyle.Exact
-          : packageJsonUpdaterModule.SemVerStyle.Tilde;
+          ? packageJsonUpdater.SemVerStyle.Exact
+          : packageJsonUpdater.SemVerStyle.Tilde;
       }
-      rangeStyles.set(packageName, rangeStyle);
+
+      packagesToAdd.push({ packageName, version, rangeStyle });
     }
 
-    const updater: PackageJsonUpdaterTypes.PackageJsonUpdater =
-      new packageJsonUpdaterModule.PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
+    const updater: PackageJsonUpdaterType.PackageJsonUpdater = new packageJsonUpdater.PackageJsonUpdater(
+      this.rushConfiguration,
+      this.rushGlobalFolder
+    );
 
     await updater.doRushAdd({
       projects: projects,
-      packageNames,
-      initialVersions,
+      packagesToAdd,
       devDependency: this._devDependencyFlag.value,
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
-      debugInstall: this.parser.isDebug,
-      rangeStyles
+      debugInstall: this.parser.isDebug
     });
   }
 }

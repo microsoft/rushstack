@@ -3,7 +3,7 @@
 
 import '../../test/mockRushCommandLineParser';
 
-import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
+import { IPackageJsonUpdaterRushAddOptions, PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { AddAction } from '../AddAction';
 
@@ -47,9 +47,18 @@ describe(AddAction.name, () => {
 
         await expect(parser.execute()).resolves.toEqual(true);
         expect(doRushAddMock).toHaveBeenCalledTimes(1);
-        expect(doRushAddMock.mock.calls[0][0].projects).toHaveLength(1);
-        expect(doRushAddMock.mock.calls[0][0].projects[0].packageName).toEqual('a');
-        expect(doRushAddMock.mock.calls[0][0].packageNames).toContain('assert');
+        const doRushAddOptions: IPackageJsonUpdaterRushAddOptions = doRushAddMock.mock.calls[0][0];
+        expect(doRushAddOptions.projects).toHaveLength(1);
+        expect(doRushAddOptions.projects[0].packageName).toEqual('a');
+        expect(doRushAddOptions.packagesToAdd).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "packageName": "assert",
+              "rangeStyle": "tilde",
+              "version": undefined,
+            },
+          ]
+        `);
       });
     });
 
@@ -72,10 +81,19 @@ describe(AddAction.name, () => {
 
         await expect(parser.execute()).resolves.toEqual(true);
         expect(doRushAddMock).toHaveBeenCalledTimes(1);
-        expect(doRushAddMock.mock.calls[0][0].projects).toHaveLength(2);
-        expect(doRushAddMock.mock.calls[0][0].projects[0].packageName).toEqual('a');
-        expect(doRushAddMock.mock.calls[0][0].projects[1].packageName).toEqual('b');
-        expect(doRushAddMock.mock.calls[0][0].packageNames).toContain('assert');
+        const doRushAddOptions: IPackageJsonUpdaterRushAddOptions = doRushAddMock.mock.calls[0][0];
+        expect(doRushAddOptions.projects).toHaveLength(2);
+        expect(doRushAddOptions.projects[0].packageName).toEqual('a');
+        expect(doRushAddOptions.projects[1].packageName).toEqual('b');
+        expect(doRushAddOptions.packagesToAdd).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "packageName": "assert",
+              "rangeStyle": "tilde",
+              "version": undefined,
+            },
+          ]
+        `);
       });
     });
   });
