@@ -168,9 +168,7 @@ export class DependencyAnalyzer {
   ): Map<string, string> {
     // Only generate implicitly preferred versions for variants that request it
     const useImplicitlyPreferredVersions: boolean =
-      commonVersionsConfiguration.implicitlyPreferredVersions !== undefined
-        ? commonVersionsConfiguration.implicitlyPreferredVersions
-        : true;
+      commonVersionsConfiguration.implicitlyPreferredVersions ?? true
 
     if (useImplicitlyPreferredVersions) {
       // If any dependency has more than one version, then filter it out (since we don't know which version
