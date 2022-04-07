@@ -159,10 +159,8 @@ export class OperationExecutionManager {
       } else {
         const parallelismAsNumber: number = Number(parallelism);
 
-        const getParallelismValueHighThanZero = (value: number) => (value > 0 ? value : 1);
-
         if (typeof parallelism === 'string' && parallelism.trim().endsWith('%')) {
-          const parsedPercentage = Number(parallelism.trim().replace(/\%$/, ''));
+          const parsedPercentage: number = Number(parallelism.trim().replace(/\%$/, ''));
 
           if (parsedPercentage <= 0 || parsedPercentage > 100) {
             throw new Error(
@@ -171,9 +169,9 @@ export class OperationExecutionManager {
           }
 
           const workers: number = Math.floor((parallelismAsNumber / 100) * numberOfCores);
-          this._parallelism = getParallelismValueHighThanZero(workers);
+          this._parallelism = Math.max(workers, 1);
         } else if (!isNaN(parallelismAsNumber)) {
-          this._parallelism = getParallelismValueHighThanZero(parallelismAsNumber);
+          this._parallelism = Math.max(parallelismAsNumber, 1);
         }
 
         throw new Error(
