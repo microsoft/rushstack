@@ -67,7 +67,7 @@ export class DependencyAnalyzer {
   }
 
   /**
-   * Generates the {@link IDependencyAnalysis} for a commonVersionsConfiguration.
+   * Generates the {@link IDependencyAnalysis} for a variant.
    *
    * @remarks
    * The result of this function is not cached.
@@ -80,11 +80,6 @@ export class DependencyAnalyzer {
       string,
       ReadonlyArray<string>
     > = commonVersionsConfiguration.allowedAlternativeVersions;
-    const implicitlyPreferredVersionByPackageNameCandidates: Map<string, Set<string>> = new Map();
-
-    // Only generate implicitly preferred versions for variants that request it
-    const useImplicitlyPreferredVersions: boolean =
-      commonVersionsConfiguration.implicitlyPreferredVersions ?? true;
 
     for (const project of this._rushConfiguration.projects) {
       const dependencies: PackageJsonDependency[] = [
@@ -102,54 +97,60 @@ export class DependencyAnalyzer {
         const localProject: RushConfigurationProject | undefined =
           this._rushConfiguration.getProjectByName(dependencyName);
         if (localProject) {
-          // For now, ignore local dependencies (that aren't cyclic dependencies).
           if (
             !project.cyclicDependencyProjects.has(dependencyName) &&
-            semver.satisfies(localProject.packageJsonEditor.version, dependencyVersion)
+            semver.satisfies(localProject.packageJson.version, dependencyVersion)
           ) {
+            // For now, ignore local dependencies (that aren't cyclic dependencies).
             continue;
           }
         }
 
-        if (useImplicitlyPreferredVersions) {
-          const alternativesForThisDependency: ReadonlyArray<string> | undefined =
-            allowedAlternativeVersions.get(dependencyName) || [];
-
-          // For each dependency, we're collecting the set of all version specifiers that appear across the repo.
-          // If there is only one version specifier, then that's the "preferred" one.
-          // However, versions listed in the common-versions.json's "allowedAlternativeVersions" property
-          // can be safely ignored in determining the set of implicitly preferred versions.
-          // (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
-          // otherwise the rule would be difficult to explain.)
-          const isNotImplicitlyPreferredVersionCandidate: boolean =
-            alternativesForThisDependency.indexOf(dependencyVersion) > 0;
-
-          if (!isNotImplicitlyPreferredVersionCandidate) {
-            this._addVersionToVersionListByDependencyName(
-              implicitlyPreferredVersionByPackageNameCandidates,
-              dependencyName,
-              dependencyVersion
-            );
-          }
+        let allVersionForDependency: Set<string> | undefined = allVersionsByPackageName.get(dependencyName);
+        if (!allVersionForDependency) {
+          allVersionForDependency = new Set<string>();
+          allVersionsByPackageName.set(dependencyName, allVersionForDependency);
         }
 
-        this._addVersionToVersionListByDependencyName(
-          allVersionsByPackageName,
-          dependencyName,
-          dependencyVersion
-        );
+        allVersionForDependency.add(dependencyVersion);
       }
     }
 
     const implicitlyPreferredVersionByPackageName: Map<string, string> = new Map();
+    // Only generate implicitly preferred versions for variants that request it
+    const useImplicitlyPreferredVersions: boolean =
+      commonVersionsConfiguration.implicitlyPreferredVersions ?? true;
     if (useImplicitlyPreferredVersions) {
-      for (const [dep, versions] of implicitlyPreferredVersionByPackageNameCandidates) {
-        // If any dependency has more than one version, then filter it out (since we don't know which version
-        // should be preferred).  What remains will be the list of preferred dependencies.
-        // dependency --> version specifier
-        if (versions.size === 1) {
-          const version: string = Array.from(versions)[0];
-          implicitlyPreferredVersionByPackageName.set(dep, version);
+      for (const [dependencyName, versions] of allVersionsByPackageName) {
+        // For each dependency, we're collecting the set of all version specifiers that appear across the repo.
+        // If there is only one version specifier, then that's the "preferred" one.
+
+        const alternativesForThisDependency: ReadonlySet<string> = new Set(
+          allowedAlternativeVersions.get(dependencyName)
+        );
+
+        let implicitlyPreferredVersion: string | undefined = undefined;
+        for (const version of versions) {
+          // Versions listed in the common-versions.json's "allowedAlternativeVersions" property
+          // can be safely ignored in determining the set of implicitly preferred versions.
+          // (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
+          // otherwise the rule would be difficult to explain.)
+          if (!alternativesForThisDependency.has(version)) {
+            if (implicitlyPreferredVersion === undefined) {
+              // There isn't a candidate for an implicitly preferred version yet. Set this value as a candidate.
+              implicitlyPreferredVersion = version;
+            } else {
+              // There was already another version that was a candidate. Clear that out and break.
+              // This dependency does not have an implicitly preferred version because there are at least
+              // two candidates.
+              implicitlyPreferredVersion = undefined;
+              break;
+            }
+          }
+        }
+
+        if (implicitlyPreferredVersion !== undefined) {
+          implicitlyPreferredVersionByPackageName.set(dependencyName, implicitlyPreferredVersion);
         }
       }
     }
@@ -159,19 +160,5 @@ export class DependencyAnalyzer {
       implicitlyPreferredVersionByPackageName,
       allVersionsByPackageName
     };
-  }
-
-  private _addVersionToVersionListByDependencyName(
-    versionListByDependencyName: Map<string, Set<string>>,
-    dependencyName: string,
-    dependencyVersion: string
-  ): void {
-    let allVersionForDependency: Set<string> | undefined = versionListByDependencyName.get(dependencyName);
-    if (!allVersionForDependency) {
-      allVersionForDependency = new Set<string>();
-      versionListByDependencyName.set(dependencyName, allVersionForDependency);
-    }
-
-    allVersionForDependency.add(dependencyVersion);
   }
 }
