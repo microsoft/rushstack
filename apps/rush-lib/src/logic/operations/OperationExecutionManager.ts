@@ -172,11 +172,11 @@ export class OperationExecutionManager {
           this._parallelism = Math.max(workers, 1);
         } else if (!isNaN(parallelismAsNumber)) {
           this._parallelism = Math.max(parallelismAsNumber, 1);
+        } else {
+          throw new Error(
+            `Invalid parallelism value of '${parallelism}', expected a number, a percentage, or 'max'`
+          );
         }
-
-        throw new Error(
-          `Invalid parallelism value of '${parallelism}', expected a number, a percentage, or 'max'`
-        );
       }
     } else {
       // If an explicit parallelism number wasn't provided, then choose a sensible
