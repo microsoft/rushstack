@@ -7,7 +7,7 @@
 /// <reference types="node" />
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
+import type * as fs from 'fs';
 
 // @public
 export enum AlreadyExistsBehavior {
@@ -29,6 +29,12 @@ export class AnsiEscape {
     static removeCodes(text: string): string;
 }
 
+// @public
+function appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
+
+// @public
+function appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
+
 // @beta
 export class Async {
     static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
@@ -40,6 +46,12 @@ export class Async {
 export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
 };
+
+// @public
+function changePosixModeBits(path: string, mode: PosixModeBits): void;
+
+// @public
+function changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void>;
 
 // @beta
 export class Colors {
@@ -128,10 +140,70 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
 }
 
 // @public
+function copyFile(options: IFileSystemCopyFileOptions): void;
+
+// @public
+function copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
+
+// @public
+function copyFiles(options: IFileSystemCopyFilesOptions): void;
+
+// @public
+function copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
+
+// @public
+function createHardLink(options: IFileSystemCreateLinkOptions): void;
+
+// @public
+function createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
+
+// @public
+function createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
+
+// @public
+function createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
+
+// @public
+function createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void;
+
+// @public
+function createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
+
+// @public
+function createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
+
+// @public
+function createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
+
+// @public
+function deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void;
+
+// @public
+function deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void>;
+
+// @public
+function deleteFolder(folderPath: string): void;
+
+// @public
+function deleteFolderAsync(folderPath: string): Promise<void>;
+
+// @public
 export enum Encoding {
     // (undocumented)
     Utf8 = "utf8"
 }
+
+// @public
+function ensureEmptyFolder(folderPath: string): void;
+
+// @public
+function ensureEmptyFolderAsync(folderPath: string): Promise<void>;
+
+// @public
+function ensureFolder(folderPath: string): void;
+
+// @public
+function ensureFolderAsync(folderPath: string): Promise<void>;
 
 // @public
 export class Enum {
@@ -180,74 +252,80 @@ export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableS
 export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit' | NodeJS.WritableStream | NodeJS.ReadableStream | number | undefined;
 
 // @public
+function exists(path: string): boolean;
+
+// @public
+function existsAsync(path: string): Promise<boolean>;
+
+// @public
 export enum FileConstants {
     PackageJson = "package.json"
 }
 
-// @public
-export class FileSystem {
-    static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
-    static appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
-    static changePosixModeBits(path: string, mode: PosixModeBits): void;
-    static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void>;
-    static copyFile(options: IFileSystemCopyFileOptions): void;
-    static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
-    static copyFiles(options: IFileSystemCopyFilesOptions): void;
-    static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
-    static createHardLink(options: IFileSystemCreateLinkOptions): void;
-    static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
-    static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
-    static createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
-    static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void;
-    static createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
-    static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
-    static createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
-    static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void;
-    static deleteFileAsync(filePath: string, options?: IFileSystemDeleteFileOptions): Promise<void>;
-    static deleteFolder(folderPath: string): void;
-    static deleteFolderAsync(folderPath: string): Promise<void>;
-    static ensureEmptyFolder(folderPath: string): void;
-    static ensureEmptyFolderAsync(folderPath: string): Promise<void>;
-    static ensureFolder(folderPath: string): void;
-    static ensureFolderAsync(folderPath: string): Promise<void>;
-    static exists(path: string): boolean;
-    static existsAsync(path: string): Promise<boolean>;
-    static formatPosixModeBits(modeBits: PosixModeBits): string;
-    static getLinkStatistics(path: string): FileSystemStats;
-    static getLinkStatisticsAsync(path: string): Promise<FileSystemStats>;
-    static getPosixModeBits(path: string): PosixModeBits;
-    static getPosixModeBitsAsync(path: string): Promise<PosixModeBits>;
-    static getRealPath(linkPath: string): string;
-    static getRealPathAsync(linkPath: string): Promise<string>;
-    static getStatistics(path: string): FileSystemStats;
-    static getStatisticsAsync(path: string): Promise<FileSystemStats>;
-    static isErrnoException(error: Error): error is NodeJS.ErrnoException;
-    static isExistError(error: Error): boolean;
-    static isFileDoesNotExistError(error: Error): boolean;
-    static isFolderDoesNotExistError(error: Error): boolean;
-    static isNotExistError(error: Error): boolean;
-    static isUnlinkNotPermittedError(error: Error): boolean;
-    static move(options: IFileSystemMoveOptions): void;
-    static moveAsync(options: IFileSystemMoveOptions): Promise<void>;
-    static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
-    static readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string>;
-    static readFileToBuffer(filePath: string): Buffer;
-    static readFileToBufferAsync(filePath: string): Promise<Buffer>;
-    // @deprecated (undocumented)
-    static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
-    // @deprecated (undocumented)
-    static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
-    static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
-    static readFolderItemNamesAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
-    static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[];
-    static readFolderItemsAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<FolderItem[]>;
-    static readLink(path: string): string;
-    static readLinkAsync(path: string): Promise<string>;
-    static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
-    static updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
-    static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
-    static writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
+declare namespace FileSystem {
+    export {
+        exists,
+        existsAsync,
+        getStatistics,
+        getStatisticsAsync,
+        updateTimes,
+        updateTimesAsync,
+        changePosixModeBits,
+        changePosixModeBitsAsync,
+        getPosixModeBits,
+        getPosixModeBitsAsync,
+        formatPosixModeBits,
+        move,
+        moveAsync,
+        ensureFolder,
+        ensureFolderAsync,
+        readFolderItemNames,
+        readFolderItemNames as readFolder,
+        readFolderItemNamesAsync,
+        readFolderItemNamesAsync as readFolderAsync,
+        readFolderItems,
+        readFolderItemsAsync,
+        deleteFolder,
+        deleteFolderAsync,
+        ensureEmptyFolder,
+        ensureEmptyFolderAsync,
+        writeFile,
+        writeFileAsync,
+        appendToFile,
+        appendToFileAsync,
+        readFile,
+        readFileAsync,
+        readFileToBuffer,
+        readFileToBufferAsync,
+        copyFile,
+        copyFileAsync,
+        copyFiles,
+        copyFilesAsync,
+        deleteFile,
+        deleteFileAsync,
+        getLinkStatistics,
+        getLinkStatisticsAsync,
+        readLink,
+        readLinkAsync,
+        createSymbolicLinkJunction,
+        createSymbolicLinkJunctionAsync,
+        createSymbolicLinkFile,
+        createSymbolicLinkFileAsync,
+        createSymbolicLinkFolder,
+        createSymbolicLinkFolderAsync,
+        createHardLink,
+        createHardLinkAsync,
+        getRealPath,
+        getRealPathAsync,
+        isExistError,
+        isNotExistError,
+        isFileDoesNotExistError,
+        isFolderDoesNotExistError,
+        isUnlinkNotPermittedError,
+        isErrnoException
+    }
 }
+export { FileSystem }
 
 // @public
 export type FileSystemCopyFilesAsyncFilter = (sourcePath: string, destinationPath: string) => Promise<boolean>;
@@ -274,6 +352,33 @@ export enum FolderConstants {
 
 // @public
 export type FolderItem = fs.Dirent;
+
+// @public
+function formatPosixModeBits(modeBits: PosixModeBits): string;
+
+// @public
+function getLinkStatistics(path: string): FileSystemStats;
+
+// @public
+function getLinkStatisticsAsync(path: string): Promise<FileSystemStats>;
+
+// @public
+function getPosixModeBits(path: string): PosixModeBits;
+
+// @public
+function getPosixModeBitsAsync(path: string): Promise<PosixModeBits>;
+
+// @public
+function getRealPath(path: string): string;
+
+// @public
+function getRealPathAsync(path: string): Promise<string>;
+
+// @public
+function getStatistics(path: string): FileSystemStats;
+
+// @public
+function getStatisticsAsync(path: string): Promise<FileSystemStats>;
 
 // @public
 export interface IAnsiEscapeConvertForTestsOptions {
@@ -549,6 +654,21 @@ export interface IProtectableMapParameters<K, V> {
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @public
+function isErrnoException(error: Error): error is NodeJS.ErrnoException;
+
+// @public
+function isExistError(error: Error): boolean;
+
+// @public
+function isFileDoesNotExistError(error: Error): boolean;
+
+// @public
+function isFolderDoesNotExistError(error: Error): boolean;
+
+// @public
+function isNotExistError(error: Error): boolean;
+
 // @beta (undocumented)
 export interface IStringBufferOutputOptions {
     normalizeSpecialCharacters: boolean;
@@ -559,6 +679,9 @@ export interface IStringBuilder {
     append(text: string): void;
     toString(): string;
 }
+
+// @public
+function isUnlinkNotPermittedError(error: Error): boolean;
 
 // @beta (undocumented)
 export interface ITerminal {
@@ -655,6 +778,12 @@ export class MapExtensions {
 }
 
 // @public
+function move(options: IFileSystemMoveOptions): void;
+
+// @public
+function moveAsync(options: IFileSystemMoveOptions): Promise<void>;
+
+// @public
 export enum NewlineKind {
     CrLf = "\r\n",
     Lf = "\n",
@@ -738,6 +867,36 @@ export class ProtectableMap<K, V> {
     set(key: K, value: V): this;
     get size(): number;
 }
+
+// @public
+function readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
+
+// @public
+function readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string>;
+
+// @public
+function readFileToBuffer(filePath: string): Buffer;
+
+// @public
+function readFileToBufferAsync(filePath: string): Promise<Buffer>;
+
+// @public
+function readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
+
+// @public
+function readFolderItemNamesAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
+
+// @public
+function readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[];
+
+// @public
+function readFolderItemsAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<FolderItem[]>;
+
+// @public
+function readLink(path: string): string;
+
+// @public
+function readLinkAsync(path: string): Promise<string>;
 
 // @public
 export class Sort {
@@ -835,5 +994,17 @@ export class TypeUuid {
     static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
     static registerClass(targetClass: any, typeUuid: string): void;
 }
+
+// @public
+function updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
+
+// @public
+function updateTimesAsync(path: string, times: IFileSystemUpdateTimeParameters): Promise<void>;
+
+// @public
+function writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
+
+// @public
+function writeFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
 
 ```
