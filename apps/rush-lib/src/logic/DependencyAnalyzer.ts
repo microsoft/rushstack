@@ -28,7 +28,7 @@ export interface IDependencyAnalysis {
 
 export class DependencyAnalyzer {
   private static _dependencyAnalyzerByRushConfiguration:
-    | Map<RushConfiguration, DependencyAnalyzer>
+    | WeakMap<RushConfiguration, DependencyAnalyzer>
     | undefined;
 
   private _rushConfiguration: RushConfiguration;
@@ -40,7 +40,7 @@ export class DependencyAnalyzer {
 
   public static forRushConfiguration(rushConfiguration: RushConfiguration): DependencyAnalyzer {
     if (!DependencyAnalyzer._dependencyAnalyzerByRushConfiguration) {
-      DependencyAnalyzer._dependencyAnalyzerByRushConfiguration = new Map();
+      DependencyAnalyzer._dependencyAnalyzerByRushConfiguration = new WeakMap();
     }
 
     let analyzer: DependencyAnalyzer | undefined =
@@ -168,7 +168,7 @@ export class DependencyAnalyzer {
   ): Map<string, string> {
     // Only generate implicitly preferred versions for variants that request it
     const useImplicitlyPreferredVersions: boolean =
-      commonVersionsConfiguration.implicitlyPreferredVersions ?? true
+      commonVersionsConfiguration.implicitlyPreferredVersions ?? true;
 
     if (useImplicitlyPreferredVersions) {
       // If any dependency has more than one version, then filter it out (since we don't know which version
