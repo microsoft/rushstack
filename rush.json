@@ -993,7 +993,7 @@
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true
     },
 
     // "webpack" folder (alphabetical order)

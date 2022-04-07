@@ -1,1 +1,3 @@
-throw new Error('Not implemented yet!');
+import { RushServePlugin } from './RushServePlugin';
+export { RushServePlugin };
+export default RushServePlugin;
