@@ -76,6 +76,34 @@ describe(OperationExecutionManager.name, () => {
           })
       ).toThrowErrorMatchingSnapshot();
     });
+
+    it('createsWithPercentageBasedParallelism', () => {
+      expect(
+        () =>
+          new OperationExecutionManager(new Set(), {
+            quietMode: false,
+            debugMode: false,
+            parallelism: '50%',
+            showTimeline: false,
+            changedProjectsOnly: false,
+            destination: mockWritable
+          })
+      ).toBeInstanceOf(Function);
+    });
+
+    it('throwsErrorOnInvalidParallelismPercentage', () => {
+      expect(
+        () =>
+          new OperationExecutionManager(new Set(), {
+            quietMode: false,
+            debugMode: false,
+            parallelism: '200%',
+            showTimeline: false,
+            changedProjectsOnly: false,
+            destination: mockWritable
+          })
+      ).toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('Error logging', () => {

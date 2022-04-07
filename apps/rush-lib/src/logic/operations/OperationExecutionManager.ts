@@ -157,13 +157,26 @@ export class OperationExecutionManager {
       if (parallelism === 'max') {
         this._parallelism = numberOfCores;
       } else {
-        const parallelismInt: number = parseInt(parallelism, 10);
+        const parallelismAsNumber: number = Number(parallelism);
 
-        if (isNaN(parallelismInt)) {
-          throw new Error(`Invalid parallelism value of '${parallelism}', expected a number or 'max'`);
+        if (typeof parallelism === 'string' && parallelism.trim().endsWith('%')) {
+          const parsedPercentage: number = Number(parallelism.trim().replace(/\%$/, ''));
+
+          if (parsedPercentage <= 0 || parsedPercentage > 100) {
+            throw new Error(
+              `Invalid percentage value of '${parallelism}', value cannot be less than '0%' or more than '100%'`
+            );
+          }
+
+          const workers: number = Math.floor((parallelismAsNumber / 100) * numberOfCores);
+          this._parallelism = Math.max(workers, 1);
+        } else if (!isNaN(parallelismAsNumber)) {
+          this._parallelism = Math.max(parallelismAsNumber, 1);
+        } else {
+          throw new Error(
+            `Invalid parallelism value of '${parallelism}', expected a number, a percentage, or 'max'`
+          );
         }
-
-        this._parallelism = parallelismInt;
       }
     } else {
       // If an explicit parallelism number wasn't provided, then choose a sensible
