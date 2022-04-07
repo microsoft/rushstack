@@ -77,6 +77,10 @@ export class ExportAnalyzer {
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
   private readonly _astNamespaceImportByModule: Map<AstModule, AstNamespaceImport> = new Map();
 
+  // Used and populated by `hasPathMappingMatch`.
+  private readonly _exactPathMappings: Set<string> = new Set<string>();
+  private readonly _prefixPathMappings: string[] = [];
+
   public constructor(
     program: ts.Program,
     typeChecker: ts.TypeChecker,
@@ -307,21 +311,28 @@ export class ExportAnalyzer {
    * - Paths with wildcards at the end: `some/path/to/*`
    */
   private _hasPathMappingMatch(moduleSpecifier: string): boolean {
+    // If there are no path mappings, there cannot be a match.
     const pathKeys: string[] = Object.keys(this._program.getCompilerOptions().paths || {});
-    for (const pathKey of pathKeys) {
-      if (pathKey.endsWith('*')) {
-        const pathPrefix: string = pathKey.slice(0, -1);
-        if (moduleSpecifier.startsWith(pathPrefix)) {
-          return true;
-        }
-      } else {
-        if (pathKey === moduleSpecifier) {
-          return true;
+    if (pathKeys.length === 0) {
+      return false;
+    }
+
+    // Otherwise, if we haven't already, initialize some data structures to optimize how we evaluate path
+    // mapping matches. This will only be run once for all calls of `_hasPathMappingMatch`.
+    if (this._exactPathMappings.size === 0 && this._prefixPathMappings.length === 0) {
+      for (const pathKey of pathKeys) {
+        if (pathKey.endsWith('*')) {
+          this._prefixPathMappings.push(pathKey.slice(0, -1));
+        } else {
+          this._exactPathMappings.add(pathKey);
         }
       }
     }
 
-    return false;
+    return (
+      this._exactPathMappings.has(moduleSpecifier) ||
+      this._prefixPathMappings.some((prefix) => moduleSpecifier.startsWith(prefix))
+    );
   }
 
   /**
