@@ -9,7 +9,7 @@ export default class RushMockFlushTelemetryPlugin {
   public apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void {
     async function flushTelemetry(data: ReadonlyArray<ITelemetryData>): Promise<void> {
       const targetPath: string = `${rushConfiguration.commonTempFolder}/test-telemetry.json`;
-      await JsonFile.saveAsync(data, targetPath);
+      await JsonFile.saveAsync(data, targetPath, { ignoreUndefinedValues: true });
     }
 
     rushSession.hooks.flushTelemetry.tapPromise(RushMockFlushTelemetryPlugin.name, flushTelemetry);
