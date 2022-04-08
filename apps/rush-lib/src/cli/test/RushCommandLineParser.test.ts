@@ -4,7 +4,7 @@
 import './mockRushCommandLineParser';
 
 import * as path from 'path';
-import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, Path, PackageJsonLookup } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { Autoinstaller } from '../../logic/Autoinstaller';
@@ -48,12 +48,25 @@ function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
   return spawnMock;
 }
 
+function getDirnameInLib(): string {
+  // Run these tests in the /lib folder because some of them require compiled output
+  const projectRootFolder: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
+  const projectRootRelativeDirnamePath: string = path.relative(projectRootFolder, __dirname);
+  const projectRootRelativeLibDirnamePath: string = projectRootRelativeDirnamePath.replace(/^src/, 'lib');
+  const dirnameInLIb: string = `${projectRootFolder}/${projectRootRelativeLibDirnamePath}`;
+  return dirnameInLIb;
+}
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const __dirnameInLib: string = getDirnameInLib();
+
 /**
  * Helper to set up a test instance for RushCommandLineParser.
  */
 function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
+  // Run these tests in the /lib folder because some of them require compiled output
   // Point to the test repo folder
-  const startPath: string = `${__dirname}/${repoName}`;
+  const startPath: string = `${__dirnameInLib}/${repoName}`;
 
   // The `build` task is hard-coded to be incremental. So delete the package-deps file folder in
   // the test repo to guarantee the test actually runs.
@@ -115,7 +128,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -123,7 +136,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
 
@@ -147,7 +160,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -155,7 +168,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
     });
@@ -181,7 +194,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -189,7 +202,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
 
@@ -213,7 +226,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -221,7 +234,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
     });
@@ -246,7 +259,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -254,7 +267,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
 
@@ -278,7 +291,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -286,7 +299,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
     });
@@ -347,18 +360,8 @@ describe(RushCommandLineParser.name, () => {
         FileSystem.deleteFile(telemetryFilePath);
 
         /**
-         * Mimic autoinstaller behavior
+         * The plugin is copied into the autoinstaller folder using an option in /config/heft.json
          */
-        const pluginPackageName: string = 'rush-mock-flush-telemetry-plugin';
-        const pluginInstallPath: string = path.join(
-          __dirname,
-          `${repoName}/common/autoinstallers/plugins/node_modules/${pluginPackageName}`
-        );
-        FileSystem.copyFiles({
-          sourcePath: path.join(__dirname, pluginPackageName),
-          destinationPath: pluginInstallPath
-        });
-
         jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async function () {});
 
         await expect(instance.parser.execute()).resolves.toEqual(true);
