@@ -5,7 +5,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "apps/api-extractor-model"
+    "directory": "libraries/api-extractor-model"
   },
   "homepage": "https://api-extractor.com",
   "main": "lib/index.js",

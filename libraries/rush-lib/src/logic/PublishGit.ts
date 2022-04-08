@@ -104,7 +104,9 @@ export class PublishGit {
       '-a',
       preReleaseName ? `${tagName}-${preReleaseName}` : tagName,
       '-m',
-      preReleaseName ? `${packageName} v${packageVersion}-${preReleaseName}` : `${packageName} v${packageVersion}`,
+      preReleaseName
+        ? `${packageName} v${packageVersion}-${preReleaseName}`
+        : `${packageName} v${packageVersion}`,
       ...(commitId ? [commitId] : [])
     ]);
   }
