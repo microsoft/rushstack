@@ -82,7 +82,7 @@ export class Telemetry {
     }
 
     const fullPath: string = this._getFilePath();
-    JsonFile.save(this._store, fullPath, { ensureFolderExists: true });
+    JsonFile.save(this._store, fullPath, { ensureFolderExists: true, ignoreUndefinedValues: true });
     if (this._rushSession.hooks.flushTelemetry.isUsed()) {
       /**
        * User defined flushTelemetry should not block anything, so we don't await here,
