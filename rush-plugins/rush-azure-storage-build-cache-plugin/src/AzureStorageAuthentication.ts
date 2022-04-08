@@ -100,19 +100,20 @@ export class AzureStorageAuthentication {
    * Launches an interactive flow to renew a cached credential.
    *
    * @param terminal - The terminal to log output to
-   * @param expiresOn - If specified, and a cached credential exists that is still valid after `expiresOn`, no action will be taken.
+   * @param onlyIfExistingCredentialExpiresAfter - If specified, and a cached credential exists that is still valid
+   * after the date specified, no action will be taken.
    */
-  public async updateCachedCredentialInteractiveAsync(terminal: ITerminal, expiresOn?: Date): Promise<void> {
+  public async updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void> {
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        if (expiresOn) {
-          const expiry: Date | undefined = credentialsCache.tryGetCacheEntry(
+        if (onlyIfExistingCredentialExpiresAfter) {
+          const existingCredentialExpiration: Date | undefined = credentialsCache.tryGetCacheEntry(
             this._credentialCacheId
           )?.expires;
-          if (expiry && expiry > expiresOn) {
+          if (existingCredentialExpiration && existingCredentialExpiration > onlyIfExistingCredentialExpiresAfter) {
             return;
           }
         }
