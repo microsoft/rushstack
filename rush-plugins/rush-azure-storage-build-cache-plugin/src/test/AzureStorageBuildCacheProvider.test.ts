@@ -4,7 +4,8 @@
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { CredentialCache, EnvironmentConfiguration, RushUserConfiguration } from '@rushstack/rush-sdk';
 
-import { AzureEnvironmentNames, AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
+import { AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
+import type { AzureEnvironmentNames } from '../AzureStorageAuthentication';
 
 describe(AzureStorageBuildCacheProvider.name, () => {
   beforeEach(() => {
