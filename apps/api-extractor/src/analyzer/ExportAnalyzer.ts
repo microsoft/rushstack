@@ -56,14 +56,6 @@ interface IAstModuleReference {
  * generating .d.ts rollups.
  */
 export class ExportAnalyzer {
-  // Captures "@a/b" or "d" from these examples:
-  //   @a/b
-  //   @a/b/c
-  //   d
-  //   d/
-  //   d/e
-  private static _modulePathRegExp: RegExp = /^((?:@[^@\/\s]+\/)?[^@\/\s]+)(?:.*)$/;
-
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
   private readonly _bundledPackageNames: ReadonlySet<string>;
@@ -278,7 +270,16 @@ export class ExportAnalyzer {
       return false;
     }
 
-    return !!resolvedModule.isExternalLibraryImport;
+    if (resolvedModule.isExternalLibraryImport === undefined) {
+      // This presumably means the compiler couldn't figure out whether the module was external, but we're not
+      // sure how this can happen.
+      throw new InternalError(
+        `Cannot determine whether the module is external ${JSON.stringify(moduleSpecifier)}\n` +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
+    }
+
+    return resolvedModule.isExternalLibraryImport;
   }
 
   /**
