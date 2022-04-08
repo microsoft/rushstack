@@ -53,8 +53,10 @@ export class PluginManager {
     const builtInPluginConfigurations: IBuiltInPluginConfiguration[] = options.builtInPluginConfigurations;
 
     const ownPackageJsonDependencies: Record<string, string> = require('../../package.json').dependencies;
-    function tryAddBuiltInPlugin(builtInPluginName: string): void {
-      const pluginPackageName: string = `@rushstack/${builtInPluginName}`;
+    function tryAddBuiltInPlugin(builtInPluginName: string, pluginPackageName?: string): void {
+      if (!pluginPackageName) {
+        pluginPackageName = `@rushstack/${builtInPluginName}`;
+      }
       if (ownPackageJsonDependencies[pluginPackageName]) {
         builtInPluginConfigurations.push({
           packageName: pluginPackageName,
@@ -69,6 +71,10 @@ export class PluginManager {
 
     tryAddBuiltInPlugin('rush-amazon-s3-build-cache-plugin');
     tryAddBuiltInPlugin('rush-azure-storage-build-cache-plugin');
+    tryAddBuiltInPlugin(
+      'rush-azure-interactive-auth-plugin',
+      '@rushstack/rush-azure-storage-build-cache-plugin'
+    );
 
     this._builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
       return new BuiltInPluginLoader({

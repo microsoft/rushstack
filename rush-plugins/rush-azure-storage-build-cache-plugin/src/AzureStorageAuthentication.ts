@@ -96,15 +96,30 @@ export class AzureStorageAuthentication {
     );
   }
 
-  public async updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void> {
-    const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync(terminal);
-    const sasString: string = sasQueryParameters.toString();
-
+  /**
+   * Launches an interactive flow to renew a cached credential.
+   *
+   * @param terminal - The terminal to log output to
+   * @param expiresOn - If specified, and a cached credential exists that is still valid after `expiresOn`, no action will be taken.
+   */
+  public async updateCachedCredentialInteractiveAsync(terminal: ITerminal, expiresOn?: Date): Promise<void> {
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
+        if (expiresOn) {
+          const expiry: Date | undefined = credentialsCache.tryGetCacheEntry(
+            this._credentialCacheId
+          )?.expires;
+          if (expiry && expiry > expiresOn) {
+            return;
+          }
+        }
+
+        const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync(terminal);
+        const sasString: string = sasQueryParameters.toString();
+
         credentialsCache.setCacheEntry(this._credentialCacheId, sasString, sasQueryParameters.expiresOn);
         await credentialsCache.saveIfModifiedAsync();
       }

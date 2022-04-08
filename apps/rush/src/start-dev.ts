@@ -11,8 +11,10 @@ import { RushCommandSelector } from './RushCommandSelector';
 
 const builtInPluginConfigurations: rushLib._IBuiltInPluginConfiguration[] = [];
 
-function includePlugin(pluginName: string): void {
-  const pluginPackageName: string = `@rushstack/${pluginName}`;
+function includePlugin(pluginName: string, pluginPackageName?: string): void {
+  if (!pluginPackageName) {
+    pluginPackageName = `@rushstack/${pluginName}`;
+  }
   builtInPluginConfigurations.push({
     packageName: pluginPackageName,
     pluginName: pluginName,
@@ -25,6 +27,8 @@ function includePlugin(pluginName: string): void {
 
 includePlugin('rush-amazon-s3-build-cache-plugin');
 includePlugin('rush-azure-storage-build-cache-plugin');
+// Including this here so that developers can reuse it without installing the plugin a second time
+includePlugin('rush-azure-interactive-auth-plugin', '@rushstack/rush-azure-storage-build-cache-plugin');
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 RushCommandSelector.execute(currentPackageVersion, rushLib, {
