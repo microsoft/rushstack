@@ -107,3 +107,5 @@ export { ILogger } from './pluginFramework/logging/Logger';
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
+
+export { ITelemetryData } from './logic/Telemetry';

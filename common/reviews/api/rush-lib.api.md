@@ -6,6 +6,7 @@
 
 /// <reference types="node" />
 
+import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
@@ -445,6 +446,20 @@ export interface IRushSessionOptions {
     terminalProvider: ITerminalProvider;
 }
 
+// @beta (undocumented)
+export interface ITelemetryData {
+    readonly durationInSeconds: number;
+    // (undocumented)
+    readonly extraData?: {
+        [key: string]: string;
+    };
+    readonly name: string;
+    readonly platform?: string;
+    readonly result: 'Succeeded' | 'Failed';
+    readonly rushVersion?: string;
+    readonly timestamp?: number;
+}
+
 // @public
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
@@ -823,6 +838,7 @@ export class _RushGlobalFolder {
 
 // @beta
 export class RushLifecycleHooks {
+    flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
     initialize: AsyncSeriesHook<IRushCommand>;
     runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
     runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;

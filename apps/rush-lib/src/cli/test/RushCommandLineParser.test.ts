@@ -3,9 +3,12 @@
 
 import './mockRushCommandLineParser';
 
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import * as path from 'path';
+import { FileSystem, JsonFile, Path, PackageJsonLookup } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { Autoinstaller } from '../../logic/Autoinstaller';
+import { ITelemetryData } from '../../logic/Telemetry';
 
 /**
  * See `__mocks__/child_process.js`.
@@ -45,12 +48,25 @@ function setSpawnMock(options?: ISpawnMockConfig): jest.Mock {
   return spawnMock;
 }
 
+function getDirnameInLib(): string {
+  // Run these tests in the /lib folder because some of them require compiled output
+  const projectRootFolder: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
+  const projectRootRelativeDirnamePath: string = path.relative(projectRootFolder, __dirname);
+  const projectRootRelativeLibDirnamePath: string = projectRootRelativeDirnamePath.replace(/^src/, 'lib');
+  const dirnameInLIb: string = `${projectRootFolder}/${projectRootRelativeLibDirnamePath}`;
+  return dirnameInLIb;
+}
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const __dirnameInLib: string = getDirnameInLib();
+
 /**
  * Helper to set up a test instance for RushCommandLineParser.
  */
 function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
+  // Run these tests in the /lib folder because some of them require compiled output
   // Point to the test repo folder
-  const startPath: string = `${__dirname}/${repoName}`;
+  const startPath: string = `${__dirnameInLib}/${repoName}`;
 
   // The `build` task is hard-coded to be incremental. So delete the package-deps file folder in
   // the test repo to guarantee the test actually runs.
@@ -112,7 +128,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -120,7 +136,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
 
@@ -144,7 +160,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -152,7 +168,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
     });
@@ -178,7 +194,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -186,7 +202,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
 
@@ -210,7 +226,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -218,7 +234,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
     });
@@ -243,7 +259,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -251,7 +267,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
 
@@ -275,7 +291,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/a`);
+          pathEquals(firstSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/a`);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
@@ -283,7 +299,7 @@ describe(RushCommandLineParser.name, () => {
             expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
           );
           expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirname}/${repoName}/b`);
+          pathEquals(secondSpawn[SPAWN_ARG_OPTIONS].cwd, `${__dirnameInLib}/${repoName}/b`);
         });
       });
     });
@@ -333,6 +349,30 @@ describe(RushCommandLineParser.name, () => {
         }).toThrowErrorMatchingInlineSnapshot(
           `"command-line.json defines a command \\"rebuild\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"rebuild\\"."`
         );
+      });
+    });
+
+    describe('in repo plugin custom flushTelemetry', () => {
+      it('creates a custom telemetry file', async () => {
+        const repoName: string = 'tapFlushTelemetryAndRunBuildActionRepo';
+        const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
+        const telemetryFilePath: string = `${instance.parser.rushConfiguration.commonTempFolder}/test-telemetry.json`;
+        FileSystem.deleteFile(telemetryFilePath);
+
+        /**
+         * The plugin is copied into the autoinstaller folder using an option in /config/heft.json
+         */
+        jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async function () {});
+
+        await expect(instance.parser.execute()).resolves.toEqual(true);
+
+        expect(FileSystem.exists(telemetryFilePath)).toEqual(true);
+
+        let telemetryStore: ITelemetryData[] = [];
+        expect(() => {
+          telemetryStore = JsonFile.load(telemetryFilePath);
+        }).not.toThrowError();
+        expect(telemetryStore?.[0].name).toEqual('build');
       });
     });
   });

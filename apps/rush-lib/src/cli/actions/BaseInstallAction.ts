@@ -197,7 +197,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       };
       this.parser.telemetry.log({
         name: 'install',
-        duration: stopwatch.duration,
+        durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData
       });

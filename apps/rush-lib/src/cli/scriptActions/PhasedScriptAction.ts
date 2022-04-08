@@ -495,7 +495,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     if (this.parser.telemetry) {
       this.parser.telemetry.log({
         name: this.actionName,
-        duration: stopwatch.duration,
+        durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData
       });

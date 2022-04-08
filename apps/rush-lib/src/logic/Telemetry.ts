@@ -2,21 +2,45 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, FileSystemStats, Import } from '@rushstack/node-core-library';
+import { FileSystem, FileSystemStats, JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
+import { RushSession } from '../pluginFramework/RushSession';
 
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
-
+/**
+ * @beta
+ */
 export interface ITelemetryData {
-  name: string;
-  duration: number;
-  result: string;
-  timestamp?: number;
-  platform?: string;
-  rushVersion?: string;
-  extraData?: { [key: string]: string };
+  /**
+   * Command name
+   * @example 'build'
+   */
+  readonly name: string;
+  /**
+   * Duration in seconds
+   */
+  readonly durationInSeconds: number;
+  /**
+   * The result of the command
+   */
+  readonly result: 'Succeeded' | 'Failed';
+  /**
+   * The timestamp of the telemetry logging
+   * @example 1648001893024
+   */
+  readonly timestamp?: number;
+  /**
+   * The platform the command was executed on, reads from process.platform
+   * @example darwin, win32, linux...
+   */
+  readonly platform?: string;
+  /**
+   * The rush version
+   * @example 5.63.0
+   */
+  readonly rushVersion?: string;
+  readonly extraData?: { [key: string]: string };
 }
 
 const MAX_FILE_COUNT: number = 100;
@@ -26,9 +50,12 @@ export class Telemetry {
   private _store: ITelemetryData[];
   private _dataFolder: string;
   private _rushConfiguration: RushConfiguration;
+  private _rushSession: RushSession;
+  private _flushAsyncTasks: Set<Promise<void>> = new Set();
 
-  public constructor(rushConfiguration: RushConfiguration) {
+  public constructor(rushConfiguration: RushConfiguration, rushSession: RushSession) {
     this._rushConfiguration = rushConfiguration;
+    this._rushSession = rushSession;
     this._enabled = this._rushConfiguration.telemetryEnabled;
     this._store = [];
 
@@ -40,23 +67,48 @@ export class Telemetry {
     if (!this._enabled) {
       return;
     }
-    const data: ITelemetryData = lodash.cloneDeep(telemetryData);
-    data.timestamp = data.timestamp || new Date().getTime();
-    data.platform = data.platform || process.platform;
-    data.rushVersion = data.rushVersion || Rush.version;
+    const data: ITelemetryData = {
+      ...telemetryData,
+      timestamp: telemetryData.timestamp || new Date().getTime(),
+      platform: telemetryData.platform || process.platform,
+      rushVersion: telemetryData.rushVersion || Rush.version
+    };
     this._store.push(data);
   }
 
-  public flush(writeFile: (file: string, data: string) => void = FileSystem.writeFile): void {
+  public flush(): void {
     if (!this._enabled || this._store.length === 0) {
       return;
     }
 
     const fullPath: string = this._getFilePath();
-    FileSystem.ensureFolder(this._dataFolder);
-    writeFile(fullPath, JSON.stringify(this._store));
+    JsonFile.save(this._store, fullPath, { ensureFolderExists: true, ignoreUndefinedValues: true });
+    if (this._rushSession.hooks.flushTelemetry.isUsed()) {
+      /**
+       * User defined flushTelemetry should not block anything, so we don't await here,
+       * and store the promise into a list so that we can await it later.
+       */
+      const asyncTaskPromise: Promise<void> = this._rushSession.hooks.flushTelemetry.promise(this._store);
+      this._flushAsyncTasks.add(asyncTaskPromise);
+      asyncTaskPromise.then(
+        () => {
+          this._flushAsyncTasks.delete(asyncTaskPromise);
+        },
+        () => {
+          this._flushAsyncTasks.delete(asyncTaskPromise);
+        }
+      );
+    }
+
     this._store = [];
     this._cleanUp();
+  }
+
+  /**
+   * There are some async tasks that are not finished when the process is exiting.
+   */
+  public async ensureFlushedAsync(): Promise<void> {
+    await Promise.all(this._flushAsyncTasks);
   }
 
   public get store(): ITelemetryData[] {
