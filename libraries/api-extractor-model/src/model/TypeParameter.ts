@@ -15,6 +15,7 @@ export interface ITypeParameterOptions {
   name: string;
   constraintExcerpt: Excerpt;
   defaultTypeExcerpt: Excerpt;
+  isOptional: boolean;
   parent: ApiTypeParameterListMixin;
 }
 
@@ -78,12 +79,18 @@ export class TypeParameter {
    */
   public name: string;
 
+  /**
+   * Whether the type parameter is optional. True IFF there exists a `defaultTypeExcerpt`.
+   */
+  public isOptional: boolean;
+
   private _parent: ApiTypeParameterListMixin;
 
   public constructor(options: ITypeParameterOptions) {
     this.name = options.name;
     this.constraintExcerpt = options.constraintExcerpt;
     this.defaultTypeExcerpt = options.defaultTypeExcerpt;
+    this.isOptional = options.isOptional;
     this._parent = options.parent;
   }
 

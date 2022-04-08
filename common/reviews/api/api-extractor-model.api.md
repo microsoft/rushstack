@@ -876,6 +876,8 @@ export interface ITypeParameterOptions {
     // (undocumented)
     defaultTypeExcerpt: Excerpt;
     // (undocumented)
+    isOptional: boolean;
+    // (undocumented)
     name: string;
     // (undocumented)
     parent: ApiTypeParameterListMixin;
@@ -915,6 +917,7 @@ export class TypeParameter {
     constructor(options: ITypeParameterOptions);
     readonly constraintExcerpt: Excerpt;
     readonly defaultTypeExcerpt: Excerpt;
+    isOptional: boolean;
     name: string;
     get tsdocTypeParamBlock(): tsdoc.DocParamBlock | undefined;
 }
