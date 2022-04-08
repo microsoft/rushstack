@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 06 Apr 2022 22:35:23 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Apr 2022 20:05:59 GMT and should not be manually modified.
+
+## 7.21.0
+Fri, 08 Apr 2022 20:05:59 GMT
+
+### Minor changes
+
+- Add support for projects that use tsconfig.json "baseUrl" and "paths" settings to remap imports of local files (GitHub #3291)
 
 ## 7.20.1
 Wed, 06 Apr 2022 22:35:23 GMT

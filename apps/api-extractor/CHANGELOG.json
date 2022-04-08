@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.21.0",
+      "tag": "@microsoft/api-extractor_v7.21.0",
+      "date": "Fri, 08 Apr 2022 20:05:59 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for projects that use tsconfig.json \"baseUrl\" and \"paths\" settings to remap imports of local files (GitHub #3291)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.20.1",
       "tag": "@microsoft/api-extractor_v7.20.1",
       "date": "Wed, 06 Apr 2022 22:35:23 GMT",
