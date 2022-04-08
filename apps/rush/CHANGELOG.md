@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 08 Apr 2022 06:16:59 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Apr 2022 23:10:18 GMT and should not be manually modified.
+
+## 5.65.1
+Fri, 08 Apr 2022 23:10:18 GMT
+
+_Version update only_
 
 ## 5.65.0
 Fri, 08 Apr 2022 06:16:59 GMT
