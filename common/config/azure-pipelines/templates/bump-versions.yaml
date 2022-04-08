@@ -1,0 +1,7 @@
+parameters:
+  - name: VersionPolicyName
+    type: string
+
+steps:
+  - script: 'node common/scripts/install-run-rush.js version --bump --version-policy ${{ parameters.VersionPolicyName }} --target-branch $(Build.SourceBranchName)'
+    displayName: 'Rush Version (Policy: ${{ parameters.VersionPolicyName }})'
