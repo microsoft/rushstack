@@ -98,10 +98,12 @@ export class ExportAnalyzer {
    *
    * @param moduleReference - contextual information about the import statement that took us to this source file.
    * or `undefined` if this source file is the initial entry point
+   * @param isExternal - whether the given `moduleReference` is external.
    */
   public fetchAstModuleFromSourceFile(
     sourceFile: ts.SourceFile,
-    moduleReference: IAstModuleReference | undefined
+    moduleReference: IAstModuleReference | undefined,
+    isExternal: boolean
   ): AstModule {
     const moduleSymbol: ts.Symbol = this._getModuleSymbolFromSourceFile(sourceFile, moduleReference);
 
@@ -111,14 +113,8 @@ export class ExportAnalyzer {
     let astModule: AstModule | undefined = this._astModulesByModuleSymbol.get(moduleSymbol);
     if (!astModule) {
       // (If moduleReference === undefined, then this is the entry point of the local project being analyzed.)
-      let externalModulePath: string | undefined = undefined;
-      if (moduleReference !== undefined) {
-        // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
-        // but ignore:  "../folder/LocalFile"
-        if (this._isExternalModulePath(moduleReference.moduleSpecifier)) {
-          externalModulePath = moduleReference.moduleSpecifier;
-        }
-      }
+      const externalModulePath: string | undefined =
+        moduleReference !== undefined && isExternal ? moduleReference.moduleSpecifier : undefined;
 
       astModule = new AstModule({ sourceFile, moduleSymbol, externalModulePath });
 
@@ -270,69 +266,23 @@ export class ExportAnalyzer {
   /**
    * Returns true if the module specifier refers to an external package.  Ignores packages listed in the
    * "bundledPackages" setting from the api-extractor.json config file.
-   *
-   * @remarks
-   * Examples:
-   *
-   * - NO:  `./file1`
-   * - YES: `library1/path/path`
-   * - YES: `@my-scope/my-package`
-   * - NO:  `@my-scope/my-package` (if present in tsconfig `paths` mapping).
    */
-  private _isExternalModulePath(moduleSpecifier: string): boolean {
-    if (ts.isExternalModuleNameRelative(moduleSpecifier)) {
-      return false;
-    }
-
-    // Any module specifiers that match a path mapping entry are considered part of the current package.
-    if (this._hasPathMappingMatch(moduleSpecifier)) {
-      return false;
-    }
-
-    const match: RegExpExecArray | null = ExportAnalyzer._modulePathRegExp.exec(moduleSpecifier);
-    if (match) {
-      // Extract "@my-scope/my-package" from "@my-scope/my-package/path/module"
-      const packageName: string = match[1];
-      if (this._bundledPackageNames.has(packageName)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Returns true if the module specifier matches a path mapping entry in the tsconfig `paths` map.
-   *
-   * @remarks
-   * Handles two types of path mappings:
-   *
-   * - Simple path-like strings: `some/path/to/import`
-   * - Paths with wildcards at the end: `some/path/to/*`
-   */
-  private _hasPathMappingMatch(moduleSpecifier: string): boolean {
-    // If there are no path mappings, there cannot be a match.
-    const pathKeys: string[] = Object.keys(this._program.getCompilerOptions().paths || {});
-    if (pathKeys.length === 0) {
-      return false;
-    }
-
-    // Otherwise, if we haven't already, initialize some data structures to optimize how we evaluate path
-    // mapping matches. This will only be run once for all calls of `_hasPathMappingMatch`.
-    if (this._exactPathMappings.size === 0 && this._prefixPathMappings.length === 0) {
-      for (const pathKey of pathKeys) {
-        if (pathKey.endsWith('*')) {
-          this._prefixPathMappings.push(pathKey.slice(0, -1));
-        } else {
-          this._exactPathMappings.add(pathKey);
-        }
-      }
-    }
-
-    return (
-      this._exactPathMappings.has(moduleSpecifier) ||
-      this._prefixPathMappings.some((prefix) => moduleSpecifier.startsWith(prefix))
+  private _isExternalModulePath(
+    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode,
+    moduleSpecifier: string
+  ): boolean {
+    const resolvedModule: ts.ResolvedModuleFull = this._getResolvedModule(
+      importOrExportDeclaration,
+      moduleSpecifier
     );
+
+    // Either something like `jquery` or `@microsoft/api-extractor`.
+    const packageName: string | undefined = resolvedModule.packageId?.name;
+    if (packageName !== undefined && this._bundledPackageNames.has(packageName)) {
+      return false;
+    }
+
+    return !!resolvedModule.isExternalLibraryImport;
   }
 
   /**
@@ -612,10 +562,7 @@ export class ExportAnalyzer {
 
       // Ignore "export { A }" without a module specifier
       if (exportDeclaration.moduleSpecifier) {
-        const externalModulePath: string | undefined = this._tryGetExternalModulePath(
-          exportDeclaration,
-          declarationSymbol
-        );
+        const externalModulePath: string | undefined = this._tryGetExternalModulePath(exportDeclaration);
 
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
@@ -641,10 +588,7 @@ export class ExportAnalyzer {
       TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
     if (importDeclaration) {
-      const externalModulePath: string | undefined = this._tryGetExternalModulePath(
-        importDeclaration,
-        declarationSymbol
-      );
+      const externalModulePath: string | undefined = this._tryGetExternalModulePath(importDeclaration);
 
       if (declaration.kind === ts.SyntaxKind.NamespaceImport) {
         // EXAMPLE:
@@ -896,22 +840,10 @@ export class ExportAnalyzer {
   }
 
   private _tryGetExternalModulePath(
-    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode,
-    exportSymbol?: ts.Symbol
+    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode
   ): string | undefined {
-    // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
-    const moduleSpecifier: string | undefined =
-      TypeScriptHelpers.getModuleSpecifier(importOrExportDeclaration);
-    if (!moduleSpecifier) {
-      throw new InternalError(
-        'Unable to parse module specifier\n' +
-          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
-      );
-    }
-
-    // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
-    // but ignore:  "../folder/LocalFile"
-    if (this._isExternalModulePath(moduleSpecifier)) {
+    const moduleSpecifier: string = this._getModuleSpecifier(importOrExportDeclaration);
+    if (this._isExternalModulePath(importOrExportDeclaration, moduleSpecifier)) {
       return moduleSpecifier;
     }
 
@@ -926,31 +858,11 @@ export class ExportAnalyzer {
     importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration,
     exportSymbol: ts.Symbol
   ): AstModule {
-    // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
-    const moduleSpecifier: string | undefined =
-      TypeScriptHelpers.getModuleSpecifier(importOrExportDeclaration);
-    if (!moduleSpecifier) {
-      throw new InternalError(
-        'Unable to parse module specifier\n' +
-          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
-      );
-    }
-
-    const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
-      importOrExportDeclaration.getSourceFile(),
+    const moduleSpecifier: string = this._getModuleSpecifier(importOrExportDeclaration);
+    const resolvedModule: ts.ResolvedModuleFull = this._getResolvedModule(
+      importOrExportDeclaration,
       moduleSpecifier
     );
-
-    if (resolvedModule === undefined) {
-      // This should not happen, since getResolvedModule() specifically looks up names that the compiler
-      // found in export declarations for this source file
-      //
-      // Encountered in https://github.com/microsoft/rushstack/issues/1914
-      throw new InternalError(
-        `getResolvedModule() could not resolve module name ${JSON.stringify(moduleSpecifier)}\n` +
-          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
-      );
-    }
 
     // Map the filename back to the corresponding SourceFile. This circuitous approach is needed because
     // we have no way to access the compiler's internal resolveExternalModuleName() function
@@ -966,13 +878,15 @@ export class ExportAnalyzer {
       );
     }
 
+    const isExternal: boolean = this._isExternalModulePath(importOrExportDeclaration, moduleSpecifier);
     const moduleReference: IAstModuleReference = {
       moduleSpecifier: moduleSpecifier,
       moduleSpecifierSymbol: exportSymbol
     };
     const specifierAstModule: AstModule = this.fetchAstModuleFromSourceFile(
       moduleSourceFile,
-      moduleReference
+      moduleReference,
+      isExternal
     );
 
     return specifierAstModule;
@@ -1006,5 +920,45 @@ export class ExportAnalyzer {
     }
 
     return astImport;
+  }
+
+  private _getResolvedModule(
+    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode,
+    moduleSpecifier: string
+  ): ts.ResolvedModuleFull {
+    const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
+      importOrExportDeclaration.getSourceFile(),
+      moduleSpecifier
+    );
+
+    if (resolvedModule === undefined) {
+      // This should not happen, since getResolvedModule() specifically looks up names that the compiler
+      // found in export declarations for this source file
+      //
+      // Encountered in https://github.com/microsoft/rushstack/issues/1914
+      throw new InternalError(
+        `getResolvedModule() could not resolve module name ${JSON.stringify(moduleSpecifier)}\n` +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
+    }
+
+    return resolvedModule;
+  }
+
+  private _getModuleSpecifier(
+    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode
+  ): string {
+    // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
+    const moduleSpecifier: string | undefined =
+      TypeScriptHelpers.getModuleSpecifier(importOrExportDeclaration);
+
+    if (!moduleSpecifier) {
+      throw new InternalError(
+        'Unable to parse module specifier\n' +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
+    }
+
+    return moduleSpecifier;
   }
 }

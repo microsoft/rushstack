@@ -11,6 +11,15 @@ export abstract class AbstractClass {
 }
 
 // @public (undocumented)
+export enum RegularEnum {
+    One = 1,
+
+    Two = RegularEnum.One + 1,
+
+    Zero
+}
+
+// @public (undocumented)
 export class SimpleClass {
     // (undocumented)
     public member(): void {}
