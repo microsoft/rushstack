@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-extractor",
       "comment": "Bug fix to API Extractor to properly process projects with path mappings in their tsconfig.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor"
