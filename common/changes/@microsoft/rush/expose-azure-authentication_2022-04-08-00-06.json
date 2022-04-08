@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Expose APIs for managing Azure credentials from @rushstack/rush-azure-storage-build-cache-plugin.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
