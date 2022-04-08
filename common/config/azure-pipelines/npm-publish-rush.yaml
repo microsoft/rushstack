@@ -7,13 +7,18 @@ steps:
   - checkout: self
     persistCredentials: true
   - template: templates/build.yaml
+  - template: templates/bump-versions.yaml
+    parameters:
+      VersionPolicyName: noRush
+  - template: templates/bump-versions.yaml
+    parameters:
+      VersionPolicyName: rush
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: noRush
+  - script: 'node apps/rush-lib/scripts/plugins-prepublish.js'
+    displayName: 'Prepublish workaround'
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: rush
-      PrePublishSteps:
-        - script: 'node apps/rush-lib/scripts/plugins-prepublish.js'
-          displayName: 'Prepublish workaround'
   - template: templates/record-published-versions.yaml
