@@ -174,7 +174,7 @@ export class AddAction extends BaseRushAction {
       this.rushGlobalFolder
     );
 
-    await updater.doRushAdd({
+    await updater.doRushAddAsync({
       projects: projects,
       packagesToAdd,
       devDependency: this._devDependencyFlag.value,
