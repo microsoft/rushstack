@@ -146,9 +146,7 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   public flushTelemetry(): void {
-    if (this.telemetry) {
-      this.telemetry.flush();
-    }
+    this.telemetry?.flush();
   }
 
   public async execute(args?: string[]): Promise<boolean> {

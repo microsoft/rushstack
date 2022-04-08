@@ -5,9 +5,26 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
 import { Telemetry, ITelemetryData } from '../Telemetry';
 import { RushSession } from '../../pluginFramework/RushSession';
-import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, JsonFile } from '@rushstack/node-core-library';
+
+interface ITelemetryPrivateMembers extends Omit<Telemetry, '_flushAsyncTasks'> {
+  _flushAsyncTasks: Map<symbol, Promise<void>>;
+}
 
 describe(Telemetry.name, () => {
+  const mockedJsonFileSave: jest.SpyInstance = jest.spyOn(JsonFile, 'save').mockImplementation(() => {
+    /* don't actually write anything */
+    return true;
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   it('adds data to store if telemetry is enabled', () => {
     const filename: string = `${__dirname}/telemetry/telemetryEnabled.json`;
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
@@ -78,14 +95,13 @@ describe(Telemetry.name, () => {
     };
 
     telemetry.log(logData);
-    let logFile: string;
-    let dataToWrite: string;
-    telemetry.flush((file, data) => {
-      logFile = file;
-      dataToWrite = data;
-    });
-    expect(logFile!.match(/telemetry_.*\.json/)).toBeDefined();
-    expect(dataToWrite!).toEqual(JSON.stringify([logData]));
+    telemetry.flush();
+    expect(mockedJsonFileSave).toHaveBeenCalledTimes(1);
+    expect(mockedJsonFileSave).toHaveBeenCalledWith(
+      [logData],
+      expect.stringMatching(/telemetry_.*\.json/),
+      expect.anything()
+    );
     expect(telemetry.store).toEqual([]);
   });
 
@@ -110,7 +126,7 @@ describe(Telemetry.name, () => {
     expect(result.timestamp).toBeDefined();
   });
 
-  it('calls custom flush telemetry', () => {
+  it('calls custom flush telemetry', async () => {
     const filename: string = `${__dirname}/telemetry/telemetryEnabled.json`;
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
     const rushSession: RushSession = new RushSession({
@@ -119,7 +135,10 @@ describe(Telemetry.name, () => {
     });
     const customFlushTelemetry: jest.Mock = jest.fn();
     rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
-    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    const telemetry: ITelemetryPrivateMembers = new Telemetry(
+      rushConfig,
+      rushSession
+    ) as unknown as ITelemetryPrivateMembers;
     const logData: ITelemetryData = {
       name: 'testData1',
       duration: 100,
@@ -130,9 +149,14 @@ describe(Telemetry.name, () => {
     telemetry.flush();
     expect(customFlushTelemetry).toHaveBeenCalledTimes(1);
     expect(customFlushTelemetry.mock.calls[0][0][0]).toEqual(expect.objectContaining(logData));
+
+    await telemetry.ensureFlushedAsync();
+
+    // Ensure the tasks get cleaned up
+    expect(telemetry._flushAsyncTasks.size).toEqual(0);
   });
 
-  it('calls custom flush telemetry twice', () => {
+  it('calls custom flush telemetry twice', async () => {
     const filename: string = `${__dirname}/telemetry/telemetryEnabled.json`;
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(filename);
     const rushSession: RushSession = new RushSession({
@@ -141,7 +165,10 @@ describe(Telemetry.name, () => {
     });
     const customFlushTelemetry: jest.Mock = jest.fn();
     rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
-    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    const telemetry: ITelemetryPrivateMembers = new Telemetry(
+      rushConfig,
+      rushSession
+    ) as unknown as ITelemetryPrivateMembers;
     const logData: ITelemetryData = {
       name: 'testData1',
       duration: 100,
@@ -163,5 +190,10 @@ describe(Telemetry.name, () => {
     telemetry.flush();
     expect(customFlushTelemetry).toHaveBeenCalledTimes(2);
     expect(customFlushTelemetry.mock.calls[1][0][0]).toEqual(expect.objectContaining(logData2));
+
+    await telemetry.ensureFlushedAsync();
+
+    // Ensure the tasks get cleaned up
+    expect(telemetry._flushAsyncTasks.size).toEqual(0);
   });
 });
