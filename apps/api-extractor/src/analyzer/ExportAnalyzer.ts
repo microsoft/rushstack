@@ -274,7 +274,7 @@ export class ExportAnalyzer {
       // This presumably means the compiler couldn't figure out whether the module was external, but we're not
       // sure how this can happen.
       throw new InternalError(
-        `Cannot determine whether the module is external ${JSON.stringify(moduleSpecifier)}\n` +
+        `Cannot determine whether the module ${JSON.stringify(moduleSpecifier)} is external\n` +
           SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
       );
     }
