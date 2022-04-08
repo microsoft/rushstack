@@ -1,6 +1,22 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 01 Apr 2022 04:51:31 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Apr 2022 06:16:59 GMT and should not be manually modified.
+
+## 5.65.0
+Fri, 08 Apr 2022 06:16:59 GMT
+
+### Updates
+
+- Expose APIs for managing Azure credentials from @rushstack/rush-azure-storage-build-cache-plugin.
+- Add flushTelemetry hook
+- Fix an edge case where `rush update` fails in a PNPM workspaces repo with no dependencies.
+- Fix some issues with "rush add"'s ability to determine which version to use when adding a dependency that is already present in the repo.
+- Add support for percentage values for --parallelism flag, eg. "50%".
+- Improve retry logic in the Amazon S3 cloud cache plugin and improve reporting when the user is not authenticated.
+- Add an additional plugin to rush-azure-storage-build-cache-plugin that can be used to prompt for Azure authentication before a command runs.
+- Change the way "rush change" prints long lists of package names to include an "(and <count> more)" line after the first five listed by name.
+- Add a "tags" field to project definitions in rush.json. These may be used to select projects, for example, "rush list --only tag:my-custom-tag".
+- Fix a typo in output of `rush change -v`
 
 ## 5.64.0
 Fri, 01 Apr 2022 04:51:31 GMT

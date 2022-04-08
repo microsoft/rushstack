@@ -2,6 +2,45 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.65.0",
+      "tag": "@microsoft/rush_v5.65.0",
+      "date": "Fri, 08 Apr 2022 06:16:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Expose APIs for managing Azure credentials from @rushstack/rush-azure-storage-build-cache-plugin."
+          },
+          {
+            "comment": "Add flushTelemetry hook"
+          },
+          {
+            "comment": "Fix an edge case where `rush update` fails in a PNPM workspaces repo with no dependencies."
+          },
+          {
+            "comment": "Fix some issues with \"rush add\"'s ability to determine which version to use when adding a dependency that is already present in the repo."
+          },
+          {
+            "comment": "Add support for percentage values for --parallelism flag, eg. \"50%\"."
+          },
+          {
+            "comment": "Improve retry logic in the Amazon S3 cloud cache plugin and improve reporting when the user is not authenticated."
+          },
+          {
+            "comment": "Add an additional plugin to rush-azure-storage-build-cache-plugin that can be used to prompt for Azure authentication before a command runs."
+          },
+          {
+            "comment": "Change the way \"rush change\" prints long lists of package names to include an \"(and <count> more)\" line after the first five listed by name."
+          },
+          {
+            "comment": "Add a \"tags\" field to project definitions in rush.json. These may be used to select projects, for example, \"rush list --only tag:my-custom-tag\"."
+          },
+          {
+            "comment": "Fix a typo in output of `rush change -v`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.64.0",
       "tag": "@microsoft/rush_v5.64.0",
       "date": "Fri, 01 Apr 2022 04:51:31 GMT",
