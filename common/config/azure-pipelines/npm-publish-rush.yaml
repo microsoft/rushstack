@@ -13,11 +13,11 @@ steps:
   - template: templates/bump-versions.yaml
     parameters:
       VersionPolicyName: rush
+  - script: 'node apps/rush-lib/scripts/plugins-prepublish.js'
+    displayName: 'Prepublish workaround'
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: noRush
-  - script: 'node apps/rush-lib/scripts/plugins-prepublish.js'
-    displayName: 'Prepublish workaround'
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: rush
