@@ -80,7 +80,7 @@ export class ProjectWatcher {
     }
 
     const previousState: ProjectChangeAnalyzer = initialChangeResult.state;
-    const repoRoot: string = Path.convertToSlashes(this._rushConfiguration.rushJsonFolder);
+    const repoRoot: string = previousState._data.rootDir;
 
     const pathsToWatch: Set<string> = new Set();
 
