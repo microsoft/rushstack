@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Bug fix to API Extractor to properly process projects with path mappings in their tsconfig.",
+      "comment": "Add support for projects that use tsconfig.json \"baseUrl\" and \"paths\" settings to remap imports of local files (GitHub #3291)",
       "type": "minor"
     }
   ],
