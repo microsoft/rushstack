@@ -3,7 +3,7 @@
 
 import { Import } from '@rushstack/node-core-library';
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
-import type { AzureEnvironmentNames } from './AzureStorageBuildCacheProvider';
+import type { AzureEnvironmentNames } from './AzureStorageAuthentication';
 
 const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCacheProvider') = Import.lazy(
   './AzureStorageBuildCacheProvider',
