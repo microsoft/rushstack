@@ -43,8 +43,7 @@ export class AzureStorageAuthentication {
     tryGetCachedCredentialAsync(): Promise<string | undefined>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
-    // (undocumented)
-    updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void>;
+    updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void>;
 }
 
 // @public (undocumented)
