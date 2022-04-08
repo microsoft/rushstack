@@ -35,7 +35,7 @@ describe(Telemetry.name, () => {
     const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
     const logData1: ITelemetryData = {
       name: 'testData1',
-      duration: 100,
+      durationInSeconds: 100,
       result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
@@ -44,7 +44,7 @@ describe(Telemetry.name, () => {
 
     const logData2: ITelemetryData = {
       name: 'testData2',
-      duration: 100,
+      durationInSeconds: 100,
       result: 'Failed',
       timestamp: new Date().getTime(),
       platform: process.platform,
@@ -66,7 +66,7 @@ describe(Telemetry.name, () => {
     const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
     const logData: ITelemetryData = {
       name: 'testData',
-      duration: 100,
+      durationInSeconds: 100,
       result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
@@ -87,7 +87,7 @@ describe(Telemetry.name, () => {
     const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
     const logData: ITelemetryData = {
       name: 'testData1',
-      duration: 100,
+      durationInSeconds: 100,
       result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
@@ -115,7 +115,7 @@ describe(Telemetry.name, () => {
     const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
     const logData: ITelemetryData = {
       name: 'testData1',
-      duration: 100,
+      durationInSeconds: 100,
       result: 'Succeeded'
     };
 
@@ -141,7 +141,7 @@ describe(Telemetry.name, () => {
     ) as unknown as ITelemetryPrivateMembers;
     const logData: ITelemetryData = {
       name: 'testData1',
-      duration: 100,
+      durationInSeconds: 100,
       result: 'Succeeded'
     };
 
@@ -171,7 +171,7 @@ describe(Telemetry.name, () => {
     ) as unknown as ITelemetryPrivateMembers;
     const logData: ITelemetryData = {
       name: 'testData1',
-      duration: 100,
+      durationInSeconds: 100,
       result: 'Succeeded'
     };
 
@@ -182,7 +182,7 @@ describe(Telemetry.name, () => {
 
     const logData2: ITelemetryData = {
       name: 'testData2',
-      duration: 200,
+      durationInSeconds: 200,
       result: 'Failed'
     };
 

@@ -20,7 +20,7 @@ export interface ITelemetryData {
   /**
    * Duration in seconds
    */
-  readonly duration: number;
+  readonly durationInSeconds: number;
   /**
    * The result of the command
    */
