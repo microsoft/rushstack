@@ -77,10 +77,6 @@ export class ExportAnalyzer {
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
   private readonly _astNamespaceImportByModule: Map<AstModule, AstNamespaceImport> = new Map();
 
-  // Used and populated by `_hasPathMappingMatch`.
-  private readonly _exactPathMappings: Set<string> = new Set<string>();
-  private readonly _prefixPathMappings: string[] = [];
-
   public constructor(
     program: ts.Program,
     typeChecker: ts.TypeChecker,
