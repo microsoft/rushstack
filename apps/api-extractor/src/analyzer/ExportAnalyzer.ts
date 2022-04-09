@@ -259,10 +259,16 @@ export class ExportAnalyzer {
     importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode,
     moduleSpecifier: string
   ): boolean {
-    const resolvedModule: ts.ResolvedModuleFull = this._getResolvedModule(
-      importOrExportDeclaration,
+    const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
+      importOrExportDeclaration.getSourceFile(),
       moduleSpecifier
     );
+
+    // This is known to happen for ambient modules. For now, just treat all ambient modules as
+    // external. This is tracked by https://github.com/microsoft/rushstack/issues/3335.
+    if (resolvedModule === undefined) {
+      return true;
+    }
 
     // Either something like `jquery` or `@microsoft/api-extractor`.
     const packageName: string | undefined = resolvedModule.packageId?.name;
@@ -856,10 +862,21 @@ export class ExportAnalyzer {
     exportSymbol: ts.Symbol
   ): AstModule {
     const moduleSpecifier: string = this._getModuleSpecifier(importOrExportDeclaration);
-    const resolvedModule: ts.ResolvedModuleFull = this._getResolvedModule(
-      importOrExportDeclaration,
+    const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
+      importOrExportDeclaration.getSourceFile(),
       moduleSpecifier
     );
+
+    if (resolvedModule === undefined) {
+      // This should not happen, since getResolvedModule() specifically looks up names that the compiler
+      // found in export declarations for this source file
+      //
+      // Encountered in https://github.com/microsoft/rushstack/issues/1914
+      throw new InternalError(
+        `getResolvedModule() could not resolve module name ${JSON.stringify(moduleSpecifier)}\n` +
+          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
+      );
+    }
 
     // Map the filename back to the corresponding SourceFile. This circuitous approach is needed because
     // we have no way to access the compiler's internal resolveExternalModuleName() function
@@ -917,29 +934,6 @@ export class ExportAnalyzer {
     }
 
     return astImport;
-  }
-
-  private _getResolvedModule(
-    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode,
-    moduleSpecifier: string
-  ): ts.ResolvedModuleFull {
-    const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
-      importOrExportDeclaration.getSourceFile(),
-      moduleSpecifier
-    );
-
-    if (resolvedModule === undefined) {
-      // This should not happen, since getResolvedModule() specifically looks up names that the compiler
-      // found in export declarations for this source file
-      //
-      // Encountered in https://github.com/microsoft/rushstack/issues/1914
-      throw new InternalError(
-        `getResolvedModule() could not resolve module name ${JSON.stringify(moduleSpecifier)}\n` +
-          SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
-      );
-    }
-
-    return resolvedModule;
   }
 
   private _getModuleSpecifier(
