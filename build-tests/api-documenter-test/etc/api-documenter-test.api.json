@@ -587,7 +587,7 @@
                   "typeParameterName": "T",
                   "constraintTokenRange": {
                     "startIndex": 1,
-                    "endIndex": 3
+                    "endIndex": 2
                   },
                   "defaultTypeTokenRange": {
                     "startIndex": 4,
