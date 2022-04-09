@@ -44,7 +44,7 @@ designed around the the requirements of large teams and projects.
 - **Explicit:**  The ruleset does not import any "recommended" templates from other ESLint packages.  This avoids
   worrying about precedence issues due to import order.  It also eliminates confusion caused by files
   overriding/undoing settings from another file.  Each rule is configured once, in one
-  [easy-to-read file](https://github.com/microsoft/rushstack/blob/master/stack/eslint-config/profile/_common.js).
+  [easy-to-read file](https://github.com/microsoft/rushstack/blob/main/stack/eslint-config/profile/_common.js).
 
 - **Minimal configuration:**  To use this ruleset, your **.eslintrc.js** will need to choose one **"profile"**
   and possibly one or two **"mixins"** that cover special cases.  Beyond that, our goal is to reduce monorepo
@@ -268,7 +268,7 @@ module.exports = {
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/stack/eslint-config/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/stack/eslint-config/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/eslint-config` is part of the [Rush Stack](https://rushstack.io/) family of projects.

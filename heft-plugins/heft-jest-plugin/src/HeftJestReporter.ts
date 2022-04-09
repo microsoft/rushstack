@@ -29,7 +29,7 @@ export interface IHeftJestReporterOptions {
  * Jest behavior.
  *
  * For reference, Jest's default implementation is here:
- * https://github.com/facebook/jest/blob/master/packages/jest-reporters/src/default_reporter.ts
+ * https://github.com/facebook/jest/blob/main/packages/jest-reporters/src/default_reporter.ts
  */
 export default class HeftJestReporter implements Reporter {
   private _terminal: ITerminal;

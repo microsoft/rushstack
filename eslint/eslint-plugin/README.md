@@ -229,7 +229,7 @@ let e: E._PrivateMember = E._PrivateMember; // okay, because _PrivateMember is d
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/stack/eslint-plugin/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/stack/eslint-plugin/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/eslint-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

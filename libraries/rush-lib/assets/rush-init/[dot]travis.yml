@@ -5,7 +5,7 @@ script:
   - set -e
 
   - echo 'Checking for missing change logs...' && echo -en 'travis_fold:start:change\\r'
-  - git fetch origin master:refs/remotes/origin/master -a
+  - git fetch origin main:refs/remotes/origin/main -a
   - node common/scripts/install-run-rush.js change -v
   - echo -en 'travis_fold:end:change\\r'
 

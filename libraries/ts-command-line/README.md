@@ -139,7 +139,7 @@ When we run `widget --verbose push --force`, the `PushAction.onExecute()` method
 
 ---
 
-**For a more complete example, take a look at the [ts-command-line-test](https://github.com/microsoft/rushstack/tree/master/build-tests/ts-command-line-test) sample project.**
+**For a more complete example, take a look at the [ts-command-line-test](https://github.com/microsoft/rushstack/tree/main/build-tests/ts-command-line-test) sample project.**
 
 ---
 
@@ -238,7 +238,7 @@ You can also mix the two models.  For example, we could augment the `WidgetComma
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/libraries/ts-command-line/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/libraries/ts-command-line/CHANGELOG.md) - Find
   out what's new in the latest version
 - [API Reference](https://rushstack.io/pages/api/ts-command-line/)
 

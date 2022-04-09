@@ -285,7 +285,7 @@ Optional arguments:
                         out branch with the specified branch to determine 
                         which projects were changed. If this parameter is not 
                         specified, the checked out branch is compared against 
-                        the \\"master\\" branch.
+                        the \\"main\\" branch.
   --overwrite           If a changefile already exists, overwrite without 
                         prompting (or erroring in --bulk mode).
   --email EMAIL         The email address to use in changefiles. If this 

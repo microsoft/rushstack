@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Rename the \"master\" branch to \"main\".",
+      "type": "patch",
+      "packageName": "@rushstack/heft-webpack4-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

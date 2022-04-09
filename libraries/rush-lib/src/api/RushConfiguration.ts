@@ -43,7 +43,7 @@ const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = Import.laz
 );
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
-const DEFAULT_BRANCH: string = 'master';
+const DEFAULT_BRANCH: string = 'main';
 const DEFAULT_REMOTE: string = 'origin';
 
 /**

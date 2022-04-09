@@ -18,7 +18,7 @@ API documentation for this package: https://rushjs.io/pages/advanced/api/
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/rush/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/apps/rush/CHANGELOG.md) - Find
   out what's new in the latest version
 - [API Reference](https://api.rushstack.io/pages/rush-lib/)
 
