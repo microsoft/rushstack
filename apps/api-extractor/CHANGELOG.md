@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 08 Apr 2022 20:05:59 GMT and should not be manually modified.
+This log was last generated on Sat, 09 Apr 2022 02:24:26 GMT and should not be manually modified.
+
+## 7.21.1
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
 
 ## 7.21.0
 Fri, 08 Apr 2022 20:05:59 GMT

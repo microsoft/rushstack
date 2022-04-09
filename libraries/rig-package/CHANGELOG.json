@@ -2,6 +2,23 @@
   "name": "@rushstack/rig-package",
   "entries": [
     {
+      "version": "0.3.9",
+      "tag": "@rushstack/rig-package_v0.3.9",
+      "date": "Sat, 09 Apr 2022 02:24:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.8",
       "tag": "@rushstack/rig-package_v0.3.8",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",

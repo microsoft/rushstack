@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.1.2",
+      "tag": "@rushstack/eslint-patch_v1.1.2",
+      "date": "Sat, 09 Apr 2022 02:24:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.1",
       "tag": "@rushstack/eslint-patch_v1.1.1",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",

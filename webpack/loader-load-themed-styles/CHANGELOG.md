@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Fri, 08 Apr 2022 20:05:59 GMT and should not be manually modified.
+This log was last generated on Sat, 09 Apr 2022 02:24:26 GMT and should not be manually modified.
+
+## 1.9.134
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
 
 ## 1.9.133
 Fri, 08 Apr 2022 20:05:59 GMT

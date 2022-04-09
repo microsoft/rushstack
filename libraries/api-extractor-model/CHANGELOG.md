@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Thu, 31 Mar 2022 02:06:05 GMT and should not be manually modified.
+This log was last generated on Sat, 09 Apr 2022 02:24:26 GMT and should not be manually modified.
+
+## 7.16.1
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+- Update a path in the README.
 
 ## 7.16.0
 Thu, 31 Mar 2022 02:06:05 GMT

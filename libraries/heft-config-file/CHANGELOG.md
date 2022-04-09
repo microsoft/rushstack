@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Sat, 19 Mar 2022 08:05:37 GMT and should not be manually modified.
+This log was last generated on Sat, 09 Apr 2022 02:24:26 GMT and should not be manually modified.
+
+## 0.8.1
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
 
 ## 0.8.0
 Sat, 19 Mar 2022 08:05:37 GMT

@@ -2,6 +2,29 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.16.1",
+      "tag": "@microsoft/api-extractor-model_v7.16.1",
+      "date": "Sat, 09 Apr 2022 02:24:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          },
+          {
+            "comment": "Update a path in the README."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.16.0",
       "tag": "@microsoft/api-extractor-model_v7.16.0",
       "date": "Thu, 31 Mar 2022 02:06:05 GMT",
