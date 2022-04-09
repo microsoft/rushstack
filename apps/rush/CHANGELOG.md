@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 08 Apr 2022 23:10:18 GMT and should not be manually modified.
+This log was last generated on Sat, 09 Apr 2022 02:24:40 GMT and should not be manually modified.
+
+## 5.66.0
+Sat, 09 Apr 2022 02:24:40 GMT
+
+### Updates
+
+- (BREAKING CHANGE) Update references to the default branch to reference "main" instead of "master".
 
 ## 5.65.1
 Fri, 08 Apr 2022 23:10:18 GMT

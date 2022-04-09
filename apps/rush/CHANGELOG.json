@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.66.0",
+      "tag": "@microsoft/rush_v5.66.0",
+      "date": "Sat, 09 Apr 2022 02:24:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(BREAKING CHANGE) Update references to the default branch to reference \"main\" instead of \"master\"."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.65.1",
       "tag": "@microsoft/rush_v5.65.1",
       "date": "Fri, 08 Apr 2022 23:10:18 GMT",
