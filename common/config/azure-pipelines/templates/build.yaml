@@ -18,7 +18,7 @@ steps:
       # Prevent time-based browserslist update warning
       # See https://github.com/microsoft/rushstack/issues/2981
       BROWSERSLIST_IGNORE_OLD_DATA: 1
-  - script: 'node libraries/rush-lib/lib/start.js build --verbose --production'
+  - script: 'node apps/rush/lib/start-dev.js build --verbose --production --timeline'
     displayName: 'Rush Build (rush-lib)'
     env:
       # Prevent time-based browserslist update warning
