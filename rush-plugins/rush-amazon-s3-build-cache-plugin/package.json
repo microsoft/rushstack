@@ -4,7 +4,8 @@
   "description": "Rush plugin for Amazon S3 cloud build cache",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/heft-plugins/heft-webpack5-plugin"
+    "url": "https://github.com/microsoft/rushstack",
+    "directory": "rush-plugins/rush-amazon-s3-build-cache-plugin"
   },
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",

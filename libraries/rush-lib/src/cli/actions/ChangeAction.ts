@@ -120,7 +120,7 @@ export class ChangeAction extends BaseRushAction {
       description:
         'If this parameter is specified, compare the checked out branch with the specified branch to ' +
         'determine which projects were changed. If this parameter is not specified, the checked out branch ' +
-        'is compared against the "master" branch.'
+        'is compared against the "main" branch.'
     });
 
     this._overwriteFlagParameter = this.defineFlagParameter({

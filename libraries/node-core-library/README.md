@@ -31,7 +31,7 @@ demonstrated.  If in doubt, create your own NPM package.
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/libraries/node-core-library/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/libraries/node-core-library/CHANGELOG.md) - Find
   out what's new in the latest version
 - [API Reference](https://rushstack.io/pages/api/node-core-library/)
 

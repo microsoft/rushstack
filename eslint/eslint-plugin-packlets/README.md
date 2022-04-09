@@ -192,7 +192,7 @@ module.exports = {
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/stack/eslint-plugin-packlets/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/stack/eslint-plugin-packlets/CHANGELOG.md) - Find
   out what's new in the latest version
 - [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) documentation
 

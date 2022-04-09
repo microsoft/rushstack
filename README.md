@@ -3,7 +3,7 @@
 <p align="center"><a href="https://rushstack.io/">https://rushstack.io/</a></p>
 </td></tr></table>
 
-[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://dev.azure.com/RushStack/GitHubProjects/_apis/build/status/rushstack/rushstack%20CI%20Build?branchName=master)](https://dev.azure.com/RushStack/GitHubProjects/_build/latest?definitionId=3&branchName=master)
+[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://dev.azure.com/RushStack/GitHubProjects/_apis/build/status/rushstack/rushstack%20CI%20Build?branchName=main)](https://dev.azure.com/RushStack/GitHubProjects/_build/latest?definitionId=3&branchName=main)
 
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
 for large scale TypeScript monorepos.

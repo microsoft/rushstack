@@ -79,10 +79,10 @@ the Rush Stack website.
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/heft/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/apps/heft/CHANGELOG.md) - Find
   out what's new in the latest version
 - [UPGRADING.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/heft/UPGRADING.md) - Instructions
+  https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md) - Instructions
   for migrating existing projects to use a newer version of Heft
 - [API Reference](https://rushstack.io/pages/api/heft/)
 

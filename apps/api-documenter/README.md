@@ -12,7 +12,7 @@ documentation.
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/api-documenter/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/apps/api-documenter/CHANGELOG.md) - Find
   out what's new in the latest version
 - [API Reference](https://rushstack.io/pages/api/api-documenter/)
 
