@@ -22,7 +22,7 @@ importers:
       js-yaml: ~3.13.1
       resolve: ~1.17.0
     dependencies:
-      '@microsoft/api-extractor-model': link:../api-extractor-model
+      '@microsoft/api-extractor-model': link:../../libraries/api-extractor-model
       '@microsoft/tsdoc': 0.13.2
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
@@ -61,7 +61,7 @@ importers:
       source-map: ~0.6.1
       typescript: ~4.5.2
     dependencies:
-      '@microsoft/api-extractor-model': link:../api-extractor-model
+      '@microsoft/api-extractor-model': link:../../libraries/api-extractor-model
       '@microsoft/tsdoc': 0.13.2
       '@microsoft/tsdoc-config': 0.15.2
       '@rushstack/node-core-library': link:../../libraries/node-core-library
@@ -82,27 +82,6 @@ importers:
       '@types/node': 12.20.24
       '@types/resolve': 1.17.1
       '@types/semver': 7.3.5
-
-  ../../apps/api-extractor-model:
-    specifiers:
-      '@microsoft/tsdoc': 0.13.2
-      '@microsoft/tsdoc-config': ~0.15.2
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.44.2
-      '@rushstack/heft-node-rig': 1.7.1
-      '@rushstack/node-core-library': workspace:*
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-    dependencies:
-      '@microsoft/tsdoc': 0.13.2
-      '@microsoft/tsdoc-config': 0.15.2
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-    devDependencies:
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': 0.44.2
-      '@rushstack/heft-node-rig': 1.7.1_@rushstack+heft@0.44.2
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
 
   ../../apps/heft:
     specifiers:
@@ -199,7 +178,7 @@ importers:
       colors: ~1.2.1
       semver: ~7.3.0
     dependencies:
-      '@microsoft/rush-lib': link:../rush-lib
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       colors: 1.2.5
       semver: 7.3.5
@@ -212,115 +191,6 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/semver': 7.3.5
-
-  ../../apps/rush-lib:
-    specifiers:
-      '@pnpm/link-bins': ~5.3.7
-      '@pnpm/logger': 4.0.0
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-config-file': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
-      '@rushstack/node-core-library': workspace:*
-      '@rushstack/package-deps-hash': workspace:*
-      '@rushstack/rig-package': workspace:*
-      '@rushstack/stream-collator': workspace:*
-      '@rushstack/terminal': workspace:*
-      '@rushstack/ts-command-line': workspace:*
-      '@types/cli-table': 0.3.0
-      '@types/glob': 7.1.1
-      '@types/heft-jest': 1.0.1
-      '@types/inquirer': 7.3.1
-      '@types/js-yaml': 3.12.1
-      '@types/lodash': 4.14.116
-      '@types/node': 12.20.24
-      '@types/node-fetch': 1.6.9
-      '@types/npm-package-arg': 6.1.0
-      '@types/npm-packlist': ~1.1.1
-      '@types/read-package-tree': 5.1.0
-      '@types/resolve': 1.17.1
-      '@types/semver': 7.3.5
-      '@types/ssri': ~7.1.0
-      '@types/strict-uri-encode': 2.0.0
-      '@types/tar': 4.0.3
-      '@yarnpkg/lockfile': ~1.0.2
-      builtin-modules: ~3.1.0
-      cli-table: ~0.3.1
-      colors: ~1.2.1
-      git-repo-info: ~2.1.0
-      glob: ~7.0.5
-      glob-escape: ~0.0.2
-      https-proxy-agent: ~5.0.0
-      ignore: ~5.1.6
-      inquirer: ~7.3.3
-      js-yaml: ~3.13.1
-      jszip: ~3.7.1
-      lodash: ~4.17.15
-      node-fetch: 2.6.7
-      npm-package-arg: ~6.1.0
-      npm-packlist: ~2.1.2
-      read-package-tree: ~5.1.5
-      resolve: ~1.17.0
-      semver: ~7.3.0
-      ssri: ~8.0.0
-      strict-uri-encode: ~2.0.0
-      tapable: 2.2.1
-      tar: ~5.0.10
-      true-case-path: ~2.2.1
-    dependencies:
-      '@pnpm/link-bins': 5.3.25
-      '@rushstack/heft-config-file': link:../../libraries/heft-config-file
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-      '@rushstack/package-deps-hash': link:../../libraries/package-deps-hash
-      '@rushstack/rig-package': link:../../libraries/rig-package
-      '@rushstack/stream-collator': link:../../libraries/stream-collator
-      '@rushstack/terminal': link:../../libraries/terminal
-      '@rushstack/ts-command-line': link:../../libraries/ts-command-line
-      '@types/node-fetch': 1.6.9
-      '@yarnpkg/lockfile': 1.0.2
-      builtin-modules: 3.1.0
-      cli-table: 0.3.11
-      colors: 1.2.5
-      git-repo-info: 2.1.1
-      glob: 7.0.6
-      glob-escape: 0.0.2
-      https-proxy-agent: 5.0.0
-      ignore: 5.1.9
-      inquirer: 7.3.3
-      js-yaml: 3.13.1
-      jszip: 3.7.1
-      lodash: 4.17.21
-      node-fetch: 2.6.7
-      npm-package-arg: 6.1.1
-      npm-packlist: 2.1.5
-      read-package-tree: 5.1.6
-      resolve: 1.17.0
-      semver: 7.3.5
-      ssri: 8.0.1
-      strict-uri-encode: 2.0.0
-      tapable: 2.2.1
-      tar: 5.0.11
-      true-case-path: 2.2.1
-    devDependencies:
-      '@pnpm/logger': 4.0.0
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@types/cli-table': 0.3.0
-      '@types/glob': 7.1.1
-      '@types/heft-jest': 1.0.1
-      '@types/inquirer': 7.3.1
-      '@types/js-yaml': 3.12.1
-      '@types/lodash': 4.14.116
-      '@types/node': 12.20.24
-      '@types/npm-package-arg': 6.1.0
-      '@types/npm-packlist': 1.1.2
-      '@types/read-package-tree': 5.1.0
-      '@types/resolve': 1.17.1
-      '@types/semver': 7.3.5
-      '@types/ssri': 7.1.1
-      '@types/strict-uri-encode': 2.0.0
-      '@types/tar': 4.0.3
 
   ../../build-tests-samples/heft-node-basic-tutorial:
     specifiers:
@@ -1137,7 +1007,7 @@ importers:
       '@microsoft/rush-lib': workspace:*
       '@rushstack/node-core-library': workspace:*
     devDependencies:
-      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
 
   ../../build-tests/localization-plugin-test-01:
@@ -1257,7 +1127,7 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@types/node': 12.20.24
     dependencies:
-      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -1604,6 +1474,27 @@ importers:
       '@types/node': 12.20.24
       webpack: 5.68.0
 
+  ../../libraries/api-extractor-model:
+    specifiers:
+      '@microsoft/tsdoc': 0.13.2
+      '@microsoft/tsdoc-config': ~0.15.2
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': 0.44.2
+      '@rushstack/heft-node-rig': 1.7.1
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+    dependencies:
+      '@microsoft/tsdoc': 0.13.2
+      '@microsoft/tsdoc-config': 0.15.2
+      '@rushstack/node-core-library': link:../node-core-library
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': 0.44.2
+      '@rushstack/heft-node-rig': 1.7.1_@rushstack+heft@0.44.2
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+
   ../../libraries/debug-certificate-manager:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -1743,6 +1634,115 @@ importers:
       '@types/resolve': 1.17.1
       ajv: 6.12.6
 
+  ../../libraries/rush-lib:
+    specifiers:
+      '@pnpm/link-bins': ~5.3.7
+      '@pnpm/logger': 4.0.0
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-config-file': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/package-deps-hash': workspace:*
+      '@rushstack/rig-package': workspace:*
+      '@rushstack/stream-collator': workspace:*
+      '@rushstack/terminal': workspace:*
+      '@rushstack/ts-command-line': workspace:*
+      '@types/cli-table': 0.3.0
+      '@types/glob': 7.1.1
+      '@types/heft-jest': 1.0.1
+      '@types/inquirer': 7.3.1
+      '@types/js-yaml': 3.12.1
+      '@types/lodash': 4.14.116
+      '@types/node': 12.20.24
+      '@types/node-fetch': 1.6.9
+      '@types/npm-package-arg': 6.1.0
+      '@types/npm-packlist': ~1.1.1
+      '@types/read-package-tree': 5.1.0
+      '@types/resolve': 1.17.1
+      '@types/semver': 7.3.5
+      '@types/ssri': ~7.1.0
+      '@types/strict-uri-encode': 2.0.0
+      '@types/tar': 4.0.3
+      '@yarnpkg/lockfile': ~1.0.2
+      builtin-modules: ~3.1.0
+      cli-table: ~0.3.1
+      colors: ~1.2.1
+      git-repo-info: ~2.1.0
+      glob: ~7.0.5
+      glob-escape: ~0.0.2
+      https-proxy-agent: ~5.0.0
+      ignore: ~5.1.6
+      inquirer: ~7.3.3
+      js-yaml: ~3.13.1
+      jszip: ~3.7.1
+      lodash: ~4.17.15
+      node-fetch: 2.6.7
+      npm-package-arg: ~6.1.0
+      npm-packlist: ~2.1.2
+      read-package-tree: ~5.1.5
+      resolve: ~1.17.0
+      semver: ~7.3.0
+      ssri: ~8.0.0
+      strict-uri-encode: ~2.0.0
+      tapable: 2.2.1
+      tar: ~5.0.10
+      true-case-path: ~2.2.1
+    dependencies:
+      '@pnpm/link-bins': 5.3.25
+      '@rushstack/heft-config-file': link:../heft-config-file
+      '@rushstack/node-core-library': link:../node-core-library
+      '@rushstack/package-deps-hash': link:../package-deps-hash
+      '@rushstack/rig-package': link:../rig-package
+      '@rushstack/stream-collator': link:../stream-collator
+      '@rushstack/terminal': link:../terminal
+      '@rushstack/ts-command-line': link:../ts-command-line
+      '@types/node-fetch': 1.6.9
+      '@yarnpkg/lockfile': 1.0.2
+      builtin-modules: 3.1.0
+      cli-table: 0.3.11
+      colors: 1.2.5
+      git-repo-info: 2.1.1
+      glob: 7.0.6
+      glob-escape: 0.0.2
+      https-proxy-agent: 5.0.0
+      ignore: 5.1.9
+      inquirer: 7.3.3
+      js-yaml: 3.13.1
+      jszip: 3.7.1
+      lodash: 4.17.21
+      node-fetch: 2.6.7
+      npm-package-arg: 6.1.1
+      npm-packlist: 2.1.5
+      read-package-tree: 5.1.6
+      resolve: 1.17.0
+      semver: 7.3.5
+      ssri: 8.0.1
+      strict-uri-encode: 2.0.0
+      tapable: 2.2.1
+      tar: 5.0.11
+      true-case-path: 2.2.1
+    devDependencies:
+      '@pnpm/logger': 4.0.0
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/cli-table': 0.3.0
+      '@types/glob': 7.1.1
+      '@types/heft-jest': 1.0.1
+      '@types/inquirer': 7.3.1
+      '@types/js-yaml': 3.12.1
+      '@types/lodash': 4.14.116
+      '@types/node': 12.20.24
+      '@types/npm-package-arg': 6.1.0
+      '@types/npm-packlist': 1.1.2
+      '@types/read-package-tree': 5.1.0
+      '@types/resolve': 1.17.1
+      '@types/semver': 7.3.5
+      '@types/ssri': 7.1.1
+      '@types/strict-uri-encode': 2.0.0
+      '@types/tar': 4.0.3
+
   ../../libraries/rush-sdk:
     specifiers:
       '@microsoft/rush-lib': workspace:*
@@ -1763,7 +1763,7 @@ importers:
       '@types/node-fetch': 1.6.9
       tapable: 2.2.1
     devDependencies:
-      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@microsoft/rush-lib': link:../rush-lib
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
@@ -1907,7 +1907,7 @@ importers:
       js-yaml: ~3.13.1
     dependencies:
       '@microsoft/api-documenter': link:../../apps/api-documenter
-      '@microsoft/api-extractor-model': link:../../apps/api-extractor-model
+      '@microsoft/api-extractor-model': link:../../libraries/api-extractor-model
       '@microsoft/tsdoc': 0.13.2
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       js-yaml: 3.13.1
@@ -1940,7 +1940,7 @@ importers:
       '@types/node': 12.20.24
       diff: ~5.0.0
     dependencies:
-      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
       diff: 5.0.0
@@ -2040,7 +2040,7 @@ importers:
       https-proxy-agent: 5.0.0
       node-fetch: 2.6.7
     devDependencies:
-      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
@@ -2068,7 +2068,7 @@ importers:
       '@rushstack/rush-sdk': link:../../libraries/rush-sdk
       '@rushstack/terminal': link:../../libraries/terminal
     devDependencies:
-      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
@@ -4203,9 +4203,9 @@ packages:
         optional: true
     dependencies:
       '@jest/console': 27.5.1
-      '@jest/reporters': 27.4.6
+      '@jest/reporters': 27.5.1
       '@jest/test-result': 27.5.1
-      '@jest/transform': 27.4.6
+      '@jest/transform': 27.5.1
       '@jest/types': 27.4.2
       '@types/node': 12.20.24
       ansi-escapes: 4.3.2
@@ -4214,15 +4214,15 @@ packages:
       exit: 0.1.2
       graceful-fs: 4.2.9
       jest-changed-files: 27.5.1
-      jest-config: 27.4.7
+      jest-config: 27.5.1
       jest-haste-map: 27.5.1
       jest-message-util: 27.5.1
       jest-regex-util: 27.5.1
-      jest-resolve: 27.4.6
+      jest-resolve: 27.5.1
       jest-resolve-dependencies: 27.5.1
       jest-runner: 27.5.1
       jest-runtime: 27.5.1
-      jest-snapshot: 27.4.6
+      jest-snapshot: 27.5.1
       jest-util: 27.5.1
       jest-validate: 27.5.1
       jest-watcher: 27.5.1
@@ -4322,7 +4322,7 @@ packages:
       '@bcoe/v8-coverage': 0.2.3
       '@jest/console': 27.5.1
       '@jest/test-result': 27.5.1
-      '@jest/transform': 27.4.6
+      '@jest/transform': 27.5.1
       '@jest/types': 27.4.2
       '@types/node': 12.20.24
       chalk: 4.1.2
@@ -4336,7 +4336,7 @@ packages:
       istanbul-lib-source-maps: 4.0.1
       istanbul-reports: 3.1.4
       jest-haste-map: 27.5.1
-      jest-resolve: 27.4.6
+      jest-resolve: 27.5.1
       jest-util: 27.5.1
       jest-worker: 27.5.1
       slash: 3.0.0
@@ -4383,7 +4383,6 @@ packages:
       v8-to-istanbul: 8.1.1
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /@jest/source-map/27.5.1:
     resolution: {integrity: sha512-y9NIHUYF3PJRlHk98NdC/N1gl88BL08aQQgu4k4ZopQkCw9t9cV8mtl3TV8b/YCB8XaVTFrmUTAJvjsntDireg==}
@@ -14442,11 +14441,11 @@ packages:
       graceful-fs: 4.2.9
       jest-circus: 27.5.1
       jest-environment-jsdom: 27.5.1
-      jest-environment-node: 27.4.6
+      jest-environment-node: 27.5.1
       jest-get-type: 27.5.1
       jest-jasmine2: 27.5.1
       jest-regex-util: 27.5.1
-      jest-resolve: 27.4.6
+      jest-resolve: 27.5.1
       jest-runner: 27.5.1
       jest-util: 27.5.1
       jest-validate: 27.5.1
@@ -14497,7 +14496,6 @@ packages:
       - canvas
       - supports-color
       - utf-8-validate
-    dev: true
 
   /jest-diff/27.5.1:
     resolution: {integrity: sha512-m0NvkX55LDt9T4mctTEgnZk3fmEg3NRYutvMPWM/0iPnkFj2wIeF45O1718cMSOFO1vINkqmxqD8vE37uTEbqw==}
@@ -14841,7 +14839,7 @@ packages:
       '@babel/plugin-syntax-typescript': 7.16.7_@babel+core@7.17.8
       '@babel/traverse': 7.17.3
       '@babel/types': 7.17.0
-      '@jest/transform': 27.4.6
+      '@jest/transform': 27.5.1
       '@jest/types': 27.4.2
       '@types/babel__traverse': 7.14.2
       '@types/prettier': 2.4.4

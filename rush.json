@@ -456,13 +456,6 @@
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
-      "packageName": "@microsoft/api-extractor-model",
-      "projectFolder": "apps/api-extractor-model",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
       "packageName": "@rushstack/heft",
       "projectFolder": "apps/heft",
       "reviewCategory": "libraries",
@@ -478,12 +471,6 @@
     {
       "packageName": "@microsoft/rush",
       "projectFolder": "apps/rush",
-      "reviewCategory": "libraries",
-      "versionPolicyName": "rush"
-    },
-    {
-      "packageName": "@microsoft/rush-lib",
-      "projectFolder": "apps/rush-lib",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
@@ -859,6 +846,13 @@
 
     // "libraries" folder (alphabetical order)
     {
+      "packageName": "@microsoft/api-extractor-model",
+      "projectFolder": "libraries/api-extractor-model",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
       "packageName": "@rushstack/debug-certificate-manager",
       "projectFolder": "libraries/debug-certificate-manager",
       "reviewCategory": "libraries",
@@ -896,6 +890,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@microsoft/rush-lib",
+      "projectFolder": "libraries/rush-lib",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@microsoft/rushell",

@@ -371,7 +371,13 @@ export class PublishAction extends BaseRushAction {
             return;
           }
 
-          git.addTag(!!this._publish.value, packageName, packageVersion, this._commitId.value, this._prereleaseName.value);
+          git.addTag(
+            !!this._publish.value,
+            packageName,
+            packageVersion,
+            this._commitId.value,
+            this._prereleaseName.value
+          );
           updated = true;
         };
 
