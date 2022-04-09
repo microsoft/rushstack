@@ -264,9 +264,10 @@ export class ExportAnalyzer {
       moduleSpecifier
     );
 
-    // This is known to happen for ambient modules. For now, just treat all ambient modules as
-    // external. This is tracked by https://github.com/microsoft/rushstack/issues/3335.
     if (resolvedModule === undefined) {
+      // The TS compiler API `getResolvedModule` cannot resolve ambient modules. Thus, to match API Extractor's
+      // previous behavior, simply treat all ambient modules as external. This bug is tracked by
+      // https://github.com/microsoft/rushstack/issues/3335.
       return true;
     }
 
@@ -868,10 +869,11 @@ export class ExportAnalyzer {
     );
 
     if (resolvedModule === undefined) {
-      // This should not happen, since getResolvedModule() specifically looks up names that the compiler
-      // found in export declarations for this source file
+      // Encountered in https://github.com/microsoft/rushstack/issues/1914.
       //
-      // Encountered in https://github.com/microsoft/rushstack/issues/1914
+      // It's also possible for this to occur with ambient modules. However, in practice this doesn't happen
+      // as API Extractor treats all ambient modules as external per the logic in `_isExternalModulePath`, and
+      // thus this code path is never reached for ambient modules.
       throw new InternalError(
         `getResolvedModule() could not resolve module name ${JSON.stringify(moduleSpecifier)}\n` +
           SourceFileLocationFormatter.formatDeclaration(importOrExportDeclaration)
