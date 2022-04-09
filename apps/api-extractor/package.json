@@ -38,8 +38,8 @@
   },
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "0.13.2",
-    "@microsoft/tsdoc-config": "~0.15.2",
+    "@microsoft/tsdoc": "0.14.1",
+    "@microsoft/tsdoc-config": "~0.16.1",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
@@ -52,8 +52,8 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.44.2",
-    "@rushstack/heft-node-rig": "1.7.1",
+    "@rushstack/heft": "0.44.9",
+    "@rushstack/heft-node-rig": "1.8.7",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "12.20.24",

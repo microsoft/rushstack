@@ -21,7 +21,7 @@
   "typings": "dist/rollup.d.ts",
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "0.13.2",
+    "@microsoft/tsdoc": "0.14.1",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "colors": "~1.2.1",

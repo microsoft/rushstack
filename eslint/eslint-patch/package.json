@@ -25,8 +25,8 @@
     "package"
   ],
   "devDependencies": {
-    "@rushstack/heft": "0.44.2",
-    "@rushstack/heft-node-rig": "1.7.1",
+    "@rushstack/heft": "0.44.9",
+    "@rushstack/heft-node-rig": "1.8.7",
     "@types/node": "12.20.24"
   }
 }
