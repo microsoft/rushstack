@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
+import { ProjectManifest } from '@pnpm/types';
 import {
   JsonFile,
   JsonSchema,
@@ -188,28 +189,16 @@ export interface IConfigurationEnvironmentVariable {
 export interface INpmOptionsJson extends IPackageManagerOptionsJsonBase {}
 
 /**
- * Part of IPnpmOptionsJson.
+ * Pnpm options in each package.json
  * @internal
  */
-export interface IPnpmPackageExtensions {
-  [packageName: string]: {
-    dependencies?: Record<string, string>;
-    optionalDependencies?: Record<string, string>;
-    peerDependencies?: Record<string, string>;
-    peerDependenciesMeta?: Record<
-      string,
-      {
-        optional?: boolean;
-      }
-    >;
-  };
-}
+export type IPnpmOptionsInProjectManifest = Required<ProjectManifest>['pnpm'];
 
 /**
  * Part of IRushConfigurationJson.
  * @internal
  */
-export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase, IPnpmOptionsInProjectManifest {
   /**
    * The store resolution method for PNPM to use
    */
@@ -226,18 +215,6 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
    */
   useWorkspaces?: boolean;
-  /**
-   * {@inheritdoc PnpmOptionsConfiguration.neverBuiltDependencies}
-   */
-  neverBuiltDependencies?: string[];
-  /**
-   * {@inheritdoc PnpmOptionsConfiguration.packageExtensions}
-   */
-  packageExtensions?: IPnpmPackageExtensions;
-  /**
-   * {@inheritdoc PnpmOptionsConfiguration.overrides}
-   */
-  overrides?: Record<string, string> | undefined;
 }
 
 /**
@@ -342,7 +319,10 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
  *
  * @public
  */
-export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+export class PnpmOptionsConfiguration
+  extends PackageManagerOptionsConfigurationBase
+  implements IPnpmOptionsInProjectManifest
+{
   /**
    * The method used to resolve the store used by PNPM.
    *
@@ -407,7 +387,29 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * This field allows to ignore the builds of specific dependencies. The "preinstall", "install", and
    * "postinstall" scripts of the listed packages will not be executed during installation.
    */
-  public readonly neverBuiltDependencies: string[] | undefined;
+  public readonly neverBuiltDependencies: IPnpmOptionsInProjectManifest['neverBuiltDependencies'];
+
+  /**
+   * See https://pnpm.io/package_json#pnpmonlybuiltdependencies
+   *
+   * @remarks
+   * A list of package names that are allowed to be executed during installation. If this field exists,
+   * only the listed packages will be able to run install scripts.
+   */
+  public readonly onlyBuiltDependencies: IPnpmOptionsInProjectManifest['onlyBuiltDependencies'];
+
+  /**
+   * See
+   * https://pnpm.io/package_json#pnpmpeerdependencyrulesignoremissing
+   * https://pnpm.io/package_json#pnpmpeerdependencyrulesallowedversions
+   *
+   * @remarks
+   * - peerDependencyRules.ignoreMissing: pnpm will not print warnings about missing peer dependencies
+   *  from this list.
+   * - peerDependencyRules.allowedVersions: Unmet peer dependency warnings will not be printed for peer
+   *  dependencies of the specified range.
+   */
+  public readonly peerDependencyRules?: IPnpmOptionsInProjectManifest['peerDependencyRules'];
 
   /**
    * See https://pnpm.io/package_json#pnpmpackageextensions
@@ -416,7 +418,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * The packageExtensions fields offer a way to extend the existing package definitions with additional
    * information.
    */
-  public readonly packageExtensions: IPnpmPackageExtensions | undefined;
+  public readonly packageExtensions: IPnpmOptionsInProjectManifest['packageExtensions'];
 
   /**
    * See https://pnpm.io/package_json#pnpmoverrides
@@ -426,7 +428,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * useful to enforce all your packages to use a single version of a dependency, backport a fix, or
    * replace a dependency with a fork.
    */
-  public readonly overrides: Record<string, string> | undefined;
+  public readonly overrides: IPnpmOptionsInProjectManifest['overrides'];
 
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
@@ -445,6 +447,12 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 
     if ('neverBuiltDependencies' in json) {
       this.neverBuiltDependencies = json.neverBuiltDependencies;
+    }
+    if ('onlyBuiltDependencies' in json) {
+      this.onlyBuiltDependencies = json.onlyBuiltDependencies;
+    }
+    if ('peerDependencyRules' in json) {
+      this.peerDependencyRules = json.peerDependencyRules;
     }
     if ('packageExtensions' in json) {
       this.packageExtensions = json.packageExtensions;
