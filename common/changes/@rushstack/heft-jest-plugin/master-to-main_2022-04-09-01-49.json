@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Rename the \"master\" branch to \"main\".",
+      "type": "patch",
+      "packageName": "@rushstack/heft-jest-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

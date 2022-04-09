@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Rename the \"master\" branch to \"main\".",
+      "type": "patch",
+      "packageName": "@rushstack/heft-web-rig"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "iclanton@users.noreply.github.com"
+}

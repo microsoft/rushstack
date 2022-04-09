@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Rename the \"master\" branch to \"main\".",
+      "type": "patch",
+      "packageName": "@rushstack/tree-pattern"
+    }
+  ],
+  "packageName": "@rushstack/tree-pattern",
+  "email": "iclanton@users.noreply.github.com"
+}

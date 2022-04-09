@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Rename the \"master\" branch to \"main\".",
+      "type": "patch",
+      "packageName": "@rushstack/heft-dev-cert-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-dev-cert-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
