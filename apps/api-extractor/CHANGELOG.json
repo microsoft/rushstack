@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.21.2",
+      "tag": "@microsoft/api-extractor_v7.21.2",
+      "date": "Sat, 09 Apr 2022 19:07:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix ambient modules bug caused by #3321."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.21.1",
       "tag": "@microsoft/api-extractor_v7.21.1",
       "date": "Sat, 09 Apr 2022 02:24:26 GMT",

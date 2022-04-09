@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 09 Apr 2022 02:24:26 GMT and should not be manually modified.
+This log was last generated on Sat, 09 Apr 2022 19:07:47 GMT and should not be manually modified.
+
+## 7.21.2
+Sat, 09 Apr 2022 19:07:47 GMT
+
+### Patches
+
+- Fix ambient modules bug caused by #3321.
 
 ## 7.21.1
 Sat, 09 Apr 2022 02:24:26 GMT
