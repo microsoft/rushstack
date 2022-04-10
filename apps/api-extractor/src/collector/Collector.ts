@@ -188,6 +188,8 @@ export class Collector {
       this.messageRouter.addCompilerDiagnostic(diagnostic);
     }
 
+    const sourceFiles: readonly ts.SourceFile[] = this.program.getSourceFiles();
+
     if (this.messageRouter.showDiagnostics) {
       this.messageRouter.logDiagnosticHeader('Root filenames');
       for (const fileName of this.program.getRootFileNames()) {
@@ -196,10 +198,23 @@ export class Collector {
       this.messageRouter.logDiagnosticFooter();
 
       this.messageRouter.logDiagnosticHeader('Files analyzed by compiler');
-      for (const sourceFile of this.program.getSourceFiles()) {
+      for (const sourceFile of sourceFiles) {
         this.messageRouter.logDiagnostic(sourceFile.fileName);
       }
       this.messageRouter.logDiagnosticFooter();
+    }
+
+    // We can throw this error earlier in CompilerState.ts, but intentionally wait until after we've logged the
+    // associated diagnostic message above to make debugging easier for developers.
+    const badSourceFile: boolean = sourceFiles.some(
+      ({ fileName }) => !ExtractorConfig.hasDtsFileExtension(fileName)
+    );
+    if (badSourceFile) {
+      throw new Error(
+        'API Extractor expects to only process .d.ts files, but encountered non-.d.ts file(s).\n' +
+          'Run with the "--diagnostics" flag and inspect the "Files analyzed by compiler" to find the unexpected ' +
+          'file(s).'
+      );
     }
 
     // Build the entry point
