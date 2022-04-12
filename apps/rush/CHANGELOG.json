@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.66.1",
+      "tag": "@microsoft/rush_v5.66.1",
+      "date": "Tue, 12 Apr 2022 01:52:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix watch-mode phased commands when rush.json is not in the repository root. Fix watch-mode change detection on Linux."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.66.0",
       "tag": "@microsoft/rush_v5.66.0",
       "date": "Sat, 09 Apr 2022 02:24:40 GMT",
