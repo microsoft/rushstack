@@ -82,10 +82,10 @@ function _run(): void {
         info: () => {},
         error: console.error
       };
-    }
-    if (!arg.startsWith('-')) {
+    } else if (!arg.startsWith('-') || arg === '-h' || arg === '--help') {
+      // We either found something that looks like a command (i.e. - doesn't start with a "-"),
+      // or we found the -h/--help flag flag, which can be run without a command
       commandFound = true;
-      break;
     }
   }
 
