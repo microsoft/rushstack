@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix watch-mode phased commands when rush.json is not in the repository root. Fix watch-mode change detection on Linux.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
