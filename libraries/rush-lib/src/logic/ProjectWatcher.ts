@@ -94,21 +94,16 @@ export class ProjectWatcher {
     // https://nodejs.org/docs/latest-v12.x/api/fs.html#fs_caveats
     const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
 
-    if (useNativeRecursiveWatch && this._projectsToWatch.size > 10) {
+    if (useNativeRecursiveWatch) {
       // Watch the entire repository; a single recursive watcher is cheap.
       pathsToWatch.add(this._repoRoot);
     } else {
       for (const project of this._projectsToWatch) {
-        if (useNativeRecursiveWatch) {
-          // Just watch the root of the project if using native recursive watch
-          pathsToWatch.add(project.projectFolder);
-          continue;
-        }
-
         const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
           project,
           this._terminal
         ))!;
+
         const prefixLength: number = project.projectFolder.length - repoRoot.length - 1;
         // Watch files in the root of the project, or
         for (const pathToWatch of ProjectWatcher._enumeratePathsToWatch(projectState.keys(), prefixLength)) {
