@@ -45,6 +45,7 @@ export class Extractor {
 
 // @public
 export class ExtractorConfig {
+    readonly alphaTrimmedFilePath: string;
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly betaTrimmedFilePath: string;
@@ -184,6 +185,7 @@ export interface IConfigDocModel {
 
 // @public
 export interface IConfigDtsRollup {
+    alphaTrimmedFilePath?: string;
     betaTrimmedFilePath?: string;
     enabled: boolean;
     omitTrimmingComments?: boolean;
@@ -264,6 +266,5 @@ export interface IExtractorMessagesConfig {
     extractorMessageReporting?: IConfigMessageReportingTable;
     tsdocMessageReporting?: IConfigMessageReportingTable;
 }
-
 
 ```

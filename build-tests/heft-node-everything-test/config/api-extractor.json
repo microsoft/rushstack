@@ -11,6 +11,7 @@
   },
   "dtsRollup": {
     "enabled": true,
+    "alphaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-alpha.d.ts",
     "betaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts"
   }
 }

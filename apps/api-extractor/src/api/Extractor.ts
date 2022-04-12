@@ -386,6 +386,12 @@ export class Extractor {
       );
       Extractor._generateRollupDtsFile(
         collector,
+        extractorConfig.alphaTrimmedFilePath,
+        DtsRollupKind.AlphaRelease,
+        extractorConfig.newlineKind
+      );
+      Extractor._generateRollupDtsFile(
+        collector,
         extractorConfig.betaTrimmedFilePath,
         DtsRollupKind.BetaRelease,
         extractorConfig.newlineKind
