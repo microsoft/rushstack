@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 12 Apr 2022 02:58:32 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Apr 2022 23:29:34 GMT and should not be manually modified.
+
+## 7.22.0
+Tue, 12 Apr 2022 23:29:34 GMT
+
+### Minor changes
+
+- Add an alphaTrimmedFilePath option that adds support for generating a DTS rollup that inclues @alpha, @beta, and @public members.
 
 ## 7.21.3
 Tue, 12 Apr 2022 02:58:32 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-serve-plugin
 
-This log was last generated on Tue, 12 Apr 2022 02:58:32 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Apr 2022 23:29:34 GMT and should not be manually modified.
+
+## 0.1.5
+Tue, 12 Apr 2022 23:29:34 GMT
+
+### Patches
+
+- Include rush-plugin-manifest.json in published files.
 
 ## 0.1.4
 Tue, 12 Apr 2022 02:58:32 GMT

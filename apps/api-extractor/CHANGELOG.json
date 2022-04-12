@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.22.0",
+      "tag": "@microsoft/api-extractor_v7.22.0",
+      "date": "Tue, 12 Apr 2022 23:29:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an alphaTrimmedFilePath option that adds support for generating a DTS rollup that inclues @alpha, @beta, and @public members."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.21.3",
       "tag": "@microsoft/api-extractor_v7.21.3",
       "date": "Tue, 12 Apr 2022 02:58:32 GMT",
