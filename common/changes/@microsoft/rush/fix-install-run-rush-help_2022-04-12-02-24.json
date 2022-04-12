@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where running the \"install-run-rush\" script with the \"--help\" parameter won't install Rush.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
