@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 12 Apr 2022 01:52:38 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Apr 2022 02:58:47 GMT and should not be manually modified.
+
+## 5.66.2
+Tue, 12 Apr 2022 02:58:47 GMT
+
+### Updates
+
+- Fix an issue where running the "install-run-rush" script with the "--help" parameter won't install Rush.
 
 ## 5.66.1
 Tue, 12 Apr 2022 01:52:38 GMT
