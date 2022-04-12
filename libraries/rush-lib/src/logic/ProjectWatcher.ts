@@ -4,8 +4,10 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import { once } from 'events';
+import { getRepoRoot } from '@rushstack/package-deps-hash';
 import { Path, ITerminal, FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 
+import { Git } from './Git';
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
@@ -41,6 +43,7 @@ export interface IProjectChangeResult {
  */
 export class ProjectWatcher {
   private readonly _debounceMilliseconds: number;
+  private readonly _repoRoot: string;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
   private readonly _terminal: ITerminal;
@@ -61,6 +64,9 @@ export class ProjectWatcher {
     this._rushConfiguration = rushConfiguration;
     this._projectsToWatch = projectsToWatch;
     this._terminal = terminal;
+
+    const gitPath: string = new Git(rushConfiguration).getGitPathOrThrow();
+    this._repoRoot = Path.convertToSlashes(getRepoRoot(rushConfiguration.rushJsonFolder, gitPath));
 
     this._initialState = initialState;
     this._previousState = initialState;
@@ -88,20 +94,25 @@ export class ProjectWatcher {
     // https://nodejs.org/docs/latest-v12.x/api/fs.html#fs_caveats
     const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
 
-    for (const project of this._projectsToWatch) {
-      const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
-        project,
-        this._terminal
-      ))!;
-      const projectFolder: string = project.projectRelativeFolder;
-      // Watch files in the root of the project, or
-      for (const fileName of projectState.keys()) {
-        for (const pathToWatch of ProjectWatcher._enumeratePathsToWatch(
-          fileName,
-          projectFolder,
-          useNativeRecursiveWatch
-        )) {
-          pathsToWatch.add(`${repoRoot}/${pathToWatch}`);
+    if (useNativeRecursiveWatch && this._projectsToWatch.size > 10) {
+      // Watch the entire repository; a single recursive watcher is cheap.
+      pathsToWatch.add(this._repoRoot);
+    } else {
+      for (const project of this._projectsToWatch) {
+        if (useNativeRecursiveWatch) {
+          // Just watch the root of the project if using native recursive watch
+          pathsToWatch.add(project.projectFolder);
+          continue;
+        }
+
+        const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
+          project,
+          this._terminal
+        ))!;
+        const prefixLength: number = project.projectFolder.length - repoRoot.length - 1;
+        // Watch files in the root of the project, or
+        for (const pathToWatch of ProjectWatcher._enumeratePathsToWatch(projectState.keys(), prefixLength)) {
+          pathsToWatch.add(`${this._repoRoot}/${pathToWatch}`);
         }
       }
     }
@@ -112,6 +123,8 @@ export class ProjectWatcher {
       (resolve: (result: IProjectChangeResult) => void, reject: (err: Error) => void) => {
         let timeout: NodeJS.Timeout | undefined;
         let terminated: boolean = false;
+
+        const debounceMilliseconds: number = this._debounceMilliseconds;
 
         const resolveIfChanged = async (): Promise<void> => {
           timeout = undefined;
@@ -143,19 +156,26 @@ export class ProjectWatcher {
           }
         };
 
-        const onError = (err: Error): void => {
+        for (const pathToWatch of pathsToWatch) {
+          console.log(pathToWatch);
+          addWatcher(pathToWatch);
+        }
+
+        if (onWatchingFiles) {
+          onWatchingFiles();
+        }
+
+        function onError(err: Error): void {
           if (terminated) {
             return;
           }
 
           terminated = true;
           reject(err);
-        };
+        }
 
-        const addWatcher = (
-          watchedPath: string,
-          listener: (event: string, fileName: string) => void
-        ): void => {
+        function addWatcher(watchedPath: string): void {
+          const listener: (event: string, fileName: string) => void = changeListener(watchedPath);
           const watcher: fs.FSWatcher = fs.watch(
             watchedPath,
             {
@@ -169,9 +189,9 @@ export class ProjectWatcher {
             watchers.delete(watchedPath);
             onError(err);
           });
-        };
+        }
 
-        const changeListener = (event: string, fileName: string): void => {
+        function innerListener(root: string, event: string, fileName: string): void {
           try {
             if (terminated) {
               return;
@@ -181,12 +201,13 @@ export class ProjectWatcher {
             if (!useNativeRecursiveWatch) {
               const decodedName: string = fileName && fileName.toString();
               const normalizedName: string = decodedName && Path.convertToSlashes(decodedName);
+              const fullName: string = normalizedName && `${root}/${normalizedName}`;
 
-              if (normalizedName && !watchers.has(normalizedName)) {
+              if (fullName && !watchers.has(fullName)) {
                 try {
-                  const stat: FileSystemStats = FileSystem.getStatistics(fileName);
+                  const stat: FileSystemStats = FileSystem.getStatistics(fullName);
                   if (stat.isDirectory()) {
-                    addWatcher(normalizedName, changeListener);
+                    addWatcher(fullName);
                   }
                 } catch (err) {
                   const code: string | undefined = (err as NodeJS.ErrnoException).code;
@@ -203,19 +224,15 @@ export class ProjectWatcher {
               clearTimeout(timeout);
             }
 
-            timeout = setTimeout(resolveIfChanged, this._debounceMilliseconds);
+            timeout = setTimeout(resolveIfChanged, debounceMilliseconds);
           } catch (err) {
             terminated = true;
             reject(err as NodeJS.ErrnoException);
           }
-        };
-
-        for (const pathToWatch of pathsToWatch) {
-          addWatcher(pathToWatch, changeListener);
         }
 
-        if (onWatchingFiles) {
-          onWatchingFiles();
+        function changeListener(root: string): (event: string, fileName: string) => void {
+          return innerListener.bind(0, root);
         }
       }
     );
@@ -295,29 +312,22 @@ export class ProjectWatcher {
     return false;
   }
 
-  private static *_enumeratePathsToWatch(
-    path: string,
-    projectRelativeFolder: string,
-    useNativeRecursiveWatch: boolean
-  ): Iterable<string> {
-    const rootSlashIndex: number = path.indexOf('/', projectRelativeFolder.length + 2);
+  private static *_enumeratePathsToWatch(paths: Iterable<string>, prefixLength: number): Iterable<string> {
+    for (const path of paths) {
+      const rootSlashIndex: number = path.indexOf('/', prefixLength);
 
-    if (rootSlashIndex < 0) {
-      yield path;
-      return;
-    }
+      if (rootSlashIndex < 0) {
+        yield path;
+        return;
+      }
 
-    yield path.slice(0, rootSlashIndex);
+      yield path.slice(0, rootSlashIndex);
 
-    if (useNativeRecursiveWatch) {
-      // Only need the root folder if fs.watch can be called with recursive: true
-      return;
-    }
-
-    let slashIndex: number = path.lastIndexOf('/');
-    while (slashIndex > rootSlashIndex) {
-      yield path.slice(0, slashIndex);
-      slashIndex = path.lastIndexOf('/', slashIndex - 1);
+      let slashIndex: number = path.indexOf('/', rootSlashIndex + 1);
+      while (slashIndex >= 0) {
+        yield path.slice(0, slashIndex);
+        slashIndex = path.indexOf('/', slashIndex + 1);
+      }
     }
   }
 }
