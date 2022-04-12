@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rig-package",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rig-package"
+}
