@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 12 Apr 2022 02:58:32 GMT and should not be manually modified.
+This log was last generated on Wed, 13 Apr 2022 15:12:40 GMT and should not be manually modified.
+
+## 7.17.0
+Wed, 13 Apr 2022 15:12:40 GMT
+
+### Minor changes
+
+- Add a new isOptional property to TypeParameters deserialized from the .api.json file with api-extractor-model.
 
 ## 7.16.2
 Tue, 12 Apr 2022 02:58:32 GMT

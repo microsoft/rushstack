@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.17.0",
+      "tag": "@microsoft/api-extractor-model_v7.17.0",
+      "date": "Wed, 13 Apr 2022 15:12:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new isOptional property to TypeParameters deserialized from the .api.json file with api-extractor-model."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.16.2",
       "tag": "@microsoft/api-extractor-model_v7.16.2",
       "date": "Tue, 12 Apr 2022 02:58:32 GMT",
