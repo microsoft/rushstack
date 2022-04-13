@@ -5,11 +5,19 @@
 ```ts
 
 // @public
+export interface Constraint {
+}
+
+// @public
 export const constVariable: number;
 
 // @public (undocumented)
 export class DecoratorExample {
     creationDate: Date;
+}
+
+// @public
+export interface DefaultType {
 }
 
 // @public
@@ -26,6 +34,7 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     deprecatedExample(): void;
     exampleFunction(a: string, b: string): string;
     exampleFunction(x: number): number;
+    genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T): void;
     interestingEdgeCases(): void;
     // @eventProperty
     malformedEvent: SystemEvent;

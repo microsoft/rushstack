@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import { IExcerptTokenRange } from './Excerpt';
+import { Excerpt, IExcerptTokenRange } from './Excerpt';
 import { TypeParameter } from '../model/TypeParameter';
 import { InternalError } from '@rushstack/node-core-library';
 import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
@@ -84,10 +84,12 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
       if (this instanceof ApiDeclaredItem) {
         if (options.typeParameters) {
           for (const typeParameterOptions of options.typeParameters) {
+            const defaultTypeExcerpt: Excerpt = this.buildExcerpt(typeParameterOptions.defaultTypeTokenRange);
             const typeParameter: TypeParameter = new TypeParameter({
               name: typeParameterOptions.typeParameterName,
               constraintExcerpt: this.buildExcerpt(typeParameterOptions.constraintTokenRange),
-              defaultTypeExcerpt: this.buildExcerpt(typeParameterOptions.defaultTypeTokenRange),
+              defaultTypeExcerpt,
+              isOptional: !defaultTypeExcerpt.isEmpty,
               parent: this
             });
 

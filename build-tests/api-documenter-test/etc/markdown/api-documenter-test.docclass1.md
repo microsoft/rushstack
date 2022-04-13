@@ -46,6 +46,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [deprecatedExample()](./api-documenter-test.docclass1.deprecatedexample.md) |  |  |
 |  [exampleFunction(a, b)](./api-documenter-test.docclass1.examplefunction.md) |  | This is an overloaded function. |
 |  [exampleFunction(x)](./api-documenter-test.docclass1.examplefunction_1.md) |  | This is also an overloaded function. |
+|  [genericWithConstraintAndDefault(x)](./api-documenter-test.docclass1.genericwithconstraintanddefault.md) |  | This is a method with a complex type parameter. |
 |  [interestingEdgeCases()](./api-documenter-test.docclass1.interestingedgecases.md) |  | Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"<!-- -->The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/ |
 |  [optionalParamFunction(x)](./api-documenter-test.docclass1.optionalparamfunction.md) |  | This is a function with an optional parameter. |
 |  [sumWithExample(x, y)](./api-documenter-test.docclass1.sumwithexample.md) | <code>static</code> | Returns the sum of two numbers. |
