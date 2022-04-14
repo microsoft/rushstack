@@ -5,3 +5,5 @@ throw new Error(
   'The @rushstack/eslint-patch package does not have a default entry point.' +
     ' See README.md for usage instructions.'
 );
+
+export {};
