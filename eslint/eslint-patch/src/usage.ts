@@ -6,4 +6,4 @@ throw new Error(
     ' See README.md for usage instructions.'
 );
 
-export = {};
+export {};
