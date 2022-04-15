@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Sat, 09 Apr 2022 02:24:26 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+
+## 1.1.3
+Fri, 15 Apr 2022 00:12:36 GMT
+
+### Patches
+
+- Fix an issue where tools could not determine the module type as CommonJS
 
 ## 1.1.2
 Sat, 09 Apr 2022 02:24:26 GMT
