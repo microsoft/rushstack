@@ -1028,6 +1028,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "projectFolder": "webpack/preserve-dynamic-require-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
