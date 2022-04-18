@@ -2243,6 +2243,22 @@ importers:
       webpack: 4.44.2
       webpack-sources: 1.4.3
 
+  ../../webpack/preserve-dynamic-require-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      webpack: ~5.68.0
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      webpack: 5.68.0
+
   ../../webpack/set-webpack-public-path-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*
