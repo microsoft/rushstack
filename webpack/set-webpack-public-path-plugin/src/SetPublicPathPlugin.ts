@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
+import { isWebpack3OrEarlier, isWebpack4Or5 } from '@rushstack/webpack-plugin-utilities';
+
 import type * as Webpack from 'webpack';
 import type * as Tapable from 'tapable';
 
@@ -153,18 +155,11 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   }
 
   public apply(compiler: Webpack.Compiler): void {
-    const isWebpack3OrEarlier: boolean = !compiler.hooks;
-
-    if (isWebpack3OrEarlier) {
+    if (isWebpack3OrEarlier(compiler)) {
       throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
     }
 
-    const webpackVersion: string | undefined = (
-      compiler as unknown as Webpack5.Compiler | { webpack: undefined }
-    ).webpack?.version;
-    const webpackMajorVersion: number = webpackVersion
-      ? Number(webpackVersion.substr(0, webpackVersion.indexOf('.')))
-      : 4;
+    const webpackMajorVersion: number = isWebpack4Or5(compiler);
 
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
