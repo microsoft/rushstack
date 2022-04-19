@@ -418,8 +418,6 @@ export class CommandLineConfiguration {
 
         this.parameters.push(normalizedParameter);
 
-        let parameterHasAssociatedPhases: boolean = false;
-
         // Do some basic validation
         switch (normalizedParameter.parameterKind) {
           case 'choice': {
@@ -441,7 +439,6 @@ export class CommandLineConfiguration {
         }
 
         let parameterHasAssociatedCommands: boolean = false;
-        let parameterIsOnlyAssociatedWithPhasedCommands: boolean = true;
         if (normalizedParameter.associatedCommands) {
           for (const associatedCommandName of normalizedParameter.associatedCommands) {
             const syntheticPhase: IPhase | undefined =
@@ -462,10 +459,6 @@ export class CommandLineConfiguration {
             } else {
               associatedCommand.associatedParameters.add(normalizedParameter);
               parameterHasAssociatedCommands = true;
-
-              if (associatedCommand.commandKind !== RushConstants.phasedCommandKind) {
-                parameterIsOnlyAssociatedWithPhasedCommands = false;
-              }
             }
           }
         }
@@ -478,9 +471,6 @@ export class CommandLineConfiguration {
                 `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
                   `that is associated with a phase "${associatedPhaseName}" that does not exist.`
               );
-            } else {
-              // Defer association to PhasedScriptAction so that it can map to the ts-command-line object
-              parameterHasAssociatedPhases = true;
             }
           }
         }
@@ -492,12 +482,8 @@ export class CommandLineConfiguration {
           );
         }
 
-        if (parameterIsOnlyAssociatedWithPhasedCommands && !parameterHasAssociatedPhases) {
-          throw new Error(
-            `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-              `that is only associated with phased commands, but lists no associated phases.`
-          );
-        }
+        // In the presence of plugins, there is utility to defining parameters that are associated with a phased
+        // command but no phases. Don't enforce that a parameter is associated with at least one phase.
       }
     }
   }

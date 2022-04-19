@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { RushConstants } from '../../logic/RushConstants';
-import { Command, CommandLineConfiguration, IParameterJson } from '../CommandLineConfiguration';
+import { Command, CommandLineConfiguration, IParameterJson, IPhase } from '../CommandLineConfiguration';
 
 describe(CommandLineConfiguration.name, () => {
   it('Forbids a misnamed phase', () => {
@@ -224,35 +224,42 @@ describe(CommandLineConfiguration.name, () => {
       expect(parametersArray[0].longName).toEqual('--flag');
     });
 
-    it('does not allow a parameter to only be associated with phased commands but not have any associated phases', () => {
-      expect(
-        () =>
-          new CommandLineConfiguration({
-            commands: [
-              {
-                commandKind: 'phased',
-                name: 'custom-phased',
-                summary: 'custom-phased',
-                enableParallelism: true,
-                safeForSimultaneousRushProcesses: false,
-                phases: ['_phase:a']
-              }
-            ],
-            phases: [
-              {
-                name: '_phase:a'
-              }
-            ],
-            parameters: [
-              {
-                parameterKind: 'flag',
-                longName: '--flag',
-                associatedCommands: ['custom-phased'],
-                description: 'flag'
-              }
-            ]
-          })
-      ).toThrowErrorMatchingSnapshot();
+    it('allows a parameter to only be associated with phased commands but not have any associated phases', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'custom-phased',
+            summary: 'custom-phased',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            phases: ['_phase:a']
+          }
+        ],
+        phases: [
+          {
+            name: '_phase:a'
+          }
+        ],
+        parameters: [
+          {
+            parameterKind: 'flag',
+            longName: '--flag',
+            associatedCommands: ['custom-phased'],
+            description: 'flag'
+          }
+        ]
+      });
+
+      const command: Command | undefined = commandLineConfiguration.commands.get('custom-phased');
+      expect(command).toBeDefined();
+      const parametersArray: IParameterJson[] = Array.from(command!.associatedParameters);
+      expect(parametersArray).toHaveLength(1);
+      expect(parametersArray[0].longName).toEqual('--flag');
+      const phase: IPhase | undefined = commandLineConfiguration.phases.get('_phase:a');
+      expect(phase).toBeDefined();
+      const phaseParametersArray: unknown[] = Array.from(phase!.associatedParameters);
+      expect(phaseParametersArray).toHaveLength(0);
     });
   });
 });
