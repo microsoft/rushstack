@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "update typescript to 4.6",
+      "type": "none",
+      "packageName": "@rushstack/eslint-config"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config",
+  "email": "12343178+F3n67u@users.noreply.github.com"
+}
