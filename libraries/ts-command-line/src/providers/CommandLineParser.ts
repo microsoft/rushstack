@@ -64,7 +64,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     this._actionsByName = new Map<string, CommandLineAction>();
 
     this._argumentParser = new CustomArgumentParser({
-      addHelp: true,
+      add_help: true,
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
       epilog: colors.bold(
@@ -87,7 +87,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    */
   public addAction(action: CommandLineAction): void {
     if (!this._actionsSubParser) {
-      this._actionsSubParser = this._argumentParser.addSubparsers({
+      this._actionsSubParser = this._argumentParser.add_subparsers({
         metavar: '<command>',
         dest: 'action'
       });
@@ -195,11 +195,14 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         args = process.argv.slice(2);
       }
       if (args.length === 0) {
-        this._argumentParser.printHelp();
+        this._argumentParser.print_help();
         return;
       }
 
-      const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
+      const data: ICommandLineParserData = {
+        parserOptions: this._options,
+        ...this._argumentParser.parse_args(args)
+      }
 
       this._processParsedData(data);
 

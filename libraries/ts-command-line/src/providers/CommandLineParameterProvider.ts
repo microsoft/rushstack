@@ -272,11 +272,11 @@ export abstract class CommandLineParameterProvider {
 
     const argparseOptions: argparse.ArgumentOptions = {
       help: this._remainder.description,
-      nargs: argparse.Const.REMAINDER,
+      nargs: argparse.REMAINDER,
       metavar: '"..."'
     };
 
-    this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
+    this._getArgumentParser().add_argument(argparse.REMAINDER, argparseOptions);
 
     return this._remainder;
   }
@@ -294,7 +294,7 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line help text.
    */
   public renderHelpText(): string {
-    return this._getArgumentParser().formatHelp();
+    return this._getArgumentParser().format_help();
   }
 
   /**
@@ -361,7 +361,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     if (this.remainder) {
-      this.remainder._setValue(data[argparse.Const.REMAINDER]);
+      this.remainder._setValue(data[argparse.REMAINDER]);
     }
 
     this._parametersProcessed = true;
@@ -396,12 +396,6 @@ export abstract class CommandLineParameterProvider {
       );
     }
 
-    const names: string[] = [];
-    if (parameter.shortName) {
-      names.push(parameter.shortName);
-    }
-    names.push(parameter.longName);
-
     parameter._parserKey = this._generateKey();
 
     let finalDescription: string = parameter.description;
@@ -422,9 +416,15 @@ export abstract class CommandLineParameterProvider {
     const argparseOptions: argparse.ArgumentOptions = {
       help: finalDescription,
       dest: parameter._parserKey,
-      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
       required: parameter.required
     };
+
+    // Only add the metavar if it's specified. Setting to undefined will cause argparse to throw when
+    // metavar isn't
+    const metavarValue: string | undefined = (parameter as CommandLineParameterWithArgument).argumentName;
+    if (metavarValue) {
+      argparseOptions.metavar = metavarValue;
+    }
 
     switch (parameter.kind) {
       case CommandLineParameterKind.Choice: {
@@ -439,7 +439,7 @@ export abstract class CommandLineParameterProvider {
         break;
       }
       case CommandLineParameterKind.Flag:
-        argparseOptions.action = 'storeTrue';
+        argparseOptions.action = 'store_true';
         break;
       case CommandLineParameterKind.Integer:
         argparseOptions.type = 'int';
@@ -456,12 +456,19 @@ export abstract class CommandLineParameterProvider {
     }
 
     const argumentParser: argparse.ArgumentParser = this._getArgumentParser();
-    argumentParser.addArgument(names, { ...argparseOptions });
-    if (parameter.undocumentedSynonyms && parameter.undocumentedSynonyms.length > 0) {
-      argumentParser.addArgument(parameter.undocumentedSynonyms, {
-        ...argparseOptions,
-        help: argparse.Const.SUPPRESS
-      });
+    if (parameter.shortName) {
+      argumentParser.add_argument(parameter.shortName, parameter.longName, { ...argparseOptions });
+    } else {
+      argumentParser.add_argument(parameter.longName, { ...argparseOptions });
+    }
+
+    if (parameter.undocumentedSynonyms) {
+      for (const undocumentedSynonym of parameter.undocumentedSynonyms) {
+        argumentParser.add_argument(undocumentedSynonym, {
+          ...argparseOptions,
+          help: argparse.SUPPRESS
+        });
+      }
     }
 
     this._parameters.push(parameter);
