@@ -53,6 +53,9 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
   public readonly shortName: string | undefined;
 
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterGroupName} */
+  public readonly groupName: string | undefined;
+
   /** {@inheritDoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
 
@@ -69,6 +72,7 @@ export abstract class CommandLineParameter {
   public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
     this.shortName = definition.parameterShortName;
+    this.groupName = definition.parameterGroupName;
     this.description = definition.description;
     this.required = !!definition.required;
     this.environmentVariable = definition.environmentVariable;
