@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Add ScopedCommandLineAction class, which allows for the definition of actions that have dynamic arguments whose definition depends on a provided scope. See https://github.com/microsoft/rushstack/pull/3364",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}
