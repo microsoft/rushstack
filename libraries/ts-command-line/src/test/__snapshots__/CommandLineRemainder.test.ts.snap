@@ -12,7 +12,7 @@ Array [
 ]
 `;
 
-exports[`CommandLineRemainder parses an action input with remainder options 1`] = `
+exports[`CommandLineRemainder parses an action input with remainder flagged options 1`] = `
 Array [
   "### --title output: ###",
   "--title",
@@ -20,15 +20,18 @@ Array [
   "### remainder output: ###",
   "--",
   "--the",
-  "--remaining",
+  "remaining",
   "--args",
 ]
 `;
 
 exports[`CommandLineRemainder prints the action help 1`] = `
-"usage: example run [-h] [--title TEXT]
+"usage: example run [-h] [--title TEXT] ...
 
 a longer description
+
+positional arguments:
+  \\"...\\"         The action remainder
 
 optional arguments:
   -h, --help    show this help message and exit
