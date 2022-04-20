@@ -198,7 +198,7 @@ export class ExcerptBuilder {
       // that was appended so far. However, if the last appended token was a separator and
       // there is no additional spaces, omit it from the range.
       let excerptEndIndex: number = excerptTokens.length;
-      if (state.lastAppendedTokenIsSeparator && excerptEndIndex - excerptStartIndex !== 1) {
+      if (state.lastAppendedTokenIsSeparator /*&& excerptEndIndex > excerptStartIndex + 1*/) {
         excerptEndIndex--;
       }
 
