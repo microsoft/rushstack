@@ -22,7 +22,7 @@ Optional scoping arguments:
 exports[`CommandLineParser prints the scoped action help 1`] = `
 "usage: example scoped-action --scope foo -- [-h] [--scoped-foo SCOPED]
 
-An example project
+a longer description
 
 Optional arguments:
   -h, --help           Show this help message and exit.

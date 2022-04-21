@@ -8,7 +8,7 @@ import type { CommandLineParameter } from '../parameters/BaseClasses';
 import type { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
 
 interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOptions {
-  readonly actionName: string;
+  readonly actionOptions: ICommandLineActionOptions;
   readonly unscopedActionParameters: ReadonlyArray<CommandLineParameter>;
   readonly onDefineScopedParameters: (commandLineParameterProvider: CommandLineParameterProvider) => void;
   readonly onExecute: () => Promise<void>;
@@ -24,14 +24,12 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     for (const parameter of options.unscopedActionParameters) {
       parameter.appendToArgList(scopingArgs);
     }
+    const unscopedToolName: string = `${options.toolFilename} ${options.actionOptions.actionName}`;
     const scopedCommandLineParserOptions: ICommandLineParserOptions = {
-      toolFilename:
-        `${options.toolFilename} ${options.actionName}` +
-        `${scopingArgs.length ? ' ' + scopingArgs.join(' ') : ''} --`,
-      toolDescription: options.toolDescription,
+      toolFilename: `${unscopedToolName}${scopingArgs.length ? ' ' + scopingArgs.join(' ') : ''} --`,
+      toolDescription: options.actionOptions.documentation,
       toolEpilog:
-        'For more information on available unscoped parameters, use ' +
-        `"${options.toolFilename} ${options.actionName} --help"`,
+        'For more information on available unscoped parameters, use ' + `"${unscopedToolName} --help"`,
       enableTabCompletionAction: false
     };
 
@@ -96,7 +94,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     // have parsed the data, since the parameter values are used during construction.
     this._scopedCommandLineParser = new InternalScopedCommandLineParser({
       ...parserOptions,
-      ...this._options,
+      actionOptions: this._options,
       unscopedActionParameters: this.parameters,
       onDefineScopedParameters: this.onDefineScopedParameters.bind(this),
       onExecute: this.onExecute.bind(this)
@@ -107,7 +105,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * {@inheritdoc CommandLineAction._execute}
    * @internal
    */
-  public _execute(): Promise<void> {
+  public async _execute(): Promise<void> {
     // override
     if (!this._unscopedParserOptions || !this._scopedCommandLineParser) {
       throw new Error('The CommandLineAction parameters must be processed before execution.');
@@ -121,6 +119,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     const scopedArgs: string[] = [];
     if (this.remainder.values.length) {
       if (this.remainder.values[0] !== '--') {
+        // Immitate argparse behavior and log out usage text before throwing.
         console.log(this.renderUsageText());
         throw new CommandLineParserExitError(
           // argparse sets exit code 2 for invalid arguments
@@ -134,7 +133,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     }
 
     // Call the scoped parser using only the scoped args.
-    return this._scopedCommandLineParser.executeWithoutErrorHandling(scopedArgs);
+    await this._scopedCommandLineParser.executeWithoutErrorHandling(scopedArgs);
+    return;
   }
 
   /**
@@ -145,8 +145,9 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
     if (!this._scopingParameters.length) {
       throw new Error(
-        'No scoping parameters defined. At least one parameter with the groupName set to ' +
-          'ScopedCommandLineAction.ScopingParameterGroupName must be defined.'
+        'No scoping parameters defined. At least one scoping parameter must be defined. ' +
+          'Scoping parameters are defined by setting the parameterGroupName to ' +
+          'ScopedCommandLineAction.ScopingParameterGroupName.'
       );
     }
     if (this.remainder) {
@@ -187,9 +188,10 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * The child class should implement this hook to define its scoping command-line parameters
-   * and its unscoped command-line parameters, e.g. by calling defineScopingFlagParameter()
-   * and defineFlagParameter(), respectively. At least one scoping parameter must be defined.
+   * The child class should implement this hook to define its unscoped command-line parameters,
+   * e.g. by calling defineFlagParameter(). At least one scoping parameter must be defined.
+   * Scoping parameters are defined by setting the parameterGroupName to
+   * ScopedCommandLineAction.ScopingParameterGroupName.
    */
   protected abstract onDefineUnscopedParameters(): void;
 
@@ -197,6 +199,10 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * The child class should implement this hook to define its scoped command-line
    * parameters, e.g. by calling scopedParameterProvider.defineFlagParameter(). These
    * parameters will only be available if the action is invoked with a scope.
+   *
+   * @remarks
+   * onDefineScopedParameters is called after the unscoped parameters have been parsed.
+   * The values they provide can be used to vary the defined scope parameters.
    */
   protected abstract onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void;
 
