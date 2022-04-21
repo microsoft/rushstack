@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CommandLineParser prints the action help 1`] = `
+"usage: example scoped-action [-h] [--scope SCOPE] ...
+
+a longer description
+
+positional arguments:
+  \\"...\\"          Scoped parameters. Must be prefixed with \\"--\\", ex. \\"-- --scoped-parameter foo --scoped-flag\\". For more information on available scoped parameters, use \\"-- --help\\" on the scoped command.
+
+optional arguments:
+  -h, --help     show this help message and exit
+
+optional scoping arguments:
+  --scope SCOPE  The scope
+"
+`;
+
+exports[`CommandLineParser prints the scoped action help 1`] = `
+"usage: example scoped-action --scope foo -- [-h] [--scoped-foo SCOPED]
+
+An example project
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --scoped-foo SCOPED  The scoped argument
+
+For more information on available unscoped parameters, use \\"example scoped-action --help\\"
+"
+`;
+
+exports[`CommandLineParser throws on missing positional arg divider 1`] = `
+"example: error: unrecognized arguments: --scoped-foo
+"
+`;
+
+exports[`CommandLineParser throws on missing positional arg divider with unknown positional args 1`] = `"example scoped-action: error: unrecognized arguments: bar"`;
+
+exports[`CommandLineParser throws on unknown arg 1`] = `
+"example: error: unrecognized arguments: --scoped-foo
+"
+`;
+
+exports[`CommandLineParser throws on unknown scoped arg 1`] = `
+"example scoped-action --scope foo --: error: unrecognized arguments: --scoped-bar baz
+"
+`;
