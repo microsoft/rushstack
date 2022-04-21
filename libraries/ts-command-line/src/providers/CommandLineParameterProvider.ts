@@ -277,11 +277,11 @@ export abstract class CommandLineParameterProvider {
 
     const argparseOptions: argparse.ArgumentOptions = {
       help: this._remainder.description,
-      nargs: argparse.REMAINDER,
+      nargs: argparse.Const.REMAINDER,
       metavar: '"..."'
     };
 
-    this._getArgumentParser().add_argument(argparse.REMAINDER, argparseOptions);
+    this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
 
     return this._remainder;
   }
@@ -299,14 +299,14 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line help text.
    */
   public renderHelpText(): string {
-    return this._getArgumentParser().format_help();
+    return this._getArgumentParser().formatHelp();
   }
 
   /**
    * Generates the command-line usage text.
    */
   public renderUsageText(): string {
-    return this._getArgumentParser().format_usage();
+    return this._getArgumentParser().formatUsage();
   }
 
   /**
@@ -373,7 +373,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     if (this.remainder) {
-      this.remainder._setValue(data[argparse.REMAINDER]);
+      this.remainder._setValue(data[argparse.Const.REMAINDER]);
     }
 
     this._parametersProcessed = true;
@@ -387,6 +387,12 @@ export abstract class CommandLineParameterProvider {
           ' no further parameters can be defined'
       );
     }
+
+    const names: string[] = [];
+    if (parameter.shortName) {
+      names.push(parameter.shortName);
+    }
+    names.push(parameter.longName);
 
     parameter._parserKey = this._generateKey();
 
@@ -408,15 +414,9 @@ export abstract class CommandLineParameterProvider {
     const argparseOptions: argparse.ArgumentOptions = {
       help: finalDescription,
       dest: parameter._parserKey,
+      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
       required: parameter.required
     };
-
-    // Only add the metavar if it's specified. Setting to undefined will cause argparse to throw when
-    // metavar isn't
-    const metavarValue: string | undefined = (parameter as CommandLineParameterWithArgument).argumentName;
-    if (metavarValue) {
-      argparseOptions.metavar = metavarValue;
-    }
 
     switch (parameter.kind) {
       case CommandLineParameterKind.Choice: {
@@ -431,7 +431,7 @@ export abstract class CommandLineParameterProvider {
         break;
       }
       case CommandLineParameterKind.Flag:
-        argparseOptions.action = 'store_true';
+        argparseOptions.action = 'storeTrue';
         break;
       case CommandLineParameterKind.Integer:
         argparseOptions.type = 'int';
@@ -451,8 +451,8 @@ export abstract class CommandLineParameterProvider {
     if (parameter.groupName) {
       argumentGroup = this._parameterGroupsByName.get(parameter.groupName);
       if (!argumentGroup) {
-        argumentGroup = this._getArgumentParser().add_argument_group({
-          title: `optional ${parameter.groupName} arguments`
+        argumentGroup = this._getArgumentParser().addArgumentGroup({
+          title: `Optional ${parameter.groupName} arguments`
         });
         this._parameterGroupsByName.set(parameter.groupName, argumentGroup);
       }
@@ -460,19 +460,13 @@ export abstract class CommandLineParameterProvider {
       argumentGroup = this._getArgumentParser();
     }
 
-    if (parameter.shortName) {
-      argumentGroup.add_argument(parameter.shortName, parameter.longName, { ...argparseOptions });
-    } else {
-      argumentGroup.add_argument(parameter.longName, { ...argparseOptions });
-    }
+    argumentGroup.addArgument(names, { ...argparseOptions });
 
-    if (parameter.undocumentedSynonyms) {
-      for (const undocumentedSynonym of parameter.undocumentedSynonyms) {
-        argumentGroup.add_argument(undocumentedSynonym, {
-          ...argparseOptions,
-          help: argparse.SUPPRESS
-        });
-      }
+    if (parameter.undocumentedSynonyms && parameter.undocumentedSynonyms.length > 0) {
+      argumentGroup.addArgument(parameter.undocumentedSynonyms, {
+        ...argparseOptions,
+        help: argparse.Const.SUPPRESS
+      });
     }
 
     this._parameters.push(parameter);

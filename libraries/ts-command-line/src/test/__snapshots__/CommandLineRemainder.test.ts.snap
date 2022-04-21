@@ -30,11 +30,11 @@ exports[`CommandLineRemainder prints the action help 1`] = `
 
 a longer description
 
-positional arguments:
+Positional arguments:
   \\"...\\"         The action remainder
 
-optional arguments:
-  -h, --help    show this help message and exit
+Optional arguments:
+  -h, --help    Show this help message and exit.
   --title TEXT  A string
 "
 `;
@@ -44,12 +44,12 @@ exports[`CommandLineRemainder prints the global help 1`] = `
 
 An example project
 
-positional arguments:
+Positional arguments:
   <command>
     run       does the job
 
-optional arguments:
-  -h, --help  show this help message and exit
+Optional arguments:
+  -h, --help  Show this help message and exit.
   --verbose   A flag that affects all actions
 
 For detailed help about a specific command, use: example <command> -h

@@ -80,7 +80,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * @internal
    */
   public _buildParser(actionsSubParser: argparse.SubParser): void {
-    this._argumentParser = actionsSubParser.add_parser(this.actionName, {
+    this._argumentParser = actionsSubParser.addParser(this.actionName, {
       help: this.summary,
       description: this.documentation
     });

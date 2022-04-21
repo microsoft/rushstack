@@ -126,8 +126,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
           // argparse sets exit code 2 for invalid arguments
           2,
           // model the message off of the built-in "unrecognized arguments" message
-          `${this._unscopedParserOptions.toolFilename} ${this.actionName}: error: unrecognized ` +
-            `arguments: ${this.remainder.values[0]}`
+          `${this._unscopedParserOptions.toolFilename} ${this.actionName}: error: Unrecognized ` +
+            `arguments: ${this.remainder.values[0]}.`
         );
       }
       scopedArgs.push(...this.remainder.values.slice(1));

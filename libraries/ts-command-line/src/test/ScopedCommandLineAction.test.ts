@@ -41,7 +41,7 @@ class TestScopedAction extends ScopedCommandLineAction {
     this._scopedArg = scopedParameterProvider.defineStringParameter({
       parameterLongName: `--scoped-${this._scopeArg.value}`,
       argumentName: 'SCOPED',
-      description: 'The scoped argument'
+      description: 'The scoped argument.'
     });
   }
 }
@@ -62,23 +62,9 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe(CommandLineParser.name, () => {
-  it('throws on unknown arg', async () => {
-    const commandLineParser: TestCommandLine = new TestCommandLine();
-    const args: string[] = ['scoped-action', '--scoped-foo', 'bar'];
-
-    return expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
-  });
-
   it('throws on unknown scoped arg', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     const args: string[] = ['scoped-action', '--scope', 'foo', '--', '--scoped-bar', 'baz'];
-
-    return expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
-  });
-
-  it('throws on missing positional arg divider', async () => {
-    const commandLineParser: TestCommandLine = new TestCommandLine();
-    const args: string[] = ['scoped-action', '--scope', 'foo', '--scoped-foo', 'bar'];
 
     return expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
   });
