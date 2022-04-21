@@ -49,7 +49,7 @@ class InternalScopedCommandLineParser extends CommandLineParser {
 
 /**
  * Represents a sub-command that is part of the CommandLineParser command-line.
- * Applications should create subclasses of CommandLineAction corresponding to
+ * Applications should create subclasses of ScopedCommandLineAction corresponding to
  * each action that they want to expose.
  *
  * The action name should be comprised of lower case words separated by hyphens
@@ -57,6 +57,14 @@ class InternalScopedCommandLineParser extends CommandLineParser {
  * hyphen to separate words (e.g. "upload-docs"). A group of related commands
  * can be prefixed with a colon (e.g. "docs:generate", "docs:deploy",
  * "docs:serve", etc).
+ *
+ * Scoped commands allow for different parameters to be specified for different
+ * provided scoping values. For example, the "scoped-action --scope A" command
+ * may allow for different scoped arguments to be specified than the "scoped-action
+ * --scope B" command.
+ *
+ * Scoped arguments are specified after the "--" pseudo-argument. For example,
+ * "scoped-action --scope A -- --scopedFoo --scopedBar".
  *
  * @public
  */
