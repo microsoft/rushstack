@@ -28,8 +28,7 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     const scopedCommandLineParserOptions: ICommandLineParserOptions = {
       toolFilename: `${unscopedToolName}${scopingArgs.length ? ' ' + scopingArgs.join(' ') : ''} --`,
       toolDescription: options.actionOptions.documentation,
-      toolEpilog:
-        'For more information on available unscoped parameters, use ' + `"${unscopedToolName} --help"`,
+      toolEpilog: `For more information on available unscoped parameters, use "${unscopedToolName} --help"`,
       enableTabCompletionAction: false
     };
 
@@ -162,9 +161,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     // we will have already defined it.
     this.defineCommandLineRemainder({
       description:
-        'Scoped parameters.  Must be prefixed with "--", ex. "-- --scoped-parameter ' +
-        'foo --scoped-flag".  For more information on available scoped parameters, use "-- --help" ' +
-        'on the scoped command.'
+        'Scoped parameters.  Must be prefixed with "--", ex. "-- --scopedParameter ' +
+        'foo --scopedFlag".  For more information on available scoped parameters, use "-- --help".'
     });
   }
 

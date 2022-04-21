@@ -7,9 +7,8 @@ a longer description
 
 Positional arguments:
   \\"...\\"          Scoped parameters. Must be prefixed with \\"--\\", ex. \\"-- 
-                 --scoped-parameter foo --scoped-flag\\". For more information 
-                 on available scoped parameters, use \\"-- --help\\" on the 
-                 scoped command.
+                 --scopedParameter foo --scopedFlag\\". For more information on 
+                 available scoped parameters, use \\"-- --help\\".
 
 Optional arguments:
   -h, --help     Show this help message and exit.
