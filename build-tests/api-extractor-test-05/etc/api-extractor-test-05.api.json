@@ -254,7 +254,7 @@
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 5,
-                    "endIndex": 5
+                    "endIndex": 6
                   },
                   "releaseTag": "Public",
                   "overloadIndex": 1,
@@ -263,7 +263,7 @@
                       "parameterName": "x",
                       "parameterTypeTokenRange": {
                         "startIndex": 1,
-                        "endIndex": 1
+                        "endIndex": 2
                       },
                       "isOptional": false
                     },
@@ -271,7 +271,7 @@
                       "parameterName": "y",
                       "parameterTypeTokenRange": {
                         "startIndex": 3,
-                        "endIndex": 3
+                        "endIndex": 4
                       },
                       "isOptional": false
                     }
