@@ -5,12 +5,11 @@
 ```ts
 
 // @public (undocumented)
-export namespace testJsLibrary {
-    let // @deprecated
-    MY_CONSTANT : number ;
-    export class MyClass {
-        someMethod(x : number , y : string ) : boolean ;
-    }
+export let MY_CONSTANT : number;
+
+// @public
+export class MyClass {
+    someMethod(x : number , y : string ) : boolean ;
 }
 
 // (No @packageDocumentation comment for this package)
