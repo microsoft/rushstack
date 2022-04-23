@@ -63,7 +63,7 @@ and recommended approach.
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/stack/eslint-patch/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/stack/eslint-patch/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/eslint-patch` is part of the [Rush Stack](https://rushstack.io/) family of projects.

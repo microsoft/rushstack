@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "pluginName": "rush-mock-flush-telemetry-plugin",
+      "description": "Rush plugin for testing flush telemetry",
+      "entryPoint": "index.js"
+    }
+  ]
+}

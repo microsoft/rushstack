@@ -23,8 +23,8 @@ Verbose logging can be turn on by set environment variable `RUSH_SDK_DEBUG` to `
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/rush/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/apps/rush/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/rush-lib/)
+- [API Reference](https://api.rushstack.io/pages/rush-lib/)
 
 Rush is part of the [Rush Stack](https://rushstack.io/) family of projects.

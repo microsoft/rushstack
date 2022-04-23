@@ -204,7 +204,7 @@ function buildRules(profile) {
           // - @typescript-eslint/interface-name-prefix
           // - @typescript-eslint/member-naming
           //
-          // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/naming-convention.md
+          // Docs: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md
           '@typescript-eslint/naming-convention': [
             'warn',
             ...macros.expandNamingConventionSelectors([

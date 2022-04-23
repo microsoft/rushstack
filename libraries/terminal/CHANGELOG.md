@@ -1,6 +1,53 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Sat, 19 Mar 2022 08:05:38 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+
+## 0.3.37
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 0.3.36
+Wed, 13 Apr 2022 15:12:41 GMT
+
+_Version update only_
+
+## 0.3.35
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 0.3.34
+Tue, 12 Apr 2022 02:58:32 GMT
+
+_Version update only_
+
+## 0.3.33
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 0.3.32
+Sat, 09 Apr 2022 02:24:27 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 0.3.31
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 0.3.30
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 0.3.29
+Thu, 31 Mar 2022 02:06:06 GMT
+
+_Version update only_
 
 ## 0.3.28
 Sat, 19 Mar 2022 08:05:38 GMT

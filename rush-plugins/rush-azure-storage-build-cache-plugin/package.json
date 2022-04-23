@@ -1,10 +1,11 @@
 {
   "name": "@rushstack/rush-azure-storage-build-cache-plugin",
-  "version": "5.63.1",
+  "version": "5.66.2",
   "description": "Rush plugin for Azure storage cloud build cache",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/heft-plugins/heft-webpack5-plugin"
+    "url": "https://github.com/microsoft/rushstack",
+    "directory": "heft-plugins/heft-webpack5-plugin"
   },
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",

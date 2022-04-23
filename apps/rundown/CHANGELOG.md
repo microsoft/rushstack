@@ -1,6 +1,53 @@
 # Change Log - @rushstack/rundown
 
-This log was last generated on Sat, 19 Mar 2022 08:05:38 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+
+## 1.0.184
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 1.0.183
+Wed, 13 Apr 2022 15:12:41 GMT
+
+_Version update only_
+
+## 1.0.182
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 1.0.181
+Tue, 12 Apr 2022 02:58:32 GMT
+
+_Version update only_
+
+## 1.0.180
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 1.0.179
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 1.0.178
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 1.0.177
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 1.0.176
+Thu, 31 Mar 2022 02:06:05 GMT
+
+_Version update only_
 
 ## 1.0.175
 Sat, 19 Mar 2022 08:05:38 GMT

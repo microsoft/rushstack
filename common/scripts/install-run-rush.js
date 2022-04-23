@@ -36,10 +36,10 @@ const fs = __importStar(require("fs"));
 const install_run_1 = require("./install-run");
 const PACKAGE_NAME = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION';
-function _getRushVersion() {
+function _getRushVersion(logger) {
     const rushPreviewVersion = process.env[RUSH_PREVIEW_VERSION];
     if (rushPreviewVersion !== undefined) {
-        console.log(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
+        logger.info(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
         return rushPreviewVersion;
     }
     const rushJsonFolder = (0, install_run_1.findRushJsonFolder)();
@@ -66,7 +66,27 @@ function _run() {
     if (!nodePath || !scriptPath) {
         throw new Error('Unexpected exception: could not detect node path or script path');
     }
-    if (process.argv.length < 3) {
+    let commandFound = false;
+    let logger = { info: console.log, error: console.error };
+    for (const arg of packageBinArgs) {
+        if (arg === '-q' || arg === '--quiet') {
+            // The -q/--quiet flag is supported by both `rush` and `rushx`, and will suppress
+            // any normal informational/diagnostic information printed during startup.
+            //
+            // To maintain the same user experience, the install-run* scripts pass along this
+            // flag but also use it to suppress any diagnostic information normally printed
+            // to stdout.
+            logger = {
+                info: () => { },
+                error: console.error
+            };
+        }
+        if (!arg.startsWith('-')) {
+            commandFound = true;
+            break;
+        }
+    }
+    if (!commandFound) {
         console.log(`Usage: ${scriptName} <command> [args...]`);
         if (scriptName === 'install-run-rush.js') {
             console.log(`Example: ${scriptName} build --to myproject`);
@@ -76,10 +96,10 @@ function _run() {
         }
         process.exit(1);
     }
-    (0, install_run_1.runWithErrorAndStatusCode)(() => {
-        const version = _getRushVersion();
-        console.log(`The rush.json configuration requests Rush version ${version}`);
-        return (0, install_run_1.installAndRun)(PACKAGE_NAME, version, bin, packageBinArgs);
+    (0, install_run_1.runWithErrorAndStatusCode)(logger, () => {
+        const version = _getRushVersion(logger);
+        logger.info(`The rush.json configuration requests Rush version ${version}`);
+        return (0, install_run_1.installAndRun)(logger, PACKAGE_NAME, version, bin, packageBinArgs);
     });
 }
 _run();

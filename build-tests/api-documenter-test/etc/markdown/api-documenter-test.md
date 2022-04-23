@@ -37,6 +37,8 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Interface | Description |
 |  --- | --- |
+|  [Constraint](./api-documenter-test.constraint.md) | Type parameter constraint used by test case below. |
+|  [DefaultType](./api-documenter-test.defaulttype.md) | Type parameter default type used by test case below. |
 |  [DocClassInterfaceMerge](./api-documenter-test.docclassinterfacemerge.md) | Interface that merges with class |
 |  [IDocInterface1](./api-documenter-test.idocinterface1.md) |  |
 |  [IDocInterface2](./api-documenter-test.idocinterface2.md) |  |

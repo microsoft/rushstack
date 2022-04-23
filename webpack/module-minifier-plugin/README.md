@@ -55,7 +55,7 @@ optimization: {
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/webpack/module-minifier-plugin/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/webpack/module-minifier-plugin/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/module-minifier-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

@@ -1,6 +1,65 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 15 Mar 2022 19:15:53 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+
+## 7.22.2
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 7.22.1
+Wed, 13 Apr 2022 15:12:40 GMT
+
+_Version update only_
+
+## 7.22.0
+Tue, 12 Apr 2022 23:29:34 GMT
+
+### Minor changes
+
+- Add an alphaTrimmedFilePath option that adds support for generating a DTS rollup that inclues @alpha, @beta, and @public members.
+
+## 7.21.3
+Tue, 12 Apr 2022 02:58:32 GMT
+
+### Patches
+
+- Update TSDoc dependencies.
+
+## 7.21.2
+Sat, 09 Apr 2022 19:07:47 GMT
+
+### Patches
+
+- Fix ambient modules bug caused by #3321.
+
+## 7.21.1
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 7.21.0
+Fri, 08 Apr 2022 20:05:59 GMT
+
+### Minor changes
+
+- Add support for projects that use tsconfig.json "baseUrl" and "paths" settings to remap imports of local files (GitHub #3291)
+
+## 7.20.1
+Wed, 06 Apr 2022 22:35:23 GMT
+
+### Patches
+
+- Fix an issue where .api.json excerpt text included extra whitespace (GitHub #3316)
+
+## 7.20.0
+Thu, 31 Mar 2022 02:06:05 GMT
+
+### Minor changes
+
+- Updated api-extractor to extract whether a parameter is optional.
 
 ## 7.19.5
 Tue, 15 Mar 2022 19:15:53 GMT

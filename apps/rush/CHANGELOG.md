@@ -1,6 +1,57 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 26 Mar 2022 00:47:39 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Apr 2022 02:58:47 GMT and should not be manually modified.
+
+## 5.66.2
+Tue, 12 Apr 2022 02:58:47 GMT
+
+### Updates
+
+- Fix an issue where running the "install-run-rush" script with the "--help" parameter won't install Rush.
+
+## 5.66.1
+Tue, 12 Apr 2022 01:52:38 GMT
+
+### Updates
+
+- Fix watch-mode phased commands when rush.json is not in the repository root. Fix watch-mode change detection on Linux.
+
+## 5.66.0
+Sat, 09 Apr 2022 02:24:40 GMT
+
+### Updates
+
+- (BREAKING CHANGE) Update references to the default branch to reference "main" instead of "master".
+
+## 5.65.1
+Fri, 08 Apr 2022 23:10:18 GMT
+
+_Version update only_
+
+## 5.65.0
+Fri, 08 Apr 2022 06:16:59 GMT
+
+### Updates
+
+- Expose APIs for managing Azure credentials from @rushstack/rush-azure-storage-build-cache-plugin.
+- Add flushTelemetry hook
+- Fix an edge case where `rush update` fails in a PNPM workspaces repo with no dependencies.
+- Fix some issues with "rush add"'s ability to determine which version to use when adding a dependency that is already present in the repo.
+- Add support for percentage values for --parallelism flag, eg. "50%".
+- Improve retry logic in the Amazon S3 cloud cache plugin and improve reporting when the user is not authenticated.
+- Add an additional plugin to rush-azure-storage-build-cache-plugin that can be used to prompt for Azure authentication before a command runs.
+- Change the way "rush change" prints long lists of package names to include an "(and <count> more)" line after the first five listed by name.
+- Add a "tags" field to project definitions in rush.json. These may be used to select projects, for example, "rush list --only tag:my-custom-tag".
+- Fix a typo in output of `rush change -v`
+
+## 5.64.0
+Fri, 01 Apr 2022 04:51:31 GMT
+
+### Updates
+
+- Add support for suppressing startup information to invocations of `rush`, `rushx`, and the `install-run-rush` scripts.
+- Add --timeline option for more detail generated at end of rush build
+- Expose plugin hooks for phased command execution: the "createOperations" hook allows customizing the set of operations to execute, and the "waitingForChanges" hook gives plugins an opportunity to display data to the console while output is paused.
 
 ## 5.63.1
 Sat, 26 Mar 2022 00:47:39 GMT

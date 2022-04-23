@@ -245,6 +245,108 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object With credentials including a session token Handles an unexpected error 2`] = `[Error: Amazon S3 responded with status code 500 (Server Error)]`;
 
+exports[`AmazonS3Client Making requests Getting an object With credentials including a session token should not retry on 400 error 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "Authorization": Array [
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+        ],
+        "X-Amz-Security-Token": Array [
+          "sessionToken",
+        ],
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials including a session token should not retry on 400 error 2`] = `[Error: Amazon S3 responded with status code 400 (Bad Request)]`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials including a session token should not retry on 401 error 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "Authorization": Array [
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+        ],
+        "X-Amz-Security-Token": Array [
+          "sessionToken",
+        ],
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials including a session token should not retry on 401 error 2`] = `[Error: Amazon S3 responded with status code 401 (Unauthorized)]`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials should not retry on 400 error 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "Authorization": Array [
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+        ],
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials should not retry on 400 error 2`] = `[Error: Amazon S3 responded with status code 400 (Bad Request)]`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials should not retry on 401 error 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "Authorization": Array [
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+        ],
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials should not retry on 401 error 2`] = `[Error: Amazon S3 responded with status code 401 (Unauthorized)]`;
+
 exports[`AmazonS3Client Making requests Getting an object Without credentials Can get an object 1`] = `
 Array [
   "http://localhost:9000/abc123",
@@ -323,7 +425,45 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object Without credentials Handles an unexpected error 2`] = `[Error: Amazon S3 responded with status code 500 (Server Error)]`;
 
-exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object 1`] = `
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 400 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 401 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 403 1`] = `
 Array [
   "http://localhost:9000/abc123",
   Object {

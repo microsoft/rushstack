@@ -1,6 +1,64 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sat, 19 Mar 2022 08:05:37 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+
+## 7.17.9
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 7.17.8
+Wed, 13 Apr 2022 15:12:40 GMT
+
+_Version update only_
+
+## 7.17.7
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 7.17.6
+Tue, 12 Apr 2022 02:58:32 GMT
+
+### Patches
+
+- Update TSDoc dependencies.
+
+## 7.17.5
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 7.17.4
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 7.17.3
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 7.17.2
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 7.17.1
+Tue, 05 Apr 2022 15:12:22 GMT
+
+### Patches
+
+- Update requirement set links in OfficeYamlDocumenter
+
+## 7.17.0
+Thu, 31 Mar 2022 02:06:05 GMT
+
+### Minor changes
+
+- Updated api-documenter to surface whether a parameter is optional.
 
 ## 7.16.0
 Sat, 19 Mar 2022 08:05:37 GMT

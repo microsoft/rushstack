@@ -58,6 +58,8 @@ export class SimpleClass {
     // (undocumented)
     member(): void;
     // (undocumented)
+    optionalParamMethod(x?: number): void;
+    // (undocumented)
     get readonlyProperty(): string;
     // (undocumented)
     get writeableProperty(): string;

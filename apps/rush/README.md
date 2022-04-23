@@ -1,7 +1,7 @@
 # @microsoft/rush
 
 
-![rush](https://github.com/microsoft/rushstack/blob/master/common/wiki-images/rush-logo.png?raw=true)
+![rush](https://github.com/microsoft/rushstack/blob/main/common/wiki-images/rush-logo.png?raw=true)
 <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://rushjs.io
 
@@ -25,7 +25,7 @@
 
 - **Bulk publishing:** When it's time to do a release, Rush can detect which packages have changes, automatically bump all the appropriate version numbers, and run `npm publish` in each folder.  If you like, configure your server to automatically run `rush publish` every hour.
 
-- **Changelog tracking:** Whenever a PR is created, you can require developers to provide a major/minor/patch log entry for the affected projects.  During publishing, these changes will be automatically aggregated into a nicely formatted [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/master/libraries/node-core-library/CHANGELOG.md) file.
+- **Changelog tracking:** Whenever a PR is created, you can require developers to provide a major/minor/patch log entry for the affected projects.  During publishing, these changes will be automatically aggregated into a nicely formatted [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/node-core-library/CHANGELOG.md) file.
 
 - **Enterprise policies:** Want to review new libraries before developers add them to package.json, but avoid hassling people about already approved cases?  Want to enforce that all your projects depend on the same library version numbers?  Are unprofessional personal e-mail addresses accidentally showing up in your company's Git history?  Rush can help maintain a consistent ecosystem when you've got many developers and many projects in the mix.
 
@@ -67,11 +67,11 @@ For more details and support resources, please visit: https://rushjs.io
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/rush/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/apps/rush/CHANGELOG.md) - Find
   out what's new in the latest version
 - [UPGRADING.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/rush/UPGRADING.md) - Instructions
+  https://github.com/microsoft/rushstack/blob/main/apps/rush/UPGRADING.md) - Instructions
   for migrating existing projects to use a newer version of Rush
-- [API Reference](https://rushstack.io/pages/api/rush-lib/)
+- [API Reference](https://api.rushstack.io/pages/rush-lib/)
 
 Rush is part of the [Rush Stack](https://rushstack.io/) family of projects.

@@ -1,0 +1,31 @@
+{
+  "name": "heft-serverless-stack-tutorial",
+  "description": "(Copy of sample project) Building this project is a regression test for Heft",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "heft test --clean",
+    "start": "heft start --sst",
+    "build": "heft build --clean",
+    "deploy": "sst deploy",
+    "remove": "sst remove",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-serverless-stack-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@serverless-stack/aws-lambda-ric": "^2.0.12",
+    "@serverless-stack/cli": "0.67.0",
+    "@serverless-stack/resources": "0.67.0",
+    "@types/aws-lambda": "8.10.93",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24",
+    "aws-cdk-lib": "2.7.0",
+    "constructs": "~10.0.98",
+    "eslint": "~8.7.0",
+    "typescript": "~4.6.3"
+  }
+}
