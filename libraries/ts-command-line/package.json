@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/ts-command-line",
-  "version": "4.10.9",
+  "version": "4.10.10",
   "description": "An object-oriented command-line parser for TypeScript",
   "repository": {
     "type": "git",
