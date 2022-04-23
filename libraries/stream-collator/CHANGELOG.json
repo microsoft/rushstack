@@ -2,6 +2,30 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.0.169",
+      "tag": "@rushstack/stream-collator_v4.0.169",
+      "date": "Sat, 23 Apr 2022 02:13:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.168",
       "tag": "@rushstack/stream-collator_v4.0.168",
       "date": "Fri, 15 Apr 2022 00:12:36 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/eslint-plugin_v0.9.0",
+      "date": "Sat, 23 Apr 2022 02:13:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 4.6"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.6",
       "tag": "@rushstack/eslint-plugin_v0.8.6",
       "date": "Sat, 09 Apr 2022 02:24:26 GMT",

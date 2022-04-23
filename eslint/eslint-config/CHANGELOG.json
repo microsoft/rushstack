@@ -2,6 +2,29 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.6.0",
+      "tag": "@rushstack/eslint-config_v2.6.0",
+      "date": "Sat, 23 Apr 2022 02:13:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 4.6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.4",
       "tag": "@rushstack/eslint-config_v2.5.4",
       "date": "Fri, 15 Apr 2022 00:12:36 GMT",

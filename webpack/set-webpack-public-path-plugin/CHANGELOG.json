@@ -2,6 +2,27 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "3.3.28",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v3.3.28",
+      "date": "Sat, 23 Apr 2022 02:13:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.27",
       "tag": "@rushstack/set-webpack-public-path-plugin_v3.3.27",
       "date": "Fri, 15 Apr 2022 00:12:36 GMT",
