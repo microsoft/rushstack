@@ -1,8 +1,8 @@
 {
   "changes": [
     {
-      "comment": "update typescript to 4.6",
-      "type": "none",
+      "comment": "Update to TypeScript 4.6",
+      "type": "minor",
       "packageName": "@rushstack/heft-web-rig"
     }
   ],
