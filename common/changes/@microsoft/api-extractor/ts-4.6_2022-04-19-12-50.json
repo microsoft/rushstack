@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Update to TypeScript 4.5",
+      "comment": "Update to TypeScript 4.6",
       "type": "minor",
       "packageName": "@microsoft/api-extractor"
     }
