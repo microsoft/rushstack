@@ -26,7 +26,6 @@
     "aws-cdk-lib": "2.7.0",
     "constructs": "~10.0.98",
     "eslint": "~8.7.0",
-    "typescript": "~4.5.5"
-  },
-  "dependencies": {}
+    "typescript": "~4.6.3"
+  }
 }
