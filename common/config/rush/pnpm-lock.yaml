@@ -1663,7 +1663,7 @@ importers:
       '@types/semver': 7.3.5
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
-      '@types/tar': 4.0.3
+      '@types/tar': 6.1.1
       '@yarnpkg/lockfile': ~1.0.2
       builtin-modules: ~3.1.0
       cli-table: ~0.3.1
@@ -1686,7 +1686,7 @@ importers:
       ssri: ~8.0.0
       strict-uri-encode: ~2.0.0
       tapable: 2.2.1
-      tar: ~5.0.10
+      tar: ~6.1.11
       true-case-path: ~2.2.1
     dependencies:
       '@pnpm/link-bins': 5.3.25
@@ -1720,7 +1720,7 @@ importers:
       ssri: 8.0.1
       strict-uri-encode: 2.0.0
       tapable: 2.2.1
-      tar: 5.0.11
+      tar: 6.1.11
       true-case-path: 2.2.1
     devDependencies:
       '@pnpm/logger': 4.0.0
@@ -1741,7 +1741,7 @@ importers:
       '@types/semver': 7.3.5
       '@types/ssri': 7.1.1
       '@types/strict-uri-encode': 2.0.0
-      '@types/tar': 4.0.3
+      '@types/tar': 6.1.1
 
   ../../libraries/rush-sdk:
     specifiers:
@@ -7676,8 +7676,8 @@ packages:
   /@types/tapable/1.0.6:
     resolution: {integrity: sha512-W+bw9ds02rAQaMvaLYxAbJ6cvguW/iJXNT6lTssS1ps6QdrMKttqEAMEG/b5CR8TZl3/L7/lH0ZV5nNR1LXikA==}
 
-  /@types/tar/4.0.3:
-    resolution: {integrity: sha512-Z7AVMMlkI8NTWF0qGhC4QIX0zkV/+y0J8x7b/RsHrN0310+YNjoJd8UrApCiGBCWtKjxS9QhNqLi2UJNToh5hA==}
+  /@types/tar/6.1.1:
+    resolution: {integrity: sha512-8mto3YZfVpqB1CHMaYz1TUYIQfZFbh/QbEq5Hsn6D0ilCfqRVCdalmc89B7vi3jhl9UYIk+dWDABShNfOkv5HA==}
     dependencies:
       '@types/minipass': 3.1.2
       '@types/node': 12.20.24
@@ -20149,18 +20149,6 @@ packages:
       safe-buffer: 5.2.1
       yallist: 3.1.1
     dev: true
-
-  /tar/5.0.11:
-    resolution: {integrity: sha512-E6q48d5y4XSCD+Xmwc0yc8lXuyDK38E0FB8N4S/drQRtXOMUhfhDxbB0xr2KKDhNfO51CFmoa6Oz00nAkWsjnA==}
-    engines: {node: '>= 8'}
-    dependencies:
-      chownr: 1.1.4
-      fs-minipass: 2.1.0
-      minipass: 3.1.6
-      minizlib: 2.1.2
-      mkdirp: 0.5.6
-      yallist: 4.0.0
-    dev: false
 
   /tar/6.1.11:
     resolution: {integrity: sha512-an/KZQzQUkZCkuoAA64hM92X0Urb6VpRhAFllDzz44U2mcD5scmT3zBc4VgVpkugF580+DQn8eAFSyoQt0tznA==}
