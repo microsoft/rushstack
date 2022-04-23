@@ -52,8 +52,8 @@
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.44.9",
-    "@rushstack/heft-node-rig": "1.8.7",
+    "@rushstack/heft": "0.45.0",
+    "@rushstack/heft-node-rig": "1.9.0",
     "@types/argparse": "1.0.38",
     "@types/eslint": "8.2.0",
     "@types/glob": "7.1.1",
