@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Report status of projects with an empty script as \"empty script,\" instead of as \"from cache.\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
