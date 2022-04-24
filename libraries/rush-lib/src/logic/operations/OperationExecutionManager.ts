@@ -47,7 +47,8 @@ const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
   [OperationStatus.Failure]: '!',
   [OperationStatus.Blocked]: '.',
   [OperationStatus.Skipped]: '%',
-  [OperationStatus.FromCache]: '%'
+  [OperationStatus.FromCache]: '%',
+  [OperationStatus.EmptyScript]: '%'
 };
 
 /**
@@ -61,7 +62,8 @@ const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => stri
   [OperationStatus.Failure]: colors.red,
   [OperationStatus.Blocked]: colors.red,
   [OperationStatus.Skipped]: colors.green,
-  [OperationStatus.FromCache]: colors.green
+  [OperationStatus.FromCache]: colors.green,
+  [OperationStatus.EmptyScript]: colors.blue
 };
 
 /**
@@ -311,7 +313,7 @@ export class OperationExecutionManager {
       /**
        * This operation failed. Mark it as such and all reachable dependents as blocked.
        */
-      case OperationStatus.Failure:
+      case OperationStatus.Failure: {
         // Failed operations get reported, even if silent.
         // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
         const message: string | undefined = record.error?.message;
@@ -341,27 +343,43 @@ export class OperationExecutionManager {
         }
         this._hasAnyFailures = true;
         break;
+      }
+
       /**
        * This operation was restored from the build cache.
        */
-      case OperationStatus.FromCache:
+      case OperationStatus.FromCache: {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(
             colors.green(`"${name}" was restored from the build cache.`)
           );
         }
         break;
+      }
+
       /**
        * This operation was skipped via legacy change detection.
        */
-      case OperationStatus.Skipped:
+      case OperationStatus.Skipped: {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(colors.green(`"${name}" was skipped.`));
         }
         // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
         blockCacheWrite = true;
         break;
-      case OperationStatus.Success:
+      }
+
+      /**
+       * This operation was skipped via legacy change detection.
+       */
+      case OperationStatus.EmptyScript: {
+        if (!silent) {
+          record.collatedWriter.terminal.writeStdoutLine(colors.gray(`"${name}" had an empty script.`));
+        }
+        break;
+      }
+
+      case OperationStatus.Success: {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(
             colors.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
@@ -370,7 +388,9 @@ export class OperationExecutionManager {
         // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
         blockSkip ||= !this._changedProjectsOnly;
         break;
-      case OperationStatus.SuccessWithWarning:
+      }
+
+      case OperationStatus.SuccessWithWarning: {
         if (!silent) {
           record.collatedWriter.terminal.writeStderrLine(
             colors.yellow(`"${name}" completed with warnings in ${record.stopwatch.toString()}.`)
@@ -380,6 +400,7 @@ export class OperationExecutionManager {
         blockSkip ||= !this._changedProjectsOnly;
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;
         break;
+      }
     }
 
     // Apply status changes to direct dependents
@@ -412,6 +433,7 @@ export class OperationExecutionManager {
         case OperationStatus.SuccessWithWarning:
         case OperationStatus.Blocked:
         case OperationStatus.Failure:
+        case OperationStatus.EmptyScript:
           break;
         default:
           // This should never happen
@@ -442,6 +464,13 @@ export class OperationExecutionManager {
       operationsByStatus,
       colors.green,
       'These operations were already up to date:'
+    );
+
+    this._writeCondensedSummary(
+      OperationStatus.EmptyScript,
+      operationsByStatus,
+      colors.gray,
+      'These operations had an empty script:'
     );
 
     this._writeCondensedSummary(

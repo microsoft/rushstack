@@ -530,6 +530,7 @@ export class Operation {
 // @beta
 export enum OperationStatus {
     Blocked = "BLOCKED",
+    EmptyScript = "EMPTY SCRIPT",
     Executing = "EXECUTING",
     Failure = "FAILURE",
     FromCache = "FROM CACHE",
