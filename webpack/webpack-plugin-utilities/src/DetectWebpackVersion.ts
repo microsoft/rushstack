@@ -1,5 +1,6 @@
 import type * as Webpack5 from 'webpack';
 import type * as Webpack4 from 'webpack4';
+import webpack from 'webpack4';
 
 /**
  * There is no `compiler.version` API available prior to webpack 5,
@@ -18,16 +19,25 @@ const isWebpack3OrEarlier = (compiler: Webpack5.Compiler): boolean => {
   return !compiler.hooks;
 };
 
+const isWebpack4 = (compiler: Webpack4.Compiler): boolean => {
+  const webpackVersion: string | undefined = (compiler as Webpack5.Compiler | { webpack: undefined }).webpack
+    ?.version;
+
+  // version property doesn't exist
+  return !webpackVersion;
+};
+
 /**
  * Detects whether or not we are using webpack major version 4 or 5
  *
  * @public
  */
-const isWebpack4Or5 = (compiler: Webpack5.Compiler | Webpack4.Compiler): number => {
+const isWebpack5 = (compiler: Webpack5.Compiler | Webpack4.Compiler): boolean => {
   const webpackVersion: string | undefined = (compiler as Webpack5.Compiler | { webpack: undefined }).webpack
     ?.version;
 
-  return webpackVersion ? Number(webpackVersion.substr(0, webpackVersion.indexOf('.'))) : 4;
+  // version property does exist
+  return !!webpackVersion;
 };
 
-export { isWebpack3OrEarlier, isWebpack4Or5 };
+export { isWebpack3OrEarlier, isWebpack4, isWebpack5 };

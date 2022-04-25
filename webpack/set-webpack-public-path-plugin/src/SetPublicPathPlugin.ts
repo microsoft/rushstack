@@ -157,12 +157,10 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
       throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
     }
 
-    const webpackMajorVersion: number = VersionDetection.isWebpack4Or5(compiler);
-
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
       (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
-        if (webpackMajorVersion === 4) {
+        if (VersionDetection.isWebpack4) {
           const webpack4Compilation: Webpack.compilation.Compilation =
             compilation as Webpack.compilation.Compilation;
           const mainTemplate: IWebpack4ExtendedMainTemplate =
@@ -202,7 +200,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     );
 
     // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
-    if (webpackMajorVersion === 4) {
+    if (VersionDetection.isWebpack4) {
       compiler.hooks.emit.tap(
         PLUGIN_NAME,
         (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
