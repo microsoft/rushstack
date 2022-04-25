@@ -41,9 +41,10 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     // No-op. Parameters are manually defined in the constructor.
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
+    await super.onExecute();
     // Redirect action execution to the provided callback
-    return this._internalOptions.onExecute();
+    await this._internalOptions.onExecute();
   }
 }
 
@@ -85,6 +86,17 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
     this._options = options;
     this._scopingParameters = [];
+  }
+
+  /**
+   * {@inheritDoc CommandLineParameterProvider.parameters}
+   */
+  public get parameters(): ReadonlyArray<CommandLineParameter> {
+    if (this._scopedCommandLineParser) {
+      return [...super.parameters, ...this._scopedCommandLineParser.parameters];
+    } else {
+      return super.parameters;
+    }
   }
 
   /**
