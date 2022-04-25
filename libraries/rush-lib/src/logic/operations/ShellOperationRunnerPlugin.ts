@@ -87,7 +87,7 @@ function createShellOperations(
         // Empty build script indicates a no-op, so use a no-op runner
         operation.runner = new NullOperationRunner({
           name: displayName,
-          result: OperationStatus.EmptyScript,
+          result: OperationStatus.NoOp,
           silent: false
         });
       }

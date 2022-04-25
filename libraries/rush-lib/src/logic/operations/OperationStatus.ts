@@ -39,7 +39,7 @@ export enum OperationStatus {
    */
   Blocked = 'BLOCKED',
   /**
-   * The Operation had an empty script
+   * The Operation was a no-op (for example, it had an empty script)
    */
-  EmptyScript = 'EMPTY SCRIPT'
+  NoOp = 'NOOP'
 }

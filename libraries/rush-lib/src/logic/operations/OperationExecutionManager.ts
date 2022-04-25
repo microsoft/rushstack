@@ -48,7 +48,7 @@ const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
   [OperationStatus.Blocked]: '.',
   [OperationStatus.Skipped]: '%',
   [OperationStatus.FromCache]: '%',
-  [OperationStatus.EmptyScript]: '%'
+  [OperationStatus.NoOp]: '%'
 };
 
 /**
@@ -63,7 +63,7 @@ const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => stri
   [OperationStatus.Blocked]: colors.red,
   [OperationStatus.Skipped]: colors.green,
   [OperationStatus.FromCache]: colors.green,
-  [OperationStatus.EmptyScript]: colors.blue
+  [OperationStatus.NoOp]: colors.gray
 };
 
 /**
@@ -370,11 +370,11 @@ export class OperationExecutionManager {
       }
 
       /**
-       * This operation was skipped via legacy change detection.
+       * This operation intentionally didn't do anything.
        */
-      case OperationStatus.EmptyScript: {
+      case OperationStatus.NoOp: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(colors.gray(`"${name}" had an empty script.`));
+          record.collatedWriter.terminal.writeStdoutLine(colors.gray(`"${name}" did not define any work.`));
         }
         break;
       }
@@ -433,7 +433,7 @@ export class OperationExecutionManager {
         case OperationStatus.SuccessWithWarning:
         case OperationStatus.Blocked:
         case OperationStatus.Failure:
-        case OperationStatus.EmptyScript:
+        case OperationStatus.NoOp:
           break;
         default:
           // This should never happen
@@ -467,10 +467,10 @@ export class OperationExecutionManager {
     );
 
     this._writeCondensedSummary(
-      OperationStatus.EmptyScript,
+      OperationStatus.NoOp,
       operationsByStatus,
       colors.gray,
-      'These operations had an empty script:'
+      'These operations did not define any work:'
     );
 
     this._writeCondensedSummary(
