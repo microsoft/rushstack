@@ -625,7 +625,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       parameterLongName: '--disable-code-coverage',
       environmentVariable: 'HEFT_JEST_DISABLE_CODE_COVERAGE',
       description:
-        'Disable any configured code coverage.' + '  If no code coverage is configured, has no effect.'
+        'Disable any configured code coverage. If code coverage is not configured, this parameter has no effect.'
     });
 
     const findRelatedTests: IHeftStringListParameter = heftSession.commandLine.registerStringListParameter({
