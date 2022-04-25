@@ -2274,7 +2274,8 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/tapable': 1.0.6
-      '@types/webpack': 4.41.24
+      '@types/webpack4': npm:@types/webpack@4.41.24
+      webpack5: npm:webpack@~5.68.0
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -2283,7 +2284,8 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/tapable': 1.0.6
-      '@types/webpack': 4.41.24
+      '@types/webpack4': /@types/webpack/4.41.24
+      webpack5: /webpack/5.68.0
 
 packages:
 
