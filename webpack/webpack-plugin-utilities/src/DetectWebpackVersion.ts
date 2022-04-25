@@ -19,6 +19,11 @@ const isWebpack3OrEarlier = (compiler: Webpack5.Compiler): boolean => {
   return !compiler.hooks;
 };
 
+/**
+ * Detects whether or not we are using webpack 4
+ *
+ * @public
+ */
 const isWebpack4 = (compiler: Webpack4.Compiler): boolean => {
   const webpackVersion: string | undefined = (compiler as Webpack5.Compiler | { webpack: undefined }).webpack
     ?.version;
@@ -28,7 +33,7 @@ const isWebpack4 = (compiler: Webpack4.Compiler): boolean => {
 };
 
 /**
- * Detects whether or not we are using webpack major version 4 or 5
+ * Detects whether or not we are using webpack 5
  *
  * @public
  */
