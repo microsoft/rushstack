@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove the @deprecated label from `RushConfigurationProject.packageJson`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
