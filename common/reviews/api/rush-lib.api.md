@@ -533,6 +533,7 @@ export enum OperationStatus {
     Executing = "EXECUTING",
     Failure = "FAILURE",
     FromCache = "FROM CACHE",
+    NoOp = "NO OP",
     Ready = "READY",
     Skipped = "SKIPPED",
     Success = "SUCCESS",
