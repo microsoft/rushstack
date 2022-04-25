@@ -3,12 +3,6 @@
 
 import { EOL } from 'os';
 import { isWebpack3OrEarlier, isWebpack4Or5 } from '@rushstack/webpack-plugin-utilities';
-<<<<<<< HEAD
-=======
-
-import type * as Webpack from 'webpack';
-import type * as Tapable from 'tapable';
->>>>>>> 241ac56209cd45fd458360e54f84e9442649e5e2
 
 import type * as Webpack from 'webpack';
 import type * as Webpack5 from 'webpack5';
