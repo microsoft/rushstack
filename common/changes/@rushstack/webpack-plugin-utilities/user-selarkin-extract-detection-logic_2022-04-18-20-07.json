@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/webpack-plugin-utilities",
-      "comment": "Initial release of webpack-plugin-utilities",
-      "type": "patch"
+      "comment": "Initial release.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/webpack-plugin-utilities"
