@@ -41,5 +41,5 @@ export enum OperationStatus {
   /**
    * The Operation was a no-op (for example, it had an empty script)
    */
-  NoOp = 'NOOP'
+  NoOp = 'NO OP'
 }
