@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.67.0",
+      "tag": "@microsoft/rush_v5.67.0",
+      "date": "Sat, 23 Apr 2022 02:13:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Upgrade \"tar\" dependency to eliminate spurious security vulnerability for \"minimist\" package"
+          },
+          {
+            "comment": "Remove requirement that custom parameters associated with a phased command must also be associated with one or more phases. This allows for custom parameters that will only be interpreted by plugins."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.66.2",
       "tag": "@microsoft/rush_v5.66.2",
       "date": "Tue, 12 Apr 2022 02:58:47 GMT",

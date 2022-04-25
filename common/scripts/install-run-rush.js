@@ -3,7 +3,11 @@
 // See the @microsoft/rush package's LICENSE file for license information.
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -81,9 +85,10 @@ function _run() {
                 error: console.error
             };
         }
-        if (!arg.startsWith('-')) {
+        else if (!arg.startsWith('-') || arg === '-h' || arg === '--help') {
+            // We either found something that looks like a command (i.e. - doesn't start with a "-"),
+            // or we found the -h/--help flag, which can be run without a command
             commandFound = true;
-            break;
         }
     }
     if (!commandFound) {

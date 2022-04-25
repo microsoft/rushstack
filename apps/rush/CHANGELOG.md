@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 12 Apr 2022 02:58:47 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Apr 2022 02:13:20 GMT and should not be manually modified.
+
+## 5.67.0
+Sat, 23 Apr 2022 02:13:20 GMT
+
+### Updates
+
+- Upgrade "tar" dependency to eliminate spurious security vulnerability for "minimist" package
+- Remove requirement that custom parameters associated with a phased command must also be associated with one or more phases. This allows for custom parameters that will only be interpreted by plugins.
 
 ## 5.66.2
 Tue, 12 Apr 2022 02:58:47 GMT

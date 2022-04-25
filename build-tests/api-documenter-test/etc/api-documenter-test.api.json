@@ -166,7 +166,8 @@
         "@preapproved": true,
         "@docCategory": true,
         "@myCustomTag": true
-      }
+      },
+      "reportUnsupportedHtmlElements": false
     }
   },
   "kind": "Package",

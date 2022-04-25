@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Apr 2022 02:13:06 GMT and should not be manually modified.
+
+## 0.45.0
+Sat, 23 Apr 2022 02:13:06 GMT
+
+### Minor changes
+
+- Add support for TypeScript 4.6
 
 ## 0.44.13
 Fri, 15 Apr 2022 00:12:36 GMT
