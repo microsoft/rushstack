@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Utility package which provides a set of tools for woking in
+ * Utility package which provides a set of tools for working in
  * webpack plugins, loaders, and other integrations.
  * @packageDocumentation
  */
 
-export * as VersionDetection from './DetectWebpackVersion';
+import * as VersionDetection from './DetectWebpackVersion';
+export { VersionDetection };

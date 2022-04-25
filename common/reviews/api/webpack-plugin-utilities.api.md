@@ -4,13 +4,21 @@
 
 ```ts
 
-import type * as Webpack from 'webpack';
-import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
+import type * as Webpack4 from 'webpack4';
+import type * as Webpack5 from 'webpack';
 
 // @public
-export const isWebpack3OrEarlier: (compiler: Webpack.Compiler) => boolean;
+const isWebpack3OrEarlier: (compiler: Webpack5.Compiler) => boolean;
 
 // @public
-export const isWebpack4Or5: (compiler: Webpack.Compiler | Webpack5.Compiler) => number;
+const isWebpack4Or5: (compiler: Webpack5.Compiler | Webpack4.Compiler) => number;
+
+declare namespace VersionDetection {
+    export {
+        isWebpack3OrEarlier,
+        isWebpack4Or5
+    }
+}
+export { VersionDetection }
 
 ```
