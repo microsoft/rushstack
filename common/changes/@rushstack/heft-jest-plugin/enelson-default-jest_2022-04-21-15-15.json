@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-jest-plugin",
-      "comment": "Enable clearMocks: true by default",
+      "comment": "(BREAKING CHANGE) Enable clearMocks: true by default",
       "type": "minor"
     }
   ],

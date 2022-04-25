@@ -1,6 +1,6 @@
 # Upgrade notes for @rushstack/heft-jest-plugin
 
-### Heft 0.3.0
+### Version 0.3.0
 
 This release of `heft-jest-plugin` enabled Jest's `clearMocks` option by default.
 If your project didn't already have this option turned on, it is possible that
