@@ -13,6 +13,6 @@
     "@microsoft/api-extractor": "workspace:*",
     "api-extractor-lib1-test": "workspace:*",
     "fs-extra": "~7.0.1",
-    "typescript": "~4.5.2"
+    "typescript": "~4.6.3"
   }
 }

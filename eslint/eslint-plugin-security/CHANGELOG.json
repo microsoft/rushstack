@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.3.0",
+      "date": "Sat, 23 Apr 2022 02:13:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 4.6"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.6",
       "tag": "@rushstack/eslint-plugin-security_v0.2.6",
       "date": "Sat, 09 Apr 2022 02:24:26 GMT",
