@@ -1,7 +1,5 @@
 import type * as Webpack from 'webpack';
-
-// Workaround for https://github.com/pnpm/pnpm/issues/4301
-import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
+import type * as Webpack5 from 'webpack5';
 
 /**
  * There is no `compiler.version` API available prior to webpack 5,
