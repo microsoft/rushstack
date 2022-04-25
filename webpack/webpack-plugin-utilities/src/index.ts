@@ -7,4 +7,4 @@
  * @packageDocumentation
  */
 
-export { isWebpack3OrEarlier, isWebpack4Or5 } from './DetectWebpackVersion';
+export * as VersionDetection from './DetectWebpackVersion';
