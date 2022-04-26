@@ -11,7 +11,7 @@ This is a collection of utilities for writing webpack plugins
 # Usage
 
 ```JavaScript
-import VersionDetection from "@rushstack/webpack-plugin-utilities"
+import { VersionDetection } from "@rushstack/webpack-plugin-utilities"
 
 class MyExampleWebpackPlugin {
   constructor() {
