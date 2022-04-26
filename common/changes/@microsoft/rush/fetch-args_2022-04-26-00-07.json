@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a -- parameter to git command invocations that accept user input to prevent arbitrary arguments from being passed.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
