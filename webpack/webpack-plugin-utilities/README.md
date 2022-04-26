@@ -2,7 +2,7 @@
 
 ## Installation
 
-`npm install @rushstack/webpack-plugin-utilities --save-dev`
+`npm install @rushstack/webpack-plugin-utilities --save`
 
 ## Overview
 
@@ -11,14 +11,12 @@ This is a collection of utilities for writing webpack plugins
 # Usage
 
 ```JavaScript
-import VersionDetection from "@rushstack/webpack-plugin-utilities"
+import { VersionDetection } from "@rushstack/webpack-plugin-utilities"
 
 class MyExampleWebpackPlugin {
   constructor() {
     this.pluginName = "MyExampleWebpackPlugin"
   }
-
-
 
   apply(compiler) {
     if (VersionDetection.isWebpack3OrEarlier(compiler)) {

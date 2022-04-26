@@ -6,6 +6,7 @@
  */
 
 import type * as Webpack from 'webpack';
+
 /**
  * We do not have quality API detection between webpack major versions 1-3.
  * We can detect the absence of hooks which was a version 3 feature.
