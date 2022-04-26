@@ -18,8 +18,6 @@ class MyExampleWebpackPlugin {
     this.pluginName = "MyExampleWebpackPlugin"
   }
 
-
-
   apply(compiler) {
     if (VersionDetection.isWebpack3OrEarlier(compiler)) {
       throw new Error(`This plugin does not support webpack 3 or below.`)
