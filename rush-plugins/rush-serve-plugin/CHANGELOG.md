@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-serve-plugin
 
-This log was last generated on Tue, 26 Apr 2022 00:10:15 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Apr 2022 15:12:54 GMT and should not be manually modified.
+
+## 0.1.10
+Tue, 26 Apr 2022 15:12:54 GMT
+
+### Patches
+
+- Fix missing runtime dependency on @rushstack/heft-config-file.
 
 ## 0.1.9
 Tue, 26 Apr 2022 00:10:15 GMT

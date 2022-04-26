@@ -2,6 +2,18 @@
   "name": "@rushstack/rush-serve-plugin",
   "entries": [
     {
+      "version": "0.1.10",
+      "tag": "@rushstack/rush-serve-plugin_v0.1.10",
+      "date": "Tue, 26 Apr 2022 15:12:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix missing runtime dependency on @rushstack/heft-config-file."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.9",
       "tag": "@rushstack/rush-serve-plugin_v0.1.9",
       "date": "Tue, 26 Apr 2022 00:10:15 GMT",
