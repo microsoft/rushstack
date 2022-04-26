@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-serve-plugin",
+      "comment": "Fix missing runtime dependency on @rushstack/heft-config-file.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-serve-plugin"
+}
