@@ -2,7 +2,7 @@
 
 ## Installation
 
-`npm install @rushstack/webpack-plugin-utilities --save-dev`
+`npm install @rushstack/webpack-plugin-utilities --save`
 
 ## Overview
 
