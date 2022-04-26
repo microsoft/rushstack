@@ -5,9 +5,9 @@ import { EOL } from 'os';
 import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
 
 import type * as Webpack from 'webpack';
+import type * as Tapable from 'tapable';
 // Workaround for https://github.com/pnpm/pnpm/issues/4301
 import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
-import type * as Tapable from 'tapable';
 
 import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
