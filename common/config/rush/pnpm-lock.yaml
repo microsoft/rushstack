@@ -2111,6 +2111,7 @@ importers:
       express: 4.17.1
     dependencies:
       '@rushstack/debug-certificate-manager': link:../../libraries/debug-certificate-manager
+      '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rig-package': link:../../libraries/rig-package
       '@rushstack/rush-sdk': link:../../libraries/rush-sdk
@@ -2119,7 +2120,6 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/express': 4.17.13
       '@types/heft-jest': 1.0.1
