@@ -4,19 +4,22 @@
 
 ```ts
 
-import type * as Webpack4 from 'webpack4';
-import type * as Webpack5 from 'webpack';
+import type * as Webpack from 'webpack';
 
 // @public
-const isWebpack3OrEarlier: (compiler: Webpack5.Compiler) => boolean;
+function isWebpack3OrEarlier(compiler: Webpack.Compiler): boolean;
 
 // @public
-const isWebpack4Or5: (compiler: Webpack5.Compiler | Webpack4.Compiler) => number;
+function isWebpack4(compiler: Webpack.Compiler): boolean;
+
+// @public
+function isWebpack5(compiler: Webpack.Compiler): boolean;
 
 declare namespace VersionDetection {
     export {
         isWebpack3OrEarlier,
-        isWebpack4Or5
+        isWebpack4,
+        isWebpack5
     }
 }
 export { VersionDetection }

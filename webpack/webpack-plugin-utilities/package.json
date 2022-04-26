@@ -33,7 +33,6 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
-    "@types/webpack4": "npm:@types/webpack@4.41.24",
     "webpack": "~5.68.0"
   }
 }

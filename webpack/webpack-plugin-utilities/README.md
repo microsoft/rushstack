@@ -11,21 +11,23 @@ This is a collection of utilities for writing webpack plugins
 # Usage
 
 ```JavaScript
-import { isWebpack3OrEarlier, isWebpack4Or5 } from "@rushstack/webpack-plugin-utilities"
+import VersionDetection from "@rushstack/webpack-plugin-utilities"
 
 class MyExampleWebpackPlugin {
   constructor() {
     this.pluginName = "MyExampleWebpackPlugin"
   }
 
+
+
   apply(compiler) {
-    if (isWebpack3OrEarlier(compiler)) {
+    if (VersionDetection.isWebpack3OrEarlier(compiler)) {
       throw new Error(`This plugin does not support webpack 3 or below.`)
     }
 
-    const webpackVersion = isWebpack4Or5(compiler);
+    const isWebpack4 = VersionDetection.isWebpack4(compiler);
 
-    if (webpackVersion === 4) {
+    if (isWebpack4) {
       compiler.hooks.compilation.tap(this.pluginName, (compilation) => {
         // ....
       });

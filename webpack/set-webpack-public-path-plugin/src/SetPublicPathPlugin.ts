@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import VersionDetection from '@rushstack/webpack-plugin-utilities';
+import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
 
 import type * as Webpack from 'webpack';
-import type * as Webpack5 from 'webpack5';
+// Workaround for https://github.com/pnpm/pnpm/issues/4301
+import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
 import type * as Tapable from 'tapable';
 
 import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
@@ -153,14 +154,18 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   }
 
   public apply(compiler: Webpack.Compiler): void {
-    if (VersionDetection.isWebpack3OrEarlier(compiler)) {
+    // Casting here beacuse VersionDetection refers to webpack 5 typings
+    if (VersionDetection.isWebpack3OrEarlier(compiler as unknown as Webpack5.Compiler)) {
       throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
     }
+
+    // Casting here beacuse VersionDetection refers to webpack 5 typings
+    const isWebpack4: boolean = VersionDetection.isWebpack4(compiler as unknown as Webpack5.Compiler);
 
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
       (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
-        if (VersionDetection.isWebpack4) {
+        if (isWebpack4) {
           const webpack4Compilation: Webpack.compilation.Compilation =
             compilation as Webpack.compilation.Compilation;
           const mainTemplate: IWebpack4ExtendedMainTemplate =
@@ -200,7 +205,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     );
 
     // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
-    if (VersionDetection.isWebpack4) {
+    if (isWebpack4) {
       compiler.hooks.emit.tap(
         PLUGIN_NAME,
         (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
