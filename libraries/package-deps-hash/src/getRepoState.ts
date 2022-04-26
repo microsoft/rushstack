@@ -302,8 +302,8 @@ export function getRepoChanges(
       '--no-commit-id',
       '--cached',
       '-z',
-      '--',
-      revision
+      revision,
+      '--'
     ],
     {
       currentWorkingDirectory: rootDirectory
