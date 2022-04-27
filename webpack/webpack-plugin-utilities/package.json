@@ -1,14 +1,14 @@
 {
-  "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "3.3.29",
+  "name": "@rushstack/webpack-plugin-utilities",
+  "version": "0.0.1",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
-  "typings": "dist/set-webpack-public-path-plugin.d.ts",
+  "typings": "dist/webpack-plugin-utilities.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "webpack/set-webpack-public-path-plugin"
+    "directory": "webpack/webpack-plugin-utilities"
   },
   "scripts": {
     "build": "heft build --clean",
@@ -30,11 +30,9 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
-    "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "@rushstack/webpack-plugin-utilities": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
-    "@types/webpack": "4.41.24"
+    "webpack": "~5.68.0"
   }
 }

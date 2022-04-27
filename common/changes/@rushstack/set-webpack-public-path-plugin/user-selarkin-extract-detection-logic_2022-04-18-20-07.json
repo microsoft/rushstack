@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Move webpack version detection logic to the \"@rushstack/webpack-plugin-utilities\" package",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin"
+}
