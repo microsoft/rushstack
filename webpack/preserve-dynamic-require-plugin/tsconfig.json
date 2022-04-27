@@ -3,6 +3,6 @@
   "compilerOptions": {
     "target": "ES2019",
     "types": ["heft-jest", "node"],
-    "noImplicitAny": false // Some typings are missing
+    "noImplicitAny": false
   }
 }
