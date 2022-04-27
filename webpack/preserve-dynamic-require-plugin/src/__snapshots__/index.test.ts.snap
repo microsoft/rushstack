@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PreserveDynamicRequireWebpackPlugin Preserves dynamic require usage 1`] = `
+Map {
+  "/release/main.js" => "/******/ (() => { // webpackBootstrap
+var __webpack_exports__ = {};
+require(process.env.SOME_PATH);
+/******/ })()
+;",
+}
+`;
