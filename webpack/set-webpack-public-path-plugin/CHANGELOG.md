@@ -1,6 +1,13 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Tue, 26 Apr 2022 00:10:15 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Apr 2022 01:19:20 GMT and should not be manually modified.
+
+## 3.3.30
+Wed, 27 Apr 2022 01:19:20 GMT
+
+### Patches
+
+- Move webpack version detection logic to the "@rushstack/webpack-plugin-utilities" package
 
 ## 3.3.29
 Tue, 26 Apr 2022 00:10:15 GMT
