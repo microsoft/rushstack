@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
+  "entries": [
+    {
+      "version": "0.9.0",
+      "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.9.0",
+      "date": "Thu, 28 Apr 2022 00:11:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Define a plugin for preserving dynamic usage of \"require\" in webpack projects that target NodeJS."
+          }
+        ]
+      }
+    }
+  ]
+}
