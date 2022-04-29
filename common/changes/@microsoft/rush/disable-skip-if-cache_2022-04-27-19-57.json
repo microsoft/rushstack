@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Disable legacy skip logic when build cache is enabled.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
