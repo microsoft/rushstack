@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 23 Apr 2022 02:13:20 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Apr 2022 05:22:05 GMT and should not be manually modified.
+
+## 5.68.0
+Fri, 29 Apr 2022 05:22:05 GMT
+
+### Updates
+
+- Disable legacy skip logic when build cache is enabled.
+- Report status of projects with an empty script as "did not define any work," instead of as "from cache."
+- Add a -- parameter to git command invocations that accept user input to prevent arbitrary arguments from being passed.
+- Remove the @deprecated label from `RushConfigurationProject.packageJson`.
 
 ## 5.67.0
 Sat, 23 Apr 2022 02:13:20 GMT

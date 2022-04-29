@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.68.0",
+      "tag": "@microsoft/rush_v5.68.0",
+      "date": "Fri, 29 Apr 2022 05:22:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable legacy skip logic when build cache is enabled."
+          },
+          {
+            "comment": "Report status of projects with an empty script as \"did not define any work,\" instead of as \"from cache.\""
+          },
+          {
+            "comment": "Add a -- parameter to git command invocations that accept user input to prevent arbitrary arguments from being passed."
+          },
+          {
+            "comment": "Remove the @deprecated label from `RushConfigurationProject.packageJson`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.67.0",
       "tag": "@microsoft/rush_v5.67.0",
       "date": "Sat, 23 Apr 2022 02:13:20 GMT",
