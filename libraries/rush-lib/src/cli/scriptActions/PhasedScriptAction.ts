@@ -34,6 +34,7 @@ import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperatio
 import { Selection } from '../../logic/Selection';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
+import type { BaseInstallManager } from '../../logic/base/BaseInstallManager';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -48,6 +49,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   phases: Map<string, IPhase>;
 
   alwaysWatch: boolean;
+  alwaysInstall: boolean | undefined;
 }
 
 interface IRunPhasesOptions {
@@ -84,6 +86,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _alwaysWatch: boolean;
+  private readonly _alwaysInstall: boolean | undefined;
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
@@ -93,6 +96,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _watchParameter: CommandLineFlagParameter | undefined;
   private _timelineParameter: CommandLineFlagParameter | undefined;
+  private _installParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -102,6 +106,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._alwaysWatch = options.alwaysWatch;
+    this._alwaysInstall = options.alwaysInstall;
     this._knownPhases = options.phases;
 
     this.hooks = new PhasedCommandHooks();
@@ -113,6 +118,46 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   }
 
   public async runAsync(): Promise<void> {
+    if (this._alwaysInstall || this._installParameter?.value) {
+      const [{ VersionMismatchFinder }, { SetupChecks }, { PurgeManager }, { InstallManagerFactory }] =
+        await Promise.all([
+          import('../../logic/versionMismatch/VersionMismatchFinder'),
+          import('../../logic/SetupChecks'),
+          import('../../logic/PurgeManager'),
+          import('../../logic/InstallManagerFactory')
+        ] as const);
+      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration);
+      SetupChecks.validate(this.rushConfiguration);
+      const purgeManager: typeof PurgeManager.prototype = new PurgeManager(
+        this.rushConfiguration,
+        this.rushGlobalFolder
+      );
+      const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+        this.rushConfiguration,
+        this.rushGlobalFolder,
+        purgeManager,
+        {
+          debug: this.parser.isDebug,
+          allowShrinkwrapUpdates: false,
+          checkOnly: false,
+          bypassPolicy: false,
+          noLink: false,
+          fullUpgrade: false,
+          recheckShrinkwrap: false,
+          collectLogFile: true,
+          pnpmFilterArguments: [],
+          maxInstallAttempts: 1,
+          networkConcurrency: undefined
+        }
+      );
+
+      try {
+        await installManager.doInstallAsync();
+      } finally {
+        purgeManager.deleteAll();
+      }
+    }
+
     // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
     const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
     if (!lastLinkFlag.isValid()) {
@@ -394,6 +439,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           this._watchPhases,
           (phase: IPhase) => phase.name
         ).join(', ')}`
+      });
+    }
+
+    // If undefined, the parameter is not supported.
+    if (this._alwaysInstall === false) {
+      this._installParameter = this.defineFlagParameter({
+        parameterLongName: '--install',
+        description:
+          'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified,' +
+          'Rush will automatically perform an install before processing the current command.'
       });
     }
 
