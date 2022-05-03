@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1005,
+    "schemaVersion": 1006,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -255,7 +255,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             }
           ],
           "implementsTokenRanges": []
@@ -298,6 +299,7 @@
                   "text": "constructor();"
                 }
               ],
+              "isProtected": false,
               "releaseTag": "Public",
               "overloadIndex": 1,
               "parameters": []
@@ -320,6 +322,7 @@
                   "text": ");"
                 }
               ],
+              "isProtected": false,
               "releaseTag": "Public",
               "overloadIndex": 2,
               "parameters": [
@@ -400,6 +403,7 @@
               ],
               "isOptional": false,
               "isStatic": false,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -445,6 +449,7 @@
               ],
               "isOptional": false,
               "isStatic": false,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -499,6 +504,7 @@
               ],
               "isOptional": false,
               "isStatic": false,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -567,6 +573,7 @@
               ],
               "isOptional": false,
               "isStatic": false,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 8,
                 "endIndex": 9
@@ -618,6 +625,7 @@
               ],
               "isOptional": false,
               "isStatic": false,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -653,7 +661,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -681,7 +690,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Method",
@@ -711,6 +721,7 @@
               ],
               "isOptional": false,
               "isStatic": false,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -754,7 +765,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -782,7 +794,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Method",
@@ -820,6 +833,7 @@
               ],
               "isOptional": false,
               "isStatic": true,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -866,6 +880,7 @@
               ],
               "isOptional": false,
               "isStatic": false,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -904,7 +919,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -931,7 +947,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             }
           ],
           "extendsTokenRange": {
@@ -2449,6 +2466,7 @@
               ],
               "isOptional": false,
               "isStatic": false,
+              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
