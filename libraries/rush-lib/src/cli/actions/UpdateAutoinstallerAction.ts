@@ -13,7 +13,7 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'update-autoinstaller',
-      summary: 'Updates autoinstaller package dependenices',
+      summary: 'Updates autoinstaller package dependencies',
       documentation: 'Use this command to regenerate the shrinkwrap file for an autoinstaller folder.',
       parser
     });
@@ -32,7 +32,10 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const autoinstallerName: string = this._name.value!;
 
-    const autoinstaller: Autoinstaller = new Autoinstaller(autoinstallerName, this.rushConfiguration);
+    const autoinstaller: Autoinstaller = new Autoinstaller({
+      autoinstallerName,
+      rushConfiguration: this.rushConfiguration
+    });
     autoinstaller.update();
 
     console.log('\nSuccess.');

@@ -16,6 +16,7 @@ export interface IPluginManagerOptions {
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
+  restrictConsoleOutput: boolean;
 }
 
 export interface ICustomCommandLineConfigurationInfo {
@@ -27,6 +28,7 @@ export class PluginManager {
   private readonly _terminal: ITerminal;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _rushSession: RushSession;
+  private readonly _restrictConsoleOutput: boolean;
   private readonly _builtInPluginLoaders: BuiltInPluginLoader[];
   private readonly _autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
   private readonly _installedAutoinstallerNames: Set<string>;
@@ -38,6 +40,7 @@ export class PluginManager {
     this._terminal = options.terminal;
     this._rushConfiguration = options.rushConfiguration;
     this._rushSession = options.rushSession;
+    this._restrictConsoleOutput = options.restrictConsoleOutput;
 
     this._installedAutoinstallerNames = new Set<string>();
 
@@ -93,7 +96,8 @@ export class PluginManager {
       return new AutoinstallerPluginLoader({
         pluginConfiguration,
         rushConfiguration: this._rushConfiguration,
-        terminal: this._terminal
+        terminal: this._terminal,
+        restrictConsoleOutput: this._restrictConsoleOutput
       });
     });
   }

@@ -74,13 +74,25 @@ export class InstallHelpers {
   public static async ensureLocalPackageManager(
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder,
-    maxInstallAttempts: number
+    maxInstallAttempts: number,
+    restrictConsoleOutput?: boolean
   ): Promise<void> {
+    let logIfConsoleOutputIsNotRestricted: (message?: string) => void;
+    if (restrictConsoleOutput) {
+      logIfConsoleOutputIsNotRestricted = () => {
+        /* noop */
+      };
+    } else {
+      logIfConsoleOutputIsNotRestricted = (message?: string) => {
+        console.log(message);
+      };
+    }
+
     // Example: "C:\Users\YourName\.rush"
     const rushUserFolder: string = rushGlobalFolder.nodeSpecificPath;
 
     if (!FileSystem.exists(rushUserFolder)) {
-      console.log('Creating ' + rushUserFolder);
+      logIfConsoleOutputIsNotRestricted('Creating ' + rushUserFolder);
       FileSystem.ensureFolder(rushUserFolder);
     }
 
@@ -95,14 +107,16 @@ export class InstallHelpers {
       node: process.versions.node
     });
 
-    console.log(`Trying to acquire lock for ${packageManagerAndVersion}`);
+    logIfConsoleOutputIsNotRestricted(`Trying to acquire lock for ${packageManagerAndVersion}`);
 
     const lock: LockFile = await LockFile.acquire(rushUserFolder, packageManagerAndVersion);
 
-    console.log(`Acquired lock for ${packageManagerAndVersion}`);
+    logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 
     if (!packageManagerMarker.isValid() || lock.dirtyWhenAcquired) {
-      console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
+      logIfConsoleOutputIsNotRestricted(
+        colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`)
+      );
 
       // note that this will remove the last-install flag from the directory
       Utilities.installPackageInDirectory({
@@ -120,9 +134,13 @@ export class InstallHelpers {
         commonRushConfigFolder: rushConfiguration.commonRushConfigFolder
       });
 
-      console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
+      logIfConsoleOutputIsNotRestricted(
+        `Successfully installed ${packageManager} version ${packageManagerVersion}`
+      );
     } else {
-      console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
+      logIfConsoleOutputIsNotRestricted(
+        `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
+      );
     }
 
     packageManagerMarker.create();
@@ -136,8 +154,8 @@ export class InstallHelpers {
       `${packageManager}-local`
     );
 
-    console.log(os.EOL + `Symlinking "${localPackageManagerToolFolder}"`);
-    console.log(`  --> "${packageManagerToolFolder}"`);
+    logIfConsoleOutputIsNotRestricted(os.EOL + `Symlinking "${localPackageManagerToolFolder}"`);
+    logIfConsoleOutputIsNotRestricted(`  --> "${packageManagerToolFolder}"`);
 
     // We cannot use FileSystem.exists() to test the existence of a symlink, because it will
     // return false for broken symlinks.  There is no way to test without catching an exception.

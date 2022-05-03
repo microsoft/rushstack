@@ -14,6 +14,10 @@ import {
   PluginLoaderBase
 } from './PluginLoaderBase';
 
+interface IAutoinstallerPluginLoaderOptions extends IPluginLoaderOptions<IRushPluginConfiguration> {
+  restrictConsoleOutput: boolean;
+}
+
 /**
  * @beta
  */
@@ -22,12 +26,13 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
 
   public readonly packageFolder: string;
 
-  public constructor(options: IPluginLoaderOptions<IRushPluginConfiguration>) {
+  public constructor(options: IAutoinstallerPluginLoaderOptions) {
     super(options);
-    this._autoinstaller = new Autoinstaller(
-      options.pluginConfiguration.autoinstallerName,
-      this._rushConfiguration
-    );
+    this._autoinstaller = new Autoinstaller({
+      autoinstallerName: options.pluginConfiguration.autoinstallerName,
+      rushConfiguration: this._rushConfiguration,
+      restrictConsoleOutput: options.restrictConsoleOutput
+    });
 
     this.packageFolder = path.join(this._autoinstaller.folderFullPath, 'node_modules', this.packageName);
   }
