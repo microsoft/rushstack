@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 29 Apr 2022 05:22:05 GMT and should not be manually modified.
+This log was last generated on Tue, 03 May 2022 21:52:56 GMT and should not be manually modified.
+
+## 5.68.1
+Tue, 03 May 2022 21:52:56 GMT
+
+### Updates
+
+- Fix an issue where "rush list --json" prints non-json output in a repo that uses rush plugins with autoinstallers.
 
 ## 5.68.0
 Fri, 29 Apr 2022 05:22:05 GMT

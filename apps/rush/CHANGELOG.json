@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.68.1",
+      "tag": "@microsoft/rush_v5.68.1",
+      "date": "Tue, 03 May 2022 21:52:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush list --json\" prints non-json output in a repo that uses rush plugins with autoinstallers."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.68.0",
       "tag": "@microsoft/rush_v5.68.0",
       "date": "Fri, 29 Apr 2022 05:22:05 GMT",
