@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.23.1",
+      "tag": "@microsoft/api-extractor_v7.23.1",
+      "date": "Wed, 04 May 2022 23:29:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the global variable analyzer to add support for changes to the TypeScript internals coming in v4.7"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.23.0",
       "tag": "@microsoft/api-extractor_v7.23.0",
       "date": "Sat, 23 Apr 2022 02:13:06 GMT",
