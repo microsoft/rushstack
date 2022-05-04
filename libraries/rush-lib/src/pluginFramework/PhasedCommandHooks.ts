@@ -64,6 +64,10 @@ export interface ICreateOperationsContext {
    */
   readonly projectSelection: ReadonlySet<RushConfigurationProject>;
   /**
+   * The set of Rush projects known to contain local changes.
+   */
+  readonly changedProjects: ReadonlySet<RushConfigurationProject>;
+  /**
    * The Rush configuration
    */
   readonly rushConfiguration: RushConfiguration;

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update watcher to only schedule operations impacted by the detected change. A behavior difference will only be observed for repositories that define a phase with no dependencies.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -46,6 +46,11 @@ export class Operation {
   public readonly associatedProject: RushConfigurationProject | undefined;
 
   /**
+   * A set of all operations which depend on this operation.
+   */
+  public readonly consumers: Set<Operation> = new Set<Operation>();
+
+  /**
    * A set of all dependencies which must be executed before this operation is complete.
    */
   public readonly dependencies: Set<Operation> = new Set<Operation>();
@@ -80,5 +85,21 @@ export class Operation {
    */
   public get name(): string | undefined {
     return this.runner?.name;
+  }
+
+  /**
+   * Adds the specified operation as a dependency and updates the consumer list.
+   */
+  public addDependency(dependency: Operation): void {
+    this.dependencies.add(dependency);
+    dependency.consumers.add(this);
+  }
+
+  /**
+   * Deletes the specified operation as a dependency and updates the consumer list.
+   */
+  public deleteDependency(dependency: Operation): void {
+    this.dependencies.delete(dependency);
+    dependency.consumers.delete(this);
   }
 }

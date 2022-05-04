@@ -257,6 +257,7 @@ export interface IConfigurationEnvironmentVariable {
 // @alpha
 export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    readonly changedProjects: ReadonlySet<RushConfigurationProject>;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
@@ -519,8 +520,11 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 // @alpha
 export class Operation {
     constructor(options?: IOperationOptions);
+    addDependency(dependency: Operation): void;
     readonly associatedPhase: IPhase | undefined;
     readonly associatedProject: RushConfigurationProject | undefined;
+    readonly consumers: Set<Operation>;
+    deleteDependency(dependency: Operation): void;
     readonly dependencies: Set<Operation>;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
