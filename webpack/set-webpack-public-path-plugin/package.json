@@ -26,12 +26,14 @@
       "optional": true
     }
   },
+  "dependencies": {
+    "@rushstack/webpack-plugin-utilities": "workspace:*"
+  },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "@rushstack/webpack-plugin-utilities": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
