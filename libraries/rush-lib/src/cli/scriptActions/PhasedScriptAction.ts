@@ -34,7 +34,6 @@ import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperatio
 import { Selection } from '../../logic/Selection';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
-import type { BaseInstallManager } from '../../logic/base/BaseInstallManager';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -119,43 +118,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
   public async runAsync(): Promise<void> {
     if (this._alwaysInstall || this._installParameter?.value) {
-      const [{ VersionMismatchFinder }, { SetupChecks }, { PurgeManager }, { InstallManagerFactory }] =
-        await Promise.all([
-          import('../../logic/versionMismatch/VersionMismatchFinder'),
-          import('../../logic/SetupChecks'),
-          import('../../logic/PurgeManager'),
-          import('../../logic/InstallManagerFactory')
-        ] as const);
-      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration);
-      SetupChecks.validate(this.rushConfiguration);
-      const purgeManager: typeof PurgeManager.prototype = new PurgeManager(
-        this.rushConfiguration,
-        this.rushGlobalFolder
-      );
-      const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
-        this.rushConfiguration,
-        this.rushGlobalFolder,
-        purgeManager,
-        {
-          debug: this.parser.isDebug,
-          allowShrinkwrapUpdates: false,
-          checkOnly: false,
-          bypassPolicy: false,
-          noLink: false,
-          fullUpgrade: false,
-          recheckShrinkwrap: false,
-          collectLogFile: true,
-          pnpmFilterArguments: [],
-          maxInstallAttempts: 1,
-          networkConcurrency: undefined
-        }
-      );
+      const { doBasicInstallAsync } = await import('../../logic/installManager/doBasicInstallAsync');
 
-      try {
-        await installManager.doInstallAsync();
-      } finally {
-        purgeManager.deleteAll();
-      }
+      await doBasicInstallAsync({
+        rushConfiguration: this.rushConfiguration,
+        rushGlobalFolder: this.rushGlobalFolder,
+        isDebug: this.parser.isDebug
+      });
     }
 
     // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
@@ -442,12 +411,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       });
     }
 
-    // If undefined, the parameter is not supported.
+    // If `this._alwaysInstall === undefined`, Rush does not define the parameter
+    // but a repository may still define a custom parameter with the same name.
     if (this._alwaysInstall === false) {
       this._installParameter = this.defineFlagParameter({
         parameterLongName: '--install',
         description:
-          'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified,' +
+          'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
           'Rush will automatically perform an install before processing the current command.'
       });
     }

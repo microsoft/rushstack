@@ -92,7 +92,8 @@ export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, I
   watchPhases: Set<IPhase>;
   /**
    * If set to `true`, then this phased command will always perform an install before executing, regardless of CLI flags.
-   * If set to `false`, then this phased command will support the "--install" CLI flag.
+   * If set to `false`, then Rush will define a built-in "--install" CLI flag for this command.
+   * If undefined, then Rush does not define a built-in "--install" CLI flag for this command and no installation is performed.
    */
   alwaysInstall: boolean | undefined;
 }
