@@ -396,7 +396,8 @@ export class RushCommandLineParser extends CommandLineParser {
         watchPhases: command.watchPhases,
         phases: commandLineConfiguration.phases,
 
-        alwaysWatch: command.alwaysWatch
+        alwaysWatch: command.alwaysWatch,
+        alwaysInstall: command.alwaysInstall
       })
     );
   }

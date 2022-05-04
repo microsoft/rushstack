@@ -74,7 +74,7 @@ export interface ICommandWithParameters {
 
 export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, ICommandWithParameters {
   /**
-   * If set to "true," then this phased command was generated from a bulk command, and
+   * If set to `true`, then this phased command was generated from a bulk command, and
    * was not explicitly defined in the command-line.json file.
    */
   isSynthetic: boolean;
@@ -83,13 +83,19 @@ export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, I
   phases: Set<IPhase>;
 
   /**
-   * If set to "true," this phased command will alwasy run in watch mode, regardless of CLI flags.
+   * If set to `true`, this phased command will always run in watch mode, regardless of CLI flags.
    */
   alwaysWatch: boolean;
   /**
    * The set of phases to execute when running this phased command in watch mode.
    */
   watchPhases: Set<IPhase>;
+  /**
+   * If set to `true`, then this phased command will always perform an install before executing, regardless of CLI flags.
+   * If set to `false`, then Rush will define a built-in "--install" CLI flag for this command.
+   * If undefined, then Rush does not define a built-in "--install" CLI flag for this command and no installation is performed.
+   */
+  alwaysInstall: boolean | undefined;
 }
 
 export interface IGlobalCommandConfig extends IGlobalCommandJson, ICommandWithParameters {}
@@ -287,7 +293,8 @@ export class CommandLineConfiguration {
               associatedParameters: new Set<IParameterJson>(),
               phases: commandPhases,
               watchPhases,
-              alwaysWatch: false
+              alwaysWatch: false,
+              alwaysInstall: undefined
             };
 
             for (const phaseName of command.phases) {
@@ -315,7 +322,7 @@ export class CommandLineConfiguration {
               }
             }
 
-            const { watchOptions } = command;
+            const { watchOptions, installOptions } = command;
 
             if (watchOptions) {
               normalizedCommand.alwaysWatch = watchOptions.alwaysWatch;
@@ -332,6 +339,10 @@ export class CommandLineConfiguration {
 
                 watchPhases.add(phase);
               }
+            }
+
+            if (installOptions) {
+              normalizedCommand.alwaysInstall = installOptions.alwaysInstall;
             }
 
             break;
@@ -401,7 +412,8 @@ export class CommandLineConfiguration {
           disableBuildCache: DEFAULT_REBUILD_COMMAND_JSON.disableBuildCache,
           associatedParameters: buildCommand.associatedParameters, // rebuild should share build's parameters in this case,
           watchPhases: new Set(),
-          alwaysWatch: false
+          alwaysWatch: false,
+          alwaysInstall: undefined
         };
         this.commands.set(rebuildCommand.name, rebuildCommand);
       }
@@ -656,7 +668,8 @@ export class CommandLineConfiguration {
       phases,
       // Bulk commands used the same phases for watch as for regular execution. Preserve behavior.
       watchPhases: command.watchForChanges ? phases : new Set(),
-      alwaysWatch: !!command.watchForChanges
+      alwaysWatch: !!command.watchForChanges,
+      alwaysInstall: undefined
     };
 
     return translatedCommand;

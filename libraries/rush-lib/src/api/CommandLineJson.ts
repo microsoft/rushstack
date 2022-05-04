@@ -49,6 +49,9 @@ export interface IPhasedCommandJson extends IPhasedCommandWithoutPhasesJson {
     alwaysWatch: boolean;
     watchPhases: string[];
   };
+  installOptions?: {
+    alwaysInstall: boolean;
+  };
 }
 
 /**

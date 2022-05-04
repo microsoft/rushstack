@@ -48,6 +48,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   phases: Map<string, IPhase>;
 
   alwaysWatch: boolean;
+  alwaysInstall: boolean | undefined;
 }
 
 interface IRunPhasesOptions {
@@ -84,6 +85,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _alwaysWatch: boolean;
+  private readonly _alwaysInstall: boolean | undefined;
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
@@ -93,6 +95,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _watchParameter: CommandLineFlagParameter | undefined;
   private _timelineParameter: CommandLineFlagParameter | undefined;
+  private _installParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -102,6 +105,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._alwaysWatch = options.alwaysWatch;
+    this._alwaysInstall = options.alwaysInstall;
     this._knownPhases = options.phases;
 
     this.hooks = new PhasedCommandHooks();
@@ -113,6 +117,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   }
 
   public async runAsync(): Promise<void> {
+    if (this._alwaysInstall || this._installParameter?.value) {
+      const { doBasicInstallAsync } = await import('../../logic/installManager/doBasicInstallAsync');
+
+      await doBasicInstallAsync({
+        rushConfiguration: this.rushConfiguration,
+        rushGlobalFolder: this.rushGlobalFolder,
+        isDebug: this.parser.isDebug
+      });
+    }
+
     // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
     const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
     if (!lastLinkFlag.isValid()) {
@@ -394,6 +408,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           this._watchPhases,
           (phase: IPhase) => phase.name
         ).join(', ')}`
+      });
+    }
+
+    // If `this._alwaysInstall === undefined`, Rush does not define the parameter
+    // but a repository may still define a custom parameter with the same name.
+    if (this._alwaysInstall === false) {
+      this._installParameter = this.defineFlagParameter({
+        parameterLongName: '--install',
+        description:
+          'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
+          'Rush will automatically perform an install before processing the current command.'
       });
     }
 
