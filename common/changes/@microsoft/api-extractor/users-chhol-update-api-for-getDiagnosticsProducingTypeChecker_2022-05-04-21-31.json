@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "update getGlobalVariableAnalyzer to support changes to typescript internals in v4.7",
+      "comment": "Update the global variable analyzer to add support for changes to the TypeScript internals coming in v4.7",
       "type": "patch"
     }
   ],
