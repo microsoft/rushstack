@@ -27,15 +27,20 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  if (packageJson.name === 'tslint-microsoft-contrib') {
-    // The `tslint-microsoft-contrib` repo is archived so it can't be updated to TS 4.4+.
-    // unmet peer typescript@"^2.1.0 || ^3.0.0": found 4.5.5
-    packageJson.peerDependencies['typescript'] = '*';
-  }
+  switch (packageJson.name) {
+    case 'tslint-microsoft-contrib': {
+      // The `tslint-microsoft-contrib` repo is archived so it can't be updated to TS 4.4+.
+      // unmet peer typescript@"^2.1.0 || ^3.0.0": found 4.5.5
+      packageJson.peerDependencies['typescript'] = '*';
+      break;
+    }
 
-  if (packageJson.name === '@serverless-stack/core') {
-    delete packageJson.dependencies['@typescript-eslint/eslint-plugin'];
-    delete packageJson.dependencies['eslint-config-serverless-stack'];
+    case '@serverless-stack/core': {
+      delete packageJson.dependencies['@typescript-eslint/eslint-plugin'];
+      delete packageJson.dependencies['eslint-config-serverless-stack'];
+      delete packageJson.dependencies['lerna'];
+      break;
+    }
   }
 
   return packageJson;
