@@ -48,12 +48,12 @@ export class Operation {
   /**
    * A set of all operations which depend on this operation.
    */
-  public readonly consumers: Set<Operation> = new Set<Operation>();
+  public readonly consumers: ReadonlySet<Operation> = new Set<Operation>();
 
   /**
    * A set of all dependencies which must be executed before this operation is complete.
    */
-  public readonly dependencies: Set<Operation> = new Set<Operation>();
+  public readonly dependencies: ReadonlySet<Operation> = new Set<Operation>();
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -91,15 +91,17 @@ export class Operation {
    * Adds the specified operation as a dependency and updates the consumer list.
    */
   public addDependency(dependency: Operation): void {
-    this.dependencies.add(dependency);
-    dependency.consumers.add(this);
+    // Cast internally to avoid adding the overhead of getters
+    (this.dependencies as Set<Operation>).add(dependency);
+    (dependency.consumers as Set<Operation>).add(this);
   }
 
   /**
    * Deletes the specified operation as a dependency and updates the consumer list.
    */
   public deleteDependency(dependency: Operation): void {
-    this.dependencies.delete(dependency);
-    dependency.consumers.delete(this);
+    // Cast internally to avoid adding the overhead of getters
+    (this.dependencies as Set<Operation>).delete(dependency);
+    (dependency.consumers as Set<Operation>).delete(this);
   }
 }

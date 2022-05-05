@@ -29,8 +29,8 @@ function createOperations(
   existingOperations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const { changedProjects, phaseSelection, projectSelection } = context;
-  const operationsWithChanges: Set<Operation> = new Set();
+  const { projectsInUnknownState: changedProjects, phaseSelection, projectSelection } = context;
+  const operationsWithWork: Set<Operation> = new Set();
 
   const operations: Map<string, Operation> = new Map();
 
@@ -41,18 +41,20 @@ function createOperations(
     }
   }
 
-  for (const operation of operationsWithChanges) {
+  // Recursively expand all consumers in the `operationsWithWork` set.
+  for (const operation of operationsWithWork) {
     for (const consumer of operation.consumers) {
-      operationsWithChanges.add(consumer);
+      operationsWithWork.add(consumer);
     }
   }
 
   for (const [key, operation] of operations) {
-    if (!operationsWithChanges.has(operation)) {
-      // In scope, but not changed.
+    if (!operationsWithWork.has(operation)) {
+      // This operation is in scope, but did not change since it was last executed by the current command.
+      // However, we have no state tracking across executions, so treat as unknown.
       operation.runner = new NullOperationRunner({
         name: key,
-        result: OperationStatus.FromCache,
+        result: OperationStatus.Skipped,
         silent: true
       });
     }
@@ -71,14 +73,14 @@ function createOperations(
       });
 
       if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
-        // Not in scope
+        // Not in scope. Mark skipped because state is unknown.
         operation.runner = new NullOperationRunner({
           name: key,
           result: OperationStatus.Skipped,
           silent: true
         });
       } else if (changedProjects.has(project)) {
-        operationsWithChanges.add(operation);
+        operationsWithWork.add(operation);
       }
 
       operations.set(key, operation);

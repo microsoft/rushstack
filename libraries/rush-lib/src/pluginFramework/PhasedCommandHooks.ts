@@ -64,9 +64,10 @@ export interface ICreateOperationsContext {
    */
   readonly projectSelection: ReadonlySet<RushConfigurationProject>;
   /**
-   * The set of Rush projects known to contain local changes.
+   * The set of Rush projects that have not been built in the current process since they were last modified.
+   * When `isInitial` is true, this will be an exact match of `projectSelection`.
    */
-  readonly changedProjects: ReadonlySet<RushConfigurationProject>;
+  readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
   /**
    * The Rush configuration
    */

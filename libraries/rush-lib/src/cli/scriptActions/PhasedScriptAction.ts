@@ -201,7 +201,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       phaseSelection: new Set(this._initialPhases),
       projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration),
       projectSelection,
-      changedProjects: projectSelection
+      projectsInUnknownState: projectSelection
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
@@ -315,7 +315,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         ...initialCreateOperationsContext,
         isInitial: false,
         projectChangeAnalyzer: state,
-        changedProjects,
+        projectsInUnknownState: changedProjects,
         phaseSelection
       });
 

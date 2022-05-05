@@ -257,7 +257,6 @@ export interface IConfigurationEnvironmentVariable {
 // @alpha
 export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
-    readonly changedProjects: ReadonlySet<RushConfigurationProject>;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
@@ -265,6 +264,7 @@ export interface ICreateOperationsContext {
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
+    readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
 }
 
@@ -523,9 +523,9 @@ export class Operation {
     addDependency(dependency: Operation): void;
     readonly associatedPhase: IPhase | undefined;
     readonly associatedProject: RushConfigurationProject | undefined;
-    readonly consumers: Set<Operation>;
+    readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
-    readonly dependencies: Set<Operation>;
+    readonly dependencies: ReadonlySet<Operation>;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
     weight: number;

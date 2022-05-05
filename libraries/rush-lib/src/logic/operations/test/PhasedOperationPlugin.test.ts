@@ -66,12 +66,14 @@ describe(PhasedOperationPlugin.name, () => {
     // Add mock runners for included operations.
     hooks.createOperations.tap('MockOperationRunnerPlugin', createMockRunner);
 
-    const context: Pick<ICreateOperationsContext, 'phaseSelection' | 'projectSelection' | 'changedProjects'> =
-      {
-        phaseSelection,
-        projectSelection,
-        changedProjects
-      };
+    const context: Pick<
+      ICreateOperationsContext,
+      'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
+    > = {
+      phaseSelection,
+      projectSelection,
+      projectsInUnknownState: changedProjects
+    };
     const operations: Set<Operation> = await hooks.createOperations.promise(
       new Set(),
       context as ICreateOperationsContext
