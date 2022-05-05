@@ -580,7 +580,7 @@ export abstract class BaseInstallManager {
           args.push('--no-strict-peer-dependencies');
         }
       } else {
-        // pnpm < 7.0.0 handles does not handle peer dependencies strict by default
+        // pnpm < 7.0.0 does not handle peer dependencies strict by default
         if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
           args.push('--strict-peer-dependencies');
         }
