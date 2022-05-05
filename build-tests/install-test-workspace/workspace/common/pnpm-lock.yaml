@@ -4,28 +4,28 @@ importers:
 
   typescript-newest-test:
     specifiers:
-      '@rushstack/eslint-config': file:rushstack-eslint-config-2.5.4.tgz
-      '@rushstack/heft': file:rushstack-heft-0.44.13.tgz
+      '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.0.tgz
+      '@rushstack/heft': file:rushstack-heft-0.45.0.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.6.3
     devDependencies:
-      '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.5.4.tgz_eslint@8.7.0+typescript@4.6.3
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.44.13.tgz
+      '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.0.tgz_eslint@8.7.0+typescript@4.6.3
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.0.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.6.3
       typescript: 4.6.3
 
   typescript-v3-test:
     specifiers:
-      '@rushstack/eslint-config': file:rushstack-eslint-config-2.5.4.tgz
-      '@rushstack/heft': file:rushstack-heft-0.44.13.tgz
+      '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.0.tgz
+      '@rushstack/heft': file:rushstack-heft-0.45.0.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.6.3
     devDependencies:
-      '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.5.4.tgz_eslint@8.7.0+typescript@4.6.3
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.44.13.tgz
+      '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.0.tgz_eslint@8.7.0+typescript@4.6.3
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.0.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.6.3
       typescript: 4.6.3
@@ -1673,19 +1673,19 @@ packages:
       commander: 2.20.3
     dev: true
 
-  file:../temp/tarballs/rushstack-eslint-config-2.5.4.tgz_eslint@8.7.0+typescript@4.6.3:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-config-2.5.4.tgz}
-    id: file:../temp/tarballs/rushstack-eslint-config-2.5.4.tgz
+  file:../temp/tarballs/rushstack-eslint-config-2.6.0.tgz_eslint@8.7.0+typescript@4.6.3:
+    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-config-2.6.0.tgz}
+    id: file:../temp/tarballs/rushstack-eslint-config-2.6.0.tgz
     name: '@rushstack/eslint-config'
-    version: 2.5.4
+    version: 2.6.0
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
       typescript: '>=3.0.0'
     dependencies:
       '@rushstack/eslint-patch': file:../temp/tarballs/rushstack-eslint-patch-1.1.3.tgz
-      '@rushstack/eslint-plugin': file:../temp/tarballs/rushstack-eslint-plugin-0.8.6.tgz_eslint@8.7.0+typescript@4.6.3
-      '@rushstack/eslint-plugin-packlets': file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.6.tgz_eslint@8.7.0+typescript@4.6.3
-      '@rushstack/eslint-plugin-security': file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.6.tgz_eslint@8.7.0+typescript@4.6.3
+      '@rushstack/eslint-plugin': file:../temp/tarballs/rushstack-eslint-plugin-0.9.0.tgz_eslint@8.7.0+typescript@4.6.3
+      '@rushstack/eslint-plugin-packlets': file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.4.0.tgz_eslint@8.7.0+typescript@4.6.3
+      '@rushstack/eslint-plugin-security': file:../temp/tarballs/rushstack-eslint-plugin-security-0.3.0.tgz_eslint@8.7.0+typescript@4.6.3
       '@typescript-eslint/eslint-plugin': 5.20.0_e20e806d7f50be84027c83f3a408385a
       '@typescript-eslint/experimental-utils': 5.20.0_eslint@8.7.0+typescript@4.6.3
       '@typescript-eslint/parser': 5.20.0_eslint@8.7.0+typescript@4.6.3
@@ -1705,11 +1705,11 @@ packages:
     version: 1.1.3
     dev: true
 
-  file:../temp/tarballs/rushstack-eslint-plugin-0.8.6.tgz_eslint@8.7.0+typescript@4.6.3:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-0.8.6.tgz}
-    id: file:../temp/tarballs/rushstack-eslint-plugin-0.8.6.tgz
+  file:../temp/tarballs/rushstack-eslint-plugin-0.9.0.tgz_eslint@8.7.0+typescript@4.6.3:
+    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-0.9.0.tgz}
+    id: file:../temp/tarballs/rushstack-eslint-plugin-0.9.0.tgz
     name: '@rushstack/eslint-plugin'
-    version: 0.8.6
+    version: 0.9.0
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
@@ -1721,11 +1721,11 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.6.tgz_eslint@8.7.0+typescript@4.6.3:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.6.tgz}
-    id: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.6.tgz
+  file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.4.0.tgz_eslint@8.7.0+typescript@4.6.3:
+    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.4.0.tgz}
+    id: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.4.0.tgz
     name: '@rushstack/eslint-plugin-packlets'
-    version: 0.3.6
+    version: 0.4.0
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
@@ -1737,11 +1737,11 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.6.tgz_eslint@8.7.0+typescript@4.6.3:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.6.tgz}
-    id: file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.6.tgz
+  file:../temp/tarballs/rushstack-eslint-plugin-security-0.3.0.tgz_eslint@8.7.0+typescript@4.6.3:
+    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-security-0.3.0.tgz}
+    id: file:../temp/tarballs/rushstack-eslint-plugin-security-0.3.0.tgz
     name: '@rushstack/eslint-plugin-security'
-    version: 0.2.6
+    version: 0.3.0
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
@@ -1753,17 +1753,17 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.44.13.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.44.13.tgz}
+  file:../temp/tarballs/rushstack-heft-0.45.0.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.45.0.tgz}
     name: '@rushstack/heft'
-    version: 0.44.13
+    version: 0.45.0
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
-      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.8.2.tgz
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.45.3.tgz
-      '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.10.tgz
-      '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.10.9.tgz
+      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.8.3.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.45.4.tgz
+      '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.11.tgz
+      '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.10.10.tgz
       '@types/tapable': 1.0.6
       argparse: 1.0.10
       chokidar: 3.4.3
@@ -1776,21 +1776,21 @@ packages:
       true-case-path: 2.2.1
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-config-file-0.8.2.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.8.2.tgz}
+  file:../temp/tarballs/rushstack-heft-config-file-0.8.3.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.8.3.tgz}
     name: '@rushstack/heft-config-file'
-    version: 0.8.2
+    version: 0.8.3
     engines: {node: '>=10.13.0'}
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.45.3.tgz
-      '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.10.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.45.4.tgz
+      '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.11.tgz
       jsonpath-plus: 4.0.0
     dev: true
 
-  file:../temp/tarballs/rushstack-node-core-library-3.45.3.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.45.3.tgz}
+  file:../temp/tarballs/rushstack-node-core-library-3.45.4.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.45.4.tgz}
     name: '@rushstack/node-core-library'
-    version: 3.45.3
+    version: 3.45.4
     dependencies:
       '@types/node': 12.20.24
       colors: 1.2.5
@@ -1803,10 +1803,10 @@ packages:
       z-schema: 5.0.2
     dev: true
 
-  file:../temp/tarballs/rushstack-rig-package-0.3.10.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-rig-package-0.3.10.tgz}
+  file:../temp/tarballs/rushstack-rig-package-0.3.11.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-rig-package-0.3.11.tgz}
     name: '@rushstack/rig-package'
-    version: 0.3.10
+    version: 0.3.11
     dependencies:
       resolve: 1.17.0
       strip-json-comments: 3.1.1
@@ -1818,10 +1818,10 @@ packages:
     version: 0.2.3
     dev: true
 
-  file:../temp/tarballs/rushstack-ts-command-line-4.10.9.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-ts-command-line-4.10.9.tgz}
+  file:../temp/tarballs/rushstack-ts-command-line-4.10.10.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-ts-command-line-4.10.10.tgz}
     name: '@rushstack/ts-command-line'
-    version: 4.10.9
+    version: 4.10.10
     dependencies:
       '@types/argparse': 1.0.38
       argparse: 1.0.10
