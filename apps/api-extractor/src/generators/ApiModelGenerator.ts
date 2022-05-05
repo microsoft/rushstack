@@ -202,6 +202,10 @@ export class ApiModelGenerator {
         this._processApiProperty(astDeclaration, exportedName, parentApiItem);
         break;
 
+      case ts.SyntaxKind.SetAccessor:
+        this._processApiProperty(astDeclaration, exportedName, parentApiItem);
+        break;
+
       case ts.SyntaxKind.IndexSignature:
         this._processApiIndexSignature(astDeclaration, exportedName, parentApiItem);
         break;
@@ -817,13 +821,17 @@ export class ApiModelGenerator {
     let apiProperty: ApiProperty | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiProperty;
 
     if (apiProperty === undefined) {
-      const propertyDeclaration: ts.PropertyDeclaration =
-        astDeclaration.declaration as ts.PropertyDeclaration;
-
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: propertyDeclaration.type, tokenRange: propertyTypeTokenRange });
+
+      // If the property declaration's type is `undefined`, then we're processing a setter with no corresponding
+      // getter. Use the parameter type instead (note that TSC will enforce that the setter has exactly one
+      // parameter).
+      const propertyTypeNode: ts.TypeNode =
+        (astDeclaration.declaration as ts.PropertyDeclaration | ts.GetAccessorDeclaration).type ||
+        (astDeclaration.declaration as ts.SetAccessorDeclaration).parameters[0].type!;
+      nodesToCapture.push({ node: propertyTypeNode, tokenRange: propertyTypeTokenRange });
 
       const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);

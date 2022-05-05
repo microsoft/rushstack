@@ -61,6 +61,19 @@ properties:
         set writeableProperty(value: string);
       return:
         type: string
+  - name: writeonlyProperty
+    uid: 'api-documenter-test!DocClass1#writeonlyProperty:member'
+    package: api-documenter-test!
+    fullName: writeonlyProperty
+    summary: API Extractor will surface an `ae-missing-getter` finding for this property.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'set writeonlyProperty(value: string);'
+      return:
+        type: string
 methods:
   - name: deprecatedExample()
     uid: 'api-documenter-test!DocClass1#deprecatedExample:member(1)'
