@@ -574,9 +574,9 @@ export abstract class BaseInstallManager {
         args.push('--network-concurrency', options.networkConcurrency.toString());
       }
 
-      if (true) {
+      if (semver.gte(this._rushConfiguration.pnpmVersion, '7.0.0')) {
         // pnpm >= 7.0.0 handles peer dependencies strict by default
-        if (this._rushConfiguration.pnpmOptions.noStrictPeerDependencies) {
+        if (this._rushConfiguration.pnpmOptions.strictPeerDependencies === false) {
           args.push('--no-strict-peer-dependencies');
         }
       } else {
