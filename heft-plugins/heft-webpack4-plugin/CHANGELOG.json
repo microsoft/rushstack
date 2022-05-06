@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "0.4.15",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.4.15",
+      "date": "Fri, 06 May 2022 18:54:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where Heft will crash if the Webpack configuration is an empty array."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.14",
       "tag": "@rushstack/heft-webpack4-plugin_v0.4.14",
       "date": "Wed, 04 May 2022 23:29:13 GMT",
