@@ -28,38 +28,6 @@ const PLUGIN_NAME: string = 'hashed-folder-copy-plugin';
 
 const EXPRESSION_NAME: string = 'requireFolder';
 
-/**
- * Describes a source folder from which assets should be copied.
- *
- * @public
- */
-export interface IRequireFolderSource {
-  /**
-   * The root under which glob patterns should be evaluated
-   */
-  globsBase: string;
-
-  /**
-   * Glob patterns matching assets to be copied
-   */
-  globPatterns: string[];
-}
-
-/**
- * @public
- */
-export interface IRequireFolderOptions {
-  /**
-   * A set of sources to copy to the specified output folder name.
-   */
-  sources: IRequireFolderSource[];
-
-  /**
-   * The name of the folder to which assets should be copied. May contain a "[hash]" token.
-   */
-  outputFolder: string;
-}
-
 interface IAcornNode<TExpression> {
   computed: boolean | undefined;
   elements: IAcornNode<unknown>[];
@@ -99,6 +67,7 @@ interface IAsset {
 
 interface IResolver {
   resolveSync: typeof EnhancedResolve.sync;
+  resolveAsync: typeof EnhancedResolve.default;
 }
 
 interface ICollectAssetsOptions {

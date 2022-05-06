@@ -24,4 +24,4 @@
 ## Project specific definitions
 # -----------------------------
 
-# (Add your exceptions here)
+!/ambientTypes.d.ts

@@ -13,7 +13,7 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "target": "es5",
-    "types": ["webpack-env"],
+    "types": ["webpack-env", "@rushstack/hashed-folder-copy-plugin/ambientTypes"],
 
     "outDir": "lib",
     "rootDir": "src",

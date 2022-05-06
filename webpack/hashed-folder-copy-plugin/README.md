@@ -74,3 +74,21 @@ supports standard Node resolution.
 # Example project
 
 See the [example project](https://github.com/microsoft/rushstack/blob/master/build-tests/hashed-folder-copy-plugin-test/).
+
+# A note about ambient types
+
+To get the `requireFolder` function type to work in TypeScript, include a reference to
+`"@rushstack/hashed-folder-copy-plugin/ambientTypes"` in your `tsconfig.json` file's
+`compilerOptions.types` property. For example:
+
+```JSON
+{
+  "compilerOptions": {
+    "types": [
+      "webpack-env",
+      "@rushstack/hashed-folder-copy-plugin/ambientTypes" // This value, specifically
+    ]
+  }
+}
+
+```

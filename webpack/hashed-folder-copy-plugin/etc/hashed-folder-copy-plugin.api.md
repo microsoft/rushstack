@@ -13,18 +13,6 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
     apply(compiler: webpack.Compiler): void;
 }
 
-// @public (undocumented)
-export interface IRequireFolderOptions {
-    outputFolder: string;
-    sources: IRequireFolderSource[];
-}
-
-// @public
-export interface IRequireFolderSource {
-    globPatterns: string[];
-    globsBase: string;
-}
-
 // (No @packageDocumentation comment for this package)
 
 ```
