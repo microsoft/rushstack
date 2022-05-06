@@ -1,3 +1,5 @@
+import { ASSETS_BASE_URL2 } from './submodule';
+
 const ASSETS_BASE_URL: string = requireFolder({
   outputFolder: 'assets_[hash]',
   sources: [
@@ -17,3 +19,7 @@ function appendImageToBody(url: string): void {
 appendImageToBody(`${ASSETS_BASE_URL}/red.png`);
 appendImageToBody(`${ASSETS_BASE_URL}/green.png`);
 appendImageToBody(`${ASSETS_BASE_URL}/blue.png`);
+
+appendImageToBody(`${ASSETS_BASE_URL2}/red.png`);
+appendImageToBody(`${ASSETS_BASE_URL2}/green.png`);
+appendImageToBody(`${ASSETS_BASE_URL2}/blue.png`);
