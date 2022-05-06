@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.68.2",
+      "tag": "@microsoft/rush_v5.68.2",
+      "date": "Fri, 06 May 2022 18:54:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Provide ability for phased script commands to internally invoke \"rush install\" prior to execution."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.68.1",
       "tag": "@microsoft/rush_v5.68.1",
       "date": "Tue, 03 May 2022 21:52:56 GMT",

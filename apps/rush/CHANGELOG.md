@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 03 May 2022 21:52:56 GMT and should not be manually modified.
+This log was last generated on Fri, 06 May 2022 18:54:55 GMT and should not be manually modified.
+
+## 5.68.2
+Fri, 06 May 2022 18:54:55 GMT
+
+### Updates
+
+- Provide ability for phased script commands to internally invoke "rush install" prior to execution.
 
 ## 5.68.1
 Tue, 03 May 2022 21:52:56 GMT
