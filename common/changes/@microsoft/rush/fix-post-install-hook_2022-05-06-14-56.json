@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[rush] always run `postRushInstall`, and run _after_ writing telemetry",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
