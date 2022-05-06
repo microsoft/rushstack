@@ -144,9 +144,17 @@ export class WebpackPlugin implements IHeftPlugin {
 
     logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
-    const compiler: WebpackCompiler | WebpackMultiCompiler = Array.isArray(webpackConfiguration)
-      ? webpack(webpackConfiguration) /* (webpack.Compilation[]) => MultiCompiler */
-      : webpack(webpackConfiguration); /* (webpack.Compilation) => Compiler */
+    let compiler: WebpackCompiler | WebpackMultiCompiler;
+    if (Array.isArray(webpackConfiguration)) {
+      if (webpackConfiguration.length === 0) {
+        logger.terminal.writeLine('The webpack configuration is an empty array - nothing to do.');
+        return;
+      } else {
+        compiler = webpack(webpackConfiguration); /* (webpack.Compilation[]) => MultiCompiler */
+      }
+    } else {
+      compiler = webpack(webpackConfiguration); /* (webpack.Compilation) => Compiler */
+    }
 
     if (buildProperties.serveMode) {
       const defaultDevServerOptions: TWebpackDevServer.Configuration = {
