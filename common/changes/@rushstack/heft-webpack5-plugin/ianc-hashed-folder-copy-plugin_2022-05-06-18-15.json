@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "comment": "Fix an issue where Heft will crash if the Webpack configuration is an empty array.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack5-plugin"
+}
