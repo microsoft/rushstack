@@ -154,12 +154,12 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   }
 
   public apply(compiler: Webpack.Compiler): void {
-    // Casting here beacuse VersionDetection refers to webpack 5 typings
+    // Casting here because VersionDetection refers to webpack 5 typings
     if (VersionDetection.isWebpack3OrEarlier(compiler as unknown as Webpack5.Compiler)) {
       throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
     }
 
-    // Casting here beacuse VersionDetection refers to webpack 5 typings
+    // Casting here because VersionDetection refers to webpack 5 typings
     const isWebpack4: boolean = VersionDetection.isWebpack4(compiler as unknown as Webpack5.Compiler);
 
     compiler.hooks.compilation.tap(

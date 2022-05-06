@@ -750,7 +750,18 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-
+    {
+      "packageName": "hashed-folder-copy-plugin-webpack4-test",
+      "projectFolder": "build-tests/hashed-folder-copy-plugin-webpack4-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "hashed-folder-copy-plugin-webpack5-test",
+      "projectFolder": "build-tests/hashed-folder-copy-plugin-webpack5-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "install-test-workspace",
       "projectFolder": "build-tests/install-test-workspace",
@@ -1006,6 +1017,12 @@
     {
       "packageName": "@microsoft/loader-load-themed-styles",
       "projectFolder": "webpack/loader-load-themed-styles",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "projectFolder": "webpack/hashed-folder-copy-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
