@@ -105,7 +105,6 @@ export class CommonVersionsConfiguration {
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     get preferredVersions(): Map<string, string>;
     save(): boolean;
-    get xstitchPreferredVersions(): Map<string, string>;
 }
 
 // @beta (undocumented)

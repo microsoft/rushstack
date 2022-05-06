@@ -46,8 +46,6 @@ interface ICommonVersionsJson {
 
   implicitlyPreferredVersions?: boolean;
 
-  xstitchPreferredVersions?: ICommonVersionsJsonVersionMap;
-
   allowedAlternativeVersions?: ICommonVersionsJsonVersionsMap;
 }
 
@@ -64,7 +62,6 @@ export class CommonVersionsConfiguration {
   private _filePath: string;
   private _preferredVersions: ProtectableMap<string, string>;
   private _implicitlyPreferredVersions: boolean | undefined;
-  private _xstitchPreferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
   private _modified: boolean = false;
 
@@ -79,10 +76,6 @@ export class CommonVersionsConfiguration {
       this._implicitlyPreferredVersions = undefined;
     }
 
-    this._xstitchPreferredVersions = new ProtectableMap<string, string>({
-      onSet: this._onSetPreferredVersions.bind(this)
-    });
-
     this._allowedAlternativeVersions = new ProtectableMap<string, string[]>({
       onSet: this._onSetAllowedAlternativeVersions.bind(this)
     });
@@ -92,10 +85,6 @@ export class CommonVersionsConfiguration {
         CommonVersionsConfiguration._deserializeTable(
           this.preferredVersions,
           commonVersionsJson.preferredVersions
-        );
-        CommonVersionsConfiguration._deserializeTable(
-          this.xstitchPreferredVersions,
-          commonVersionsJson.xstitchPreferredVersions
         );
         CommonVersionsConfiguration._deserializeTable(
           this.allowedAlternativeVersions,
@@ -212,18 +201,6 @@ export class CommonVersionsConfiguration {
   }
 
   /**
-   * A table of specifies preferred versions maintained by the XStitch tool.
-   *
-   * @remarks
-   * This property has the same behavior as the "preferredVersions" property, except these entries
-   * are automatically managed by the XStitch tool.  It is an error for the same dependency name
-   * to appear in both tables.
-   */
-  public get xstitchPreferredVersions(): Map<string, string> {
-    return this._xstitchPreferredVersions.protectedView;
-  }
-
-  /**
    * A table that stores, for a given dependency, a list of SemVer ranges that will be accepted
    * by "rush check" in addition to the normal version range.
    *
@@ -240,12 +217,11 @@ export class CommonVersionsConfiguration {
   }
 
   /**
-   * Returns the union of preferredVersions and xstitchPreferredVersions.
+   * Returns preferredVersions.
    */
   public getAllPreferredVersions(): Map<string, string> {
     const allPreferredVersions: Map<string, string> = new Map<string, string>();
     MapExtensions.mergeFromMap(allPreferredVersions, this.preferredVersions);
-    MapExtensions.mergeFromMap(allPreferredVersions, this.xstitchPreferredVersions);
     return allPreferredVersions;
   }
 
@@ -255,22 +231,6 @@ export class CommonVersionsConfiguration {
     value: string
   ): string {
     PackageNameParsers.permissive.validate(key);
-
-    if (source === this._preferredVersions) {
-      if (this._xstitchPreferredVersions.has(key)) {
-        throw new Error(
-          `The package "${key}" cannot be added to preferredVersions because it was already` +
-            ` added to xstitchPreferredVersions`
-        );
-      }
-    } else {
-      if (this._preferredVersions.has(key)) {
-        throw new Error(
-          `The package "${key}" cannot be added to xstitchPreferredVersions because it was already` +
-            ` added to preferredVersions`
-        );
-      }
-    }
 
     this._modified = true;
 
@@ -296,12 +256,6 @@ export class CommonVersionsConfiguration {
 
     if (this._preferredVersions.size) {
       result.preferredVersions = CommonVersionsConfiguration._serializeTable(this.preferredVersions);
-    }
-
-    if (this._xstitchPreferredVersions.size) {
-      result.xstitchPreferredVersions = CommonVersionsConfiguration._serializeTable(
-        this.xstitchPreferredVersions
-      );
     }
 
     if (this._allowedAlternativeVersions.size) {
