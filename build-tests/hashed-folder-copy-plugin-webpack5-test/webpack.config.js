@@ -35,6 +35,7 @@ function generateConfiguration(mode, outputFolderName) {
 }
 
 module.exports = [
-  generateConfiguration('development', 'dist-dev'),
-  generateConfiguration('production', 'dist-prod')
+  // // Build currently emits warnings
+  // generateConfiguration('development', 'dist-dev'),
+  // generateConfiguration('production', 'dist-prod')
 ];

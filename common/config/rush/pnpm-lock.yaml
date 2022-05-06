@@ -2174,7 +2174,9 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
+      '@rushstack/webpack-plugin-utilities': workspace:*
       '@types/enhanced-resolve': 3.0.7
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
@@ -2184,11 +2186,13 @@ importers:
       webpack: ~4.44.2
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/webpack-plugin-utilities': link:../webpack-plugin-utilities
       glob: 7.0.6
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@types/enhanced-resolve': 3.0.7
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1

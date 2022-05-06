@@ -7,6 +7,9 @@ import crypto from 'crypto';
 import type * as webpack from 'webpack';
 import { FileSystem, Import } from '@rushstack/node-core-library';
 import type * as EnhancedResolve from 'enhanced-resolve';
+import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
+// Workaround for https://github.com/pnpm/pnpm/issues/4301
+import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
 
 interface IParserHelpers {
   evaluateToString: (type: string) => () => void;
@@ -112,6 +115,11 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
   }
 
   public apply(compiler: webpack.Compiler): void {
+    // Casting here because VersionDetection refers to webpack 5 typings
+    let needToWarnAboutWebpack5: boolean = VersionDetection.isWebpack5(
+      compiler as unknown as Webpack5.Compiler
+    );
+
     compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
       const normalResolver: IResolver = (normalModuleFactory as IExtendedNormalModuleFactory).getResolver(
         'normal',
@@ -122,6 +130,15 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
       ) => {
         const parser: IExtendedParser = baseParser as IExtendedParser;
         parser.hooks.call.for(EXPRESSION_NAME).tap(PLUGIN_NAME, (expression: IExpression) => {
+          const compilation: webpack.compilation.Compilation = parser.state.compilation;
+          if (needToWarnAboutWebpack5) {
+            compilation.warnings.push(
+              `HashedFolderCopyPlugin is not fully supported supported in webpack 5. ` +
+                `Unexpected behavior is likely to occur.`
+            );
+            needToWarnAboutWebpack5 = false; // Only warn once
+          }
+
           let errorMessage: string | undefined;
           let requireFolderOptions: IRequireFolderOptions | undefined = undefined;
           if (expression.arguments.length !== 1) {
@@ -161,7 +178,6 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
           }
 
           const currentModule: IExtendedModule = parser.state.current;
-          const compilation: webpack.compilation.Compilation = parser.state.compilation;
           let dependencyText: string;
           if (!requireFolderOptions) {
             dependencyText = this._renderError(errorMessage!);
