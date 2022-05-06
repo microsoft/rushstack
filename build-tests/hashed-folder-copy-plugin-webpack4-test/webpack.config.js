@@ -12,25 +12,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 function generateConfiguration(mode, outputFolderName) {
   return {
     mode: mode,
-    module: {
-      rules: [
-        {
-          test: /\.tsx?$/,
-          loader: require.resolve('ts-loader'),
-          exclude: /(node_modules)/,
-          options: {
-            compiler: require.resolve('typescript'),
-            logLevel: 'ERROR',
-            configFile: path.resolve(__dirname, 'tsconfig.json')
-          }
-        }
-      ]
-    },
-    resolve: {
-      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
-    },
     entry: {
-      test: path.join(__dirname, 'src', 'index.ts')
+      test: path.join(__dirname, 'lib', 'index.js')
     },
     output: {
       path: path.join(__dirname, outputFolderName),
