@@ -1,7 +1,7 @@
 /** @public */
 export let MY_CONSTANT : number ;
 /**
- * This is my class.
+ * @public This is my class.
  */
 export class MyClass {
   /**

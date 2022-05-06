@@ -194,7 +194,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-extractor-test-05!MyClass:class",
-          "docComment": "/**\n * This is my class.\n */\n",
+          "docComment": "/**\n * This is my class.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
