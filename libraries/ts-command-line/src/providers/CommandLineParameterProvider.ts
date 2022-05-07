@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as argparse from 'argparse';
-
-import type {
+import {
   ICommandLineChoiceDefinition,
   ICommandLineChoiceListDefinition,
   ICommandLineIntegerDefinition,
@@ -13,7 +12,6 @@ import type {
   ICommandLineStringListDefinition,
   ICommandLineRemainderDefinition
 } from '../parameters/CommandLineDefinition';
-import type { ICommandLineParserOptions } from './CommandLineParser';
 import {
   CommandLineParameter,
   CommandLineParameterWithArgument,
@@ -27,7 +25,6 @@ import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
-import { SCOPING_PARAMETER_GROUP } from '../Constants';
 
 /**
  * This is the argparse result data object
@@ -49,7 +46,6 @@ export abstract class CommandLineParameterProvider {
 
   private _parameters: CommandLineParameter[];
   private _parametersByLongName: Map<string, CommandLineParameter>;
-  private _parameterGroupsByName: Map<string | typeof SCOPING_PARAMETER_GROUP, argparse.ArgumentGroup>;
   private _parametersProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
 
@@ -57,8 +53,7 @@ export abstract class CommandLineParameterProvider {
   // Third party code should not inherit subclasses or call this constructor
   public constructor() {
     this._parameters = [];
-    this._parametersByLongName = new Map();
-    this._parameterGroupsByName = new Map();
+    this._parametersByLongName = new Map<string, CommandLineParameter>();
     this._parametersProcessed = false;
   }
 
@@ -212,7 +207,6 @@ export abstract class CommandLineParameterProvider {
   public getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter {
     return this._getParameter(parameterLongName, CommandLineParameterKind.IntegerList);
   }
-
   /**
    * Defines a command-line parameter whose argument is a single text string.
    *
@@ -304,13 +298,6 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * Generates the command-line usage text.
-   */
-  public renderUsageText(): string {
-    return this._getArgumentParser().formatUsage();
-  }
-
-  /**
    * Returns a object which maps the long name of each parameter in this.parameters
    * to the stringified form of its value. This is useful for logging telemetry, but
    * it is not the proper way of accessing parameters or their values.
@@ -362,7 +349,7 @@ export abstract class CommandLineParameterProvider {
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
   /** @internal */
-  protected _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
+  protected _processParsedData(data: ICommandLineParserData): void {
     if (this._parametersProcessed) {
       throw new Error('Command Line Parser Data was already processed');
     }
@@ -380,8 +367,28 @@ export abstract class CommandLineParameterProvider {
     this._parametersProcessed = true;
   }
 
-  /** @internal */
-  protected _defineParameter(parameter: CommandLineParameter): void {
+  private _generateKey(): string {
+    return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
+  }
+
+  private _getParameter<T extends CommandLineParameter>(
+    parameterLongName: string,
+    expectedKind: CommandLineParameterKind
+  ): T {
+    const parameter: CommandLineParameter | undefined = this._parametersByLongName.get(parameterLongName);
+    if (!parameter) {
+      throw new Error(`The parameter "${parameterLongName}" is not defined`);
+    }
+    if (parameter.kind !== expectedKind) {
+      throw new Error(
+        `The parameter "${parameterLongName}" is of type "${CommandLineParameterKind[parameter.kind]}"` +
+          ` whereas the caller was expecting "${CommandLineParameterKind[expectedKind]}".`
+      );
+    }
+    return parameter as T;
+  }
+
+  private _defineParameter(parameter: CommandLineParameter): void {
     if (this._remainder) {
       throw new Error(
         'defineCommandLineRemainder() was already called for this provider;' +
@@ -448,32 +455,10 @@ export abstract class CommandLineParameterProvider {
         break;
     }
 
-    let argumentGroup: argparse.ArgumentGroup | undefined;
-    if (parameter.parameterGroup) {
-      argumentGroup = this._parameterGroupsByName.get(parameter.parameterGroup);
-      if (!argumentGroup) {
-        let parameterGroupName: string;
-        if (typeof parameter.parameterGroup === 'string') {
-          parameterGroupName = parameter.parameterGroup;
-        } else if (parameter.parameterGroup === SCOPING_PARAMETER_GROUP) {
-          parameterGroupName = 'scoping';
-        } else {
-          throw new Error('Unexpected parameter group: ' + parameter.parameterGroup);
-        }
-
-        argumentGroup = this._getArgumentParser().addArgumentGroup({
-          title: `Optional ${parameterGroupName} arguments`
-        });
-        this._parameterGroupsByName.set(parameter.parameterGroup, argumentGroup);
-      }
-    } else {
-      argumentGroup = this._getArgumentParser();
-    }
-
-    argumentGroup.addArgument(names, { ...argparseOptions });
-
+    const argumentParser: argparse.ArgumentParser = this._getArgumentParser();
+    argumentParser.addArgument(names, { ...argparseOptions });
     if (parameter.undocumentedSynonyms && parameter.undocumentedSynonyms.length > 0) {
-      argumentGroup.addArgument(parameter.undocumentedSynonyms, {
+      argumentParser.addArgument(parameter.undocumentedSynonyms, {
         ...argparseOptions,
         help: argparse.Const.SUPPRESS
       });
@@ -481,26 +466,5 @@ export abstract class CommandLineParameterProvider {
 
     this._parameters.push(parameter);
     this._parametersByLongName.set(parameter.longName, parameter);
-  }
-
-  private _generateKey(): string {
-    return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
-  }
-
-  private _getParameter<T extends CommandLineParameter>(
-    parameterLongName: string,
-    expectedKind: CommandLineParameterKind
-  ): T {
-    const parameter: CommandLineParameter | undefined = this._parametersByLongName.get(parameterLongName);
-    if (!parameter) {
-      throw new Error(`The parameter "${parameterLongName}" is not defined`);
-    }
-    if (parameter.kind !== expectedKind) {
-      throw new Error(
-        `The parameter "${parameterLongName}" is of type "${CommandLineParameterKind[parameter.kind]}"` +
-          ` whereas the caller was expecting "${CommandLineParameterKind[expectedKind]}".`
-      );
-    }
-    return parameter as T;
   }
 }
