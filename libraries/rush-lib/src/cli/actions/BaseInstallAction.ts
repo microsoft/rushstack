@@ -151,12 +151,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
     try {
       await installManager.doInstallAsync();
 
-      this.eventHooksManager.handle(
-        Event.postRushInstall,
-        this.parser.isDebug,
-        this._ignoreHooksParameter.value
-      );
-
       if (warnAboutScriptUpdate) {
         console.log(
           os.EOL +
@@ -178,6 +172,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
       stopwatch.stop();
 
       this._collectTelemetry(stopwatch, installManagerOptions, installSuccessful);
+      this.parser.flushTelemetry();
+      this.eventHooksManager.handle(
+        Event.postRushInstall,
+        this.parser.isDebug,
+        this._ignoreHooksParameter.value
+      );
     }
   }
 
