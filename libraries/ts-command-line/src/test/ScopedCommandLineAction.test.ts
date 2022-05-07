@@ -40,7 +40,7 @@ class TestScopedAction extends ScopedCommandLineAction {
 
     this._scopeArg = this.defineStringParameter({
       parameterLongName: '--scope',
-      parameterGroupName: ScopedCommandLineAction.ScopingParameterGroupName,
+      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup,
       argumentName: 'SCOPE',
       description: 'The scope'
     });

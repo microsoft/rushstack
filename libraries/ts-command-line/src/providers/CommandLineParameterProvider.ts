@@ -27,6 +27,7 @@ import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
+import { SCOPING_PARAMETER_GROUP } from './ScopedCommandLineAction';
 
 /**
  * This is the argparse result data object
@@ -48,7 +49,7 @@ export abstract class CommandLineParameterProvider {
 
   private _parameters: CommandLineParameter[];
   private _parametersByLongName: Map<string, CommandLineParameter>;
-  private _parameterGroupsByName: Map<string, argparse.ArgumentGroup>;
+  private _parameterGroupsByName: Map<string | typeof SCOPING_PARAMETER_GROUP, argparse.ArgumentGroup>;
   private _parametersProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
 
@@ -56,8 +57,8 @@ export abstract class CommandLineParameterProvider {
   // Third party code should not inherit subclasses or call this constructor
   public constructor() {
     this._parameters = [];
-    this._parametersByLongName = new Map<string, CommandLineParameter>();
-    this._parameterGroupsByName = new Map<string, argparse.ArgumentGroup>();
+    this._parametersByLongName = new Map();
+    this._parameterGroupsByName = new Map();
     this._parametersProcessed = false;
   }
 
@@ -448,13 +449,22 @@ export abstract class CommandLineParameterProvider {
     }
 
     let argumentGroup: argparse.ArgumentGroup | undefined;
-    if (parameter.groupName) {
-      argumentGroup = this._parameterGroupsByName.get(parameter.groupName);
+    if (parameter.parameterGroup) {
+      argumentGroup = this._parameterGroupsByName.get(parameter.parameterGroup);
       if (!argumentGroup) {
+        let parameterGroupName: string;
+        if (typeof parameter.parameterGroup === 'string') {
+          parameterGroupName = parameter.parameterGroup;
+        } else if (parameter.parameterGroup === SCOPING_PARAMETER_GROUP) {
+          parameterGroupName = 'scoping';
+        } else {
+          throw new Error('Unexpected parameter group: ' + parameter.parameterGroup);
+        }
+
         argumentGroup = this._getArgumentParser().addArgumentGroup({
-          title: `Optional ${parameter.groupName} arguments`
+          title: `Optional ${parameterGroupName} arguments`
         });
-        this._parameterGroupsByName.set(parameter.groupName, argumentGroup);
+        this._parameterGroupsByName.set(parameter.parameterGroup, argumentGroup);
       }
     } else {
       argumentGroup = this._getArgumentParser();

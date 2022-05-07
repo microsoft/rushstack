@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { SCOPING_PARAMETER_GROUP } from '../providers/ScopedCommandLineAction';
+
 /**
  * For use with CommandLineParser, this interface represents a generic command-line parameter
  *
@@ -20,7 +22,7 @@ export interface IBaseCommandLineDefinition {
   /**
    * An optional parameter group name, shown when invoking the tool with "--help"
    */
-  parameterGroupName?: string;
+  parameterGroup?: string | typeof SCOPING_PARAMETER_GROUP;
 
   /**
    * Documentation for the parameter that will be shown when invoking the tool with "--help"

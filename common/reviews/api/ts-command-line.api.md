@@ -113,9 +113,9 @@ export abstract class CommandLineParameter {
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    readonly groupName: string | undefined;
     abstract get kind(): CommandLineParameterKind;
     readonly longName: string;
+    readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
     // @internal
     _parserKey: string | undefined;
     protected reportInvalidData(data: any): never;
@@ -253,7 +253,7 @@ export class DynamicCommandLineParser extends CommandLineParser {
 export interface IBaseCommandLineDefinition {
     description: string;
     environmentVariable?: string;
-    parameterGroupName?: string;
+    parameterGroup?: string | typeof SCOPING_PARAMETER_GROUP;
     parameterLongName: string;
     parameterShortName?: string;
     required?: boolean;
@@ -345,7 +345,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     get parameters(): ReadonlyArray<CommandLineParameter>;
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
-    static ScopingParameterGroupName: 'scoping';
+    static readonly ScopingParameterGroup: typeof SCOPING_PARAMETER_GROUP;
 }
 
 ```

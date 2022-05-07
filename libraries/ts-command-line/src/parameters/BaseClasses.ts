@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { SCOPING_PARAMETER_GROUP } from '../providers/ScopedCommandLineAction';
 import { IBaseCommandLineDefinition, IBaseCommandLineDefinitionWithArgument } from './CommandLineDefinition';
 
 /**
@@ -53,8 +54,8 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
   public readonly shortName: string | undefined;
 
-  /** {@inheritDoc IBaseCommandLineDefinition.parameterGroupName} */
-  public readonly groupName: string | undefined;
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterGroup} */
+  public readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
@@ -72,7 +73,7 @@ export abstract class CommandLineParameter {
   public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
     this.shortName = definition.parameterShortName;
-    this.groupName = definition.parameterGroupName;
+    this.parameterGroup = definition.parameterGroup;
     this.description = definition.description;
     this.required = !!definition.required;
     this.environmentVariable = definition.environmentVariable;
