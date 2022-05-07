@@ -232,9 +232,9 @@ export class Git {
     const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
       '--no-optional-locks',
       'merge-base',
+      '--',
       'HEAD',
-      targetBranch,
-      '--'
+      targetBranch
     ]);
     const result: string = output.trim();
 
@@ -320,6 +320,7 @@ export class Git {
           const remoteUrl: string = this._executeGitCommandAndCaptureOutput(gitPath, [
             'remote',
             'get-url',
+            '--',
             remoteName
           ]).trim();
 
@@ -525,7 +526,7 @@ export class Git {
     const gitPath: string = this.getGitPathOrThrow();
     const spawnResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
       gitPath,
-      ['fetch', remoteName, branchName],
+      ['fetch', '--', remoteName, branchName],
       {
         stdio: 'ignore'
       }

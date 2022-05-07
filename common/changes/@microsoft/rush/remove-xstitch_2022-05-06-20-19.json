@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING CHANGE) Remove the \"xstitchPreferredVersions\" property from common-versions.json and the CommonVersionsConfiguration API.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

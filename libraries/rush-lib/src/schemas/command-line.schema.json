@@ -209,6 +209,20 @@
                   }
                 }
               }
+            },
+            "installOptions": {
+              "title": "Install Options",
+              "description": "Controls behavior related to performing installation as part of executing this command.",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["alwaysInstall"],
+              "properties": {
+                "alwaysInstall": {
+                  "title": "Always Install",
+                  "description": "Indicates that this command will always perform a standard \"rush install\" before executing, as if the \"--install\" CLI flag was passed.",
+                  "type": "boolean"
+                }
+              }
             }
           }
         },
@@ -225,7 +239,8 @@
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "incremental": { "$ref": "#/definitions/anything" },
             "phases": { "$ref": "#/definitions/anything" },
-            "watchOptions": { "$ref": "#/definitions/anything" }
+            "watchOptions": { "$ref": "#/definitions/anything" },
+            "installOptions": { "$ref": "#/definitions/anything" }
           }
         }
       ]

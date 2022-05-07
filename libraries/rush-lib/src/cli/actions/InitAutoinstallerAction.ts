@@ -38,7 +38,10 @@ export class InitAutoinstallerAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const autoinstallerName: string = this._name.value!;
 
-    const autoinstaller: Autoinstaller = new Autoinstaller(autoinstallerName, this.rushConfiguration);
+    const autoinstaller: Autoinstaller = new Autoinstaller({
+      autoinstallerName,
+      rushConfiguration: this.rushConfiguration
+    });
 
     if (FileSystem.exists(autoinstaller.folderFullPath)) {
       // It's okay if the folder is empty

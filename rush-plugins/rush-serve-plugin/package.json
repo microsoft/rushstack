@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-serve-plugin",
-  "version": "0.1.8",
+  "version": "0.1.11",
   "description": "A Rush plugin that hooks into a rush action and serves output folders from all projects in the repository.",
   "license": "MIT",
   "repository": {
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",
+    "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
@@ -26,7 +27,6 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/express": "4.17.13",
     "@types/heft-jest": "1.0.1",

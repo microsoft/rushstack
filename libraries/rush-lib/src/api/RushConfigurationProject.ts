@@ -355,7 +355,6 @@ export class RushConfigurationProject {
 
   /**
    * The parsed NPM "package.json" file from projectFolder.
-   * @deprecated Use packageJsonEditor instead
    */
   public get packageJson(): IPackageJson {
     return this._packageJson;

@@ -1,6 +1,30 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 23 Apr 2022 02:13:20 GMT and should not be manually modified.
+This log was last generated on Fri, 06 May 2022 18:54:55 GMT and should not be manually modified.
+
+## 5.68.2
+Fri, 06 May 2022 18:54:55 GMT
+
+### Updates
+
+- Provide ability for phased script commands to internally invoke "rush install" prior to execution.
+
+## 5.68.1
+Tue, 03 May 2022 21:52:56 GMT
+
+### Updates
+
+- Fix an issue where "rush list --json" prints non-json output in a repo that uses rush plugins with autoinstallers.
+
+## 5.68.0
+Fri, 29 Apr 2022 05:22:05 GMT
+
+### Updates
+
+- Disable legacy skip logic when build cache is enabled.
+- Report status of projects with an empty script as "did not define any work," instead of as "from cache."
+- Add a -- parameter to git command invocations that accept user input to prevent arbitrary arguments from being passed.
+- Remove the @deprecated label from `RushConfigurationProject.packageJson`.
 
 ## 5.67.0
 Sat, 23 Apr 2022 02:13:20 GMT

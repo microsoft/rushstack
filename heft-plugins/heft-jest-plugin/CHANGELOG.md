@@ -1,6 +1,22 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Sat, 23 Apr 2022 02:13:06 GMT and should not be manually modified.
+This log was last generated on Wed, 04 May 2022 23:29:13 GMT and should not be manually modified.
+
+## 0.3.1
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 0.3.0
+Tue, 26 Apr 2022 00:10:15 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Enable clearMocks: true by default
+
+### Patches
+
+- Add command-line flag for disabling code coverage.
 
 ## 0.2.15
 Sat, 23 Apr 2022 02:13:06 GMT

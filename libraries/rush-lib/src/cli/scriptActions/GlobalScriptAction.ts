@@ -84,7 +84,10 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
   }
 
   private async _prepareAutoinstallerName(): Promise<void> {
-    const autoInstaller: Autoinstaller = new Autoinstaller(this._autoinstallerName, this.rushConfiguration);
+    const autoInstaller: Autoinstaller = new Autoinstaller({
+      autoinstallerName: this._autoinstallerName,
+      rushConfiguration: this.rushConfiguration
+    });
 
     await autoInstaller.prepareAsync();
   }

@@ -72,6 +72,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _debugParameter!: CommandLineFlagParameter;
   private _quietParameter!: CommandLineFlagParameter;
+  private _restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
   private readonly _rushOptions: IRushCommandLineParserOptions;
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
@@ -98,7 +99,7 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
         startingFolder: this._rushOptions.cwd,
-        showVerbose: !RushCommandLineParser.shouldRestrictConsoleOutput()
+        showVerbose: !this._restrictConsoleOutput
       });
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
@@ -121,7 +122,8 @@ export class RushCommandLineParser extends CommandLineParser {
       rushSession: this.rushSession,
       rushConfiguration: this.rushConfiguration,
       terminal: this._terminal,
-      builtInPluginConfigurations: this._rushOptions.builtInPluginConfigurations
+      builtInPluginConfigurations: this._rushOptions.builtInPluginConfigurations,
+      restrictConsoleOutput: this._restrictConsoleOutput
     });
 
     this._populateActions();
@@ -394,7 +396,8 @@ export class RushCommandLineParser extends CommandLineParser {
         watchPhases: command.watchPhases,
         phases: commandLineConfiguration.phases,
 
-        alwaysWatch: command.alwaysWatch
+        alwaysWatch: command.alwaysWatch,
+        alwaysInstall: command.alwaysInstall
       })
     );
   }

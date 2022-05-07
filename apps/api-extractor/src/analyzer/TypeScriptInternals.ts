@@ -108,10 +108,13 @@ export class TypeScriptInternals {
 
   public static getGlobalVariableAnalyzer(program: ts.Program): IGlobalVariableAnalyzer {
     const anyProgram: any = program;
-    if (!anyProgram.getDiagnosticsProducingTypeChecker) {
-      throw new InternalError('Missing Program.getDiagnosticsProducingTypeChecker');
+    const typeCheckerInstance: any =
+      anyProgram.getDiagnosticsProducingTypeChecker ?? anyProgram.getTypeChecker;
+
+    if (!typeCheckerInstance) {
+      throw new InternalError('Missing Program.getDiagnosticsProducingTypeChecker or Program.getTypeChecker');
     }
-    const typeChecker: any = anyProgram.getDiagnosticsProducingTypeChecker();
+    const typeChecker: any = typeCheckerInstance();
     if (!typeChecker.getEmitResolver) {
       throw new InternalError('Missing TypeChecker.getEmitResolver');
     }

@@ -2,6 +2,51 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.68.2",
+      "tag": "@microsoft/rush_v5.68.2",
+      "date": "Fri, 06 May 2022 18:54:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Provide ability for phased script commands to internally invoke \"rush install\" prior to execution."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.68.1",
+      "tag": "@microsoft/rush_v5.68.1",
+      "date": "Tue, 03 May 2022 21:52:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush list --json\" prints non-json output in a repo that uses rush plugins with autoinstallers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.68.0",
+      "tag": "@microsoft/rush_v5.68.0",
+      "date": "Fri, 29 Apr 2022 05:22:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable legacy skip logic when build cache is enabled."
+          },
+          {
+            "comment": "Report status of projects with an empty script as \"did not define any work,\" instead of as \"from cache.\""
+          },
+          {
+            "comment": "Add a -- parameter to git command invocations that accept user input to prevent arbitrary arguments from being passed."
+          },
+          {
+            "comment": "Remove the @deprecated label from `RushConfigurationProject.packageJson`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.67.0",
       "tag": "@microsoft/rush_v5.67.0",
       "date": "Sat, 23 Apr 2022 02:13:20 GMT",

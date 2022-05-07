@@ -20,13 +20,6 @@
       "description": "When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions, except in cases where different projects specify different version ranges for a given dependency.  For older package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause trouble for indirect dependencies with incompatible peerDependencies ranges.",
       "type": "boolean"
     },
-    "xstitchPreferredVersions": {
-      "description": "A table of specifies preferred versions maintained by the XStitch tool. See the Rush documentation for details.",
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
     "allowedAlternativeVersions": {
       "description": "The \"rush check\" command can be used to enforce that every project in the repo must specify the same SemVer range for a given dependency.  However, sometimes exceptions are needed.  The allowedAlternativeVersions table allows you to list other SemVer ranges that will be accepted by \"rush check\" for a given dependency. Note that the normal version range (as inferred by looking at all projects in the repo) should NOT be included in this list.",
       "type": "object",

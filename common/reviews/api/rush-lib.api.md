@@ -105,7 +105,6 @@ export class CommonVersionsConfiguration {
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     get preferredVersions(): Map<string, string>;
     save(): boolean;
-    get xstitchPreferredVersions(): Map<string, string>;
 }
 
 // @beta (undocumented)
@@ -533,6 +532,7 @@ export enum OperationStatus {
     Executing = "EXECUTING",
     Failure = "FAILURE",
     FromCache = "FROM CACHE",
+    NoOp = "NO OP",
     Ready = "READY",
     Skipped = "SKIPPED",
     Success = "SUCCESS",
@@ -756,7 +756,6 @@ export class RushConfigurationProject {
     get isMainProject(): boolean;
     // @deprecated
     get localDependencyProjects(): ReadonlyArray<RushConfigurationProject>;
-    // @deprecated
     get packageJson(): IPackageJson;
     // @beta
     get packageJsonEditor(): PackageJsonEditor;

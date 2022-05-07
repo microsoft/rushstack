@@ -409,6 +409,9 @@ export class ShellOperationRunner implements IOperationRunner {
       this._projectBuildCache = undefined;
 
       if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
+        // Disable legacy skip logic if the build cache is in play
+        this.isSkipAllowed = false;
+
         const projectConfiguration: RushProjectConfiguration | undefined =
           await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
         if (projectConfiguration) {
