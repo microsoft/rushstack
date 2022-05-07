@@ -263,6 +263,7 @@ export interface ICreateOperationsContext {
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
+    readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
 }
 
@@ -518,9 +519,12 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 // @alpha
 export class Operation {
     constructor(options?: IOperationOptions);
+    addDependency(dependency: Operation): void;
     readonly associatedPhase: IPhase | undefined;
     readonly associatedProject: RushConfigurationProject | undefined;
-    readonly dependencies: Set<Operation>;
+    readonly consumers: ReadonlySet<Operation>;
+    deleteDependency(dependency: Operation): void;
+    readonly dependencies: ReadonlySet<Operation>;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
     weight: number;

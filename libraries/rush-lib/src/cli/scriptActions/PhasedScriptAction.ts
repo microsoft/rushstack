@@ -31,7 +31,6 @@ import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfigur
 import { Operation } from '../../logic/operations/Operation';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
-import { Selection } from '../../logic/Selection';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 
@@ -201,7 +200,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       rushConfiguration: this.rushConfiguration,
       phaseSelection: new Set(this._initialPhases),
       projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration),
-      projectSelection
+      projectSelection,
+      projectsInUnknownState: projectSelection
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
@@ -311,17 +311,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         terminal.writeLine(`    ${colors.cyan(name)}`);
       }
 
-      // Account for consumer relationships
-      const projectSelection: Set<RushConfigurationProject> = Selection.intersection(
-        Selection.expandAllConsumers(changedProjects),
-        projectsToWatch
-      );
-
       const operations: Set<Operation> = await this.hooks.createOperations.promise(new Set(), {
         ...initialCreateOperationsContext,
         isInitial: false,
         projectChangeAnalyzer: state,
-        projectSelection,
+        projectsInUnknownState: changedProjects,
         phaseSelection
       });
 
