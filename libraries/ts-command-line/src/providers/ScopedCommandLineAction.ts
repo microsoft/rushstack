@@ -50,6 +50,13 @@ class InternalScopedCommandLineParser extends CommandLineParser {
   protected onDefineParameters(): void {
     // No-op. Parameters are manually defined in the constructor.
   }
+
+  protected async onExecute(): Promise<void> {
+    // override
+    // Only set if we made it this far, which may not be the case if an error occurred or
+    // if '--help' was specified.
+    this._canExecute = true;
+  }
 }
 
 /**
