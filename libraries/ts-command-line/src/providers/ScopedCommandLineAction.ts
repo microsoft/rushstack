@@ -11,9 +11,12 @@ interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOpti
   readonly actionOptions: ICommandLineActionOptions;
   readonly unscopedActionParameters: ReadonlyArray<CommandLineParameter>;
   readonly onDefineScopedParameters: (commandLineParameterProvider: CommandLineParameterProvider) => void;
-  readonly onExecute: () => Promise<void>;
 }
 
+/**
+ * A CommandLineParser used exclusively to parse the scoped command-line parameters
+ * for a ScopedCommandLineAction.
+ */
 class InternalScopedCommandLineParser extends CommandLineParser {
   private _internalOptions: IInternalScopedCommandLineParserOptions;
 
@@ -39,12 +42,6 @@ class InternalScopedCommandLineParser extends CommandLineParser {
 
   protected onDefineParameters(): void {
     // No-op. Parameters are manually defined in the constructor.
-  }
-
-  protected async onExecute(): Promise<void> {
-    await super.onExecute();
-    // Redirect action execution to the provided callback
-    await this._internalOptions.onExecute();
   }
 }
 
@@ -115,8 +112,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       ...parserOptions,
       actionOptions: this._options,
       unscopedActionParameters: this.parameters,
-      onDefineScopedParameters: this.onDefineScopedParameters.bind(this),
-      onExecute: this.onExecute.bind(this)
+      onDefineScopedParameters: this.onDefineScopedParameters.bind(this)
     });
   }
 
@@ -153,6 +149,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
     // Call the scoped parser using only the scoped args.
     await this._scopedCommandLineParser.executeWithoutErrorHandling(scopedArgs);
+    await super._execute();
     return;
   }
 
