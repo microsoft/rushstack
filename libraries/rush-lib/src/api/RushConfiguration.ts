@@ -484,7 +484,6 @@ export class RushConfiguration {
   private _repositoryDefaultRemote: string;
 
   private _npmOptions: NpmOptionsConfiguration;
-  private _pnpmVersion: string;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
   private _packageManagerConfigurationOptions!: PackageManagerOptionsConfigurationBase;
@@ -582,7 +581,6 @@ export class RushConfiguration {
     this.__rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
-    this._pnpmVersion = rushConfigurationJson.pnpmVersion || '';
     this._pnpmOptions = new PnpmOptionsConfiguration(
       rushConfigurationJson.pnpmOptions || {},
       this._commonTempFolder
@@ -1471,13 +1469,6 @@ export class RushConfiguration {
    */
   public get npmOptions(): NpmOptionsConfiguration {
     return this._npmOptions;
-  }
-
-  /**
-   * TODO
-   */
-  public get pnpmVersion(): string {
-    return this._pnpmVersion;
   }
 
   /**
