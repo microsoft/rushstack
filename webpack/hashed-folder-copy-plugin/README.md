@@ -73,7 +73,7 @@ supports standard Node resolution.
 
 # Example project
 
-See the [example project](https://github.com/microsoft/rushstack/blob/master/build-tests/hashed-folder-copy-plugin-test/).
+See the [example project](https://github.com/microsoft/rushstack/blob/master/build-tests/hashed-folder-copy-plugin-webpack4-test/).
 
 # A note about ambient types
 
