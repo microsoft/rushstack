@@ -77,14 +77,14 @@ describe(CommandLineParser.name, () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     const args: string[] = ['scoped-action', '--scope', 'foo', '--', '--scoped-bar', 'baz'];
 
-    return expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
   });
 
   it('throws on missing positional arg divider with unknown positional args', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     const args: string[] = ['scoped-action', '--scope', 'foo', 'bar'];
 
-    return expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
   });
 
   it('executes a scoped action', async () => {
@@ -110,7 +110,7 @@ describe(CommandLineParser.name, () => {
 
   it('prints the scoped action help', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    // Execute the parser in order to populate the scoped action
+    // Execute the parser in order to populate the scoped action to populate the help text.
     await commandLineParser.execute(['scoped-action', '--scope', 'foo', '--', '--scoped-foo', 'bar']);
     const scopedAction: TestScopedAction & { _getScopedCommandLineParser(): CommandLineParser } =
       commandLineParser.getAction('scoped-action') as TestScopedAction & {

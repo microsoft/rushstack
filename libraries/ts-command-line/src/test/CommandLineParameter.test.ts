@@ -366,7 +366,7 @@ describe(CommandLineParameter.name, () => {
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = '[u';
 
-      return expect(
+      await expect(
         commandLineParser.executeWithoutErrorHandling(args)
       ).rejects.toThrowErrorMatchingSnapshot();
     });
@@ -376,7 +376,7 @@ describe(CommandLineParameter.name, () => {
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = '[{}]';
 
-      return expect(
+      await expect(
         commandLineParser.executeWithoutErrorHandling(args)
       ).rejects.toThrowErrorMatchingSnapshot();
     });
@@ -386,7 +386,7 @@ describe(CommandLineParameter.name, () => {
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = 'oblong';
 
-      return expect(
+      await expect(
         commandLineParser.executeWithoutErrorHandling(args)
       ).rejects.toThrowErrorMatchingSnapshot();
     });
