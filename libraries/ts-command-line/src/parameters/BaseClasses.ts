@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SCOPING_PARAMETER_GROUP } from '../providers/ScopedCommandLineAction';
+import type { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { IBaseCommandLineDefinition, IBaseCommandLineDefinitionWithArgument } from './CommandLineDefinition';
 
 /**

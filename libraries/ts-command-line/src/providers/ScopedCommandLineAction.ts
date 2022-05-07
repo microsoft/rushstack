@@ -6,6 +6,7 @@ import { CommandLineParser, ICommandLineParserOptions } from './CommandLineParse
 import { CommandLineParserExitError } from './CommandLineParserExitError';
 import type { CommandLineParameter } from '../parameters/BaseClasses';
 import type { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
+import { SCOPING_PARAMETER_GROUP } from '../Constants';
 
 interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOptions {
   readonly actionOptions: ICommandLineActionOptions;
@@ -44,8 +45,6 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     // No-op. Parameters are manually defined in the constructor.
   }
 }
-
-export const SCOPING_PARAMETER_GROUP: unique symbol = Symbol('scoping');
 
 /**
  * Represents a sub-command that is part of the CommandLineParser command-line.

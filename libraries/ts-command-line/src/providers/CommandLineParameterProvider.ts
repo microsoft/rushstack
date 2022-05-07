@@ -27,7 +27,7 @@ import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
-import { SCOPING_PARAMETER_GROUP } from './ScopedCommandLineAction';
+import { SCOPING_PARAMETER_GROUP } from '../Constants';
 
 /**
  * This is the argparse result data object
