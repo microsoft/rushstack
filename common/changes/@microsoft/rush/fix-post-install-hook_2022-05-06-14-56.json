@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "[rush] always run `postRushInstall`, and run _after_ writing telemetry",
+      "comment": "Update the `postRushInstall` hook to always run, and move its execution to after telemetry is written.",
       "type": "none"
     }
   ],
