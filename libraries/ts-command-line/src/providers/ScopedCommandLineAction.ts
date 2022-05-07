@@ -19,7 +19,12 @@ interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOpti
  * for a ScopedCommandLineAction.
  */
 class InternalScopedCommandLineParser extends CommandLineParser {
+  private _canExecute: boolean;
   private _internalOptions: IInternalScopedCommandLineParserOptions;
+
+  public get canExecute(): boolean {
+    return this._canExecute;
+  }
 
   public constructor(options: IInternalScopedCommandLineParserOptions) {
     // We can run the parser directly because we are not going to use it for any other actions,
@@ -37,6 +42,7 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     };
 
     super(scopedCommandLineParserOptions);
+    this._canExecute = false;
     this._internalOptions = options;
     this._internalOptions.onDefineScopedParameters(this);
   }
@@ -148,9 +154,15 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       scopedArgs.push(...this.remainder.values.slice(1));
     }
 
-    // Call the scoped parser using only the scoped args.
+    // Call the scoped parser using only the scoped args to handle parsing
     await this._scopedCommandLineParser.executeWithoutErrorHandling(scopedArgs);
-    await super._execute();
+
+    // Only call execute if the parser reached the execute stage. This may not be true if
+    // the parser exited early due to a specified '--help' parameter.
+    if (this._scopedCommandLineParser.canExecute) {
+      await super._execute();
+    }
+
     return;
   }
 
