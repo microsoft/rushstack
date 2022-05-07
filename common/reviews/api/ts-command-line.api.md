@@ -20,7 +20,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     protected abstract onDefineParameters(): void;
     protected abstract onExecute(): Promise<void>;
     // @internal
-    _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    _processParsedData(data: _ICommandLineParserData): void;
     readonly summary: string;
 }
 
@@ -113,7 +113,6 @@ export abstract class CommandLineParameter {
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    readonly groupName: string | undefined;
     abstract get kind(): CommandLineParameterKind;
     readonly longName: string;
     // @internal
@@ -149,8 +148,6 @@ export abstract class CommandLineParameterProvider {
     defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
     defineIntegerListParameter(definition: ICommandLineIntegerListDefinition): CommandLineIntegerListParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
-    // @internal (undocumented)
-    protected _defineParameter(parameter: CommandLineParameter): void;
     defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
     defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
     // @internal
@@ -167,10 +164,9 @@ export abstract class CommandLineParameterProvider {
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
     // @internal (undocumented)
-    protected _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    protected _processParsedData(data: _ICommandLineParserData): void;
     get remainder(): CommandLineRemainder | undefined;
     renderHelpText(): string;
-    renderUsageText(): string;
 }
 
 // @public
@@ -253,7 +249,6 @@ export class DynamicCommandLineParser extends CommandLineParser {
 export interface IBaseCommandLineDefinition {
     description: string;
     environmentVariable?: string;
-    parameterGroupName?: string;
     parameterLongName: string;
     parameterShortName?: string;
     required?: boolean;
@@ -311,7 +306,6 @@ export interface _ICommandLineParserData {
 export interface ICommandLineParserOptions {
     enableTabCompletionAction?: boolean;
     toolDescription: string;
-    toolEpilog?: string;
     toolFilename: string;
 }
 
@@ -327,24 +321,6 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 
 // @public
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
-}
-
-// @public
-export abstract class ScopedCommandLineAction extends CommandLineAction {
-    constructor(options: ICommandLineActionOptions);
-    // @internal (undocumented)
-    protected _defineParameter(parameter: CommandLineParameter): void;
-    // @internal
-    _execute(): Promise<void>;
-    // @internal
-    protected _getScopedCommandLineParser(): CommandLineParser;
-    protected onDefineParameters(): void;
-    protected abstract onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void;
-    protected abstract onDefineUnscopedParameters(): void;
-    protected abstract onExecute(): Promise<void>;
-    // @internal
-    _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
-    static ScopingParameterGroupName: 'scoping';
 }
 
 ```

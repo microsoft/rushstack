@@ -18,11 +18,6 @@ export interface IBaseCommandLineDefinition {
   parameterShortName?: string;
 
   /**
-   * An optional parameter group name, shown when invoking the tool with "--help"
-   */
-  parameterGroupName?: string;
-
-  /**
    * Documentation for the parameter that will be shown when invoking the tool with "--help"
    */
   description: string;

@@ -361,34 +361,31 @@ describe(CommandLineParameter.name, () => {
       return commandLineParser;
     }
 
-    it('raises an error if env var value is not valid json', async () => {
+    it('raises an error if env var value is not valid json', () => {
       const commandLineParser: CommandLineParser = createHelloWorldParser();
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = '[u';
 
-      return expect(
-        commandLineParser.executeWithoutErrorHandling(args)
-      ).rejects.toThrowErrorMatchingSnapshot();
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
     });
 
-    it('raises an error if env var value is json containing non-scalars', async () => {
+    it('raises an error if env var value is json containing non-scalars', () => {
       const commandLineParser: CommandLineParser = createHelloWorldParser();
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = '[{}]';
 
-      return expect(
-        commandLineParser.executeWithoutErrorHandling(args)
-      ).rejects.toThrowErrorMatchingSnapshot();
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
     });
 
-    it('raises an error if env var value is not a valid choice', async () => {
+    it('raises an error if env var value is not a valid choice', () => {
       const commandLineParser: CommandLineParser = createHelloWorldParser();
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = 'oblong';
 
-      return expect(
-        commandLineParser.executeWithoutErrorHandling(args)
-      ).rejects.toThrowErrorMatchingSnapshot();
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 });
