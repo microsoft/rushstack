@@ -48,6 +48,8 @@ class InternalScopedCommandLineParser extends CommandLineParser {
   }
 }
 
+export const SCOPING_PARAMETER_GROUP: unique symbol = Symbol('scoping');
+
 /**
  * Represents a sub-command that is part of the CommandLineParser command-line.
  * Applications should create subclasses of ScopedCommandLineAction corresponding to
@@ -79,7 +81,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * The required group name to apply to all scoping parameters. At least one parameter
    * must be defined with this group name.
    */
-  public static ScopingParameterGroupName: 'scoping' = 'scoping';
+  public static readonly ScopingParameterGroup: typeof SCOPING_PARAMETER_GROUP = SCOPING_PARAMETER_GROUP;
 
   public constructor(options: ICommandLineActionOptions) {
     super(options);
@@ -200,7 +202,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   /** @internal */
   protected _defineParameter(parameter: CommandLineParameter): void {
     super._defineParameter(parameter);
-    if (parameter.groupName === ScopedCommandLineAction.ScopingParameterGroupName) {
+    if (parameter.parameterGroup === ScopedCommandLineAction.ScopingParameterGroup) {
       this._scopingParameters.push(parameter);
     }
   }
