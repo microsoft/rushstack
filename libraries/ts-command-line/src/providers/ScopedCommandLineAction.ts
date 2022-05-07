@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { CommandLineAction, ICommandLineActionOptions } from './CommandLineAction';
 import { CommandLineParser, ICommandLineParserOptions } from './CommandLineParser';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
 import type { CommandLineParameter } from '../parameters/BaseClasses';
 import type { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
-import { SCOPING_PARAMETER_GROUP } from '../Constants';
 
 interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOptions {
   readonly actionOptions: ICommandLineActionOptions;
