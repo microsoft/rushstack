@@ -342,7 +342,6 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     protected abstract onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void;
     protected abstract onDefineUnscopedParameters(): void;
     protected abstract onExecute(): Promise<void>;
-    get parameters(): ReadonlyArray<CommandLineParameter>;
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     static ScopingParameterGroupName: 'scoping';

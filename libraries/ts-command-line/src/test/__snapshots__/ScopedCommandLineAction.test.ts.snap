@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CommandLineParser prints the action help 1`] = `
-"usage: example scoped-action [-h] [--verbose] [--scope SCOPE] ...
+"usage: example scoped-action [-h] [--scope SCOPE] ...
 
 a longer description
 
@@ -12,7 +12,6 @@ Positional arguments:
 
 Optional arguments:
   -h, --help     Show this help message and exit.
-  --verbose      A flag parameter.
 
 Optional scoping arguments:
   --scope SCOPE  The scope
@@ -31,29 +30,6 @@ Optional arguments:
 For more information on available unscoped parameters, use \\"example 
 scoped-action --help\\"
 "
-`;
-
-exports[`CommandLineParser prints the scoped action parameter map 1`] = `
-Object {
-  "--scope": "\\"foo\\"",
-  "--scoped-foo": undefined,
-  "--verbose": "false",
-}
-`;
-
-exports[`CommandLineParser prints the scoped action parameter map 2`] = `
-Object {
-  "--scope": "\\"foo\\"",
-  "--scoped-foo": "\\"bar\\"",
-  "--verbose": "false",
-}
-`;
-
-exports[`CommandLineParser prints the unscoped action parameter map 1`] = `
-Object {
-  "--scope": undefined,
-  "--verbose": "true",
-}
 `;
 
 exports[`CommandLineParser throws on missing positional arg divider with unknown positional args 1`] = `"example scoped-action: error: Unrecognized arguments: bar."`;

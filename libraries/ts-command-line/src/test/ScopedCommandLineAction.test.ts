@@ -7,14 +7,12 @@ import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction';
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
 import { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 
 class TestScopedAction extends ScopedCommandLineAction {
   public done: boolean = false;
   public scopedValue: string | undefined;
-  private _verboseArg!: CommandLineFlagParameter;
   private _scopeArg!: CommandLineStringParameter;
-  private _scopedArg: CommandLineStringParameter | undefined;
+  private _scopedArg!: CommandLineStringParameter;
 
   public constructor() {
     super({
@@ -25,19 +23,12 @@ class TestScopedAction extends ScopedCommandLineAction {
   }
 
   protected async onExecute(): Promise<void> {
-    if (this._scopedArg) {
-      expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);
-      this.scopedValue = this._scopedArg.value;
-    }
+    expect(this._scopedArg.longName).toBe(`--scoped-${this._scopeArg.value}`);
+    this.scopedValue = this._scopedArg.value;
     this.done = true;
   }
 
   protected onDefineUnscopedParameters(): void {
-    this._verboseArg = this.defineFlagParameter({
-      parameterLongName: '--verbose',
-      description: 'A flag parameter.'
-    });
-
     this._scopeArg = this.defineStringParameter({
       parameterLongName: '--scope',
       parameterGroupName: ScopedCommandLineAction.ScopingParameterGroupName,
@@ -47,13 +38,11 @@ class TestScopedAction extends ScopedCommandLineAction {
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    if (this._scopeArg.value) {
-      this._scopedArg = scopedParameterProvider.defineStringParameter({
-        parameterLongName: `--scoped-${this._scopeArg.value}`,
-        argumentName: 'SCOPED',
-        description: 'The scoped argument.'
-      });
-    }
+    this._scopedArg = scopedParameterProvider.defineStringParameter({
+      parameterLongName: `--scoped-${this._scopeArg.value}`,
+      argumentName: 'SCOPED',
+      description: 'The scoped argument.'
+    });
   }
 }
 
@@ -112,43 +101,12 @@ describe(CommandLineParser.name, () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
     // Execute the parser in order to populate the scoped action
     await commandLineParser.execute(['scoped-action', '--scope', 'foo', '--', '--scoped-foo', 'bar']);
-    const scopedAction: TestScopedAction & { _getScopedCommandLineParser(): CommandLineParser } =
+    const unscopedAction: TestScopedAction & { _getScopedCommandLineParser(): CommandLineParser } =
       commandLineParser.getAction('scoped-action') as TestScopedAction & {
         _getScopedCommandLineParser(): CommandLineParser;
       };
-    const scopedCommandLineParser: CommandLineParser = scopedAction._getScopedCommandLineParser();
+    const scopedCommandLineParser: CommandLineParser = unscopedAction._getScopedCommandLineParser();
     const helpText: string = colors.stripColors(scopedCommandLineParser.renderHelpText());
     expect(helpText).toMatchSnapshot();
-  });
-
-  it('prints the unscoped action parameter map', async () => {
-    const commandLineParser: TestCommandLine = new TestCommandLine();
-    // Execute the parser in order to populate the scoped action
-    await commandLineParser.execute(['scoped-action', '--verbose']);
-    const scopedAction: TestScopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
-    expect(scopedAction.done).toBe(true);
-    expect(scopedAction.parameters.length).toBe(2);
-    const parameterStringMap: Record<string, string> = scopedAction.getParameterStringMap();
-    expect(parameterStringMap).toMatchSnapshot();
-  });
-
-  it('prints the scoped action parameter map', async () => {
-    let commandLineParser: TestCommandLine = new TestCommandLine();
-    // Execute the parser in order to populate the scoped action
-    await commandLineParser.execute(['scoped-action', '--scope', 'foo']);
-    let scopedAction: TestScopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
-    expect(scopedAction.done).toBe(true);
-    expect(scopedAction.parameters.length).toBe(3);
-    let parameterStringMap: Record<string, string> = scopedAction.getParameterStringMap();
-    expect(parameterStringMap).toMatchSnapshot();
-
-    commandLineParser = new TestCommandLine();
-    // Execute the parser in order to populate the scoped action
-    await commandLineParser.execute(['scoped-action', '--scope', 'foo', '--', '--scoped-foo', 'bar']);
-    scopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
-    expect(scopedAction.done).toBe(true);
-    expect(scopedAction.parameters.length).toBe(3);
-    parameterStringMap = scopedAction.getParameterStringMap();
-    expect(parameterStringMap).toMatchSnapshot();
   });
 });

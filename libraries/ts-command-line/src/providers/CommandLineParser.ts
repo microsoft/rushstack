@@ -201,9 +201,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);
       }
-      if (this.actions.length > 0 && args.length === 0) {
-        // Parsers that use actions should print help when 0 args are provided. Allow
-        // actionless parsers to continue on zero args.
+      if (args.length === 0) {
         this._argumentParser.printHelp();
         return;
       }
