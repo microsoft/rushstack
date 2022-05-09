@@ -440,7 +440,7 @@ export class Git {
     for (const gitStatusEntry of gitStatusEntries) {
       if (
         gitStatusEntry.kind === 'untracked' ||
-        (gitStatusEntry as IChangedGitStatusEntry).unstagedChangeType
+        (gitStatusEntry as IChangedGitStatusEntry).unstagedChangeType !== undefined
       ) {
         return true;
       }
