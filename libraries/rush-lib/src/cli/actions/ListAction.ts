@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleTerminalProvider, Import, Sort, Terminal } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Sort, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -9,8 +9,6 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
 import { SelectionParameterSet } from '../SelectionParameterSet';
-
-const cliTable: typeof import('cli-table') = Import.lazy('cli-table', require);
 
 /**
  * Shape of "rush list --json" output.
@@ -132,7 +130,7 @@ export class ListAction extends BaseRushAction {
     if (this._jsonFlag.value) {
       this._printJson(selection);
     } else if (this._version.value || this._path.value || this._fullPath.value || this._detailedFlag.value) {
-      this._printListTable(selection);
+      await this._printListTableAsync(selection);
     } else {
       this._printList(selection);
     }
@@ -179,7 +177,7 @@ export class ListAction extends BaseRushAction {
     }
   }
 
-  private _printListTable(selection: Set<RushConfigurationProject>): void {
+  private async _printListTableAsync(selection: Set<RushConfigurationProject>): Promise<void> {
     const tableHeader: string[] = ['Project'];
     if (this._version.value || this._detailedFlag.value) {
       tableHeader.push('Version');
@@ -198,8 +196,8 @@ export class ListAction extends BaseRushAction {
       tableHeader.push('Tags');
     }
 
-    // eslint-disable-next-line @typescript-eslint/typedef
-    const table = new cliTable({
+    const { default: CliTable } = await import('cli-table');
+    const table: import('cli-table') = new CliTable({
       head: tableHeader
     });
 
