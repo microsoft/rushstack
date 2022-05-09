@@ -3,6 +3,7 @@
 
 /**
  * Encapsulates information about an error
+ * @alpha
  */
 export class OperationError extends Error {
   protected _type: string;

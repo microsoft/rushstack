@@ -4,17 +4,24 @@
 // The TaskExecutionManager prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
 
-import colors from 'colors/safe';
 import { EOL } from 'os';
-import type { CollatedTerminal } from '@rushstack/stream-collator';
+
+import colors from 'colors/safe';
+
+import { Terminal } from '@rushstack/node-core-library';
+import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable } from '@rushstack/terminal';
 
 import { OperationExecutionManager, IOperationExecutionManagerOptions } from '../OperationExecutionManager';
+import { _printOperationStatus } from '../OperationResultSummarizerPlugin';
+import { _printTimeline } from '../ConsoleTimelinePlugin';
 import { OperationStatus } from '../OperationStatus';
 import { Operation } from '../Operation';
 import { Utilities } from '../../../utilities/Utilities';
 import type { IOperationRunner } from '../IOperationRunner';
 import { MockOperationRunner } from './MockOperationRunner';
+import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
+import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
@@ -27,6 +34,7 @@ mockGetTimeInMs.mockImplementation(() => {
 });
 
 const mockWritable: MockWritable = new MockWritable();
+const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
 
 function createExecutionManager(
   executionManagerOptions: IOperationExecutionManagerOptions,
@@ -38,8 +46,6 @@ function createExecutionManager(
 
   return new OperationExecutionManager(new Set([operation]), executionManagerOptions);
 }
-
-const EXPECTED_FAIL: string = `Promise returned by ${OperationExecutionManager.prototype.executeAsync.name}() resolved but was expected to fail`;
 
 describe(OperationExecutionManager.name, () => {
   let executionManager: OperationExecutionManager;
@@ -70,7 +76,6 @@ describe(OperationExecutionManager.name, () => {
             quietMode: false,
             debugMode: false,
             parallelism: 'tequila',
-            showTimeline: false,
             changedProjectsOnly: false,
             destination: mockWritable
           })
@@ -84,7 +89,6 @@ describe(OperationExecutionManager.name, () => {
             quietMode: false,
             debugMode: false,
             parallelism: '50%',
-            showTimeline: false,
             changedProjectsOnly: false,
             destination: mockWritable
           })
@@ -98,7 +102,6 @@ describe(OperationExecutionManager.name, () => {
             quietMode: false,
             debugMode: false,
             parallelism: '200%',
-            showTimeline: false,
             changedProjectsOnly: false,
             destination: mockWritable
           })
@@ -112,7 +115,6 @@ describe(OperationExecutionManager.name, () => {
         quietMode: false,
         debugMode: false,
         parallelism: '1',
-        showTimeline: false,
         changedProjectsOnly: false,
         destination: mockWritable
       };
@@ -128,15 +130,16 @@ describe(OperationExecutionManager.name, () => {
         })
       );
 
-      try {
-        await executionManager.executeAsync();
-        fail(EXPECTED_FAIL);
-      } catch (err) {
-        expect((err as Error).message).toMatchSnapshot();
-        const allMessages: string = mockWritable.getAllOutput();
-        expect(allMessages).toContain('Error: step 1 failed');
-        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
-      }
+      const result: IExecutionResult = await executionManager.executeAsync();
+      _printOperationStatus(mockTerminal, result);
+      expect(result.status).toEqual(OperationStatus.Failure);
+      expect(result.operationResults.size).toEqual(1);
+      const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
+      expect(firstResult.status).toEqual(OperationStatus.Failure);
+
+      const allMessages: string = mockWritable.getAllOutput();
+      expect(allMessages).toContain('Error: step 1 failed');
+      expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
     });
 
     it('printedStdoutAfterErrorWithEmptyStderr', async () => {
@@ -149,16 +152,17 @@ describe(OperationExecutionManager.name, () => {
         })
       );
 
-      try {
-        await executionManager.executeAsync();
-        fail(EXPECTED_FAIL);
-      } catch (err) {
-        expect((err as Error).message).toMatchSnapshot();
-        const allOutput: string = mockWritable.getAllOutput();
-        expect(allOutput).toMatch(/Build step 1/);
-        expect(allOutput).toMatch(/Error: step 1 failed/);
-        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
-      }
+      const result: IExecutionResult = await executionManager.executeAsync();
+      _printOperationStatus(mockTerminal, result);
+      expect(result.status).toEqual(OperationStatus.Failure);
+      expect(result.operationResults.size).toEqual(1);
+      const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
+      expect(firstResult.status).toEqual(OperationStatus.Failure);
+
+      const allOutput: string = mockWritable.getAllOutput();
+      expect(allOutput).toMatch(/Build step 1/);
+      expect(allOutput).toMatch(/Error: step 1 failed/);
+      expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
     });
   });
 
@@ -169,7 +173,6 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: '1',
-          showTimeline: false,
           changedProjectsOnly: false,
           destination: mockWritable
         };
@@ -185,16 +188,17 @@ describe(OperationExecutionManager.name, () => {
           })
         );
 
-        try {
-          await executionManager.executeAsync();
-          fail(EXPECTED_FAIL);
-        } catch (err) {
-          expect((err as Error).message).toMatchSnapshot();
-          const allMessages: string = mockWritable.getAllOutput();
-          expect(allMessages).toContain('Build step 1');
-          expect(allMessages).toContain('step 1 succeeded with warnings');
-          expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
-        }
+        const result: IExecutionResult = await executionManager.executeAsync();
+        _printOperationStatus(mockTerminal, result);
+        expect(result.status).toEqual(OperationStatus.SuccessWithWarning);
+        expect(result.operationResults.size).toEqual(1);
+        const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
+        expect(firstResult.status).toEqual(OperationStatus.SuccessWithWarning);
+
+        const allMessages: string = mockWritable.getAllOutput();
+        expect(allMessages).toContain('Build step 1');
+        expect(allMessages).toContain('step 1 succeeded with warnings');
+        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
       });
     });
 
@@ -204,7 +208,6 @@ describe(OperationExecutionManager.name, () => {
           quietMode: false,
           debugMode: false,
           parallelism: '1',
-          showTimeline: false,
           changedProjectsOnly: false,
           destination: mockWritable
         };
@@ -224,7 +227,12 @@ describe(OperationExecutionManager.name, () => {
           )
         );
 
-        await executionManager.executeAsync();
+        const result: IExecutionResult = await executionManager.executeAsync();
+        _printOperationStatus(mockTerminal, result);
+        expect(result.status).toEqual(OperationStatus.Success);
+        expect(result.operationResults.size).toEqual(1);
+        const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
+        expect(firstResult.status).toEqual(OperationStatus.SuccessWithWarning);
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Build step 1');
         expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
@@ -232,8 +240,6 @@ describe(OperationExecutionManager.name, () => {
       });
 
       it('logs warnings correctly with --timeline option', async () => {
-        executionManagerOptions.showTimeline = true;
-
         executionManager = createExecutionManager(
           executionManagerOptions,
           new MockOperationRunner(
@@ -247,7 +253,9 @@ describe(OperationExecutionManager.name, () => {
           )
         );
 
-        await executionManager.executeAsync();
+        const result: IExecutionResult = await executionManager.executeAsync();
+        _printTimeline(mockTerminal, result);
+        _printOperationStatus(mockTerminal, result);
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Build step 1');
         expect(allMessages).toContain('Warning: step 1 succeeded with warnings');

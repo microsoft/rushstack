@@ -12,10 +12,33 @@ export enum StopwatchState {
 }
 
 /**
+ * Represents a readonly view of a `Stopwatch`.
+ * @alpha
+ */
+export interface IStopwatchResult {
+  /**
+   * Displays how long the stopwatch has been executing in a human readable format.
+   */
+  toString(): string;
+  /**
+   * Get the duration in seconds.
+   */
+  get duration(): number;
+  /**
+   * Return the start time of the most recent stopwatch run.
+   */
+  get startTime(): number | undefined;
+  /**
+   * Return the end time of the most recent stopwatch run.
+   */
+  get endTime(): number | undefined;
+}
+
+/**
  * Represents a typical timer/stopwatch which keeps track
  * of elapsed time in between two events.
  */
-export class Stopwatch {
+export class Stopwatch implements IStopwatchResult {
   private _startTime: number | undefined;
   private _endTime: number | undefined;
   private _state: StopwatchState;
