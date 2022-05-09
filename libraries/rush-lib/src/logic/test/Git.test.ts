@@ -42,7 +42,7 @@ describe(Git.name, () => {
         .spyOn(gitInstance, '_executeGitCommandAndCaptureOutput')
         .mockImplementation((gitPath: string, args: string[]) => {
           expect(gitPath).toEqual('/git/bin/path');
-          expect(args).toEqual(['status', '--porcelain=2', '--null']);
+          expect(args).toEqual(['status', '--porcelain=2', '--null', '--ignored=no']);
           return outputSections.join('\0');
         });
 
@@ -58,8 +58,6 @@ describe(Git.name, () => {
           '1 MM N... 100644 100644 100644 d20c7e41acf4295db610f395f50a554145b4ece7 8299b2a7d657ec1211649f14c85737d68a920d9e path/b.ts',
           // Unstaged deletion
           '1 .D N... 100644 100644 000000 3fcb58810c113c90c366dd81d16443425c7b95fa 3fcb58810c113c90c366dd81d16443425c7b95fa path/c.ts',
-          // Ignored file
-          '! ignored.log',
           // Staged deletion
           '1 D. N... 100644 000000 000000 91b0203b85a7bb605e35f842d1d05d66a6275e10 0000000000000000000000000000000000000000 path/d.ts',
           // Staged rename
@@ -110,10 +108,6 @@ describe(Git.name, () => {
             "stagedChangeType": undefined,
             "unstagedChangeType": "deleted",
             "worktreeFileMode": "000000",
-          },
-          Object {
-            "kind": "ignored",
-            "path": "ignored.log",
           },
           Object {
             "headFileMode": "100644",

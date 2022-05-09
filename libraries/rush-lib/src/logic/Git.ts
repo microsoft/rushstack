@@ -19,12 +19,8 @@ import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
 
 export interface IGitStatusEntryBase {
-  kind: 'untracked' | 'ignored' | 'changed' | 'unmerged' | 'renamed' | 'copied';
+  kind: 'untracked' | 'changed' | 'unmerged' | 'renamed' | 'copied';
   path: string;
-}
-
-export interface IIgnoredGitStatusEntry extends IGitStatusEntryBase {
-  kind: 'ignored';
 }
 
 export interface IUntrackedGitStatusEntry extends IGitStatusEntryBase {
@@ -70,7 +66,6 @@ export interface IUnmergedGitStatusEntry extends IGitStatusEntryBase {
 
 export type IGitStatusEntry =
   | IUntrackedGitStatusEntry
-  | IIgnoredGitStatusEntry
   | IChangedGitStatusEntry
   | IRenamedOrCopiedGitStatusEntry
   | IUnmergedGitStatusEntry;
@@ -426,10 +421,10 @@ export class Git {
 
   public hasUncommittedChanges(): boolean {
     const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const gitStatusEntry of gitStatusEntries) {
-      if (gitStatusEntry.kind !== 'ignored') {
-        return true;
-      }
+      // If there are any changes, return true. We only need to evaluate the first iterator entry
+      return true;
     }
 
     return false;
@@ -456,9 +451,7 @@ export class Git {
     const result: string[] = [];
     const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
     for (const gitStatusEntry of gitStatusEntries) {
-      if (gitStatusEntry.kind !== 'ignored') {
-        result.push(gitStatusEntry.path);
-      }
+      result.push(gitStatusEntry.path);
     }
 
     return result;
@@ -474,7 +467,8 @@ export class Git {
     const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
       'status',
       '--porcelain=2',
-      '--null'
+      '--null',
+      '--ignored=no'
     ]);
 
     // State machine for parsing a git status entry
@@ -544,13 +538,6 @@ export class Git {
               currentObject.kind = 'unmerged';
               isUnmerged = false;
               state = GitStatusEntryState.changeType;
-              break;
-            }
-
-            case '!': {
-              // Ignored
-              currentObject.kind = 'ignored';
-              state = GitStatusEntryState.path;
               break;
             }
 
