@@ -188,11 +188,11 @@ export class ChangeAction extends BaseRushAction {
     const sortedProjectList: string[] = (await this._getChangedProjectNamesAsync()).sort();
     if (sortedProjectList.length === 0) {
       this._logNoChangeFileRequired();
-      this._warnUncommittedChanges();
+      this._warnUnstagedChanges();
       return;
     }
 
-    this._warnUncommittedChanges();
+    this._warnUnstagedChanges();
 
     const promptModule: inquirerTypes.PromptModule = inquirer.createPromptModule();
     let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
@@ -600,19 +600,19 @@ export class ChangeAction extends BaseRushAction {
     return email;
   }
 
-  private _warnUncommittedChanges(): void {
+  private _warnUnstagedChanges(): void {
     try {
-      if (this._git.hasUncommittedChanges()) {
+      if (this._git.hasUnstagedChanges()) {
         console.log(
           os.EOL +
             colors.yellow(
-              'Warning: You have uncommitted changes, which do not trigger prompting for change ' +
+              'Warning: You have unstaged changes, which do not trigger prompting for change ' +
                 'descriptions.'
             )
         );
       }
     } catch (error) {
-      console.log(`An error occurred when detecting uncommitted changes: ${error}`);
+      console.log(`An error occurred when detecting unstaged changes: ${error}`);
     }
   }
 

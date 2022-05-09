@@ -18,6 +18,63 @@ import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
 export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
 
+export interface IGitStatusEntryBase {
+  kind: 'untracked' | 'ignored' | 'changed' | 'unmerged' | 'renamed' | 'copied';
+  path: string;
+}
+
+export interface IIgnoredGitStatusEntry extends IGitStatusEntryBase {
+  kind: 'ignored';
+}
+
+export interface IUntrackedGitStatusEntry extends IGitStatusEntryBase {
+  kind: 'untracked';
+}
+
+export type GitStatusChangeType = 'added' | 'deleted' | 'modified' | 'renamed' | 'copied' | 'type-changed';
+
+export interface IChangedGitStatusEntryFields {
+  stagedChangeType: GitStatusChangeType | undefined;
+  unstagedChangeType: GitStatusChangeType | undefined;
+  isInSubmodule: boolean;
+  headFileMode: string;
+  indexFileMode: string;
+  worktreeFileMode: string;
+  headObjectName: string;
+  indexObjectName: string;
+}
+
+export interface IChangedGitStatusEntry extends IGitStatusEntryBase, IChangedGitStatusEntryFields {
+  kind: 'changed';
+}
+
+export interface IRenamedOrCopiedGitStatusEntry extends IGitStatusEntryBase, IChangedGitStatusEntryFields {
+  kind: 'renamed' | 'copied';
+  renameOrCopyScore: number;
+  originalPath: string;
+}
+
+export interface IUnmergedGitStatusEntry extends IGitStatusEntryBase {
+  kind: 'unmerged';
+  stagedChangeType: GitStatusChangeType | undefined;
+  unstagedChangeType: GitStatusChangeType | undefined;
+  isInSubmodule: boolean;
+  stage1FileMode: string;
+  stage2FileMode: string;
+  stage3FileMode: string;
+  worktreeFileMode: string;
+  stage1ObjectName: string;
+  stage2ObjectName: string;
+  stage3ObjectName: string;
+}
+
+export type IGitStatusEntry =
+  | IUntrackedGitStatusEntry
+  | IIgnoredGitStatusEntry
+  | IChangedGitStatusEntry
+  | IRenamedOrCopiedGitStatusEntry
+  | IUnmergedGitStatusEntry;
+
 interface IResultOrError<TResult> {
   error?: Error;
   result?: TResult;
@@ -368,24 +425,312 @@ export class Git {
   }
 
   public hasUncommittedChanges(): boolean {
-    return this.getUncommittedChanges().length > 0;
+    const gitStatusEntries: ReadonlyArray<IGitStatusEntry> = this.getGitStatus();
+    for (const gitStatusEntry of gitStatusEntries) {
+      if (gitStatusEntry.kind !== 'ignored') {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public hasUnstagedChanges(): boolean {
+    const gitStatusEntries: ReadonlyArray<IGitStatusEntry> = this.getGitStatus();
+    for (const gitStatusEntry of gitStatusEntries) {
+      if (
+        gitStatusEntry.kind === 'untracked' ||
+        (gitStatusEntry as IChangedGitStatusEntry).unstagedChangeType
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
    * The list of files changed but not committed
    */
   public getUncommittedChanges(): ReadonlyArray<string> {
-    const changes: string[] = [];
-    changes.push(...this._getUntrackedChanges());
-    changes.push(...this._getDiffOnHEAD());
+    const result: string[] = [];
+    const gitStatusEntries: ReadonlyArray<IGitStatusEntry> = this.getGitStatus();
+    for (const gitStatusEntry of gitStatusEntries) {
+      if (gitStatusEntry.kind !== 'ignored') {
+        result.push(gitStatusEntry.path);
+      }
+    }
 
-    return changes.filter((change) => {
-      return change.trim().length > 0;
-    });
+    return result;
   }
 
   public getTagSeparator(): string {
     return this._rushConfiguration.gitTagSeparator || DEFAULT_GIT_TAG_SEPARATOR;
+  }
+
+  public getGitStatus(): ReadonlyArray<IGitStatusEntry> {
+    const gitPath: string = this.getGitPathOrThrow();
+    // See Git.test.ts for example output
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      'status',
+      '--porcelain=2',
+      '--null'
+    ]);
+
+    const entries: IGitStatusEntry[] = [];
+
+    // State machine for parsing a git status entry
+    // See reference https://git-scm.com/docs/git-status?msclkid=1cff552bcdce11ecadf77a086eded66c#_porcelain_format_version_2
+
+    const enum GitStatusEntryState {
+      mode,
+      changeType,
+      headFileMode,
+      indexFileMode,
+      stage1FileMode,
+      stage2FileMode,
+      stage3FileMode,
+      worktreeFileMode,
+      headObjectName,
+      indexObjectName,
+      stage1ObjectName,
+      stage2ObjectName,
+      stage3ObjectName,
+      submoduleState,
+      renameOrCopyScore,
+      path
+    }
+
+    let pos: number = 0;
+    let state: GitStatusEntryState | undefined = GitStatusEntryState.mode;
+
+    let isRenamedOrCopied: boolean = false;
+    let isUnmerged: boolean = false;
+    let currentObject: Partial<IGitStatusEntry> = {};
+    function emitAndReset(): void {
+      entries.push(currentObject as IGitStatusEntry);
+      isRenamedOrCopied = false;
+      isUnmerged = false;
+      currentObject = {};
+    }
+
+    function getFieldAndAdvancePos(delimiter: string): string {
+      const newPos: number = output.indexOf(delimiter, pos);
+      const field: string = output.substring(pos, newPos);
+      pos = newPos + delimiter.length;
+      return field;
+    }
+
+    while (state !== undefined) {
+      switch (state) {
+        case GitStatusEntryState.mode: {
+          const modeField: string = getFieldAndAdvancePos(' ');
+          switch (modeField) {
+            case '?': {
+              // Untracked
+              currentObject.kind = 'untracked';
+              state = GitStatusEntryState.path;
+              break;
+            }
+
+            case '1': {
+              // Simple change
+              currentObject.kind = 'changed';
+              state = GitStatusEntryState.changeType;
+              break;
+            }
+
+            case '2': {
+              // Renamed or copied
+              isRenamedOrCopied = true;
+              state = GitStatusEntryState.changeType;
+              break;
+            }
+
+            case 'u': {
+              // Unmerged
+              currentObject.kind = 'unmerged';
+              isUnmerged = false;
+              state = GitStatusEntryState.changeType;
+              break;
+            }
+
+            case '!': {
+              // Ignored
+              currentObject.kind = 'ignored';
+              state = GitStatusEntryState.path;
+              break;
+            }
+
+            default: {
+              throw new Error(`Unexpected git status mode: ${modeField}`);
+            }
+          }
+
+          break;
+        }
+
+        case GitStatusEntryState.changeType: {
+          const typedCurrentObject: IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry =
+            currentObject as IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry;
+
+          const changeTypeField: string = getFieldAndAdvancePos(' ');
+          const rawStagedChangeType: string = changeTypeField.charAt(0);
+          typedCurrentObject.stagedChangeType = this._parseGitStatusChangeType(rawStagedChangeType);
+          const rawUnstagedChangeType: string = changeTypeField.charAt(1);
+          typedCurrentObject.unstagedChangeType = this._parseGitStatusChangeType(rawUnstagedChangeType);
+
+          state = GitStatusEntryState.submoduleState;
+
+          break;
+        }
+
+        case GitStatusEntryState.submoduleState: {
+          const typedCurrentObject: IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry =
+            currentObject as IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry;
+
+          // This field is actually four characters long, but this parser only handles if the entry is in a
+          // submodule or not. That is represented by a "N" or an "S" in the first character.
+          const submoduleState: string = getFieldAndAdvancePos(' ');
+          const submoduleMode: string = submoduleState.charAt(0);
+          if (submoduleMode === 'N') {
+            typedCurrentObject.isInSubmodule = false;
+          } else if (submoduleMode === 'S') {
+            typedCurrentObject.isInSubmodule = true;
+          } else {
+            throw new Error(`Unexpected submodule state: ${submoduleState}`);
+          }
+
+          if (isUnmerged) {
+            state = GitStatusEntryState.stage1FileMode;
+          } else {
+            state = GitStatusEntryState.headFileMode;
+          }
+
+          break;
+        }
+
+        case GitStatusEntryState.headFileMode: {
+          (currentObject as IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry).headFileMode =
+            getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.indexFileMode;
+          break;
+        }
+
+        case GitStatusEntryState.indexFileMode: {
+          (currentObject as IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry).indexFileMode =
+            getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.worktreeFileMode;
+          break;
+        }
+
+        case GitStatusEntryState.stage1FileMode: {
+          (currentObject as IUnmergedGitStatusEntry).stage1FileMode = getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.stage2FileMode;
+          break;
+        }
+
+        case GitStatusEntryState.stage2FileMode: {
+          (currentObject as IUnmergedGitStatusEntry).stage2FileMode = getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.stage3FileMode;
+          break;
+        }
+
+        case GitStatusEntryState.stage3FileMode: {
+          (currentObject as IUnmergedGitStatusEntry).stage3FileMode = getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.worktreeFileMode;
+          break;
+        }
+
+        case GitStatusEntryState.worktreeFileMode: {
+          (currentObject as IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry).worktreeFileMode =
+            getFieldAndAdvancePos(' ');
+
+          if (isUnmerged) {
+            state = GitStatusEntryState.stage1ObjectName;
+          } else {
+            state = GitStatusEntryState.headObjectName;
+          }
+
+          break;
+        }
+
+        case GitStatusEntryState.headObjectName: {
+          (currentObject as IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry).headObjectName =
+            getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.indexObjectName;
+          break;
+        }
+
+        case GitStatusEntryState.indexObjectName: {
+          (currentObject as IChangedGitStatusEntry | IRenamedOrCopiedGitStatusEntry).indexObjectName =
+            getFieldAndAdvancePos(' ');
+          if (isRenamedOrCopied) {
+            state = GitStatusEntryState.renameOrCopyScore;
+          } else {
+            state = GitStatusEntryState.path;
+          }
+          break;
+        }
+
+        case GitStatusEntryState.stage1ObjectName: {
+          (currentObject as IUnmergedGitStatusEntry).stage1ObjectName = getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.stage2ObjectName;
+          break;
+        }
+
+        case GitStatusEntryState.stage2ObjectName: {
+          (currentObject as IUnmergedGitStatusEntry).stage2ObjectName = getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.stage3ObjectName;
+          break;
+        }
+
+        case GitStatusEntryState.stage3ObjectName: {
+          (currentObject as IUnmergedGitStatusEntry).stage3ObjectName = getFieldAndAdvancePos(' ');
+          state = GitStatusEntryState.path;
+          break;
+        }
+
+        case GitStatusEntryState.renameOrCopyScore: {
+          const typedCurrentObject: IRenamedOrCopiedGitStatusEntry =
+            currentObject as IRenamedOrCopiedGitStatusEntry;
+
+          const renameOrCopyScoreField: string = getFieldAndAdvancePos(' ');
+          const renameOrCopyMode: string = renameOrCopyScoreField.charAt(0);
+          if (renameOrCopyMode === 'R') {
+            typedCurrentObject.kind = 'renamed';
+          } else if (renameOrCopyMode === 'C') {
+            typedCurrentObject.kind = 'copied';
+          } else {
+            throw new Error(`Unexpected rename or copy mode: ${renameOrCopyMode}`);
+          }
+
+          const rawRenameOrCopyScore: string = renameOrCopyScoreField.substring(1);
+          typedCurrentObject.renameOrCopyScore = parseInt(rawRenameOrCopyScore, 10);
+          state = GitStatusEntryState.path;
+          break;
+        }
+
+        case GitStatusEntryState.path: {
+          currentObject.path = getFieldAndAdvancePos('\0');
+          if (isRenamedOrCopied) {
+            (currentObject as IRenamedOrCopiedGitStatusEntry).originalPath = getFieldAndAdvancePos('\0');
+          }
+
+          emitAndReset();
+
+          if (pos >= output.length) {
+            state = undefined;
+          } else {
+            state = GitStatusEntryState.mode;
+          }
+
+          break;
+        }
+      }
+    }
+
+    return entries;
   }
 
   /**
@@ -495,23 +840,6 @@ export class Git {
     return this._gitHooksPath;
   }
 
-  private _getUntrackedChanges(): string[] {
-    const gitPath: string = this.getGitPathOrThrow();
-    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
-      'ls-files',
-      '--exclude-standard',
-      '--others'
-    ]);
-    return output.trim().split('\n');
-  }
-
-  private _getDiffOnHEAD(): string[] {
-    const gitPath: string = this.getGitPathOrThrow();
-
-    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['diff', 'HEAD', '--name-only']);
-    return output.trim().split('\n');
-  }
-
   private _tryFetchRemoteBranch(remoteBranchName: string): boolean {
     const firstSlashIndex: number = remoteBranchName.indexOf('/');
     if (firstSlashIndex === -1) {
@@ -544,7 +872,46 @@ export class Git {
     }
   }
 
-  private _executeGitCommandAndCaptureOutput(
+  private _parseGitStatusChangeType(str: string): GitStatusChangeType | undefined {
+    switch (str) {
+      case 'M': {
+        return 'modified';
+      }
+
+      case 'T': {
+        return 'type-changed';
+      }
+
+      case 'A': {
+        return 'added';
+      }
+
+      case 'D': {
+        return 'deleted';
+      }
+
+      case 'R': {
+        return 'renamed';
+      }
+
+      case 'C': {
+        return 'copied';
+      }
+
+      case '.': {
+        return undefined;
+      }
+
+      default: {
+        throw new Error(`Unexpected git status change type: ${str}`);
+      }
+    }
+  }
+
+  /**
+   * @internal
+   */
+  public _executeGitCommandAndCaptureOutput(
     gitPath: string,
     args: string[],
     repositoryRoot: string = this._rushConfiguration.rushJsonFolder
