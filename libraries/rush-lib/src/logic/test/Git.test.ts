@@ -35,7 +35,7 @@ describe(Git.name, () => {
   });
 
   describe(Git.prototype.getGitStatus.name, () => {
-    function getGitStatusEntriesForCommandOutput(outputSections: string[]): ReadonlyArray<IGitStatusEntry> {
+    function getGitStatusEntriesForCommandOutput(outputSections: string[]): IGitStatusEntry[] {
       const gitInstance: Git = new Git({ rushJsonFolder: '/repo/root' } as RushConfiguration);
       jest.spyOn(gitInstance, 'getGitPathOrThrow').mockReturnValue('/git/bin/path');
       jest
@@ -46,7 +46,7 @@ describe(Git.name, () => {
           return outputSections.join('\0');
         });
 
-      return gitInstance.getGitStatus();
+      return Array.from(gitInstance.getGitStatus());
     }
 
     it('parses a git status', () => {

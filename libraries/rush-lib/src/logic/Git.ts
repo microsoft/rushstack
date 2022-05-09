@@ -425,7 +425,7 @@ export class Git {
   }
 
   public hasUncommittedChanges(): boolean {
-    const gitStatusEntries: ReadonlyArray<IGitStatusEntry> = this.getGitStatus();
+    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
     for (const gitStatusEntry of gitStatusEntries) {
       if (gitStatusEntry.kind !== 'ignored') {
         return true;
@@ -436,7 +436,7 @@ export class Git {
   }
 
   public hasUnstagedChanges(): boolean {
-    const gitStatusEntries: ReadonlyArray<IGitStatusEntry> = this.getGitStatus();
+    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
     for (const gitStatusEntry of gitStatusEntries) {
       if (
         gitStatusEntry.kind === 'untracked' ||
@@ -454,7 +454,7 @@ export class Git {
    */
   public getUncommittedChanges(): ReadonlyArray<string> {
     const result: string[] = [];
-    const gitStatusEntries: ReadonlyArray<IGitStatusEntry> = this.getGitStatus();
+    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
     for (const gitStatusEntry of gitStatusEntries) {
       if (gitStatusEntry.kind !== 'ignored') {
         result.push(gitStatusEntry.path);
@@ -468,7 +468,7 @@ export class Git {
     return this._rushConfiguration.gitTagSeparator || DEFAULT_GIT_TAG_SEPARATOR;
   }
 
-  public getGitStatus(): ReadonlyArray<IGitStatusEntry> {
+  public *getGitStatus(): Iterable<IGitStatusEntry> {
     const gitPath: string = this.getGitPathOrThrow();
     // See Git.test.ts for example output
     const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
@@ -476,8 +476,6 @@ export class Git {
       '--porcelain=2',
       '--null'
     ]);
-
-    const entries: IGitStatusEntry[] = [];
 
     // State machine for parsing a git status entry
     // See reference https://git-scm.com/docs/git-status?msclkid=1cff552bcdce11ecadf77a086eded66c#_porcelain_format_version_2
@@ -507,12 +505,6 @@ export class Git {
     let isRenamedOrCopied: boolean = false;
     let isUnmerged: boolean = false;
     let currentObject: Partial<IGitStatusEntry> = {};
-    function emitAndReset(): void {
-      entries.push(currentObject as IGitStatusEntry);
-      isRenamedOrCopied = false;
-      isUnmerged = false;
-      currentObject = {};
-    }
 
     function getFieldAndAdvancePos(delimiter: string): string {
       const newPos: number = output.indexOf(delimiter, pos);
@@ -717,7 +709,10 @@ export class Git {
             (currentObject as IRenamedOrCopiedGitStatusEntry).originalPath = getFieldAndAdvancePos('\0');
           }
 
-          emitAndReset();
+          yield currentObject as IGitStatusEntry;
+          isRenamedOrCopied = false;
+          isUnmerged = false;
+          currentObject = {};
 
           if (pos >= output.length) {
             state = undefined;
@@ -729,8 +724,6 @@ export class Git {
         }
       }
     }
-
-    return entries;
   }
 
   /**
