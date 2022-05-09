@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix handling of erroneous undefined values when printing `rush list --detailed`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
