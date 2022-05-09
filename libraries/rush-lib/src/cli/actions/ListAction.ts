@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleTerminalProvider, Import, Sort, Terminal } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Sort, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -10,38 +10,40 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 
-const cliTable: typeof import('cli-table') = Import.lazy('cli-table', require);
-
 /**
  * Shape of "rush list --json" output.
  *
  * It contains parts (with different names) coming from
- * {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson | IRushConfigurationProjectJson}.
+ * {@link ../../api/RushConfigurationProject#RushConfigurationProject | RushConfigurationProject}.
  */
 export interface IJsonEntry {
   name: string;
   version: string;
   /**
-   * @see {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson.publishFolder | IRushConfigurationProjectJson.publishFolder}
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.publishFolder | RushConfigurationProject.publishFolder}
    */
   path: string;
   fullPath: string;
   /**
-   * @see {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson.versionPolicyName | IRushConfigurationProjectJson.versionPolicyName}
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.versionPolicyName | RushConfigurationProject.versionPolicyName}
    */
-  versionPolicyName?: string;
+  versionPolicyName: string | undefined;
   /**
    * @see {@link ../../api/VersionPolicy#VersionPolicyDefinitionName | VersionPolicyDefinitionName}
    */
-  versionPolicy?: string;
+  versionPolicy: string | undefined;
   /**
-   * @see {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson.shouldPublish | IRushConfigurationProjectJson.shouldPublish}
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.shouldPublish | RushConfigurationProject.shouldPublish}
    */
-  shouldPublish?: boolean;
+  shouldPublish: boolean | undefined;
   /**
-   * @see {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson.reviewCategory | IRushConfigurationProjectJson.reviewCategory}
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.reviewCategory | RushConfigurationProject.reviewCategory}
    */
-  reviewCategory?: string;
+  reviewCategory: string | undefined;
+  /**
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.tags | RushConfigurationProject.tags}
+   */
+  tags: string[];
 }
 
 export interface IJsonOutput {
@@ -99,7 +101,7 @@ export class ListAction extends BaseRushAction {
         'For the non --json view, if this flag is specified, ' +
         'include path (-p), version (-v) columns along with ' +
         "the project's applicable: versionPolicy, versionPolicyName, " +
-        'shouldPublish, and reviewPolicy fields.'
+        'shouldPublish, reviewPolicy, and tags fields.'
     });
 
     this._jsonFlag = this.defineFlagParameter({
@@ -128,7 +130,7 @@ export class ListAction extends BaseRushAction {
     if (this._jsonFlag.value) {
       this._printJson(selection);
     } else if (this._version.value || this._path.value || this._fullPath.value || this._detailedFlag.value) {
-      this._printListTable(selection);
+      await this._printListTableAsync(selection);
     } else {
       this._printList(selection);
     }
@@ -158,7 +160,8 @@ export class ListAction extends BaseRushAction {
         versionPolicy,
         versionPolicyName,
         shouldPublish,
-        reviewCategory
+        reviewCategory,
+        tags: Array.from(config.tags)
       };
     });
 
@@ -174,7 +177,7 @@ export class ListAction extends BaseRushAction {
     }
   }
 
-  private _printListTable(selection: Set<RushConfigurationProject>): void {
+  private async _printListTableAsync(selection: Set<RushConfigurationProject>): Promise<void> {
     const tableHeader: string[] = ['Project'];
     if (this._version.value || this._detailedFlag.value) {
       tableHeader.push('Version');
@@ -190,10 +193,11 @@ export class ListAction extends BaseRushAction {
       tableHeader.push('Version policy name');
       tableHeader.push('Should publish');
       tableHeader.push('Review category');
+      tableHeader.push('Tags');
     }
 
-    // eslint-disable-next-line @typescript-eslint/typedef
-    const table = new cliTable({
+    const { default: CliTable } = await import('cli-table');
+    const table: import('cli-table') = new CliTable({
       head: tableHeader
     });
 
@@ -229,6 +233,7 @@ export class ListAction extends BaseRushAction {
         packageRow.push(versionPolicyName);
         packageRow.push(shouldPublish);
         packageRow.push(reviewCategory);
+        packageRow.push(Array.from(project.tags).join(', '));
       }
       table.push(packageRow);
     }
