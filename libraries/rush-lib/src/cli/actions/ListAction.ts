@@ -16,32 +16,36 @@ const cliTable: typeof import('cli-table') = Import.lazy('cli-table', require);
  * Shape of "rush list --json" output.
  *
  * It contains parts (with different names) coming from
- * {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson | IRushConfigurationProjectJson}.
+ * {@link ../../api/RushConfigurationProject#RushConfigurationProject | RushConfigurationProject}.
  */
 export interface IJsonEntry {
   name: string;
   version: string;
   /**
-   * @see {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson.publishFolder | IRushConfigurationProjectJson.publishFolder}
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.publishFolder | RushConfigurationProject.publishFolder}
    */
   path: string;
   fullPath: string;
   /**
-   * @see {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson.versionPolicyName | IRushConfigurationProjectJson.versionPolicyName}
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.versionPolicyName | RushConfigurationProject.versionPolicyName}
    */
-  versionPolicyName?: string;
+  versionPolicyName: string | undefined;
   /**
    * @see {@link ../../api/VersionPolicy#VersionPolicyDefinitionName | VersionPolicyDefinitionName}
    */
-  versionPolicy?: string;
+  versionPolicy: string | undefined;
   /**
-   * @see {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson.shouldPublish | IRushConfigurationProjectJson.shouldPublish}
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.shouldPublish | RushConfigurationProject.shouldPublish}
    */
-  shouldPublish?: boolean;
+  shouldPublish: boolean | undefined;
   /**
-   * @see {@link ../../api/RushConfigurationProject#IRushConfigurationProjectJson.reviewCategory | IRushConfigurationProjectJson.reviewCategory}
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.reviewCategory | RushConfigurationProject.reviewCategory}
    */
-  reviewCategory?: string;
+  reviewCategory: string | undefined;
+  /**
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.tags | RushConfigurationProject.tags}
+   */
+  tags: string[];
 }
 
 export interface IJsonOutput {
@@ -99,7 +103,7 @@ export class ListAction extends BaseRushAction {
         'For the non --json view, if this flag is specified, ' +
         'include path (-p), version (-v) columns along with ' +
         "the project's applicable: versionPolicy, versionPolicyName, " +
-        'shouldPublish, and reviewPolicy fields.'
+        'shouldPublish, reviewPolicy, and tags fields.'
     });
 
     this._jsonFlag = this.defineFlagParameter({
@@ -158,7 +162,8 @@ export class ListAction extends BaseRushAction {
         versionPolicy,
         versionPolicyName,
         shouldPublish,
-        reviewCategory
+        reviewCategory,
+        tags: Array.from(config.tags)
       };
     });
 
@@ -190,6 +195,7 @@ export class ListAction extends BaseRushAction {
       tableHeader.push('Version policy name');
       tableHeader.push('Should publish');
       tableHeader.push('Review category');
+      tableHeader.push('Tags');
     }
 
     // eslint-disable-next-line @typescript-eslint/typedef
@@ -229,6 +235,7 @@ export class ListAction extends BaseRushAction {
         packageRow.push(versionPolicyName);
         packageRow.push(shouldPublish);
         packageRow.push(reviewCategory);
+        packageRow.push(Array.from(project.tags).join(', '));
       }
       table.push(packageRow);
     }
