@@ -69,6 +69,7 @@ describe(Git.name, () => {
           '? path/g.ts',
           // Unstaged unresolved merge conflict
           'u .M N... 100644 100644 100644 100644 07b1571a387db3072be485e6cc5591fef35bf666 63f37aa0393e142e2c8329593eb0f78e4cc77032 ebac91ffe8227e6e9b99d9816ce0a6d166b4a524 path/unmerged.ts',
+          '1 AM N... 000000 100644 100644 0000000000000000000000000000000000000000 9d9ab4adc79c591c0aa72f7fd29a008c80893e3e path/h.ts',
           ''
         ])
       ).toMatchInlineSnapshot(`
@@ -160,6 +161,18 @@ describe(Git.name, () => {
             "kind": "unmerged",
             "path": "63f37aa0393e142e2c8329593eb0f78e4cc77032 ebac91ffe8227e6e9b99d9816ce0a6d166b4a524 path/unmerged.ts",
             "stagedChangeType": undefined,
+            "unstagedChangeType": "modified",
+            "worktreeFileMode": "100644",
+          },
+          Object {
+            "headFileMode": "000000",
+            "headObjectName": "0000000000000000000000000000000000000000",
+            "indexFileMode": "100644",
+            "indexObjectName": "9d9ab4adc79c591c0aa72f7fd29a008c80893e3e",
+            "isInSubmodule": false,
+            "kind": "changed",
+            "path": "path/h.ts",
+            "stagedChangeType": "added",
             "unstagedChangeType": "modified",
             "worktreeFileMode": "100644",
           },
