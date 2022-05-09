@@ -202,15 +202,21 @@ export class ListAction extends BaseRushAction {
     });
 
     for (const project of selection) {
-      const packageRow: string[] = [project.packageName];
+      const packageRow: string[] = [];
+      function appendToPackageRow(value: string): void {
+        packageRow.push(value === undefined ? 'UNDEFINED' : value);
+      }
+
+      appendToPackageRow(project.packageName);
+
       if (this._version.value || this._detailedFlag.value) {
-        packageRow.push(project.packageJson.version);
+        appendToPackageRow(project.packageJson.version);
       }
       if (this._path.value || this._detailedFlag.value) {
-        packageRow.push(project.projectRelativeFolder);
+        appendToPackageRow(project.projectRelativeFolder);
       }
       if (this._fullPath.value) {
-        packageRow.push(project.projectFolder);
+        appendToPackageRow(project.projectFolder);
       }
       if (this._detailedFlag.value) {
         // When we HAVE a version policy
@@ -229,12 +235,13 @@ export class ListAction extends BaseRushAction {
         if (project.reviewCategory) {
           reviewCategory = project.reviewCategory;
         }
-        packageRow.push(versionPolicyDefinitionName);
-        packageRow.push(versionPolicyName);
-        packageRow.push(shouldPublish);
-        packageRow.push(reviewCategory);
-        packageRow.push(Array.from(project.tags).join(', '));
+        appendToPackageRow(versionPolicyDefinitionName);
+        appendToPackageRow(versionPolicyName);
+        appendToPackageRow(shouldPublish);
+        appendToPackageRow(reviewCategory);
+        appendToPackageRow(Array.from(project.tags).join(', '));
       }
+
       table.push(packageRow);
     }
     console.log(table.toString());
