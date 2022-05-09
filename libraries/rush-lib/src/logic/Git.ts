@@ -474,7 +474,7 @@ export class Git {
     // State machine for parsing a git status entry
     // See reference https://git-scm.com/docs/git-status?msclkid=1cff552bcdce11ecadf77a086eded66c#_porcelain_format_version_2
 
-    const enum GitStatusEntryState {
+    enum GitStatusEntryState {
       mode,
       changeType,
       headFileMode,
