@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix handing of the `strictPeerDependencies` option when using PNPM >= 7.0.0.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
