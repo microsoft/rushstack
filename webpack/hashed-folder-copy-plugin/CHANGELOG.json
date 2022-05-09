@@ -2,6 +2,18 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.1",
+      "date": "Mon, 09 May 2022 15:13:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a link in the README."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.0",
       "date": "Fri, 06 May 2022 18:54:42 GMT",
