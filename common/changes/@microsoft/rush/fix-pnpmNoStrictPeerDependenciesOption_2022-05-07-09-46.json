@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Incorporate the fact that --strict-peer-dependencies is now true by default in PNPM >= 7.0.0.",
+      "comment": "Fix handing of the `strictPeerDependencies` option when using PNPM >= 7.0.0.",
       "type": "none"
     }
   ],

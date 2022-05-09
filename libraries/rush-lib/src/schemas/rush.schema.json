@@ -92,7 +92,7 @@
           "enum": ["local", "global"]
         },
         "strictPeerDependencies": {
-          "description": "If true, then the installation will fail if there is a missing or invalid peer dependency in the tree. The default is the default of PNPM. Note that the default of PNPM changed in version 7 of PNPM. For PNPM version < 7.0.0, the default was false and for PNPM >= 7.0.0 the default is true. If strictPeerDependency is set to true, then Rush will add the \"--strict-peer-dependencies\" option when invoking PNPM version < 7.0.0. If strictPeerDependency is set to false, then Rush will add the \"--no-strict-peer-dependencies\" option when invoking PNPM version < 7.0.0.",
+          "description": "If true, then the installation will fail if there is a missing or invalid peer dependency in the tree, which is an invalid state that can cause build failures or incompatible dependency versions. (For historical reasons, JavaScript package managers generally do not treat this invalid state as an error.) This is done via the \"--strict-peer-dependencies\" flag in PNPM version < 7.0.0 and via the \"--no-strict-peer-dependencies\" flag in PNPM >= 7.0.0. The default value is false.",
           "type": "boolean"
         },
         "resolutionStrategy": {
