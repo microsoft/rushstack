@@ -249,6 +249,48 @@ describe(Async.name, () => {
       ).rejects.toThrow(expectedError);
     });
 
+    it('does not exceed the maxiumum concurrency for an async iterator', async () => {
+      let waitingIterators: number = 0;
+
+      let resolve2!: (value: { done: true; value: undefined }) => void;
+      const signal2: Promise<{ done: true; value: undefined }> = new Promise((resolve, reject) => {
+        resolve2 = resolve;
+      });
+
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          iteratorIndex++;
+          if (iteratorIndex < 20) {
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            ++waitingIterators;
+            return signal2;
+          }
+        }
+      };
+      const asyncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      const expectedConcurrency: 4 = 4;
+      const finalPromise: Promise<void> = Async.forEachAsync(
+        asyncIterable,
+        async (item) => {
+          // Do nothing
+        },
+        {
+          concurrency: expectedConcurrency
+        }
+      );
+
+      // Wait for all the instant resolutions to be done
+      await Async.sleep(1);
+      expect(waitingIterators).toEqual(expectedConcurrency);
+      resolve2({ done: true, value: undefined });
+      await finalPromise;
+    });
+
     it('rejects if an async iterator rejects', async () => {
       const expectedError: Error = new Error('iterator error');
       let iteratorIndex: number = 0;
