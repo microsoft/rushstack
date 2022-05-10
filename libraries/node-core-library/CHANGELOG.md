@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 23 Apr 2022 02:13:07 GMT and should not be manually modified.
+This log was last generated on Tue, 10 May 2022 01:20:43 GMT and should not be manually modified.
+
+## 3.45.5
+Tue, 10 May 2022 01:20:43 GMT
+
+### Patches
+
+- Fix and issue where Async.forEachAsync with an async iterator can overflow the max concurrency
 
 ## 3.45.4
 Sat, 23 Apr 2022 02:13:07 GMT
