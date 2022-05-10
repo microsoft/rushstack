@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 06 May 2022 18:54:55 GMT and should not be manually modified.
+This log was last generated on Tue, 10 May 2022 01:20:58 GMT and should not be manually modified.
+
+## 5.69.0
+Tue, 10 May 2022 01:20:58 GMT
+
+### Updates
+
+- Fix handling of erroneous undefined values when printing `rush list --detailed`
+- Update watcher to only schedule operations impacted by the detected change. A behavior difference will only be observed for repositories that define a phase with no dependencies.
+- Fix handing of the `strictPeerDependencies` option when using PNPM >= 7.0.0.
+- Update the `postRushInstall` hook to always run, and move its execution to after telemetry is written.
+- (BREAKING CHANGE) Remove the "xstitchPreferredVersions" property from common-versions.json and the CommonVersionsConfiguration API.
+- Correct a warning that is printed during "rush change" to only be concerned with unstaged changes.
+- Include tags in the `rush list` output.
 
 ## 5.68.2
 Fri, 06 May 2022 18:54:55 GMT

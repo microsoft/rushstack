@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.69.0",
+      "tag": "@microsoft/rush_v5.69.0",
+      "date": "Tue, 10 May 2022 01:20:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix handling of erroneous undefined values when printing `rush list --detailed`"
+          },
+          {
+            "comment": "Update watcher to only schedule operations impacted by the detected change. A behavior difference will only be observed for repositories that define a phase with no dependencies."
+          },
+          {
+            "comment": "Fix handing of the `strictPeerDependencies` option when using PNPM >= 7.0.0."
+          },
+          {
+            "comment": "Update the `postRushInstall` hook to always run, and move its execution to after telemetry is written."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the \"xstitchPreferredVersions\" property from common-versions.json and the CommonVersionsConfiguration API."
+          },
+          {
+            "comment": "Correct a warning that is printed during \"rush change\" to only be concerned with unstaged changes."
+          },
+          {
+            "comment": "Include tags in the `rush list` output."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.68.2",
       "tag": "@microsoft/rush_v5.68.2",
       "date": "Fri, 06 May 2022 18:54:55 GMT",
