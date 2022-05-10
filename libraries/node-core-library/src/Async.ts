@@ -100,12 +100,14 @@ export class Async {
 
       async function queueOperationsAsync(): Promise<void> {
         while (operationsInProgress < concurrency && !iteratorIsComplete && !promiseHasResolvedOrRejected) {
+          // Increment the concurrency while waiting for the iterator.
+          // This function is reentrant, so this ensures that at most `concurrency` executions are waiting
+          operationsInProgress++;
           const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
           // eslint-disable-next-line require-atomic-updates
           iteratorIsComplete = !!currentIteratorResult.done;
 
           if (!iteratorIsComplete) {
-            operationsInProgress++;
             Promise.resolve(callback(currentIteratorResult.value, arrayIndex++))
               .then(async () => {
                 operationsInProgress--;
@@ -115,6 +117,9 @@ export class Async {
                 promiseHasResolvedOrRejected = true;
                 reject(error);
               });
+          } else {
+            // The iterator is complete and there wasn't a value, so untrack the waiting state.
+            operationsInProgress--;
           }
         }
 
