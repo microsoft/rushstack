@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { Git, IGitStatusEntry } from '../Git';
+import { Git } from '../Git';
+import { IGitStatusEntry } from '../GitStatusParser';
 
 describe(Git.name, () => {
   describe(Git.normalizeGitUrlForComparison.name, () => {
@@ -180,6 +181,12 @@ describe(Git.name, () => {
           },
         ]
       `);
+    });
+
+    it('throws with invalid git output', () => {
+      expect(() =>
+        getGitStatusEntriesForCommandOutput(['1 A. N... 000000 100644 100644 000000000000000000'])
+      ).toThrowErrorMatchingInlineSnapshot(`"Unexpected end of git status output after position 31"`);
     });
   });
 });
