@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Introduce rush upgrade-interactive",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

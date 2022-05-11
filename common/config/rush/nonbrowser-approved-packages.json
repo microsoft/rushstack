@@ -571,6 +571,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "npm-check",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "npm-package-arg",
       "allowedCategories": [ "libraries" ]
     },
@@ -673,6 +677,10 @@
     {
       "name": "terser-webpack-plugin",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "text-table",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "timsort",

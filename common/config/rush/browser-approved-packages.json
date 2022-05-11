@@ -11,12 +11,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "npm-check",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "react-dom",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "run-async",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tslib",
