@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 10 May 2022 01:20:58 GMT and should not be manually modified.
+This log was last generated on Wed, 11 May 2022 22:21:40 GMT and should not be manually modified.
+
+## 5.70.0
+Wed, 11 May 2022 22:21:40 GMT
+
+### Updates
+
+- Add a new `afterExecuteOperations` hook to phased command execution. This hook is used for the console timeline view and the standard result summary.
 
 ## 5.69.0
 Tue, 10 May 2022 01:20:58 GMT

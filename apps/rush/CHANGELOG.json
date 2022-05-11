@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.70.0",
+      "tag": "@microsoft/rush_v5.70.0",
+      "date": "Wed, 11 May 2022 22:21:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new `afterExecuteOperations` hook to phased command execution. This hook is used for the console timeline view and the standard result summary."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.69.0",
       "tag": "@microsoft/rush_v5.69.0",
       "date": "Tue, 10 May 2022 01:20:58 GMT",
