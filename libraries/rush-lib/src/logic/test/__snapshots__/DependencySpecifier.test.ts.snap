@@ -1,0 +1,134 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DependencySpecifier parses correctly 1`] = `
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "foo",
+  "specifierType": "Tag",
+  "versionSpecifier": "",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: * 1`] = `
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "foo",
+  "specifierType": "Range",
+  "versionSpecifier": "*",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: ^0 1`] = `
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "foo",
+  "specifierType": "Range",
+  "versionSpecifier": "^0",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: ^1.2.3 1`] = `
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "foo",
+  "specifierType": "Range",
+  "versionSpecifier": "^1.2.3",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: ~24.42.1 1`] = `
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "foo",
+  "specifierType": "Range",
+  "versionSpecifier": "~24.42.1",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: 3 1`] = `
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "foo",
+  "specifierType": "Range",
+  "versionSpecifier": "3",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: npm:@rushstack/heft@3.2.4 1`] = `
+DependencySpecifier {
+  "aliasTarget": DependencySpecifier {
+    "aliasTarget": undefined,
+    "packageName": "@rushstack/heft",
+    "specifierType": "Version",
+    "versionSpecifier": "3.2.4",
+  },
+  "packageName": "foo",
+  "specifierType": "Alias",
+  "versionSpecifier": "npm:@rushstack/heft@3.2.4",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: npm:bar@ 1`] = `
+DependencySpecifier {
+  "aliasTarget": DependencySpecifier {
+    "aliasTarget": undefined,
+    "packageName": "bar",
+    "specifierType": "Tag",
+    "versionSpecifier": "",
+  },
+  "packageName": "foo",
+  "specifierType": "Alias",
+  "versionSpecifier": "npm:bar@",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: npm:foo@^3.2.1 1`] = `
+DependencySpecifier {
+  "aliasTarget": DependencySpecifier {
+    "aliasTarget": undefined,
+    "packageName": "foo",
+    "specifierType": "Range",
+    "versionSpecifier": "^3.2.1",
+  },
+  "packageName": "foo",
+  "specifierType": "Alias",
+  "versionSpecifier": "npm:foo@^3.2.1",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: workspace:* 1`] = `
+DependencySpecifier {
+  "aliasTarget": undefined,
+  "packageName": "foo",
+  "specifierType": "Workspace",
+  "versionSpecifier": "*",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: workspace:@rushstack/heft@3.2.4 1`] = `
+DependencySpecifier {
+  "aliasTarget": DependencySpecifier {
+    "aliasTarget": undefined,
+    "packageName": "@rushstack/heft",
+    "specifierType": "Workspace",
+    "versionSpecifier": "3.2.4",
+  },
+  "packageName": "foo",
+  "specifierType": "Workspace",
+  "versionSpecifier": "workspace:@rushstack/heft@3.2.4",
+}
+`;
+
+exports[`DependencySpecifier parses correctly: workspace:foo@^3.2.1 1`] = `
+DependencySpecifier {
+  "aliasTarget": DependencySpecifier {
+    "aliasTarget": undefined,
+    "packageName": "foo",
+    "specifierType": "Workspace",
+    "versionSpecifier": "^3.2.1",
+  },
+  "packageName": "foo",
+  "specifierType": "Workspace",
+  "versionSpecifier": "workspace:foo@^3.2.1",
+}
+`;
