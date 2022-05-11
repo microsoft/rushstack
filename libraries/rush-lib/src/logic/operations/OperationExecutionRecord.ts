@@ -6,7 +6,6 @@ import { InternalError } from '@rushstack/node-core-library';
 import { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus } from './OperationStatus';
-import { OperationError } from './OperationError';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -34,7 +33,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    * The error which occurred while executing this operation, this is stored in case we need
    * it later (for example to re-print errors at end of execution).
    */
-  public error: OperationError | undefined = undefined;
+  public error: Error | undefined = undefined;
 
   /**
    * This number represents how far away this Operation is from the furthest "root" operation (i.e.
@@ -130,7 +129,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       onResult(this);
     } catch (error) {
       this.status = OperationStatus.Failure;
-      this.error = error as OperationError;
+      this.error = error;
       // Delegate global state reporting
       onResult(this);
     } finally {

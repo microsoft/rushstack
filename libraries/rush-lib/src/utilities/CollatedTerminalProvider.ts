@@ -3,6 +3,7 @@
 
 import { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
+import { TerminalChunkKind } from '@rushstack/terminal';
 
 export interface ICollatedTerminalProviderOptions {
   debugEnabled: boolean;
@@ -40,7 +41,7 @@ export class CollatedTerminalProvider implements ITerminalProvider {
         // Unlike the basic ConsoleTerminalProvider, verbose messages are always passed
         // to stdout -- by convention the user-controlled build script output is sent
         // to verbose, and will be routed to a variety of other providers in the ProjectBuilder.
-        this._collatedTerminal.writeStdoutLine(data);
+        this._collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stdout });
         break;
       }
 
@@ -48,19 +49,19 @@ export class CollatedTerminalProvider implements ITerminalProvider {
         // Similar to the basic ConsoleTerminalProvider, debug messages are discarded
         // unless they are explicitly enabled.
         if (this._debugEnabled) {
-          this._collatedTerminal.writeStdoutLine(data);
+          this._collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stdout });
         }
         break;
       }
 
       case TerminalProviderSeverity.error: {
-        this._collatedTerminal.writeStderrLine(data);
+        this._collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stderr });
         this._hasErrors = true;
         break;
       }
 
       case TerminalProviderSeverity.warning: {
-        this._collatedTerminal.writeStderrLine(data);
+        this._collatedTerminal.writeChunk({ text: data, kind: TerminalChunkKind.Stderr });
         this._hasWarnings = true;
         break;
       }

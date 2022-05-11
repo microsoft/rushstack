@@ -287,6 +287,12 @@ export interface IEnvironmentConfigurationInitializeOptions {
     doNotNormalizePaths?: boolean;
 }
 
+// @alpha
+export interface IExecutionResult {
+    readonly operationResults: ReadonlyMap<Operation, IOperationExecutionResult>;
+    readonly status: OperationStatus;
+}
+
 // @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
@@ -358,6 +364,14 @@ export class IndividualVersionPolicy extends VersionPolicy {
 
 // @internal
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
+}
+
+// @alpha
+export interface IOperationExecutionResult {
+    readonly error: Error | undefined;
+    readonly status: OperationStatus;
+    readonly stdioSummarizer: StdioSummarizer;
+    readonly stopwatch: IStopwatchResult;
 }
 
 // @alpha
@@ -444,6 +458,14 @@ export interface IRushSessionOptions {
     getIsDebugMode: () => boolean;
     // (undocumented)
     terminalProvider: ITerminalProvider;
+}
+
+// @alpha
+export interface IStopwatchResult {
+    get duration(): number;
+    get endTime(): number | undefined;
+    get startTime(): number | undefined;
+    toString(): string;
 }
 
 // @beta (undocumented)
@@ -605,6 +627,7 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 
 // @alpha
 export class PhasedCommandHooks {
+    readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly waitingForChanges: SyncHook<void>;
 }
