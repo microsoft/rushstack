@@ -29,7 +29,8 @@ function createOperations(
   existingOperations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const { phaseSelection, projectSelection } = context;
+  const { projectsInUnknownState: changedProjects, phaseSelection, projectSelection } = context;
+  const operationsWithWork: Set<Operation> = new Set();
 
   const operations: Map<string, Operation> = new Map();
 
@@ -40,6 +41,25 @@ function createOperations(
     }
   }
 
+  // Recursively expand all consumers in the `operationsWithWork` set.
+  for (const operation of operationsWithWork) {
+    for (const consumer of operation.consumers) {
+      operationsWithWork.add(consumer);
+    }
+  }
+
+  for (const [key, operation] of operations) {
+    if (!operationsWithWork.has(operation)) {
+      // This operation is in scope, but did not change since it was last executed by the current command.
+      // However, we have no state tracking across executions, so treat as unknown.
+      operation.runner = new NullOperationRunner({
+        name: key,
+        result: OperationStatus.Skipped,
+        silent: true
+      });
+    }
+  }
+
   return existingOperations;
 
   // Binds phaseSelection, projectSelection, operations via closure
@@ -47,20 +67,22 @@ function createOperations(
     const key: string = getOperationKey(phase, project);
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
-      const isIncluded: boolean = phaseSelection.has(phase) && projectSelection.has(project);
-
       operation = new Operation({
         project,
-        phase,
-        // included operations will be initialized by later plugins
-        runner: isIncluded
-          ? undefined
-          : new NullOperationRunner({
-              name: key,
-              result: OperationStatus.Skipped,
-              silent: true
-            })
+        phase
       });
+
+      if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
+        // Not in scope. Mark skipped because state is unknown.
+        operation.runner = new NullOperationRunner({
+          name: key,
+          result: OperationStatus.Skipped,
+          silent: true
+        });
+      } else if (changedProjects.has(project)) {
+        operationsWithWork.add(operation);
+      }
+
       operations.set(key, operation);
       existingOperations.add(operation);
 
@@ -68,10 +90,8 @@ function createOperations(
         dependencies: { self, upstream }
       } = phase;
 
-      const { dependencies } = operation;
-
       for (const depPhase of self) {
-        dependencies.add(getOrCreateOperation(depPhase, project));
+        operation.addDependency(getOrCreateOperation(depPhase, project));
       }
 
       if (upstream.size) {
@@ -79,7 +99,7 @@ function createOperations(
         if (dependencyProjects.size) {
           for (const depPhase of upstream) {
             for (const dependencyProject of dependencyProjects) {
-              dependencies.add(getOrCreateOperation(depPhase, dependencyProject));
+              operation.addDependency(getOrCreateOperation(depPhase, dependencyProject));
             }
           }
         }

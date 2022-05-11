@@ -9,7 +9,6 @@ describe(CommonVersionsConfiguration.name, () => {
     const configuration: CommonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(filename);
 
     expect(configuration.preferredVersions.get('@scope/library-1')).toEqual('~3.2.1');
-    expect(configuration.xstitchPreferredVersions.get('library-2')).toEqual('1.2.3');
     expect(configuration.allowedAlternativeVersions.get('library-3')).toEqual(['^1.2.3']);
   });
 });

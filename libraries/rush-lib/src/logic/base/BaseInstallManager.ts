@@ -574,8 +574,16 @@ export abstract class BaseInstallManager {
         args.push('--network-concurrency', options.networkConcurrency.toString());
       }
 
-      if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
-        args.push('--strict-peer-dependencies');
+      if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '7.0.0')) {
+        // pnpm >= 7.0.0 handles peer dependencies strict by default
+        if (this._rushConfiguration.pnpmOptions.strictPeerDependencies === false) {
+          args.push('--no-strict-peer-dependencies');
+        }
+      } else {
+        // pnpm < 7.0.0 does not handle peer dependencies strict by default
+        if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
+          args.push('--strict-peer-dependencies');
+        }
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');

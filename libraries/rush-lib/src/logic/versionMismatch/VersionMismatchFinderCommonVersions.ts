@@ -56,11 +56,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
       );
     }
 
-    if (this._fileManager.xstitchPreferredVersions.has(packageName)) {
-      this._fileManager.xstitchPreferredVersions.set(packageName, newVersion);
-    } else {
-      this._fileManager.preferredVersions.set(packageName, newVersion);
-    }
+    this._fileManager.preferredVersions.set(packageName, newVersion);
   }
 
   public saveIfModified(): boolean {

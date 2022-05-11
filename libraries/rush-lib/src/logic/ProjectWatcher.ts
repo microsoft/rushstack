@@ -152,7 +152,6 @@ export class ProjectWatcher {
         };
 
         for (const pathToWatch of pathsToWatch) {
-          console.log(pathToWatch);
           addWatcher(pathToWatch);
         }
 

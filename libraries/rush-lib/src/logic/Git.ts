@@ -15,6 +15,7 @@ import { Utilities } from '../utilities/Utilities';
 import { GitEmailPolicy } from './policy/GitEmailPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
+import { IChangedGitStatusEntry, IGitStatusEntry, parseGitStatus } from './GitStatusParser';
 
 export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
 
@@ -368,24 +369,58 @@ export class Git {
   }
 
   public hasUncommittedChanges(): boolean {
-    return this.getUncommittedChanges().length > 0;
+    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const gitStatusEntry of gitStatusEntries) {
+      // If there are any changes, return true. We only need to evaluate the first iterator entry
+      return true;
+    }
+
+    return false;
+  }
+
+  public hasUnstagedChanges(): boolean {
+    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
+    for (const gitStatusEntry of gitStatusEntries) {
+      if (
+        gitStatusEntry.kind === 'untracked' ||
+        (gitStatusEntry as IChangedGitStatusEntry).unstagedChangeType !== undefined
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
    * The list of files changed but not committed
    */
   public getUncommittedChanges(): ReadonlyArray<string> {
-    const changes: string[] = [];
-    changes.push(...this._getUntrackedChanges());
-    changes.push(...this._getDiffOnHEAD());
+    const result: string[] = [];
+    const gitStatusEntries: Iterable<IGitStatusEntry> = this.getGitStatus();
+    for (const gitStatusEntry of gitStatusEntries) {
+      result.push(gitStatusEntry.path);
+    }
 
-    return changes.filter((change) => {
-      return change.trim().length > 0;
-    });
+    return result;
   }
 
   public getTagSeparator(): string {
     return this._rushConfiguration.gitTagSeparator || DEFAULT_GIT_TAG_SEPARATOR;
+  }
+
+  public getGitStatus(): Iterable<IGitStatusEntry> {
+    const gitPath: string = this.getGitPathOrThrow();
+    // See Git.test.ts for example output
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      'status',
+      '--porcelain=2',
+      '--null',
+      '--ignored=no'
+    ]);
+
+    return parseGitStatus(output);
   }
 
   /**
@@ -495,23 +530,6 @@ export class Git {
     return this._gitHooksPath;
   }
 
-  private _getUntrackedChanges(): string[] {
-    const gitPath: string = this.getGitPathOrThrow();
-    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
-      'ls-files',
-      '--exclude-standard',
-      '--others'
-    ]);
-    return output.trim().split('\n');
-  }
-
-  private _getDiffOnHEAD(): string[] {
-    const gitPath: string = this.getGitPathOrThrow();
-
-    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['diff', 'HEAD', '--name-only']);
-    return output.trim().split('\n');
-  }
-
   private _tryFetchRemoteBranch(remoteBranchName: string): boolean {
     const firstSlashIndex: number = remoteBranchName.indexOf('/');
     if (firstSlashIndex === -1) {
@@ -544,7 +562,10 @@ export class Git {
     }
   }
 
-  private _executeGitCommandAndCaptureOutput(
+  /**
+   * @internal
+   */
+  public _executeGitCommandAndCaptureOutput(
     gitPath: string,
     args: string[],
     repositoryRoot: string = this._rushConfiguration.rushJsonFolder

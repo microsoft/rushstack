@@ -92,7 +92,7 @@
           "enum": ["local", "global"]
         },
         "strictPeerDependencies": {
-          "description": "If true, then Rush will add the \"--strict-peer-dependencies\" option when invoking PNPM. This causes \"rush install\" to fail if there are unsatisfied peer dependencies, which is an invalid state that can cause build failures or incompatible dependency versions. (For historical reasons, JavaScript package managers generally do not treat this invalid state as an error.) The default value is false.",
+          "description": "If true, then the installation will fail if there is a missing or invalid peer dependency in the tree, which is an invalid state that can cause build failures or incompatible dependency versions. (For historical reasons, JavaScript package managers generally do not treat this invalid state as an error.) This is done via the \"--strict-peer-dependencies\" flag in PNPM version < 7.0.0 and via the \"--no-strict-peer-dependencies\" flag in PNPM >= 7.0.0. The default value is false.",
           "type": "boolean"
         },
         "resolutionStrategy": {
