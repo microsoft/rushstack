@@ -13,6 +13,10 @@ export interface IPnpmfileShimSettings {
   semverPath: string;
   allPreferredVersions: { [dependencyName: string]: string };
   allowedAlternativeVersions: { [dependencyName: string]: ReadonlyArray<string> };
+  /**
+   * The versions of all packages that are part of the workspace.
+   */
+  workspaceVersions: Record<string, string>;
   userPnpmfilePath?: string;
 }
 

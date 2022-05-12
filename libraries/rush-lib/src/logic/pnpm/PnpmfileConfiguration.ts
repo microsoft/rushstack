@@ -84,6 +84,7 @@ export class PnpmfileConfiguration {
   ): IPnpmfileShimSettings {
     let allPreferredVersions: { [dependencyName: string]: string } = {};
     let allowedAlternativeVersions: { [dependencyName: string]: readonly string[] } = {};
+    const workspaceVersions: Record<string, string> = {};
 
     // Only workspaces shims in the common versions using pnpmfile
     if ((rushConfiguration.packageManagerOptions as PnpmOptionsConfiguration).useWorkspaces) {
@@ -95,11 +96,16 @@ export class PnpmfileConfiguration {
       allowedAlternativeVersions = MapExtensions.toObject(
         commonVersionsConfiguration.allowedAlternativeVersions
       );
+
+      for (const project of rushConfiguration.projects) {
+        workspaceVersions[project.packageName] = project.packageJson.version;
+      }
     }
 
     const settings: IPnpmfileShimSettings = {
       allPreferredVersions,
       allowedAlternativeVersions,
+      workspaceVersions,
       semverPath: require.resolve('semver')
     };
 
