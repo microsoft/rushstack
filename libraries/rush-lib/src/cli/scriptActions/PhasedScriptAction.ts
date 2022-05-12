@@ -69,6 +69,21 @@ interface IExecutionOperationsOptions {
   terminal: Terminal;
 }
 
+interface IPhasedCommandTelemetry {
+  [key: string]: string | number | boolean;
+  isInitial: boolean;
+  isWatch: boolean;
+
+  countAll: number;
+  countSuccess: number;
+  countSuccessWithWarnings: number;
+  countFailure: number;
+  countBlocked: number;
+  countFromCache: number;
+  countSkipped: number;
+  countNoOp: number;
+}
+
 /**
  * This class implements phased commands which are run individually for each project in the repo,
  * possibly in parallel, and which may define multiple phases.
@@ -456,12 +471,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       executionManagerOptions
     );
 
-    const { isWatch } = options.createOperationsContext;
+    const { isInitial, isWatch } = options.createOperationsContext;
 
     let success: boolean = false;
+    let result: IExecutionResult | undefined;
 
     try {
-      const result: IExecutionResult = await executionManager.executeAsync();
+      result = await executionManager.executeAsync();
       success = result.status === OperationStatus.Success;
 
       await this.hooks.afterExecuteOperations.promise(result, options.createOperationsContext);
@@ -494,7 +510,73 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     if (!ignoreHooks) {
-      this._doAfterTask(stopwatch, success);
+      this._doAfterTask();
+    }
+
+    if (this.parser.telemetry) {
+      const extraData: IPhasedCommandTelemetry = {
+        // Fields preserved across the command invocation
+        ...this._selectionParameters.getTelemetry(),
+        ...this.getParameterStringMap(),
+        isWatch,
+        // Fields specific to the current operation set
+        isInitial,
+
+        countAll: 0,
+        countSuccess: 0,
+        countSuccessWithWarnings: 0,
+        countFailure: 0,
+        countBlocked: 0,
+        countFromCache: 0,
+        countSkipped: 0,
+        countNoOp: 0
+      };
+
+      if (result) {
+        for (const [operation, operationResult] of result.operationResults) {
+          if (operation.runner?.silent) {
+            // Architectural operation. Ignore.
+            continue;
+          }
+
+          extraData.countAll++;
+          switch (operationResult.status) {
+            case OperationStatus.Success:
+              extraData.countSuccess++;
+              break;
+            case OperationStatus.SuccessWithWarning:
+              extraData.countSuccessWithWarnings++;
+              break;
+            case OperationStatus.Failure:
+              extraData.countFailure++;
+              break;
+            case OperationStatus.Blocked:
+              extraData.countBlocked++;
+              break;
+            case OperationStatus.FromCache:
+              extraData.countFromCache++;
+              break;
+            case OperationStatus.Skipped:
+              extraData.countSkipped++;
+              break;
+            case OperationStatus.NoOp:
+              extraData.countNoOp++;
+              break;
+            default:
+              // Do nothing.
+              break;
+          }
+        }
+      }
+
+      this.parser.telemetry.log({
+        name: this.actionName,
+        durationInSeconds: stopwatch.duration,
+        result: success ? 'Succeeded' : 'Failed',
+        extraData
+      });
+
+      this.parser.flushTelemetry();
     }
 
     if (!success && !isWatch) {
@@ -516,7 +598,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
   }
 
-  private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
+  private _doAfterTask(): void {
     if (
       this.actionName !== RushConstants.buildCommandName &&
       this.actionName !== RushConstants.rebuildCommandName
@@ -524,24 +606,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       // Only collects information for built-in commands like build or rebuild.
       return;
     }
-    this._collectTelemetry(stopwatch, success);
-    this.parser.flushTelemetry();
     this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
-  }
-
-  private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    const extraData: Record<string, string> = {
-      ...this._selectionParameters.getTelemetry(),
-      ...this.getParameterStringMap()
-    };
-
-    if (this.parser.telemetry) {
-      this.parser.telemetry.log({
-        name: this.actionName,
-        durationInSeconds: stopwatch.duration,
-        result: success ? 'Succeeded' : 'Failed',
-        extraData
-      });
-    }
   }
 }

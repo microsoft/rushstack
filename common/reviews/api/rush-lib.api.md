@@ -473,7 +473,7 @@ export interface ITelemetryData {
     readonly durationInSeconds: number;
     // (undocumented)
     readonly extraData?: {
-        [key: string]: string;
+        [key: string]: string | number | boolean;
     };
     readonly name: string;
     readonly platform?: string;
