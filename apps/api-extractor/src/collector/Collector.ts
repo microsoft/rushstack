@@ -206,14 +206,17 @@ export class Collector {
 
     // We can throw this error earlier in CompilerState.ts, but intentionally wait until after we've logged the
     // associated diagnostic message above to make debugging easier for developers.
-    const badSourceFile: boolean = sourceFiles.some(
+    // Typically there will be many such files -- to avoid too much noise, only report the first one.
+    const badSourceFile: ts.SourceFile | undefined = sourceFiles.find(
       ({ fileName }) => !ExtractorConfig.hasDtsFileExtension(fileName)
     );
     if (badSourceFile) {
-      throw new Error(
-        'API Extractor expects to only process .d.ts files, but encountered non-.d.ts file(s).\n' +
-          'Run with the "--diagnostics" flag and inspect the "Files analyzed by compiler" to find the unexpected ' +
-          'file(s).'
+      this.messageRouter.addAnalyzerIssueForPosition(
+        ExtractorMessageId.NotDtsFileExtension,
+        'Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension. ' +
+          'Troubleshooting tips: https://api-extractor.com/link/dts-error',
+        badSourceFile,
+        0
       );
     }
 
