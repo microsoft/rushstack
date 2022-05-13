@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-extractor",
       "comment": "Throw an error early if API Extractor will attempt to process non-.d.ts files",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor"

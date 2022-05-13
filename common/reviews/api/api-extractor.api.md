@@ -135,13 +135,13 @@ export const enum ExtractorMessageId {
     MisplacedPackageTag = "ae-misplaced-package-tag",
     MissingGetter = "ae-missing-getter",
     MissingReleaseTag = "ae-missing-release-tag",
-    NotDtsFileExtension = "ae-wrong-input-file-type",
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
     PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
     SetterWithDocs = "ae-setter-with-docs",
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
-    UnresolvedLink = "ae-unresolved-link"
+    UnresolvedLink = "ae-unresolved-link",
+    WrongInputFileType = "ae-wrong-input-file-type",
 }
 
 // @public
