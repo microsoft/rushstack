@@ -141,7 +141,7 @@ export const enum ExtractorMessageId {
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
     UnresolvedLink = "ae-unresolved-link",
-    WrongInputFileType = "ae-wrong-input-file-type",
+    WrongInputFileType = "ae-wrong-input-file-type"
 }
 
 // @public
