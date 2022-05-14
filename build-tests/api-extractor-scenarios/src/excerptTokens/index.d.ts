@@ -1,5 +1,8 @@
+// prettier-ignore
 /** @public */
 export let MY_CONSTANT : number ;
+
+// prettier-ignore
 /**
  * @public This is my class.
  */

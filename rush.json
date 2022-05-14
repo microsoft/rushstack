@@ -537,12 +537,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "api-extractor-test-05",
-      "projectFolder": "build-tests/api-extractor-test-05",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",

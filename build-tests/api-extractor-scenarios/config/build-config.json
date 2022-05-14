@@ -18,6 +18,7 @@
     "dynamicImportType2",
     "dynamicImportType3",
     "ecmaScriptPrivateFields",
+    "excerptTokens",
     "exportDuplicate",
     "exportEquals",
     "exportImportedExternal",

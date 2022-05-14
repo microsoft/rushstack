@@ -161,18 +161,18 @@
     }
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-test-05!",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
-  "name": "api-extractor-test-05",
+  "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "api-extractor-test-05!",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Variable",
-          "canonicalReference": "api-extractor-test-05!MY_CONSTANT:var",
+          "canonicalReference": "api-extractor-scenarios!MY_CONSTANT:var",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -193,7 +193,7 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "api-extractor-test-05!MyClass:class",
+          "canonicalReference": "api-extractor-scenarios!MyClass:class",
           "docComment": "/**\n * This is my class.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -206,7 +206,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-test-05!MyClass#someMethod:member(1)",
+              "canonicalReference": "api-extractor-scenarios!MyClass#someMethod:member(1)",
               "docComment": "/**\n * This method does something.\n *\n * @param x - This is x.\n *\n * @param y - This is y.\n */\n",
               "excerptTokens": [
                 {
