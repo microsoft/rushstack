@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 10 May 2022 01:20:43 GMT and should not be manually modified.
+This log was last generated on Sat, 14 May 2022 03:01:27 GMT and should not be manually modified.
+
+## 7.24.0
+Sat, 14 May 2022 03:01:27 GMT
+
+### Minor changes
+
+- Throw an error early if API Extractor will attempt to process non-.d.ts files
+- Generate API doc model nodes for setters without getters
+
+### Patches
+
+- Address edge case in excerptBuilder token range logic
 
 ## 7.23.2
 Tue, 10 May 2022 01:20:43 GMT

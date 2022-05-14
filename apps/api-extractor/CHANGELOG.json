@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.24.0",
+      "tag": "@microsoft/api-extractor_v7.24.0",
+      "date": "Sat, 14 May 2022 03:01:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Throw an error early if API Extractor will attempt to process non-.d.ts files"
+          },
+          {
+            "comment": "Generate API doc model nodes for setters without getters"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Address edge case in excerptBuilder token range logic"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.23.2",
       "tag": "@microsoft/api-extractor_v7.23.2",
       "date": "Tue, 10 May 2022 01:20:43 GMT",
