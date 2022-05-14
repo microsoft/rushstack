@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Write local telemetry for all phased commands, including partial runs when running in watch mode.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

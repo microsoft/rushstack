@@ -40,7 +40,7 @@ export interface ITelemetryData {
    * @example 5.63.0
    */
   readonly rushVersion?: string;
-  readonly extraData?: { [key: string]: string };
+  readonly extraData?: { [key: string]: string | number | boolean };
 }
 
 const MAX_FILE_COUNT: number = 100;

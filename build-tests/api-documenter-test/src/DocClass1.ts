@@ -207,6 +207,11 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public set writeableProperty(value: string) {}
 
   /**
+   * API Extractor will surface an `ae-missing-getter` finding for this property.
+   */
+  public set writeonlyProperty(value: string) {}
+
+  /**
    * This event is fired whenever the object is modified.
    * @eventProperty
    */

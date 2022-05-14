@@ -49,6 +49,7 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     // (undocumented)
     get writeableProperty(): string;
     set writeableProperty(value: string);
+    set writeonlyProperty(value: string);
 }
 
 // @public

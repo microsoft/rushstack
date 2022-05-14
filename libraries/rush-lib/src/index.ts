@@ -81,6 +81,7 @@ export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsCon
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 
 export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
+export { IExecutionResult, IOperationExecutionResult } from './logic/operations/IOperationExecutionResult';
 export { IOperationOptions, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
 
@@ -109,3 +110,5 @@ export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCachePro
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 
 export { ITelemetryData } from './logic/Telemetry';
+
+export { IStopwatchResult } from './utilities/Stopwatch';
