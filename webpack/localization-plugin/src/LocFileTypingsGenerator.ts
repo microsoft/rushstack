@@ -13,6 +13,7 @@ import { LocFileParser } from './utilities/LocFileParser';
 export interface ITypingsGeneratorOptions {
   srcFolder: string;
   generatedTsFolder: string;
+  onLocFileParsed?: (filePath: string, locFileData: ILocalizationFile) => Promise<void> | void;
   terminal?: ITerminal;
   exportAsDefault?: boolean;
   globsToIgnore?: string[];
@@ -27,10 +28,11 @@ export interface ITypingsGeneratorOptions {
  */
 export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
   public constructor(options: ITypingsGeneratorOptions) {
+    const { onLocFileParsed } = options;
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json'],
-      parseAndGenerateTypings: (fileContents: string, filePath: string) => {
+      parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
         const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: filePath,
           content: fileContents,
@@ -40,14 +42,14 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
         });
 
         const typings: IStringValueTyping[] = [];
-
-        // eslint-disable-next-line guard-for-in
-        for (const stringName in locFileData) {
+        for (const [stringName, { comment }] of Object.entries(locFileData)) {
           typings.push({
             exportName: stringName,
-            comment: locFileData[stringName].comment
+            comment: comment
           });
         }
+
+        await onLocFileParsed?.(filePath, locFileData);
 
         return { typings };
       }
