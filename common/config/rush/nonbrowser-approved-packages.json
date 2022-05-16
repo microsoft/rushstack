@@ -148,7 +148,7 @@
     },
     {
       "name": "@rushstack/localization-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/module-minifier-plugin",

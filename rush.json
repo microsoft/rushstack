@@ -854,6 +854,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "@rushstack/loc-typings-generator-plugin",
+      "projectFolder": "heft-plugins/loc-typings-generator-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false // For now
+    },
 
     // "libraries" folder (alphabetical order)
     {

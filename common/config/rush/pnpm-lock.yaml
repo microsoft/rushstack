@@ -1518,6 +1518,27 @@ importers:
       '@types/node': 12.20.24
       webpack: 5.68.0
 
+  ../../heft-plugins/loc-typings-generator-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-config-file': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/localization-plugin': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/node': 12.20.24
+      eslint: ~8.7.0
+    dependencies:
+      '@rushstack/heft-config-file': link:../../libraries/heft-config-file
+      '@rushstack/localization-plugin': link:../../webpack/localization-plugin
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/node': 12.20.24
+      eslint: 8.7.0
+
   ../../libraries/api-extractor-model:
     specifiers:
       '@microsoft/tsdoc': 0.14.1
