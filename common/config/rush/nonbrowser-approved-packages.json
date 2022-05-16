@@ -247,6 +247,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/heft-node-loc-plugin",
+      "allowedCategories": [  ]
+    },
+    {
       "name": "@storybook/theming",
       "allowedCategories": [ "tests" ]
     },

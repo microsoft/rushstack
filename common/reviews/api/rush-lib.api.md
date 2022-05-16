@@ -159,6 +159,7 @@ export class EnvironmentConfiguration {
     static get pnpmStorePathOverride(): string | undefined;
     static reset(): void;
     static get rushGlobalFolderOverride(): string | undefined;
+    static get rushLocale(): string | undefined;
     static get rushTempFolderOverride(): string | undefined;
     static get tarBinaryPath(): string | undefined;
     static validate(options?: IEnvironmentConfigurationInitializeOptions): void;
@@ -176,6 +177,7 @@ export enum EnvironmentVariableNames {
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
     RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
+    RUSH_LOCALE = "RUSH_LOCALE",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",

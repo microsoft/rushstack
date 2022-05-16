@@ -1707,6 +1707,7 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/heft-node-loc-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/package-deps-hash': workspace:*
       '@rushstack/rig-package': workspace:*
@@ -1792,6 +1793,7 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/heft-node-loc-plugin': link:../../heft-plugins/heft-node-loc-plugin
       '@types/cli-table': 0.3.0
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1

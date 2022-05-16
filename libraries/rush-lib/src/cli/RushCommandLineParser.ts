@@ -22,6 +22,8 @@ import {
   IGlobalCommandConfig,
   IPhasedCommandConfig
 } from '../api/CommandLineConfiguration';
+import { strings } from '../loc';
+import { RushErrors } from '../utilities/RushErrors';
 
 import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
@@ -80,15 +82,7 @@ export class RushCommandLineParser extends CommandLineParser {
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
       toolFilename: 'rush',
-      toolDescription:
-        'Rush makes life easier for JavaScript developers who develop, build, and publish' +
-        ' many packages from a central Git repo.  It is designed to handle very large repositories' +
-        ' supporting many projects and people.  Rush provides policies, protections, and customizations' +
-        ' that help coordinate teams and safely onboard new contributors.  Rush also generates change logs' +
-        ' and automates package publishing.  It can manage decoupled subsets of projects with different' +
-        ' release and versioning strategies.  A full API is included to facilitate integration with other' +
-        ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,' +
-        ' Rush is for you.',
+      toolDescription: strings.rushToolDescription,
       enableTabCompletionAction: true
     });
 
@@ -135,9 +129,11 @@ export class RushCommandLineParser extends CommandLineParser {
         this._addCommandLineConfigActions(commandLineConfiguration);
       } catch (e) {
         this._terminal.writeErrorLine(
-          `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
+          RushErrors.getPluginAddCommandLineActionsErrorMessage(
+            pluginLoader.pluginName,
+            pluginLoader.packageName,
             e as Error
-          ).toString()}`
+          )
         );
       }
     }
@@ -185,13 +181,13 @@ export class RushCommandLineParser extends CommandLineParser {
     this._debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',
-      description: 'Show the full call stack if an error occurs while executing the tool'
+      description: strings.rushToolDebugFlagDescription
     });
 
     this._quietParameter = this.defineFlagParameter({
       parameterLongName: '--quiet',
       parameterShortName: '-q',
-      description: 'Hide rush startup information'
+      description: strings.rushToolQuietFlagDescription
     });
   }
 
@@ -296,10 +292,7 @@ export class RushCommandLineParser extends CommandLineParser {
     command: Command
   ): void {
     if (this.tryGetAction(command.name)) {
-      throw new Error(
-        `${RushConstants.commandLineFilename} defines a command "${command.name}"` +
-          ` using a name that already exists`
-      );
+      throw new Error(RushErrors.getCommandCollisionErrorMessage(command.name));
     }
 
     switch (command.commandKind) {
@@ -313,12 +306,7 @@ export class RushCommandLineParser extends CommandLineParser {
           !command.isSynthetic && // synthetic commands come from bulk commands
           !this.rushConfiguration.experimentsConfiguration.configuration.phasedCommands
         ) {
-          throw new Error(
-            `${RushConstants.commandLineFilename} defines a command "${command.name}" ` +
-              `that uses the "${RushConstants.phasedCommandKind}" command kind. To use this command kind, ` +
-              'the "phasedCommands" experiment must be enabled. Note that this feature is not complete ' +
-              'and will not work as expected.'
-          );
+          throw new Error(RushErrors.getPhasedCommandsExperimentMustBeEnabledErrorMessage(command.name));
         }
 
         this._addPhasedCommandLineConfigAction(commandLineConfiguration, command);
@@ -327,8 +315,10 @@ export class RushCommandLineParser extends CommandLineParser {
 
       default:
         throw new Error(
-          `${RushConstants.commandLineFilename} defines a command "${(command as Command).name}"` +
-            ` using an unsupported command kind "${(command as Command).commandKind}"`
+          RushErrors.getUnsupportedCommandKindErrorMessage(
+            (command as Command).name,
+            (command as Command).commandKind
+          )
         );
     }
   }
@@ -357,11 +347,7 @@ export class RushCommandLineParser extends CommandLineParser {
       command.name === RushConstants.buildCommandName ||
       command.name === RushConstants.rebuildCommandName
     ) {
-      throw new Error(
-        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-          `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
-          `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
-      );
+      throw new Error(RushErrors.getDisallowedGlobalCommandErrorMessage(command.name));
     }
 
     const sharedCommandOptions: IBaseScriptActionOptions<IGlobalCommandConfig> =

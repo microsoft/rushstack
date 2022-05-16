@@ -1,0 +1,6 @@
+{
+  "srcFolder": "src",
+  "generatedTsFolder": "temp/generated-ts",
+  "exportAsDefault": true,
+  "stringsOutputFolders": ["lib"]
+}

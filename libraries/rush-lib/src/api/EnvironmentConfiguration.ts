@@ -151,7 +151,12 @@ export enum EnvironmentVariableNames {
    * The `RUSH_INVOKED_FOLDER` variable is the same idea as the `INIT_CWD` variable that package managers
    * assign when they execute lifecycle scripts.
    */
-  RUSH_INVOKED_FOLDER = 'RUSH_INVOKED_FOLDER'
+  RUSH_INVOKED_FOLDER = 'RUSH_INVOKED_FOLDER',
+
+  /**
+   * The locale to use for the command-line interface.
+   */
+  RUSH_LOCALE = 'RUSH_LOCALE'
 }
 
 /**
@@ -186,6 +191,8 @@ export class EnvironmentConfiguration {
   private static _gitBinaryPath: string | undefined;
 
   private static _tarBinaryPath: string | undefined;
+
+  private static _rushLocale: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -287,6 +294,15 @@ export class EnvironmentConfiguration {
   public static get tarBinaryPath(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._tarBinaryPath;
+  }
+
+  /**
+   * The locale for the Rush CLI.
+   * See {@link EnvironmentVariableNames.RUSH_LOCALE}
+   */
+  public static get rushLocale(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._rushLocale;
   }
 
   /**
@@ -402,6 +418,11 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_TAR_BINARY_PATH: {
             EnvironmentConfiguration._tarBinaryPath = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_LOCALE: {
+            EnvironmentConfiguration._rushLocale = value;
             break;
           }
 
