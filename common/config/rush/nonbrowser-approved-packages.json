@@ -119,6 +119,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-node-loc-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -245,10 +249,6 @@
     {
       "name": "@storybook/react",
       "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@rushstack/heft-node-loc-plugin",
-      "allowedCategories": [  ]
     },
     {
       "name": "@storybook/theming",
