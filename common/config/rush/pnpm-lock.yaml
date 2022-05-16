@@ -1518,7 +1518,7 @@ importers:
       '@types/node': 12.20.24
       webpack: 5.68.0
 
-  ../../heft-plugins/loc-typings-generator-plugin:
+  ../../heft-plugins/heft-node-loc-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*

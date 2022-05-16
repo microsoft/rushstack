@@ -8,9 +8,9 @@
  */
 
 import type { IHeftPlugin } from '@rushstack/heft';
-import { LocTypingsPlugin } from './LocTypingsPlugin';
+import { NodeLocPlugin } from './NodeLocPlugin';
 
 /**
  * @internal
  */
-export default new LocTypingsPlugin() as IHeftPlugin;
+export default new NodeLocPlugin() as IHeftPlugin;

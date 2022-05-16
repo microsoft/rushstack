@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Loc Typings Configuration",
-  "description": "This schema describes the \"config/loc-typings.json\" config file used to configure \"@rushstack/loc-typings-generator-plugin\".",
+  "title": "Node Localization Configuration",
+  "description": "This schema describes the \"config/node-loc.json\" config file used to configure \"@rushstack/heft-node-loc-plugin\".",
   "type": "object",
 
   "additionalProperties": false,
@@ -27,9 +27,17 @@
       "description": "Output directory for generated typings."
     },
 
+    "stringsOutputFolders": {
+      "type": "array",
+      "description": "List of folders to output strings JSON files without comments to.",
+      "items": {
+        "type": "string"
+      }
+    },
+
     "exportAsDefault": {
       "type": "boolean",
-      "description": "Determines whether export values are wrapped in a default property, or not."
+      "description": "Determines whether the typings export values are wrapped in a default property, or not."
     }
   }
 }

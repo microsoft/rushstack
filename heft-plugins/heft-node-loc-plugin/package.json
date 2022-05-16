@@ -1,15 +1,15 @@
 {
-  "name": "@rushstack/loc-typings-generator-plugin",
+  "name": "@rushstack/heft-node-loc-plugin",
   "version": "0.0.0",
   "description": "Heft plugin for generating typings for .resx and .loc.json files.",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "heft-plugins/loc-typings-generator-plugin"
+    "directory": "heft-plugins/heft-node-loc-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "lib/index.js",
-  "types": "dist/loc-typings-generator-plugin.d.ts",
+  "types": "dist/heft-node-loc-plugin.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",

@@ -201,6 +201,8 @@ export interface ITypingsGeneratorOptions {
     // (undocumented)
     ignoreMissingResxComments?: boolean | undefined;
     // (undocumented)
+    onLocFileParsed?: (filePath: string, locFileData: ILocalizationFile) => Promise<void> | void;
+    // (undocumented)
     resxNewlineNormalization?: NewlineKind | undefined;
     // (undocumented)
     srcFolder: string;
