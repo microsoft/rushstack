@@ -82,7 +82,7 @@ export class DevCertPlugin implements IHeftPlugin {
 
   private _determineMajorVersion(version?: string): number | undefined {
     if (version) {
-      return Number(version.split('.')[0]);
+      return parseInt(version);
     } else {
       return;
     }
