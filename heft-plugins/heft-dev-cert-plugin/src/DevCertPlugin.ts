@@ -101,7 +101,6 @@ export class DevCertPlugin implements IHeftPlugin {
       if (webpackDevServerMajorVersion && webpackDevServerMajorVersion === 4) {
         webpackConfiguration.devServer = {
           ...webpackConfiguration.devServer,
-          // This API throws depreaction warnings for webpack
           server: {
             type: 'https',
             options: {
@@ -113,7 +112,6 @@ export class DevCertPlugin implements IHeftPlugin {
       } else {
         webpackConfiguration.devServer = {
           ...webpackConfiguration.devServer,
-          // This API throws depreaction warnings for webpack
           https: {
             key: certificate.pemKey,
             cert: certificate.pemCertificate
