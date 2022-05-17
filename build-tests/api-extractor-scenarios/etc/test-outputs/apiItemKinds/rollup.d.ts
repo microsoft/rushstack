@@ -58,6 +58,8 @@ export declare class SimpleClass {
     get readonlyProperty(): string;
     get writeableProperty(): string;
     set writeableProperty(value: string);
+    readonly someReadonlyProp = 5;
+    readonly someReadonlyPropWithType: number;
 }
 
 /** @public */

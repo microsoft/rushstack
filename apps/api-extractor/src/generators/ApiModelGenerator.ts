@@ -824,13 +824,20 @@ export class ApiModelGenerator {
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+      let propertyTypeNode: ts.TypeNode | undefined;
 
-      // If the property declaration's type is `undefined`, then we're processing a setter with no corresponding
-      // getter. Use the parameter type instead (note that TypeScript always reports an error if a setter
-      // does not have exactly one parameter).
-      const propertyTypeNode: ts.TypeNode | undefined =
-        (astDeclaration.declaration as ts.PropertyDeclaration | ts.GetAccessorDeclaration).type ||
-        (astDeclaration.declaration as ts.SetAccessorDeclaration).parameters[0].type;
+      if (
+        ts.isPropertyDeclaration(astDeclaration.declaration) ||
+        ts.isGetAccessorDeclaration(astDeclaration.declaration)
+      ) {
+        propertyTypeNode = astDeclaration.declaration.type;
+      }
+
+      if (ts.isSetAccessorDeclaration(astDeclaration.declaration)) {
+        // Note that TypeScript always reports an error if a setter does not have exactly one parameter.
+        propertyTypeNode = astDeclaration.declaration.parameters[0].type;
+      }
+
       nodesToCapture.push({ node: propertyTypeNode, tokenRange: propertyTypeTokenRange });
 
       const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
