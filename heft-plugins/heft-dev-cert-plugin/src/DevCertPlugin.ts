@@ -71,7 +71,8 @@ export class DevCertPlugin implements IHeftPlugin {
             await this._configureDevServerAsync(
               bundleSubstage.properties?.webpackConfiguration as IWebpackConfigPartial | undefined,
               certificateManager,
-              logger
+              logger,
+              this._determineMajorVersion(bundleSubstage.properties.webpackDevServerVersion)
             );
           });
         }
@@ -79,22 +80,46 @@ export class DevCertPlugin implements IHeftPlugin {
     });
   }
 
+  private _determineMajorVersion(version?: string): number | undefined {
+    if (version) {
+      return Number(version.split('.')[0]);
+    } else {
+      return;
+    }
+  }
+
   private async _configureDevServerAsync(
     webpackConfiguration: IWebpackConfigPartial | undefined,
     certificateManager: CertificateManager,
-    logger: IScopedLogger
+    logger: IScopedLogger,
+    webpackDevServerMajorVersion?: number
   ): Promise<void> {
     const certificate: ICertificate = await certificateManager.ensureCertificateAsync(true, logger.terminal);
     if (!webpackConfiguration) {
       logger.terminal.writeVerboseLine('No webpack configuration available to configure devServer.');
     } else {
-      webpackConfiguration.devServer = {
-        ...webpackConfiguration.devServer,
-        https: {
-          key: certificate.pemKey,
-          cert: certificate.pemCertificate
-        }
-      };
+      if (webpackDevServerMajorVersion && webpackDevServerMajorVersion === 4) {
+        webpackConfiguration.devServer = {
+          ...webpackConfiguration.devServer,
+          // This API throws depreaction warnings for webpack
+          server: {
+            type: 'https',
+            options: {
+              key: certificate.pemKey,
+              cert: certificate.pemCertificate
+            }
+          }
+        };
+      } else {
+        webpackConfiguration.devServer = {
+          ...webpackConfiguration.devServer,
+          // This API throws depreaction warnings for webpack
+          https: {
+            key: certificate.pemKey,
+            cert: certificate.pemCertificate
+          }
+        };
+      }
     }
   }
 }
