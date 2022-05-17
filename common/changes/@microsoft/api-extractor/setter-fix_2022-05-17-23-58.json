@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix bug in how API properties are processed introduced by https://github.com/microsoft/rushstack/pull/3396",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
