@@ -196,9 +196,8 @@ export class WebpackPlugin implements IHeftPlugin {
       // Register a plugin to callback after webpack is done with the first compilation
       // so we can move on to post-build
       let firstCompilationDoneCallback: (() => void) | undefined;
-      const originalBeforeCallback: typeof options.onBeforeSetupMiddleware | undefined =
-        options.onBeforeSetupMiddleware;
-      options.onBeforeSetupMiddleware = (devServer) => {
+      const originalBeforeCallback: typeof options.setupMiddlewares | undefined = options.setupMiddlewares;
+      options.setupMiddlewares = (middlewares, devServer) => {
         compiler.hooks.done.tap('heft-webpack-plugin', () => {
           if (firstCompilationDoneCallback) {
             firstCompilationDoneCallback();
@@ -207,8 +206,9 @@ export class WebpackPlugin implements IHeftPlugin {
         });
 
         if (originalBeforeCallback) {
-          return originalBeforeCallback(devServer);
+          return originalBeforeCallback(middlewares, devServer);
         }
+        return middlewares;
       };
 
       // The webpack-dev-server package has a design flaw, where merely loading its package will set the
