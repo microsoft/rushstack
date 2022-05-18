@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier",
+      "comment": "Factor out minifiers from @rushstack/module-minifier-plugin.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier"
+}

@@ -5,7 +5,7 @@ import webpack, { Compiler, Plugin } from 'webpack';
 import { ReplaceSource } from 'webpack-sources';
 import { Tapable, TapOptions } from 'tapable';
 
-import Template from 'webpack/lib/Template';
+const { Template } = webpack;
 
 import { STAGE_AFTER } from './Constants';
 import {

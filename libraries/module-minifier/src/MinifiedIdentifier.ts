@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 // TODO: Allow dynamic override of these values in the input to the minifier
-import { IDENTIFIER_LEADING_DIGITS, IDENTIFIER_TRAILING_DIGITS } from './Constants';
+import { IDENTIFIER_LEADING_DIGITS, IDENTIFIER_TRAILING_DIGITS } from './constants';
 
 // Set of ECMAScript reserved keywords (past and present): https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar
 const RESERVED_KEYWORDS: string[] = [
@@ -74,7 +74,7 @@ const RESERVED_KEYWORDS: string[] = [
 
 /**
  * Gets a base54 string suitable for use as a JavaScript identifier, not accounting for reserved keywords
- * @param ordinal The number to convert to a base54 identifier
+ * @param ordinal - The number to convert to a base54 identifier
  */
 export function getIdentifierInternal(ordinal: number): string {
   let ret: string = IDENTIFIER_LEADING_DIGITS[ordinal % 54];
@@ -102,6 +102,7 @@ for (let i: number = 0; i < 64; i++) {
 /**
  * Converts an identifier into the ordinal that would produce it, not accounting for reserved keywords
  * Returns NaN if the result would exceed 31 bits
+ * @param identifier - The identifier to convert to a numeric value
  */
 export function getOrdinalFromIdentifierInternal(identifier: string): number {
   let ordinal: number = 0;

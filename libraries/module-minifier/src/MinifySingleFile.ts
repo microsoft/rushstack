@@ -11,8 +11,8 @@ declare module 'terser' {
   }
 }
 
-import { getIdentifier } from '../MinifiedIdentifier';
-import { IModuleMinificationRequest, IModuleMinificationResult } from '../ModuleMinifierPlugin.types';
+import { getIdentifier } from './MinifiedIdentifier';
+import type { IModuleMinificationRequest, IModuleMinificationResult } from './types';
 
 const nth_identifier: SimpleIdentifierMangler = {
   get: getIdentifier
@@ -22,7 +22,7 @@ const nth_identifier: SimpleIdentifierMangler = {
  * Minifies a single chunk of code. Factored out for reuse between WorkerPoolMinifier and LocalMinifier
  * @internal
  */
-export async function minifySingleFile(
+export async function minifySingleFileAsync(
   request: IModuleMinificationRequest,
   terserOptions: MinifyOptions
 ): Promise<IModuleMinificationResult> {

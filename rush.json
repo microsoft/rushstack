@@ -883,6 +883,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/module-minifier",
+      "projectFolder": "libraries/module-minifier",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
@@ -901,6 +907,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/worker-pool",
+      "projectFolder": "libraries/worker-pool",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/rush-lib",

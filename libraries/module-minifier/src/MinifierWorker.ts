@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { minifySingleFile } from '../terser/MinifySingleFile';
-import { MinifyOptions } from 'terser';
+import type { MinifyOptions } from 'terser';
 import { parentPort, workerData } from 'worker_threads';
-import { IModuleMinificationRequest, IModuleMinificationResult } from '../ModuleMinifierPlugin.types';
+
+import { minifySingleFileAsync } from './MinifySingleFile';
+import type { IModuleMinificationRequest, IModuleMinificationResult } from './types';
 
 const terserOptions: MinifyOptions = workerData;
 
@@ -16,7 +17,7 @@ parentPort!.on('message', async (message: IModuleMinificationRequest) => {
     process.exit(0);
   }
 
-  const result: IModuleMinificationResult = await minifySingleFile(message, terserOptions);
+  const result: IModuleMinificationResult = await minifySingleFileAsync(message, terserOptions);
 
   parentPort!.postMessage(result);
 });

@@ -6,13 +6,26 @@
 
 import type { AsyncSeriesWaterfallHook } from 'tapable';
 import { Compiler } from 'webpack';
-import type { MinifyOptions } from 'terser';
+import { getIdentifier } from '@rushstack/module-minifier';
+import { ILocalMinifierOptions } from '@rushstack/module-minifier';
+import { IMinifierConnection } from '@rushstack/module-minifier';
+import { IModuleMinificationCallback } from '@rushstack/module-minifier';
+import { IModuleMinificationErrorResult } from '@rushstack/module-minifier';
+import { IModuleMinificationRequest } from '@rushstack/module-minifier';
+import { IModuleMinificationResult } from '@rushstack/module-minifier';
+import { IModuleMinificationSuccessResult } from '@rushstack/module-minifier';
+import { IModuleMinifier } from '@rushstack/module-minifier';
+import { IModuleMinifierFunction } from '@rushstack/module-minifier';
+import { IWorkerPoolMinifierOptions } from '@rushstack/module-minifier';
+import { LocalMinifier } from '@rushstack/module-minifier';
+import { MessagePortMinifier } from '@rushstack/module-minifier';
+import { NoopMinifier } from '@rushstack/module-minifier';
 import { Plugin } from 'webpack';
-import type { RawSourceMap } from 'source-map';
 import type { ReplaceSource } from 'webpack-sources';
 import { Source } from 'webpack-sources';
 import type { SyncWaterfallHook } from 'tapable';
 import * as webpack from 'webpack';
+import { WorkerPoolMinifier } from '@rushstack/module-minifier';
 
 // @public
 export const CHUNK_MODULES_TOKEN: '__WEBPACK_CHUNK_MODULES__';
@@ -20,8 +33,7 @@ export const CHUNK_MODULES_TOKEN: '__WEBPACK_CHUNK_MODULES__';
 // @public
 export function generateLicenseFileForAsset(compilation: webpack.compilation.Compilation, asset: IAssetInfo, minifiedModules: IModuleMap): string;
 
-// @public
-export function getIdentifier(ordinal: number): string;
+export { getIdentifier }
 
 // @internal
 export interface _IAcornComment {
@@ -54,12 +66,6 @@ export interface IDehydratedAssets {
 }
 
 // @public
-export const IDENTIFIER_LEADING_DIGITS: string;
-
-// @public
-export const IDENTIFIER_TRAILING_DIGITS: string;
-
-// @public
 export interface IExtendedModule extends webpack.compilation.Module {
     external?: boolean;
     hasDependencies(callback: (dep: webpack.compilation.Dependency) => boolean | void): boolean;
@@ -70,17 +76,9 @@ export interface IExtendedModule extends webpack.compilation.Module {
     resource?: string;
 }
 
-// @public
-export interface ILocalMinifierOptions {
-    // (undocumented)
-    terserOptions?: MinifyOptions;
-}
+export { ILocalMinifierOptions }
 
-// @public
-export interface IMinifierConnection {
-    configHash: string;
-    disconnect(): Promise<void>;
-}
+export { IMinifierConnection }
 
 // @public
 export interface IModuleInfo {
@@ -91,50 +89,19 @@ export interface IModuleInfo {
 // @public
 export type IModuleMap = Map<string | number, IModuleInfo>;
 
-// @public
-export interface IModuleMinificationCallback {
-    // (undocumented)
-    (result: IModuleMinificationResult): void;
-}
+export { IModuleMinificationCallback }
 
-// @public
-export interface IModuleMinificationErrorResult {
-    code?: undefined;
-    error: Error;
-    hash: string;
-    map?: undefined;
-}
+export { IModuleMinificationErrorResult }
 
-// @public
-export interface IModuleMinificationRequest {
-    code: string;
-    externals: string[] | undefined;
-    hash: string;
-    nameForMap: string | undefined;
-}
+export { IModuleMinificationRequest }
 
-// @public
-export type IModuleMinificationResult = IModuleMinificationErrorResult | IModuleMinificationSuccessResult;
+export { IModuleMinificationResult }
 
-// @public
-export interface IModuleMinificationSuccessResult {
-    code: string;
-    error: undefined;
-    hash: string;
-    map?: RawSourceMap;
-}
+export { IModuleMinificationSuccessResult }
 
-// @public
-export interface IModuleMinifier {
-    connect(): Promise<IMinifierConnection>;
-    minify: IModuleMinifierFunction;
-}
+export { IModuleMinifier }
 
-// @public
-export interface IModuleMinifierFunction {
-    // (undocumented)
-    (request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-}
+export { IModuleMinifierFunction }
 
 // @public
 export interface IModuleMinifierPluginHooks {
@@ -177,20 +144,11 @@ export interface _IWebpackCompilationData {
     normalModuleFactory: webpack.compilation.NormalModuleFactory;
 }
 
-// @public
-export interface IWorkerPoolMinifierOptions {
-    maxThreads?: number;
-    terserOptions?: MinifyOptions;
-    verbose?: boolean;
-}
+export { IWorkerPoolMinifierOptions }
 
-// @public
-export class LocalMinifier implements IModuleMinifier {
-    constructor(options: ILocalMinifierOptions);
-    // (undocumented)
-    connect(): Promise<IMinifierConnection>;
-    minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-}
+export { LocalMinifier }
+
+export { MessagePortMinifier }
 
 // @public
 export const MODULE_WRAPPER_PREFIX: '__MINIFY_MODULE__(';
@@ -209,12 +167,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
     minifier: IModuleMinifier;
 }
 
-// @public
-export class NoopMinifier implements IModuleMinifier {
-    // (undocumented)
-    connect(): Promise<IMinifierConnection>;
-    minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-}
+export { NoopMinifier }
 
 // @public
 export class PortableMinifierModuleIdsPlugin implements Plugin {
@@ -232,16 +185,7 @@ export const STAGE_AFTER: 100;
 // @public
 export const STAGE_BEFORE: -100;
 
-// @public
-export class WorkerPoolMinifier implements IModuleMinifier {
-    constructor(options: IWorkerPoolMinifierOptions);
-    // (undocumented)
-    connect(): Promise<IMinifierConnection>;
-    // (undocumented)
-    get maxThreads(): number;
-    set maxThreads(threads: number);
-    minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-}
+export { WorkerPoolMinifier }
 
 // (No @packageDocumentation comment for this package)
 
