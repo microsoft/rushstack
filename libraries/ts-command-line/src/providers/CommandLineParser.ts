@@ -25,12 +25,6 @@ export interface ICommandLineParserOptions {
   toolDescription: string;
 
   /**
-   * An optional string to append at the end of the "--help" main page. If not provided, an epilog
-   * will be automatically generated based on the toolFilename.
-   */
-  toolEpilog?: string;
-
-  /**
    * Set to true to auto-define a tab completion action. False by default.
    */
   enableTabCompletionAction?: boolean;
@@ -74,8 +68,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
       epilog: colors.bold(
-        this._options.toolEpilog ??
-          `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
+        `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
       )
     });
 
@@ -201,21 +194,19 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);
       }
-      if (this.actions.length > 0 && args.length === 0) {
-        // Parsers that use actions should print help when 0 args are provided. Allow
-        // actionless parsers to continue on zero args.
+      if (args.length === 0) {
         this._argumentParser.printHelp();
         return;
       }
 
       const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
 
-      this._processParsedData(this._options, data);
+      this._processParsedData(data);
 
       for (const action of this._actions) {
         if (action.actionName === data.action) {
           this.selectedAction = action;
-          action._processParsedData(this._options, data);
+          action._processParsedData(data);
           break;
         }
       }

@@ -2,9 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as argparse from 'argparse';
-
 import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
-import type { ICommandLineParserOptions } from './CommandLineParser';
 
 /**
  * Options for the CommandLineAction constructor.
@@ -92,8 +90,8 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * This is called internally by CommandLineParser.execute()
    * @internal
    */
-  public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
-    super._processParsedData(parserOptions, data);
+  public _processParsedData(data: ICommandLineParserData): void {
+    super._processParsedData(data);
   }
 
   /**

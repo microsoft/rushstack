@@ -8,8 +8,6 @@
  */
 
 export { CommandLineAction, ICommandLineActionOptions } from './providers/CommandLineAction';
-export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction';
-export { ScopedCommandLineAction } from './providers/ScopedCommandLineAction';
 
 export {
   IBaseCommandLineDefinition,
@@ -45,6 +43,9 @@ export {
 } from './providers/CommandLineParameterProvider';
 
 export { ICommandLineParserOptions, CommandLineParser } from './providers/CommandLineParser';
+
+export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction';
+
 export { DynamicCommandLineParser } from './providers/DynamicCommandLineParser';
 
 export { CommandLineConstants } from './Constants';
