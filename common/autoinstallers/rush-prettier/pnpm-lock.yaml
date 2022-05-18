@@ -1,12 +1,12 @@
 lockfileVersion: 5.3
 
 specifiers:
-  prettier: 2.3.1
-  pretty-quick: 3.1.0
+  prettier: 2.6.1
+  pretty-quick: 3.1.3
 
 dependencies:
-  prettier: 2.3.1
-  pretty-quick: 3.1.0_prettier@2.3.1
+  prettier: 2.6.1
+  pretty-quick: 3.1.3_prettier@2.6.1
 
 packages:
 
@@ -37,7 +37,7 @@ packages:
     dev: false
 
   /balanced-match/1.0.0:
-    resolution: {integrity: sha1-ibTRmasr7kneFk6gK4nORi1xt2c=}
+    resolution: {integrity: sha512-9Y0g0Q8rmSt+H33DfKv7FOc3v+iRI+o1lbzt8jGcIosYW37IIW/2XVYq5NPdmaD5NQ59Nk26Kl/vZbwW9Fr8vg==}
     dev: false
 
   /brace-expansion/1.1.11:
@@ -226,14 +226,14 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
-  /prettier/2.3.1:
-    resolution: {integrity: sha512-p+vNbgpLjif/+D+DwAZAbndtRrR0md0MwfmOVN9N+2RgyACMT+7tfaRnT+WDPkqnuVwleyuBIG2XBxKDme3hPA==}
+  /prettier/2.6.1:
+    resolution: {integrity: sha512-8UVbTBYGwN37Bs9LERmxCPjdvPxlEowx2urIL6urHzdb3SDq4B/Z6xLFCblrSnE4iKWcS6ziJ3aOYrc1kz/E2A==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: false
 
-  /pretty-quick/3.1.0_prettier@2.3.1:
-    resolution: {integrity: sha512-DtxIxksaUWCgPFN7E1ZZk4+Aav3CCuRdhrDSFZENb404sYMtuo9Zka823F+Mgeyt8Zt3bUiCjFzzWYE9LYqkmQ==}
+  /pretty-quick/3.1.3_prettier@2.6.1:
+    resolution: {integrity: sha512-kOCi2FJabvuh1as9enxYmrnBC6tVMoVOenMaBqRfsvBHB0cbpYHjdQEpSglpASDFEXVwplpcGR4CLEaisYAFcA==}
     engines: {node: '>=10.13'}
     hasBin: true
     peerDependencies:
@@ -245,7 +245,7 @@ packages:
       ignore: 5.1.8
       mri: 1.1.5
       multimatch: 4.0.0
-      prettier: 2.3.1
+      prettier: 2.6.1
     dev: false
 
   /pump/3.0.0:
