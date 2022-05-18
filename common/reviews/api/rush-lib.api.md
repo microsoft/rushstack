@@ -105,7 +105,6 @@ export class CommonVersionsConfiguration {
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     get preferredVersions(): Map<string, string>;
     save(): boolean;
-    get xstitchPreferredVersions(): Map<string, string>;
 }
 
 // @beta (undocumented)
@@ -264,6 +263,7 @@ export interface ICreateOperationsContext {
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
+    readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
 }
 
@@ -285,6 +285,12 @@ export interface ICredentialCacheOptions {
 export interface IEnvironmentConfigurationInitializeOptions {
     // (undocumented)
     doNotNormalizePaths?: boolean;
+}
+
+// @alpha
+export interface IExecutionResult {
+    readonly operationResults: ReadonlyMap<Operation, IOperationExecutionResult>;
+    readonly status: OperationStatus;
 }
 
 // @beta
@@ -358,6 +364,14 @@ export class IndividualVersionPolicy extends VersionPolicy {
 
 // @internal
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
+}
+
+// @alpha
+export interface IOperationExecutionResult {
+    readonly error: Error | undefined;
+    readonly status: OperationStatus;
+    readonly stdioSummarizer: StdioSummarizer;
+    readonly stopwatch: IStopwatchResult;
 }
 
 // @alpha
@@ -446,12 +460,20 @@ export interface IRushSessionOptions {
     terminalProvider: ITerminalProvider;
 }
 
+// @alpha
+export interface IStopwatchResult {
+    get duration(): number;
+    get endTime(): number | undefined;
+    get startTime(): number | undefined;
+    toString(): string;
+}
+
 // @beta (undocumented)
 export interface ITelemetryData {
     readonly durationInSeconds: number;
     // (undocumented)
     readonly extraData?: {
-        [key: string]: string;
+        [key: string]: string | number | boolean;
     };
     readonly name: string;
     readonly platform?: string;
@@ -519,9 +541,12 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 // @alpha
 export class Operation {
     constructor(options?: IOperationOptions);
+    addDependency(dependency: Operation): void;
     readonly associatedPhase: IPhase | undefined;
     readonly associatedProject: RushConfigurationProject | undefined;
-    readonly dependencies: Set<Operation>;
+    readonly consumers: ReadonlySet<Operation>;
+    deleteDependency(dependency: Operation): void;
+    readonly dependencies: ReadonlySet<Operation>;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
     weight: number;
@@ -533,6 +558,7 @@ export enum OperationStatus {
     Executing = "EXECUTING",
     Failure = "FAILURE",
     FromCache = "FROM CACHE",
+    NoOp = "NO OP",
     Ready = "READY",
     Skipped = "SKIPPED",
     Success = "SUCCESS",
@@ -601,6 +627,7 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 
 // @alpha
 export class PhasedCommandHooks {
+    readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly waitingForChanges: SyncHook<void>;
 }
@@ -756,7 +783,6 @@ export class RushConfigurationProject {
     get isMainProject(): boolean;
     // @deprecated
     get localDependencyProjects(): ReadonlyArray<RushConfigurationProject>;
-    // @deprecated
     get packageJson(): IPackageJson;
     // @beta
     get packageJsonEditor(): PackageJsonEditor;

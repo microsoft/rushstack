@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
+import { AsyncSeriesHook, AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
@@ -11,6 +11,7 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
+import { IExecutionResult } from '../logic/operations/IOperationExecutionResult';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -64,6 +65,11 @@ export interface ICreateOperationsContext {
    */
   readonly projectSelection: ReadonlySet<RushConfigurationProject>;
   /**
+   * The set of Rush projects that have not been built in the current process since they were last modified.
+   * When `isInitial` is true, this will be an exact match of `projectSelection`.
+   */
+  readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
+  /**
    * The Rush configuration
    */
   readonly rushConfiguration: RushConfiguration;
@@ -80,6 +86,14 @@ export class PhasedCommandHooks {
    */
   public readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]> =
     new AsyncSeriesWaterfallHook(['operations', 'context'], 'createOperations');
+
+  /**
+   * Hook invoked after executing a set of operations.
+   * Use the context to distinguish between the initial run and phased runs.
+   * Hook is series for stable output.
+   */
+  public readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]> =
+    new AsyncSeriesHook(['results', 'context']);
 
   /**
    * Hook invoked after a run has finished and the command is watching for changes.

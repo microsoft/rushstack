@@ -195,10 +195,10 @@ export class ExcerptBuilder {
       capturedTokenRange.startIndex = excerptStartIndex;
 
       // We will assign capturedTokenRange.startIndex to be the index after the last token
-      // that was appended so far. However, if the last appended token was a separator,
-      // then omit it from the range.
+      // that was appended so far. However, if the last appended token was a separator and
+      // there is no additional spaces, omit it from the range.
       let excerptEndIndex: number = excerptTokens.length;
-      if (state.lastAppendedTokenIsSeparator) {
+      if (state.lastAppendedTokenIsSeparator && excerptEndIndex > excerptStartIndex + 1) {
         excerptEndIndex--;
       }
 

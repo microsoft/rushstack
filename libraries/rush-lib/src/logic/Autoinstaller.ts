@@ -15,15 +15,24 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConstants } from './RushConstants';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 
+interface IAutoinstallerOptions {
+  autoinstallerName: string;
+  rushConfiguration: RushConfiguration;
+  restrictConsoleOutput?: boolean;
+}
+
 export class Autoinstaller {
-  public name: string;
+  public readonly name: string;
 
-  private _rushConfiguration: RushConfiguration;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _restrictConsoleOutput: boolean;
 
-  public constructor(autoinstallerName: string, rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-    Autoinstaller.validateName(autoinstallerName);
-    this.name = autoinstallerName;
+  public constructor(options: IAutoinstallerOptions) {
+    this.name = options.autoinstallerName;
+    this._rushConfiguration = options.rushConfiguration;
+    this._restrictConsoleOutput = options.restrictConsoleOutput || false;
+
+    Autoinstaller.validateName(this.name);
   }
 
   // Example: .../common/autoinstallers/my-task
@@ -68,7 +77,8 @@ export class Autoinstaller {
     await InstallHelpers.ensureLocalPackageManager(
       this._rushConfiguration,
       rushGlobalFolder,
-      RushConstants.defaultMaxInstallAttempts
+      RushConstants.defaultMaxInstallAttempts,
+      this._restrictConsoleOutput
     );
 
     // Example: common/autoinstallers/my-task/package.json
@@ -77,7 +87,7 @@ export class Autoinstaller {
       autoinstallerFullPath
     );
 
-    console.log(`Acquiring lock for "${relativePathForLogs}" folder...`);
+    this._logIfConsoleOutputIsNotRestricted(`Acquiring lock for "${relativePathForLogs}" folder...`);
 
     const lock: LockFile = await LockFile.acquire(autoinstallerFullPath, 'autoinstaller');
 
@@ -104,14 +114,14 @@ export class Autoinstaller {
       const nodeModulesFolder: string = path.join(autoinstallerFullPath, 'node_modules');
 
       if (FileSystem.exists(nodeModulesFolder)) {
-        console.log('Deleting old files from ' + nodeModulesFolder);
+        this._logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
         FileSystem.ensureEmptyFolder(nodeModulesFolder);
       }
 
       // Copy: .../common/autoinstallers/my-task/.npmrc
       Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, autoinstallerFullPath);
 
-      console.log(`Installing dependencies under ${autoinstallerFullPath}...\n`);
+      this._logIfConsoleOutputIsNotRestricted(`Installing dependencies under ${autoinstallerFullPath}...\n`);
 
       Utilities.executeCommand({
         command: this._rushConfiguration.packageManagerToolFilename,
@@ -123,9 +133,9 @@ export class Autoinstaller {
       // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
       lastInstallFlag.create();
 
-      console.log('Auto install completed successfully\n');
+      this._logIfConsoleOutputIsNotRestricted('Auto install completed successfully\n');
     } else {
-      console.log('Autoinstaller folder is already up to date\n');
+      this._logIfConsoleOutputIsNotRestricted('Autoinstaller folder is already up to date\n');
     }
 
     lock.release();
@@ -138,13 +148,15 @@ export class Autoinstaller {
       throw new Error(`The specified autoinstaller path does not exist: ` + autoinstallerPackageJsonPath);
     }
 
-    console.log(`Updating autoinstaller package: ${autoinstallerPackageJsonPath}`);
+    this._logIfConsoleOutputIsNotRestricted(
+      `Updating autoinstaller package: ${autoinstallerPackageJsonPath}`
+    );
 
     let oldFileContents: string = '';
 
     if (FileSystem.exists(this.shrinkwrapFilePath)) {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
-      console.log('Deleting ' + this.shrinkwrapFilePath);
+      this._logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
       FileSystem.deleteFile(this.shrinkwrapFilePath);
     }
 
@@ -158,7 +170,7 @@ export class Autoinstaller {
       );
     }
 
-    console.log();
+    this._logIfConsoleOutputIsNotRestricted();
 
     Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this.folderFullPath);
 
@@ -169,18 +181,18 @@ export class Autoinstaller {
       keepEnvironment: true
     });
 
-    console.log();
+    this._logIfConsoleOutputIsNotRestricted();
 
     if (this._rushConfiguration.packageManager === 'npm') {
-      console.log(colors.bold('Running "npm shrinkwrap"...'));
+      this._logIfConsoleOutputIsNotRestricted(colors.bold('Running "npm shrinkwrap"...'));
       Utilities.executeCommand({
         command: this._rushConfiguration.packageManagerToolFilename,
         args: ['shrinkwrap'],
         workingDirectory: this.folderFullPath,
         keepEnvironment: true
       });
-      console.log('"npm shrinkwrap" completed');
-      console.log();
+      this._logIfConsoleOutputIsNotRestricted('"npm shrinkwrap" completed');
+      this._logIfConsoleOutputIsNotRestricted();
     }
 
     if (!FileSystem.exists(this.shrinkwrapFilePath)) {
@@ -193,12 +205,18 @@ export class Autoinstaller {
       convertLineEndings: NewlineKind.Lf
     });
     if (oldFileContents !== newFileContents) {
-      console.log(
+      this._logIfConsoleOutputIsNotRestricted(
         colors.green('The shrinkwrap file has been updated.') + '  Please commit the updated file:'
       );
-      console.log(`\n  ${this.shrinkwrapFilePath}`);
+      this._logIfConsoleOutputIsNotRestricted(`\n  ${this.shrinkwrapFilePath}`);
     } else {
-      console.log(colors.green('Already up to date.'));
+      this._logIfConsoleOutputIsNotRestricted(colors.green('Already up to date.'));
+    }
+  }
+
+  private _logIfConsoleOutputIsNotRestricted(message?: string): void {
+    if (!this._restrictConsoleOutput) {
+      console.log(message);
     }
   }
 }

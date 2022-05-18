@@ -1,6 +1,37 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+This log was last generated on Sat, 14 May 2022 03:01:27 GMT and should not be manually modified.
+
+## 7.24.0
+Sat, 14 May 2022 03:01:27 GMT
+
+### Minor changes
+
+- Throw an error early if API Extractor will attempt to process non-.d.ts files
+- Generate API doc model nodes for setters without getters
+
+### Patches
+
+- Address edge case in excerptBuilder token range logic
+
+## 7.23.2
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 7.23.1
+Wed, 04 May 2022 23:29:13 GMT
+
+### Patches
+
+- Update the global variable analyzer to add support for changes to the TypeScript internals coming in v4.7
+
+## 7.23.0
+Sat, 23 Apr 2022 02:13:06 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.6
 
 ## 7.22.2
 Fri, 15 Apr 2022 00:12:36 GMT

@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.66.1",
+  "rushVersion": "5.68.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -750,7 +750,18 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-
+    {
+      "packageName": "hashed-folder-copy-plugin-webpack4-test",
+      "projectFolder": "build-tests/hashed-folder-copy-plugin-webpack4-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "hashed-folder-copy-plugin-webpack5-test",
+      "projectFolder": "build-tests/hashed-folder-copy-plugin-webpack5-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "install-test-workspace",
       "projectFolder": "build-tests/install-test-workspace",
@@ -998,8 +1009,20 @@
 
     // "webpack" folder (alphabetical order)
     {
+      "packageName": "@rushstack/webpack-plugin-utilities",
+      "projectFolder": "webpack/webpack-plugin-utilities",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/loader-load-themed-styles",
       "projectFolder": "webpack/loader-load-themed-styles",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "projectFolder": "webpack/hashed-folder-copy-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1018,6 +1041,12 @@
     {
       "packageName": "@rushstack/module-minifier-plugin",
       "projectFolder": "webpack/module-minifier-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "projectFolder": "webpack/preserve-dynamic-require-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

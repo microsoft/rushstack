@@ -17,5 +17,3 @@ exports[`CommandLineConfiguration Forbids a misnamed phase 3`] = `"In command-li
 exports[`CommandLineConfiguration Forbids a misnamed phase 4`] = `"In command-line.json, the phase \\"_phase:A\\"'s name is not a valid phase name. Phase names must begin with the required prefix \\"_phase:\\" followed by a name containing lowercase letters, numbers, or hyphens. The name must start with a letter and must not end with a hyphen."`;
 
 exports[`CommandLineConfiguration Forbids a misnamed phase 5`] = `"In command-line.json, the phase \\"_phase:A-\\"'s name is not a valid phase name. Phase names must begin with the required prefix \\"_phase:\\" followed by a name containing lowercase letters, numbers, or hyphens. The name must start with a letter and must not end with a hyphen."`;
-
-exports[`CommandLineConfiguration parameters does not allow a parameter to only be associated with phased commands but not have any associated phases 1`] = `"command-line.json defines a parameter \\"--flag\\" that is only associated with phased commands, but lists no associated phases."`;

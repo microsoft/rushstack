@@ -103,7 +103,10 @@ export class AzureStorageAuthentication {
    * @param onlyIfExistingCredentialExpiresAfter - If specified, and a cached credential exists that is still valid
    * after the date specified, no action will be taken.
    */
-  public async updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void> {
+  public async updateCachedCredentialInteractiveAsync(
+    terminal: ITerminal,
+    onlyIfExistingCredentialExpiresAfter?: Date
+  ): Promise<void> {
     await CredentialCache.usingAsync(
       {
         supportEditing: true
@@ -113,7 +116,10 @@ export class AzureStorageAuthentication {
           const existingCredentialExpiration: Date | undefined = credentialsCache.tryGetCacheEntry(
             this._credentialCacheId
           )?.expires;
-          if (existingCredentialExpiration && existingCredentialExpiration > onlyIfExistingCredentialExpiresAfter) {
+          if (
+            existingCredentialExpiration &&
+            existingCredentialExpiration > onlyIfExistingCredentialExpiresAfter
+          ) {
             return;
           }
         }

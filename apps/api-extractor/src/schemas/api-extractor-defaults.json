@@ -72,6 +72,9 @@
       "ae-unresolved-inheritdoc-base": {
         "logLevel": "warning",
         "addToApiReportFile": true
+      },
+      "ae-wrong-input-file-type": {
+        "logLevel": "error"
       }
     },
     "tsdocMessageReporting": {

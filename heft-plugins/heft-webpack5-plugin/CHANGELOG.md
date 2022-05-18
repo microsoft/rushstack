@@ -1,6 +1,45 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+This log was last generated on Wed, 18 May 2022 15:10:55 GMT and should not be manually modified.
+
+## 0.5.18
+Wed, 18 May 2022 15:10:55 GMT
+
+### Patches
+
+- fix: removed deprecation warning for webpack-dev-server
+
+## 0.5.17
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 0.5.16
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 0.5.15
+Fri, 06 May 2022 18:54:42 GMT
+
+### Patches
+
+- Fix an issue where Heft will crash if the Webpack configuration is an empty array.
+
+## 0.5.14
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 0.5.13
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 0.5.12
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
 
 ## 0.5.11
 Fri, 15 Apr 2022 00:12:36 GMT

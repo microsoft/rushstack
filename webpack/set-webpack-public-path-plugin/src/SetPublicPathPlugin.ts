@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
+import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
+
 import type * as Webpack from 'webpack';
 import type * as Tapable from 'tapable';
-
 // Workaround for https://github.com/pnpm/pnpm/issues/4301
 import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
 
@@ -153,23 +154,18 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   }
 
   public apply(compiler: Webpack.Compiler): void {
-    const isWebpack3OrEarlier: boolean = !compiler.hooks;
-
-    if (isWebpack3OrEarlier) {
+    // Casting here because VersionDetection refers to webpack 5 typings
+    if (VersionDetection.isWebpack3OrEarlier(compiler as unknown as Webpack5.Compiler)) {
       throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
     }
 
-    const webpackVersion: string | undefined = (
-      compiler as unknown as Webpack5.Compiler | { webpack: undefined }
-    ).webpack?.version;
-    const webpackMajorVersion: number = webpackVersion
-      ? Number(webpackVersion.substr(0, webpackVersion.indexOf('.')))
-      : 4;
+    // Casting here because VersionDetection refers to webpack 5 typings
+    const isWebpack4: boolean = VersionDetection.isWebpack4(compiler as unknown as Webpack5.Compiler);
 
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
       (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
-        if (webpackMajorVersion === 4) {
+        if (isWebpack4) {
           const webpack4Compilation: Webpack.compilation.Compilation =
             compilation as Webpack.compilation.Compilation;
           const mainTemplate: IWebpack4ExtendedMainTemplate =
@@ -209,7 +205,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     );
 
     // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
-    if (webpackMajorVersion === 4) {
+    if (isWebpack4) {
       compiler.hooks.emit.tap(
         PLUGIN_NAME,
         (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {

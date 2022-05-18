@@ -1,6 +1,33 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+This log was last generated on Sat, 14 May 2022 03:01:27 GMT and should not be manually modified.
+
+## 1.9.4
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 1.9.3
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 1.9.2
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 1.9.1
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 1.9.0
+Sat, 23 Apr 2022 02:13:06 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.6
 
 ## 1.8.11
 Fri, 15 Apr 2022 00:12:36 GMT

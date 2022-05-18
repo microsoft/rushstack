@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-serverless-stack-plugin",
-  "version": "0.1.9",
+  "version": "0.1.14",
   "description": "Heft plugin for building apps using the Serverless Stack (SST) framework",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "_phase:test": "heft test --no-build"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.44.13"
+    "@rushstack/heft": "^0.45.3"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"

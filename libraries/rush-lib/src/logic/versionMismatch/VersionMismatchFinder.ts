@@ -96,8 +96,7 @@ export class VersionMismatchFinder {
 
     const projects: VersionMismatchFinderEntity[] = [];
 
-    // Create an object for the purposes of reporting conflicts with preferredVersions
-    // or xstitchPreferredVersions from common-versions.json
+    // Create an object for the purposes of reporting conflicts with preferredVersions from common-versions.json
     // Make sure this one is first so it doesn't get truncated when a long list is printed
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 

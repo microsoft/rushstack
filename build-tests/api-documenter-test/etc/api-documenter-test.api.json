@@ -166,7 +166,8 @@
         "@preapproved": true,
         "@docCategory": true,
         "@myCustomTag": true
-      }
+      },
+      "reportUnsupportedHtmlElements": false
     }
   },
   "kind": "Package",
@@ -899,6 +900,33 @@
               "isOptional": false,
               "releaseTag": "Public",
               "name": "writeableProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#writeonlyProperty:member",
+              "docComment": "/**\n * API Extractor will surface an `ae-missing-getter` finding for this property.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "set writeonlyProperty(value: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ");"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "writeonlyProperty",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

@@ -1,6 +1,38 @@
 # Change Log - @rushstack/heft-dev-cert-plugin
 
-This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+This log was last generated on Wed, 18 May 2022 15:10:55 GMT and should not be manually modified.
+
+## 0.1.33
+Wed, 18 May 2022 15:10:55 GMT
+
+### Patches
+
+- fix issue where webpack-dev-server v4 users recieved deprecation warnings
+
+## 0.1.32
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 0.1.31
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 0.1.30
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 0.1.29
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 0.1.28
+Sat, 23 Apr 2022 02:13:06 GMT
+
+_Version update only_
 
 ## 0.1.27
 Fri, 15 Apr 2022 00:12:36 GMT

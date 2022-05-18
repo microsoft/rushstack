@@ -2,6 +2,108 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.70.0",
+      "tag": "@microsoft/rush_v5.70.0",
+      "date": "Wed, 11 May 2022 22:21:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new `afterExecuteOperations` hook to phased command execution. This hook is used for the console timeline view and the standard result summary."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.69.0",
+      "tag": "@microsoft/rush_v5.69.0",
+      "date": "Tue, 10 May 2022 01:20:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix handling of erroneous undefined values when printing `rush list --detailed`"
+          },
+          {
+            "comment": "Update watcher to only schedule operations impacted by the detected change. A behavior difference will only be observed for repositories that define a phase with no dependencies."
+          },
+          {
+            "comment": "Fix handing of the `strictPeerDependencies` option when using PNPM >= 7.0.0."
+          },
+          {
+            "comment": "Update the `postRushInstall` hook to always run, and move its execution to after telemetry is written."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the \"xstitchPreferredVersions\" property from common-versions.json and the CommonVersionsConfiguration API."
+          },
+          {
+            "comment": "Correct a warning that is printed during \"rush change\" to only be concerned with unstaged changes."
+          },
+          {
+            "comment": "Include tags in the `rush list` output."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.68.2",
+      "tag": "@microsoft/rush_v5.68.2",
+      "date": "Fri, 06 May 2022 18:54:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Provide ability for phased script commands to internally invoke \"rush install\" prior to execution."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.68.1",
+      "tag": "@microsoft/rush_v5.68.1",
+      "date": "Tue, 03 May 2022 21:52:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush list --json\" prints non-json output in a repo that uses rush plugins with autoinstallers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.68.0",
+      "tag": "@microsoft/rush_v5.68.0",
+      "date": "Fri, 29 Apr 2022 05:22:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable legacy skip logic when build cache is enabled."
+          },
+          {
+            "comment": "Report status of projects with an empty script as \"did not define any work,\" instead of as \"from cache.\""
+          },
+          {
+            "comment": "Add a -- parameter to git command invocations that accept user input to prevent arbitrary arguments from being passed."
+          },
+          {
+            "comment": "Remove the @deprecated label from `RushConfigurationProject.packageJson`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.67.0",
+      "tag": "@microsoft/rush_v5.67.0",
+      "date": "Sat, 23 Apr 2022 02:13:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Upgrade \"tar\" dependency to eliminate spurious security vulnerability for \"minimist\" package"
+          },
+          {
+            "comment": "Remove requirement that custom parameters associated with a phased command must also be associated with one or more phases. This allows for custom parameters that will only be interpreted by plugins."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.66.2",
       "tag": "@microsoft/rush_v5.66.2",
       "date": "Tue, 12 Apr 2022 02:58:47 GMT",

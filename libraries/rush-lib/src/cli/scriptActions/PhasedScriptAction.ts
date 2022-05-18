@@ -31,9 +31,11 @@ import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfigur
 import { Operation } from '../../logic/operations/Operation';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
-import { Selection } from '../../logic/Selection';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
+import { OperationStatus } from '../../logic/operations/OperationStatus';
+import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
+import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -48,6 +50,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   phases: Map<string, IPhase>;
 
   alwaysWatch: boolean;
+  alwaysInstall: boolean | undefined;
 }
 
 interface IRunPhasesOptions {
@@ -58,12 +61,27 @@ interface IRunPhasesOptions {
 }
 
 interface IExecutionOperationsOptions {
+  createOperationsContext: ICreateOperationsContext;
   executionManagerOptions: IOperationExecutionManagerOptions;
   ignoreHooks: boolean;
   operations: Set<Operation>;
   stopwatch: Stopwatch;
-  isWatch: boolean;
   terminal: Terminal;
+}
+
+interface IPhasedCommandTelemetry {
+  [key: string]: string | number | boolean;
+  isInitial: boolean;
+  isWatch: boolean;
+
+  countAll: number;
+  countSuccess: number;
+  countSuccessWithWarnings: number;
+  countFailure: number;
+  countBlocked: number;
+  countFromCache: number;
+  countSkipped: number;
+  countNoOp: number;
 }
 
 /**
@@ -84,6 +102,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _alwaysWatch: boolean;
+  private readonly _alwaysInstall: boolean | undefined;
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
@@ -93,6 +112,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _watchParameter: CommandLineFlagParameter | undefined;
   private _timelineParameter: CommandLineFlagParameter | undefined;
+  private _installParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -102,6 +122,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._alwaysWatch = options.alwaysWatch;
+    this._alwaysInstall = options.alwaysInstall;
     this._knownPhases = options.phases;
 
     this.hooks = new PhasedCommandHooks();
@@ -113,6 +134,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   }
 
   public async runAsync(): Promise<void> {
+    if (this._alwaysInstall || this._installParameter?.value) {
+      const { doBasicInstallAsync } = await import('../../logic/installManager/doBasicInstallAsync');
+
+      await doBasicInstallAsync({
+        rushConfiguration: this.rushConfiguration,
+        rushGlobalFolder: this.rushGlobalFolder,
+        isDebug: this.parser.isDebug
+      });
+    }
+
     // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
     const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
     if (!lastLinkFlag.isValid()) {
@@ -129,6 +160,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
+    const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
+
+    const showTimeline: boolean = this._timelineParameter ? this._timelineParameter.value : false;
+    if (showTimeline) {
+      const { ConsoleTimelinePlugin } = await import('../../logic/operations/ConsoleTimelinePlugin');
+      new ConsoleTimelinePlugin(terminal).apply(this.hooks);
+    }
+    // Enable the standard summary
+    new OperationResultSummarizerPlugin(terminal).apply(this.hooks);
+
     const { hooks: sessionHooks } = this.rushSession;
     if (sessionHooks.runAnyPhasedCommand.isUsed()) {
       // Avoid the cost of compiling the hook if it wasn't tapped.
@@ -138,6 +179,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const hookForAction: AsyncSeriesHook<IPhasedCommand> | undefined = sessionHooks.runPhasedCommand.get(
       this.actionName
     );
+
     if (hookForAction) {
       // Run the more specific hook for a command with this name after the general hook
       await hookForAction.promise(this);
@@ -149,11 +191,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     // if parallelism is not enabled, then restrict to 1 core
     const parallelism: string | undefined = this._enableParallelism ? this._parallelismParameter!.value : '1';
 
-    const showTimeline: boolean = this._timelineParameter ? this._timelineParameter.value : false;
-
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
-    const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
     if (!this._disableBuildCache) {
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
@@ -187,14 +226,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       rushConfiguration: this.rushConfiguration,
       phaseSelection: new Set(this._initialPhases),
       projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration),
-      projectSelection
+      projectSelection,
+      projectsInUnknownState: projectSelection
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism,
-      showTimeline,
       changedProjectsOnly
     };
 
@@ -225,13 +264,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       initialCreateOperationsContext
     );
 
-    const { isWatch } = initialCreateOperationsContext;
-
     const initialOptions: IExecutionOperationsOptions = {
+      createOperationsContext: initialCreateOperationsContext,
       ignoreHooks: false,
       operations,
       stopwatch,
-      isWatch,
       executionManagerOptions,
       terminal
     };
@@ -298,25 +335,25 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
 
       // Account for consumer relationships
-      const projectSelection: Set<RushConfigurationProject> = Selection.intersection(
-        Selection.expandAllConsumers(changedProjects),
-        projectsToWatch
-      );
-
-      const operations: Set<Operation> = await this.hooks.createOperations.promise(new Set(), {
+      const createOperationsContext: ICreateOperationsContext = {
         ...initialCreateOperationsContext,
         isInitial: false,
         projectChangeAnalyzer: state,
-        projectSelection,
+        projectsInUnknownState: changedProjects,
         phaseSelection
-      });
+      };
+
+      const operations: Set<Operation> = await this.hooks.createOperations.promise(
+        new Set(),
+        createOperationsContext
+      );
 
       const executeOptions: IExecutionOperationsOptions = {
+        createOperationsContext,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
         operations,
         stopwatch,
-        isWatch: true,
         executionManagerOptions,
         terminal
       };
@@ -397,6 +434,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       });
     }
 
+    // If `this._alwaysInstall === undefined`, Rush does not define the parameter
+    // but a repository may still define a custom parameter with the same name.
+    if (this._alwaysInstall === false) {
+      this._installParameter = this.defineFlagParameter({
+        parameterLongName: '--install',
+        description:
+          'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
+          'Rush will automatically perform an install before processing the current command.'
+      });
+    }
+
     this.defineScriptParameters();
 
     for (const [{ associatedPhases }, tsCommandLineParameter] of this.customParameters) {
@@ -416,23 +464,34 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    * Runs a set of operations and reports the results.
    */
   private async _executeOperations(options: IExecutionOperationsOptions): Promise<void> {
-    const { executionManagerOptions, ignoreHooks, operations, stopwatch, isWatch, terminal } = options;
+    const { executionManagerOptions, ignoreHooks, operations, stopwatch, terminal } = options;
 
     const executionManager: OperationExecutionManager = new OperationExecutionManager(
       operations,
       executionManagerOptions
     );
 
+    const { isInitial, isWatch } = options.createOperationsContext;
+
+    let success: boolean = false;
+    let result: IExecutionResult | undefined;
+
     try {
-      await executionManager.executeAsync();
+      result = await executionManager.executeAsync();
+      success = result.status === OperationStatus.Success;
+
+      await this.hooks.afterExecuteOperations.promise(result, options.createOperationsContext);
 
       stopwatch.stop();
-      terminal.writeLine(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
 
-      if (!ignoreHooks) {
-        this._doAfterTask(stopwatch, true);
+      const message: string = `rush ${this.actionName} (${stopwatch.toString()})`;
+      if (result.status === OperationStatus.Success) {
+        terminal.writeLine(colors.green(message));
+      } else {
+        terminal.writeLine(message);
       }
     } catch (error) {
+      success = false;
       stopwatch.stop();
 
       if (error instanceof AlreadyReportedError) {
@@ -448,14 +507,80 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
         terminal.writeErrorLine(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
       }
+    }
 
-      if (!ignoreHooks) {
-        this._doAfterTask(stopwatch, false);
+    if (!ignoreHooks) {
+      this._doAfterTask();
+    }
+
+    if (this.parser.telemetry) {
+      const extraData: IPhasedCommandTelemetry = {
+        // Fields preserved across the command invocation
+        ...this._selectionParameters.getTelemetry(),
+        ...this.getParameterStringMap(),
+        isWatch,
+        // Fields specific to the current operation set
+        isInitial,
+
+        countAll: 0,
+        countSuccess: 0,
+        countSuccessWithWarnings: 0,
+        countFailure: 0,
+        countBlocked: 0,
+        countFromCache: 0,
+        countSkipped: 0,
+        countNoOp: 0
+      };
+
+      if (result) {
+        for (const [operation, operationResult] of result.operationResults) {
+          if (operation.runner?.silent) {
+            // Architectural operation. Ignore.
+            continue;
+          }
+
+          extraData.countAll++;
+          switch (operationResult.status) {
+            case OperationStatus.Success:
+              extraData.countSuccess++;
+              break;
+            case OperationStatus.SuccessWithWarning:
+              extraData.countSuccessWithWarnings++;
+              break;
+            case OperationStatus.Failure:
+              extraData.countFailure++;
+              break;
+            case OperationStatus.Blocked:
+              extraData.countBlocked++;
+              break;
+            case OperationStatus.FromCache:
+              extraData.countFromCache++;
+              break;
+            case OperationStatus.Skipped:
+              extraData.countSkipped++;
+              break;
+            case OperationStatus.NoOp:
+              extraData.countNoOp++;
+              break;
+            default:
+              // Do nothing.
+              break;
+          }
+        }
       }
 
-      if (!isWatch) {
-        throw new AlreadyReportedError();
-      }
+      this.parser.telemetry.log({
+        name: this.actionName,
+        durationInSeconds: stopwatch.duration,
+        result: success ? 'Succeeded' : 'Failed',
+        extraData
+      });
+
+      this.parser.flushTelemetry();
+    }
+
+    if (!success && !isWatch) {
+      throw new AlreadyReportedError();
     }
   }
 
@@ -473,7 +598,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
   }
 
-  private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
+  private _doAfterTask(): void {
     if (
       this.actionName !== RushConstants.buildCommandName &&
       this.actionName !== RushConstants.rebuildCommandName
@@ -481,24 +606,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       // Only collects information for built-in commands like build or rebuild.
       return;
     }
-    this._collectTelemetry(stopwatch, success);
-    this.parser.flushTelemetry();
     this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
-  }
-
-  private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    const extraData: Record<string, string> = {
-      ...this._selectionParameters.getTelemetry(),
-      ...this.getParameterStringMap()
-    };
-
-    if (this.parser.telemetry) {
-      this.parser.telemetry.log({
-        name: this.actionName,
-        durationInSeconds: stopwatch.duration,
-        result: success ? 'Succeeded' : 'Failed',
-        extraData
-      });
-    }
   }
 }

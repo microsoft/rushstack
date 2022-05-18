@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { AlreadyExistsBehavior, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import {
   Extractor,
   ExtractorConfig,
@@ -15,6 +15,20 @@ import {
 
 export function runScenarios(buildConfigPath: string): void {
   const buildConfig = JsonFile.load(buildConfigPath);
+
+  // Copy any .d.ts files into the "lib/" folder
+  FileSystem.copyFiles({
+    sourcePath: './src/',
+    destinationPath: './lib/',
+    alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite,
+    filter: (sourcePath: string, destinationPath: string): boolean => {
+      if (sourcePath.endsWith('.d.ts') || !sourcePath.endsWith('.ts')) {
+        // console.log('COPY ' + sourcePath);
+        return true;
+      }
+      return false;
+    }
+  });
 
   const entryPoints: string[] = [];
 

@@ -66,6 +66,7 @@ export interface IJestPluginOptions {
   configurationPath?: string;
   debugHeftReporter?: boolean;
   detectOpenHandles?: boolean;
+  disableCodeCoverage?: boolean;
   disableConfigurationModuleResolution?: boolean;
   findRelatedTests?: ReadonlyArray<string>;
   maxWorkers?: string;
@@ -217,6 +218,10 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       // Pass test names as the command line remainder
       jestArgv.findRelatedTests = true;
       jestArgv._ = [...options.findRelatedTests];
+    }
+
+    if (options?.disableCodeCoverage) {
+      jestConfig.collectCoverage = false;
     }
 
     // Stringify the config and pass it into Jest directly
@@ -615,6 +620,14 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         ' This corresponds to the "--detectOpenHandles" parameter in Jest\'s documentation.'
     });
 
+    const disableCodeCoverage: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
+      associatedActionNames: ['test'],
+      parameterLongName: '--disable-code-coverage',
+      environmentVariable: 'HEFT_JEST_DISABLE_CODE_COVERAGE',
+      description:
+        'Disable any configured code coverage. If code coverage is not configured, this parameter has no effect.'
+    });
+
     const findRelatedTests: IHeftStringListParameter = heftSession.commandLine.registerStringListParameter({
       associatedActionNames: ['test'],
       parameterLongName: '--find-related-tests',
@@ -704,6 +717,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         configurationPath: config.value,
         debugHeftReporter: debugHeftReporter.value,
         detectOpenHandles: detectOpenHandles.value,
+        disableCodeCoverage: disableCodeCoverage.value,
         findRelatedTests: findRelatedTests.value,
         maxWorkers: maxWorkers.value,
         // Temporary workaround for https://github.com/microsoft/rushstack/issues/2759

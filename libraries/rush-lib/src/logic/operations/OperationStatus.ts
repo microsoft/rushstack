@@ -37,5 +37,9 @@ export enum OperationStatus {
   /**
    * The Operation could not be executed because one or more of its dependencies failed
    */
-  Blocked = 'BLOCKED'
+  Blocked = 'BLOCKED',
+  /**
+   * The Operation was a no-op (for example, it had an empty script)
+   */
+  NoOp = 'NO OP'
 }

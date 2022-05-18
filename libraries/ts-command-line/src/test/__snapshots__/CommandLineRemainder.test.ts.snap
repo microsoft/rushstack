@@ -12,6 +12,19 @@ Array [
 ]
 `;
 
+exports[`CommandLineRemainder parses an action input with remainder flagged options 1`] = `
+Array [
+  "### --title output: ###",
+  "--title",
+  "The title",
+  "### remainder output: ###",
+  "--",
+  "--the",
+  "remaining",
+  "--args",
+]
+`;
+
 exports[`CommandLineRemainder prints the action help 1`] = `
 "usage: example run [-h] [--title TEXT] ...
 

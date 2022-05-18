@@ -188,6 +188,8 @@ export class Collector {
       this.messageRouter.addCompilerDiagnostic(diagnostic);
     }
 
+    const sourceFiles: readonly ts.SourceFile[] = this.program.getSourceFiles();
+
     if (this.messageRouter.showDiagnostics) {
       this.messageRouter.logDiagnosticHeader('Root filenames');
       for (const fileName of this.program.getRootFileNames()) {
@@ -196,10 +198,26 @@ export class Collector {
       this.messageRouter.logDiagnosticFooter();
 
       this.messageRouter.logDiagnosticHeader('Files analyzed by compiler');
-      for (const sourceFile of this.program.getSourceFiles()) {
+      for (const sourceFile of sourceFiles) {
         this.messageRouter.logDiagnostic(sourceFile.fileName);
       }
       this.messageRouter.logDiagnosticFooter();
+    }
+
+    // We can throw this error earlier in CompilerState.ts, but intentionally wait until after we've logged the
+    // associated diagnostic message above to make debugging easier for developers.
+    // Typically there will be many such files -- to avoid too much noise, only report the first one.
+    const badSourceFile: ts.SourceFile | undefined = sourceFiles.find(
+      ({ fileName }) => !ExtractorConfig.hasDtsFileExtension(fileName)
+    );
+    if (badSourceFile) {
+      this.messageRouter.addAnalyzerIssueForPosition(
+        ExtractorMessageId.WrongInputFileType,
+        'Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension. ' +
+          'Troubleshooting tips: https://api-extractor.com/link/dts-error',
+        badSourceFile,
+        0
+      );
     }
 
     // Build the entry point
