@@ -14,7 +14,7 @@ for large scale TypeScript monorepos.
 ## Documentation Links
 
 - [What is Rush Stack?](https://rushstack.io/) - learn about the mission behind these projects
-- [API reference](https://rushstack.io/pages/api/) - browse API documentation for NPM packages
+- [API reference](https://api.rushstack.io/) - browse API documentation for NPM packages
 - [Zulip chat room](https://rushstack.zulipchat.com/) - chat with the Rush Stack developers
 - [Rush](https://rushjs.io/) - a build orchestrator for large scale TypeScript monorepos
 - [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
