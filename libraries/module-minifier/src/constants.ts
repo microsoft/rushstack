@@ -3,14 +3,14 @@
 
 /**
  * The sorted sequence of leading digits for mangled identifiers
- * Computed from character frequency analysis of the source code for OneDrive
+ * Used in MinifiedIdentifier computation for converting an ordinal to a valid ECMAScript identifier
  * @public
  */
 export const IDENTIFIER_LEADING_DIGITS: string = 'etnairoscdlufpm_hbgvySDIxCOwEALkMPTUFHRNBjVzGKWqQYJXZ$';
 
 /**
  * The sorted sequence of trailing digits for mangled identifiers
- * Computed from character frequency analysis of the source code for OneDrive
+ * Used in MinifiedIdentifier computation for converting an ordinal to a valid ECMAScript identifier
  * @public
  */
 export const IDENTIFIER_TRAILING_DIGITS: string =

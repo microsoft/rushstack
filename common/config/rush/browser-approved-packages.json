@@ -3,14 +3,6 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
-      "name": "@rushstack/module-minifier",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@rushstack/worker-pool",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "react",
       "allowedCategories": [ "tests" ]
     },
