@@ -30,26 +30,6 @@ export interface IHeftConfigurationInitializationOptions {
 }
 
 /**
- * The base action configuration that all custom action configuration files
- * should inherit from.
- *
- * @public
- */
-export interface IHeftActionConfiguration {}
-
-/**
- * Options to be used when retrieving the action configuration.
- *
- * @public
- */
-export interface IHeftActionConfigurationOptions {
-  /**
-   * Whether or not arrays should be merged across Heft action configuration files.
-   */
-  mergeArrays?: boolean;
-}
-
-/**
  * @public
  */
 export class HeftConfiguration {

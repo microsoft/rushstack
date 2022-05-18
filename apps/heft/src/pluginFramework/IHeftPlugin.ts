@@ -1,17 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonSchema } from '@rushstack/node-core-library';
-
-import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { HeftSession } from './HeftSession';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import type { HeftTaskSession } from './HeftTaskSession';
+import type { HeftLifecycleSession } from './HeftLifecycleSession';
 
 /**
  * @public
  */
-export interface IHeftPlugin<TOptions = void> {
-  readonly pluginName: string;
-  readonly optionsSchema?: JsonSchema;
+export interface IHeftPlugin<
+  TSession extends HeftLifecycleSession | HeftTaskSession = HeftLifecycleSession | HeftTaskSession,
+  TOptions = void
+> {
   readonly accessor?: object;
-  apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions): void;
+  apply(session: TSession, heftConfiguration: HeftConfiguration, pluginOptions?: TOptions): void;
+}
+
+/**
+ * @public
+ */
+export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<HeftLifecycleSession, TOptions> {}
+
+/**
+ * @public
+ */
+export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<HeftTaskSession, TOptions> {
+  apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration, pluginOptions?: TOptions): void;
 }

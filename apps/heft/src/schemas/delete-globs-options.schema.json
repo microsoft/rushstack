@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "DeleteGlobs Heft Task Event Options",
+  "description": "Defines configuration used by the \"deleteGlobs\" Heft task event.",
+  "type": "object",
+
+  "additionalProperties": false,
+  "required": ["globsToDelete"],
+
+  "properties": {
+    "globsToDelete": {
+      "title": "Globs to Delete",
+      "type": "array",
+      "description": "Glob patterns to be deleted. The paths are resolved relative to the project root.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    }
+  }
+}

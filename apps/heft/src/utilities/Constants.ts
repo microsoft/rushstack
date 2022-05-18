@@ -8,9 +8,13 @@ export class Constants {
 
   public static buildCacheFolderName: string = 'build-cache';
 
-  public static pluginParameterLongName: string = '--plugin';
+  public static unmanagedParameterLongName: string = '--unmanaged';
 
   public static debugParameterLongName: string = '--debug';
+
+  public static verboseParameterLongName: string = '--verbose';
+
+  public static verboseParameterShortName: string = '-v';
 
   public static maxParallelism: number = 100;
 }

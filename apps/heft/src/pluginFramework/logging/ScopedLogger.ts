@@ -3,12 +3,13 @@
 
 import { Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 
-import { IHeftPlugin } from '../IHeftPlugin';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { LoggingManager } from './LoggingManager';
 
+/**
+ * @public
+ */
 export interface IScopedLoggerOptions {
-  requestingPlugin: IHeftPlugin;
   loggerName: string;
   terminalProvider: ITerminalProvider;
   getShouldPrintStacks: () => boolean;
@@ -52,11 +53,6 @@ export class ScopedLogger implements IScopedLogger {
     return [...this._warnings];
   }
 
-  /**
-   * @internal
-   */
-  public readonly _requestingPlugin: IHeftPlugin;
-
   public readonly loggerName: string;
 
   public readonly terminalProvider: ITerminalProvider;
@@ -68,7 +64,6 @@ export class ScopedLogger implements IScopedLogger {
    */
   public constructor(options: IScopedLoggerOptions) {
     this._options = options;
-    this._requestingPlugin = options.requestingPlugin;
     this.loggerName = options.loggerName;
 
     this.terminalProvider = new PrefixProxyTerminalProvider(

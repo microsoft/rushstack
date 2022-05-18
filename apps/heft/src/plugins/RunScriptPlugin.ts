@@ -1,27 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async } from '@rushstack/node-core-library';
+import type { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
+import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
 
-import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
-import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { HeftSession } from '../pluginFramework/HeftSession';
-import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import {
-  IHeftEventActions,
-  IHeftConfigurationRunScriptEventAction,
-  HeftEvent
-} from '../utilities/CoreConfigFiles';
-import { IBuildStageProperties } from '../stages/BuildStage';
-import { ITestStageProperties } from '../stages/TestStage';
-import { Constants } from '../utilities/Constants';
-
-/**
- * Interface used by scripts that are run by the RunScriptPlugin.
- */
-interface IRunScript<TStageProperties> {
-  run?: (options: IRunScriptOptions<TStageProperties>) => void;
-  runAsync?: (options: IRunScriptOptions<TStageProperties>) => Promise<void>;
+interface IRunScriptPluginOptions {
+  scriptPath: string;
+  scriptOptions: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 /**
@@ -29,106 +16,67 @@ interface IRunScript<TStageProperties> {
  *
  * @beta
  */
-export interface IRunScriptOptions<TStageProperties> {
+export interface IRunScriptOptions {
   scopedLogger: ScopedLogger;
   heftConfiguration: HeftConfiguration;
   debugMode: boolean;
-  properties: TStageProperties;
+  production: boolean;
   scriptOptions: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export class RunScriptPlugin extends HeftEventPluginBase<IHeftConfigurationRunScriptEventAction> {
-  public readonly pluginName: string = 'RunScriptPlugin';
-  protected readonly eventActionName: keyof IHeftEventActions = 'runScript';
-  protected readonly loggerName: string = 'run-script';
+/**
+ * Interface used by scripts that are run by the RunScriptPlugin.
+ */
+export interface IRunScript {
+  run?: (options: IRunScriptOptions) => void;
+  runAsync?: (options: IRunScriptOptions) => Promise<void>;
+}
 
-  /**
-   * @override
-   */
-  protected async handleBuildEventActionsAsync(
-    heftEvent: HeftEvent,
-    runScriptEventActions: IHeftConfigurationRunScriptEventAction[],
-    logger: ScopedLogger,
-    heftSession: HeftSession,
+export class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions> {
+  public readonly accessor?: object | undefined;
+
+  public apply(
+    taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    properties: IBuildStageProperties
-  ): Promise<void> {
-    await this._runScriptsForHeftEventActions(
-      runScriptEventActions,
-      logger,
-      heftSession,
-      heftConfiguration,
-      properties
-    );
+    pluginOptions: IRunScriptPluginOptions
+  ): void {
+    taskSession.hooks.run.tapAsync(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
+      await this._runScriptAsync(taskSession, heftConfiguration, pluginOptions, runOptions);
+    });
   }
 
-  /**
-   * @override
-   */
-  protected async handleTestEventActionsAsync(
-    heftEvent: HeftEvent,
-    runScriptEventActions: IHeftConfigurationRunScriptEventAction[],
-    logger: ScopedLogger,
-    heftSession: HeftSession,
+  private async _runScriptAsync(
+    taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    properties: ITestStageProperties
+    pluginOptions: IRunScriptPluginOptions,
+    runOptions: IHeftTaskRunHookOptions
   ): Promise<void> {
-    await this._runScriptsForHeftEventActions(
-      runScriptEventActions,
-      logger,
-      heftSession,
-      heftConfiguration,
-      properties
-    );
-  }
+    // The scriptPath property should be fully resolved since it is included in the resolution logic used by
+    // HeftConfiguration
+    const resolvedModulePath: string = pluginOptions.scriptPath;
 
-  private async _runScriptsForHeftEventActions<TStageProperties>(
-    runScriptEventActions: IHeftConfigurationRunScriptEventAction[],
-    logger: ScopedLogger,
-    heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration,
-    properties: TStageProperties
-  ): Promise<void> {
-    await Async.forEachAsync(
-      runScriptEventActions,
-      async (runScriptEventAction) => {
-        // The scriptPath property should be fully resolved since it is included in the resolution logic used by
-        // HeftConfiguration
-        const resolvedModulePath: string = runScriptEventAction.scriptPath;
+    const runScript: IRunScript = await import(resolvedModulePath);
+    if (runScript.run && runScript.runAsync) {
+      throw new Error(`The script at "${resolvedModulePath}" exports both a "run" and a "runAsync" function`);
+    } else if (!runScript.run && !runScript.runAsync) {
+      throw new Error(
+        `The script at "${resolvedModulePath}" doesn\'t export a "run" or a "runAsync" function`
+      );
+    }
 
-        // Use the HeftEvent.actionId field for the logger since this should identify the HeftEvent that the
-        // script is sourced from. This is also a bit more user-friendly and customizable than simply using
-        // the script name for the logger. We will also prefix the logger name with the plugin name to clarify
-        // that the output is coming from the RunScriptPlugin.
-        const scriptLogger: ScopedLogger = heftSession.requestScopedLogger(
-          `${logger.loggerName}:${runScriptEventAction.actionId}`
-        );
-
-        const runScript: IRunScript<TStageProperties> = require(resolvedModulePath);
-        if (runScript.run && runScript.runAsync) {
-          throw new Error(
-            `The script at "${resolvedModulePath}" exports both a "run" and a "runAsync" function`
-          );
-        } else if (!runScript.run && !runScript.runAsync) {
-          throw new Error(
-            `The script at "${resolvedModulePath}" doesn\'t export a "run" or a "runAsync" function`
-          );
-        }
-
-        const runScriptOptions: IRunScriptOptions<TStageProperties> = {
-          scopedLogger: scriptLogger,
-          debugMode: heftSession.debugMode,
-          scriptOptions: runScriptEventAction.scriptOptions,
-          heftConfiguration,
-          properties
-        };
-        if (runScript.run) {
-          runScript.run(runScriptOptions);
-        } else if (runScript.runAsync) {
-          await runScript.runAsync(runScriptOptions);
-        }
-      },
-      { concurrency: Constants.maxParallelism }
-    );
+    const runScriptOptions: IRunScriptOptions = {
+      heftConfiguration: heftConfiguration,
+      scriptOptions: pluginOptions.scriptOptions,
+      scopedLogger: taskSession.logger,
+      debugMode: taskSession.debugMode,
+      production: runOptions.production
+    };
+    if (runScript.run) {
+      runScript.run(runScriptOptions);
+    } else if (runScript.runAsync) {
+      await runScript.runAsync(runScriptOptions);
+    }
   }
 }
+
+export default new RunScriptPlugin() as IHeftTaskPlugin<IRunScriptPluginOptions>;

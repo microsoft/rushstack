@@ -3,73 +3,46 @@
 
 import * as path from 'path';
 import glob from 'glob';
-import { FileSystem, LegacyAdapters, Async } from '@rushstack/node-core-library';
+import { FileSystem, LegacyAdapters, Async, ITerminal } from '@rushstack/node-core-library';
 
-import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
-import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { HeftSession } from '../pluginFramework/HeftSession';
-import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import {
-  IHeftEventActions,
-  HeftEvent,
-  IHeftConfigurationDeleteGlobsEventAction
-} from '../utilities/CoreConfigFiles';
-import { ICleanStageProperties } from '../stages/CleanStage';
-import { IBuildStageProperties } from '../stages/BuildStage';
 import { Constants } from '../utilities/Constants';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
+import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
 
-const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
+// No @types/glob-escape package exists
+const globEscape: (unescaped: string) => string = require('glob-escape');
 
-export class DeleteGlobsPlugin extends HeftEventPluginBase<IHeftConfigurationDeleteGlobsEventAction> {
-  public readonly pluginName: string = 'DeleteGlobsPlugin';
-  protected eventActionName: keyof IHeftEventActions = 'deleteGlobs';
-  protected loggerName: string = 'delete-globs';
+interface IDeleteGlobsPluginOptions {
+  globsToDelete: string[];
+}
 
-  /**
-   * @override
-   */
-  protected async handleCleanEventActionsAsync(
-    heftEvent: HeftEvent,
-    heftEventActions: IHeftConfigurationDeleteGlobsEventAction[],
-    logger: ScopedLogger,
-    heftSession: HeftSession,
+export class DeleteGlobsPlugin implements IHeftTaskPlugin<IDeleteGlobsPluginOptions> {
+  public readonly accessor?: object | undefined;
+
+  public apply(
+    taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    properties: ICleanStageProperties
-  ): Promise<void> {
-    await this._runDeleteForHeftEventActions(
-      heftEventActions,
-      logger,
-      heftConfiguration,
-      properties.pathsToDelete
-    );
+    pluginOptions: IDeleteGlobsPluginOptions
+  ): void {
+    taskSession.hooks.run.tapAsync(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
+      await this._deleteGlobsAsync(taskSession.logger.terminal, heftConfiguration, pluginOptions);
+    });
   }
 
-  /**
-   * @override
-   */
-  protected async handleBuildEventActionsAsync(
-    heftEvent: HeftEvent,
-    heftEventActions: IHeftConfigurationDeleteGlobsEventAction[],
-    logger: ScopedLogger,
-    heftSession: HeftSession,
+  private async _deleteGlobsAsync(
+    terminal: ITerminal,
     heftConfiguration: HeftConfiguration,
-    properties: IBuildStageProperties
-  ): Promise<void> {
-    await this._runDeleteForHeftEventActions(heftEventActions, logger, heftConfiguration);
-  }
-
-  private async _runDeleteForHeftEventActions(
-    heftEventActions: IHeftConfigurationDeleteGlobsEventAction[],
-    logger: ScopedLogger,
-    heftConfiguration: HeftConfiguration,
-    additionalPathsToDelete?: Set<string>
+    pluginOptions: IDeleteGlobsPluginOptions,
+    additionalPathsToDelete?: string[]
   ): Promise<void> {
     let deletedFiles: number = 0;
     let deletedFolders: number = 0;
 
     const pathsToDelete: Set<string> = new Set<string>(additionalPathsToDelete);
-    for (const deleteGlobsEventAction of heftEventActions) {
-      for (const globPattern of deleteGlobsEventAction.globsToDelete) {
+    await Async.forEachAsync(
+      pluginOptions.globsToDelete,
+      async (globPattern: string) => {
         const resolvedPaths: string[] = await this._resolvePathAsync(
           globPattern,
           heftConfiguration.buildFolder
@@ -77,21 +50,28 @@ export class DeleteGlobsPlugin extends HeftEventPluginBase<IHeftConfigurationDel
         for (const resolvedPath of resolvedPaths) {
           pathsToDelete.add(resolvedPath);
         }
-      }
-    }
+      },
+      { concurrency: Constants.maxParallelism }
+    );
 
     await Async.forEachAsync(
       pathsToDelete,
-      async (pathToDelete) => {
+      async (pathToDelete: string) => {
         try {
-          FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
-          logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
+          await FileSystem.deleteFileAsync(pathToDelete, { throwIfNotExists: true });
+          terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
           deletedFiles++;
         } catch (error) {
-          if (FileSystem.exists(pathToDelete)) {
-            FileSystem.deleteFolder(pathToDelete);
-            logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
-            deletedFolders++;
+          // If it doesn't exist, we can ignore the error
+          if (!FileSystem.isNotExistError(error)) {
+            // Happens when trying to delete a folder as if it was a file
+            if (FileSystem.isUnlinkNotPermittedError(error)) {
+              await FileSystem.deleteFolderAsync(pathToDelete);
+              terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
+              deletedFolders++;
+            } else {
+              throw error;
+            }
           }
         }
       },
@@ -99,7 +79,7 @@ export class DeleteGlobsPlugin extends HeftEventPluginBase<IHeftConfigurationDel
     );
 
     if (deletedFiles > 0 || deletedFolders > 0) {
-      logger.terminal.writeLine(
+      terminal.writeLine(
         `Deleted ${deletedFiles} file${deletedFiles !== 1 ? 's' : ''} ` +
           `and ${deletedFolders} folder${deletedFolders !== 1 ? 's' : ''}`
       );
@@ -123,3 +103,5 @@ export class DeleteGlobsPlugin extends HeftEventPluginBase<IHeftConfigurationDel
     }
   }
 }
+
+export default new DeleteGlobsPlugin() as IHeftTaskPlugin<IDeleteGlobsPluginOptions>;
