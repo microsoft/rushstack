@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.5.18",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.5.18",
+      "date": "Wed, 18 May 2022 15:10:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix: removed deprecation warning for webpack-dev-server"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.17",
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.17",
       "date": "Sat, 14 May 2022 03:01:27 GMT",
