@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 14 May 2022 03:01:27 GMT and should not be manually modified.
+This log was last generated on Thu, 19 May 2022 15:13:20 GMT and should not be manually modified.
+
+## 7.24.1
+Thu, 19 May 2022 15:13:20 GMT
+
+### Patches
+
+- Fix a recent regression that produced an error "Cannot read properties of undefined" (GitHub #3423)
 
 ## 7.24.0
 Sat, 14 May 2022 03:01:27 GMT
