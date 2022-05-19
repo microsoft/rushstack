@@ -20,4 +20,7 @@ export class SimpleClass {
     return 'hello';
   }
   public set writeableProperty(value: string) {}
+
+  readonly someReadonlyProp = 5;
+  readonly someReadonlyPropWithType: number = 5;
 }

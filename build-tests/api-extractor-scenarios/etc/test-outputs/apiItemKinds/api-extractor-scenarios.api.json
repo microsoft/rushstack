@@ -687,6 +687,52 @@
             },
             {
               "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!SimpleClass#someReadonlyProp:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "readonly someReadonlyProp = 5;"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "someReadonlyProp",
+              "propertyTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!SimpleClass#someReadonlyPropWithType:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "readonly someReadonlyPropWithType: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "someReadonlyPropWithType",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false
+            },
+            {
+              "kind": "Property",
               "canonicalReference": "api-extractor-scenarios!SimpleClass#writeableProperty:member",
               "docComment": "",
               "excerptTokens": [
