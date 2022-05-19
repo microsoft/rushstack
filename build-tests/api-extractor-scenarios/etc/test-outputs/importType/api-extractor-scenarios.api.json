@@ -189,6 +189,7 @@
               "text": " "
             }
           ],
+          "isReadonly": false,
           "releaseTag": "Public",
           "name": "A",
           "members": [],
@@ -218,6 +219,7 @@
               "text": " "
             }
           ],
+          "isReadonly": false,
           "releaseTag": "Public",
           "name": "B",
           "members": [],
@@ -247,6 +249,7 @@
               "text": " "
             }
           ],
+          "isReadonly": false,
           "releaseTag": "Public",
           "name": "C",
           "members": [],

@@ -27,6 +27,7 @@ import {
   IApiTypeParameterListMixinJson,
   ApiTypeParameterListMixin
 } from '../mixins/ApiTypeParameterListMixin';
+import { ApiReadonlyMixin, IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
 import { DeserializerContext } from './DeserializerContext';
 
 /**
@@ -38,7 +39,8 @@ export interface IApiInterfaceOptions
     IApiNameMixinOptions,
     IApiTypeParameterListMixinOptions,
     IApiReleaseTagMixinOptions,
-    IApiDeclaredItemOptions {
+    IApiDeclaredItemOptions,
+    IApiReadonlyMixinOptions {
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
@@ -69,7 +71,7 @@ export interface IApiInterfaceJson
  * @public
  */
 export class ApiInterface extends ApiItemContainerMixin(
-  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)))
+  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiReadonlyMixin(ApiDeclaredItem))))
 ) {
   private readonly _extendsTypes: HeritageType[] = [];
 

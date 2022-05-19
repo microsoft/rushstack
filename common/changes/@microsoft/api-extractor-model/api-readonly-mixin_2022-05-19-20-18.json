@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Adding readonlyMixin for Api Extractor",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}

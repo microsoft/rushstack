@@ -653,6 +653,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiInterface = new ApiInterface({
         name,
@@ -660,13 +661,23 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         typeParameters,
-        extendsTokenRanges
+        extendsTokenRanges,
+        isReadonly
       });
 
       parentApiItem.addMember(apiInterface);
     }
 
     this._processChildDeclarations(astDeclaration, exportedName, apiInterface);
+  }
+
+  private _determineReadonly(astDeclaration: AstDeclaration): boolean {
+    const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
+    const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
+    const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(astDeclaration);
+    return (astDeclaration.modifierFlags & ts.ModifierFlags.Readonly) !== 0
+      || (docComment !== undefined &&  docComment.modifierTagSet.hasTagName('@readonly'))
+      || (declarationMetadata.ancillaryDeclarations.length === 0 && astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor);
   }
 
   private _processApiMethod(
@@ -709,6 +720,7 @@ export class ApiModelGenerator {
       }
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiMethod = new ApiMethod({
         name,
@@ -720,7 +732,8 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        isReadonly
       });
 
       parentApiItem.addMember(apiMethod);
@@ -765,6 +778,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiMethodSignature = new ApiMethodSignature({
         name,
@@ -775,7 +789,8 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        isReadonly
       });
 
       parentApiItem.addMember(apiMethodSignature);
@@ -839,6 +854,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiProperty = new ApiProperty({
         name,
@@ -846,6 +862,7 @@ export class ApiModelGenerator {
         releaseTag,
         isStatic,
         isOptional,
+        isReadonly,
         excerptTokens,
         propertyTypeTokenRange
       });
@@ -882,6 +899,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiPropertySignature = new ApiPropertySignature({
         name,
@@ -889,7 +907,8 @@ export class ApiModelGenerator {
         releaseTag,
         isOptional,
         excerptTokens,
-        propertyTypeTokenRange
+        propertyTypeTokenRange,
+        isReadonly
       });
 
       parentApiItem.addMember(apiPropertySignature);

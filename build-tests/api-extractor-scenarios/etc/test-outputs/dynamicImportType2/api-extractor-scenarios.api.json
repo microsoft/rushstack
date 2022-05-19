@@ -180,6 +180,7 @@
               "text": "export interface IExample "
             }
           ],
+          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IExample",
           "members": [
@@ -210,6 +211,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "dottedImportType",
@@ -245,6 +247,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "dottedImportType2",

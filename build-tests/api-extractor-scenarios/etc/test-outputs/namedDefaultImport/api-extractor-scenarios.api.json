@@ -180,6 +180,7 @@
               "text": "export interface DefaultImportTypes "
             }
           ],
+          "isReadonly": false,
           "releaseTag": "Public",
           "name": "DefaultImportTypes",
           "members": [
@@ -206,6 +207,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "dynamicImport",
@@ -233,6 +235,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "namedImport",
@@ -260,6 +263,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "reExport",

@@ -201,6 +201,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "member1",
@@ -233,6 +234,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -286,6 +288,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -340,6 +343,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {

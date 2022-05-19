@@ -40,7 +40,8 @@ import {
   IResolveDeclarationReferenceResult,
   ApiTypeAlias,
   ExcerptToken,
-  ApiOptionalMixin
+  ApiOptionalMixin,
+  ApiReadonlyMixin
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -993,6 +994,15 @@ export class MarkdownDocumenter {
       section.appendNodesInParagraph([
         new DocEmphasisSpan({ configuration, italic: true }, [
           new DocPlainText({ configuration, text: '(Optional)' })
+        ]),
+        new DocPlainText({ configuration, text: ' ' })
+      ]);
+    }
+    //Should this be under modifer or descriptions?
+    if (ApiReadonlyMixin.isBaseClassOf(apiItem) && apiItem.isReadonly) {
+      section.appendNodesInParagraph([
+        new DocEmphasisSpan({ configuration, italic: true }, [
+          new DocPlainText({ configuration, text: '[Readonly]' })
         ]),
         new DocPlainText({ configuration, text: ' ' })
       ]);

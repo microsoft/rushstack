@@ -29,13 +29,13 @@ The constructor for this class is marked as internal. Third-party code should no
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [malformedEvent](./api-documenter-test.docclass1.malformedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event should have been marked as readonly. |
-|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event is fired whenever the object is modified. |
+|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | <i>\[Readonly\]</i> This event is fired whenever the object is modified. |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) |  | string |  |
+|  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) |  | string | <i>\[Readonly\]</i> |
 |  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |
 |  [writeableProperty](./api-documenter-test.docclass1.writeableproperty.md) |  | string |  |
 |  [writeonlyProperty](./api-documenter-test.docclass1.writeonlyproperty.md) |  | string | API Extractor will surface an <code>ae-missing-getter</code> finding for this property. |

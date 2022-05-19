@@ -8,6 +8,7 @@ import {
   Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
+import { ApiReadonlyMixin, IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
@@ -15,7 +16,7 @@ import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyIt
  * Constructor options for {@link ApiProperty}.
  * @public
  */
-export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiStaticMixinOptions {}
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiReadonlyMixinOptions, IApiStaticMixinOptions {}
 
 /**
  * Represents a TypeScript property declaration that belongs to an `ApiClass`.
@@ -51,7 +52,7 @@ export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiStatic
  *
  * @public
  */
-export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
+export class ApiProperty extends ApiReadonlyMixin(ApiStaticMixin(ApiPropertyItem)) {
   public constructor(options: IApiPropertyOptions) {
     super(options);
   }

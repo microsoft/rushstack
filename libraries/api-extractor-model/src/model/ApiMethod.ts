@@ -19,6 +19,7 @@ import {
   IApiTypeParameterListMixinOptions
 } from '../mixins/ApiTypeParameterListMixin';
 import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
+import { ApiReadonlyMixin, IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
 
 /**
  * Constructor options for {@link ApiMethod}.
@@ -32,6 +33,7 @@ export interface IApiMethodOptions
     IApiReturnTypeMixinOptions,
     IApiStaticMixinOptions,
     IApiOptionalMixinOptions,
+    IApiReadonlyMixinOptions,
     IApiDeclaredItemOptions {}
 
 /**
@@ -58,7 +60,9 @@ export interface IApiMethodOptions
 export class ApiMethod extends ApiNameMixin(
   ApiTypeParameterListMixin(
     ApiParameterListMixin(
-      ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiOptionalMixin(ApiDeclaredItem))))
+      ApiReleaseTagMixin(
+        ApiReturnTypeMixin(ApiStaticMixin(ApiOptionalMixin(ApiReadonlyMixin(ApiDeclaredItem))))
+      )
     )
   )
 ) {

@@ -508,6 +508,22 @@ export class ApiPropertySignature extends ApiPropertyItem {
 }
 
 // @public
+export function ApiReadonlyMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiReadonlyMixin);
+
+// @public
+export interface ApiReadonlyMixin extends ApiItem {
+    // (undocumented)
+    readonly isReadonly: boolean;
+    // (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+// @public
+export namespace ApiReadonlyMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiReadonlyMixin;
+}
+
+// @public
 export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiReleaseTagMixin);
 
 // @public
@@ -701,7 +717,7 @@ export interface IApiIndexSignatureOptions extends IApiParameterListMixinOptions
 }
 
 // @public
-export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiReadonlyMixinOptions {
     // (undocumented)
     extendsTokenRanges: IExcerptTokenRange[];
 }
@@ -721,11 +737,11 @@ export interface IApiItemOptions {
 }
 
 // @public
-export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public (undocumented)
-export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiOptionalMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -776,17 +792,23 @@ export interface IApiParameterOptions {
 }
 
 // @public
-export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
+export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiOptionalMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     propertyTypeTokenRange: IExcerptTokenRange;
 }
 
 // @public
-export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiStaticMixinOptions {
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiReadonlyMixinOptions, IApiStaticMixinOptions {
 }
 
 // @public
 export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
+}
+
+// @public
+export interface IApiReadonlyMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    isReadonly: boolean;
 }
 
 // @public

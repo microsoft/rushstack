@@ -180,6 +180,7 @@
               "text": "export interface A "
             }
           ],
+          "isReadonly": false,
           "releaseTag": "Public",
           "name": "A",
           "members": [
@@ -201,6 +202,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "myProperty",
@@ -256,6 +258,7 @@
                       "text": ";"
                     }
                   ],
+                  "isReadonly": false,
                   "isOptional": false,
                   "isStatic": false,
                   "returnTypeTokenRange": {
