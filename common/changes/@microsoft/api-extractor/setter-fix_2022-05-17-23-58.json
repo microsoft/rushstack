@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Fix bug in how API properties are processed introduced by https://github.com/microsoft/rushstack/pull/3396",
+      "comment": "Fix a recent regression that produced an error \"Cannot read properties of undefined\" (GitHub #3423)",
       "type": "patch"
     }
   ],
