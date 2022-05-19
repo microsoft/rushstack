@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/module-minifier",
       "comment": "Factor out minifiers from @rushstack/module-minifier-plugin.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/module-minifier"

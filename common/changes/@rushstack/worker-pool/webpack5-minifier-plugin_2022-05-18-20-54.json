@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/worker-pool",
       "comment": "Factor out WorkerPool from @rushstack/module-minifier-plugin.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/worker-pool"
