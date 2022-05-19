@@ -3,19 +3,18 @@
 
 import { createHash } from 'crypto';
 import { cpus } from 'os';
+
 import serialize from 'serialize-javascript';
 import type { MinifyOptions } from 'terser';
+import { WorkerPool } from '@rushstack/worker-pool';
 
-import {
+import type {
   IMinifierConnection,
   IModuleMinificationCallback,
   IModuleMinificationResult,
   IModuleMinificationRequest,
   IModuleMinifier
-} from './ModuleMinifierPlugin.types';
-import { WorkerPool } from './workerPool/WorkerPool';
-
-import './OverrideWebpackIdentifierAllocation';
+} from './types';
 
 /**
  * Options for configuring the WorkerPoolMinifier
@@ -64,7 +63,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       id: 'Minifier',
       maxWorkers: maxThreads,
       workerData: terserOptions,
-      workerScriptPath: require.resolve('./workerPool/MinifierWorker')
+      workerScriptPath: require.resolve('./MinifierWorker')
     });
 
     this._configHash = createHash('sha256')

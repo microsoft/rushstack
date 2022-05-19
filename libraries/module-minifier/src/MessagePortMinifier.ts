@@ -4,13 +4,13 @@
 import { once } from 'events';
 import { MessagePort } from 'worker_threads';
 
-import {
+import type {
   IMinifierConnection,
   IModuleMinificationCallback,
   IModuleMinificationRequest,
   IModuleMinificationResult,
   IModuleMinifier
-} from './ModuleMinifierPlugin.types';
+} from './types';
 
 /**
  * Minifier implementation that outsources requests to the other side of a MessagePort

@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
 import { ConcatSource } from 'webpack-sources';
-import {
+import type {
   IAssetInfo,
   IModuleMap,
   IModuleInfo,

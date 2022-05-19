@@ -5,15 +5,14 @@ import { createHash } from 'crypto';
 import serialize from 'serialize-javascript';
 import type { MinifyOptions } from 'terser';
 
-import {
+import type {
   IMinifierConnection,
   IModuleMinificationCallback,
   IModuleMinificationRequest,
   IModuleMinificationResult,
   IModuleMinifier
-} from './ModuleMinifierPlugin.types';
-import { minifySingleFile } from './terser/MinifySingleFile';
-import './OverrideWebpackIdentifierAllocation';
+} from './types';
+import { minifySingleFileAsync } from './MinifySingleFile';
 
 /**
  * Options for configuring the LocalMinifier
@@ -66,7 +65,7 @@ export class LocalMinifier implements IModuleMinifier {
       return callback(cached);
     }
 
-    minifySingleFile(request, this._terserOptions)
+    minifySingleFileAsync(request, this._terserOptions)
       .then((result: IModuleMinificationResult) => {
         this._resultCache.set(hash, result);
         callback(result);

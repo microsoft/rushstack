@@ -1,10 +1,13 @@
-import { minifySingleFile } from '../terser/MinifySingleFile';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
-describe(minifySingleFile.name, () => {
+import { minifySingleFileAsync } from '../MinifySingleFile';
+
+describe(minifySingleFileAsync.name, () => {
   it('uses consistent identifiers for webpack vars', async () => {
     const code: string = `__MINIFY_MODULE__(function (module, __webpack_exports__, __webpack_require__) {});`;
 
-    const minifierResult = await minifySingleFile(
+    const minifierResult = await minifySingleFileAsync(
       {
         hash: 'foo',
         code,

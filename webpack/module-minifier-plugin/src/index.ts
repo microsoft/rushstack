@@ -5,9 +5,24 @@ export * from './Constants';
 export * from './GenerateLicenseFileForAsset';
 export * from './ModuleMinifierPlugin.types';
 export * from './ModuleMinifierPlugin';
-export * from './NoopMinifier';
 export * from './PortableMinifierIdsPlugin';
 export * from './RehydrateAsset';
-export * from './LocalMinifier';
-export * from './WorkerPoolMinifier';
-export { getIdentifier } from './MinifiedIdentifier';
+export type {
+  ILocalMinifierOptions,
+  IMinifierConnection,
+  IModuleMinificationCallback,
+  IModuleMinificationErrorResult,
+  IModuleMinificationRequest,
+  IModuleMinificationResult,
+  IModuleMinificationSuccessResult,
+  IModuleMinifier,
+  IModuleMinifierFunction,
+  IWorkerPoolMinifierOptions
+} from '@rushstack/module-minifier';
+export {
+  getIdentifier,
+  LocalMinifier,
+  MessagePortMinifier,
+  NoopMinifier,
+  WorkerPoolMinifier
+} from '@rushstack/module-minifier';

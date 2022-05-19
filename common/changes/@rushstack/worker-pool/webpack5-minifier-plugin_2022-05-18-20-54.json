@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/worker-pool",
+      "comment": "Factor out WorkerPool from @rushstack/module-minifier-plugin.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/worker-pool"
+}
