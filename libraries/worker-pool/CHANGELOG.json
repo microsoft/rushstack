@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/worker-pool",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/worker-pool_v0.1.0",
+      "date": "Fri, 20 May 2022 00:11:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Factor out WorkerPool from @rushstack/module-minifier-plugin."
+          }
+        ]
+      }
+    }
+  ]
+}

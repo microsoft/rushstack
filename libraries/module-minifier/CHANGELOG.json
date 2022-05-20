@@ -1,0 +1,22 @@
+{
+  "name": "@rushstack/module-minifier",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/module-minifier_v0.1.0",
+      "date": "Fri, 20 May 2022 00:11:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Factor out minifiers from @rushstack/module-minifier-plugin."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.1.0`"
+          }
+        ]
+      }
+    }
+  ]
+}
