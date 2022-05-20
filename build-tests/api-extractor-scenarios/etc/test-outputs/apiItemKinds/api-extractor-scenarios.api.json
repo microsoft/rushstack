@@ -394,7 +394,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "isReadonly": true
         },
         {
           "kind": "Interface",
@@ -572,7 +573,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "isReadonly": false
         },
         {
           "kind": "Class",

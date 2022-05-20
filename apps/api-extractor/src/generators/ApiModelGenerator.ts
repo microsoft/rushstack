@@ -471,8 +471,9 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
-      apiEnum = new ApiEnum({ name, docComment, releaseTag, excerptTokens });
+      apiEnum = new ApiEnum({ name, docComment, releaseTag, excerptTokens, isReadonly });
       parentApiItem.addMember(apiEnum);
     }
 
@@ -667,18 +668,6 @@ export class ApiModelGenerator {
     }
 
     this._processChildDeclarations(astDeclaration, exportedName, apiInterface);
-  }
-
-  private _determineReadonly(astDeclaration: AstDeclaration): boolean {
-    const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
-    const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
-    const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(astDeclaration);
-    //Line 1: sees whether the readonly modifier is present
-    //Line 2: sees if the TSDoc comment for @readonly is present
-    //Line 3: sees whether a getter is present for a property with no setter
-    return (astDeclaration.modifierFlags & ts.ModifierFlags.Readonly) !== 0
-      || (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly'))
-      || (declarationMetadata.ancillaryDeclarations.length === 0 && astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor);
   }
 
   private _processApiMethod(
@@ -1061,5 +1050,17 @@ export class ApiModelGenerator {
       });
     }
     return parameters;
+  }
+
+  private _determineReadonly(astDeclaration: AstDeclaration): boolean {
+    const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
+    const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
+    const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(astDeclaration);
+    //Line 1: sees whether the readonly or const modifiers  present
+    //Line 2: sees if the TSDoc comment for @readonly is present
+    //Line 3: sees whether a getter is present for a property with no setter
+    return (astDeclaration.modifierFlags & (ts.ModifierFlags.Readonly + ts.ModifierFlags.Const)) !== 0
+      || (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly'))
+      || (declarationMetadata.ancillaryDeclarations.length === 0 && astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor);
   }
 }

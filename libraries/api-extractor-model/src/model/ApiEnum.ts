@@ -13,6 +13,7 @@ import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiRel
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiEnumMember } from './ApiEnumMember';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { IApiReadonlyMixinOptions, ApiReadonlyMixin } from '../mixins/ApiReadonlyMixin';
 
 /**
  * Constructor options for {@link ApiEnum}.
@@ -22,7 +23,8 @@ export interface IApiEnumOptions
   extends IApiItemContainerMixinOptions,
     IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
-    IApiDeclaredItemOptions {}
+    IApiDeclaredItemOptions,
+    IApiReadonlyMixinOptions {}
 
 /**
  * Represents a TypeScript enum declaration.
@@ -44,7 +46,7 @@ export interface IApiEnumOptions
  *
  * @public
  */
-export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+export class ApiEnum extends ApiReadonlyMixin(ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)))) {
   public constructor(options: IApiEnumOptions) {
     super(options);
   }

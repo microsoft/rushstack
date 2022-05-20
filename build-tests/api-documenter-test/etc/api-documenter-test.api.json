@@ -1070,7 +1070,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "isReadonly": false
         },
         {
           "kind": "Enum",
@@ -1127,7 +1128,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "isReadonly": false
         },
         {
           "kind": "Namespace",

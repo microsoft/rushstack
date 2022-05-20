@@ -998,15 +998,6 @@ export class MarkdownDocumenter {
         new DocPlainText({ configuration, text: ' ' })
       ]);
     }
-    //Should this be under modifer or descriptions?
-    if (ApiReadonlyMixin.isBaseClassOf(apiItem) && apiItem.isReadonly) {
-      section.appendNodesInParagraph([
-        new DocEmphasisSpan({ configuration, italic: true }, [
-          new DocPlainText({ configuration, text: '[Readonly]' })
-        ]),
-        new DocPlainText({ configuration, text: ' ' })
-      ]);
-    }
 
     if (apiItem instanceof ApiDocumentedItem) {
       if (apiItem.tsdocComment !== undefined) {
@@ -1025,6 +1016,12 @@ export class MarkdownDocumenter {
     if (ApiStaticMixin.isBaseClassOf(apiItem)) {
       if (apiItem.isStatic) {
         section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: 'static' }));
+      }
+    }
+
+    if (ApiReadonlyMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isReadonly) {
+        section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: 'readonly' }));
       }
     }
 

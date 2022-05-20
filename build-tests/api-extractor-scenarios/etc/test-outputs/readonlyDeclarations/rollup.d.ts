@@ -1,4 +1,10 @@
 /** @public */
+export declare const enum ConstEnum {
+    Zero = 0,
+    One = 1
+}
+
+/** @public */
 export declare interface _IInternalThing {
     title: string;
 }

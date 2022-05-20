@@ -7,6 +7,11 @@ export interface _IInternalThing {
 }
 
 /** @public */
+export const enum ConstEnum {
+  Zero,
+  One = 1
+}
+/** @public */
 export class MyClass {
   public get _writableThing(): _IInternalThing {
     return { title: 'thing' };

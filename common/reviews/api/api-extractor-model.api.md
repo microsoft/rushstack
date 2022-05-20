@@ -707,7 +707,7 @@ export interface IApiEnumMemberOptions extends IApiNameMixinOptions, IApiRelease
 }
 
 // @public
-export interface IApiEnumOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiEnumOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiReadonlyMixinOptions {
 }
 
 // @public

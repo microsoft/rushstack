@@ -5,6 +5,14 @@
 ```ts
 
 // @public (undocumented)
+export const enum ConstEnum {
+    // (undocumented)
+    One = 1,
+    // (undocumented)
+    Zero = 0
+}
+
+// @public (undocumented)
 export interface _IInternalThing {
     // (undocumented)
     title: string;
