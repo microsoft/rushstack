@@ -494,8 +494,10 @@ export class ApiPropertyItem extends ApiPropertyItem_base {
     serializeInto(jsonObject: Partial<IApiPropertyItemJson>): void;
 }
 
+// Warning: (ae-forgotten-export) The symbol "ApiPropertySignature_base" needs to be exported by the entry point index.d.ts
+//
 // @public
-export class ApiPropertySignature extends ApiPropertyItem {
+export class ApiPropertySignature extends ApiPropertySignature_base {
     constructor(options: IApiPropertySignatureOptions);
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
@@ -717,7 +719,7 @@ export interface IApiIndexSignatureOptions extends IApiParameterListMixinOptions
 }
 
 // @public
-export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiReadonlyMixinOptions {
+export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     extendsTokenRanges: IExcerptTokenRange[];
 }
@@ -802,7 +804,7 @@ export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiReadon
 }
 
 // @public
-export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
+export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions, IApiReadonlyMixinOptions {
 }
 
 // @public

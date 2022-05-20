@@ -180,7 +180,6 @@
               "text": "export interface _IInternalThing "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "_IInternalThing",
           "members": [

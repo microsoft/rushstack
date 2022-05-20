@@ -9,12 +9,12 @@ import {
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
-
+import { ApiReadonlyMixin, IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
 /**
  * Constructor options for {@link ApiPropertySignature}.
  * @public
  */
-export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {}
+export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions, IApiReadonlyMixinOptions {}
 
 /**
  * Represents a TypeScript property declaration that belongs to an `ApiInterface`.
@@ -38,7 +38,7 @@ export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {}
  *
  * @public
  */
-export class ApiPropertySignature extends ApiPropertyItem {
+export class ApiPropertySignature extends ApiReadonlyMixin(ApiPropertyItem) {
   public constructor(options: IApiPropertySignatureOptions) {
     super(options);
   }

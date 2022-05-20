@@ -180,7 +180,6 @@
               "text": "export interface IBeta "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Beta",
           "name": "IBeta",
           "members": [

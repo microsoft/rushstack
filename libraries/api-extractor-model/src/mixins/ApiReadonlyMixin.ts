@@ -19,7 +19,8 @@ export interface IApiReadonlyMixinJson extends IApiItemJson {
 const _isReadonly: unique symbol = Symbol('ApiReadonlyMixin._isReadonly');
 
 /**
- * The mixin base class for API items that can have type parameters.
+ * The mixin base class for API items that cannot be modified after instantiation.
+ * Examples such as the readonly modifier and only having a getter but no setter.
  *
  * @remarks
  *

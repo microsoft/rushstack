@@ -180,7 +180,6 @@
               "text": "export interface ITeamsContext "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "ITeamsContext",
           "members": [

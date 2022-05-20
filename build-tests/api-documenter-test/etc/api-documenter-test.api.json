@@ -190,7 +190,6 @@
               "text": "export interface Constraint "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "Constraint",
           "members": [],
@@ -272,7 +271,6 @@
               "text": "export interface DefaultType "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "DefaultType",
           "members": [],
@@ -991,7 +989,6 @@
               "text": "export interface DocClassInterfaceMerge "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "DocClassInterfaceMerge",
           "members": [],
@@ -1448,7 +1445,6 @@
               "text": "export interface IDocInterface1 "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IDocInterface1",
           "members": [
@@ -1502,7 +1498,6 @@
               "text": " "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IDocInterface2",
           "members": [
@@ -1553,7 +1548,6 @@
               "text": "export interface IDocInterface3 "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IDocInterface3",
           "members": [
@@ -1773,7 +1767,6 @@
               "text": "export interface IDocInterface4 "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IDocInterface4",
           "members": [
@@ -1903,7 +1896,6 @@
               "text": "export interface IDocInterface5 "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IDocInterface5",
           "members": [
@@ -1947,7 +1939,6 @@
               "text": "export interface IDocInterface6 "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IDocInterface6",
           "members": [
@@ -2242,7 +2233,6 @@
               "text": "export interface IDocInterface7 "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IDocInterface7",
           "members": [

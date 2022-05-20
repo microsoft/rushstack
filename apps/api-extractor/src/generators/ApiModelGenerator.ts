@@ -653,7 +653,6 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiInterface = new ApiInterface({
         name,
@@ -661,8 +660,7 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         typeParameters,
-        extendsTokenRanges,
-        isReadonly
+        extendsTokenRanges
       });
 
       parentApiItem.addMember(apiInterface);
@@ -675,8 +673,11 @@ export class ApiModelGenerator {
     const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
     const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
     const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(astDeclaration);
+    //Line 1: sees whether the readonly modifier is present
+    //Line 2: sees if the TSDoc comment for @readonly is present
+    //Line 3: sees whether a getter is present for a property with no setter
     return (astDeclaration.modifierFlags & ts.ModifierFlags.Readonly) !== 0
-      || (docComment !== undefined &&  docComment.modifierTagSet.hasTagName('@readonly'))
+      || (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly'))
       || (declarationMetadata.ancillaryDeclarations.length === 0 && astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor);
   }
 

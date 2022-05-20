@@ -180,7 +180,6 @@
               "text": "export interface A "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "A",
           "members": [

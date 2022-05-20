@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "Adding readonlyMixin for Api Extractor",
-      "type": "patch"
+      "comment": "Adding isReadonly field to the models of relevant api pieces.",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor-model"

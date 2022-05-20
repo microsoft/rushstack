@@ -379,7 +379,6 @@
               "text": "export interface GenericInterface<T> "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -446,7 +445,6 @@
               "text": "export interface InterfaceWithGenericCallSignature "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "InterfaceWithGenericCallSignature",
           "members": [
@@ -502,7 +500,6 @@
               "text": "export interface InterfaceWithGenericConstructSignature "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "InterfaceWithGenericConstructSignature",
           "members": [

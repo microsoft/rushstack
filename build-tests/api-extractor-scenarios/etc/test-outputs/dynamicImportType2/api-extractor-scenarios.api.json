@@ -180,7 +180,6 @@
               "text": "export interface IExample "
             }
           ],
-          "isReadonly": false,
           "releaseTag": "Public",
           "name": "IExample",
           "members": [

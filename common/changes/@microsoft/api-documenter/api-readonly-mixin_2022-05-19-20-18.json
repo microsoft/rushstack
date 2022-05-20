@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "Adding readonlyMixin for Api Extractor",
-      "type": "patch"
+      "comment": "Add support for rendering readonly information next to API items",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-documenter"
