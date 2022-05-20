@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Node Localization Configuration",
+  "description": "This schema describes the \"config/node-loc.json\" config file used to configure \"@rushstack/heft-node-loc-plugin\".",
+  "type": "object",
+
+  "additionalProperties": false,
+  "required": ["srcFolder", "generatedTsFolder"],
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "srcFolder": {
+      "type": "string",
+      "description": "Source code root directory."
+    },
+
+    "generatedTsFolder": {
+      "type": "string",
+      "description": "Output directory for generated typings."
+    },
+
+    "stringsOutputFolders": {
+      "type": "array",
+      "description": "List of folders to output strings JSON files without comments to.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "exportAsDefault": {
+      "type": "boolean",
+      "description": "Determines whether the typings export values are wrapped in a default property, or not."
+    }
+  }
+}

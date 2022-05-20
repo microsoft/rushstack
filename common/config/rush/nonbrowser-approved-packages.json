@@ -119,6 +119,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-node-loc-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -148,7 +152,7 @@
     },
     {
       "name": "@rushstack/localization-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/module-minifier",

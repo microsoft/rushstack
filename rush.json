@@ -825,6 +825,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-node-loc-plugin",
+      "projectFolder": "heft-plugins/heft-node-loc-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false // For now
+    },
+    {
       "packageName": "@rushstack/heft-sass-plugin",
       "projectFolder": "heft-plugins/heft-sass-plugin",
       "reviewCategory": "libraries",

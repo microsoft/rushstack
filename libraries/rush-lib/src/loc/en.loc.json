@@ -1,0 +1,50 @@
+{
+  "rushToolDescription": {
+    "value": "Rush makes life easier for JavaScript developers who develop, build, and publish many packages from a central Git repo.  It is designed to handle very large repositories supporting many projects and people.  Rush provides policies, protections, and customizations that help coordinate teams and safely onboard new contributors.  Rush also generates change logs and automates package publishing.  It can manage decoupled subsets of projects with different release and versioning strategies.  A full API is included to facilitate integration with other automation tools.  If you are looking for a proven turnkey solution for monorepo management, Rush is for you.",
+    "comment": "This is the text that is printed as the description for what Rush is and does when a user runs \"rush --help\""
+  },
+  "rushToolDebugFlagDescription": {
+    "value": "Show the full call stack if an error occurs while executing the tool",
+    "comment": "The help text for the \"--debug\" flag"
+  },
+  "rushToolQuietFlagDescription": {
+    "value": "Hide rush startup information",
+    "comment": "The help text for the \"--quiet\" flag"
+  },
+  "pluginAddCommandLineActionsErrorMessage": {
+    "value": "Error from plugin {0} by {1}: {2}",
+    "comment": "The error message when a plugin throws an exception when adding commands. The {0} placeholder is the plugin name, the {1} placeholder is the plugin's package name, and the {2} placeholder is the error message."
+  },
+  "commandCollisionErrorMessage": {
+    "value": "{0} defines a command \"{1}\" using a name that already exists",
+    "comment": "An error message printed when a repo attempts to re-define an existing command. The {0} placeholder is \"command-line.json\" file path and the {1} placeholder is the command name."
+  },
+  "phasedCommandExperimentMustBeEnabledErrorMessage": {
+    "value": "{0} defines a command \"{1}\" using a name that that uses the \"{2}\" command kind. To use this command kind, the \"phasedCommands\" experiment must be enabled.",
+    "comment": "An error message printed when a repo attempts to define a phased command without enabling the phased commands experiment. The {0} placeholder is \"command-line.json\" file path, the {1} placeholder is the command name, and the {2} placeholder is the name of the phased command kind identifier."
+  },
+  "unsupportedCommandKindErrorMessage": {
+    "value": "{0} defines a command \"{1}\" using an unsupported command kind \"{2}\"",
+    "comment": "An error message printed when a repo attempts define a command using a kind that isn't recognized. The {0} placeholder is \"command-line.json\" file path, the {1} placeholder is the command name, and the {2} placeholder is the specified command kind."
+  },
+  "disallowedGlobalCommandErrorMessage": {
+    "value": "{0} defines a command \"{1}\" using the command kind \"{2}\". This command can only be designated as a command kind \"{3}\" or \"{4}\".",
+    "comment": "An error message printed when a repo attempts define a command using a kind that isn't recognized. The {0} placeholder is \"command-line.json\" file path, the {1} placeholder is the command name, the {2} placeholder is global command kind identifier, the {3} placeholder is the bulk command kind identifier, and the {4} placeholder is the phased command kind identifier."
+  },
+  "deprecatedCommandWarningSingleAlternative": {
+    "value": "Instead of \"{0}\", use \"{1}\".",
+    "comment": "This string is printed when a user runs a deprecated command. The {0} placeholder is the old, deprecated command and the {1} placeholder is the new command."
+  },
+  "deprecatedCommandWarningTwoAlternatives": {
+    "value": "Instead of \"{0}\", use \"{1}\" or \"{2}\".",
+    "comment": "This string is printed when a user runs a deprecated command. The {0} placeholder is the old, deprecated command and the {1} and {2} placeholders are alternatives for the new command."
+  },
+  "deprecatedCommandWarning": {
+    "value": "ERROR: You specified an outdated command-line that is no longer supported by this version of Rush: ",
+    "comment": "This string is printed in red when a user runs a deprecated command before suggested alternatives are printed."
+  },
+  "deprecatedCommandMigrationInstructions": {
+    "value": "For command-line help, type \"rush -h\". For migration instructions, please visit {0}",
+    "comment": "This string is printed when a user runs a deprecated command. The {0} placeholder is the Rush website URL."
+  }
+}

@@ -60,6 +60,7 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft-node-loc-plugin": "workspace:*",
     "@types/cli-table": "0.3.0",
     "@types/glob": "7.1.1",
     "@types/heft-jest": "1.0.1",

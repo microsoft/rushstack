@@ -1,3 +1,7 @@
 {
-  "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json"
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json",
+
+  "moduleNameMapper": {
+    "en\\.loc\\.json": "<rootDir>/lib/loc/en.loc.json"
+  }
 }

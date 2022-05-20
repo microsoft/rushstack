@@ -123,7 +123,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
         let classMap: IClassMap = {};
         const cssModulesClassMapPlugin: postcss.Plugin = cssModules({
           getJSON: (cssFileName: string, json: IClassMap) => {
-            // This callback will be invoked durint the promise evaluation of the postcss process() function.
+            // This callback will be invoked during the promise evaluation of the postcss process() function.
             classMap = json;
           },
           // Avoid unnecessary name hashing.
