@@ -1027,24 +1027,32 @@ importers:
       '@rushstack/heft-dev-cert-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       '@rushstack/heft-webpack5-plugin': workspace:*
+      '@rushstack/module-minifier': workspace:*
+      '@rushstack/webpack5-module-minifier-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
       eslint: ~8.7.0
+      html-webpack-plugin: ~5.5.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
       typescript: ~4.6.3
+      webpack: ~5.68.0
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-dev-cert-plugin': link:../../heft-plugins/heft-dev-cert-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/module-minifier': link:../../libraries/module-minifier
+      '@rushstack/webpack5-module-minifier-plugin': link:../../webpack/module-minifier-plugin-5
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
       eslint: 8.7.0
+      html-webpack-plugin: 5.5.0_webpack@5.68.0
       tslint: 5.20.1_typescript@4.6.3
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@4.6.3
       typescript: 4.6.3
+      webpack: 5.68.0
 
   ../../build-tests/install-test-workspace:
     specifiers:
@@ -2372,6 +2380,35 @@ importers:
       '@types/webpack-sources': 1.4.2
       webpack: 4.44.2
       webpack-sources: 1.4.3
+
+  ../../webpack/module-minifier-plugin-5:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/module-minifier': workspace:*
+      '@rushstack/worker-pool': workspace:*
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      memfs: 3.4.3
+      tapable: 2.2.1
+      webpack: ~5.68.0
+    dependencies:
+      '@rushstack/worker-pool': link:../../libraries/worker-pool
+      '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      tapable: 2.2.1
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/module-minifier': link:../../libraries/module-minifier
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      memfs: 3.4.3
+      webpack: 5.68.0
 
   ../../webpack/preserve-dynamic-require-plugin:
     specifiers:
@@ -9420,7 +9457,7 @@ packages:
       multicast-dns-service-types: 1.1.0
 
   /boolbase/1.0.0:
-    resolution: {integrity: sha1-aN/1++YMUes3cl6p4+0xDcwed24=}
+    resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
   /boxen/5.1.2:
     resolution: {integrity: sha512-9gYgQKXx+1nP8mP7CzFyaUARhg7D3n1dF/FnErWmu9l6JvGpNUN278h0aSb+QjoiKSWG+iZ3uHrcqk0qrY9RQQ==}
@@ -12728,7 +12765,7 @@ packages:
       deepmerge: 4.2.2
       fs-extra: 9.1.0
       glob: 7.2.0
-      memfs: 3.4.1
+      memfs: 3.4.3
       minimatch: 3.1.2
       schema-utils: 2.7.0
       semver: 7.3.5
@@ -15981,8 +16018,8 @@ packages:
     resolution: {integrity: sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=}
     engines: {node: '>= 0.6'}
 
-  /memfs/3.4.1:
-    resolution: {integrity: sha512-1c9VPVvW5P7I85c35zAdEr1TD5+F11IToIHIlrVIcflfnzPkJa0ZoYEoEdYDP8KgPFoSZ/opDrUsAoZWym3mtw==}
+  /memfs/3.4.3:
+    resolution: {integrity: sha512-eivjfi7Ahr6eQTn44nvTnR60e4a1Fs1Via2kCR5lHo/kyNoiMWaXCNJ/GpSd0ilXas2JSOl9B5FTIhflXu0hlg==}
     engines: {node: '>= 4.0.0'}
     dependencies:
       fs-monkey: 1.0.3
@@ -21405,7 +21442,7 @@ packages:
       webpack: ^4.0.0 || ^5.0.0
     dependencies:
       colorette: 2.0.16
-      memfs: 3.4.1
+      memfs: 3.4.3
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.0.0

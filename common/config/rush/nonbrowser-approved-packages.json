@@ -156,7 +156,7 @@
     },
     {
       "name": "@rushstack/module-minifier",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/module-minifier-plugin",
@@ -213,6 +213,10 @@
     {
       "name": "@rushstack/webpack-plugin-utilities",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/webpack5-module-minifier-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/worker-pool",
@@ -537,6 +541,10 @@
     {
       "name": "long",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "memfs",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "mini-css-extract-plugin",
