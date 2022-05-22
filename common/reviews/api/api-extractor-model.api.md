@@ -854,7 +854,7 @@ export interface IApiTypeParameterOptions {
 }
 
 // @public
-export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiReadonlyMixinOptions {
     // (undocumented)
     variableTypeTokenRange: IExcerptTokenRange;
 }

@@ -214,62 +214,22 @@
           "extendsTokenRanges": []
         },
         {
-          "kind": "Enum",
-          "canonicalReference": "api-extractor-scenarios!ConstEnum:enum",
+          "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!FOO:var",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare const enum ConstEnum "
+              "text": "FOO = \"foo\""
             }
           ],
           "releaseTag": "Public",
-          "name": "ConstEnum",
-          "members": [
-            {
-              "kind": "EnumMember",
-              "canonicalReference": "api-extractor-scenarios!ConstEnum.One:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "One = "
-                },
-                {
-                  "kind": "Content",
-                  "text": "1"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "One",
-              "initializerTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            },
-            {
-              "kind": "EnumMember",
-              "canonicalReference": "api-extractor-scenarios!ConstEnum.Zero:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "Zero = "
-                },
-                {
-                  "kind": "Content",
-                  "text": "0"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "Zero",
-              "initializerTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              }
-            }
-          ],
-          "isReadonly": true
+          "name": "FOO",
+          "isReadonly": true,
+          "variableTypeTokenRange": {
+            "startIndex": 0,
+            "endIndex": 0
+          }
         },
         {
           "kind": "Class",

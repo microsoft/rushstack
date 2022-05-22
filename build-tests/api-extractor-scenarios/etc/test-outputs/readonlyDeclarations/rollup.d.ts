@@ -1,8 +1,5 @@
 /** @public */
-export declare const enum ConstEnum {
-    Zero = 0,
-    One = 1
-}
+export declare const FOO = "foo";
 
 /** @public */
 export declare interface _IInternalThing {

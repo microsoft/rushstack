@@ -7,10 +7,8 @@ export interface _IInternalThing {
 }
 
 /** @public */
-export const enum ConstEnum {
-  Zero,
-  One = 1
-}
+export const FOO = 'foo';
+
 /** @public */
 export class MyClass {
   public get _writableThing(): _IInternalThing {

@@ -254,6 +254,7 @@
               ],
               "releaseTag": "Public",
               "name": "calucatorVersion",
+              "isReadonly": true,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -405,6 +406,7 @@
               ],
               "releaseTag": "Public",
               "name": "calucatorVersion",
+              "isReadonly": true,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

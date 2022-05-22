@@ -211,6 +211,7 @@
           ],
           "releaseTag": "Public",
           "name": "constVariable",
+          "isReadonly": true,
           "variableTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -1202,6 +1203,7 @@
               ],
               "releaseTag": "Public",
               "name": "example",
+              "isReadonly": true,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -2439,6 +2441,7 @@
               ],
               "releaseTag": "Public",
               "name": "nestedVariable",
+              "isReadonly": false,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

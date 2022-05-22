@@ -186,6 +186,7 @@
           ],
           "releaseTag": "Public",
           "name": "MY_CONSTANT",
+          "isReadonly": false,
           "variableTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

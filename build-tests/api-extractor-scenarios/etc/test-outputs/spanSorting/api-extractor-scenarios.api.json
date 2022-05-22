@@ -374,6 +374,7 @@
           ],
           "releaseTag": "Public",
           "name": "exampleD",
+          "isReadonly": true,
           "variableTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

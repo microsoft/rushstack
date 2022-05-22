@@ -186,6 +186,7 @@
           ],
           "releaseTag": "Public",
           "name": "_default",
+          "isReadonly": true,
           "variableTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

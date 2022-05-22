@@ -5,12 +5,7 @@
 ```ts
 
 // @public (undocumented)
-export const enum ConstEnum {
-    // (undocumented)
-    One = 1,
-    // (undocumented)
-    Zero = 0
-}
+export const FOO = "foo";
 
 // @public (undocumented)
 export interface _IInternalThing {

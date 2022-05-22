@@ -977,8 +977,9 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
-      apiVariable = new ApiVariable({ name, docComment, releaseTag, excerptTokens, variableTypeTokenRange });
+      apiVariable = new ApiVariable({ name, docComment, releaseTag, excerptTokens, variableTypeTokenRange, isReadonly });
 
       parentApiItem.addMember(apiVariable);
     }
@@ -1059,8 +1060,10 @@ export class ApiModelGenerator {
     //Line 1: sees whether the readonly or const modifiers  present
     //Line 2: sees if the TSDoc comment for @readonly is present
     //Line 3: sees whether a getter is present for a property with no setter
+    //Line 4: sees if the var has a Const flag
     return (astDeclaration.modifierFlags & (ts.ModifierFlags.Readonly + ts.ModifierFlags.Const)) !== 0
       || (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly'))
-      || (declarationMetadata.ancillaryDeclarations.length === 0 && astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor);
+      || (declarationMetadata.ancillaryDeclarations.length === 0 && astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor)
+      || (ts.getCombinedNodeFlags(astDeclaration.declaration) & ts.NodeFlags.Const) !== 0;
   }
 }

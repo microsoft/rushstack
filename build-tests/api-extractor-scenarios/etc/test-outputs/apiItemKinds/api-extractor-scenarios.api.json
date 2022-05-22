@@ -469,6 +469,7 @@
               ],
               "releaseTag": "Public",
               "name": "constVariable",
+              "isReadonly": false,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -490,6 +491,7 @@
               ],
               "releaseTag": "Public",
               "name": "variable",
+              "isReadonly": false,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -745,6 +747,7 @@
           ],
           "releaseTag": "Public",
           "name": "VARIABLE",
+          "isReadonly": true,
           "variableTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
