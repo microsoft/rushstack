@@ -44,6 +44,8 @@ import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule } from '../analyzer/AstModule';
 
+import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+
 export class ApiModelGenerator {
   private readonly _collector: Collector;
   private readonly _apiModel: ApiModel;
@@ -1064,6 +1066,6 @@ export class ApiModelGenerator {
     return (astDeclaration.modifierFlags & (ts.ModifierFlags.Readonly + ts.ModifierFlags.Const)) !== 0
       || (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly'))
       || (declarationMetadata.ancillaryDeclarations.length === 0 && astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor)
-      || (ts.getCombinedNodeFlags(astDeclaration.declaration) & ts.NodeFlags.Const) !== 0;
+      || ts.isVariableDeclaration(astDeclaration.declaration) && TypeScriptInternals.isVarConst(astDeclaration.declaration)
   }
 }
