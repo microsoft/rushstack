@@ -51,7 +51,7 @@ export class WebpackConfigurationUpdater {
 
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
       {
-        test: Constants.RESX_OR_LOC_JSON_REGEX,
+        test: Constants.RESOURCE_FILE_NAME_REGEXP,
         use: [
           {
             loader: loader,
@@ -101,11 +101,11 @@ export class WebpackConfigurationUpdater {
     const rules: Webpack.RuleSetCondition =
       globsToIgnore && globsToIgnore.length > 0
         ? {
-            include: Constants.RESX_OR_LOC_JSON_REGEX,
+            include: Constants.RESOURCE_FILE_NAME_REGEXP,
             exclude: (filePath: string): boolean =>
               globsToIgnore.some((glob: string): boolean => minimatch(filePath, glob))
           }
-        : Constants.RESX_OR_LOC_JSON_REGEX;
+        : Constants.RESOURCE_FILE_NAME_REGEXP;
     WebpackConfigurationUpdater._addRulesToConfiguration(configuration, [
       {
         test: rules,

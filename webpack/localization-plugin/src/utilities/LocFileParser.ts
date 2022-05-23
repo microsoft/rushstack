@@ -46,13 +46,43 @@ export class LocFileParser {
         newlineNormalization: options.resxNewlineNormalization,
         warnOnMissingComment: !options.ignoreMissingResxComments
       });
-    } else {
+    } else if (/\.(resx|loc)\.json$/i.test(options.filePath)) {
       parsedFile = JsonFile.parseString(options.content);
       try {
         Constants.LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
       } catch (e) {
         options.terminal.writeError(`The loc file is invalid. Error: ${e}`);
       }
+    } else if (/\.resjson$/i.test(options.filePath)) {
+      const resjsonFile: Record<string, string> = JsonFile.parseString(options.content);
+      parsedFile = {};
+      const comments: Record<string, string> = {};
+      for (const [key, value] of Object.entries(resjsonFile)) {
+        if (key.startsWith('_') && key.endsWith('.comment')) {
+          const commentKey: string = key.substring(1, key.length - '.comment'.length);
+          comments[commentKey] = value;
+        } else {
+          parsedFile[key] = { value };
+        }
+      }
+
+      const orphanComments: string[] = [];
+      for (const [key, comment] of Object.entries(comments)) {
+        if (parsedFile[key]) {
+          parsedFile[key].comment = comment;
+        } else {
+          orphanComments.push(key);
+        }
+      }
+
+      if (orphanComments.length > 0) {
+        options.terminal.writeErrorLine(
+          'The resjson file is invalid. Comments exist for the following string keys ' +
+            `that don't have values: ${orphanComments.join(', ')}.`
+        );
+      }
+    } else {
+      throw new Error(`Unsupported file extension in file: ${options.filePath}`);
     }
 
     parseCache.set(fileCacheKey, { content: options.content, parsedFile });
