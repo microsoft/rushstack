@@ -169,6 +169,8 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     super();
   }
 
+  static readonly staticReadonlyThing: boolean;
+
   /**
    * This is an overloaded function.
    * @param a - the first string

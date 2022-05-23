@@ -16,7 +16,7 @@ export interface _IInternalThing {
 // @public (undocumented)
 export class MyClass {
     // (undocumented)
-    readonly declaredReadonlyThing: _IInternalThing;
+    static readonly declaredReadonlyThing: _IInternalThing;
     // (undocumented)
     get _onlyHasGetterThing(): _IInternalThing;
     tsDocReadonlyThing: _IInternalThing;

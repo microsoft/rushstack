@@ -44,6 +44,8 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     // (undocumented)
     get readonlyProperty(): string;
     regularProperty: SystemEvent;
+    // (undocumented)
+    static readonly staticReadonlyThing: boolean;
     static sumWithExample(x: number, y: number): number;
     tableExample(): void;
     // (undocumented)

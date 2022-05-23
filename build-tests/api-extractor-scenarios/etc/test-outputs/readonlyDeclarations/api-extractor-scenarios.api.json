@@ -317,12 +317,12 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!MyClass#declaredReadonlyThing:member",
+              "canonicalReference": "api-extractor-scenarios!MyClass.declaredReadonlyThing:member",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "readonly declaredReadonlyThing: "
+                  "text": "static readonly declaredReadonlyThing: "
                 },
                 {
                   "kind": "Reference",
@@ -342,7 +342,7 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": true
             },
             {
               "kind": "Property",

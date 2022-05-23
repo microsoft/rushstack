@@ -21,7 +21,7 @@ export class MyClass {
     return { title: 'thing' };
   }
 
-  readonly declaredReadonlyThing: _IInternalThing;
+  static readonly declaredReadonlyThing: _IInternalThing;
 
   /**
    * Technically isn't but for testing purposes

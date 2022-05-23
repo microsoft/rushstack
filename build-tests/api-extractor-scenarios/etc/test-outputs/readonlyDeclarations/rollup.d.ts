@@ -11,7 +11,7 @@ export declare class MyClass {
     get _writableThing(): _IInternalThing;
     set _writableThing(value: _IInternalThing);
     get _onlyHasGetterThing(): _IInternalThing;
-    readonly declaredReadonlyThing: _IInternalThing;
+    static readonly declaredReadonlyThing: _IInternalThing;
     /**
      * Technically isn't but for testing purposes
      * @readonly
