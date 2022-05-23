@@ -239,7 +239,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {

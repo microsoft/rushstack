@@ -707,7 +707,7 @@ export interface IApiEnumMemberOptions extends IApiNameMixinOptions, IApiRelease
 }
 
 // @public
-export interface IApiEnumOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiReadonlyMixinOptions {
+export interface IApiEnumOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -739,11 +739,11 @@ export interface IApiItemOptions {
 }
 
 // @public
-export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public (undocumented)
-export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiOptionalMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public

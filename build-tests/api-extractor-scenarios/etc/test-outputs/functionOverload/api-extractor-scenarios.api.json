@@ -397,7 +397,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -460,7 +459,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {

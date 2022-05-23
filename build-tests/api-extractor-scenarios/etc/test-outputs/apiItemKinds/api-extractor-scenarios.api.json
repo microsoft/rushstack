@@ -201,7 +201,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -255,7 +254,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -303,7 +301,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -394,8 +391,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "isReadonly": true
+          ]
         },
         {
           "kind": "Interface",
@@ -575,8 +571,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "isReadonly": false
+          ]
         },
         {
           "kind": "Class",
@@ -609,7 +604,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -647,7 +641,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {

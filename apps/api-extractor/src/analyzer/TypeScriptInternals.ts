@@ -126,7 +126,7 @@ export class TypeScriptInternals {
   }
 
   /**
-   * Returns whether a variable has the const declaration
+   * Returns whether a variable is declared with the const keyword
    */
   public static isVarConst(node: ts.VariableDeclaration | ts.VariableDeclarationList): boolean {
     // Compiler internal: https://github.com/microsoft/TypeScript/blob/71286e3d49c10e0e99faac360a6bbd40f12db7b6/src/compiler/utilities.ts#L925

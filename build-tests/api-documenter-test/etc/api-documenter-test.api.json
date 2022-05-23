@@ -400,7 +400,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -446,7 +445,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -501,7 +499,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -570,7 +567,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -622,7 +618,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -718,7 +713,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -830,7 +824,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": true,
               "returnTypeTokenRange": {
@@ -877,7 +870,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
@@ -1071,8 +1063,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "isReadonly": false
+          ]
         },
         {
           "kind": "Enum",
@@ -1129,8 +1120,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "isReadonly": false
+          ]
         },
         {
           "kind": "Namespace",
@@ -1523,7 +1513,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -2004,7 +1993,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -2285,7 +2273,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": true,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -2488,7 +2475,6 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
               "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
