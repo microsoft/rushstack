@@ -80,7 +80,7 @@ import { LocalizationPlugin } from '@rushstack/localization-plugin';
 }
 ```
 
-**_A note about the dev server:_** When Webpack is being run by the Webpack dev server, this plugin pipes
+***A note about the dev server:*** When Webpack is being run by the Webpack dev server, this plugin pipes
 the strings in the loc files in the source (the `.loc.json` and the `.resx` files) to the output without
 any translations.
 
