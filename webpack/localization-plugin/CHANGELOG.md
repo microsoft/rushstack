@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Thu, 19 May 2022 15:13:20 GMT and should not be manually modified.
+This log was last generated on Tue, 24 May 2022 15:12:19 GMT and should not be manually modified.
+
+## 0.11.0
+Tue, 24 May 2022 15:12:19 GMT
+
+### Minor changes
+
+- Add support for .resjson files
 
 ## 0.10.21
 Thu, 19 May 2022 15:13:20 GMT

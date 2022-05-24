@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.11.0",
+      "tag": "@rushstack/localization-plugin_v0.11.0",
+      "date": "Tue, 24 May 2022 15:12:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for .resjson files"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.21",
       "tag": "@rushstack/localization-plugin_v0.10.21",
       "date": "Thu, 19 May 2022 15:13:20 GMT",
