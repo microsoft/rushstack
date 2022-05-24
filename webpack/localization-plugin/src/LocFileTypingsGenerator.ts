@@ -21,7 +21,7 @@ export interface ITypingsGeneratorOptions {
 }
 
 /**
- * This is a simple tool that generates .d.ts files for .loc.json, .resx.json, and .resx files.
+ * This is a simple tool that generates .d.ts files for .loc.json, .resx.json, .resjson, and .resx files.
  *
  * @public
  */
@@ -29,7 +29,7 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
   public constructor(options: ITypingsGeneratorOptions) {
     super({
       ...options,
-      fileExtensions: ['.resx', '.resx.json', '.loc.json'],
+      fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
       parseAndGenerateTypings: (fileContents: string, filePath: string) => {
         const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: filePath,

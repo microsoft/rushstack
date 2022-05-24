@@ -48,7 +48,7 @@ export interface ITypingsGenerationOptions {
 export interface IDefaultLocaleOptions {
   /**
    * This required property specifies the name of the locale used in the
-   * `.resx` and `.loc.json` files in the source
+   * `.resx`, `.loc.json`, and `.resjson` files in the source
    */
   localeName: string;
 
@@ -158,7 +158,7 @@ export interface ILocalizationPluginOptions {
   localizedData: ILocalizedData;
 
   /**
-   * This option is used to specify `.resx`, `.resx.json` and `.loc.json` files that should not be processed by
+   * This option is used to specify `.resx`, `.resx.json`, and `.loc.json` files that should not be processed by
    * this plugin.
    */
   globsToIgnore?: string[];
