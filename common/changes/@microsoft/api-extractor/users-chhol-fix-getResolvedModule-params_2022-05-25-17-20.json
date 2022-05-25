@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "add missing required parameter for getResolvedModule to ensure typescript can accurately resolve module kind",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

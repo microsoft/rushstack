@@ -259,9 +259,18 @@ export class ExportAnalyzer {
     importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode,
     moduleSpecifier: string
   ): boolean {
+    const specifier: ts.TypeNode | ts.Expression | undefined = ts.isImportTypeNode(importOrExportDeclaration)
+      ? importOrExportDeclaration.argument
+      : importOrExportDeclaration.moduleSpecifier;
+    const mode: ts.StringLiteralLike =
+      specifier && ts.isStringLiteralLike(specifier)
+        ? TypeScriptInternals.getModeForUsageLocation(importOrExportDeclaration.getSourceFile(), specifier)
+        : undefined;
+
     const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
       importOrExportDeclaration.getSourceFile(),
-      moduleSpecifier
+      moduleSpecifier,
+      mode
     );
 
     if (resolvedModule === undefined) {
@@ -863,9 +872,18 @@ export class ExportAnalyzer {
     exportSymbol: ts.Symbol
   ): AstModule {
     const moduleSpecifier: string = this._getModuleSpecifier(importOrExportDeclaration);
+    const mode: ts.StringLiteralLike | undefined =
+      importOrExportDeclaration.moduleSpecifier &&
+      ts.isStringLiteralLike(importOrExportDeclaration.moduleSpecifier)
+        ? TypeScriptInternals.getModeForUsageLocation(
+            importOrExportDeclaration.getSourceFile(),
+            importOrExportDeclaration.moduleSpecifier
+          )
+        : undefined;
     const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
       importOrExportDeclaration.getSourceFile(),
-      moduleSpecifier
+      moduleSpecifier,
+      mode
     );
 
     if (resolvedModule === undefined) {
