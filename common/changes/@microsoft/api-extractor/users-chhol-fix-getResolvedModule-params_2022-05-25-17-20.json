@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "add missing required parameter for getResolvedModule to ensure typescript can accurately resolve module kind",
-      "type": "minor"
+      "comment": "Fix an issue where API Extractor would fail to run on a project where `\"moduleResolution\"` is set to `\"Node16\"` in `tsconfig.json`",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-extractor"
