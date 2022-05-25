@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 19 May 2022 15:13:20 GMT and should not be manually modified.
+This log was last generated on Wed, 25 May 2022 22:25:07 GMT and should not be manually modified.
+
+## 7.24.2
+Wed, 25 May 2022 22:25:07 GMT
+
+### Patches
+
+- Fix an issue where API Extractor would fail to run on a project where `"moduleResolution"` is set to `"Node16"` in `tsconfig.json`
 
 ## 7.24.1
 Thu, 19 May 2022 15:13:20 GMT
