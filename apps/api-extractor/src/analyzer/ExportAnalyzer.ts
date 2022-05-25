@@ -262,7 +262,7 @@ export class ExportAnalyzer {
     const specifier: ts.TypeNode | ts.Expression | undefined = ts.isImportTypeNode(importOrExportDeclaration)
       ? importOrExportDeclaration.argument
       : importOrExportDeclaration.moduleSpecifier;
-    const mode: ts.StringLiteralLike =
+    const mode: ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined =
       specifier && ts.isStringLiteralLike(specifier)
         ? TypeScriptInternals.getModeForUsageLocation(importOrExportDeclaration.getSourceFile(), specifier)
         : undefined;
@@ -872,7 +872,7 @@ export class ExportAnalyzer {
     exportSymbol: ts.Symbol
   ): AstModule {
     const moduleSpecifier: string = this._getModuleSpecifier(importOrExportDeclaration);
-    const mode: ts.StringLiteralLike | undefined =
+    const mode: ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined =
       importOrExportDeclaration.moduleSpecifier &&
       ts.isStringLiteralLike(importOrExportDeclaration.moduleSpecifier)
         ? TypeScriptInternals.getModeForUsageLocation(

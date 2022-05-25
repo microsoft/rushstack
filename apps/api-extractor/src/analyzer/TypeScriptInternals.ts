@@ -84,10 +84,10 @@ export class TypeScriptInternals {
   public static getResolvedModule(
     sourceFile: ts.SourceFile,
     moduleNameText: string,
-    mode: ts.StringLiteralLike | undefined
+    mode: ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined
   ): ts.ResolvedModuleFull | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L218
+    // https://github.com/microsoft/TypeScript/blob/v4.7.2/src/compiler/utilities.ts#L161
 
     return (ts as any).getResolvedModule(sourceFile, moduleNameText, mode);
   }
@@ -97,12 +97,12 @@ export class TypeScriptInternals {
    */
   public static getModeForUsageLocation(
     file: { impliedNodeFormat?: ts.SourceFile['impliedNodeFormat'] },
-    usage: ts.StringLiteralLike
-  ) {
+    usage: ts.StringLiteralLike | undefined
+  ): ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined {
     // Compiler internal:
     // https://github.com/microsoft/TypeScript/blob/v4.7.2/src/compiler/program.ts#L568
 
-    return (ts as any).getModeForUsageLocation(file, usage);
+    return (ts as any).getModeForUsageLocation?.(file, usage);
   }
 
   /**
