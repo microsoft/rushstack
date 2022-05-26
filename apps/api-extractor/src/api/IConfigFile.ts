@@ -405,4 +405,9 @@ export interface IConfigFile {
    * to prevent spurious diffs in output files tracked for tests.
    */
   testMode?: boolean;
+
+  /**
+   * Set to true when invoking API Extractor wishing to preserve the order of members inside from an Enum.
+   */
+  preserveEnumMemberOrder?: boolean;
 }

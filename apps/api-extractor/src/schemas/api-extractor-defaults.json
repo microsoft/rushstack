@@ -84,5 +84,6 @@
     }
   },
 
-  "testMode": false
+  "testMode": false,
+  "preserveEnumMemberOrder": false
 }

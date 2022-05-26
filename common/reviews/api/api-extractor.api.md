@@ -67,6 +67,7 @@ export class ExtractorConfig {
     readonly packageFolder: string | undefined;
     readonly packageJson: INodePackageJson | undefined;
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
+    readonly preserveEnumMemberOrder: boolean;
     readonly projectFolder: string;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
@@ -206,6 +207,7 @@ export interface IConfigFile {
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
     newlineKind?: 'crlf' | 'lf' | 'os';
+    preserveEnumMemberOrder?: boolean;
     projectFolder?: string;
     testMode?: boolean;
     // @beta

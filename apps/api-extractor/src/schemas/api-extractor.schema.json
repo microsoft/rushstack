@@ -175,6 +175,10 @@
     "testMode": {
       "description": "Set to true invoking API Extractor's test harness. When \"testMode\" is true, the \"toolVersion\" field in the .api.json file is assigned an empty string to prevent spurious diffs in output files tracked for tests.",
       "type": "boolean"
+    },
+    "preserveEnumMemberOrder": {
+      "description": "When \"preserveEnumMemberOrder\" is true, the api.json order of members inside of enums will be the same as the source code.",
+      "type": "boolean"
     }
   },
   "required": ["mainEntryPointFilePath"],
