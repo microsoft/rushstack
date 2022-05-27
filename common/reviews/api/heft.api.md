@@ -5,13 +5,25 @@
 ```ts
 
 import { AsyncParallelHook } from 'tapable';
+import { CommandLineChoiceParameter } from '@rushstack/ts-command-line';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterProvider } from '@rushstack/ts-command-line';
+import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileErrorFormat } from '@rushstack/node-core-library';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { Terminal } from '@rushstack/node-core-library';
+
+export { CommandLineChoiceParameter }
+
+export { CommandLineFlagParameter }
+
+export { CommandLineParameter }
+
+export { CommandLineStringParameter }
 
 // @public (undocumented)
 export class HeftConfiguration {
@@ -27,6 +39,8 @@ export class HeftConfiguration {
     get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
     get rigConfig(): RigConfig;
+    // (undocumented)
+    get rigToolResolver(): RigToolResolver;
     get terminalProvider(): ITerminalProvider;
 }
 
@@ -66,6 +80,25 @@ export class HeftTaskSession {
     readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     // (undocumented)
     readonly taskName: string;
+}
+
+// @public
+export interface ICopyOperation extends IFileGlobSpecifier {
+    destinationFolders: string[];
+    flatten?: boolean;
+    hardlink?: boolean;
+}
+
+// @public
+export interface IDeleteOperation extends IFileGlobSpecifier {
+}
+
+// @public
+export interface IFileGlobSpecifier {
+    excludeGlobs?: string[];
+    fileExtensions?: string[];
+    includeGlobs?: string[];
+    sourceFolder: string;
 }
 
 // @internal (undocumented)
@@ -138,10 +171,14 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<HeftTaskSe
 
 // @public (undocumented)
 export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {
+    // (undocumented)
+    addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
 // @public (undocumented)
 export interface IIHeftTaskCleanHookOptions extends IHeftTaskHookOptions {
+    // (undocumented)
+    addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 // @public (undocumented)
@@ -163,6 +200,24 @@ export interface _IPerformanceData {
     encounteredError?: boolean;
     // (undocumented)
     taskTotalExecutionMs: number;
+}
+
+// @beta
+export interface IRunScript {
+    // (undocumented)
+    runAsync?: (options: IRunScriptOptions) => Promise<void>;
+}
+
+// @beta
+export interface IRunScriptOptions {
+    // (undocumented)
+    heftConfiguration: HeftConfiguration;
+    // (undocumented)
+    heftTaskSession: HeftTaskSession;
+    // (undocumented)
+    runOptions: IHeftTaskRunHookOptions;
+    // (undocumented)
+    scriptOptions: Record<string, unknown>;
 }
 
 // @public (undocumented)
@@ -195,6 +250,14 @@ export class _MetricsCollector {
 
 // @public (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;
+
+// @public (undocumented)
+export class RigToolResolver {
+    // @internal
+    constructor(heftConfiguration: HeftConfiguration);
+    // (undocumented)
+    resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
+}
 
 // @public (undocumented)
 export class ScopedLogger implements IScopedLogger {
