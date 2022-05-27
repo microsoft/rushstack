@@ -308,16 +308,12 @@ export class ApiReportGenerator {
 
       case ts.SyntaxKind.SyntaxList:
         if (span.parent) {
-          if (span.parent.kind === ts.SyntaxKind.EnumDeclaration
-            && collector.extractorConfig.memberSortOrder === EnumMemberOrder.preserve) {
-            //Configured to keep enum member source ordering, leave sortChildren false
-          } else if (AstDeclaration.isSupportedSyntaxKind(span.parent.kind)) {
-              // If the immediate parent is an API declaration, and the immediate children are API declarations,
-              // then sort the children alphabetically
+          if (AstDeclaration.isSupportedSyntaxKind(span.parent.kind)) {
+            if (span.parent.kind === ts.SyntaxKind.EnumDeclaration) {
+              sortChildren = collector.extractorConfig.enumMemberOrder === EnumMemberOrder.ByName;
+            } else {
               sortChildren = true;
-          } else if (span.parent.kind === ts.SyntaxKind.ModuleBlock) {
-            // Namespaces are special because their chain goes ModuleDeclaration -> ModuleBlock -> SyntaxList
-            sortChildren = true;
+            }
           }
         }
         break;

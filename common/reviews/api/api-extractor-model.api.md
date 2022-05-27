@@ -619,9 +619,9 @@ export type Constructor<T = {}> = new (...args: any[]) => T;
 // @public
 export enum EnumMemberOrder {
     // (undocumented)
-    byName = "by-name",
+    ByName = "by-name",
     // (undocumented)
-    preserve = "preserve"
+    Preserve = "preserve"
 }
 
 // @public

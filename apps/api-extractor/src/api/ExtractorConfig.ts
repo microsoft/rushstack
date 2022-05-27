@@ -21,6 +21,7 @@ import { RigConfig } from '@rushstack/rig-package';
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
@@ -164,7 +165,7 @@ interface IExtractorConfigParameters {
   newlineKind: NewlineKind;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
-  memberSortOrder: string;
+  enumMemberOrder: EnumMemberOrder;
 }
 
 /**
@@ -283,8 +284,8 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.testMode} */
   public readonly testMode: boolean;
 
-  /** {@inheritDoc IConfigFile.memberSortOrder} */
-  public readonly memberSortOrder: string;
+  /** {@inheritDoc IConfigFile.enumMemberOrder} */
+  public readonly enumMemberOrder: EnumMemberOrder;
 
   private constructor(parameters: IExtractorConfigParameters) {
     this.projectFolder = parameters.projectFolder;
@@ -313,7 +314,7 @@ export class ExtractorConfig {
     this.newlineKind = parameters.newlineKind;
     this.messages = parameters.messages;
     this.testMode = parameters.testMode;
-    this.memberSortOrder = parameters.memberSortOrder;
+    this.enumMemberOrder = parameters.enumMemberOrder;
   }
 
   /**
@@ -970,8 +971,8 @@ export class ExtractorConfig {
           break;
       }
 
-      const memberSortOrder: string = configObject.memberSortOrder ?? "by-name";
-      
+      const enumMemberOrder: EnumMemberOrder = configObject.enumMemberOrder ?? EnumMemberOrder.ByName;
+
       extractorConfigParameters = {
         projectFolder: projectFolder,
         packageJson,
@@ -997,7 +998,7 @@ export class ExtractorConfig {
         newlineKind,
         messages: configObject.messages || {},
         testMode: !!configObject.testMode,
-        memberSortOrder
+        enumMemberOrder
       };
     } catch (e) {
       throw new Error(`Error parsing ${filenameForErrors}:\n` + (e as Error).message);

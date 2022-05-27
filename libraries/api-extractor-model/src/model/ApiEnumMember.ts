@@ -30,8 +30,8 @@ export interface IApiEnumMemberOptions
  * @public
  */
 export enum EnumMemberOrder {
-  byName = "by-name",
-  preserve = "preserve"
+  ByName = "by-name",
+  Preserve = "preserve"
 }
 
 export interface IApiEnumMemberJson extends IApiDeclaredItemJson {

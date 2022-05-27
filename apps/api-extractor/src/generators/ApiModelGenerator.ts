@@ -472,7 +472,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const shouldSortMembers: boolean = this._collector.extractorConfig.memberSortOrder !== EnumMemberOrder.preserve;
+      const shouldSortMembers: boolean = this._collector.extractorConfig.enumMemberOrder !== EnumMemberOrder.Preserve;
 
       apiEnum = new ApiEnum({ name, docComment, releaseTag, excerptTokens, shouldSortMembers });
       parentApiItem.addMember(apiEnum);

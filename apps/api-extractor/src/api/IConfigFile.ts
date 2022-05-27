@@ -408,13 +408,13 @@ export interface IConfigFile {
   testMode?: boolean;
 
   /**
-   * Specifies how API Extractor sorts the members of an enum when generating the .d.ts rollup and
-   * .api.json doc model.  The API report is always sorted to avoid spurious diffs.
+   * Specifies how API Extractor sorts members of an enum when generating api.json, api.md and rollup.d.ts.
+   * The efault behaviour has been alphabetical, ByName in this case.
    *
    * - "by-name": sort the items according to the enum member name
    * - "preserve": keep the original order that items appear in the source code
    *
    * DEFAULT VALUE: "by-name"
    */
-   memberSortOrder: EnumMemberOrder;
+   enumMemberOrder: EnumMemberOrder;
 }

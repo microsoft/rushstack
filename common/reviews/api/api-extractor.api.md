@@ -52,6 +52,7 @@ export class ExtractorConfig {
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
+    readonly enumMemberOrder: EnumMemberOrder;
     static readonly FILENAME: string;
     getDiagnosticDump(): string;
     // @internal
@@ -61,7 +62,6 @@ export class ExtractorConfig {
     static loadFile(jsonFilePath: string): IConfigFile;
     static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
     readonly mainEntryPointFilePath: string;
-    readonly memberSortOrder: string;
     readonly messages: IExtractorMessagesConfig;
     readonly newlineKind: NewlineKind;
     readonly omitTrimmingComments: boolean;
@@ -204,9 +204,9 @@ export interface IConfigFile {
     docModel?: IConfigDocModel;
     // @beta
     dtsRollup?: IConfigDtsRollup;
+    enumMemberOrder: EnumMemberOrder;
     extends?: string;
     mainEntryPointFilePath: string;
-    memberSortOrder: EnumMemberOrder;
     messages?: IExtractorMessagesConfig;
     newlineKind?: 'crlf' | 'lf' | 'os';
     projectFolder?: string;
