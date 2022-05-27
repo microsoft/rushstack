@@ -154,12 +154,12 @@ export class HeftLifecycle extends HeftPluginHost {
         heftConfiguration: this._internalHeftSession.heftConfiguration,
         loggingManager: this._internalHeftSession.loggingManager,
         metricsCollector: this._internalHeftSession.metricsCollector,
-        getIsDebugMode: () => this._internalHeftSession.debugMode,
         logger: this._internalHeftSession.loggingManager.requestScopedLogger(
           `lifecycle:${pluginDefinition.pluginName}`
         ),
         lifecycleHooks: this.hooks,
         parametersByLongName: new Map([...pluginDefinition.parameters].map((x) => [x.longName, x])),
+        getIsDebugMode: () => this._internalHeftSession.debugMode,
         requestAccessToPluginByName: this.getRequestAccessToPluginByNameFn(
           this.getPluginHookName(pluginDefinition.pluginPackageName, pluginDefinition.pluginName)
         )

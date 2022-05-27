@@ -9,6 +9,8 @@ import type { ScopedLogger } from './logging/ScopedLogger';
 import type { HeftTask } from './HeftTask';
 import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
 import type { RequestAccessToPluginByNameCallback } from './HeftPluginHost';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
+import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 
 /**
  * @public
@@ -20,18 +22,22 @@ export interface IHeftTaskHookOptions {
 /**
  * @public
  */
-export interface IIHeftTaskCleanHookOptions extends IHeftTaskHookOptions {}
+export interface IHeftTaskCleanHookOptions extends IHeftTaskHookOptions {
+  addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+}
 
 /**
  * @public
  */
-export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {}
+export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {
+  addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
+}
 
 /**
  * @public
  */
 export interface IHeftTaskHooks {
-  clean: AsyncParallelHook<IIHeftTaskCleanHookOptions>;
+  clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
   run: AsyncParallelHook<IHeftTaskRunHookOptions>;
 }
 

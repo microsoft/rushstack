@@ -10,7 +10,7 @@
   "properties": {
     "copyOperations": {
       "type": "array",
-      "description": "An array of copy operations to run perform during the specified Heft event.",
+      "description": "An array of copy operations to perform during the specified Heft event.",
 
       "items": {
         "type": "object",
@@ -21,14 +21,14 @@
           "sourceFolder": {
             "title": "Source Folder",
             "type": "string",
-            "description": "The base folder that files will be copied from, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. NOTE: Assigning \"sourceFolder\" does not by itself select any files to be copied.",
+            "description": "The base folder that files will be copied from, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, all files in the folder will be copied.",
             "pattern": "[^\\\\]"
           },
 
           "destinationFolders": {
             "title": "Destination Folders",
             "type": "array",
-            "description": "One or more folders that files will be copied into, relative to the project root. If you specify more than one destination folder, Heft will read the input files only once, using streams to efficiently write multiple outputs.",
+            "description": "One or more folders that files will be copied into, relative to the project root.",
             "items": {
               "type": "string",
               "pattern": "[^\\\\]"

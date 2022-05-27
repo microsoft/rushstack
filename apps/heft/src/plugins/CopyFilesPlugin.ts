@@ -2,47 +2,26 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import glob from 'fast-glob';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
+import { getRelativeFilePathsAsync, type IFileGlobSpecifier } from './FileGlobSpecifier';
 import type { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
 
-interface ICopyFileDescriptor {
-  sourceFilePath: string;
-  destinationFilePath: string;
-  hardlink: boolean;
-}
-
-interface ICopyOperation {
-  /**
-   * Absolute path to the folder from which files should be copied.
-   */
-  sourceFolder: string;
-
+/**
+ * Used to specify a selection of files to copy from a specific source folder to one
+ * or more destination folders.
+ *
+ * @public
+ */
+export interface ICopyOperation extends IFileGlobSpecifier {
   /**
    * Absolute paths to folder(s) which files should be copied to.
    */
   destinationFolders: string[];
-
-  /**
-   * File extensions that should be copied from the source folder to the destination folder(s)
-   */
-  fileExtensions?: string[];
-
-  /**
-   * Globs that should be explicitly excluded. This takes precedence over globs listed in "includeGlobs" and
-   * files that match the file extensions provided in "fileExtensions".
-   */
-  excludeGlobs?: string[];
-
-  /**
-   * Globs that should be explicitly included.
-   */
-  includeGlobs?: string[];
 
   /**
    * Copy only the file and discard the relative path from the source folder.
@@ -64,6 +43,12 @@ interface ICopyFilesResult {
   linkedFileCount: number;
 }
 
+interface ICopyFileDescriptor {
+  sourceFilePath: string;
+  destinationFilePath: string;
+  hardlink: boolean;
+}
+
 export class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions> {
   public readonly accessor?: object | undefined;
 
@@ -73,18 +58,23 @@ export class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions>
     pluginOptions: ICopyFilesPluginOptions
   ): void {
     taskSession.hooks.run.tapPromise(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runCopyFilesAsync(pluginOptions.copyOperations, taskSession.logger);
+      await CopyFilesPlugin.copyFilesAsync(pluginOptions.copyOperations, taskSession.logger);
     });
   }
 
-  private async _runCopyFilesAsync(copyOperations: ICopyOperation[], logger: ScopedLogger): Promise<void> {
-    const copyDescriptors: ICopyFileDescriptor[] = await this._getCopyFileDescriptorsAsync(copyOperations);
+  public static async copyFilesAsync(copyOperations: ICopyOperation[], logger: ScopedLogger): Promise<void> {
+    const copyDescriptors: ICopyFileDescriptor[] = await CopyFilesPlugin._getCopyFileDescriptorsAsync(
+      copyOperations
+    );
     if (copyDescriptors.length === 0) {
       // No need to run copy and print to console
       return;
     }
 
-    const { copiedFileCount, linkedFileCount } = await this._copyFilesAsync(copyDescriptors, logger);
+    const { copiedFileCount, linkedFileCount } = await CopyFilesPlugin._copyFilesAsync(
+      copyDescriptors,
+      logger
+    );
     logger.terminal.writeLine(
       `Copied ${copiedFileCount} file${copiedFileCount === 1 ? '' : 's'} and ` +
         `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
@@ -97,7 +87,7 @@ export class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions>
     // }
   }
 
-  private async _copyFilesAsync(
+  private static async _copyFilesAsync(
     copyDescriptors: ICopyFileDescriptor[],
     logger: ScopedLogger
   ): Promise<ICopyFilesResult> {
@@ -138,7 +128,7 @@ export class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions>
     return { copiedFileCount, linkedFileCount };
   }
 
-  private async _getCopyFileDescriptorsAsync(
+  private static async _getCopyFileDescriptorsAsync(
     copyConfigurations: ICopyOperation[]
   ): Promise<ICopyFileDescriptor[]> {
     const processedCopyDescriptors: ICopyFileDescriptor[] = [];
@@ -150,14 +140,7 @@ export class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions>
     await Async.forEachAsync(
       copyConfigurations,
       async (copyConfiguration: ICopyOperation) => {
-        const sourceFileRelativePaths: Set<string> = new Set<string>(
-          await glob(this._getIncludedGlobPatterns(copyConfiguration), {
-            cwd: copyConfiguration.sourceFolder,
-            ignore: copyConfiguration.excludeGlobs,
-            dot: true,
-            onlyFiles: true
-          })
-        );
+        const sourceFileRelativePaths: Set<string> = await getRelativeFilePathsAsync(copyConfiguration);
 
         // Dedupe and throw if a double-write is detected
         for (const destinationFolderPath of copyConfiguration.destinationFolders) {
@@ -205,42 +188,6 @@ export class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions>
 
     // We're done with the map, grab the values and return
     return processedCopyDescriptors;
-  }
-
-  private _getIncludedGlobPatterns(copyConfiguration: ICopyOperation): string[] {
-    const patternsToGlob: Set<string> = new Set<string>();
-
-    // Glob file extensions with a specific glob to increase perf
-    const escapedFileExtensions: Set<string> = new Set<string>();
-    for (const fileExtension of copyConfiguration.fileExtensions || []) {
-      let escapedFileExtension: string;
-      if (fileExtension.charAt(0) === '.') {
-        escapedFileExtension = fileExtension.slice(1);
-      } else {
-        escapedFileExtension = fileExtension;
-      }
-
-      escapedFileExtension = glob.escapePath(escapedFileExtension);
-      escapedFileExtensions.add(escapedFileExtension);
-    }
-
-    if (escapedFileExtensions.size > 1) {
-      patternsToGlob.add(`**/*.{${[...escapedFileExtensions].join(',')}}`);
-    } else if (escapedFileExtensions.size === 1) {
-      patternsToGlob.add(`**/*.${[...escapedFileExtensions][0]}`);
-    }
-
-    // Now include the other globs as well
-    for (const include of copyConfiguration.includeGlobs || []) {
-      patternsToGlob.add(include);
-    }
-
-    // Include a default glob if none are specified
-    if (!patternsToGlob.size) {
-      patternsToGlob.add('**/*');
-    }
-
-    return [...patternsToGlob];
   }
 
   // TODO: Handle watch mode

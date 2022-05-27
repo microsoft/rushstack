@@ -5,7 +5,7 @@ import { AsyncParallelHook } from 'tapable';
 import { Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { HeftTaskSession, IIHeftTaskCleanHookOptions } from './HeftTaskSession';
+import { HeftTaskSession, IHeftTaskCleanHookOptions } from './HeftTaskSession';
 import { HeftPluginHost } from './HeftPluginHost';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
@@ -34,7 +34,7 @@ export class HeftPhaseSession extends HeftPluginHost {
   /**
    * @beta
    */
-  public readonly cleanHook: AsyncParallelHook<IIHeftTaskCleanHookOptions>;
+  public readonly cleanHook: AsyncParallelHook<IHeftTaskCleanHookOptions>;
 
   /**
    * @beta

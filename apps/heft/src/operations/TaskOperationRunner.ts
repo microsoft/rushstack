@@ -2,8 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { performance } from 'perf_hooks';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { OperationStatus } from './OperationStatus';
+import { CopyFilesPlugin, type ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { HeftTask } from '../pluginFramework/HeftTask';
 import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
@@ -48,8 +50,29 @@ export class TaskOperationRunner implements IOperationRunner {
     if (taskSession.hooks.run.isUsed()) {
       const startTime: number = performance.now();
       taskSession.logger.terminal.writeVerboseLine('Starting task execution');
-      const runHookOptions: IHeftTaskRunHookOptions = { production };
-      await taskSession.hooks.run.promise(runHookOptions);
+
+      // Create the options and provide a utility method to obtain paths to copy
+      const copyOperations: ICopyOperation[] = [];
+      const runHookOptions: IHeftTaskRunHookOptions = {
+        production,
+        addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
+          copyOperations.push(...copyOperationsToAdd)
+      };
+
+      try {
+        await taskSession.hooks.run.promise(runHookOptions);
+      } catch (e: unknown) {
+        // Log out using the task logger, and return an error status
+        if (!(e instanceof AlreadyReportedError)) {
+          taskSession.logger.emitError(e as Error);
+        }
+        return OperationStatus.Failure;
+      }
+
+      if (copyOperations.length) {
+        await CopyFilesPlugin.copyFilesAsync(copyOperations, taskSession.logger);
+      }
+
       taskSession.logger.terminal.writeVerboseLine(
         `Finished task execution (${performance.now() - startTime}ms)`
       );

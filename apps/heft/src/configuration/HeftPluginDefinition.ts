@@ -257,7 +257,7 @@ export abstract class HeftPluginDefinitionBase {
       const loadedPluginModule: IHeftPlugin | { default: IHeftPlugin } = await import(entryPointPath);
       heftPlugin = (loadedPluginModule as { default: IHeftPlugin }).default || loadedPluginModule;
     } catch (error) {
-      throw new InternalError(`Error loading plugin package from "${entryPointPath}": ${error}`);
+      throw new InternalError(`Error loading plugin from "${entryPointPath}": ${error}`);
     }
 
     if (!heftPlugin) {
@@ -266,7 +266,7 @@ export abstract class HeftPluginDefinitionBase {
       );
     }
 
-    logger.terminal.writeVerboseLine(`Loaded plugin package from "${entryPointPath}"`);
+    logger.terminal.writeVerboseLine(`Loaded plugin from "${entryPointPath}"`);
 
     if (!heftPlugin.apply || typeof heftPlugin.apply !== 'function') {
       throw new InternalError(

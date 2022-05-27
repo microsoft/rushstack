@@ -30,6 +30,7 @@ export interface IExecuteInstrumentedOptions {
 
 export interface ICreateOperationsOptions {
   internalHeftSession: InternalHeftSession;
+  selectedPhases: Set<HeftPhase>;
   terminal: ITerminal;
   production: boolean;
   clean: boolean;
@@ -40,8 +41,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
   const phaseOperations: Map<string, Operation> = new Map();
   const leafNodeTaskOperations: Map<string, Set<Operation>> = new Map();
 
-  const { internalHeftSession, terminal } = options;
-  for (const phase of internalHeftSession.phases) {
+  for (const phase of options.selectedPhases) {
     // Create operation for the phase start node
     const phaseOperation: Operation = getOrCreatePhaseOperation(phase, options);
     phaseOperations.set(phase.phaseName, phaseOperation);
@@ -61,7 +61,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
   }
 
   let hasWarnedAboutSkippedPhases: boolean = false;
-  for (const phase of internalHeftSession.phases) {
+  for (const phase of options.selectedPhases) {
     if (phase.dependencyPhases.size) {
       // Link up the leaf node operations of the dependency phases to the root node operations of the current
       // phase.
@@ -69,7 +69,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
       for (const dependencyPhase of phase.dependencyPhases) {
         // Check to see if the dependency phase is in the list of selected phases and if not, ignore it. We
         // will assume that unselected dependency phases have already completed and we don't need to run them.
-        if (internalHeftSession.phases.has(dependencyPhase)) {
+        if (options.selectedPhases.has(dependencyPhase)) {
           // Add the dependency phase operation to the current phase operation's dependencies to allow for
           // taskless dependency phases
           const dependencyPhaseOperation: Operation = phaseOperations.get(dependencyPhase.phaseName)!;
@@ -85,7 +85,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
         } else if (!hasWarnedAboutSkippedPhases) {
           // Only write once, and write with yellow to make it stand out without writing a warning to stderr
           hasWarnedAboutSkippedPhases = true;
-          terminal.writeLine(
+          options.terminal.writeLine(
             Colors.yellow(
               'The provided list of phases does not contain all phase dependencies. You may need to run the ' +
                 'excluded phases manually.'

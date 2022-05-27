@@ -13,6 +13,7 @@ import { trueCasePathSync } from 'true-case-path';
 import { RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
+import { RigToolResolver } from './RigToolResolver';
 
 /**
  * @internal
@@ -40,6 +41,7 @@ export class HeftConfiguration {
   private _rigConfig: RigConfig | undefined;
   private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
+  private _rigToolResolver!: RigToolResolver;
 
   /**
    * Project build folder. This is the folder containing the project's package.json file.
@@ -94,6 +96,10 @@ export class HeftConfiguration {
       );
     }
     return this._rigConfig;
+  }
+
+  public get rigToolResolver(): RigToolResolver {
+    return this._rigToolResolver;
   }
 
   /**
@@ -159,6 +165,7 @@ export class HeftConfiguration {
 
     configuration._terminalProvider = options.terminalProvider;
     configuration._globalTerminal = new Terminal(options.terminalProvider);
+    configuration._rigToolResolver = new RigToolResolver(configuration);
 
     return configuration;
   }

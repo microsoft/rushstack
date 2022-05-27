@@ -86,16 +86,16 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     // Define these flags here, since we want them to be available to all scoped actions.
     // It also makes it easier to append these flags when using NPM scripts, for example:
     // "npm run <script> -- --production"
-    this._verboseFlag = this.defineFlagParameter({
+    this._verboseFlag = scopedParameterProvider.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'If specified, log information useful for debugging.'
     });
-    this._productionFlag = this.defineFlagParameter({
+    this._productionFlag = scopedParameterProvider.defineFlagParameter({
       parameterLongName: '--production',
       description: 'If specified, run Heft in production mode.'
     });
-    this._cleanFlag = this.defineFlagParameter({
+    this._cleanFlag = scopedParameterProvider.defineFlagParameter({
       parameterLongName: '--clean',
       description: 'If specified, clean the package before running.'
     });
@@ -126,6 +126,7 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
       executeAsync: async () => {
         const operations: Set<Operation> = createOperations({
           internalHeftSession: this._internalSession,
+          selectedPhases: this._selectedPhases!,
           terminal: this.terminal,
           production: this._productionFlag.value,
           clean: this._cleanFlag.value

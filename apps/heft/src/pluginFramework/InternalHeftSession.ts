@@ -28,11 +28,11 @@ export interface IInternalHeftSessionOptions {
  */
 export class InternalHeftSession {
   private readonly _options: IInternalHeftSessionOptions;
-  private _heftConfigurationJson: IHeftConfigurationJson;
+  private readonly _heftConfigurationJson: IHeftConfigurationJson;
+  private readonly _phaseSessionsByName: Map<string, HeftPhaseSession> = new Map();
   private _lifecycle: HeftLifecycle | undefined;
   private _phases: Set<HeftPhase> | undefined;
   private _phasesByName: Map<string, HeftPhase> | undefined;
-  private _phaseSessionsByName: Map<string, HeftPhaseSession> = new Map();
 
   private constructor(options: IInternalHeftSessionOptions, heftConfigurationJson: IHeftConfigurationJson) {
     this._options = options;

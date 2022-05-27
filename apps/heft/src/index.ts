@@ -8,6 +8,8 @@ export {
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 
+export { RigToolResolver } from './configuration/RigToolResolver';
+
 export {
   IHeftLifecycleHooks,
   IHeftLifecycleHookOptions,
@@ -19,12 +21,20 @@ export {
 export {
   IHeftTaskHooks,
   IHeftTaskHookOptions,
-  IIHeftTaskCleanHookOptions,
+  IHeftTaskCleanHookOptions as IIHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
   HeftTaskSession
 } from './pluginFramework/HeftTaskSession';
 
 export { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
+
+export { ICopyOperation } from './plugins/CopyFilesPlugin';
+
+export { IDeleteOperation } from './plugins/DeleteFilesPlugin';
+
+export { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
+
+export { IFileGlobSpecifier } from './plugins/FileGlobSpecifier';
 
 export { RequestAccessToPluginByNameCallback } from './pluginFramework/HeftPluginHost';
 
@@ -36,6 +46,13 @@ export {
 } from './metrics/MetricsCollector';
 
 export { ScopedLogger, IScopedLogger, IScopedLoggerOptions } from './pluginFramework/logging/ScopedLogger';
+
+export type {
+  CommandLineParameter,
+  CommandLineChoiceParameter,
+  CommandLineFlagParameter,
+  CommandLineStringParameter
+} from '@rushstack/ts-command-line';
 
 // Other hooks
 // export {

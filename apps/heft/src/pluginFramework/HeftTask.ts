@@ -98,6 +98,8 @@ export class HeftTask {
     this._parentPhase = parentPhase;
     this._taskName = taskName;
     this._taskSpecifier = taskSpecifier;
+
+    this._validate();
   }
 
   public async ensureInitializedAsync(): Promise<void> {
@@ -129,10 +131,10 @@ export class HeftTask {
             packageName: '@rushstack/heft'
           });
         }
-        case 'deleteGlobs': {
+        case 'deleteFiles': {
           return HeftTaskPluginDefinition.loadFromObject({
             heftPluginDefinitionJson: {
-              pluginName: 'DeleteGlobsPlugin',
+              pluginName: 'DeleteFilesPlugin',
               entryPoint: './lib/plugins/DeleteGlobsPlugin',
               optionsSchema: './lib/schemas/delete-globs-options.schema.json'
             },
@@ -174,6 +176,16 @@ export class HeftTask {
     } else {
       // Shouldn't happen but throw just in case
       throw new InternalError(`Task "${this._taskName}" has no specified task event or task plugin.`);
+    }
+  }
+
+  private _validate(): void {
+    const reservedTaskNames: Set<string> = new Set(['clean']);
+    if (reservedTaskNames.has(this.taskName)) {
+      throw new Error(`Task name "${this.taskName}" is reserved and cannot be used as a task name.`);
+    }
+    if (!this._taskSpecifier.taskEvent && !this._taskSpecifier.taskPlugin) {
+      throw new Error(`Task "${this.taskName}" has no specified task event or task plugin.`);
     }
   }
 }

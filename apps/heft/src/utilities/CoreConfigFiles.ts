@@ -6,7 +6,7 @@ import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushs
 import { Import, ITerminal } from '@rushstack/node-core-library';
 import type { RigConfig } from '@rushstack/rig-package';
 
-export type HeftEventKind = 'copyFiles' | 'deleteGlobs' | 'runScript';
+export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript';
 
 export interface IHeftConfigurationJsonEventSpecifier {
   eventKind: HeftEventKind;
@@ -106,6 +106,11 @@ export class CoreConfigFiles {
             },
           // Special handling for "copyFiles" task events to resolve the destination folders
           '$.phasesByName.*.tasksByName[?(@.taskEvent && @.taskEvent.eventKind == "copyFiles")].taskEvent.options.copyOperations.*.destinationFolders.*':
+            {
+              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+            },
+          // Special handling for "deleteFiles" task events to resolve the source folder
+          '$.phasesByName.*.tasksByName[?(@.taskEvent && @.taskEvent.eventKind == "deleteFiles")].taskEvent.options.deleteOperations.*.sourceFolder':
             {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
             }

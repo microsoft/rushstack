@@ -95,6 +95,7 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
       executeAsync: async () => {
         const operations: Set<Operation> = createOperations({
           internalHeftSession: this._internalSession,
+          selectedPhases: this._selectedPhases,
           terminal: this.terminal,
           production: this._productionFlag.value,
           clean: this._cleanFlag.value
