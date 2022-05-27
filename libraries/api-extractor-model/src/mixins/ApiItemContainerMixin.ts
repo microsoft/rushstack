@@ -19,7 +19,7 @@ import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
  */
 export interface IApiItemContainerMixinOptions extends IApiItemOptions {
   members?: ApiItem[];
-  enumMemberOrder?: string;
+  shouldSortMembers?: boolean;
 }
 
 export interface IApiItemContainerJson extends IApiItemJson {
@@ -104,7 +104,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
     public readonly [_members]: ApiItem[];
     public [_membersSorted]: boolean;
     public [_membersByContainerKey]: Map<string, ApiItem>;
-    public enumMemberOrder: string = "by-value";
+    public shouldSortMembers: boolean = true;
 
     // For members of this container that extend ApiNameMixin, this stores the list of members with a given name.
     // Examples include merged declarations, overloaded functions, etc.
@@ -121,7 +121,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
 
       this[_members] = [];
       this[_membersByContainerKey] = new Map<string, ApiItem>();
-      this.enumMemberOrder = options.enumMemberOrder ? options.enumMemberOrder : "by-name";
+      this.shouldSortMembers = options.shouldSortMembers ?? true;
 
       if (options.members) {
         for (const member of options.members) {
@@ -137,7 +137,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       jsonObject: IApiItemContainerJson
     ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
-
+      options.shouldSortMembers = false;
       options.members = [];
       for (const memberObject of jsonObject.members) {
         options.members.push(ApiItem.deserialize(memberObject, context));
@@ -146,7 +146,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
 
     /** @override */
     public get members(): ReadonlyArray<ApiItem> {
-      if (!this[_membersSorted] && this.enumMemberOrder !== "preserve") {
+      if (!this[_membersSorted] && this.shouldSortMembers) {
         LegacyAdapters.sortStable(this[_members], (x, y) => x.getSortKey().localeCompare(y.getSortKey()));
         this[_membersSorted] = true;
       }

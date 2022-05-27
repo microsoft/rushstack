@@ -713,9 +713,9 @@ export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<
 // @public
 export interface IApiItemContainerMixinOptions extends IApiItemOptions {
     // (undocumented)
-    enumMemberOrder?: string;
-    // (undocumented)
     members?: ApiItem[];
+    // (undocumented)
+    shouldSortMembers?: boolean;
 }
 
 // @public

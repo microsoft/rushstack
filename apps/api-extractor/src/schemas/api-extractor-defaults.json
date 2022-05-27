@@ -7,6 +7,8 @@
 
   "newlineKind": "crlf",
 
+  "memberSortOrder": "by-name",
+
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/tsconfig.json",
     "skipLibCheck": false
@@ -83,7 +85,5 @@
       }
     }
   },
-
-  "testMode": false,
-  "enumMemberOrder": "by-name"
+  "testMode": false
 }

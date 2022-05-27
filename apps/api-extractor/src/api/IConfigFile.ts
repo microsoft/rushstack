@@ -411,10 +411,9 @@ export interface IConfigFile {
    * .api.json doc model.  The API report is always sorted to avoid spurious diffs.
    *
    * - "by-name": sort the items according to the enum member name
-   * - "by-value": sort the items according to the enum value
    * - "preserve": keep the original order that items appear in the source code
    *
    * DEFAULT VALUE: "by-name"
    */
-   enumMemberOrder: string;
+   memberSortOrder: string;
 }
