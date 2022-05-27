@@ -85,5 +85,5 @@
   },
 
   "testMode": false,
-  "preserveEnumMemberOrder": false
+  "enumMemberOrder": "by-name"
 }

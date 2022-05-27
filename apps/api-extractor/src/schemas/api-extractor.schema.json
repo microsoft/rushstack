@@ -176,9 +176,9 @@
       "description": "Set to true invoking API Extractor's test harness. When \"testMode\" is true, the \"toolVersion\" field in the .api.json file is assigned an empty string to prevent spurious diffs in output files tracked for tests.",
       "type": "boolean"
     },
-    "preserveEnumMemberOrder": {
-      "description": "When \"preserveEnumMemberOrder\" is true, the api.json order of members inside of enums will be the same as the source code.",
-      "type": "boolean"
+    "enumMemberOrder": {
+      "description":  "Specifies how API Extractor sorts the members of an enum when generating the .d.ts rollup and .api.json doc model. \n 'by-name': sort the items according to the enum member name \n 'by-value': sort the items according to the enum value \n 'preserve': keep the original order that items appear in the source code",
+      "type": "string"
     }
   },
   "required": ["mainEntryPointFilePath"],

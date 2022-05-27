@@ -407,7 +407,14 @@ export interface IConfigFile {
   testMode?: boolean;
 
   /**
-   * Set to true when invoking API Extractor wishing to preserve the order of members inside from an Enum.
+   * Specifies how API Extractor sorts the members of an enum when generating the .d.ts rollup and
+   * .api.json doc model.  The API report is always sorted to avoid spurious diffs.
+   *
+   * - "by-name": sort the items according to the enum member name
+   * - "by-value": sort the items according to the enum value
+   * - "preserve": keep the original order that items appear in the source code
+   *
+   * DEFAULT VALUE: "by-name"
    */
-  preserveEnumMemberOrder?: boolean;
+   enumMemberOrder: string;
 }

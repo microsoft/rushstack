@@ -164,7 +164,7 @@ interface IExtractorConfigParameters {
   newlineKind: NewlineKind;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
-  preserveEnumMemberOrder: boolean;
+  enumMemberOrder: string;
 }
 
 /**
@@ -283,8 +283,8 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.testMode} */
   public readonly testMode: boolean;
 
-  /** {@inheritDoc IConfigFile.preserveEnumMemberOrder} */
-  public readonly preserveEnumMemberOrder: boolean;
+  /** {@inheritDoc IConfigFile.enumMemberOrder} */
+  public readonly enumMemberOrder: string;
 
   private constructor(parameters: IExtractorConfigParameters) {
     this.projectFolder = parameters.projectFolder;
@@ -313,7 +313,7 @@ export class ExtractorConfig {
     this.newlineKind = parameters.newlineKind;
     this.messages = parameters.messages;
     this.testMode = parameters.testMode;
-    this.preserveEnumMemberOrder = parameters.preserveEnumMemberOrder;
+    this.enumMemberOrder = parameters.enumMemberOrder;
   }
 
   /**
@@ -969,6 +969,9 @@ export class ExtractorConfig {
           newlineKind = NewlineKind.CrLf;
           break;
       }
+
+      const enumMemberOrder: string = configObject.enumMemberOrder ? configObject.enumMemberOrder : "by-value";
+      
       extractorConfigParameters = {
         projectFolder: projectFolder,
         packageJson,
@@ -994,7 +997,7 @@ export class ExtractorConfig {
         newlineKind,
         messages: configObject.messages || {},
         testMode: !!configObject.testMode,
-        preserveEnumMemberOrder: !!configObject.preserveEnumMemberOrder
+        enumMemberOrder
       };
     } catch (e) {
       throw new Error(`Error parsing ${filenameForErrors}:\n` + (e as Error).message);

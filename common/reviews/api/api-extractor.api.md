@@ -51,6 +51,7 @@ export class ExtractorConfig {
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
+    readonly enumMemberOrder: string;
     static readonly FILENAME: string;
     getDiagnosticDump(): string;
     // @internal
@@ -67,7 +68,6 @@ export class ExtractorConfig {
     readonly packageFolder: string | undefined;
     readonly packageJson: INodePackageJson | undefined;
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
-    readonly preserveEnumMemberOrder: boolean;
     readonly projectFolder: string;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
@@ -203,11 +203,11 @@ export interface IConfigFile {
     docModel?: IConfigDocModel;
     // @beta
     dtsRollup?: IConfigDtsRollup;
+    enumMemberOrder: string;
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
     newlineKind?: 'crlf' | 'lf' | 'os';
-    preserveEnumMemberOrder?: boolean;
     projectFolder?: string;
     testMode?: boolean;
     // @beta
