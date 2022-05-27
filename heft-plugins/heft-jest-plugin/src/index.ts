@@ -2,15 +2,9 @@
 // See LICENSE in the project root for license information.
 
 /**
- * A Heft plugin for using Jest during the "test" stage.
+ * A Heft plugin for using Jest.
  *
  * @packageDocumentation
  */
 
-import type { IHeftPlugin } from '@rushstack/heft';
-import { JestPlugin } from './JestPlugin';
-
-/**
- * @internal
- */
-export default new JestPlugin() as IHeftPlugin;
+export {};

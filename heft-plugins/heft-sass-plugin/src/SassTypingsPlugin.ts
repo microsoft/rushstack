@@ -3,14 +3,14 @@
 
 import type {
   HeftConfiguration,
-  HeftSession,
-  IBuildStageContext,
+  HeftTaskSession,
   IHeftPlugin,
-  IPreCompileSubstage,
-  ScopedLogger
+  IHeftTaskRunHookOptions,
+  IScopedLogger
 } from '@rushstack/heft';
 import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
 import { JsonSchema } from '@rushstack/node-core-library';
+
 import { ISassConfiguration, SassTypingsGenerator } from './SassTypingsGenerator';
 import { Async } from './utilities/Async';
 
@@ -29,29 +29,21 @@ export class SassTypingsPlugin implements IHeftPlugin {
   /**
    * Generate typings for Sass files before TypeScript compilation.
    */
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runSassTypingsGeneratorAsync(
-            heftSession,
-            heftConfiguration,
-            build.properties.watchMode
-          );
-        });
-      });
+  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (hookOptions: IHeftTaskRunHookOptions) => {
+      // TODO: Handle watch mode
+      await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration, false);
     });
   }
 
   private async _runSassTypingsGeneratorAsync(
-    heftSession: HeftSession,
+    taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
     isWatchMode: boolean
   ): Promise<void> {
-    const logger: ScopedLogger = heftSession.requestScopedLogger('sass-typings-generator');
     const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
       heftConfiguration,
-      logger
+      taskSession.logger
     );
     const sassTypingsGenerator: SassTypingsGenerator = new SassTypingsGenerator({
       buildFolder: heftConfiguration.buildFolder,
@@ -60,13 +52,16 @@ export class SassTypingsPlugin implements IHeftPlugin {
 
     await sassTypingsGenerator.generateTypingsAsync();
     if (isWatchMode) {
-      Async.runWatcherWithErrorHandling(async () => await sassTypingsGenerator.runWatcherAsync(), logger);
+      Async.runWatcherWithErrorHandling(
+        async () => await sassTypingsGenerator.runWatcherAsync(),
+        taskSession.logger
+      );
     }
   }
 
   private async _loadSassConfigurationAsync(
     heftConfiguration: HeftConfiguration,
-    logger: ScopedLogger
+    logger: IScopedLogger
   ): Promise<ISassConfiguration> {
     const { buildFolder } = heftConfiguration;
     const sassConfigurationJson: ISassConfigurationJson | undefined =
@@ -105,3 +100,5 @@ export class SassTypingsPlugin implements IHeftPlugin {
     return SassTypingsPlugin._sassConfigurationLoader;
   }
 }
+
+export default new SassTypingsPlugin();

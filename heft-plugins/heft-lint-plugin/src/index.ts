@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * A Heft plugin for using node-sass during the "build" stage.
+ * A Heft plugin for using ESLint or TSLint.
  *
  * @packageDocumentation
  */
