@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 import { Text, InternalError } from '@rushstack/node-core-library';
-import { ReleaseTag } from '@microsoft/api-extractor-model';
+import { EnumMemberOrder, ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
@@ -308,10 +308,13 @@ export class ApiReportGenerator {
 
       case ts.SyntaxKind.SyntaxList:
         if (span.parent) {
-          if (AstDeclaration.isSupportedSyntaxKind(span.parent.kind)) {
-            // If the immediate parent is an API declaration, and the immediate children are API declarations,
-            // then sort the children alphabetically
-            sortChildren = true;
+          if (span.parent.kind === ts.SyntaxKind.EnumDeclaration
+            && collector.extractorConfig.memberSortOrder === EnumMemberOrder.preserve) {
+            //Configured to keep enum member source ordering, leave sortChildren false
+          } else if (AstDeclaration.isSupportedSyntaxKind(span.parent.kind)) {
+              // If the immediate parent is an API declaration, and the immediate children are API declarations,
+              // then sort the children alphabetically
+              sortChildren = true;
           } else if (span.parent.kind === ts.SyntaxKind.ModuleBlock) {
             // Namespaces are special because their chain goes ModuleDeclaration -> ModuleBlock -> SyntaxList
             sortChildren = true;

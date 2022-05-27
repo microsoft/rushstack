@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { ExtractorLogLevel } from './ExtractorLogLevel';
 
 /**
@@ -415,5 +416,5 @@ export interface IConfigFile {
    *
    * DEFAULT VALUE: "by-name"
    */
-   memberSortOrder: string;
+   memberSortOrder: EnumMemberOrder;
 }

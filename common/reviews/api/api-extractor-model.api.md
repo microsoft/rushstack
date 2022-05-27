@@ -617,6 +617,14 @@ export class ApiVariable extends ApiVariable_base {
 export type Constructor<T = {}> = new (...args: any[]) => T;
 
 // @public
+export enum EnumMemberOrder {
+    // (undocumented)
+    byName = "by-name",
+    // (undocumented)
+    preserve = "preserve"
+}
+
+// @public
 export class Excerpt {
     constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange);
     get isEmpty(): boolean;

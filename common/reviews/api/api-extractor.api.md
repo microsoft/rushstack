@@ -4,6 +4,7 @@
 
 ```ts
 
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { INodePackageJson } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
@@ -205,7 +206,7 @@ export interface IConfigFile {
     dtsRollup?: IConfigDtsRollup;
     extends?: string;
     mainEntryPointFilePath: string;
-    memberSortOrder: string;
+    memberSortOrder: EnumMemberOrder;
     messages?: IExtractorMessagesConfig;
     newlineKind?: 'crlf' | 'lf' | 'os';
     projectFolder?: string;

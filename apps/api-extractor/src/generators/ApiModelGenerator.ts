@@ -30,7 +30,8 @@ import {
   ApiVariable,
   ApiTypeAlias,
   ApiCallSignature,
-  IApiTypeParameterOptions
+  IApiTypeParameterOptions,
+  EnumMemberOrder
 } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
@@ -471,7 +472,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const shouldSortMembers: boolean = this._collector.extractorConfig.memberSortOrder !== 'preserve';
+      const shouldSortMembers: boolean = this._collector.extractorConfig.memberSortOrder !== EnumMemberOrder.preserve;
 
       apiEnum = new ApiEnum({ name, docComment, releaseTag, excerptTokens, shouldSortMembers });
       parentApiItem.addMember(apiEnum);

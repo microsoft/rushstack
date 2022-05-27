@@ -47,7 +47,7 @@ export { IApiConstructorOptions, ApiConstructor } from './model/ApiConstructor';
 export { IApiConstructSignatureOptions, ApiConstructSignature } from './model/ApiConstructSignature';
 export { IApiEntryPointOptions, ApiEntryPoint } from './model/ApiEntryPoint';
 export { IApiEnumOptions, ApiEnum } from './model/ApiEnum';
-export { IApiEnumMemberOptions, ApiEnumMember } from './model/ApiEnumMember';
+export { IApiEnumMemberOptions, ApiEnumMember, EnumMemberOrder } from './model/ApiEnumMember';
 export { IApiFunctionOptions, ApiFunction } from './model/ApiFunction';
 export { IApiIndexSignatureOptions, ApiIndexSignature } from './model/ApiIndexSignature';
 export { IApiInterfaceOptions, ApiInterface } from './model/ApiInterface';

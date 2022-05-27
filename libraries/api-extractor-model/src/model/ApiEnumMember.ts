@@ -25,6 +25,15 @@ export interface IApiEnumMemberOptions
   initializerTokenRange: IExcerptTokenRange;
 }
 
+/**
+ * Sort options for enum members in api reports and markdowns
+ * @public
+ */
+export enum EnumMemberOrder {
+  byName = "by-name",
+  preserve = "preserve"
+}
+
 export interface IApiEnumMemberJson extends IApiDeclaredItemJson {
   initializerTokenRange: IExcerptTokenRange;
 }

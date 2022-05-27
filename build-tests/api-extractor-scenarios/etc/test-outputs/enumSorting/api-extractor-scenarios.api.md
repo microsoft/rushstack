@@ -7,18 +7,18 @@
 // @public (undocumented)
 export const enum ConstEnum {
     // (undocumented)
+    Zero = 0,
+    // (undocumented)
     One = 1,
     // (undocumented)
-    Two = 2,
-    // (undocumented)
-    Zero = 0
+    Two = 2
 }
 
 // @public (undocumented)
 export enum RegularEnum {
+    Zero = 0,
     One = 1,
-    Two = 2,
-    Zero = 0
+    Two = 2
 }
 
 // (No @packageDocumentation comment for this package)
