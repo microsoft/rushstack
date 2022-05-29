@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Change build cache output folder",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
