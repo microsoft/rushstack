@@ -88,10 +88,12 @@ export class HeftJestDataFile {
   }
 
   /**
-   * Get the absolute path to the heft-jest-data.json file
+   * Get the absolute path to the heft-jest-data.json file.
+   *
+   * See also: HeftConfiguration.buildCacheFolder.
    */
   public static getConfigFilePath(projectFolder: string): string {
-    return path.join(projectFolder, '.heft', 'build-cache', 'heft-jest-data.json');
+    return path.join(projectFolder, 'temp', 'heft', 'build-cache', 'heft-jest-data.json');
   }
 
   private static async _validateHeftJestDataFileAsync(

@@ -73,7 +73,10 @@ export class HeftConfiguration {
    */
   public get projectHeftDataFolder(): string {
     if (!this._projectHeftDataFolder) {
-      this._projectHeftDataFolder = path.join(this.buildFolder, Constants.projectHeftFolderName);
+      this._projectHeftDataFolder = path.join(
+        this.buildFolder,
+        ...Constants.projectHeftFolderName.split('/')
+      );
     }
 
     return this._projectHeftDataFolder;

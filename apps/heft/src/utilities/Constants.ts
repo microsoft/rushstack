@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 export class Constants {
-  public static projectHeftFolderName: string = '.heft';
+  public static projectHeftFolderName: string = 'temp/heft';
 
   public static projectConfigFolderName: string = 'config';
 
