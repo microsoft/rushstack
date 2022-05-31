@@ -4,6 +4,8 @@
 
 ```ts
 
+import type { HeftConfiguration } from '@rushstack/heft';
+import { ITerminal } from '@rushstack/node-core-library';
 import { SyncHook } from 'tapable';
 import type * as TTypescript from 'typescript';
 
@@ -68,6 +70,18 @@ export interface IExtendedTypeScript {
 }
 
 // @beta (undocumented)
+export interface IPartialTsconfig {
+    // (undocumented)
+    compilerOptions?: IPartialTsconfigCompilerOptions;
+}
+
+// @beta (undocumented)
+export interface IPartialTsconfigCompilerOptions {
+    // (undocumented)
+    outDir?: string;
+}
+
+// @beta (undocumented)
 export interface IStaticAssetsCopyConfiguration {
     // (undocumented)
     excludeGlobs: string[];
@@ -82,7 +96,6 @@ export interface ITypeScriptConfigurationJson {
     additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
     buildProjectReferences?: boolean;
     emitCjsExtensionForCommonJS?: boolean | undefined;
-    emitFolderNameForTests?: string;
     emitMjsExtensionForESModule?: boolean | undefined;
     maxWriteParallelism?: number;
     // (undocumented)
@@ -94,8 +107,12 @@ export interface ITypeScriptConfigurationJson {
 export interface ITypeScriptPluginAccessor {
     // (undocumented)
     readonly onChangedFilesHook?: SyncHook<IChangedFilesHookOptions>;
-    // (undocumented)
-    readonly onTypeScriptConfigurationLoadedHook?: SyncHook<ITypeScriptConfigurationJson>;
 }
+
+// @beta (undocumented)
+export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal, typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined): Promise<IPartialTsconfig | undefined>;
+
+// @beta (undocumented)
+export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<ITypeScriptConfigurationJson | undefined>;
 
 ```

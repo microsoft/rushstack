@@ -3,10 +3,6 @@
 
   "taskPlugins": [
     {
-      "pluginName": "JestTypeScriptSetupPlugin",
-      "entryPoint": "./lib/JestTypeScriptSetupPlugin"
-    },
-    {
       "pluginName": "JestPlugin",
       "entryPoint": "./lib/JestPlugin",
       "optionsSchema": "./lib/schemas/heft-jest-plugin.schema.json",

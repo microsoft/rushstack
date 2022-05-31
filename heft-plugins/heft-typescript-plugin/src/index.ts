@@ -14,9 +14,13 @@ export type {
 } from './internalTypings/TypeScriptInternals';
 
 export type {
-  ITypeScriptConfigurationJson,
-  IStaticAssetsCopyConfiguration,
   IEmitModuleKind,
+  IStaticAssetsCopyConfiguration,
+  ITypeScriptConfigurationJson,
+  IPartialTsconfigCompilerOptions,
+  IPartialTsconfig,
   IChangedFilesHookOptions,
   ITypeScriptPluginAccessor
 } from './TypeScriptPlugin';
+
+export { loadTypeScriptConfigurationFileAsync, loadPartialTsconfigFileAsync } from './TypeScriptPlugin';
