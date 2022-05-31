@@ -25,11 +25,10 @@
             "pluginPackage": "@rushstack/heft-lint-plugin"
           }
         },
-        "setupJest": {
+        "api-extractor": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-jest-plugin",
-            "pluginName": "JestTypeScriptSetupPlugin"
+            "pluginPackage": "@rushstack/heft-api-extractor-plugin"
           }
         }
       }

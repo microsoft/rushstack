@@ -1,0 +1,10 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "ApiExtractorPlugin",
+      "entryPoint": "./lib/ApiExtractorPlugin"
+    }
+  ]
+}
