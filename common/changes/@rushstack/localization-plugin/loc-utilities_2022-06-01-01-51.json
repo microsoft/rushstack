@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Extract utilities to @rushstack/localization-utilitiles.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin"
+}
