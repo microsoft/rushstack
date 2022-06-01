@@ -5,19 +5,19 @@ import decache from 'decache';
 
 import { IPseudolocaleOptions } from './interfaces';
 
-  /**
-   * Get a function that pseudolocalizes a string.
-   *
-   * @public
-   */
-  export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string) => string {
-    // pseudolocale maintains static state, so we need to load it as isolated modules
-    decache('pseudolocale');
-    const pseudolocale = require('pseudolocale'); // eslint-disable-line
+/**
+ * Get a function that pseudolocalizes a string.
+ *
+ * @public
+ */
+export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string) => string {
+  // pseudolocale maintains static state, so we need to load it as isolated modules
+  decache('pseudolocale');
+  const pseudolocale = require('pseudolocale'); // eslint-disable-line
 
-    pseudolocale.option = {
-      ...pseudolocale.option,
-      ...options
-    };
-    return pseudolocale.str;
-  }
+  pseudolocale.option = {
+    ...pseudolocale.option,
+    ...options
+  };
+  return pseudolocale.str;
+}
