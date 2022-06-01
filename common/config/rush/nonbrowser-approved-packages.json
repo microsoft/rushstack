@@ -151,6 +151,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/localization-utilities",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries" ]
     },

@@ -5,7 +5,7 @@ import { StringValuesTypingsGenerator, IStringValueTyping } from '@rushstack/typ
 import { ITerminal, NewlineKind } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from './interfaces';
-import { LocFileParser } from './utilities/LocFileParser';
+import { parseLocFile } from './LocFileParser';
 
 /**
  * @public
@@ -31,7 +31,7 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
       parseAndGenerateTypings: (fileContents: string, filePath: string) => {
-        const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
+        const locFileData: ILocalizationFile = parseLocFile({
           filePath: filePath,
           content: fileContents,
           terminal: this._options.terminal!,

@@ -883,6 +883,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/localization-utilities",
+      "projectFolder": "libraries/localization-utilities",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/module-minifier",
       "projectFolder": "libraries/module-minifier",
       "reviewCategory": "libraries",

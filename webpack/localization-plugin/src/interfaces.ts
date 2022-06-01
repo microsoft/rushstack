@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IPseudolocaleOptions } from '@rushstack/localization-utilities';
+
 /**
  * Options for the passthrough locale.
  *
@@ -57,24 +59,6 @@ export interface IDefaultLocaleOptions {
    * `localizedData.translatedStrings` will be provided by the default locale
    */
   fillMissingTranslationStrings?: boolean;
-}
-
-/**
- * Options for the pseudolocale library.
- *
- * @internalRemarks
- * Eventually this should be replaced with DefinitelyTyped types.
- *
- * @public
- */
-export interface IPseudolocaleOptions {
-  prepend?: string;
-  append?: string;
-  delimiter?: string;
-  startDelimiter?: string;
-  endDelimiter?: string;
-  extend?: number;
-  override?: string;
 }
 
 /**
@@ -184,21 +168,6 @@ export interface ILocalizationPluginOptions {
    * TODO: Remove when version 1.0.0 is released.
    */
   filesToIgnore?: string[];
-}
-
-/**
- * @public
- */
-export interface ILocalizationFile {
-  [stringName: string]: ILocalizedString;
-}
-
-/**
- * @public
- */
-export interface ILocalizedString {
-  value: string;
-  comment?: string;
 }
 
 /**
