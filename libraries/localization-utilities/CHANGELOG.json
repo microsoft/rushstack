@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/localization-utilities",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/localization-utilities_v0.1.0",
+      "date": "Wed, 01 Jun 2022 23:31:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial project creation."
+          }
+        ]
+      }
+    }
+  ]
+}
