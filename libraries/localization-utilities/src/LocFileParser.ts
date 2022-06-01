@@ -56,18 +56,18 @@ export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
   } else if (/\.resjson$/i.test(options.filePath)) {
     const resjsonFile: Record<string, string> = JsonFile.parseString(options.content);
     parsedFile = {};
-    const comments: Record<string, string> = {};
+    const comments: Map<string, string> = new Map();
     for (const [key, value] of Object.entries(resjsonFile)) {
       if (key.startsWith('_') && key.endsWith('.comment')) {
         const commentKey: string = key.substring(1, key.length - '.comment'.length);
-        comments[commentKey] = value;
+        comments.set(commentKey, value);
       } else {
         parsedFile[key] = { value };
       }
     }
 
     const orphanComments: string[] = [];
-    for (const [key, comment] of Object.entries(comments)) {
+    for (const [key, comment] of comments) {
       if (parsedFile[key]) {
         parsedFile[key].comment = comment;
       } else {

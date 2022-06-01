@@ -17,7 +17,6 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/typings-generator": "workspace:*",
-    "@types/node": "12.20.24",
     "decache": "~4.5.1",
     "pseudolocale": "~1.1.0",
     "xmldoc": "~1.1.2"
@@ -26,6 +25,7 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@types/node": "12.20.24",
     "@types/xmldoc": "1.1.4"
   }
 }

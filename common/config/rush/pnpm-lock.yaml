@@ -1612,7 +1612,6 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
       '@rushstack/typings-generator': link:../typings-generator
-      '@types/node': 12.20.24
       decache: 4.5.1
       pseudolocale: 1.1.0
       xmldoc: 1.1.2
@@ -1620,6 +1619,7 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/node': 12.20.24
       '@types/xmldoc': 1.1.4
 
   ../../libraries/module-minifier:
