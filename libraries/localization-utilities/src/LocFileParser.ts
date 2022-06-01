@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal, NewlineKind, JsonFile } from '@rushstack/node-core-library';
+import { ITerminal, NewlineKind, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import { ILocalizationFile } from '../interfaces';
-import { ResxReader } from './ResxReader';
-import { Constants } from './Constants';
+import { ILocalizationFile } from './interfaces';
+import { readResxAsLocFile } from './ResxReader';
+
+const LOC_JSON_SCHEMA: JsonSchema = JsonSchema.fromFile(`${__dirname}/schemas/locJson.schema.json`);
 
 /**
- * @internal
+ * @public
  */
 export interface IParseLocFileOptions {
   terminal: ITerminal;
@@ -25,11 +26,10 @@ interface IParseCacheEntry {
 
 const parseCache: Map<string, IParseCacheEntry> = new Map<string, IParseCacheEntry>();
 
-/**
- * @internal
- */
-export class LocFileParser {
-  public static parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
+  /**
+   * @public
+   */
+  export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
     const fileCacheKey: string = `${options.filePath}?${options.resxNewlineNormalization || 'none'}`;
     if (parseCache.has(fileCacheKey)) {
       const entry: IParseCacheEntry = parseCache.get(fileCacheKey)!;
@@ -40,7 +40,7 @@ export class LocFileParser {
 
     let parsedFile: ILocalizationFile;
     if (/\.resx$/i.test(options.filePath)) {
-      parsedFile = ResxReader.readResxAsLocFile(options.content, {
+      parsedFile = readResxAsLocFile(options.content, {
         terminal: options.terminal,
         resxFilePath: options.filePath,
         newlineNormalization: options.resxNewlineNormalization,
@@ -49,7 +49,7 @@ export class LocFileParser {
     } else if (/\.(resx|loc)\.json$/i.test(options.filePath)) {
       parsedFile = JsonFile.parseString(options.content);
       try {
-        Constants.LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
+        LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
       } catch (e) {
         options.terminal.writeError(`The loc file is invalid. Error: ${e}`);
       }
@@ -88,4 +88,3 @@ export class LocFileParser {
     parseCache.set(fileCacheKey, { content: options.content, parsedFile });
     return parsedFile;
   }
-}

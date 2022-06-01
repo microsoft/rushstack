@@ -1597,6 +1597,31 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
 
+  ../../libraries/localization-utilities:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/typings-generator': workspace:*
+      '@types/node': 12.20.24
+      '@types/xmldoc': 1.1.4
+      decache: ~4.5.1
+      pseudolocale: ~1.1.0
+      xmldoc: ~1.1.2
+    dependencies:
+      '@rushstack/node-core-library': link:../node-core-library
+      '@rushstack/typings-generator': link:../typings-generator
+      '@types/node': 12.20.24
+      decache: 4.5.1
+      pseudolocale: 1.1.0
+      xmldoc: 1.1.2
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/xmldoc': 1.1.4
+
   ../../libraries/module-minifier:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -2285,34 +2310,27 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/localization-utilities': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
-      '@rushstack/typings-generator': workspace:*
       '@types/loader-utils': 1.1.3
       '@types/lodash': 4.14.116
       '@types/minimatch': 3.0.5
       '@types/node': 12.20.24
       '@types/tapable': 1.0.6
       '@types/webpack': 4.41.24
-      '@types/xmldoc': 1.1.4
-      decache: ~4.5.1
       loader-utils: ~1.1.0
       lodash: ~4.17.15
       minimatch: ~3.0.3
-      pseudolocale: ~1.1.0
       webpack: ~4.44.2
-      xmldoc: ~1.1.2
     dependencies:
+      '@rushstack/localization-utilities': link:../../libraries/localization-utilities
       '@rushstack/node-core-library': link:../../libraries/node-core-library
-      '@rushstack/typings-generator': link:../../libraries/typings-generator
       '@types/node': 12.20.24
       '@types/tapable': 1.0.6
-      decache: 4.5.1
       loader-utils: 1.1.0
       lodash: 4.17.21
       minimatch: 3.0.8
-      pseudolocale: 1.1.0
-      xmldoc: 1.1.2
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -2322,7 +2340,6 @@ importers:
       '@types/lodash': 4.14.116
       '@types/minimatch': 3.0.5
       '@types/webpack': 4.41.24
-      '@types/xmldoc': 1.1.4
       webpack: 4.44.2
 
   ../../webpack/module-minifier-plugin:
@@ -9691,7 +9708,7 @@ packages:
     dev: true
 
   /callsite/1.0.0:
-    resolution: {integrity: sha1-KAOY5dZkvXQDi28JBRU+borxvCA=}
+    resolution: {integrity: sha512-0vdNRFXn5q+dtOqjfFtmtlI9N2eVZ7LMyEV2iKC5mEEFvSg/69Ml6b/WU2qF8W1nLRa0wiSrDT3Y5jOHZCwKPQ==}
     dev: false
 
   /callsites/3.1.0:

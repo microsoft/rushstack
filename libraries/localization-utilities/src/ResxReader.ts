@@ -4,7 +4,7 @@
 import { FileSystem, ITerminal, Text, NewlineKind } from '@rushstack/node-core-library';
 import { XmlDocument, XmlElement } from 'xmldoc';
 
-import { ILocalizedString, ILocalizationFile } from '../interfaces';
+import { ILocalizedString, ILocalizationFile } from './interfaces';
 
 const STRING_NAME_RESX: RegExp = /^[A-z_$][A-z0-9_$]*$/;
 
@@ -30,41 +30,43 @@ interface IResxReaderOptionsInternal extends Omit<IResxReaderOptions, 'terminal'
   loggingFunctions: ILoggingFunctions;
 }
 
-/**
- * @public
- */
-export class ResxReader {
-  public static readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile {
+  /**
+   * @public
+   */
+  export function readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile {
     const resxContents: string = FileSystem.readFile(options.resxFilePath);
-    return ResxReader.readResxAsLocFile(resxContents, options);
+    return readResxAsLocFile(resxContents, options);
   }
 
-  public static readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocalizationFile {
+  /**
+   * @public
+   */
+  export function readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocalizationFile {
     const writeError: (message: string) => void = options.terminal.writeErrorLine.bind(options.terminal);
     const writeWarning: (message: string) => void = options.terminal.writeWarningLine.bind(options.terminal);
     const loggingFunctions: ILoggingFunctions = {
       logError: (message: string) => writeError(message),
       logWarning: (message: string) => writeWarning(message),
       logFileError: (message: string, filePath: string, line?: number, position?: number) => {
-        ResxReader._logWithLocation(writeError, message, filePath, line, position);
+        _logWithLocation(writeError, message, filePath, line, position);
       },
       logFileWarning: (message: string, filePath: string, line?: number, position?: number) => {
-        ResxReader._logWithLocation(writeWarning, message, filePath, line, position);
+        _logWithLocation(writeWarning, message, filePath, line, position);
       }
     };
 
-    return this._readResxAsLocFileInternal({
+    return _readResxAsLocFileInternal({
       ...options,
       resxContents,
       loggingFunctions
     });
   }
 
-  private static _readResxAsLocFileInternal(options: IResxReaderOptionsInternal): ILocalizationFile {
+  function _readResxAsLocFileInternal(options: IResxReaderOptionsInternal): ILocalizationFile {
     const xmlDocument: XmlDocument = new XmlDocument(options.resxContents);
 
     if (xmlDocument.name !== 'root') {
-      ResxReader._logErrorWithLocation(
+      _logErrorWithLocation(
         options,
         `Expected RESX to have a "root" element, found "${xmlDocument.name}"`,
         xmlDocument
@@ -80,26 +82,15 @@ export class ResxReader {
             case 'data': {
               const stringName: string = childNode.attr.name;
               if (!stringName) {
-                ResxReader._logErrorWithLocation(
-                  options,
-                  'Unexpected missing or empty string name',
-                  childNode
-                );
+                _logErrorWithLocation(options, 'Unexpected missing or empty string name', childNode);
               } else if (!STRING_NAME_RESX.test(stringName)) {
-                ResxReader._logErrorWithLocation(options, `Invalid string name "${stringName}"`, childNode);
+                _logErrorWithLocation(options, `Invalid string name "${stringName}"`, childNode);
               } else {
                 if (locFile.hasOwnProperty(stringName)) {
-                  ResxReader._logErrorWithLocation(
-                    options,
-                    `Duplicate string value "${stringName}"`,
-                    childNode
-                  );
+                  _logErrorWithLocation(options, `Duplicate string value "${stringName}"`, childNode);
                 }
 
-                const locString: ILocalizedString | undefined = ResxReader._readDataElement(
-                  options,
-                  childNode
-                );
+                const locString: ILocalizedString | undefined = _readDataElement(options, childNode);
 
                 if (locString) {
                   locFile[stringName] = locString;
@@ -115,11 +106,7 @@ export class ResxReader {
               break;
 
             default:
-              ResxReader._logErrorWithLocation(
-                options,
-                `Unexpected RESX element ${childNode.name}`,
-                childNode
-              );
+              _logErrorWithLocation(options, `Unexpected RESX element ${childNode.name}`, childNode);
           }
 
           break;
@@ -127,7 +114,7 @@ export class ResxReader {
 
         case 'text': {
           if (childNode.text.trim() !== '') {
-            ResxReader._logErrorWithLocation(options, 'Found unexpected non-empty text node in RESX');
+            _logErrorWithLocation(options, 'Found unexpected non-empty text node in RESX');
           }
 
           break;
@@ -137,7 +124,7 @@ export class ResxReader {
           break;
 
         default:
-          ResxReader._logErrorWithLocation(options, `Unexpected ${childNode.type} child in RESX`);
+          _logErrorWithLocation(options, `Unexpected ${childNode.type} child in RESX`);
           break;
       }
     }
@@ -145,7 +132,7 @@ export class ResxReader {
     return locFile;
   }
 
-  private static _readDataElement(
+  function _readDataElement(
     options: IResxReaderOptionsInternal,
     dataElement: XmlElement
   ): ILocalizedString | undefined {
@@ -160,10 +147,10 @@ export class ResxReader {
           switch (childNode.name) {
             case 'value': {
               if (foundValueElement) {
-                ResxReader._logErrorWithLocation(options, 'Duplicate <value> element found', childNode);
+                _logErrorWithLocation(options, 'Duplicate <value> element found', childNode);
               } else {
                 foundValueElement = true;
-                value = ResxReader._readTextElement(options, childNode);
+                value = _readTextElement(options, childNode);
                 if (value && options.newlineNormalization) {
                   value = Text.convertTo(value, options.newlineNormalization);
                 }
@@ -174,21 +161,17 @@ export class ResxReader {
 
             case 'comment': {
               if (foundCommentElement) {
-                ResxReader._logErrorWithLocation(options, 'Duplicate <comment> element found', childNode);
+                _logErrorWithLocation(options, 'Duplicate <comment> element found', childNode);
               } else {
                 foundCommentElement = true;
-                comment = ResxReader._readTextElement(options, childNode);
+                comment = _readTextElement(options, childNode);
               }
 
               break;
             }
 
             default:
-              ResxReader._logErrorWithLocation(
-                options,
-                `Unexpected RESX element ${childNode.name}`,
-                childNode
-              );
+              _logErrorWithLocation(options, `Unexpected RESX element ${childNode.name}`, childNode);
               break;
           }
 
@@ -197,7 +180,7 @@ export class ResxReader {
 
         case 'text': {
           if (childNode.text.trim() !== '') {
-            ResxReader._logErrorWithLocation(
+            _logErrorWithLocation(
               options,
               'Found unexpected non-empty text node in RESX <data> element',
               dataElement
@@ -211,7 +194,7 @@ export class ResxReader {
           break;
 
         default:
-          ResxReader._logErrorWithLocation(
+          _logErrorWithLocation(
             options,
             `Unexpected ${childNode.type} child in RESX <data> element`,
             dataElement
@@ -220,10 +203,10 @@ export class ResxReader {
     }
 
     if (!foundValueElement) {
-      ResxReader._logErrorWithLocation(options, 'Missing string value in <data> element', dataElement);
+      _logErrorWithLocation(options, 'Missing string value in <data> element', dataElement);
     } else {
       if (comment === undefined && options.warnOnMissingComment) {
-        ResxReader._logWarningWithLocation(options, 'Missing string comment in <data> element', dataElement);
+        _logWarningWithLocation(options, 'Missing string comment in <data> element', dataElement);
       }
 
       return {
@@ -233,10 +216,7 @@ export class ResxReader {
     }
   }
 
-  private static _readTextElement(
-    options: IResxReaderOptionsInternal,
-    element: XmlElement
-  ): string | undefined {
+  function _readTextElement(options: IResxReaderOptionsInternal, element: XmlElement): string | undefined {
     let foundText: string | undefined = undefined;
 
     for (const childNode of element.children) {
@@ -244,11 +224,7 @@ export class ResxReader {
         case 'cdata':
         case 'text': {
           if (foundText !== undefined) {
-            ResxReader._logErrorWithLocation(
-              options,
-              'More than one child node found containing text content',
-              element
-            );
+            _logErrorWithLocation(options, 'More than one child node found containing text content', element);
             break;
           }
 
@@ -260,11 +236,11 @@ export class ResxReader {
           break;
 
         case 'element':
-          ResxReader._logErrorWithLocation(options, `Unexpected element`, childNode);
+          _logErrorWithLocation(options, `Unexpected element`, childNode);
           break;
 
         default:
-          ResxReader._logErrorWithLocation(options, `Unexpected ${element.type} child`, element);
+          _logErrorWithLocation(options, `Unexpected ${element.type} child`, element);
           break;
       }
     }
@@ -272,7 +248,7 @@ export class ResxReader {
     return foundText;
   }
 
-  private static _logErrorWithLocation(
+  function _logErrorWithLocation(
     options: IResxReaderOptionsInternal,
     message: string,
     element?: XmlElement | XmlDocument
@@ -289,7 +265,7 @@ export class ResxReader {
     }
   }
 
-  private static _logWarningWithLocation(
+  function _logWarningWithLocation(
     options: IResxReaderOptionsInternal,
     message: string,
     element?: XmlElement | XmlDocument
@@ -306,7 +282,7 @@ export class ResxReader {
     }
   }
 
-  private static _logWithLocation(
+  function _logWithLocation(
     loggingFn: (message: string) => void,
     message: string,
     filePath: string,
@@ -324,4 +300,3 @@ export class ResxReader {
 
     loggingFn(`${location}: ${message}`);
   }
-}

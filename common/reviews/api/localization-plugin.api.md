@@ -4,9 +4,9 @@
 
 ```ts
 
+import { ILocalizationFile } from '@rushstack/localization-utilities';
+import { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 import { ITerminal } from '@rushstack/node-core-library';
-import { NewlineKind } from '@rushstack/node-core-library';
-import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)
@@ -31,12 +31,6 @@ export interface ILocaleElementMap {
 export interface ILocaleFileData {
     // (undocumented)
     [stringName: string]: string;
-}
-
-// @public (undocumented)
-export interface ILocalizationFile {
-    // (undocumented)
-    [stringName: string]: ILocalizedString;
 }
 
 // @public
@@ -92,14 +86,6 @@ export interface ILocalizedData {
 }
 
 // @public (undocumented)
-export interface ILocalizedString {
-    // (undocumented)
-    comment?: string;
-    // (undocumented)
-    value: string;
-}
-
-// @public (undocumented)
 export interface ILocalizedStrings {
     // (undocumented)
     [locale: string]: ILocaleData;
@@ -113,42 +99,10 @@ export interface ILocalizedWebpackChunk extends Webpack.compilation.Chunk {
     };
 }
 
-// @internal (undocumented)
-export interface _IParseLocFileOptions {
-    // (undocumented)
-    content: string;
-    // (undocumented)
-    filePath: string;
-    // (undocumented)
-    ignoreMissingResxComments: boolean | undefined;
-    // (undocumented)
-    resxNewlineNormalization: NewlineKind | undefined;
-    // (undocumented)
-    terminal: ITerminal;
-}
-
 // @public
 export interface IPassthroughLocaleOptions {
     passthroughLocaleName?: string;
     usePassthroughLocale?: boolean;
-}
-
-// @public
-export interface IPseudolocaleOptions {
-    // (undocumented)
-    append?: string;
-    // (undocumented)
-    delimiter?: string;
-    // (undocumented)
-    endDelimiter?: string;
-    // (undocumented)
-    extend?: number;
-    // (undocumented)
-    override?: string;
-    // (undocumented)
-    prepend?: string;
-    // (undocumented)
-    startDelimiter?: string;
 }
 
 // @public
@@ -161,18 +115,6 @@ export interface IPseudolocalesOptions {
 export interface IResolvedMissingTranslations {
     // (undocumented)
     [localeName: string]: string | ILocaleFileData;
-}
-
-// @public (undocumented)
-export interface IResxReaderOptions {
-    // (undocumented)
-    newlineNormalization: NewlineKind | undefined;
-    // (undocumented)
-    resxFilePath: string;
-    // (undocumented)
-    terminal: ITerminal;
-    // (undocumented)
-    warnOnMissingComment: boolean;
 }
 
 // @internal (undocumented)
@@ -190,24 +132,6 @@ export interface ITypingsGenerationOptions {
     sourceRoot?: string;
 }
 
-// @public (undocumented)
-export interface ITypingsGeneratorOptions {
-    // (undocumented)
-    exportAsDefault?: boolean;
-    // (undocumented)
-    generatedTsFolder: string;
-    // (undocumented)
-    globsToIgnore?: string[];
-    // (undocumented)
-    ignoreMissingResxComments?: boolean | undefined;
-    // (undocumented)
-    resxNewlineNormalization?: NewlineKind | undefined;
-    // (undocumented)
-    srcFolder: string;
-    // (undocumented)
-    terminal?: ITerminal;
-}
-
 // @public
 export class LocalizationPlugin implements Webpack.Plugin {
     constructor(options: ILocalizationPluginOptions);
@@ -223,25 +147,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
     getDataForSerialNumber(serialNumber: string): IStringSerialNumberData | undefined;
     // @internal (undocumented)
     stringKeys: Map<string, _IStringPlaceholder>;
-}
-
-// @internal (undocumented)
-export class _LocFileParser {
-    // (undocumented)
-    static parseLocFile(options: _IParseLocFileOptions): ILocalizationFile;
-}
-
-// @public (undocumented)
-export class ResxReader {
-    // (undocumented)
-    static readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocalizationFile;
-    // (undocumented)
-    static readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile;
-}
-
-// @public
-export class TypingsGenerator extends StringValuesTypingsGenerator {
-    constructor(options: ITypingsGeneratorOptions);
 }
 
 // (No @packageDocumentation comment for this package)

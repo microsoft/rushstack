@@ -5,8 +5,12 @@ import decache from 'decache';
 
 import { IPseudolocaleOptions } from './interfaces';
 
-export class Pseudolocalization {
-  public static getPseudolocalizer(options: IPseudolocaleOptions): (str: string) => string {
+  /**
+   * Get a function that pseudolocalizes a string.
+   *
+   * @public
+   */
+  export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string) => string {
     // pseudolocale maintains static state, so we need to load it as isolated modules
     decache('pseudolocale');
     const pseudolocale = require('pseudolocale'); // eslint-disable-line
@@ -17,4 +21,3 @@ export class Pseudolocalization {
     };
     return pseudolocale.str;
   }
-}
