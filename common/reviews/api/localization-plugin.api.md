@@ -129,6 +129,7 @@ export interface _IStringPlaceholder {
 export interface ITypingsGenerationOptions {
     exportAsDefault?: boolean;
     generatedTsFolder: string;
+    ignoreString?: (resxFilePath: string, stringName: string) => boolean;
     sourceRoot?: string;
 }
 
