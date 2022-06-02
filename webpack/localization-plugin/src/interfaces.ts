@@ -42,6 +42,22 @@ export interface ITypingsGenerationOptions {
    * If this option is set to `true`, loc modules typings will be exported wrapped in a `default` property.
    */
   exportAsDefault?: boolean;
+
+  /**
+   * Optionally, provide a function that will be called for each string. If the function returns `true`
+   * the string will not be included in the typings.
+   */
+  ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+
+  /**
+   * Optionally, provide a function that will process string comments. The returned value will become the
+   * TSDoc comment for the string in the typings.
+   */
+  processComment?: (
+    comment: string | undefined,
+    resxFilePath: string,
+    stringName: string
+  ) => string | undefined;
 }
 
 /**

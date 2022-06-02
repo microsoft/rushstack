@@ -80,6 +80,10 @@ export interface ITypingsGeneratorOptions {
     // (undocumented)
     ignoreMissingResxComments?: boolean | undefined;
     // (undocumented)
+    ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+    // (undocumented)
+    processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
+    // (undocumented)
     resxNewlineNormalization?: NewlineKind | undefined;
     // (undocumented)
     srcFolder: string;
