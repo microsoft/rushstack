@@ -2,5 +2,9 @@
   "string1": {
     "value": "string one",
     "comment": "the first string"
+  },
+  "__IGNORED_STRING__": {
+    "value": "ignored string",
+    "comment": "ignored string"
   }
 }
