@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/webpack5-module-minifier-plugin",
+  "entries": [
+    {
+      "version": "5.1.0",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.0",
+      "date": "Thu, 02 Jun 2022 15:13:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial implementation of @rushstack/webpack5-module-minifier-plugin. Supports externals, inline modules, concatenation, and recording of minified module sizes."
+          }
+        ]
+      }
+    }
+  ]
+}
