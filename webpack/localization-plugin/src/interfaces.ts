@@ -48,6 +48,16 @@ export interface ITypingsGenerationOptions {
    * the string will not be included in the typings.
    */
   ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+
+  /**
+   * Optionally, provide a function that will process string comments. The returned value will become the
+   * TSDoc comment for the string in the typings.
+   */
+  processComment?: (
+    comment: string | undefined,
+    resxFilePath: string,
+    stringName: string
+  ) => string | undefined;
 }
 
 /**

@@ -130,6 +130,7 @@ export interface ITypingsGenerationOptions {
     exportAsDefault?: boolean;
     generatedTsFolder: string;
     ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+    processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
     sourceRoot?: string;
 }
 

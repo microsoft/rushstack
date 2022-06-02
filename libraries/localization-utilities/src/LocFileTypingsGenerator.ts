@@ -19,6 +19,11 @@ export interface ITypingsGeneratorOptions {
   resxNewlineNormalization?: NewlineKind | undefined;
   ignoreMissingResxComments?: boolean | undefined;
   ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+  processComment?: (
+    comment: string | undefined,
+    resxFilePath: string,
+    stringName: string
+  ) => string | undefined;
 }
 
 /**
@@ -28,6 +33,7 @@ export interface ITypingsGeneratorOptions {
  */
 export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
   public constructor(options: ITypingsGeneratorOptions) {
+    const { ignoreString, processComment } = options;
     super({
       ...options,
       fileExtensions: ['.resx', '.resx.json', '.loc.json', '.resjson'],
@@ -44,10 +50,14 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
 
         // eslint-disable-next-line guard-for-in
         for (const stringName in locFileData) {
-          if (!options.ignoreString?.(resxFilePath, stringName)) {
+          if (!ignoreString?.(resxFilePath, stringName)) {
+            let comment: string | undefined = locFileData[stringName].comment;
+            if (processComment) {
+              comment = processComment(comment, resxFilePath, stringName);
+            }
             typings.push({
               exportName: stringName,
-              comment: locFileData[stringName].comment
+              comment
             });
           }
         }

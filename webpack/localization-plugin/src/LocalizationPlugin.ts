@@ -174,7 +174,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
         exportAsDefault: this._options.typingsOptions.exportAsDefault,
         globsToIgnore: this._options.globsToIgnore,
-        ignoreString: this._options.typingsOptions.ignoreString
+        ignoreString: this._options.typingsOptions.ignoreString,
+        processComment: this._options.typingsOptions.processComment
       });
     } else {
       typingsPreprocessor = undefined;

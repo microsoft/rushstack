@@ -84,7 +84,8 @@ function generateConfiguration(mode, outputFolderName) {
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
           sourceRoot: path.resolve(__dirname, 'src'),
-          ignoreString: (filePath, stringName) => stringName === '__IGNORED_STRING__'
+          ignoreString: (filePath, stringName) => stringName === '__IGNORED_STRING__',
+          processComment: (comment) => (comment ? `${comment} (processed)` : comment)
         },
         localizationStats: {
           dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
