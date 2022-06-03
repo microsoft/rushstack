@@ -2,6 +2,26 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/localization-plugin_v0.13.0",
+      "date": "Fri, 03 Jun 2022 00:11:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the ability to tweak string comments in generated typings."
+          },
+          {
+            "comment": "Include an option to ignore strings from typings generation."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.0",
       "tag": "@rushstack/localization-plugin_v0.12.0",
       "date": "Wed, 01 Jun 2022 23:31:32 GMT",

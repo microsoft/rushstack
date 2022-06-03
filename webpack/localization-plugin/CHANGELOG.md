@@ -1,6 +1,14 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Wed, 01 Jun 2022 23:31:32 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Jun 2022 00:11:05 GMT and should not be manually modified.
+
+## 0.13.0
+Fri, 03 Jun 2022 00:11:05 GMT
+
+### Minor changes
+
+- Add the ability to tweak string comments in generated typings.
+- Include an option to ignore strings from typings generation.
 
 ## 0.12.0
 Wed, 01 Jun 2022 23:31:32 GMT

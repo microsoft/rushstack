@@ -2,6 +2,21 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/localization-utilities_v0.2.0",
+      "date": "Fri, 03 Jun 2022 00:11:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the ability to tweak string comments in generated typings."
+          },
+          {
+            "comment": "Include an option to ignore strings from typings generation."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/localization-utilities_v0.1.0",
       "date": "Wed, 01 Jun 2022 23:31:32 GMT",
