@@ -37,8 +37,8 @@ describe(PublishAction.name, () => {
 
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'publish'];
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const updateBeforeMock = jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .spyOn(PublishAction.prototype as any, '_updateBeforePublish')
           .mockImplementation(() => {});
 
