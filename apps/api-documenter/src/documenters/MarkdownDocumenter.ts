@@ -40,8 +40,7 @@ import {
   IResolveDeclarationReferenceResult,
   ApiTypeAlias,
   ExcerptToken,
-  ApiOptionalMixin,
-  ApiReadonlyMixin
+  ApiOptionalMixin
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -1016,12 +1015,6 @@ export class MarkdownDocumenter {
     if (ApiStaticMixin.isBaseClassOf(apiItem)) {
       if (apiItem.isStatic) {
         section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: 'static' }));
-      }
-    }
-
-    if (ApiReadonlyMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.isReadonly) {
-        section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: 'readonly' }));
       }
     }
 

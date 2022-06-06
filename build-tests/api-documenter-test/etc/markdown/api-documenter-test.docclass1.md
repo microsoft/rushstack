@@ -29,15 +29,15 @@ The constructor for this class is marked as internal. Third-party code should no
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [malformedEvent](./api-documenter-test.docclass1.malformedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event should have been marked as readonly. |
-|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) | <code>readonly</code> | [SystemEvent](./api-documenter-test.systemevent.md) | This event is fired whenever the object is modified. |
+|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event is fired whenever the object is modified. |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) | <code>readonly</code> | string |  |
+|  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) |  | string |  |
 |  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |
-|  [staticReadonlyThing](./api-documenter-test.docclass1.staticreadonlything.md) | <code>static</code><code>readonly</code> | boolean |  |
+|  [staticReadonlyThing](./api-documenter-test.docclass1.staticreadonlything.md) | <code>static</code> | boolean |  |
 |  [writeableProperty](./api-documenter-test.docclass1.writeableproperty.md) |  | string |  |
 |  [writeonlyProperty](./api-documenter-test.docclass1.writeonlyproperty.md) |  | string | API Extractor will surface an <code>ae-missing-getter</code> finding for this property. |
 
