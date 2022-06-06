@@ -26,7 +26,7 @@ export interface IApiEnumMemberOptions
 }
 
 /**
- * Sort options for enum members in api reports and markdowns
+ * Sort options for enum members in api reports
  * @public
  */
 export enum EnumMemberOrder {
