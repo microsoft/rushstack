@@ -126,7 +126,7 @@ export abstract class LinterBase<TLintResult> {
         continue;
       }
 
-      // Older compilers don't compute the ts.SourceFile.version.  If it is missing, then we can't skip processing
+      // Compute the version from the source file content
       const version: string = sourceFile.version || '';
       const cachedVersion: string = cachedNoFailureFileVersions.get(relative) || '';
       if (

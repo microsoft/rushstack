@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 import * as path from 'path';
 
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   HeftTaskSession,
@@ -24,7 +24,7 @@ import type { LinterBase } from './LinterBase';
 
 const PLUGIN_NAME: string = 'LintPlugin';
 
-export class LintPlugin implements IHeftTaskPlugin {
+export default class LintPlugin implements IHeftTaskPlugin {
   private readonly _lintingPromises: Promise<LinterBase<unknown>[]>[] = [];
 
   // These are initliazed by _initAsync
@@ -45,8 +45,8 @@ export class LintPlugin implements IHeftTaskPlugin {
         accessor.onChangedFilesHook?.tap(PLUGIN_NAME, (changedFilesHookOptions: IChangedFilesHookOptions) => {
           this._lintingPromises.push(
             this._lintAsync(
+              taskSession,
               heftConfiguration,
-              taskSession.logger,
               changedFilesHookOptions.program,
               changedFilesHookOptions.changedFiles
             )
@@ -58,7 +58,7 @@ export class LintPlugin implements IHeftTaskPlugin {
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
       // Run init again. Since we are intentionally swallowing init errors in the linting promises,
       // we will await the init here in order to ensure that init errors bubble up.
-      await this._initAsync(heftConfiguration, taskSession.logger);
+      await this._initAsync(taskSession, heftConfiguration);
 
       // Linter wasn't requested to run, exit early
       if (!this._lintingPromises.length) {
@@ -76,12 +76,14 @@ export class LintPlugin implements IHeftTaskPlugin {
     });
   }
 
-  private async _initAsync(heftConfiguration: HeftConfiguration, logger: IScopedLogger): Promise<void> {
+  private async _initAsync(
+    taskSession: HeftTaskSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<void> {
     // Make sure that we only ever init once by memoizing the init promise
-    if (this._initPromise) {
-      await this._initPromise;
+    if (!this._initPromise) {
+      this._initPromise = this._initInnerAsync(heftConfiguration, taskSession.logger);
     }
-    this._initPromise = this._initInnerAsync(heftConfiguration, logger);
     await this._initPromise;
   }
 
@@ -91,7 +93,7 @@ export class LintPlugin implements IHeftTaskPlugin {
       'typescript',
       logger.terminal
     );
-    this._typeScript = require(typeScriptToolPath);
+    this._typeScript = await import(typeScriptToolPath);
 
     // TODO: Disable during lite/watch mode
     const lintEnabled: boolean = true;
@@ -116,13 +118,13 @@ export class LintPlugin implements IHeftTaskPlugin {
   }
 
   private async _lintAsync(
+    taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    logger: IScopedLogger,
     tsProgram: IExtendedProgram,
     changedFiles?: Set<IExtendedSourceFile>
   ): Promise<LinterBase<unknown>[]> {
     try {
-      await this._initAsync(heftConfiguration, logger);
+      await this._initAsync(taskSession, heftConfiguration);
     } catch {
       // Initialization failures are handled in the run hook. For now, just return
       return [];
@@ -133,8 +135,8 @@ export class LintPlugin implements IHeftTaskPlugin {
     if (this._eslintToolPath && this._eslintConfigFilePath) {
       lintingPromises.push(
         this._runEslintAsync(
+          taskSession,
           heftConfiguration,
-          logger,
           this._eslintToolPath,
           this._eslintConfigFilePath,
           tsProgram,
@@ -145,8 +147,8 @@ export class LintPlugin implements IHeftTaskPlugin {
     if (this._tslintToolPath && this._tslintConfigFilePath) {
       lintingPromises.push(
         this._runTslintAsync(
+          taskSession,
           heftConfiguration,
-          logger,
           this._tslintToolPath,
           this._tslintConfigFilePath,
           tsProgram,
@@ -159,8 +161,8 @@ export class LintPlugin implements IHeftTaskPlugin {
   }
 
   private async _runEslintAsync(
+    taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    logger: IScopedLogger,
     eslintToolPath: string,
     eslintConfigFilePath: string,
     tsProgram: IExtendedProgram,
@@ -168,11 +170,11 @@ export class LintPlugin implements IHeftTaskPlugin {
   ): Promise<Eslint> {
     const eslint: Eslint = await Eslint.loadAsync({
       ts: this._typeScript,
-      scopedLogger: logger,
+      scopedLogger: taskSession.logger,
       eslintPackagePath: eslintToolPath,
       linterConfigFilePath: eslintConfigFilePath,
       buildFolderPath: heftConfiguration.buildFolder,
-      buildMetadataFolderPath: Path.convertToSlashes(`${heftConfiguration.buildFolder}/temp`)
+      buildMetadataFolderPath: taskSession.cacheFolder
     });
 
     eslint.printVersionHeader();
@@ -188,8 +190,8 @@ export class LintPlugin implements IHeftTaskPlugin {
   }
 
   private async _runTslintAsync(
+    taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    logger: IScopedLogger,
     tslintToolPath: string,
     tslintConfigFilePath: string,
     tsProgram: IExtendedProgram,
@@ -197,11 +199,11 @@ export class LintPlugin implements IHeftTaskPlugin {
   ): Promise<Tslint> {
     const tslint: Tslint = await Tslint.loadAsync({
       ts: this._typeScript,
-      scopedLogger: logger,
+      scopedLogger: taskSession.logger,
       tslintPackagePath: tslintToolPath,
       linterConfigFilePath: tslintConfigFilePath,
       buildFolderPath: heftConfiguration.buildFolder,
-      buildMetadataFolderPath: Path.convertToSlashes(`${heftConfiguration.buildFolder}/temp`)
+      buildMetadataFolderPath: taskSession.cacheFolder
     });
 
     tslint.printVersionHeader();
@@ -233,5 +235,3 @@ export class LintPlugin implements IHeftTaskPlugin {
     return defaultPath;
   }
 }
-
-export default new LintPlugin();
