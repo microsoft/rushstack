@@ -43,12 +43,20 @@ export enum ApiJsonSchemaVersion {
   V_1005 = 1005,
 
   /**
+   * Add an `isProtected` field to `IApiConstructorOptions`, `IApiPropertyOptions`, and `IApiMethodOptions` to
+   * track whether a class member has the `protected` modifier.
+   *
+   * When loading older JSON files, the value defaults to `false`.
+   */
+  V_1006 = 1006,
+
+  /**
    * The current latest .api.json schema version.
    *
    * IMPORTANT: When incrementing this number, consider whether `OLDEST_SUPPORTED` or `OLDEST_FORWARDS_COMPATIBLE`
    * should be updated.
    */
-  LATEST = V_1005,
+  LATEST = V_1006,
 
   /**
    * The oldest .api.json schema version that is still supported for backwards compatibility.

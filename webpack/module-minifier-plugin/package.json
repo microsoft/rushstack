@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/module-minifier-plugin",
-  "version": "0.8.16",
+  "version": "0.9.1",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "lib/index.js",
   "typings": "dist/module-minifier-plugin.d.ts",
@@ -29,12 +29,11 @@
     }
   },
   "dependencies": {
+    "@rushstack/module-minifier": "workspace:*",
+    "@rushstack/worker-pool": "workspace:*",
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
-    "serialize-javascript": "6.0.0",
-    "source-map": "~0.7.3",
-    "tapable": "1.1.3",
-    "terser": "5.9.0"
+    "tapable": "1.1.3"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

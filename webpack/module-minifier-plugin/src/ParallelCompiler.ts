@@ -2,16 +2,16 @@ import { cpus } from 'os';
 import { resolve } from 'path';
 import { Worker } from 'worker_threads';
 
-import type { MinifyOptions } from 'terser';
 import type { Configuration } from 'webpack';
 
-import { WorkerPoolMinifier } from './WorkerPoolMinifier';
-import { WorkerPool } from './workerPool/WorkerPool';
 import type {
   IMinifierConnection,
   IModuleMinificationRequest,
-  IModuleMinificationResult
-} from './ModuleMinifierPlugin.types';
+  IModuleMinificationResult,
+  MinifyOptions
+} from '@rushstack/module-minifier';
+import { WorkerPoolMinifier } from '@rushstack/module-minifier';
+import { WorkerPool } from '@rushstack/worker-pool';
 
 export interface IParallelWebpackOptions {
   cacheDirectory?: string;

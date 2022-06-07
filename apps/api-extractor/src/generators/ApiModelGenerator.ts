@@ -43,7 +43,6 @@ import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule } from '../analyzer/AstModule';
-
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 
 export class ApiModelGenerator {
@@ -336,10 +335,12 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
 
       apiConstructor = new ApiConstructor({
         docComment,
         releaseTag,
+        isProtected,
         parameters,
         overloadIndex,
         excerptTokens
@@ -711,11 +712,13 @@ export class ApiModelGenerator {
       }
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
 
       apiMethod = new ApiMethod({
         name,
         docComment,
         releaseTag,
+        isProtected,
         isStatic,
         isOptional,
         typeParameters,
@@ -826,13 +829,20 @@ export class ApiModelGenerator {
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+      let propertyTypeNode: ts.TypeNode | undefined;
 
-      // If the property declaration's type is `undefined`, then we're processing a setter with no corresponding
-      // getter. Use the parameter type instead (note that TypeScript always reports an error if a setter
-      // does not have exactly one parameter).
-      const propertyTypeNode: ts.TypeNode | undefined =
-        (astDeclaration.declaration as ts.PropertyDeclaration | ts.GetAccessorDeclaration).type ||
-        (astDeclaration.declaration as ts.SetAccessorDeclaration).parameters[0].type;
+      if (
+        ts.isPropertyDeclaration(astDeclaration.declaration) ||
+        ts.isGetAccessorDeclaration(astDeclaration.declaration)
+      ) {
+        propertyTypeNode = astDeclaration.declaration.type;
+      }
+
+      if (ts.isSetAccessorDeclaration(astDeclaration.declaration)) {
+        // Note that TypeScript always reports an error if a setter does not have exactly one parameter.
+        propertyTypeNode = astDeclaration.declaration.parameters[0].type;
+      }
+
       nodesToCapture.push({ node: propertyTypeNode, tokenRange: propertyTypeTokenRange });
 
       const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
@@ -841,12 +851,14 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
       const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiProperty = new ApiProperty({
         name,
         docComment,
         releaseTag,
+        isProtected,
         isStatic,
         isOptional,
         isReadonly,
@@ -976,7 +988,14 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
-      apiVariable = new ApiVariable({ name, docComment, releaseTag, excerptTokens, variableTypeTokenRange, isReadonly });
+      apiVariable = new ApiVariable({
+        name,
+        docComment,
+        releaseTag,
+        excerptTokens,
+        variableTypeTokenRange,
+        isReadonly
+      });
 
       parentApiItem.addMember(apiVariable);
     }
@@ -1058,9 +1077,13 @@ export class ApiModelGenerator {
     //Line 2: sees if the TSDoc comment for @readonly is present
     //Line 3: sees whether a getter is present for a property with no setter
     //Line 4: sees if the var declaration has Const keyword
-    return (astDeclaration.modifierFlags & (ts.ModifierFlags.Readonly + ts.ModifierFlags.Const)) !== 0
-      || (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly'))
-      || (declarationMetadata.ancillaryDeclarations.length === 0 && astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor)
-      || ts.isVariableDeclaration(astDeclaration.declaration) && TypeScriptInternals.isVarConst(astDeclaration.declaration)
+    return (
+      (astDeclaration.modifierFlags & (ts.ModifierFlags.Readonly + ts.ModifierFlags.Const)) !== 0 ||
+      (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly')) ||
+      (declarationMetadata.ancillaryDeclarations.length === 0 &&
+        astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) ||
+      (ts.isVariableDeclaration(astDeclaration.declaration) &&
+        TypeScriptInternals.isVarConst(astDeclaration.declaration))
+    );
   }
 }

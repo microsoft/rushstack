@@ -62,6 +62,10 @@ export class SimpleClass {
     // (undocumented)
     get readonlyProperty(): string;
     // (undocumented)
+    readonly someReadonlyProp = 5;
+    // (undocumented)
+    readonly someReadonlyPropWithType: number;
+    // (undocumented)
     get writeableProperty(): string;
     set writeableProperty(value: string);
 }

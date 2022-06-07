@@ -494,10 +494,8 @@ export class ApiPropertyItem extends ApiPropertyItem_base {
     serializeInto(jsonObject: Partial<IApiPropertyItemJson>): void;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ApiPropertySignature_base" needs to be exported by the entry point index.d.ts
-//
 // @public
-export class ApiPropertySignature extends ApiPropertySignature_base {
+export class ApiPropertySignature extends ApiPropertyItem {
     constructor(options: IApiPropertySignatureOptions);
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
@@ -510,19 +508,18 @@ export class ApiPropertySignature extends ApiPropertySignature_base {
 }
 
 // @public
-export function ApiReadonlyMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiReadonlyMixin);
+export function ApiProtectedMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiProtectedMixin);
 
 // @public
-export interface ApiReadonlyMixin extends ApiItem {
-    // (undocumented)
-    readonly isReadonly: boolean;
-    // (undocumented)
+export interface ApiProtectedMixin extends ApiItem {
+    readonly isProtected: boolean;
+    // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
 // @public
-export namespace ApiReadonlyMixin {
-    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiReadonlyMixin;
+export namespace ApiProtectedMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiProtectedMixin;
 }
 
 // @public
@@ -677,7 +674,7 @@ export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNam
 }
 
 // @public
-export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiProtectedMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -739,7 +736,7 @@ export interface IApiItemOptions {
 }
 
 // @public
-export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiProtectedMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public (undocumented)
@@ -794,23 +791,23 @@ export interface IApiParameterOptions {
 }
 
 // @public
-export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiOptionalMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
+export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     propertyTypeTokenRange: IExcerptTokenRange;
 }
 
 // @public
-export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiReadonlyMixinOptions, IApiStaticMixinOptions {
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiProtectedMixinOptions, IApiStaticMixinOptions {
 }
 
 // @public
-export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions, IApiReadonlyMixinOptions {
+export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
 }
 
 // @public
-export interface IApiReadonlyMixinOptions extends IApiItemOptions {
+export interface IApiProtectedMixinOptions extends IApiItemOptions {
     // (undocumented)
-    isReadonly: boolean;
+    isProtected: boolean;
 }
 
 // @public
@@ -854,7 +851,7 @@ export interface IApiTypeParameterOptions {
 }
 
 // @public
-export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiReadonlyMixinOptions {
+export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     variableTypeTokenRange: IExcerptTokenRange;
 }

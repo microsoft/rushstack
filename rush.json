@@ -883,6 +883,18 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/localization-utilities",
+      "projectFolder": "libraries/localization-utilities",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/module-minifier",
+      "projectFolder": "libraries/module-minifier",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
@@ -901,6 +913,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/worker-pool",
+      "projectFolder": "libraries/worker-pool",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/rush-lib",
@@ -1041,6 +1059,12 @@
     {
       "packageName": "@rushstack/module-minifier-plugin",
       "projectFolder": "webpack/module-minifier-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack5-module-minifier-plugin",
+      "projectFolder": "webpack/module-minifier-plugin-5",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

@@ -9,6 +9,7 @@ import {
 import { ApiItemKind } from '../items/ApiItem';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import { ApiProtectedMixin, IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 
 /**
@@ -17,6 +18,7 @@ import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiRel
  */
 export interface IApiConstructorOptions
   extends IApiParameterListMixinOptions,
+    IApiProtectedMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiDeclaredItemOptions {}
 
@@ -47,7 +49,9 @@ export interface IApiConstructorOptions
  *
  * @public
  */
-export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+export class ApiConstructor extends ApiParameterListMixin(
+  ApiReleaseTagMixin(ApiProtectedMixin(ApiDeclaredItem))
+) {
   public constructor(options: IApiConstructorOptions) {
     super(options);
   }
