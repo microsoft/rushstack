@@ -334,10 +334,12 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
 
       apiConstructor = new ApiConstructor({
         docComment,
         releaseTag,
+        isProtected,
         parameters,
         overloadIndex,
         excerptTokens
@@ -709,11 +711,13 @@ export class ApiModelGenerator {
       }
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
 
       apiMethod = new ApiMethod({
         name,
         docComment,
         releaseTag,
+        isProtected,
         isStatic,
         isOptional,
         typeParameters,
@@ -846,11 +850,13 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
 
       apiProperty = new ApiProperty({
         name,
         docComment,
         releaseTag,
+        isProtected,
         isStatic,
         isOptional,
         excerptTokens,

@@ -508,6 +508,21 @@ export class ApiPropertySignature extends ApiPropertyItem {
 }
 
 // @public
+export function ApiProtectedMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiProtectedMixin);
+
+// @public
+export interface ApiProtectedMixin extends ApiItem {
+    readonly isProtected: boolean;
+    // @override (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+// @public
+export namespace ApiProtectedMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiProtectedMixin;
+}
+
+// @public
 export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiReleaseTagMixin);
 
 // @public
@@ -659,7 +674,7 @@ export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNam
 }
 
 // @public
-export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiProtectedMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -721,7 +736,7 @@ export interface IApiItemOptions {
 }
 
 // @public
-export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiProtectedMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public (undocumented)
@@ -782,11 +797,17 @@ export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiRelea
 }
 
 // @public
-export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiStaticMixinOptions {
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiProtectedMixinOptions, IApiStaticMixinOptions {
 }
 
 // @public
 export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
+}
+
+// @public
+export interface IApiProtectedMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    isProtected: boolean;
 }
 
 // @public
