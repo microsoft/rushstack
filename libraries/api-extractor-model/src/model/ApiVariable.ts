@@ -22,8 +22,8 @@ import { DeserializerContext } from './DeserializerContext';
 export interface IApiVariableOptions
   extends IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
-    IApiDeclaredItemOptions,
-    IApiReadonlyMixinOptions {
+    IApiReadonlyMixinOptions,
+    IApiDeclaredItemOptions {
   variableTypeTokenRange: IExcerptTokenRange;
 }
 
@@ -51,7 +51,7 @@ export interface IApiVariableJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiVariable extends ApiReadonlyMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiReadonlyMixin(ApiDeclaredItem))) {
   /**
    * An {@link Excerpt} that describes the type of the variable.
    */

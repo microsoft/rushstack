@@ -50,7 +50,7 @@ export interface IApiConstructorOptions
  * @public
  */
 export class ApiConstructor extends ApiParameterListMixin(
-  ApiReleaseTagMixin(ApiProtectedMixin(ApiDeclaredItem))
+  ApiProtectedMixin(ApiReleaseTagMixin(ApiDeclaredItem))
 ) {
   public constructor(options: IApiConstructorOptions) {
     super(options);
