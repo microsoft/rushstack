@@ -2,11 +2,11 @@
   "operationSettings": [
     {
       "operationName": "_phase:build",
-      "outputFolderNames": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6", "temp"]
+      "outputFolderNames": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6"]
     },
     {
       "operationName": "build",
-      "outputFolderNames": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6", "temp"]
+      "outputFolderNames": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6"]
     }
   ]
 }
