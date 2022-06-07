@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Sanitize projectName in scoped packages",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
