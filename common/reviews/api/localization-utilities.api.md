@@ -26,6 +26,14 @@ export interface ILocalizedString {
 }
 
 // @public (undocumented)
+export interface IParseFileOptions {
+    // (undocumented)
+    content: string;
+    // (undocumented)
+    filePath: string;
+}
+
+// @public (undocumented)
 export interface IParseLocFileOptions {
     // (undocumented)
     content: string;
@@ -33,6 +41,8 @@ export interface IParseLocFileOptions {
     filePath: string;
     // (undocumented)
     ignoreMissingResxComments: boolean | undefined;
+    // (undocumented)
+    parser?: ParserKind;
     // (undocumented)
     resxNewlineNormalization: NewlineKind | undefined;
     // (undocumented)
@@ -89,6 +99,15 @@ export interface ITypingsGeneratorOptions {
 
 // @public (undocumented)
 export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile;
+
+// @public (undocumented)
+export function parseLocJson(options: IParseFileOptions): ILocalizationFile;
+
+// @public (undocumented)
+export function parseResJson(options: IParseFileOptions): ILocalizationFile;
+
+// @public (undocumented)
+export type ParserKind = 'resx' | 'loc.json' | 'resjson';
 
 // @public (undocumented)
 export function readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocalizationFile;

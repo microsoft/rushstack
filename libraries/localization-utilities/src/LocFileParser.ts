@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal, NewlineKind, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { ITerminal, NewlineKind } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from './interfaces';
+import { parseLocJson } from './parsers/parseLocJson';
+import { parseResJson } from './parsers/parseResJson';
 import { readResxAsLocFile } from './ResxReader';
 
-const LOC_JSON_SCHEMA: JsonSchema = JsonSchema.fromFile(`${__dirname}/schemas/locJson.schema.json`);
+/**
+ * @public
+ */
+export type ParserKind = 'resx' | 'loc.json' | 'resjson';
 
 /**
  * @public
@@ -15,6 +20,7 @@ export interface IParseLocFileOptions {
   terminal: ITerminal;
   filePath: string;
   content: string;
+  parser?: ParserKind;
   resxNewlineNormalization: NewlineKind | undefined;
   ignoreMissingResxComments: boolean | undefined;
 }
@@ -26,65 +32,47 @@ interface IParseCacheEntry {
 
 const parseCache: Map<string, IParseCacheEntry> = new Map<string, IParseCacheEntry>();
 
+export function selectParserByFilePath(filePath: string): ParserKind {
+  if (/\.resx$/i.test(filePath)) {
+    return 'resx';
+  } else if (/\.(resx|loc)\.json$/i.test(filePath)) {
+    return 'loc.json';
+  } else if (/\.resjson$/i.test(filePath)) {
+    return 'resjson';
+  } else {
+    throw new Error(`Unsupported file extension in file: ${filePath}`);
+  }
+}
+
 /**
  * @public
  */
 export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
-  const fileCacheKey: string = `${options.filePath}?${options.resxNewlineNormalization || 'none'}`;
-  if (parseCache.has(fileCacheKey)) {
-    const entry: IParseCacheEntry = parseCache.get(fileCacheKey)!;
-    if (entry.content === options.content) {
-      return entry.parsedFile;
-    }
-  }
+  const { parser = selectParserByFilePath(options.filePath) } = options;
 
   let parsedFile: ILocalizationFile;
-  if (/\.resx$/i.test(options.filePath)) {
+  if (parser === 'resx') {
+    const fileCacheKey: string = `${options.filePath}?${options.resxNewlineNormalization || 'none'}`;
+    if (parseCache.has(fileCacheKey)) {
+      const entry: IParseCacheEntry = parseCache.get(fileCacheKey)!;
+      if (entry.content === options.content) {
+        return entry.parsedFile;
+      }
+    }
     parsedFile = readResxAsLocFile(options.content, {
       terminal: options.terminal,
       resxFilePath: options.filePath,
       newlineNormalization: options.resxNewlineNormalization,
       warnOnMissingComment: !options.ignoreMissingResxComments
     });
-  } else if (/\.(resx|loc)\.json$/i.test(options.filePath)) {
-    parsedFile = JsonFile.parseString(options.content);
-    try {
-      LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
-    } catch (e) {
-      options.terminal.writeError(`The loc file is invalid. Error: ${e}`);
-    }
-  } else if (/\.resjson$/i.test(options.filePath)) {
-    const resjsonFile: Record<string, string> = JsonFile.parseString(options.content);
-    parsedFile = {};
-    const comments: Map<string, string> = new Map();
-    for (const [key, value] of Object.entries(resjsonFile)) {
-      if (key.startsWith('_') && key.endsWith('.comment')) {
-        const commentKey: string = key.substring(1, key.length - '.comment'.length);
-        comments.set(commentKey, value);
-      } else {
-        parsedFile[key] = { value };
-      }
-    }
+    parseCache.set(fileCacheKey, { content: options.content, parsedFile });
 
-    const orphanComments: string[] = [];
-    for (const [key, comment] of comments) {
-      if (parsedFile[key]) {
-        parsedFile[key].comment = comment;
-      } else {
-        orphanComments.push(key);
-      }
-    }
-
-    if (orphanComments.length > 0) {
-      options.terminal.writeErrorLine(
-        'The resjson file is invalid. Comments exist for the following string keys ' +
-          `that don't have values: ${orphanComments.join(', ')}.`
-      );
-    }
+    return parsedFile;
+  } else if (parser === 'loc.json') {
+    return parseLocJson(options);
+  } else if (parser === 'resjson') {
+    return parseResJson(options);
   } else {
-    throw new Error(`Unsupported file extension in file: ${options.filePath}`);
+    throw new Error(`Unsupported parser: ${parser}`);
   }
-
-  parseCache.set(fileCacheKey, { content: options.content, parsedFile });
-  return parsedFile;
 }

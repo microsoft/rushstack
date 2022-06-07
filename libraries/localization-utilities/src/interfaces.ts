@@ -33,3 +33,11 @@ export interface ILocalizedString {
   value: string;
   comment?: string;
 }
+
+/**
+ * @public
+ */
+export interface IParseFileOptions {
+  content: string;
+  filePath: string;
+}

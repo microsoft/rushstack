@@ -1612,21 +1612,21 @@ importers:
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/typings-generator': workspace:*
+      '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/xmldoc': 1.1.4
-      decache: ~4.5.1
       pseudolocale: ~1.1.0
       xmldoc: ~1.1.2
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
       '@rushstack/typings-generator': link:../typings-generator
-      decache: 4.5.1
       pseudolocale: 1.1.0
       xmldoc: 1.1.2
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/xmldoc': 1.1.4
 
@@ -9744,10 +9744,6 @@ packages:
     resolution: {integrity: sha1-JtII6onje1y95gJQoV8DHBak1ms=}
     dev: true
 
-  /callsite/1.0.0:
-    resolution: {integrity: sha512-0vdNRFXn5q+dtOqjfFtmtlI9N2eVZ7LMyEV2iKC5mEEFvSg/69Ml6b/WU2qF8W1nLRa0wiSrDT3Y5jOHZCwKPQ==}
-    dev: false
-
   /callsites/3.1.0:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
@@ -10924,12 +10920,6 @@ packages:
 
   /debuglog/1.0.1:
     resolution: {integrity: sha1-qiT/uaw9+aI1GDfPstJ5NgzXhJI=}
-
-  /decache/4.5.1:
-    resolution: {integrity: sha512-5J37nATc6FmOTLbcsr9qx7Nm28qQyg1SK4xyEHqM0IBkNhWFp0Sm+vKoWYHD8wq+OUEb9jLyaKFfzzd1A9hcoA==}
-    dependencies:
-      callsite: 1.0.0
-    dev: false
 
   /decamelize-keys/1.1.0:
     resolution: {integrity: sha1-0XGoeTMlKAfrPLYdwcFEXQeN8tk=}
