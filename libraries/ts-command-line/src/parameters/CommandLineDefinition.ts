@@ -80,6 +80,16 @@ export interface IBaseCommandLineDefinition {
    * still be using the old name. Only the `parameterLongName` syntax is currently allowed.
    */
   undocumentedSynonyms?: string[];
+
+  /**
+   * Specifies a custom validator to use for long name and undocumented synonym validation.
+   *
+   * @remarks
+   * Used with care. The default validator will enforce lower-case alpha-numeric characters
+   * and dashes. Custom validators may allow for more complex and unexpected syntax for
+   * paramter names.
+   */
+  customNameValidator?: (name: string) => boolean;
 }
 
 /**
