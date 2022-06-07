@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Adding readonlyMixin for Api Extractor",
+      "comment": "Add an \"isReadonly\" field to the doc model to indicate whether a property or variable is readonly",
       "type": "minor"
     }
   ],

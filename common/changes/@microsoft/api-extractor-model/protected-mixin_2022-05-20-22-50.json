@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "Add parsing logic to parse whether a class constructor, property, or method has the 'protected' modifier.",
+      "comment": "Add an \"isProtected\" field to ApiConstructor, ApiMethod, and ApiProperty",
       "type": "minor"
     }
   ],

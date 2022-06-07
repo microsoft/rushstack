@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Add an ApiParameterMixin that adds an isProtected parameter to class constructor, property, and method API items.",
+      "comment": "Add an \"isProtected\" field to the doc model to indicate protected class members",
       "type": "minor"
     }
   ],

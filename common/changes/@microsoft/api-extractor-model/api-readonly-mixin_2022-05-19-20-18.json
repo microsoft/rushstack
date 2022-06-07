@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "Adding isReadonly field to the models of relevant api pieces.",
+      "comment": "Add an \"isReadonly\" field to ApiProperty, ApiPropertySignature, and ApiVariable",
       "type": "minor"
     }
   ],
