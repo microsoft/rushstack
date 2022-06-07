@@ -14,18 +14,14 @@ export interface IApiExtractorRunnerConfiguration {
   buildFolder: string;
 
   /**
-   * The path to the Extractor's config file ("api-extractor.json")
-   *
-   * For example, /home/username/code/repo/project/config/api-extractor.json
+   * The loaded and prepared Extractor config file ("api-extractor.json")
    */
-  apiExtractorJsonFilePath: string;
+  apiExtractorConfiguration: TApiExtractor.ExtractorConfig;
 
   /**
-   * The path to the @microsoft/api-extractor package
-   *
-   * For example, /home/username/code/repo/project/node_modules/@microsoft/api-extractor
+   * The imported @microsoft/api-extractor package
    */
-  apiExtractorPackagePath: string;
+  apiExtractor: typeof TApiExtractor;
 
   /**
    * The path to the typescript package
@@ -49,19 +45,21 @@ export class ApiExtractorRunner {
   private _configuration: IApiExtractorRunnerConfiguration;
   private _scopedLogger: IScopedLogger;
   private _terminal: ITerminal;
+  private _apiExtractor: typeof TApiExtractor;
 
   public constructor(configuration: IApiExtractorRunnerConfiguration) {
     this._configuration = configuration;
+    this._apiExtractor = configuration.apiExtractor;
     this._scopedLogger = configuration.scopedLogger;
     this._terminal = configuration.scopedLogger.terminal;
   }
 
   public async invokeAsync(): Promise<void> {
-    const apiExtractor: typeof TApiExtractor = require(this._configuration.apiExtractorPackagePath);
+    this._scopedLogger.terminal.writeLine(
+      `Using API Extractor version ${this._apiExtractor.Extractor.version}`
+    );
 
-    this._scopedLogger.terminal.writeLine(`Using API Extractor version ${apiExtractor.Extractor.version}`);
-
-    const apiExtractorVersion: semver.SemVer | null = semver.parse(apiExtractor.Extractor.version);
+    const apiExtractorVersion: semver.SemVer | null = semver.parse(this._apiExtractor.Extractor.version);
     if (
       !apiExtractorVersion ||
       apiExtractorVersion.major < 7 ||
@@ -70,24 +68,14 @@ export class ApiExtractorRunner {
       this._scopedLogger.emitWarning(new Error(`Heft requires API Extractor version 7.10.0 or newer`));
     }
 
-    const configObjectFullPath: string = this._configuration.apiExtractorJsonFilePath;
-    const configObject: TApiExtractor.IConfigFile =
-      apiExtractor.ExtractorConfig.loadFile(configObjectFullPath);
-
-    const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.prepare({
-      configObject,
-      configObjectFullPath,
-      packageJsonFullPath: path.join(this._configuration.buildFolder, 'package.json'),
-      projectFolderLookupToken: this._configuration.buildFolder
-    });
-
+    const extractorConfig: TApiExtractor.ExtractorConfig = this._configuration.apiExtractorConfiguration;
     const extractorOptions: TApiExtractor.IExtractorInvokeOptions = {
       localBuild: !this._configuration.production,
       typescriptCompilerFolder: this._configuration.typescriptPackagePath,
       messageCallback: (message: TApiExtractor.ExtractorMessage) => {
         switch (message.logLevel) {
-          case apiExtractor.ExtractorLogLevel.Error:
-          case apiExtractor.ExtractorLogLevel.Warning: {
+          case this._apiExtractor.ExtractorLogLevel.Error:
+          case this._apiExtractor.ExtractorLogLevel.Warning: {
             let errorToEmit: Error | undefined;
             if (message.sourceFilePath) {
               const filePathForLog: string = Path.isUnderOrEqual(
@@ -106,9 +94,9 @@ export class ApiExtractorRunner {
               errorToEmit = new Error(message.text);
             }
 
-            if (message.logLevel === apiExtractor.ExtractorLogLevel.Error) {
+            if (message.logLevel === this._apiExtractor.ExtractorLogLevel.Error) {
               this._scopedLogger.emitError(errorToEmit);
-            } else if (message.logLevel === apiExtractor.ExtractorLogLevel.Warning) {
+            } else if (message.logLevel === this._apiExtractor.ExtractorLogLevel.Warning) {
               this._scopedLogger.emitWarning(errorToEmit);
             } else {
               // Should never happen, but just in case
@@ -117,17 +105,17 @@ export class ApiExtractorRunner {
             break;
           }
 
-          case apiExtractor.ExtractorLogLevel.Verbose: {
+          case this._apiExtractor.ExtractorLogLevel.Verbose: {
             this._terminal.writeVerboseLine(message.text);
             break;
           }
 
-          case apiExtractor.ExtractorLogLevel.Info: {
+          case this._apiExtractor.ExtractorLogLevel.Info: {
             this._terminal.writeLine(message.text);
             break;
           }
 
-          case apiExtractor.ExtractorLogLevel.None: {
+          case this._apiExtractor.ExtractorLogLevel.None: {
             // Ignore messages with ExtractorLogLevel.None
             break;
           }
@@ -142,7 +130,7 @@ export class ApiExtractorRunner {
       }
     };
 
-    const apiExtractorResult: TApiExtractor.ExtractorResult = apiExtractor.Extractor.invoke(
+    const apiExtractorResult: TApiExtractor.ExtractorResult = this._apiExtractor.Extractor.invoke(
       extractorConfig,
       extractorOptions
     );
