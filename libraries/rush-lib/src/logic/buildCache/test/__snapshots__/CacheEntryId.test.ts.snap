@@ -42,7 +42,7 @@ exports[`CacheEntryId Valid pattern names Handles a cache entry name for a proje
 
 exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: [projectName:normalize]_[phaseName:trimPrefix]_[hash] 1`] = `"scope+project++name_compile_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
 
-exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: [projectName]_[hash] 1`] = `"scope/project+name_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
+exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: [projectName]_[hash] 1`] = `"@scope/project+name_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
 
 exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: no pattern 1`] = `"09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
 
@@ -52,11 +52,11 @@ exports[`CacheEntryId Valid pattern names Handles a cache entry name for a proje
 
 exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: prefix/[projectName:normalize]_[phaseName:trimPrefix]_[hash] 1`] = `"prefix/scope+project++name_compile_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
 
-exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: prefix/[projectName]_[hash] 1`] = `"prefix/scope/project+name_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
+exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: prefix/[projectName]_[hash] 1`] = `"prefix/@scope/project+name_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
 
-exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: prefix/[projectName]_[phaseName:normalize]_[hash] 1`] = `"prefix/scope/project+name__phase_compile_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
+exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: prefix/[projectName]_[phaseName:normalize]_[hash] 1`] = `"prefix/@scope/project+name__phase_compile_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
 
-exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: prefix/[projectName]_[phaseName:trimPrefix]_[hash] 1`] = `"prefix/scope/project+name_compile_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
+exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name with a scope: prefix/[projectName]_[phaseName:trimPrefix]_[hash] 1`] = `"prefix/@scope/project+name_compile_09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
 
 exports[`CacheEntryId Valid pattern names Handles a cache entry name for a project name without a scope: [hash] 1`] = `"09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3"`;
 
