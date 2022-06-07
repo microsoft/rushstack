@@ -36,6 +36,30 @@ const _isReadonly: unique symbol = Symbol('ApiReadonlyMixin._isReadonly');
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiReadonlyMixin extends ApiItem {
+  /**
+   * Indicates that the API item's value cannot be assigned by an external consumer.
+   *
+   * @remarks
+   * Examples of API items that would be considered "read only" by API Extractor:
+   *
+   * - A class or interface's property that has the `readonly` modifier.
+   *
+   * - A variable that has the `const` modifier.
+   *
+   * - A property or variable whose TSDoc comment includes the `@readonly` tag.
+   *
+   * - A property declaration with a getter but no setter.
+   *
+   * Note that if the `readonly` keyword appears in a type annotation, this does not
+   * guarantee that that the API item will be considered readonly. For example:
+   *
+   * ```ts
+   * declare class C {
+   *   // isReadonly=false in this case, because C.x is assignable
+   *   public x: readonly string[];
+   * }
+   * ```
+   */
   readonly isReadonly: boolean;
 
   serializeInto(jsonObject: Partial<IApiItemJson>): void;

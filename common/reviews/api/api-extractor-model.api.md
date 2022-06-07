@@ -527,7 +527,6 @@ export function ApiReadonlyMixin<TBaseClass extends IApiItemConstructor>(baseCla
 
 // @public
 export interface ApiReadonlyMixin extends ApiItem {
-    // (undocumented)
     readonly isReadonly: boolean;
     // (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
