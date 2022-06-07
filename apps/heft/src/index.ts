@@ -21,7 +21,7 @@ export {
 export {
   IHeftTaskHooks,
   IHeftTaskHookOptions,
-  IHeftTaskCleanHookOptions as IIHeftTaskCleanHookOptions,
+  IHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
   HeftTaskSession
 } from './pluginFramework/HeftTaskSession';

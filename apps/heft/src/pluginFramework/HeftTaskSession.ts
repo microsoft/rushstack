@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import type { AsyncParallelHook } from 'tapable';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
@@ -76,6 +77,16 @@ export class HeftTaskSession {
   /**
    * @public
    */
+  public readonly cacheFolder: string;
+
+  /**
+   * @public
+   */
+  public readonly tempFolder: string;
+
+  /**
+   * @public
+   */
   public readonly logger: ScopedLogger;
 
   /**
@@ -110,6 +121,19 @@ export class HeftTaskSession {
     this.taskName = options.task.taskName;
     this.hooks = options.taskHooks;
     this.parametersByLongName = options.parametersByLongName;
+
+    // Guranteed to be unique since phases are uniquely named, tasks are uniquely named within
+    // phases, and neither can have '.' in their names. We will also use the phase name and
+    // task name as the folder name (instead of the plugin name) since we want to enable re-use
+    // of plugins in multiple phases and tasks while maintaining unique temp/cache folders for
+    // each task.
+    const uniqueTaskFolderName: string = `${options.phase.phaseName}.${options.task.taskName}`;
+
+    // <projectFolder>/.cache/<phaseName>.<taskName>
+    this.cacheFolder = path.join(options.heftConfiguration.cacheFolder, uniqueTaskFolderName);
+
+    // <projectFolder>/temp/<phaseName>.<taskName>
+    this.tempFolder = path.join(options.heftConfiguration.tempFolder, uniqueTaskFolderName);
 
     this.requestAccessToPluginByName = options.requestAccessToPluginByName;
   }

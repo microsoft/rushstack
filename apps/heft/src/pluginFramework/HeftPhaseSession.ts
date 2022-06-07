@@ -13,6 +13,7 @@ import type { HeftPhase } from './HeftPhase';
 import type { HeftTask } from './HeftTask';
 import type { IHeftTaskPlugin } from './IHeftPlugin';
 import type { LoggingManager } from './logging/LoggingManager';
+import type { HeftParameterManager } from '../configuration/HeftParameterManager';
 
 /**
  * @internal
@@ -22,6 +23,11 @@ export interface IHeftPhaseSessionOptions extends IInternalHeftSessionOptions {
    * @beta
    */
   phase: HeftPhase;
+
+  /**
+   * @beta
+   */
+  parameterManager: HeftParameterManager;
 }
 
 /**
@@ -72,7 +78,7 @@ export class HeftPhaseSession extends HeftPluginHost {
           clean: this.cleanHook,
           run: new AsyncParallelHook(['runHookOptions'])
         },
-        parametersByLongName: new Map([...task.pluginDefinition.parameters].map((x) => [x.longName, x])),
+        parametersByLongName: this._options.parameterManager.getParametersForPlugin(task.pluginDefinition),
         requestAccessToPluginByName: this.getRequestAccessToPluginByNameFn(task.taskName),
         task
       });

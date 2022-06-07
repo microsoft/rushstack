@@ -10,6 +10,12 @@
       "items": { "$ref": "#/definitions/anything" }
     },
 
+    "inheritance-type": {
+      "description": "The inheritance type that should be used when extending a configuration for a target property.",
+      "type": "string",
+      "enum": ["append", "replace", "merge"]
+    },
+
     "heft-plugin": {
       "description": "A plugin that can be used to extend Heft functionality.",
       "type": "object",
@@ -23,7 +29,8 @@
         },
         "pluginName": {
           "description": "Name of the plugin to load from the specified package. If not specified and the plugin package provides a single plugin, that plugin will be loaded.",
-          "type": "string"
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
         },
         "options": {
           "description": "Options to pass to the plugin.",
@@ -48,6 +55,43 @@
           "type": "object"
         }
       }
+    },
+
+    "delete-operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sourceFolder": {
+          "title": "Source Folder",
+          "type": "string",
+          "description": "The base folder that files will be deleted from, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the folder will be deleted.",
+          "pattern": "[^\\\\]"
+        },
+        "fileExtensions": {
+          "type": "array",
+          "description": "If specified, this option recursively scans all folders under \"sourceFolder\" and includes any files that match the specified extensions.  (If \"fileExtensions\" and \"includeGlobs\" are both specified, their selections are added together.)",
+          "items": {
+            "type": "string",
+            "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+          }
+        },
+        "excludeGlobs": {
+          "type": "array",
+          "description": "A list of glob patterns that exclude files/folders from being copied.  The paths are resolved relative to \"sourceFolder\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        },
+        "includeGlobs": {
+          "type": "array",
+          "description": "A list of glob patterns that select files to be copied.  The paths are resolved relative to \"sourceFolder\".",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        }
+      }
     }
   },
 
@@ -70,11 +114,13 @@
       "items": { "$ref": "#/definitions/heft-plugin" }
     },
 
+    "$phasesByName.inheritanceType": { "$ref": "#/definitions/inheritance-type" },
     "phasesByName": {
       "type": "object",
       "description": "Heft phases that can be run during an execution of Heft.",
       "additionalProperties": false,
       "patternProperties": {
+        "^\\$[a-zA-Z0-9-_]+\\.inheritanceType$": { "$ref": "#/definitions/inheritance-type" },
         "^[a-zA-Z0-9-_]+$": {
           "description": "Defines a Heft phase.",
           "type": "object",
@@ -94,11 +140,19 @@
               }
             },
 
+            "cleanAdditionalFiles": {
+              "description": "List of delete operations to perform when the clean phase is run. This list is in addition to the clean that plugins already perform.",
+              "type": "array",
+              "items": { "$ref": "#/definitions/delete-operation" }
+            },
+
+            "$tasksByName.inheritanceType": { "$ref": "#/definitions/inheritance-type" },
             "tasksByName": {
               "description": "Heft tasks that are run during an execution of the Heft phase.",
               "type": "object",
               "additionalProperties": false,
               "patternProperties": {
+                "^\\$[a-zA-Z0-9-_]+\\.inheritanceType$": { "$ref": "#/definitions/inheritance-type" },
                 "^[a-zA-Z0-9-_]+$": {
                   "type": "object",
                   "description": "Defines a Heft task.",

@@ -31,7 +31,7 @@ export interface IRunScript {
   runAsync?: (options: IRunScriptOptions) => Promise<void>;
 }
 
-export class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions> {
+export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions> {
   public readonly accessor?: object | undefined;
 
   public apply(
@@ -71,5 +71,3 @@ export class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions>
     await runScript.runAsync(runScriptOptions);
   }
 }
-
-export default new RunScriptPlugin() as IHeftTaskPlugin<IRunScriptPluginOptions>;

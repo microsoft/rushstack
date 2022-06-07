@@ -4,6 +4,9 @@
 import { HeftTask } from './HeftTask';
 import type { InternalHeftSession } from './InternalHeftSession';
 import type { IHeftConfigurationJsonPhaseSpecifier } from '../utilities/CoreConfigFiles';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
+
+const RESERVED_PHASE_NAMES: Set<string> = new Set(['lifecycle']);
 
 /**
  * @internal
@@ -14,6 +17,7 @@ export class HeftPhase {
   private _phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier;
   private _consumingPhases: Set<HeftPhase> | undefined;
   private _dependencyPhases: Set<HeftPhase> | undefined;
+  private _cleanAdditionalFiles: Set<IDeleteOperation> | undefined;
   private _tasks: Set<HeftTask> | undefined;
   private _tasksByName: Map<string, HeftTask> | undefined;
 
@@ -26,7 +30,7 @@ export class HeftPhase {
     this._phaseName = phaseName;
     this._phaseSpecifier = phaseSpecifier;
 
-    // TODO: Validate the phase name. Allow A-Za-z0-9-_.
+    this._validate();
   }
 
   public get phaseName(): string {
@@ -35,6 +39,13 @@ export class HeftPhase {
 
   public get phaseDescription(): string | undefined {
     return this._phaseSpecifier.phaseDescription;
+  }
+
+  public get cleanAdditionalFiles(): Set<IDeleteOperation> {
+    if (!this._cleanAdditionalFiles) {
+      this._cleanAdditionalFiles = new Set(this._phaseSpecifier.cleanAdditionalFiles || []);
+    }
+    return this._cleanAdditionalFiles;
   }
 
   public get consumingPhases(): ReadonlySet<HeftPhase> {
@@ -94,6 +105,12 @@ export class HeftPhase {
         this._tasks.add(task);
         this._tasksByName.set(taskName, task);
       }
+    }
+  }
+
+  private _validate(): void {
+    if (RESERVED_PHASE_NAMES.has(this.phaseName)) {
+      throw new Error(`Phase name "${this.phaseName}" is reserved and cannot be used as a phase name.`);
     }
   }
 }

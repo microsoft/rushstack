@@ -4,22 +4,38 @@
 import { performance } from 'perf_hooks';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
-import { OperationStatus } from './OperationStatus';
-import { CopyFilesPlugin, type ICopyOperation } from '../plugins/CopyFilesPlugin';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
-import type { HeftTask } from '../pluginFramework/HeftTask';
-import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
-import type { HeftPhaseSession } from '../pluginFramework/HeftPhaseSession';
-import type { IPhaseOperationRunnerOptions } from './PhaseOperationRunner';
+import { OperationStatus } from '../OperationStatus';
+import CopyFilesPlugin, { type ICopyOperation } from '../../plugins/CopyFilesPlugin';
+import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
+import type { HeftTask } from '../../pluginFramework/HeftTask';
+import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../../pluginFramework/HeftTaskSession';
+import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
+import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
+import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 
 /**
  *
  */
-export interface ITaskOperationRunnerOptions extends IPhaseOperationRunnerOptions {
+export interface ITaskOperationRunnerOptions {
+  /**
+   *
+   */
+  internalHeftSession: InternalHeftSession;
+
+  /**
+   * The task to execute.
+   */
+  phase: HeftPhase;
+
   /**
    * The task to execute.
    */
   task: HeftTask;
+
+  /**
+   *
+   */
+  production: boolean;
 }
 
 /**
@@ -51,14 +67,16 @@ export class TaskOperationRunner implements IOperationRunner {
       const startTime: number = performance.now();
       taskSession.logger.terminal.writeVerboseLine('Starting task execution');
 
-      // Create the options and provide a utility method to obtain paths to copy
       const copyOperations: ICopyOperation[] = [];
+
+      // Create the options and provide a utility method to obtain paths to copy
       const runHookOptions: IHeftTaskRunHookOptions = {
         production,
         addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
           copyOperations.push(...copyOperationsToAdd)
       };
 
+      // Run the plugin run hook
       try {
         await taskSession.hooks.run.promise(runHookOptions);
       } catch (e: unknown) {
@@ -69,6 +87,7 @@ export class TaskOperationRunner implements IOperationRunner {
         return OperationStatus.Failure;
       }
 
+      // Copy the files if any were specified
       if (copyOperations.length) {
         await CopyFilesPlugin.copyFilesAsync(copyOperations, taskSession.logger);
       }

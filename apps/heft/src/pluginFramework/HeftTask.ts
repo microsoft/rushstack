@@ -16,6 +16,8 @@ import type {
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
+const RESERVED_TASK_NAMES: Set<string> = new Set(['clean']);
+
 /**
  * @internal
  */
@@ -180,8 +182,7 @@ export class HeftTask {
   }
 
   private _validate(): void {
-    const reservedTaskNames: Set<string> = new Set(['clean']);
-    if (reservedTaskNames.has(this.taskName)) {
+    if (RESERVED_TASK_NAMES.has(this.taskName)) {
       throw new Error(`Task name "${this.taskName}" is reserved and cannot be used as a task name.`);
     }
     if (!this._taskSpecifier.taskEvent && !this._taskSpecifier.taskPlugin) {

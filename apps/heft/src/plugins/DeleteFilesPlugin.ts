@@ -22,7 +22,7 @@ interface IDeleteFilesPluginOptions {
   deleteOperations: IDeleteOperation[];
 }
 
-export class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOptions> {
+export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOptions> {
   public readonly accessor?: object | undefined;
 
   public apply(
@@ -97,5 +97,3 @@ export class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOpti
     }
   }
 }
-
-export default new DeleteFilesPlugin() as IHeftTaskPlugin<IDeleteFilesPluginOptions>;

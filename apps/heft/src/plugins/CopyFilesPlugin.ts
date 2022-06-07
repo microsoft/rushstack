@@ -49,7 +49,7 @@ interface ICopyFileDescriptor {
   hardlink: boolean;
 }
 
-export class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions> {
+export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions> {
   public readonly accessor?: object | undefined;
 
   public apply(
@@ -248,5 +248,3 @@ export class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions>
   //   });
   // }
 }
-
-export default new CopyFilesPlugin() as IHeftTaskPlugin<ICopyFilesPluginOptions>;

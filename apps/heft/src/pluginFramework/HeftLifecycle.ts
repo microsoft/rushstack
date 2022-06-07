@@ -13,6 +13,7 @@ import type { HeftLifecyclePluginDefinition } from '../configuration/HeftPluginD
 import type { IHeftLifecyclePlugin, IHeftPlugin } from './IHeftPlugin';
 import {
   HeftLifecycleSession,
+  type IHeftLifecycleCleanHookOptions,
   type IHeftLifecycleHooks,
   type IHeftLifecycleToolStartHookOptions,
   type IHeftLifecycleToolStopHookOptions
@@ -67,6 +68,7 @@ export class HeftLifecycle extends HeftPluginHost {
     this._lifecyclePluginSpecifiers = lifecyclePluginSpecifiers;
 
     this._lifecycleHooks = {
+      clean: new AsyncParallelHook<IHeftLifecycleCleanHookOptions>(),
       toolStart: new AsyncParallelHook<IHeftLifecycleToolStartHookOptions>(),
       toolStop: new AsyncParallelHook<IHeftLifecycleToolStopHookOptions>(),
       recordMetrics: internalHeftSession.metricsCollector.recordMetricsHook
@@ -115,8 +117,7 @@ export class HeftLifecycle extends HeftPluginHost {
       this.pluginDefinitions,
       async (pluginDefinition: HeftLifecyclePluginDefinition) => {
         try {
-          const lifecycleSession: HeftLifecycleSession =
-            this._getLifecycleSessionForPluginDefinition(pluginDefinition);
+          const lifecycleSession: HeftLifecycleSession = this.getSessionForPluginDefinition(pluginDefinition);
           const lifecyclePlugin: IHeftLifecyclePlugin<object | void> =
             await this._getLifecyclePluginForPluginDefinitionAsync(pluginDefinition);
           const pluginOptions: object | undefined =
@@ -144,7 +145,7 @@ export class HeftLifecycle extends HeftPluginHost {
     );
   }
 
-  private _getLifecycleSessionForPluginDefinition(
+  public getSessionForPluginDefinition(
     pluginDefinition: HeftLifecyclePluginDefinition
   ): HeftLifecycleSession {
     let lifecycleSession: HeftLifecycleSession | undefined =
@@ -158,7 +159,9 @@ export class HeftLifecycle extends HeftPluginHost {
           `lifecycle:${pluginDefinition.pluginName}`
         ),
         lifecycleHooks: this.hooks,
-        parametersByLongName: new Map([...pluginDefinition.parameters].map((x) => [x.longName, x])),
+        parametersByLongName:
+          this._internalHeftSession.parameterManager.getParametersForPlugin(pluginDefinition),
+        pluginDefinition: pluginDefinition,
         getIsDebugMode: () => this._internalHeftSession.debugMode,
         requestAccessToPluginByName: this.getRequestAccessToPluginByNameFn(
           this.getPluginHookName(pluginDefinition.pluginPackageName, pluginDefinition.pluginName)
@@ -175,8 +178,7 @@ export class HeftLifecycle extends HeftPluginHost {
     let lifecyclePlugin: IHeftPlugin<HeftLifecycleSession, object | void> | undefined =
       this._lifecyclePluginsByDefinition.get(pluginDefinition);
     if (!lifecyclePlugin) {
-      const lifecycleSession: HeftLifecycleSession =
-        this._getLifecycleSessionForPluginDefinition(pluginDefinition);
+      const lifecycleSession: HeftLifecycleSession = this.getSessionForPluginDefinition(pluginDefinition);
       lifecyclePlugin = await pluginDefinition.loadPluginAsync(lifecycleSession.logger);
       this._lifecyclePluginsByDefinition.set(pluginDefinition, lifecyclePlugin);
     }

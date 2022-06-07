@@ -6,6 +6,8 @@ import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushs
 import { Import, ITerminal } from '@rushstack/node-core-library';
 import type { RigConfig } from '@rushstack/rig-package';
 
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
+
 export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript';
 
 export interface IHeftConfigurationJsonEventSpecifier {
@@ -33,6 +35,7 @@ export interface IHeftConfigurationJsonTasks {
 export interface IHeftConfigurationJsonPhaseSpecifier {
   phaseDescription?: string;
   phaseDependencies?: string[];
+  cleanAdditionalFiles?: IDeleteOperation[];
   tasksByName?: IHeftConfigurationJsonTasks;
 }
 

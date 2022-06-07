@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 export class Constants {
-  public static projectHeftFolderName: string = '.heft';
-
   public static projectConfigFolderName: string = 'config';
 
-  public static buildCacheFolderName: string = 'build-cache';
+  public static cacheFolderName: string = '.cache';
+
+  public static tempFolderName: string = 'temp';
 
   public static unmanagedParameterLongName: string = '--unmanaged';
 

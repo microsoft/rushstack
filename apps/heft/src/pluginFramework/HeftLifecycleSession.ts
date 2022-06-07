@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import type { AsyncParallelHook } from 'tapable';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
@@ -8,11 +9,22 @@ import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics
 import type { ScopedLogger } from './logging/ScopedLogger';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
 import type { RequestAccessToPluginByNameCallback } from './HeftPluginHost';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
+import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
+
+// Very basic, only intended to ensure filesystem-safe folder names for lifecycle plugins
+const ESCAPE_PACKAGE_NAME_REGEX: RegExp = /[^a-z0-9-]/g;
 
 /**
  * @public
  */
-export interface IHeftLifecycleHookOptions {}
+export interface IHeftLifecycleHookOptions {
+  production: boolean;
+}
+
+export interface IHeftLifecycleCleanHookOptions extends IHeftLifecycleHookOptions {
+  addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+}
 
 /**
  * @public
@@ -28,6 +40,7 @@ export interface IHeftLifecycleToolStopHookOptions extends IHeftLifecycleHookOpt
  * @public
  */
 export interface IHeftLifecycleHooks {
+  clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
   toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
   toolStop: AsyncParallelHook<IHeftLifecycleToolStopHookOptions>;
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
@@ -39,6 +52,7 @@ export interface IHeftLifecycleHooks {
 export interface IHeftLifecycleSessionOptions extends IInternalHeftSessionOptions {
   logger: ScopedLogger;
   lifecycleHooks: IHeftLifecycleHooks;
+  pluginDefinition: HeftPluginDefinitionBase;
   parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
   requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
 }
@@ -58,6 +72,16 @@ export class HeftLifecycleSession {
    * @public
    */
   public readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+
+  /**
+   * @public
+   */
+  public readonly cacheFolder: string;
+
+  /**
+   * @public
+   */
+  public readonly tempFolder: string;
 
   /**
    * @public
@@ -95,6 +119,20 @@ export class HeftLifecycleSession {
     this.metricsCollector = options.metricsCollector;
     this.hooks = options.lifecycleHooks;
     this.parametersByLongName = options.parametersByLongName;
+
+    // Largely guranteed to be unique since package names and plugin names must be unique,
+    // and phases are forbidden from using the name 'lifecycle'
+    const escapedPackageName: string = options.pluginDefinition.pluginPackageName.replace(
+      ESCAPE_PACKAGE_NAME_REGEX,
+      '_'
+    );
+    const uniquePluginFolderName: string = `lifecycle.${escapedPackageName}.${options.pluginDefinition.pluginName}`;
+
+    // <projectFolder>/.cache/<phaseName>.<taskName>
+    this.cacheFolder = path.join(options.heftConfiguration.cacheFolder, uniquePluginFolderName);
+
+    // <projectFolder>/temp/<phaseName>.<taskName>
+    this.tempFolder = path.join(options.heftConfiguration.tempFolder, uniquePluginFolderName);
 
     this.requestAccessToPluginByName = options.requestAccessToPluginByName;
   }

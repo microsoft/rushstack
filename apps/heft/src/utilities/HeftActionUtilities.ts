@@ -11,12 +11,14 @@ import {
 } from '@rushstack/node-core-library';
 
 import { Operation } from '../operations/Operation';
-import { TaskOperationRunner } from '../operations/TaskOperationRunner';
-import { PhaseOperationRunner } from '../operations/PhaseOperationRunner';
+import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
+import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
+import { LifecycleOperationRunner } from '../operations/runners/LifecycleOperationRunner';
 import type { IHeftAction } from '../cli/actions/IHeftAction';
-import type { HeftPhase } from '../pluginFramework/HeftPhase';
+import { HeftPhase } from '../pluginFramework/HeftPhase';
 import type { HeftTask } from '../pluginFramework/HeftTask';
 import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
+import type { LifecycleOperationRunnerType } from '../operations/runners/LifecycleOperationRunner';
 
 export interface IExpandPhaseSelectionOptions {
   to?: Set<HeftPhase>;
@@ -34,69 +36,99 @@ export interface ICreateOperationsOptions {
   terminal: ITerminal;
   production: boolean;
   clean: boolean;
+  cleanCache: boolean;
 }
 
 export function createOperations(options: ICreateOperationsOptions): Set<Operation> {
   const operations: Map<string, Operation> = new Map();
-  const phaseOperations: Map<string, Operation> = new Map();
-  const leafNodeTaskOperations: Map<string, Set<Operation>> = new Map();
+  const leafNodeTaskOperationsByPhaseName: Map<string, Set<Operation>> = new Map();
 
+  if (options.cleanCache && !options.clean) {
+    throw new Error('The "--clean-cache" option can only be used in conjunction with "--clean".');
+  }
+
+  const startLifecycleOperation: Operation = getOrCreateLifecycleOperation('start', options);
+  const stopLifecycleOperation: Operation = getOrCreateLifecycleOperation('stop', options);
+
+  let hasWarnedAboutSkippedPhases: boolean = false;
   for (const phase of options.selectedPhases) {
+    // Warn if any dependencies are excluded from the list of selected phases
+    if (
+      !hasWarnedAboutSkippedPhases &&
+      [...phase.dependencyPhases].some((dependency: HeftPhase) => !options.selectedPhases.has(dependency))
+    ) {
+      // Only write once, and write with yellow to make it stand out without writing a warning to stderr
+      hasWarnedAboutSkippedPhases = true;
+      options.terminal.writeLine(
+        Colors.yellow(
+          'The provided list of phases does not contain all phase dependencies. You may need to run the ' +
+            'excluded phases manually.'
+        )
+      );
+    }
+
     // Create operation for the phase start node
     const phaseOperation: Operation = getOrCreatePhaseOperation(phase, options);
-    phaseOperations.set(phase.phaseName, phaseOperation);
+    // Set the 'start' lifecycle operation as a dependency of all phases to ensure the 'start' lifecycle
+    // operation runs first
+    phaseOperation.dependencies.add(startLifecycleOperation);
+    // Set the phase operation as a dependency of the 'end' lifecycle operation to ensure the phase
+    // operation runs first
+    stopLifecycleOperation.dependencies.add(phaseOperation);
 
     // Create operations for each task
     const phaseLeafNodes: Set<Operation> = new Set();
     for (const task of phase.tasks) {
       const taskOperation: Operation = getOrCreateTaskOperation(task, options);
-      // All tasks in a phase depend on the phase operation
+      // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
       taskOperation.dependencies.add(phaseOperation);
-      // Save the leaf nodes for later processing
-      if (!task.consumingTasks.size) {
-        phaseLeafNodes.add(taskOperation);
+      // Set the 'start' lifecycle operation as a dependency of all tasks to ensure the 'start' lifecycle
+      // operation runs first
+      taskOperation.dependencies.add(startLifecycleOperation);
+      // Set the task operation as a dependency of the 'stop' lifecycle operation to ensure the task operation
+      // runs first
+      stopLifecycleOperation.dependencies.add(taskOperation);
+
+      // Set all dependency tasks as dependencies of the task operation
+      for (const dependencyTask of task.dependencyTasks) {
+        taskOperation.dependencies.add(getOrCreateTaskOperation(dependencyTask, options));
       }
-    }
-    leafNodeTaskOperations.set(phase.phaseName, phaseLeafNodes);
-  }
 
-  let hasWarnedAboutSkippedPhases: boolean = false;
-  for (const phase of options.selectedPhases) {
-    if (phase.dependencyPhases.size) {
-      // Link up the leaf node operations of the dependency phases to the root node operations of the current
-      // phase.
-      const phaseOperation: Operation = phaseOperations.get(phase.phaseName)!;
-      for (const dependencyPhase of phase.dependencyPhases) {
-        // Check to see if the dependency phase is in the list of selected phases and if not, ignore it. We
-        // will assume that unselected dependency phases have already completed and we don't need to run them.
-        if (options.selectedPhases.has(dependencyPhase)) {
-          // Add the dependency phase operation to the current phase operation's dependencies to allow for
-          // taskless dependency phases
-          const dependencyPhaseOperation: Operation = phaseOperations.get(dependencyPhase.phaseName)!;
-          phaseOperation.dependencies.add(dependencyPhaseOperation);
-
-          // Link up the dependency phase leaf nodes to the current phase operation
-          const dependencyPhaseLeafNodeOperations: Set<Operation> = leafNodeTaskOperations.get(
-            dependencyPhase.phaseName
-          )!;
-          for (const dependencyPhaseLeafNodeOperation of dependencyPhaseLeafNodeOperations) {
-            phaseOperation.dependencies.add(dependencyPhaseLeafNodeOperation);
-          }
-        } else if (!hasWarnedAboutSkippedPhases) {
-          // Only write once, and write with yellow to make it stand out without writing a warning to stderr
-          hasWarnedAboutSkippedPhases = true;
-          options.terminal.writeLine(
-            Colors.yellow(
-              'The provided list of phases does not contain all phase dependencies. You may need to run the ' +
-                'excluded phases manually.'
-            )
-          );
+      // Set all tasks in a in a phase as dependencies of the consuming phase
+      for (const consumingPhase of phase.consumingPhases) {
+        if (options.selectedPhases.has(consumingPhase)) {
+          // Set all tasks in a dependency phase as dependencies of the consuming phase to ensure the dependency
+          // tasks run first
+          const consumingPhaseOperation: Operation = getOrCreatePhaseOperation(consumingPhase, options);
+          consumingPhaseOperation.dependencies.add(taskOperation);
         }
       }
     }
+    leafNodeTaskOperationsByPhaseName.set(phase.phaseName, phaseLeafNodes);
   }
 
   return new Set(operations.values());
+
+  function getOrCreateLifecycleOperation(
+    type: LifecycleOperationRunnerType,
+    options: ICreateOperationsOptions
+  ): Operation {
+    const key: string = `lifecycle.${type}`;
+    let operation: Operation | undefined = operations.get(key);
+    if (!operation) {
+      operation = new Operation({
+        runner: new LifecycleOperationRunner({
+          internalHeftSession: options.internalHeftSession,
+          production: options.production,
+          clean: options.clean,
+          cleanCache: options.cleanCache,
+          type
+        })
+      });
+      operations.set(key, operation);
+    }
+    return operation;
+  }
 
   function getOrCreatePhaseOperation(phase: HeftPhase, options: ICreateOperationsOptions): Operation {
     const key: string = phase.phaseName;
@@ -108,6 +140,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
           internalHeftSession: options.internalHeftSession,
           production: options.production,
           clean: options.clean,
+          cleanCache: options.cleanCache,
           phase
         })
       });
@@ -117,22 +150,18 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
   }
 
   function getOrCreateTaskOperation(task: HeftTask, options: ICreateOperationsOptions): Operation {
-    const key: string = `${task.parentPhase.phaseName};${task.taskName}`;
+    const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
       operation = new Operation({
         runner: new TaskOperationRunner({
           internalHeftSession: options.internalHeftSession,
           production: options.production,
-          clean: options.clean,
           phase: task.parentPhase,
           task
         })
       });
       operations.set(key, operation);
-      for (const dependencyTask of task.dependencyTasks) {
-        operation.dependencies.add(getOrCreateTaskOperation(dependencyTask, options));
-      }
     }
     return operation;
   }

@@ -21,7 +21,6 @@ import { Constants } from '../utilities/Constants';
 import { PhaseAction } from './actions/PhaseAction';
 import { RunAction } from './actions/RunAction';
 import type { IHeftActionOptions } from './actions/IHeftAction';
-import { IHeftLifecycleToolStopHookOptions } from '../pluginFramework/HeftLifecycleSession';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -39,7 +38,6 @@ export class HeftCommandLineParser extends CommandLineParser {
   private _loggingManager: LoggingManager;
   private _metricsCollector: MetricsCollector;
   private _heftConfiguration: HeftConfiguration;
-  private _internalHeftSession: InternalHeftSession | undefined;
 
   private _preInitializationArgumentValues: IPreInitializationArgumentValues;
 
@@ -108,23 +106,12 @@ export class HeftCommandLineParser extends CommandLineParser {
         this.globalTerminal.writeLine(`Using rig configuration from ${relativeRigFolderPath}`);
       }
 
-      // await this._initializePluginsAsync();
-
-      // const heftLifecycle: IHeftLifecycle = {
-      //   hooks: new HeftLifecycleHooks()
-      // };
-      // this._heftLifecycleHook.call(heftLifecycle);
-
-      // await heftLifecycle.hooks.toolStart.promise();
-
       const internalHeftSession: InternalHeftSession = await InternalHeftSession.initializeAsync({
         heftConfiguration: this._heftConfiguration,
         loggingManager: this._loggingManager,
         metricsCollector: this._metricsCollector,
         getIsDebugMode: () => this.isDebug
       });
-
-      await internalHeftSession.lifecycle.ensureInitializedAsync();
 
       const actionOptions: IHeftActionOptions = {
         internalHeftSession: internalHeftSession,
@@ -163,10 +150,6 @@ export class HeftCommandLineParser extends CommandLineParser {
   protected async onExecute(): Promise<void> {
     try {
       await super.onExecute();
-      if (this._internalHeftSession) {
-        const toolStopHookOptions: IHeftLifecycleToolStopHookOptions = {};
-        await this._internalHeftSession.lifecycle.hooks.toolStop.promise(toolStopHookOptions);
-      }
     } catch (e) {
       await this._reportErrorAndSetExitCode(e as Error);
     }
@@ -201,19 +184,6 @@ export class HeftCommandLineParser extends CommandLineParser {
     return result;
   }
 
-  // private async _initializePluginsAsync(): Promise<void> {
-  //   this._pluginManager.initializeDefaultPlugins();
-
-  //   await this._pluginManager.initializePluginsFromConfigFileAsync();
-
-  //   const pluginSpecifiers: string[] = this._preInitializationArgumentValues.plugins || [];
-  //   for (const pluginSpecifier of pluginSpecifiers) {
-  //     this._pluginManager.initializePlugin(pluginSpecifier);
-  //   }
-
-  //   this._pluginManager.afterInitializeAllPlugins();
-  // }
-
   private async _reportErrorAndSetExitCode(error: Error): Promise<void> {
     if (!(error instanceof AlreadyReportedError)) {
       this.globalTerminal.writeErrorLine(error.toString());
@@ -222,11 +192,6 @@ export class HeftCommandLineParser extends CommandLineParser {
     if (this.isDebug) {
       this.globalTerminal.writeLine();
       this.globalTerminal.writeErrorLine(error.stack!);
-    }
-
-    if (this._internalHeftSession) {
-      const toolStopHookOptions: IHeftLifecycleToolStopHookOptions = {};
-      await this._internalHeftSession.lifecycle.hooks.toolStop.promise(toolStopHookOptions);
     }
 
     if (!process.exitCode || process.exitCode > 0) {

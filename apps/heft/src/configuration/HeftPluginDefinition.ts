@@ -1,10 +1,4 @@
 import * as path from 'path';
-import {
-  CommandLineParameterKind,
-  type CommandLineParameter,
-  type CommandLineParameterProvider,
-  type CommandLineChoiceParameter
-} from '@rushstack/ts-command-line';
 import { InternalError, JsonSchema } from '@rushstack/node-core-library';
 
 import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
@@ -20,27 +14,15 @@ export interface IBaseParameterJson {
   /**
    * Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\".
    */
-  parameterKind: 'flag' | 'choice' | 'string';
+  parameterKind: 'flag' | 'choice' | '' | 'string';
   /**
    * The name of the parameter (e.g. \"--verbose\").  This is a required field.
    */
   longName: string;
   /**
-   * An optional short form of the parameter (e.g. \"-v\" instead of \"--verbose\").
-   */
-  shortName?: string;
-  /**
    * A detailed description of the parameter, which appears when requesting help for the command (e.g. \"rush --help my-command\").
    */
   description: string;
-  /**
-   * A list of custom commands and/or built-in Rush commands that this parameter may be used with, by name.
-   */
-  associatedCommands?: string[];
-  /**
-   * A list of the names of the phases that this command-line parameter should be provided to.
-   */
-  associatedPhases?: string[];
   /**
    * If true, then this parameter must be included on the command line.
    */
@@ -133,7 +115,6 @@ export abstract class HeftPluginDefinitionBase {
   private _pluginPackageName: string;
   private _resolvedEntryPoint: string;
   private _optionsSchema: JsonSchema | undefined;
-  private _parameters: Set<CommandLineParameter> | undefined;
 
   protected constructor(options: IHeftPluginDefinitionOptions) {
     this._heftPluginDefinitionJson = options.heftPluginDefinitionJson;
@@ -178,74 +159,10 @@ export abstract class HeftPluginDefinitionBase {
   }
 
   /**
-   * The parameters belonging to the plugin that have been applied to the Heft action. These will only
-   * be available after HeftPluginDefinition.defineParameters() has been called.
+   * The parameters that are defined for this plugin.
    */
-  public get parameters(): Set<CommandLineParameter> {
-    if (!this._parameters) {
-      throw new InternalError('HeftPluginDefinition.defineParameters() has not been called.');
-    }
-    return this._parameters;
-  }
-
-  public defineParameters(commandLineParameterProvider: CommandLineParameterProvider): void {
-    if (!this._parameters) {
-      this._parameters = new Set();
-      const existingParameters: Map<string, CommandLineParameter> = new Map(
-        commandLineParameterProvider.parameters.map((v: CommandLineParameter) => [v.longName, v])
-      );
-
-      for (const parameter of this._heftPluginDefinitionJson.parameters || []) {
-        let definedParameter: CommandLineParameter | undefined;
-        const existingParameter: CommandLineParameter | undefined = existingParameters.get(
-          parameter.longName
-        );
-        if (existingParameter) {
-          // Will throw if incompatible, otherwise continue since the parameter is already defined.
-          this._validateParameterCompatibility(parameter, existingParameter);
-          definedParameter = existingParameter;
-        } else {
-          switch (parameter.parameterKind) {
-            case 'flag': {
-              definedParameter = commandLineParameterProvider.defineFlagParameter({
-                parameterShortName: parameter.shortName,
-                parameterLongName: parameter.longName,
-                description: parameter.description,
-                required: parameter.required
-              });
-              break;
-            }
-            case 'choice': {
-              definedParameter = commandLineParameterProvider.defineChoiceParameter({
-                parameterShortName: parameter.shortName,
-                parameterLongName: parameter.longName,
-                description: parameter.description,
-                required: parameter.required,
-                alternatives: parameter.alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
-                defaultValue: parameter.defaultValue
-              });
-              break;
-            }
-            case 'string': {
-              definedParameter = commandLineParameterProvider.defineStringParameter({
-                parameterShortName: parameter.shortName,
-                parameterLongName: parameter.longName,
-                description: parameter.description,
-                required: parameter.required,
-                argumentName: parameter.argumentName
-              });
-              break;
-            }
-          }
-          if (!definedParameter) {
-            // Shouldn't be possible, but throw just in case
-            throw new InternalError(`Unrecognized parameter kind: ${parameter.parameterKind}`);
-          }
-        }
-
-        this._parameters.add(definedParameter);
-      }
-    }
+  public get pluginParameters(): ReadonlyArray<IParameterJson> {
+    return this._heftPluginDefinitionJson.parameters || [];
   }
 
   public async loadPluginAsync(logger: ScopedLogger): Promise<IHeftPlugin> {
@@ -254,10 +171,23 @@ export abstract class HeftPluginDefinitionBase {
     let heftPlugin: IHeftPlugin | undefined;
     const entryPointPath: string = this.entryPoint;
     try {
-      const loadedPluginModule: IHeftPlugin | { default: IHeftPlugin } = await import(entryPointPath);
-      heftPlugin = (loadedPluginModule as { default: IHeftPlugin }).default || loadedPluginModule;
-    } catch (error) {
-      throw new InternalError(`Error loading plugin from "${entryPointPath}": ${error}`);
+      const loadedPluginModule: (new () => IHeftPlugin) | { default: new () => IHeftPlugin } = await import(
+        entryPointPath
+      );
+      const heftPluginConstructor: new () => IHeftPlugin =
+        (loadedPluginModule as { default: new () => IHeftPlugin }).default || loadedPluginModule;
+      heftPlugin = new heftPluginConstructor();
+    } catch (e: unknown) {
+      const error: Error = e as Error;
+      if (error.message === 'heftPluginConstructor is not a constructor') {
+        // Common error scenario, give a more helpful error message
+        throw new Error(
+          `Could not load plugin from "${entryPointPath}": The target module does not export a ` +
+            'plugin class with a parameterless constructor.'
+        );
+      } else {
+        throw new InternalError(`Could not load plugin from "${entryPointPath}": ${error}`);
+      }
     }
 
     if (!heftPlugin) {
@@ -287,58 +217,6 @@ export abstract class HeftPluginDefinitionBase {
         throw new Error(
           `Provided options for plugin "${this.pluginName}" did not match the provided plugin schema.\n${error}`
         );
-      }
-    }
-  }
-
-  private _validateParameterCompatibility(
-    newParameter: IParameterJson,
-    existingParameter: CommandLineParameter
-  ): void {
-    // Throw in various conflict scenarios:
-    // - Conflicting parameterKind
-    // - Conflicting shortName
-    // - Conflicting alternatives when the parameterKind is "choice"
-    // Most other conflicts are superficial and can be ignored.
-    // TODO: This is not ideal. Create a formal mapping that can be provided by the plugin specifier in
-    // heft.json to allow for manual re-mapping of conflicting parameters.
-    let existingKind: 'flag' | 'choice' | 'string' | undefined;
-    switch (existingParameter.kind) {
-      case CommandLineParameterKind.Flag: {
-        existingKind = 'flag';
-        break;
-      }
-      case CommandLineParameterKind.Choice: {
-        existingKind = 'choice';
-        break;
-      }
-      case CommandLineParameterKind.String: {
-        existingKind = 'string';
-        break;
-      }
-    }
-
-    const errorMessage: string = `An existing parameter "${existingParameter.longName}" was already defined with a different`;
-    if (newParameter.parameterKind !== existingKind) {
-      throw new Error(`${errorMessage} "parameterKind" value.`);
-    } else if (
-      newParameter.shortName &&
-      newParameter.shortName &&
-      newParameter.shortName !== existingParameter.shortName
-    ) {
-      // Only throw when both the new parameter and the existing parameter have a shortName that differ.
-      // Ignore if one or the other does not have a shortName.
-      throw new Error(`${errorMessage} "shortName" value.`);
-    } else if (existingParameter.kind === CommandLineParameterKind.Choice) {
-      // Only throw if the alternatives differ.
-      const choiceParameterJson: IChoiceParameterJson = newParameter as IChoiceParameterJson;
-      const existingChoiceParameter: CommandLineChoiceParameter =
-        existingParameter as CommandLineChoiceParameter;
-      const existingChoices: Set<string> = new Set(existingChoiceParameter.alternatives);
-      for (const newChoice of choiceParameterJson.alternatives) {
-        if (!existingChoices.has(newChoice.name)) {
-          throw new Error(`${errorMessage} "alternatives" value.`);
-        }
       }
     }
   }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async } from '@rushstack/node-core-library';
+import { Async, InternalError } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
 import { HeftLifecycle } from './HeftLifecycle';
@@ -12,6 +12,7 @@ import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { LoggingManager } from './logging/LoggingManager';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { HeftTask } from './HeftTask';
+import type { HeftParameterManager } from '../configuration/HeftParameterManager';
 
 /**
  * @internal
@@ -33,6 +34,7 @@ export class InternalHeftSession {
   private _lifecycle: HeftLifecycle | undefined;
   private _phases: Set<HeftPhase> | undefined;
   private _phasesByName: Map<string, HeftPhase> | undefined;
+  private _parameterManager: HeftParameterManager | undefined;
 
   private constructor(options: IInternalHeftSessionOptions, heftConfigurationJson: IHeftConfigurationJson) {
     this._options = options;
@@ -60,13 +62,19 @@ export class InternalHeftSession {
       },
       { concurrency: Constants.maxParallelism }
     );
-    for (const phase of internalHeftSession.phases) {
-      for (const task of phase.tasks) {
-        await task.ensureInitializedAsync();
-      }
-    }
 
     return internalHeftSession;
+  }
+
+  public get parameterManager(): HeftParameterManager {
+    if (!this._parameterManager) {
+      throw new InternalError('A parameter manager for the session has not been provided.');
+    }
+    return this._parameterManager;
+  }
+
+  public set parameterManager(value: HeftParameterManager) {
+    this._parameterManager = value;
   }
 
   public get debugMode(): boolean {
@@ -105,7 +113,11 @@ export class InternalHeftSession {
   public getSessionForPhase(phase: HeftPhase): HeftPhaseSession {
     let phaseSession: HeftPhaseSession | undefined = this._phaseSessionsByName.get(phase.phaseName);
     if (!phaseSession) {
-      phaseSession = new HeftPhaseSession({ ...this._options, phase });
+      phaseSession = new HeftPhaseSession({
+        ...this._options,
+        phase,
+        parameterManager: this.parameterManager
+      });
       this._phaseSessionsByName.set(phase.phaseName, phaseSession);
     }
     return phaseSession;

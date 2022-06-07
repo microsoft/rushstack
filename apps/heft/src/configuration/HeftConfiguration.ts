@@ -37,7 +37,8 @@ export class HeftConfiguration {
   private _buildFolder!: string;
   private _projectHeftDataFolder: string | undefined;
   private _projectConfigFolder: string | undefined;
-  private _buildCacheFolder: string | undefined;
+  private _cacheFolder: string | undefined;
+  private _tempFolder: string | undefined;
   private _rigConfig: RigConfig | undefined;
   private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
@@ -48,17 +49,6 @@ export class HeftConfiguration {
    */
   public get buildFolder(): string {
     return this._buildFolder;
-  }
-
-  /**
-   * The path to the project's ".heft" folder.
-   */
-  public get projectHeftDataFolder(): string {
-    if (!this._projectHeftDataFolder) {
-      this._projectHeftDataFolder = path.join(this.buildFolder, Constants.projectHeftFolderName);
-    }
-
-    return this._projectHeftDataFolder;
   }
 
   /**
@@ -73,17 +63,34 @@ export class HeftConfiguration {
   }
 
   /**
-   * The project's build cache folder.
+   * The project's cache folder.
    *
-   * This folder exists at \<project root\>/.heft/build-cache. TypeScript's output
-   * goes into this folder and then is either copied or linked to the final output folder
+   * @remarks This folder exists at \<project root\>/.cache. In general, this folder is used to store
+   * cached output from tasks under task-specific subfolders, and is not intended to be directly
+   * written to. Instead, plugins should write to the directory provided by
+   * HeftTaskSession.taskCacheFolder
    */
-  public get buildCacheFolder(): string {
-    if (!this._buildCacheFolder) {
-      this._buildCacheFolder = path.join(this.projectHeftDataFolder, Constants.buildCacheFolderName);
+  public get cacheFolder(): string {
+    if (!this._cacheFolder) {
+      this._cacheFolder = path.join(this.buildFolder, Constants.cacheFolderName);
     }
 
-    return this._buildCacheFolder;
+    return this._cacheFolder;
+  }
+
+  /**
+   * The project's temporary folder.
+   *
+   * @remarks This folder exists at \<project root\>/temp. In general, this folder is used to store temporary
+   * output from tasks under task-specific subfolders, and is not intended to be directly written to.
+   * Instead, plugins should write to the directory provided by HeftTaskSession.taskTempFolder
+   */
+  public get tempFolder(): string {
+    if (!this._tempFolder) {
+      this._tempFolder = path.join(this._buildFolder, Constants.tempFolderName);
+    }
+
+    return this._tempFolder;
   }
 
   /**

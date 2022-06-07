@@ -19,6 +19,7 @@ import {
   OperationExecutionManager,
   type IOperationExecutionManagerOptions
 } from '../../operations/OperationExecutionManager';
+import { HeftParameterManager } from '../../configuration/HeftParameterManager';
 import type { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import type { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
 import type { MetricsCollector } from '../../metrics/MetricsCollector';
@@ -35,9 +36,11 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   public readonly metricsCollector: MetricsCollector;
   public readonly heftConfiguration: HeftConfiguration;
 
+  private _parameterManager: HeftParameterManager;
   private _verboseFlag!: CommandLineFlagParameter;
   private _productionFlag!: CommandLineFlagParameter;
   private _cleanFlag!: CommandLineFlagParameter;
+  private _cleanCacheFlag!: CommandLineFlagParameter;
   private _to!: CommandLineStringListParameter;
   private _only!: CommandLineStringListParameter;
 
@@ -60,6 +63,7 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     this.metricsCollector = options.metricsCollector;
     this.heftConfiguration = options.heftConfiguration;
 
+    this._parameterManager = new HeftParameterManager();
     this._internalSession = options.internalHeftSession;
 
     initializeAction(this);
@@ -97,7 +101,13 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     });
     this._cleanFlag = scopedParameterProvider.defineFlagParameter({
       parameterLongName: '--clean',
-      description: 'If specified, clean the package before running.'
+      description: 'If specified, clean the outputs before running each phase.'
+    });
+    this._cleanCacheFlag = scopedParameterProvider.defineFlagParameter({
+      parameterLongName: '--clean-cache',
+      description:
+        'If specified, clean the cache before running each phase. To use this flag, the ' +
+        '--clean flag must also be provided.'
     });
 
     const [toPhases, onlyPhases] = [this._to, this._only].map((listParameter) => {
@@ -109,11 +119,24 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
       onlyPhases
     );
 
+    // Add all the parameters for the action
+    for (const lifecyclePluginDefinition of this._internalSession.lifecycle.pluginDefinitions) {
+      this._parameterManager.addPluginParameters(lifecyclePluginDefinition);
+    }
     for (const phase of this._selectedPhases) {
       for (const task of phase.tasks) {
-        task.pluginDefinition.defineParameters(scopedParameterProvider);
+        this._parameterManager.addPluginParameters(task.pluginDefinition);
       }
     }
+
+    // Finalize and apply to the CommandLineParameterProvider
+    this._parameterManager.finalizeParameters(scopedParameterProvider);
+
+    // Set the parameter provider on the internal session, which is used to provide the selected
+    // parameters to plugins. Set this now since the second phase of parsing for a ScopedCommandLineAction
+    // is executed during action execution, so we know this action is being executed, and the session
+    // should be populated with the executing parameters.
+    this._internalSession.parameterManager = this._parameterManager;
   }
 
   protected async onExecute(): Promise<void> {
@@ -129,7 +152,8 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
           selectedPhases: this._selectedPhases!,
           terminal: this.terminal,
           production: this._productionFlag.value,
-          clean: this._cleanFlag.value
+          clean: this._cleanFlag.value,
+          cleanCache: this._cleanCacheFlag.value
         });
         const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
           loggingManager: this.loggingManager,

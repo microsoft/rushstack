@@ -182,7 +182,7 @@
           "title": "Plugin Name",
           "type": "string",
           "description": "Name of the plugin to load from the package.",
-          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+          "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
         },
 
         "entryPoint": {
