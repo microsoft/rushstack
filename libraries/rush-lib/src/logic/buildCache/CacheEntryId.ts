@@ -90,11 +90,11 @@ export class CacheEntryId {
           case PROJECT_NAME_TOKEN_NAME: {
             switch (tokenAttribute) {
               case undefined: {
-                return `\${${OPTIONS_ARGUMENT_NAME}.projectName}`;
+                return `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace('@','')}`;
               }
 
               case 'normalize': {
-                return `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace(/\\+/g, '++').replace(/\\/\/g, '+')}`;
+                return `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace('@','').replace(/\\+/g, '++').replace(/\\/\/g, '+')}`;
               }
 
               default: {
