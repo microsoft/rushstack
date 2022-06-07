@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1005,
+    "schemaVersion": 1006,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -223,9 +223,9 @@
               "text": "FOO = \"foo\""
             }
           ],
+          "isReadonly": true,
           "releaseTag": "Public",
           "name": "FOO",
-          "isReadonly": true,
           "variableTypeTokenRange": {
             "startIndex": 0,
             "endIndex": 0
@@ -271,7 +271,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -313,7 +314,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -342,7 +344,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": true
+              "isStatic": true,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -371,7 +374,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             }
           ],
           "implementsTokenRanges": []

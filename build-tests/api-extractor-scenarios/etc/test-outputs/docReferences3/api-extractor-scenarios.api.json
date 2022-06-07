@@ -257,16 +257,16 @@
                       "text": ";"
                     }
                   ],
-                  "isOptional": false,
                   "isStatic": false,
-                  "isProtected": false,
                   "returnTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
                   },
                   "releaseTag": "Public",
+                  "isProtected": false,
                   "overloadIndex": 1,
                   "parameters": [],
+                  "isOptional": false,
                   "name": "myMethod"
                 }
               ],

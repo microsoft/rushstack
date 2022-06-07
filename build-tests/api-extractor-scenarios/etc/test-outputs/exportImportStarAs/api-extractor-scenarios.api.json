@@ -252,9 +252,9 @@
                   "text": "string"
                 }
               ],
+              "isReadonly": true,
               "releaseTag": "Public",
               "name": "calucatorVersion",
-              "isReadonly": true,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -404,9 +404,9 @@
                   "text": "string"
                 }
               ],
+              "isReadonly": true,
               "releaseTag": "Public",
               "name": "calucatorVersion",
-              "isReadonly": true,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

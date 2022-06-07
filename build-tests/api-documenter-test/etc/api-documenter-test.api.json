@@ -209,9 +209,9 @@
               "text": "number"
             }
           ],
+          "isReadonly": true,
           "releaseTag": "Public",
           "name": "constVariable",
-          "isReadonly": true,
           "variableTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -301,8 +301,8 @@
                   "text": "constructor();"
                 }
               ],
-              "isProtected": false,
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": []
             },
@@ -324,8 +324,8 @@
                   "text": ");"
                 }
               ],
-              "isProtected": false,
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 2,
               "parameters": [
                 {
@@ -403,16 +403,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "deprecatedExample"
             },
             {
@@ -449,14 +449,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -476,6 +475,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "exampleFunction"
             },
             {
@@ -504,14 +504,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 2,
               "parameters": [
                 {
@@ -523,6 +522,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "exampleFunction"
             },
             {
@@ -573,25 +573,6 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
-              "isStatic": false,
-              "isProtected": false,
-              "returnTypeTokenRange": {
-                "startIndex": 8,
-                "endIndex": 9
-              },
-              "releaseTag": "Public",
-              "overloadIndex": 1,
-              "parameters": [
-                {
-                  "parameterName": "x",
-                  "parameterTypeTokenRange": {
-                    "startIndex": 6,
-                    "endIndex": 7
-                  },
-                  "isOptional": false
-                }
-              ],
               "typeParameters": [
                 {
                   "typeParameterName": "T",
@@ -605,6 +586,25 @@
                   }
                 }
               ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 8,
+                "endIndex": 9
+              },
+              "releaseTag": "Public",
+              "isProtected": false,
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 7
+                  },
+                  "isOptional": false
+                }
+              ],
+              "isOptional": false,
               "name": "genericWithConstraintAndDefault"
             },
             {
@@ -625,16 +625,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "interestingEdgeCases"
             },
             {
@@ -723,14 +723,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -742,6 +741,7 @@
                   "isOptional": true
                 }
               ],
+              "isOptional": false,
               "name": "optionalParamFunction"
             },
             {
@@ -829,7 +829,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": true
+              "isStatic": true,
+              "isProtected": false
             },
             {
               "kind": "Method",
@@ -865,14 +866,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": true,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -892,6 +892,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "sumWithExample"
             },
             {
@@ -912,16 +913,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "tableExample"
             },
             {
@@ -1236,9 +1237,9 @@
                   "text": "unique symbol"
                 }
               ],
+              "isReadonly": true,
               "releaseTag": "Public",
               "name": "example",
-              "isReadonly": true,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -2471,9 +2472,9 @@
                   "text": "boolean"
                 }
               ],
+              "isReadonly": false,
               "releaseTag": "Public",
               "name": "nestedVariable",
-              "isReadonly": false,
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -2520,14 +2521,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -2539,6 +2539,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "addHandler"
             }
           ],

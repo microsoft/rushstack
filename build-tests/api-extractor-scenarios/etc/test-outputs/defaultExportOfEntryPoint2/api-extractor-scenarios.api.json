@@ -184,9 +184,9 @@
               "text": "() => void"
             }
           ],
+          "isReadonly": true,
           "releaseTag": "Public",
           "name": "defaultFunctionStatement",
-          "isReadonly": true,
           "variableTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
