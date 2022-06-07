@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
 import type { AsyncTransformer, SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
 import type { Config } from '@jest/types';
+import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
 
 import { HeftJestDataFile, IHeftJestDataFileJson } from '../HeftJestDataFile';
 import { GetCacheKeyFunction, createCacheKeyFunction, createCacheKeyFunctionAsync } from '../JestUtils';
