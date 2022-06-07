@@ -17,7 +17,10 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/heft-api-extractor-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-sass-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "autoprefixer": "~10.4.2",
