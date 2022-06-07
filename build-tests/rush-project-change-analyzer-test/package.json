@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "heft build --clean",
     "start": "heft start",
-    "_phase:build": "heft build --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",

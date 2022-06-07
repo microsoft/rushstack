@@ -3,8 +3,8 @@
 
 import {
   HeftConfiguration,
-  HeftSession,
-  IHeftPlugin,
+  HeftTaskSession,
+  IHeftTaskPlugin,
   IHeftFlagParameter,
   IHeftStringParameter,
   IHeftIntegerParameter,
@@ -12,27 +12,21 @@ import {
   IHeftChoiceParameter,
   IHeftChoiceListParameter,
   IBuildStageContext,
-  ICompileSubstage
+  ICompileSubstage,
+  CommandLineFlagParameter,
+  CommandLineStringParameter
 } from '@rushstack/heft';
 import { FileSystem } from '@rushstack/node-core-library';
 
-class HeftParameterPlugin implements IHeftPlugin {
-  public readonly pluginName: string = 'heft-action-plugin';
+export default class HeftParameterPlugin implements IHeftTaskPlugin {
+  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    const customParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
+      '--custom-parameter'
+    ) as CommandLineFlagParameter;
 
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    const customParameter: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
-      associatedActionNames: ['build', 'test', 'start'],
-      parameterLongName: '--custom-parameter',
-      description: 'Test running a custom parameter'
-    });
-
-    const customStringParameter: IHeftStringParameter = heftSession.commandLine.registerStringParameter({
-      associatedActionNames: ['build', 'test', 'start'],
-      parameterLongName: '--custom-string-parameter',
-      description: 'Test running a custom string parameter',
-      argumentName: 'TEXT',
-      required: true
-    });
+    const customStringParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
+      '--custom-string-parameter'
+    ) as CommandLineStringParameter;
 
     const customNumberParameter: IHeftIntegerParameter = heftSession.commandLine.registerIntegerParameter({
       associatedActionNames: ['build', 'test', 'start'],

@@ -1,21 +1,20 @@
 import { SyncHook } from 'tapable';
-import {
-  IHeftPlugin,
-  HeftSession,
+import type {
+  IHeftTaskPlugin,
+  HeftTaskSession,
   HeftConfiguration,
-  IBuildStageContext,
-  IPreCompileSubstage
+  IHeftTaskRunHookOptions
 } from '@rushstack/heft';
 
 export const enum PluginNames {
-  ExamplePlugin01 = 'example-plugin-01'
+  ExamplePlugin01 = 'examplePlugin01'
 }
 
 export interface IExamplePlugin01Accessor {
   exampleHook: SyncHook;
 }
 
-export class ExamplePlugin01 implements IHeftPlugin {
+export default class ExamplePlugin01 implements IHeftTaskPlugin {
   private _accessor: IExamplePlugin01Accessor;
 
   public pluginName: string = PluginNames.ExamplePlugin01;
@@ -24,19 +23,13 @@ export class ExamplePlugin01 implements IHeftPlugin {
     return this._accessor;
   }
 
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
     this._accessor = {
       exampleHook: new SyncHook()
     };
 
-    heftSession.hooks.build.tap(PluginNames.ExamplePlugin01, (build: IBuildStageContext) => {
-      build.hooks.preCompile.tap(PluginNames.ExamplePlugin01, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tap(PluginNames.ExamplePlugin01, () => {
-          this.accessor.exampleHook.call();
-        });
-      });
+    taskSession.hooks.run.tapPromise(PluginNames.ExamplePlugin01, async (build: IHeftTaskRunHookOptions) => {
+      this.accessor.exampleHook.call();
     });
   }
 }
-
-export default new ExamplePlugin01();

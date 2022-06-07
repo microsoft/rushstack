@@ -17,12 +17,15 @@
       "moduleKind": "umd",
       "outFolderName": "lib-umd"
     }
-  ]
+  ],
 
   /**
-   * If set to "true", the TSlint task will not be invoked.
+   * Configures additional file types that should be copied into the TypeScript compiler's emit
+   * folders, for example so that these files can be resolved by import statements.
    */
-  // "disableTslint": true,
+  "staticAssetsToCopy": {
+    "fileExtensions": [".txt"]
+  }
 
   /**
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.

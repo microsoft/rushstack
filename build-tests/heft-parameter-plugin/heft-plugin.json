@@ -1,0 +1,8 @@
+{
+  "taskPlugins": [
+    {
+      "pluginName": "examplePlugin01",
+      "entryPoint": "./lib/index"
+    }
+  ]
+}

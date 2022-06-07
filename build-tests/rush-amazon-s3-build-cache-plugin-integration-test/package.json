@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
     "read-s3-object": "node ./lib/readObject.js",
     "start-proxy-server": "node ./lib/startProxyServer.js"
   },

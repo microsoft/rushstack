@@ -1,19 +1,20 @@
-import { IHeftPlugin, HeftSession, HeftConfiguration } from '@rushstack/heft';
+import type { HeftTaskSession, HeftConfiguration, IHeftTaskPlugin } from '@rushstack/heft';
 import { PluginNames as OtherPluginNames, IExamplePlugin01Accessor } from 'heft-example-plugin-01';
 
 const enum PluginNames {
-  ExamplePlugin02 = 'example-plugin-02'
+  ExamplePlugin02 = 'examplePlugin02'
 }
 
-export class ExamplePlugin02 implements IHeftPlugin {
+export default class ExamplePlugin02 implements IHeftTaskPlugin {
   public pluginName: string = PluginNames.ExamplePlugin02;
 
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.requestAccessToPluginByName(
+  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    taskSession.requestAccessToPluginByName(
+      'heft-example-plugin-01',
       OtherPluginNames.ExamplePlugin01,
       (accessor: IExamplePlugin01Accessor) => {
         accessor.exampleHook.tap(PluginNames.ExamplePlugin02, () => {
-          heftConfiguration.globalTerminal.writeLine(
+          taskSession.logger.terminal.writeLine(
             `!!!!!!!!!!!!!!! Plugin "${OtherPluginNames.ExamplePlugin01}" hook called !!!!!!!!!!!!!!! `
           );
         });
@@ -21,5 +22,3 @@ export class ExamplePlugin02 implements IHeftPlugin {
     );
   }
 }
-
-export default new ExamplePlugin02();

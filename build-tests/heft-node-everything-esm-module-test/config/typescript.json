@@ -17,7 +17,15 @@
       "moduleKind": "umd",
       "outFolderName": "lib-umd"
     }
-  ]
+  ],
+
+  /**
+   * Configures additional file types that should be copied into the TypeScript compiler's emit
+   * folders, for example so that these files can be resolved by import statements.
+   */
+  "staticAssetsToCopy": {
+    "fileExtensions": [".txt"]
+  }
 
   /**
    * If set to "true", the TSlint task will not be invoked.
