@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
-import type * as webpack from 'webpack';
-import type { IBuildStageProperties, IBundleSubstageProperties } from '@rushstack/heft';
+import type * as TWebpack from 'webpack';
+import type { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 /**
  * @public
  */
-export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
+export interface IWebpackConfigurationWithDevServer extends TWebpack.Configuration {
   devServer?: WebpackDevServerConfiguration;
 }
 
@@ -23,7 +23,7 @@ export type IWebpackConfiguration =
 /**
  * @public
  */
-export interface IWebpackBundleSubstageProperties extends IBundleSubstageProperties {
+export interface IWebpackPluginAccessor {
   /**
    * The configuration used by the Webpack plugin. This must be populated
    * for Webpack to run. If webpackConfigFilePath is specified,
@@ -36,12 +36,9 @@ export interface IWebpackBundleSubstageProperties extends IBundleSubstagePropert
    */
   // We are inheriting this problem from Tapable's API
   // eslint-disable-next-line @rushstack/no-new-null
-  webpackConfiguration?: webpack.Configuration | webpack.Configuration[] | null;
-}
-
-/**
- * @public
- */
-export interface IWebpackBuildStageProperties extends IBuildStageProperties {
-  webpackStats?: webpack.Stats | webpack.MultiStats;
+  onConfigureWebpackHook: AsyncSeriesWaterfallHook<IWebpackConfiguration | null>;
+  // We are inheriting this problem from Tapable's API
+  // eslint-disable-next-line @rushstack/no-new-null
+  onAfterConfigureWebpackHook: AsyncParallelHook<IWebpackConfiguration | null>;
+  onEmitStatsHook: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
 }

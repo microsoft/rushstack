@@ -1,18 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IHeftPlugin } from '@rushstack/heft';
-
-import { WebpackPlugin } from './WebpackPlugin';
-
-export {
+export type {
   IWebpackConfigurationWithDevServer,
   IWebpackConfiguration,
-  IWebpackBuildStageProperties,
-  IWebpackBundleSubstageProperties
+  IWebpackPluginAccessor
 } from './shared';
-
-/**
- * @internal
- */
-export default new WebpackPlugin() as IHeftPlugin;
