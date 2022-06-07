@@ -36,17 +36,20 @@ export enum ApiJsonSchemaVersion {
   V_1004 = 1004,
 
   /**
-   * Add an `isOptional` field to `IApiParameterOptions` to track whether a function parameter is optional.
+   * Add an `isOptional` field to `Parameter` and `TypeParameter` to track whether a function parameter is optional.
    *
    * When loading older JSON files, the value defaults to `false`.
    */
   V_1005 = 1005,
 
   /**
-   * Add an `isProtected` field to `IApiConstructorOptions`, `IApiPropertyOptions`, and `IApiMethodOptions` to
+   * Add an `isProtected` field to `ApiConstructor`, `ApiMethod`, and `ApiProperty` to
    * track whether a class member has the `protected` modifier.
    *
-   * When loading older JSON files, the value defaults to `false`.
+   * Add an `isReadonly` field to `ApiProperty`, `ApiPropertySignature`, and `ApiVariable` to
+   * track whether the item is readonly.
+   *
+   * When loading older JSON files, the values default to `false`.
    */
   V_1006 = 1006,
 

@@ -397,14 +397,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
               },
               "releaseTag": "Beta",
+              "isProtected": false,
               "overloadIndex": 2,
               "parameters": [
                 {
@@ -424,6 +423,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "combine"
             },
             {
@@ -460,14 +460,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 3,
               "parameters": [
                 {
@@ -487,6 +486,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "combine"
             }
           ],

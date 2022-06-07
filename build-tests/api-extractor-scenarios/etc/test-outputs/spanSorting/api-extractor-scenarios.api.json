@@ -201,6 +201,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "member1",
@@ -234,16 +235,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 3
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "member2"
             }
           ],
@@ -288,14 +289,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -307,6 +307,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "tryLoadFromFile"
             }
           ],
@@ -343,16 +344,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "member1"
             }
           ],
@@ -372,6 +373,7 @@
               "text": "(o: {\n    a: number;\n    b(): string;\n}) => void"
             }
           ],
+          "isReadonly": true,
           "releaseTag": "Public",
           "name": "exampleD",
           "variableTypeTokenRange": {

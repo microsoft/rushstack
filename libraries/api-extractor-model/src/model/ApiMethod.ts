@@ -27,13 +27,13 @@ import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptiona
  */
 export interface IApiMethodOptions
   extends IApiNameMixinOptions,
-    IApiTypeParameterListMixinOptions,
+    IApiOptionalMixinOptions,
     IApiParameterListMixinOptions,
     IApiProtectedMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiReturnTypeMixinOptions,
     IApiStaticMixinOptions,
-    IApiOptionalMixinOptions,
+    IApiTypeParameterListMixinOptions,
     IApiDeclaredItemOptions {}
 
 /**
@@ -58,10 +58,10 @@ export interface IApiMethodOptions
  * @public
  */
 export class ApiMethod extends ApiNameMixin(
-  ApiTypeParameterListMixin(
+  ApiOptionalMixin(
     ApiParameterListMixin(
-      ApiReleaseTagMixin(
-        ApiReturnTypeMixin(ApiProtectedMixin(ApiStaticMixin(ApiOptionalMixin(ApiDeclaredItem))))
+      ApiProtectedMixin(
+        ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiTypeParameterListMixin(ApiDeclaredItem))))
       )
     )
   )

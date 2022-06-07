@@ -201,16 +201,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "methodA1"
             },
             {
@@ -231,16 +231,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "methodA3"
             }
           ],
@@ -277,16 +277,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "methodB2"
             },
             {
@@ -307,16 +307,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "methodB4"
             }
           ],
@@ -353,16 +353,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "method1"
             },
             {
@@ -383,16 +383,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "method2"
             }
           ],

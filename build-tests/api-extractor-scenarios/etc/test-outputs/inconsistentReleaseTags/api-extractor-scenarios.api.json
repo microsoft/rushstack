@@ -201,6 +201,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Beta",
               "name": "x",

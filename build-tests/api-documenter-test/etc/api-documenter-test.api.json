@@ -209,6 +209,7 @@
               "text": "number"
             }
           ],
+          "isReadonly": true,
           "releaseTag": "Public",
           "name": "constVariable",
           "variableTypeTokenRange": {
@@ -248,6 +249,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "creationDate",
@@ -299,8 +301,8 @@
                   "text": "constructor();"
                 }
               ],
-              "isProtected": false,
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": []
             },
@@ -322,8 +324,8 @@
                   "text": ");"
                 }
               ],
-              "isProtected": false,
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 2,
               "parameters": [
                 {
@@ -401,16 +403,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "deprecatedExample"
             },
             {
@@ -447,14 +449,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -474,6 +475,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "exampleFunction"
             },
             {
@@ -502,14 +504,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 2,
               "parameters": [
                 {
@@ -521,6 +522,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "exampleFunction"
             },
             {
@@ -571,25 +573,6 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
-              "isStatic": false,
-              "isProtected": false,
-              "returnTypeTokenRange": {
-                "startIndex": 8,
-                "endIndex": 9
-              },
-              "releaseTag": "Public",
-              "overloadIndex": 1,
-              "parameters": [
-                {
-                  "parameterName": "x",
-                  "parameterTypeTokenRange": {
-                    "startIndex": 6,
-                    "endIndex": 7
-                  },
-                  "isOptional": false
-                }
-              ],
               "typeParameters": [
                 {
                   "typeParameterName": "T",
@@ -603,6 +586,25 @@
                   }
                 }
               ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 8,
+                "endIndex": 9
+              },
+              "releaseTag": "Public",
+              "isProtected": false,
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 7
+                  },
+                  "isOptional": false
+                }
+              ],
+              "isOptional": false,
               "name": "genericWithConstraintAndDefault"
             },
             {
@@ -623,16 +625,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "interestingEdgeCases"
             },
             {
@@ -654,6 +656,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "malformedEvent",
@@ -683,6 +686,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "modifiedEvent",
@@ -719,14 +723,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -738,6 +741,7 @@
                   "isOptional": true
                 }
               ],
+              "isOptional": false,
               "name": "optionalParamFunction"
             },
             {
@@ -758,6 +762,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "readonlyProperty",
@@ -787,6 +792,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "regularProperty",
@@ -795,6 +801,35 @@
                 "endIndex": 2
               },
               "isStatic": false,
+              "isProtected": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1.staticReadonlyThing:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "static readonly staticReadonlyThing: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": true,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "staticReadonlyThing",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": true,
               "isProtected": false
             },
             {
@@ -831,14 +866,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": true,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -858,6 +892,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "sumWithExample"
             },
             {
@@ -878,16 +913,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "tableExample"
             },
             {
@@ -912,6 +947,7 @@
                   "text": "\n\nset writeableProperty(value: string);"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "writeableProperty",
@@ -940,6 +976,7 @@
                   "text": ");"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "writeonlyProperty",
@@ -1200,6 +1237,7 @@
                   "text": "unique symbol"
                 }
               ],
+              "isReadonly": true,
               "releaseTag": "Public",
               "name": "example",
               "variableTypeTokenRange": {
@@ -1469,6 +1507,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "regularProperty",
@@ -1569,6 +1608,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "\"[not.a.symbol]\"",
@@ -1604,6 +1644,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "[EcmaSmbols.example]",
@@ -1743,6 +1784,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "redundantQuotes",
@@ -1785,6 +1827,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "Context",
@@ -1816,6 +1859,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "generic",
@@ -1842,6 +1886,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "numberOrFunction",
@@ -1868,6 +1913,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "stringOrNumber",
@@ -1910,6 +1956,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "regularProperty",
@@ -1957,6 +2004,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "arrayProperty",
@@ -2051,6 +2099,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "intersectionProperty",
@@ -2077,6 +2126,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "regularProperty",
@@ -2121,6 +2171,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "tupleProperty",
@@ -2161,6 +2212,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "typeReferenceProperty",
@@ -2197,6 +2249,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "unionProperty",
@@ -2239,6 +2292,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": true,
               "releaseTag": "Public",
               "name": "optionalField",
@@ -2293,6 +2347,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": true,
               "isOptional": true,
               "releaseTag": "Public",
               "name": "optionalReadonlyField",
@@ -2319,6 +2374,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": true,
               "releaseTag": "Public",
               "name": "optionalUndocumentedField",
@@ -2416,6 +2472,7 @@
                   "text": "boolean"
                 }
               ],
+              "isReadonly": false,
               "releaseTag": "Public",
               "name": "nestedVariable",
               "variableTypeTokenRange": {
@@ -2464,14 +2521,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
-              "isProtected": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -2483,6 +2539,7 @@
                   "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "addHandler"
             }
           ],

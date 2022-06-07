@@ -206,6 +206,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "lib1",
@@ -239,6 +240,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "lib2",
@@ -272,6 +274,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "lib3",
@@ -305,6 +308,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "options",
@@ -338,6 +342,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "reExport",

@@ -206,6 +206,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "dynamicImport",
@@ -233,6 +234,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "namedImport",
@@ -260,6 +262,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "reExport",

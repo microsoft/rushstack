@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Add an \"isProtected\" field to the doc model to indicate protected class members",
+      "comment": "Add an \"isReadonly\" field to the doc model to indicate whether a property or variable is readonly",
       "type": "minor"
     }
   ],

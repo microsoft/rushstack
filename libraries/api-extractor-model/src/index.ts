@@ -37,6 +37,7 @@ export { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from './mixins/ApiRetu
 export { IApiStaticMixinOptions, ApiStaticMixin } from './mixins/ApiStaticMixin';
 export { IApiNameMixinOptions, ApiNameMixin } from './mixins/ApiNameMixin';
 export { IApiOptionalMixinOptions, ApiOptionalMixin } from './mixins/ApiOptionalMixin';
+export { IApiReadonlyMixinOptions, ApiReadonlyMixin } from './mixins/ApiReadonlyMixin';
 
 export { ExcerptTokenKind, IExcerptTokenRange, IExcerptToken, ExcerptToken, Excerpt } from './mixins/Excerpt';
 export { Constructor, PropertiesOf } from './mixins/Mixin';

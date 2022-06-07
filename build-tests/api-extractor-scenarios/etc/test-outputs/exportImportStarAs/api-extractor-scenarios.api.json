@@ -252,6 +252,7 @@
                   "text": "string"
                 }
               ],
+              "isReadonly": true,
               "releaseTag": "Public",
               "name": "calucatorVersion",
               "variableTypeTokenRange": {
@@ -403,6 +404,7 @@
                   "text": "string"
                 }
               ],
+              "isReadonly": true,
               "releaseTag": "Public",
               "name": "calucatorVersion",
               "variableTypeTokenRange": {

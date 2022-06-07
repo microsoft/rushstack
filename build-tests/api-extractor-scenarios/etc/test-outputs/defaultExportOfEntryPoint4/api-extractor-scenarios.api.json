@@ -184,6 +184,7 @@
               "text": "\"literal\""
             }
           ],
+          "isReadonly": true,
           "releaseTag": "Public",
           "name": "_default",
           "variableTypeTokenRange": {

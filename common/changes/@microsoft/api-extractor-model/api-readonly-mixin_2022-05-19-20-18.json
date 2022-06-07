@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "Add an \"isProtected\" field to ApiConstructor, ApiMethod, and ApiProperty",
+      "comment": "Add an \"isReadonly\" field to ApiProperty, ApiPropertySignature, and ApiVariable",
       "type": "minor"
     }
   ],

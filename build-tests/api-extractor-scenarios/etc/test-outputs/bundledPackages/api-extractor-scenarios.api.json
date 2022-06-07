@@ -272,6 +272,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "readonlyProperty",
@@ -300,6 +301,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "writeableProperty",
