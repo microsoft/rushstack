@@ -9,7 +9,6 @@ import {
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiProtectedMixin, IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
-import { ApiReadonlyMixin, IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
@@ -20,7 +19,6 @@ import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyIt
 export interface IApiPropertyOptions
   extends IApiPropertyItemOptions,
     IApiProtectedMixinOptions,
-    IApiReadonlyMixinOptions,
     IApiStaticMixinOptions {}
 
 /**
@@ -57,7 +55,7 @@ export interface IApiPropertyOptions
  *
  * @public
  */
-export class ApiProperty extends ApiProtectedMixin(ApiReadonlyMixin(ApiStaticMixin(ApiPropertyItem))) {
+export class ApiProperty extends ApiProtectedMixin(ApiStaticMixin(ApiPropertyItem)) {
   public constructor(options: IApiPropertyOptions) {
     super(options);
   }
