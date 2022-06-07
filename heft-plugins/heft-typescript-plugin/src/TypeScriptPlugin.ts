@@ -15,7 +15,7 @@ import type {
   HeftTaskSession,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
-  IIHeftTaskCleanHookOptions
+  IHeftTaskCleanHookOptions
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
@@ -231,7 +231,7 @@ export async function loadPartialTsconfigFileAsync(
   return await partialTsconfigFilePromise;
 }
 
-export class TypeScriptPlugin implements IHeftTaskPlugin {
+export default class TypeScriptPlugin implements IHeftTaskPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public accessor: ITypeScriptPluginAccessor = {
@@ -239,7 +239,7 @@ export class TypeScriptPlugin implements IHeftTaskPlugin {
   };
 
   public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IIHeftTaskCleanHookOptions) => {
+    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       await this._updateClean(taskSession, heftConfiguration, cleanOptions);
     });
 
@@ -252,7 +252,7 @@ export class TypeScriptPlugin implements IHeftTaskPlugin {
   private async _updateClean(
     taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    cleanOptions: IIHeftTaskCleanHookOptions
+    cleanOptions: IHeftTaskCleanHookOptions
   ): Promise<void> {
     const configurationFile: ITypeScriptConfigurationJson | undefined =
       await loadTypeScriptConfigurationFileAsync(heftConfiguration, taskSession.logger.terminal);
@@ -346,7 +346,7 @@ export class TypeScriptPlugin implements IHeftTaskPlugin {
     // Build out the configuration
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolder: heftConfiguration.buildFolder,
-      buildMetadataFolder: Path.convertToSlashes(`${heftConfiguration.buildFolder}/temp`),
+      buildMetadataFolder: taskSession.cacheFolder,
       typeScriptToolPath: typeScriptToolPath,
 
       buildProjectReferences: typeScriptConfigurationJson?.buildProjectReferences,
@@ -384,5 +384,3 @@ export class TypeScriptPlugin implements IHeftTaskPlugin {
     return partialTsconfigFile?.compilerOptions?.outDir;
   }
 }
-
-export default new TypeScriptPlugin();
