@@ -77,7 +77,8 @@ export class RushPnpmCommandLine {
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
       if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
+        // showVerbose is false because the logging message may break JSON output
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: false });
       }
 
       NodeJsCompatibility.warnAboutCompatibilityIssues({
