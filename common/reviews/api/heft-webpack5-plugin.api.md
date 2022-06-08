@@ -4,34 +4,27 @@
 
 ```ts
 
+import type { AsyncParallelHook } from 'tapable';
+import type { AsyncSeriesWaterfallHook } from 'tapable';
 import type { Configuration } from 'webpack-dev-server';
-import type { IBuildStageProperties } from '@rushstack/heft';
-import type { IBundleSubstageProperties } from '@rushstack/heft';
-import type { IHeftPlugin } from '@rushstack/heft';
-import type * as webpack from 'webpack';
-
-// @public (undocumented)
-const _default: IHeftPlugin<void>;
-export default _default;
-
-// @public (undocumented)
-export interface IWebpackBuildStageProperties extends IBuildStageProperties {
-    // (undocumented)
-    webpackStats?: webpack.Stats | webpack.MultiStats;
-}
-
-// @public (undocumented)
-export interface IWebpackBundleSubstageProperties extends IBundleSubstageProperties {
-    webpackConfiguration?: webpack.Configuration | webpack.Configuration[] | null;
-}
+import type * as TWebpack from 'webpack';
 
 // @public (undocumented)
 export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[] | undefined;
 
 // @public (undocumented)
-export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
+export interface IWebpackConfigurationWithDevServer extends TWebpack.Configuration {
     // (undocumented)
     devServer?: Configuration;
+}
+
+// @public (undocumented)
+export interface IWebpackPluginAccessor {
+    // (undocumented)
+    onAfterConfigureWebpackHook: AsyncParallelHook<IWebpackConfiguration | null>;
+    onConfigureWebpackHook: AsyncSeriesWaterfallHook<IWebpackConfiguration | null>;
+    // (undocumented)
+    onEmitStatsHook: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
 }
 
 // (No @packageDocumentation comment for this package)

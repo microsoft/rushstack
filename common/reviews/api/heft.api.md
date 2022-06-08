@@ -8,7 +8,7 @@ import { AsyncParallelHook } from 'tapable';
 import { CommandLineChoiceParameter } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
-import { CommandLineParameterProvider } from '@rushstack/ts-command-line';
+import type { CommandLineParameterProvider } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileErrorFormat } from '@rushstack/node-core-library';
 import { IPackageJson } from '@rushstack/node-core-library';
@@ -27,8 +27,8 @@ export { CommandLineStringParameter }
 
 // @public (undocumented)
 export class HeftConfiguration {
-    get buildCacheFolder(): string;
     get buildFolder(): string;
+    get cacheFolder(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
     get globalTerminal(): Terminal;
@@ -36,11 +36,11 @@ export class HeftConfiguration {
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
     get projectConfigFolder(): string;
-    get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
     get rigConfig(): RigConfig;
     // (undocumented)
     get rigToolResolver(): RigToolResolver;
+    get tempFolder(): string;
     get terminalProvider(): ITerminalProvider;
 }
 
@@ -50,6 +50,8 @@ export class HeftLifecycleSession {
     //
     // @internal
     constructor(options: IHeftLifecycleSessionOptions);
+    // (undocumented)
+    readonly cacheFolder: string;
     get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftLifecycleHooks;
@@ -60,6 +62,8 @@ export class HeftLifecycleSession {
     // (undocumented)
     readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
     readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+    // (undocumented)
+    readonly tempFolder: string;
 }
 
 // @public (undocumented)
@@ -68,6 +72,8 @@ export class HeftTaskSession {
     //
     // @internal
     constructor(options: IHeftTaskSessionOptions);
+    // (undocumented)
+    readonly cacheFolder: string;
     get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftTaskHooks;
@@ -80,6 +86,8 @@ export class HeftTaskSession {
     readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     // (undocumented)
     readonly taskName: string;
+    // (undocumented)
+    readonly tempFolder: string;
 }
 
 // @public
@@ -109,10 +117,16 @@ export interface _IHeftConfigurationInitializationOptions {
 
 // @public (undocumented)
 export interface IHeftLifecycleHookOptions {
+    // (undocumented)
+    production: boolean;
 }
 
 // @public (undocumented)
 export interface IHeftLifecycleHooks {
+    // Warning: (ae-forgotten-export) The symbol "IHeftLifecycleCleanHookOptions" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
     // (undocumented)
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     // (undocumented)
@@ -150,6 +164,12 @@ export interface IHeftRecordMetricsHookOptions {
 }
 
 // @public (undocumented)
+export interface IHeftTaskCleanHookOptions extends IHeftTaskHookOptions {
+    // (undocumented)
+    addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+}
+
+// @public (undocumented)
 export interface IHeftTaskHookOptions {
     // (undocumented)
     production: boolean;
@@ -158,7 +178,7 @@ export interface IHeftTaskHookOptions {
 // @public (undocumented)
 export interface IHeftTaskHooks {
     // (undocumented)
-    clean: AsyncParallelHook<IIHeftTaskCleanHookOptions>;
+    clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
     // (undocumented)
     run: AsyncParallelHook<IHeftTaskRunHookOptions>;
 }
@@ -173,12 +193,6 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<HeftTaskSe
 export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {
     // (undocumented)
     addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
-}
-
-// @public (undocumented)
-export interface IIHeftTaskCleanHookOptions extends IHeftTaskHookOptions {
-    // (undocumented)
-    addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 // @public (undocumented)
