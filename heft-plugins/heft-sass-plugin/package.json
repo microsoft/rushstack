@@ -12,10 +12,10 @@
   "types": "dist/heft-sass-plugin.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
     "start": "heft test --clean --watch",
+    "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test --"
+    "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
     "@rushstack/heft": "^0.45.3"

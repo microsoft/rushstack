@@ -20,7 +20,7 @@ const PLUGIN_NAME: string = 'SassTypingsPlugin';
 const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-sass-plugin.schema.json`;
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
-export class SassTypingsPlugin implements IHeftPlugin {
+export default class SassTypingsPlugin implements IHeftPlugin {
   private static _sassConfigurationLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
 
   public readonly pluginName: string = PLUGIN_NAME;
@@ -100,5 +100,3 @@ export class SassTypingsPlugin implements IHeftPlugin {
     return SassTypingsPlugin._sassConfigurationLoader;
   }
 }
-
-export default new SassTypingsPlugin();
