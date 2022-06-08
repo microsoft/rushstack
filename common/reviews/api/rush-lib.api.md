@@ -338,6 +338,7 @@ export interface ILaunchOptions {
     // @internal
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
+    terminalProvider?: ITerminalProvider;
 }
 
 // @beta (undocumented)

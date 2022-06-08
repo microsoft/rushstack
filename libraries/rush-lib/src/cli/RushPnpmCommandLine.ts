@@ -18,7 +18,6 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SpawnSyncReturns } from 'child_process';
 import { ILaunchOptions } from '../api/Rush';
-import { InstallHelpers } from '../logic/installManager/InstallHelpers';
 
 export interface ILaunchRushPnpmInternalOptions extends ILaunchOptions {}
 
@@ -71,7 +70,7 @@ export class RushPnpmCommandLine {
     process.exitCode = 1;
 
     const { terminalProvider } = options;
-    const terminal = new Terminal(terminalProvider || new ConsoleTerminalProvider());
+    const terminal: ITerminal = new Terminal(terminalProvider || new ConsoleTerminalProvider());
 
     try {
       // Are we in a Rush repo?
