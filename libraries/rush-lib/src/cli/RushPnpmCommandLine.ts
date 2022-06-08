@@ -18,6 +18,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SpawnSyncReturns } from 'child_process';
 import { ILaunchOptions } from '../api/Rush';
+import { InstallHelpers } from '../logic/installManager/InstallHelpers';
 
 export interface ILaunchRushPnpmInternalOptions extends ILaunchOptions {}
 
@@ -129,6 +130,20 @@ export class RushPnpmCommandLine {
 
       if (rushConfiguration.pnpmOptions.pnpmStorePath) {
         pnpmEnvironmentMap.set('NPM_CONFIG_STORE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      }
+
+      if (rushConfiguration.pnpmOptions.environmentVariables) {
+        for (const [envKey, { value: envValue, override }] of Object.entries(
+          rushConfiguration.pnpmOptions.environmentVariables
+        )) {
+          if (override) {
+            pnpmEnvironmentMap.set(envKey, envValue);
+          } else {
+            if ('undefined' === typeof pnpmEnvironmentMap.get(envKey)) {
+              pnpmEnvironmentMap.set(envKey, envValue);
+            }
+          }
+        }
       }
 
       const result: SpawnSyncReturns<string> = Executable.spawnSync(
