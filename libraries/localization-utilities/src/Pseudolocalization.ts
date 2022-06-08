@@ -19,7 +19,6 @@ interface IPseudolocale {
  * @public
  */
 export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string) => string {
-  // eslint-disable-next-line @typescript-eslint/typedef
   const pseudolocaleCode: string = FileSystem.readFile(pseudolocalePath);
   const context: {
     pseudolocale: IPseudolocale | undefined;
@@ -27,6 +26,7 @@ export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string)
     pseudolocale: undefined
   };
 
+  // Load pseudolocale in an isolated context because the configuration for is stored on a singleton
   vm.runInNewContext(pseudolocaleCode, context);
   const { pseudolocale } = context;
   if (!pseudolocale) {
@@ -34,5 +34,6 @@ export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string)
   }
 
   Object.assign(pseudolocale.option, options);
+  // `pseudolocale.str` captures `pseudolocale` in its closure and refers to `pseudolocale.option`.
   return pseudolocale.str;
 }
