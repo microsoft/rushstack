@@ -60,7 +60,8 @@ export class RushPnpmCommandLine {
     [/* synonym */ 't', CommandKind.KnownSafe],
     ['unlink', CommandKind.ShowWarning],
     ['update', CommandKind.ShowWarning],
-    [/* synonym */ 'up', CommandKind.ShowWarning]
+    [/* synonym */ 'up', CommandKind.ShowWarning],
+    ['why', CommandKind.KnownSafe]
   ]);
 
   public static launch(launcherVersion: string, options: ILaunchRushPnpmInternalOptions): void {
