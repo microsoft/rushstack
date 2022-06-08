@@ -2,18 +2,24 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import colors from 'colors/safe';
-import { FileSystem, AlreadyReportedError, Executable, EnvironmentMap } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  AlreadyReportedError,
+  Executable,
+  EnvironmentMap,
+  ITerminal,
+  Colors,
+  Terminal,
+  ConsoleTerminalProvider
+} from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SpawnSyncReturns } from 'child_process';
+import { ILaunchOptions } from '../api/Rush';
 
-export interface ILaunchRushPnpmInternalOptions {
-  isManaged: boolean;
-  alreadyReportedNodeTooNewError?: boolean;
-}
+export interface ILaunchRushPnpmInternalOptions extends ILaunchOptions {}
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -25,7 +31,7 @@ enum CommandKind {
 
 export class RushPnpmCommandLine {
   private static _knownCommandMap: Map<string, CommandKind> = new Map<string, CommandKind>([
-    ['add', CommandKind.ShowWarning],
+    ['add', CommandKind.Blocked],
     ['audit', CommandKind.KnownSafe],
     ['exec', CommandKind.KnownSafe],
     ['import', CommandKind.Blocked],
@@ -62,6 +68,9 @@ export class RushPnpmCommandLine {
     // and set it to 0 only on success.
     process.exitCode = 1;
 
+    const { terminalProvider } = options;
+    const terminal = new Terminal(terminalProvider || new ConsoleTerminalProvider());
+
     try {
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
@@ -97,15 +106,15 @@ export class RushPnpmCommandLine {
       const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
 
       if (!FileSystem.exists(workspaceFilePath)) {
-        console.error(colors.red('Error: The PNPM workspace file has not been generated:'));
-        console.error(`  ${colors.red(workspaceFilePath)}\n`);
-        console.error(colors.cyan(`Do you need to run "rush install" or "rush update"?`));
+        terminal.writeErrorLine('Error: The PNPM workspace file has not been generated:');
+        terminal.writeErrorLine(`  ${workspaceFilePath}\n`);
+        terminal.writeLine(Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
         throw new AlreadyReportedError();
       }
 
       if (!FileSystem.exists(rushConfiguration.packageManagerToolFilename)) {
-        console.error(colors.red('Error: The PNPM local binary has not been installed yet.'));
-        console.error('\n' + colors.cyan(`Do you need to run "rush install" or "rush update"?`));
+        terminal.writeErrorLine('Error: The PNPM local binary has not been installed yet.');
+        terminal.writeLine('\n' + Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
         throw new AlreadyReportedError();
       }
 
@@ -113,7 +122,7 @@ export class RushPnpmCommandLine {
       // 1 = rush-pnpm
       const pnpmArgs: string[] = process.argv.slice(2);
 
-      RushPnpmCommandLine._validatePnpmUsage(pnpmArgs);
+      RushPnpmCommandLine._validatePnpmUsage(pnpmArgs, terminal);
 
       const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
       pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
@@ -140,12 +149,12 @@ export class RushPnpmCommandLine {
     } catch (error) {
       if (!(error instanceof AlreadyReportedError)) {
         const prefix: string = 'ERROR: ';
-        console.error('\n' + colors.red(PrintUtilities.wrapWords(prefix + error.message)));
+        terminal.writeErrorLine('\n' + PrintUtilities.wrapWords(prefix + error.message));
       }
     }
   }
 
-  private static _validatePnpmUsage(pnpmArgs: string[]): void {
+  private static _validatePnpmUsage(pnpmArgs: string[], terminal: ITerminal): void {
     if (pnpmArgs[0] === RUSH_SKIP_CHECKS_PARAMETER) {
       pnpmArgs.shift();
       // Ignore other checks
@@ -172,10 +181,10 @@ export class RushPnpmCommandLine {
 
     if (!/^[a-z]+([a-z0-9\-])*$/.test(firstArg)) {
       // We can't parse this CLI syntax
-      console.error(
-        colors.red(`Warning: The "rush-pnpm" wrapper expects a command verb before "${firstArg}"`) + '\n'
+      terminal.writeErrorLine(
+        `Warning: The "rush-pnpm" wrapper expects a command verb before "${firstArg}"\n`
       );
-      console.error(colors.cyan(BYPASS_NOTICE));
+      terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
       throw new AlreadyReportedError();
     } else {
       const commandName: string = firstArg;
@@ -189,11 +198,9 @@ export class RushPnpmCommandLine {
       if (pnpmArgs.indexOf(RUSH_SKIP_CHECKS_PARAMETER) >= 0) {
         // We do not attempt to parse PNPM's complete CLI syntax, so we cannot be sure how to interpret
         // strings that appear outside of the specific patterns that this parser recognizes
-        console.error(
-          colors.red(
-            PrintUtilities.wrapWords(
-              `Error: The "${RUSH_SKIP_CHECKS_PARAMETER}" option must be the first parameter for the "rush-pnpm" command.`
-            )
+        terminal.writeErrorLine(
+          PrintUtilities.wrapWords(
+            `Error: The "${RUSH_SKIP_CHECKS_PARAMETER}" option must be the first parameter for the "rush-pnpm" command.`
           )
         );
         throw new AlreadyReportedError();
@@ -201,19 +208,18 @@ export class RushPnpmCommandLine {
 
       // Warn about commands known not to work
       switch (commandName) {
+        case 'add':
         case 'install':
         case 'i':
         case 'install-test':
         case 'it':
-          console.error(
-            colors.red(
-              PrintUtilities.wrapWords(
-                `Error: The "pnpm ${commandName}" command is incompatible with Rush's environment.` +
-                  ` Use the "rush install" or "rush update" commands instead.`
-              )
+          terminal.writeErrorLine(
+            PrintUtilities.wrapWords(
+              `Error: The "pnpm ${commandName}" command is incompatible with Rush's environment.` +
+                ` Use the "rush install" or "rush update" commands instead.`
             ) + '\n'
           );
-          console.error(colors.cyan(BYPASS_NOTICE));
+          terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
       }
 
@@ -222,36 +228,28 @@ export class RushPnpmCommandLine {
         case CommandKind.KnownSafe:
           break;
         case CommandKind.ShowWarning:
-          console.log(
-            colors.yellow(
-              PrintUtilities.wrapWords(
-                `Warning: The "pnpm ${commandName}" command makes changes that may invalidate Rush's workspace state.`
-              ) + '\n'
-            )
+          terminal.writeWarningLine(
+            PrintUtilities.wrapWords(
+              `Warning: The "pnpm ${commandName}" command makes changes that may invalidate Rush's workspace state.`
+            ) + '\n'
           );
-          console.log(
-            colors.yellow(`==> Consider running "rush install" or "rush update" afterwards.`) + '\n'
-          );
+          terminal.writeWarningLine(`==> Consider running "rush install" or "rush update" afterwards.\n`);
           break;
         case CommandKind.Blocked:
-          console.error(
-            colors.red(
-              PrintUtilities.wrapWords(
-                `Error: The "pnpm ${commandName}" command is known to be incompatible with Rush's environment.`
-              )
+          terminal.writeErrorLine(
+            PrintUtilities.wrapWords(
+              `Error: The "pnpm ${commandName}" command is known to be incompatible with Rush's environment.`
             ) + '\n'
           );
-          console.error(colors.cyan(BYPASS_NOTICE));
+          terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
         default:
-          console.error(
-            colors.red(
-              PrintUtilities.wrapWords(
-                `Error: The "pnpm ${commandName}" command has not been tested with Rush's environment. It may be incompatible.`
-              )
+          terminal.writeErrorLine(
+            PrintUtilities.wrapWords(
+              `Error: The "pnpm ${commandName}" command has not been tested with Rush's environment. It may be incompatible.`
             ) + '\n'
           );
-          console.error(colors.cyan(BYPASS_NOTICE));
+          terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
       }
     }

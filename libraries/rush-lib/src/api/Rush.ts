@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PackageJsonLookup } from '@rushstack/node-core-library';
+import { ITerminalProvider, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushStartupBanner } from '../cli/RushStartupBanner';
@@ -36,6 +36,11 @@ export interface ILaunchOptions {
    * @internal
    */
   builtInPluginConfigurations?: IBuiltInPluginConfiguration[];
+
+  /**
+   * Used to specify terminal how to write a message
+   */
+  terminalProvider?: ITerminalProvider;
 }
 
 /**
