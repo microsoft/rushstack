@@ -1060,13 +1060,13 @@
       "packageName": "@rushstack/module-minifier-plugin",
       "projectFolder": "webpack/module-minifier-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     },
     {
       "packageName": "@rushstack/webpack5-module-minifier-plugin",
       "projectFolder": "webpack/module-minifier-plugin-5",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": false
     },
     {
       "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
