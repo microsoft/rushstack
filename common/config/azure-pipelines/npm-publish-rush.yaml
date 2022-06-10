@@ -15,8 +15,9 @@ steps:
       VersionPolicyName: rush
   - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
     displayName: 'Prepublish workaround for rush-lib'
-  - script: 'node webpack/module-minifier-plugin-5/scripts/prepublish.js'
-    displayName: 'Prepublish workaround for module-minifier-plugin@5'
+    # TEMPORARILY DISABLED, SEE https://github.com/microsoft/rushstack/pull/3460
+    # - script: 'node webpack/module-minifier-plugin-5/scripts/prepublish.js'
+    #  displayName: 'Prepublish workaround for module-minifier-plugin@5'
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: noRush
