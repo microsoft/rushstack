@@ -23,46 +23,7 @@ export interface ILaunchRushPnpmInternalOptions extends ILaunchOptions {}
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
-enum CommandKind {
-  KnownSafe,
-  ShowWarning,
-  Blocked
-}
-
 export class RushPnpmCommandLine {
-  private static _knownCommandMap: Map<string, CommandKind> = new Map<string, CommandKind>([
-    ['add', CommandKind.Blocked],
-    ['audit', CommandKind.KnownSafe],
-    ['exec', CommandKind.KnownSafe],
-    ['import', CommandKind.Blocked],
-    ['install', CommandKind.Blocked],
-    [/* synonym */ 'i', CommandKind.Blocked],
-    ['install-test', CommandKind.Blocked],
-    [/* synonym */ 'it', CommandKind.Blocked],
-    ['link', CommandKind.ShowWarning],
-    [/* synonym */ 'ln', CommandKind.ShowWarning],
-    ['list', CommandKind.KnownSafe],
-    [/* synonym */ 'ls', CommandKind.KnownSafe],
-    ['outdated', CommandKind.KnownSafe],
-    ['pack', CommandKind.KnownSafe],
-    ['prune', CommandKind.KnownSafe],
-    ['publish', CommandKind.KnownSafe],
-    ['rebuild', CommandKind.KnownSafe],
-    [/* synonym */ 'rb', CommandKind.KnownSafe],
-    ['remove', CommandKind.ShowWarning],
-    [/* synonym */ 'rm', CommandKind.ShowWarning],
-    ['root', CommandKind.KnownSafe],
-    ['run', CommandKind.KnownSafe],
-    ['start', CommandKind.KnownSafe],
-    ['store', CommandKind.KnownSafe],
-    ['test', CommandKind.KnownSafe],
-    [/* synonym */ 't', CommandKind.KnownSafe],
-    ['unlink', CommandKind.ShowWarning],
-    ['update', CommandKind.ShowWarning],
-    [/* synonym */ 'up', CommandKind.ShowWarning],
-    ['why', CommandKind.KnownSafe]
-  ]);
-
   public static launch(launcherVersion: string, options: ILaunchRushPnpmInternalOptions): void {
     // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
@@ -70,7 +31,7 @@ export class RushPnpmCommandLine {
     process.exitCode = 1;
 
     const { terminalProvider } = options;
-    const terminal: ITerminal = new Terminal(terminalProvider || new ConsoleTerminalProvider());
+    const terminal: ITerminal = new Terminal(terminalProvider ?? new ConsoleTerminalProvider());
 
     try {
       // Are we in a Rush repo?
@@ -140,7 +101,7 @@ export class RushPnpmCommandLine {
           if (override) {
             pnpmEnvironmentMap.set(envKey, envValue);
           } else {
-            if ('undefined' === typeof pnpmEnvironmentMap.get(envKey)) {
+            if (undefined === pnpmEnvironmentMap.get(envKey)) {
               pnpmEnvironmentMap.set(envKey, envValue);
             }
           }
@@ -183,7 +144,7 @@ export class RushPnpmCommandLine {
     const firstArg: string = pnpmArgs[0];
 
     // Detect common safe invocations
-    if (pnpmArgs.indexOf('-h') >= 0 || pnpmArgs.indexOf('--help') >= 0 || pnpmArgs.indexOf('-?') >= 0) {
+    if (pnpmArgs.includes('-h') || pnpmArgs.includes('--help') || pnpmArgs.includes('-?')) {
       return;
     }
 
@@ -223,12 +184,27 @@ export class RushPnpmCommandLine {
       }
 
       // Warn about commands known not to work
+      /* eslint-disable no-fallthrough */
       switch (commandName) {
+        // Blocked
+        case 'import': {
+          terminal.writeErrorLine(
+            PrintUtilities.wrapWords(
+              `Error: The "pnpm ${commandName}" command is known to be incompatible with Rush's environment.`
+            ) + '\n'
+          );
+          terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
+          throw new AlreadyReportedError();
+        }
+
+        // Show warning for install commands
         case 'add':
         case 'install':
+        /* synonym */
         case 'i':
         case 'install-test':
-        case 'it':
+        /* synonym */
+        case 'it': {
           terminal.writeErrorLine(
             PrintUtilities.wrapWords(
               `Error: The "pnpm ${commandName}" command is incompatible with Rush's environment.` +
@@ -237,13 +213,19 @@ export class RushPnpmCommandLine {
           );
           terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
-      }
+        }
 
-      const commandKind: CommandKind | undefined = RushPnpmCommandLine._knownCommandMap.get(commandName);
-      switch (commandKind) {
-        case CommandKind.KnownSafe:
-          break;
-        case CommandKind.ShowWarning:
+        // Show warning
+        case 'link':
+        /* synonym */
+        case 'ln':
+        case 'remove':
+        /* synonym */
+        case 'rm':
+        case 'unlink':
+        case 'update':
+        /* synonym */
+        case 'up': {
           terminal.writeWarningLine(
             PrintUtilities.wrapWords(
               `Warning: The "pnpm ${commandName}" command makes changes that may invalidate Rush's workspace state.`
@@ -251,15 +233,34 @@ export class RushPnpmCommandLine {
           );
           terminal.writeWarningLine(`==> Consider running "rush install" or "rush update" afterwards.\n`);
           break;
-        case CommandKind.Blocked:
-          terminal.writeErrorLine(
-            PrintUtilities.wrapWords(
-              `Error: The "pnpm ${commandName}" command is known to be incompatible with Rush's environment.`
-            ) + '\n'
-          );
-          terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
-          throw new AlreadyReportedError();
-        default:
+        }
+
+        // Known safe
+        case 'audit':
+        case 'exec':
+        case 'list':
+        /* synonym */
+        case 'ls':
+        case 'outdated':
+        case 'pack':
+        case 'prune':
+        case 'publish':
+        case 'rebuild':
+        /* synonym */
+        case 'rb':
+        case 'root':
+        case 'run':
+        case 'start':
+        case 'store':
+        case 'test':
+        /* synonym */
+        case 't':
+        case 'why': {
+          break;
+        }
+
+        // Unknown
+        default: {
           terminal.writeErrorLine(
             PrintUtilities.wrapWords(
               `Error: The "pnpm ${commandName}" command has not been tested with Rush's environment. It may be incompatible.`
@@ -267,7 +268,9 @@ export class RushPnpmCommandLine {
           );
           terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
+        }
       }
+      /* eslint-enable no-fallthrough */
     }
   }
 }
