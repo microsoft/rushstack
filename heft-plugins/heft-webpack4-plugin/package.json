@@ -19,6 +19,7 @@
   },
   "peerDependencies": {
     "@rushstack/heft": "^0.45.6",
+    "@types/webpack": "4.41.24",
     "webpack": "~4.44.2"
   },
   "dependencies": {
