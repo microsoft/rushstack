@@ -99,19 +99,20 @@ export class HeftParameterManager {
     const synonym: string = this._generateScopedParameterLongName(parameterConfiguration);
     const parameterLongName: string = useSynonymForLongName ? synonym : parameter.longName;
     // Only use undocumented synonyms when the long name isn't already being set to the synonym.
-    const undocumentedSynonyms: string[] | undefined = useSynonymForLongName ? undefined : [synonym];
+    const synonyms: string[] | undefined = useSynonymForLongName ? undefined : [synonym];
 
     // Short names are excluded since it would be difficult and confusing to de-dupe/handle shortname conflicts
     // as well as longname conflicts
     let definedParameter: CommandLineParameter;
     switch (parameter.parameterKind) {
-      case 'flag': {
-        definedParameter = commandLineParameterProvider.defineFlagParameter({
+      case 'choiceList': {
+        definedParameter = commandLineParameterProvider.defineChoiceListParameter({
           description: parameter.description,
           required: parameter.required,
+          alternatives: parameter.alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
           customNameValidator: this._validateParameterName,
           parameterLongName,
-          undocumentedSynonyms
+          synonyms
         });
         break;
       }
@@ -123,7 +124,51 @@ export class HeftParameterManager {
           defaultValue: parameter.defaultValue,
           customNameValidator: this._validateParameterName,
           parameterLongName,
-          undocumentedSynonyms
+          synonyms
+        });
+        break;
+      }
+      case 'flag': {
+        definedParameter = commandLineParameterProvider.defineFlagParameter({
+          description: parameter.description,
+          required: parameter.required,
+          customNameValidator: this._validateParameterName,
+          parameterLongName,
+          synonyms
+        });
+        break;
+      }
+      case 'integerList': {
+        definedParameter = commandLineParameterProvider.defineIntegerListParameter({
+          description: parameter.description,
+          required: parameter.required,
+          argumentName: parameter.argumentName,
+          customNameValidator: this._validateParameterName,
+          parameterLongName,
+          synonyms
+        });
+        break;
+      }
+      case 'integer': {
+        definedParameter = commandLineParameterProvider.defineIntegerParameter({
+          description: parameter.description,
+          required: parameter.required,
+          argumentName: parameter.argumentName,
+          defaultValue: parameter.defaultValue,
+          customNameValidator: this._validateParameterName,
+          parameterLongName,
+          synonyms
+        });
+        break;
+      }
+      case 'stringList': {
+        definedParameter = commandLineParameterProvider.defineStringListParameter({
+          description: parameter.description,
+          required: parameter.required,
+          argumentName: parameter.argumentName,
+          customNameValidator: this._validateParameterName,
+          parameterLongName,
+          synonyms
         });
         break;
       }
@@ -132,9 +177,10 @@ export class HeftParameterManager {
           description: parameter.description,
           required: parameter.required,
           argumentName: parameter.argumentName,
+          defaultValue: parameter.defaultValue,
           customNameValidator: this._validateParameterName,
           parameterLongName,
-          undocumentedSynonyms
+          synonyms
         });
         break;
       }

@@ -22,6 +22,10 @@ const RESERVED_TASK_NAMES: Set<string> = new Set(['clean']);
  * @internal
  */
 export class HeftTask {
+  private static _copyFilesPluginDefinition: HeftTaskPluginDefinition | undefined;
+  private static _deleteFilesPluginDefinition: HeftTaskPluginDefinition | undefined;
+  private static _runScriptPluginDefinition: HeftTaskPluginDefinition | undefined;
+
   private _parentPhase: HeftPhase;
   private _taskName: string;
   private _taskSpecifier: IHeftConfigurationJsonTaskSpecifier;
@@ -123,37 +127,46 @@ export class HeftTask {
     if (this._taskSpecifier.taskEvent) {
       switch (this._taskSpecifier.taskEvent.eventKind) {
         case 'copyFiles': {
-          return HeftTaskPluginDefinition.loadFromObject({
-            heftPluginDefinitionJson: {
-              pluginName: 'CopyFilesPlugin',
-              entryPoint: './lib/plugins/CopyFilesPlugin',
-              optionsSchema: './lib/schemas/copy-files-options.schema.json'
-            },
-            packageRoot: `${__dirname}/../..`,
-            packageName: '@rushstack/heft'
-          });
+          if (!HeftTask._copyFilesPluginDefinition) {
+            HeftTask._copyFilesPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
+              heftPluginDefinitionJson: {
+                pluginName: 'CopyFilesPlugin',
+                entryPoint: './lib/plugins/CopyFilesPlugin',
+                optionsSchema: './lib/schemas/copy-files-options.schema.json'
+              },
+              packageRoot: `${__dirname}/../..`,
+              packageName: '@rushstack/heft'
+            });
+          }
+          return HeftTask._copyFilesPluginDefinition;
         }
         case 'deleteFiles': {
-          return HeftTaskPluginDefinition.loadFromObject({
-            heftPluginDefinitionJson: {
-              pluginName: 'DeleteFilesPlugin',
-              entryPoint: './lib/plugins/DeleteGlobsPlugin',
-              optionsSchema: './lib/schemas/delete-globs-options.schema.json'
-            },
-            packageRoot: `${__dirname}/../..`,
-            packageName: '@rushstack/heft'
-          });
+          if (!HeftTask._deleteFilesPluginDefinition) {
+            HeftTask._deleteFilesPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
+              heftPluginDefinitionJson: {
+                pluginName: 'DeleteFilesPlugin',
+                entryPoint: './lib/plugins/DeleteGlobsPlugin',
+                optionsSchema: './lib/schemas/delete-globs-options.schema.json'
+              },
+              packageRoot: `${__dirname}/../..`,
+              packageName: '@rushstack/heft'
+            });
+          }
+          return HeftTask._deleteFilesPluginDefinition;
         }
         case 'runScript': {
-          return HeftTaskPluginDefinition.loadFromObject({
-            heftPluginDefinitionJson: {
-              pluginName: 'RunScriptPlugin',
-              entryPoint: './lib/plugins/RunScriptPlugin',
-              optionsSchema: './lib/schemas/run-script-options.schema.json'
-            },
-            packageRoot: `${__dirname}/../..`,
-            packageName: '@rushstack/heft'
-          });
+          if (!HeftTask._runScriptPluginDefinition) {
+            HeftTask._runScriptPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
+              heftPluginDefinitionJson: {
+                pluginName: 'RunScriptPlugin',
+                entryPoint: './lib/plugins/RunScriptPlugin',
+                optionsSchema: './lib/schemas/run-script-options.schema.json'
+              },
+              packageRoot: `${__dirname}/../..`,
+              packageName: '@rushstack/heft'
+            });
+          }
+          return HeftTask._runScriptPluginDefinition;
         }
         default: {
           throw new InternalError(`Unknown task event kind "${this._taskSpecifier.taskEvent.eventKind}"`);

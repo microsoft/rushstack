@@ -32,8 +32,6 @@ export interface IRunScript {
 }
 
 export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions> {
-  public readonly accessor?: object | undefined;
-
   public apply(
     heftTaskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,

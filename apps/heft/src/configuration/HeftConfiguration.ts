@@ -106,6 +106,13 @@ export class HeftConfiguration {
   }
 
   public get rigToolResolver(): RigToolResolver {
+    if (!this._rigToolResolver) {
+      this._rigToolResolver = new RigToolResolver({
+        buildFolder: this.buildFolder,
+        projectPackageJson: this.projectPackageJson,
+        rigConfig: this.rigConfig
+      });
+    }
     return this._rigToolResolver;
   }
 
@@ -172,8 +179,6 @@ export class HeftConfiguration {
 
     configuration._terminalProvider = options.terminalProvider;
     configuration._globalTerminal = new Terminal(options.terminalProvider);
-    configuration._rigToolResolver = new RigToolResolver(configuration);
-
     return configuration;
   }
 }

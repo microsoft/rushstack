@@ -12,9 +12,6 @@ import type { RequestAccessToPluginByNameCallback } from './HeftPluginHost';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 
-// Very basic, only intended to ensure filesystem-safe folder names for lifecycle plugins
-const ESCAPE_PACKAGE_NAME_REGEX: RegExp = /[^a-z0-9-]/g;
-
 /**
  * @public
  */
@@ -22,6 +19,9 @@ export interface IHeftLifecycleHookOptions {
   production: boolean;
 }
 
+/**
+ * @public
+ */
 export interface IHeftLifecycleCleanHookOptions extends IHeftLifecycleHookOptions {
   addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
@@ -120,13 +120,9 @@ export class HeftLifecycleSession {
     this.hooks = options.lifecycleHooks;
     this.parametersByLongName = options.parametersByLongName;
 
-    // Largely guranteed to be unique since package names and plugin names must be unique,
-    // and phases are forbidden from using the name 'lifecycle'
-    const escapedPackageName: string = options.pluginDefinition.pluginPackageName.replace(
-      ESCAPE_PACKAGE_NAME_REGEX,
-      '_'
-    );
-    const uniquePluginFolderName: string = `lifecycle.${escapedPackageName}.${options.pluginDefinition.pluginName}`;
+    // Guranteed to be unique since phases are forbidden from using the name 'lifecycle'
+    // and lifecycle plugin names are enforced to be unique.
+    const uniquePluginFolderName: string = `lifecycle.${options.pluginDefinition.pluginName}`;
 
     // <projectFolder>/.cache/<phaseName>.<taskName>
     this.cacheFolder = path.join(options.heftConfiguration.cacheFolder, uniquePluginFolderName);

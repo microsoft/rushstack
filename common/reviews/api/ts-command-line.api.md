@@ -123,6 +123,7 @@ export abstract class CommandLineParameter {
     // @internal
     abstract _setValue(data: any): void;
     readonly shortName: string | undefined;
+    readonly synonyms: string[] | undefined;
     readonly undocumentedSynonyms: string[] | undefined;
     // (undocumented)
     protected validateDefaultValue(hasDefaultValue: boolean): void;
@@ -258,6 +259,7 @@ export interface IBaseCommandLineDefinition {
     parameterLongName: string;
     parameterShortName?: string;
     required?: boolean;
+    synonyms?: string[];
     undocumentedSynonyms?: string[];
 }
 

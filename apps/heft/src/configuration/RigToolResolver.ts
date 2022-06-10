@@ -6,29 +6,41 @@ import {
   PackageJsonLookup,
   Import,
   type ITerminal,
-  type INodePackageJson
+  type INodePackageJson,
+  type IPackageJson
 } from '@rushstack/node-core-library';
 import type { RigConfig } from '@rushstack/rig-package';
 
-import type { HeftConfiguration } from './HeftConfiguration';
+/**
+ * @internal
+ */
+export interface IRigToolResolverOptions {
+  buildFolder: string;
+  projectPackageJson: IPackageJson;
+  rigConfig: RigConfig;
+}
 
 /**
  * @public
  */
 export class RigToolResolver {
-  private _heftConfiguration: HeftConfiguration;
+  private _buildFolder: string;
+  private _projectPackageJson: IPackageJson;
+  private _rigConfig: RigConfig;
   private _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
   private _resolverCache: Map<string, Promise<string>> = new Map();
 
   /**
    * @internal
    */
-  public constructor(heftConfiguration: HeftConfiguration) {
-    this._heftConfiguration = heftConfiguration;
+  public constructor(options: IRigToolResolverOptions) {
+    this._buildFolder = options.buildFolder;
+    this._projectPackageJson = options.projectPackageJson;
+    this._rigConfig = options.rigConfig;
   }
 
   public async resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string> {
-    const buildFolder: string = this._heftConfiguration.buildFolder;
+    const buildFolder: string = this._buildFolder;
     const projectFolder: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(buildFolder);
     if (!projectFolder) {
       throw new Error(`Unable to find a package.json file for "${buildFolder}" `);
@@ -55,13 +67,13 @@ export class RigToolResolver {
 
     // See if the project has a devDependency on the package
     if (
-      this._heftConfiguration.projectPackageJson.devDependencies &&
-      this._heftConfiguration.projectPackageJson.devDependencies[toolPackageName]
+      this._projectPackageJson.devDependencies &&
+      this._projectPackageJson.devDependencies[toolPackageName]
     ) {
       try {
         const resolvedPackageFolder: string = Import.resolvePackage({
           packageName: toolPackageName,
-          baseFolderPath: this._heftConfiguration.buildFolder
+          baseFolderPath: this._buildFolder
         });
         terminal.writeVerboseLine(`Resolved "${toolPackageName}" as a direct devDependency of the project.`);
         return resolvedPackageFolder;
@@ -73,7 +85,7 @@ export class RigToolResolver {
       }
     }
 
-    const rigConfiguration: RigConfig = this._heftConfiguration.rigConfig;
+    const rigConfiguration: RigConfig = this._rigConfig;
     if (rigConfiguration.rigFound) {
       const rigFolder: string = rigConfiguration.getResolvedProfileFolder();
       const rigPackageJsonPath: string | undefined =
@@ -107,7 +119,7 @@ export class RigToolResolver {
     try {
       const resolvedPackageFolder: string = Import.resolvePackage({
         packageName: toolPackageName,
-        baseFolderPath: this._heftConfiguration.buildFolder
+        baseFolderPath: this._buildFolder
       });
       terminal.writeVerboseLine(`Resolved "${toolPackageName}" from ${resolvedPackageFolder}.`);
       return resolvedPackageFolder;

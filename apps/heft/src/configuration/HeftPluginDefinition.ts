@@ -12,9 +12,9 @@ import type { HeftTaskSession } from '../pluginFramework/HeftTaskSession';
  */
 export interface IBaseParameterJson {
   /**
-   * Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\".
+   * Indicates the kind of syntax for this command-line parameter.
    */
-  parameterKind: 'flag' | 'choice' | '' | 'string';
+  parameterKind: 'choice' | 'choiceList' | 'flag' | 'integer' | 'integerList' | 'string' | 'stringList';
   /**
    * The name of the parameter (e.g. \"--verbose\").  This is a required field.
    */
@@ -30,17 +30,6 @@ export interface IBaseParameterJson {
 }
 
 /**
- * A custom command-line parameter whose presence acts as an on/off switch.
- * @public
- */
-export interface IFlagParameterJson extends IBaseParameterJson {
-  /**
-   * Denotes that this is a flag (boolean) parameter.
-   */
-  parameterKind: 'flag';
-}
-
-/**
  * Part of "choiceParameter" from command-line.schema.json
  * @public
  */
@@ -53,6 +42,21 @@ export interface IChoiceParameterAlternativeJson {
    * A detailed description for the alternative that will be shown in the command-line help.
    */
   description: string;
+}
+
+/**
+ * A custom command-line parameter whose list of arguments must be chosen from a list of allowable alternatives.
+ * @public
+ */
+export interface IChoiceListParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a choice list parameter.
+   */
+  parameterKind: 'choiceList';
+  /**
+   * A list of alternative argument values that can be chosen for this parameter.
+   */
+  alternatives: IChoiceParameterAlternativeJson[];
 }
 
 /**
@@ -75,6 +79,66 @@ export interface IChoiceParameterJson extends IBaseParameterJson {
 }
 
 /**
+ * A custom command-line parameter whose presence acts as an on/off switch.
+ * @public
+ */
+export interface IFlagParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a flag (boolean) parameter.
+   */
+  parameterKind: 'flag';
+}
+
+/**
+ * A custom command-line parameter whose list of values are interpreted as integers.
+ * @public
+ */
+export interface IIntegerListParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is an integer list parameter.
+   */
+  parameterKind: 'integerList';
+  /**
+   * The name of the argument for this parameter.
+   */
+  argumentName: string;
+}
+
+/**
+ * A custom command-line parameter whose value is interpreted as an integer.
+ * @public
+ */
+export interface IIntegerParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is an integer parameter.
+   */
+  parameterKind: 'integer';
+  /**
+   * The name of the argument for this parameter.
+   */
+  argumentName: string;
+  /**
+   * If the parameter is omitted from the command line, this value will be inserted by default.
+   */
+  defaultValue?: number;
+}
+
+/**
+ * A custom command-line parameter whose list of values are interpreted as strings.
+ * @public
+ */
+export interface IStringListParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a string list parameter.
+   */
+  parameterKind: 'stringList';
+  /**
+   * The name of the argument for this parameter.
+   */
+  argumentName: string;
+}
+
+/**
  * A custom command-line parameter whose value is interpreted as a string.
  * @public
  */
@@ -87,9 +151,20 @@ export interface IStringParameterJson extends IBaseParameterJson {
    * The name of the argument for this parameter.
    */
   argumentName: string;
+  /**
+   * If the parameter is omitted from the command line, this value will be inserted by default.
+   */
+  defaultValue?: string;
 }
 
-export type IParameterJson = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
+export type IParameterJson =
+  | IChoiceListParameterJson
+  | IChoiceParameterJson
+  | IFlagParameterJson
+  | IIntegerListParameterJson
+  | IIntegerParameterJson
+  | IStringListParameterJson
+  | IStringParameterJson;
 
 export interface IHeftPluginDefinitionJson {
   pluginName: string;
@@ -109,7 +184,7 @@ export interface IHeftPluginDefinitionOptions {
 }
 
 export abstract class HeftPluginDefinitionBase {
-  private static _pluginOptionsSchemas: Map<string, JsonSchema> = new Map();
+  private static _loadedPluginPathsByName: Map<string, string> = new Map();
 
   private _heftPluginDefinitionJson: IHeftPluginDefinitionJson;
   private _pluginPackageName: string;
@@ -121,19 +196,27 @@ export abstract class HeftPluginDefinitionBase {
     this._pluginPackageName = options.packageName;
     this._resolvedEntryPoint = path.resolve(options.packageRoot, this._heftPluginDefinitionJson.entryPoint);
 
-    // Load up and memoize the options schemas. Unfortunately loading the schema is a synchronous process.
+    // Ensure that plugin names are unique. Main reason for this restriction is to ensure that command-line
+    // parameter conflicts can be handled/undocumented synonms can be provided in all scenarios
+    const existingPluginPath: string | undefined = HeftPluginDefinitionBase._loadedPluginPathsByName.get(
+      this.pluginName
+    );
+    if (existingPluginPath && existingPluginPath !== this._resolvedEntryPoint) {
+      throw new Error(
+        `A plugin named "${this.pluginName}" has already been loaded from "${existingPluginPath}". ` +
+          `Plugins must have unique names.`
+      );
+    } else if (!existingPluginPath) {
+      HeftPluginDefinitionBase._loadedPluginPathsByName.set(this.pluginName, this._resolvedEntryPoint);
+    }
+
+    // Unfortunately loading the schema is a synchronous process.
     if (options.heftPluginDefinitionJson.optionsSchema) {
       const resolvedSchemaPath: string = path.resolve(
         options.packageRoot,
         options.heftPluginDefinitionJson.optionsSchema
       );
-      let schema: JsonSchema | undefined =
-        HeftPluginDefinitionBase._pluginOptionsSchemas.get(resolvedSchemaPath);
-      if (!schema) {
-        schema = JsonSchema.fromFile(resolvedSchemaPath);
-        HeftPluginDefinitionBase._pluginOptionsSchemas.set(resolvedSchemaPath, schema);
-      }
-      this._optionsSchema = schema;
+      this._optionsSchema = JsonSchema.fromFile(resolvedSchemaPath);
     }
   }
 

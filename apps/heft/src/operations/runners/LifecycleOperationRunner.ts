@@ -4,7 +4,7 @@
 import { performance } from 'perf_hooks';
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
-import DeleteFilesPlugin from '../../plugins/DeleteFilesPlugin';
+import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin';
 import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
@@ -128,7 +128,7 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
           // Delete the files if any were specified
           if (deleteOperations.length) {
-            await DeleteFilesPlugin.deleteFilesAsync(deleteOperations, cleanLogger);
+            await deleteFilesAsync(deleteOperations, cleanLogger);
           }
 
           cleanLogger.terminal.writeVerboseLine(`Finished clean (${performance.now() - startTime}ms)`);

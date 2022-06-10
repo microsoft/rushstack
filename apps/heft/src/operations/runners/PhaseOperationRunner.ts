@@ -5,7 +5,7 @@ import { performance } from 'perf_hooks';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { OperationStatus } from '../OperationStatus';
-import DeleteFilesPlugin, { IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
+import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
@@ -115,7 +115,7 @@ export class PhaseOperationRunner implements IOperationRunner {
 
       // Delete the files if any were specified
       if (deleteOperations.length) {
-        await DeleteFilesPlugin.deleteFilesAsync(deleteOperations, cleanLogger);
+        await deleteFilesAsync(deleteOperations, cleanLogger);
       }
 
       cleanLogger.terminal.writeVerboseLine(`Finished clean (${performance.now() - startTime}ms)`);

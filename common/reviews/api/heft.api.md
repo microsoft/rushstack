@@ -5,10 +5,14 @@
 ```ts
 
 import { AsyncParallelHook } from 'tapable';
+import { CommandLineChoiceListParameter } from '@rushstack/ts-command-line';
 import { CommandLineChoiceParameter } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { CommandLineIntegerListParameter } from '@rushstack/ts-command-line';
+import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
 import type { CommandLineParameterProvider } from '@rushstack/ts-command-line';
+import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileErrorFormat } from '@rushstack/node-core-library';
 import { IPackageJson } from '@rushstack/node-core-library';
@@ -17,11 +21,19 @@ import { ITerminalProvider } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { Terminal } from '@rushstack/node-core-library';
 
+export { CommandLineChoiceListParameter }
+
 export { CommandLineChoiceParameter }
 
 export { CommandLineFlagParameter }
 
+export { CommandLineIntegerListParameter }
+
+export { CommandLineIntegerParameter }
+
 export { CommandLineParameter }
+
+export { CommandLineStringListParameter }
 
 export { CommandLineStringParameter }
 
@@ -46,10 +58,8 @@ export class HeftConfiguration {
 
 // @public (undocumented)
 export class HeftLifecycleSession {
-    // Warning: (ae-forgotten-export) The symbol "IHeftLifecycleSessionOptions" needs to be exported by the entry point index.d.ts
-    //
     // @internal
-    constructor(options: IHeftLifecycleSessionOptions);
+    constructor(options: _IHeftLifecycleSessionOptions);
     // (undocumented)
     readonly cacheFolder: string;
     get debugMode(): boolean;
@@ -68,10 +78,8 @@ export class HeftLifecycleSession {
 
 // @public (undocumented)
 export class HeftTaskSession {
-    // Warning: (ae-forgotten-export) The symbol "IHeftTaskSessionOptions" needs to be exported by the entry point index.d.ts
-    //
     // @internal
-    constructor(options: IHeftTaskSessionOptions);
+    constructor(options: _IHeftTaskSessionOptions);
     // (undocumented)
     readonly cacheFolder: string;
     get debugMode(): boolean;
@@ -116,6 +124,12 @@ export interface _IHeftConfigurationInitializationOptions {
 }
 
 // @public (undocumented)
+export interface IHeftLifecycleCleanHookOptions extends IHeftLifecycleHookOptions {
+    // (undocumented)
+    addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+}
+
+// @public (undocumented)
 export interface IHeftLifecycleHookOptions {
     // (undocumented)
     production: boolean;
@@ -123,8 +137,6 @@ export interface IHeftLifecycleHookOptions {
 
 // @public (undocumented)
 export interface IHeftLifecycleHooks {
-    // Warning: (ae-forgotten-export) The symbol "IHeftLifecycleCleanHookOptions" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
     // (undocumented)
@@ -137,6 +149,22 @@ export interface IHeftLifecycleHooks {
 
 // @public (undocumented)
 export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<HeftLifecycleSession, TOptions> {
+}
+
+// @internal (undocumented)
+export interface _IHeftLifecycleSessionOptions extends _IInternalHeftSessionOptions {
+    // (undocumented)
+    lifecycleHooks: IHeftLifecycleHooks;
+    // (undocumented)
+    logger: ScopedLogger;
+    // (undocumented)
+    parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+    // Warning: (ae-forgotten-export) The symbol "HeftPluginDefinitionBase" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    pluginDefinition: HeftPluginDefinitionBase;
+    // (undocumented)
+    requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
 }
 
 // @public (undocumented)
@@ -195,6 +223,38 @@ export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {
     addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
+// Warning: (ae-forgotten-export) The symbol "IHeftPhaseSessionOptions" needs to be exported by the entry point index.d.ts
+//
+// @internal (undocumented)
+export interface _IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
+    // (undocumented)
+    logger: ScopedLogger;
+    // (undocumented)
+    parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+    // (undocumented)
+    requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+    // Warning: (ae-forgotten-export) The symbol "HeftTask" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    task: HeftTask;
+    // (undocumented)
+    taskHooks: IHeftTaskHooks;
+}
+
+// @internal (undocumented)
+export interface _IInternalHeftSessionOptions {
+    // (undocumented)
+    getIsDebugMode(): boolean;
+    // (undocumented)
+    heftConfiguration: HeftConfiguration;
+    // Warning: (ae-forgotten-export) The symbol "LoggingManager" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    loggingManager: LoggingManager;
+    // (undocumented)
+    metricsCollector: _MetricsCollector;
+}
+
 // @public (undocumented)
 export interface IMetricsData {
     command: string;
@@ -214,6 +274,16 @@ export interface _IPerformanceData {
     encounteredError?: boolean;
     // (undocumented)
     taskTotalExecutionMs: number;
+}
+
+// @internal (undocumented)
+export interface _IRigToolResolverOptions {
+    // (undocumented)
+    buildFolder: string;
+    // (undocumented)
+    projectPackageJson: IPackageJson;
+    // (undocumented)
+    rigConfig: RigConfig;
 }
 
 // @beta
@@ -268,7 +338,7 @@ export type RequestAccessToPluginByNameCallback = (pluginToAccessPackage: string
 // @public (undocumented)
 export class RigToolResolver {
     // @internal
-    constructor(heftConfiguration: HeftConfiguration);
+    constructor(options: _IRigToolResolverOptions);
     // (undocumented)
     resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
 }

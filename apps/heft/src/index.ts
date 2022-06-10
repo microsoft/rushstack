@@ -8,13 +8,20 @@ export {
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 
-export { RigToolResolver } from './configuration/RigToolResolver';
+export {
+  RigToolResolver,
+  IRigToolResolverOptions as _IRigToolResolverOptions
+} from './configuration/RigToolResolver';
+
+export { IInternalHeftSessionOptions as _IInternalHeftSessionOptions } from './pluginFramework/InternalHeftSession';
 
 export {
   IHeftLifecycleHooks,
   IHeftLifecycleHookOptions,
+  IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
   IHeftLifecycleToolStopHookOptions,
+  IHeftLifecycleSessionOptions as _IHeftLifecycleSessionOptions,
   HeftLifecycleSession
 } from './pluginFramework/HeftLifecycleSession';
 
@@ -23,6 +30,7 @@ export {
   IHeftTaskHookOptions,
   IHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
+  IHeftTaskSessionOptions as _IHeftTaskSessionOptions,
   HeftTaskSession
 } from './pluginFramework/HeftTaskSession';
 
@@ -47,10 +55,15 @@ export {
 
 export { ScopedLogger, IScopedLogger, IScopedLoggerOptions } from './pluginFramework/logging/ScopedLogger';
 
+// Re-export types required to use custom command-line parameters
 export type {
   CommandLineParameter,
+  CommandLineChoiceListParameter,
   CommandLineChoiceParameter,
   CommandLineFlagParameter,
+  CommandLineIntegerListParameter,
+  CommandLineIntegerParameter,
+  CommandLineStringListParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 

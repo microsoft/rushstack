@@ -99,8 +99,8 @@ export class HeftLifecycle extends HeftPluginHost {
           }
           if (this._lifecyclePluginDefinitions!.has(pluginDefinition)) {
             throw new Error(
-              `Plugin "${pluginDefinition.pluginName}" from package "${pluginSpecifier.pluginPackage}" ` +
-                'cannot be specified more than once.'
+              `Lifecycle plugin "${pluginDefinition.pluginName}" from package ` +
+                `"${pluginSpecifier.pluginPackage}" cannot be specified more than once.`
             );
           }
           this._lifecyclePluginDefinitions!.add(pluginDefinition);

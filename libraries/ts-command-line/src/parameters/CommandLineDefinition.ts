@@ -71,6 +71,17 @@ export interface IBaseCommandLineDefinition {
   environmentVariable?: string;
 
   /**
+   * Specifies additional names for this parameter that are accepted and displayed in the
+   * command line help.
+   *
+   * @remarks
+   * This option can be used in cases where a command-line parameter may have alternate names
+   * that the developer wants to advertise. Only the `parameterLongName` syntax is currently
+   * allowed.
+   */
+  synonyms?: string[];
+
+  /**
    * Specifies additional names for this parameter that are accepted but not displayed
    * in the command line help.
    *

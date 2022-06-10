@@ -5,7 +5,7 @@ import { performance } from 'perf_hooks';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { OperationStatus } from '../OperationStatus';
-import CopyFilesPlugin, { type ICopyOperation } from '../../plugins/CopyFilesPlugin';
+import { copyFilesAsync, type ICopyOperation } from '../../plugins/CopyFilesPlugin';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { HeftTask } from '../../pluginFramework/HeftTask';
 import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../../pluginFramework/HeftTaskSession';
@@ -89,7 +89,7 @@ export class TaskOperationRunner implements IOperationRunner {
 
       // Copy the files if any were specified
       if (copyOperations.length) {
-        await CopyFilesPlugin.copyFilesAsync(copyOperations, taskSession.logger);
+        await copyFilesAsync(copyOperations, taskSession.logger);
       }
 
       taskSession.logger.terminal.writeVerboseLine(
