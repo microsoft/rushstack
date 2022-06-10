@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 27 May 2022 00:50:06 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Jun 2022 20:01:47 GMT and should not be manually modified.
+
+## 5.72.0
+Fri, 10 Jun 2022 20:01:47 GMT
+
+### Updates
+
+- Introduce a "rush-pnpm" shell command for invoking native PNPM commands in a Rush workspace
 
 ## 5.71.0
 Fri, 27 May 2022 00:50:06 GMT

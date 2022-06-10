@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.72.0",
+      "tag": "@microsoft/rush_v5.72.0",
+      "date": "Fri, 10 Jun 2022 20:01:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Introduce a \"rush-pnpm\" shell command for invoking native PNPM commands in a Rush workspace"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.71.0",
       "tag": "@microsoft/rush_v5.71.0",
       "date": "Fri, 27 May 2022 00:50:06 GMT",
