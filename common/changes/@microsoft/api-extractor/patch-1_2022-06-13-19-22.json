@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "fixed wrongly documented default value for reportFolder",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
