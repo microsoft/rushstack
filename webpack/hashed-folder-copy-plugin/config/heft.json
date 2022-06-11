@@ -1,3 +1,6 @@
+/**
+ * Defines configuration used by core Heft.
+ */
 {
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 

@@ -28,6 +28,7 @@
     },
 
     "test": {
+      "phaseDependencies": ["build"],
       "tasksByName": {
         "jest": {
           "taskPlugin": {

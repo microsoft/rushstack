@@ -11,6 +11,8 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",

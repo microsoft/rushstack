@@ -1,3 +1,6 @@
+/**
+ * Defines configuration used by core Heft.
+ */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 
