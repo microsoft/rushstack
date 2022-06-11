@@ -39,19 +39,6 @@
   // "emitMjsExtensionForESModule": true,
 
   /**
-   * Specifies the intermediary folder that tests will use.  Because Jest uses the
-   * Node.js runtime to execute tests, the module format must be CommonJS.
-   *
-   * The default value is "lib".
-   */
-  // "emitFolderNameForTests": "lib-commonjs",
-
-  /**
-   * If set to "true", the TSlint task will not be invoked.
-   */
-  // "disableTslint": true,
-
-  /**
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.
    * The default is 50.
    */
