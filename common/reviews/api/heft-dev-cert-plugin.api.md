@@ -4,10 +4,4 @@
 
 ```ts
 
-import type { IHeftPlugin } from '@rushstack/heft';
-
-// @public (undocumented)
-const _default: IHeftPlugin<void>;
-export default _default;
-
 ```

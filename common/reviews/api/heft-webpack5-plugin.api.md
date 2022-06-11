@@ -21,11 +21,23 @@ export interface IWebpackConfigurationWithDevServer extends TWebpack.Configurati
 // @public (undocumented)
 export interface IWebpackPluginAccessor {
     // (undocumented)
-    onAfterConfigureWebpackHook: AsyncParallelHook<IWebpackConfiguration | null>;
-    onConfigureWebpackHook: AsyncSeriesWaterfallHook<IWebpackConfiguration | null>;
+    readonly onAfterConfigureWebpackHook?: AsyncParallelHook<IWebpackConfiguration | null>;
+    readonly onConfigureWebpackHook?: AsyncSeriesWaterfallHook<IWebpackConfiguration | null>;
     // (undocumented)
-    onEmitStatsHook: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
+    readonly onEmitStatsHook?: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
+    readonly onEmitWebpackVersionsHook?: AsyncParallelHook<IWebpackVersions>;
 }
+
+// @public (undocumented)
+export interface IWebpackVersions {
+    // (undocumented)
+    webpackDevServerVersion: string;
+    // (undocumented)
+    webpackVersion: string;
+}
+
+// @public (undocumented)
+export const PluginName: string;
 
 // (No @packageDocumentation comment for this package)
 
