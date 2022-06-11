@@ -4,19 +4,28 @@
 import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
-import { LegacyAdapters } from '@rushstack/node-core-library';
+import { Import, IPackageJson, LegacyAdapters, PackageJsonLookup } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   HeftTaskSession,
+  IHeftTaskCleanHookOptions,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IScopedLogger
 } from '@rushstack/heft';
 
-import type { IWebpackConfiguration, IWebpackPluginAccessor } from './shared';
+import type {
+  IWebpackConfiguration,
+  IWebpackConfigurationWithDevServer,
+  IWebpackPluginAccessor,
+  IWebpackVersions
+} from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
-const PLUGIN_NAME: string = 'WebpackPlugin';
+/**
+ * @public
+ */
+export const PLUGIN_NAME: string = 'WebpackPlugin';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
 const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
 
@@ -24,10 +33,13 @@ const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
  * @internal
  */
 export default class WebpackPlugin implements IHeftTaskPlugin {
+  private _webpack: typeof TWebpack | undefined;
+  private _webpackVersions: IWebpackVersions | undefined;
+  private _loadedWebpackConfiguration: IWebpackConfiguration | null | undefined;
+
   public readonly accessor: IWebpackPluginAccessor = {
-    onConfigureWebpackHook: new AsyncSeriesWaterfallHook<IWebpackConfiguration | null>([
-      'webpackConfiguration'
-    ]),
+    onEmitWebpackVersionsHook: new AsyncParallelHook(['webpackVersions']),
+    onConfigureWebpackHook: new AsyncSeriesWaterfallHook(['webpackConfiguration']),
     onAfterConfigureWebpackHook: new AsyncParallelHook(['webpackConfiguration']),
     onEmitStatsHook: new AsyncParallelHook(['webpackStats'])
   };
@@ -38,7 +50,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
     let serveMode: boolean;
     let watchMode: boolean;
 
-    this.accessor.onConfigureWebpackHook.tapPromise(
+    this.accessor.onConfigureWebpackHook!.tapPromise(
       PLUGIN_NAME,
       async (existingConfiguration: IWebpackConfiguration | null) => {
         if (existingConfiguration) {
@@ -57,6 +69,27 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
       }
     );
 
+    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
+      // Obtain the finalized webpack configuration
+      const webpackConfiguration: IWebpackConfiguration | null = await this._getWebpackConfigurationAsync();
+      if (webpackConfiguration) {
+        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] = Array.isArray(
+          webpackConfiguration
+        )
+          ? webpackConfiguration
+          : [webpackConfiguration];
+
+        // Add each output path to the clean list
+        for (const config of webpackConfigurationArray) {
+          if (config.output?.path) {
+            cleanOptions.addDeleteOperations({
+              sourceFolder: config.output.path
+            });
+          }
+        }
+      }
+    });
+
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       production = runOptions.production;
       // TODO: Support watch mode
@@ -64,14 +97,60 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
       // TODO: Support serve mode
       serveMode = false;
 
-      // Obtain the webpack configuration by calling into the hook
-      const webpackConfiguration: IWebpackConfiguration | null =
-        await this.accessor.onConfigureWebpackHook.promise(undefined);
-      await this.accessor.onAfterConfigureWebpackHook.promise(webpackConfiguration);
-
       // Run webpack with the finalized webpack configuration
+      const webpackConfiguration: IWebpackConfiguration | null = await this._getWebpackConfigurationAsync();
       await this._runWebpackAsync(taskSession, heftConfiguration, webpackConfiguration, serveMode, watchMode);
     });
+  }
+
+  private async _getWebpackAsync(): Promise<typeof TWebpack> {
+    if (!this._webpack) {
+      this._webpack = await import('webpack');
+    }
+    return this._webpack;
+  }
+
+  private async _getWebpackVersionsAsync(): Promise<IWebpackVersions> {
+    if (!this._webpackVersions) {
+      const webpackDevServerPackageJsonPath: string = Import.resolveModule({
+        modulePath: 'webpack-dev-server/package.json',
+        baseFolderPath: __dirname
+      });
+      const webpackDevServerPackageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        webpackDevServerPackageJsonPath
+      );
+      const webpack: typeof TWebpack = await this._getWebpackAsync();
+      this._webpackVersions = {
+        webpackVersion: webpack.version!,
+        webpackDevServerVersion: webpackDevServerPackageJson.version
+      };
+    }
+
+    return this._webpackVersions;
+  }
+
+  private async _getWebpackConfigurationAsync(): Promise<IWebpackConfiguration | null> {
+    if (this._webpackVersions === undefined || this._loadedWebpackConfiguration === undefined) {
+      // First, load and emit the webpack versions so that plugins can use them when loading
+      // their webpack configuration
+      if (this.accessor.onEmitWebpackVersionsHook!.isUsed()) {
+        this._webpackVersions = await this._getWebpackVersionsAsync();
+        await this.accessor.onEmitWebpackVersionsHook!.promise(this._webpackVersions);
+      }
+
+      // Obtain the webpack configuration by calling into the hook. This hook is always used
+      // since the WebpackPlugin itself taps the hook.
+      const webpackConfiguration: IWebpackConfiguration | null =
+        await this.accessor.onConfigureWebpackHook!.promise(undefined);
+
+      // Provide the finalized configuration
+      if (this.accessor.onAfterConfigureWebpackHook!.isUsed()) {
+        await this.accessor.onAfterConfigureWebpackHook!.promise(webpackConfiguration);
+      }
+
+      this._loadedWebpackConfiguration = webpackConfiguration;
+    }
+    return this._loadedWebpackConfiguration;
   }
 
   private async _runWebpackAsync(
@@ -86,7 +165,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
     }
 
     const logger: IScopedLogger = taskSession.logger;
-    const webpack: typeof TWebpack = await import('webpack');
+    const webpack: typeof TWebpack = await this._getWebpackAsync();
     logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
     let compiler: TWebpack.Compiler | TWebpack.MultiCompiler;
@@ -156,7 +235,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
       // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
       // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call require()
       // only if Heft is in serve mode.
-      const WebpackDevServer: typeof TWebpackDevServer = require(WEBPACK_DEV_SERVER_PACKAGE_NAME);
+      const WebpackDevServer: typeof TWebpackDevServer = await import(WEBPACK_DEV_SERVER_PACKAGE_NAME);
       // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
       // use of that to make logging cleaner
       const webpackDevServer: TWebpackDevServer = new WebpackDevServer(compiler, options);
@@ -201,7 +280,9 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
       }
 
       if (stats) {
-        await this.accessor.onEmitStatsHook.promise(stats);
+        if (this.accessor.onEmitStatsHook!.isUsed()) {
+          await this.accessor.onEmitStatsHook!.promise(stats);
+        }
         this._emitErrors(logger, stats);
       }
     }

@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",
+    "@rushstack/heft-webpack4-plugin": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {

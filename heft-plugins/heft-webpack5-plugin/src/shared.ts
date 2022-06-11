@@ -23,7 +23,19 @@ export type IWebpackConfiguration =
 /**
  * @public
  */
+export interface IWebpackVersions {
+  webpackVersion: string;
+  webpackDevServerVersion: string;
+}
+
+/**
+ * @public
+ */
 export interface IWebpackPluginAccessor {
+  /**
+   * A hook that provides the versions of Webpack and Webpack Dev Server.
+   */
+  readonly onEmitWebpackVersionsHook?: AsyncParallelHook<IWebpackVersions>;
   /**
    * The configuration used by the Webpack plugin. This must be populated
    * for Webpack to run. If webpackConfigFilePath is specified,
@@ -36,9 +48,9 @@ export interface IWebpackPluginAccessor {
    */
   // We are inheriting this problem from Tapable's API
   // eslint-disable-next-line @rushstack/no-new-null
-  onConfigureWebpackHook: AsyncSeriesWaterfallHook<IWebpackConfiguration | null>;
+  readonly onConfigureWebpackHook?: AsyncSeriesWaterfallHook<IWebpackConfiguration | null>;
   // We are inheriting this problem from Tapable's API
   // eslint-disable-next-line @rushstack/no-new-null
-  onAfterConfigureWebpackHook: AsyncParallelHook<IWebpackConfiguration | null>;
-  onEmitStatsHook: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
+  readonly onAfterConfigureWebpackHook?: AsyncParallelHook<IWebpackConfiguration | null>;
+  readonly onEmitStatsHook?: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
 }
