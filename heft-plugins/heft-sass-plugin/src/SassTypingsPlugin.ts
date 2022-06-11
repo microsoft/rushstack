@@ -5,11 +5,11 @@ import type {
   HeftConfiguration,
   HeftTaskSession,
   IHeftPlugin,
+  IHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
   IScopedLogger
 } from '@rushstack/heft';
 import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
-import { JsonSchema } from '@rushstack/node-core-library';
 
 import { ISassConfiguration, SassTypingsGenerator } from './SassTypingsGenerator';
 import { Async } from './utilities/Async';
@@ -23,14 +23,15 @@ const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 export default class SassTypingsPlugin implements IHeftPlugin {
   private static _sassConfigurationLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
 
-  public readonly pluginName: string = PLUGIN_NAME;
-  public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
-
   /**
    * Generate typings for Sass files before TypeScript compilation.
    */
   public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (hookOptions: IHeftTaskRunHookOptions) => {
+    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
+      // No-op. Currently relies on the TypeScript plugin to clean up the generated typings.
+    });
+
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       // TODO: Handle watch mode
       await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration, false);
     });
