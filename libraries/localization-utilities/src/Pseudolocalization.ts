@@ -1,9 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import decache from 'decache';
+import vm from 'vm';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { IPseudolocaleOptions } from './interfaces';
+
+const pseudolocalePath: string = require.resolve('pseudolocale/pseudolocale.min.js');
+
+interface IPseudolocale {
+  option: IPseudolocaleOptions;
+  str(str: string): string;
+}
 
 /**
  * Get a function that pseudolocalizes a string.
@@ -11,13 +19,21 @@ import { IPseudolocaleOptions } from './interfaces';
  * @public
  */
 export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string) => string {
-  // pseudolocale maintains static state, so we need to load it as isolated modules
-  decache('pseudolocale');
-  const pseudolocale = require('pseudolocale'); // eslint-disable-line
-
-  pseudolocale.option = {
-    ...pseudolocale.option,
-    ...options
+  const pseudolocaleCode: string = FileSystem.readFile(pseudolocalePath);
+  const context: {
+    pseudolocale: IPseudolocale | undefined;
+  } = {
+    pseudolocale: undefined
   };
+
+  // Load pseudolocale in an isolated context because the configuration for is stored on a singleton
+  vm.runInNewContext(pseudolocaleCode, context);
+  const { pseudolocale } = context;
+  if (!pseudolocale) {
+    throw new Error(`Failed to load pseudolocale module`);
+  }
+
+  Object.assign(pseudolocale.option, options);
+  // `pseudolocale.str` captures `pseudolocale` in its closure and refers to `pseudolocale.option`.
   return pseudolocale.str;
 }
