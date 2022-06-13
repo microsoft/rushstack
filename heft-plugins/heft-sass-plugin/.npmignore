@@ -28,3 +28,4 @@
 #--------------------------------------------
 
 # (Add your project-specific overrides here)
+!heft-plugin.json
