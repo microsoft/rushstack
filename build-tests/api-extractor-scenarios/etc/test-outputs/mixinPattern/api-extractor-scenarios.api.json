@@ -174,32 +174,31 @@
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "api-extractor-scenarios!IFile:class",
+          "canonicalReference": "api-extractor-scenarios!A:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class IFile "
+              "text": "export declare class A "
             }
           ],
           "extendsTokenRanges": [],
           "releaseTag": "Public",
-          "name": "IFile",
+          "name": "A",
           "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!IFile#containingFolder:member",
+              "canonicalReference": "api-extractor-scenarios!A#prop:member",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "containingFolder: "
+                  "text": "prop?: "
                 },
                 {
-                  "kind": "Reference",
-                  "text": "IFolder",
-                  "canonicalReference": "api-extractor-scenarios!IFolder:class"
+                  "kind": "Content",
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
@@ -207,9 +206,9 @@
                 }
               ],
               "isReadonly": false,
-              "isOptional": false,
+              "isOptional": true,
               "releaseTag": "Public",
-              "name": "containingFolder",
+              "name": "prop",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -222,88 +221,33 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "api-extractor-scenarios!IFolder:class",
+          "canonicalReference": "api-extractor-scenarios!B:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class IFolder "
-            }
-          ],
-          "extendsTokenRanges": [],
-          "releaseTag": "Public",
-          "name": "IFolder",
-          "preserveMemberOrder": false,
-          "members": [
-            {
-              "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!IFolder#containingFolder:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "containingFolder: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "IFolder",
-                  "canonicalReference": "api-extractor-scenarios!IFolder:class"
-                },
-                {
-                  "kind": "Content",
-                  "text": " | undefined"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "isReadonly": false,
-              "isOptional": false,
-              "releaseTag": "Public",
-              "name": "containingFolder",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 3
-              },
-              "isStatic": false,
-              "isProtected": false
+              "text": "export declare class B extends "
             },
             {
-              "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!IFolder#files:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "files: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "IFile",
-                  "canonicalReference": "api-extractor-scenarios!IFile:class"
-                },
-                {
-                  "kind": "Content",
-                  "text": "[]"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "isReadonly": false,
-              "isOptional": false,
-              "releaseTag": "Public",
-              "name": "files",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 3
-              },
-              "isStatic": false,
-              "isProtected": false
+              "kind": "Reference",
+              "text": "B_base",
+              "canonicalReference": "api-extractor-scenarios!~B_base"
+            },
+            {
+              "kind": "Content",
+              "text": " "
             }
           ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 2
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "B",
+          "preserveMemberOrder": false,
+          "members": [],
           "implementsTokenRanges": []
         }
       ]

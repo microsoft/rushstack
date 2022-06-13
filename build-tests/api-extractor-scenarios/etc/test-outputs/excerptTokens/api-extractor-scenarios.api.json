@@ -204,6 +204,7 @@
               "text": "export class MyClass "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "MyClass",
           "preserveMemberOrder": false,

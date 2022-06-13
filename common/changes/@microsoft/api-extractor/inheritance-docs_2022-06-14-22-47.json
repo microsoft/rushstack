@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Small API doc model change to support changes to api-extractor-model for finding an item's inherited members.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

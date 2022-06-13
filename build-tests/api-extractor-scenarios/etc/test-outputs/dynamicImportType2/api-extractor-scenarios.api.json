@@ -182,6 +182,7 @@
               "text": "export interface IExample "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IExample",
           "preserveMemberOrder": false,
@@ -258,8 +259,7 @@
                 "endIndex": 4
               }
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         }
       ]
     }

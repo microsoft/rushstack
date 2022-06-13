@@ -192,11 +192,11 @@
               "text": "export interface Constraint "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "Constraint",
           "preserveMemberOrder": false,
-          "members": [],
-          "extendsTokenRanges": []
+          "members": []
         },
         {
           "kind": "Variable",
@@ -230,6 +230,7 @@
               "text": "export declare class DecoratorExample "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "DecoratorExample",
           "preserveMemberOrder": false,
@@ -277,11 +278,11 @@
               "text": "export interface DefaultType "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "DefaultType",
           "preserveMemberOrder": false,
-          "members": [],
-          "extendsTokenRanges": []
+          "members": []
         },
         {
           "kind": "Class",
@@ -293,6 +294,7 @@
               "text": "export declare class DocBaseClass "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "DocBaseClass",
           "preserveMemberOrder": false,
@@ -386,6 +388,12 @@
             {
               "kind": "Content",
               "text": " "
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 2
             }
           ],
           "releaseTag": "Public",
@@ -1024,10 +1032,6 @@
               "isProtected": false
             }
           ],
-          "extendsTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          },
           "implementsTokenRanges": [
             {
               "startIndex": 4,
@@ -1049,6 +1053,7 @@
               "text": "export declare class DocClassInterfaceMerge "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "DocClassInterfaceMerge",
           "preserveMemberOrder": false,
@@ -1065,11 +1070,11 @@
               "text": "export interface DocClassInterfaceMerge "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "DocClassInterfaceMerge",
           "preserveMemberOrder": false,
-          "members": [],
-          "extendsTokenRanges": []
+          "members": []
         },
         {
           "kind": "Enum",
@@ -1461,6 +1466,7 @@
               "text": "export declare class Generic<T> "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -1528,6 +1534,7 @@
               "text": "export interface IDocInterface1 "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IDocInterface1",
           "preserveMemberOrder": false,
@@ -1560,8 +1567,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         },
         {
           "kind": "Interface",
@@ -1580,6 +1586,12 @@
             {
               "kind": "Content",
               "text": " "
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 2
             }
           ],
           "releaseTag": "Public",
@@ -1614,12 +1626,6 @@
               "parameters": [],
               "name": "deprecatedExample"
             }
-          ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            }
           ]
         },
         {
@@ -1632,6 +1638,7 @@
               "text": "export interface IDocInterface3 "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IDocInterface3",
           "preserveMemberOrder": false,
@@ -1840,8 +1847,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         },
         {
           "kind": "Interface",
@@ -1853,6 +1859,7 @@
               "text": "export interface IDocInterface4 "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IDocInterface4",
           "preserveMemberOrder": false,
@@ -1970,8 +1977,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         },
         {
           "kind": "Interface",
@@ -1983,6 +1989,7 @@
               "text": "export interface IDocInterface5 "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IDocInterface5",
           "preserveMemberOrder": false,
@@ -2014,8 +2021,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         },
         {
           "kind": "Interface",
@@ -2027,6 +2033,7 @@
               "text": "export interface IDocInterface6 "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IDocInterface6",
           "preserveMemberOrder": false,
@@ -2308,8 +2315,7 @@
                 "endIndex": 4
               }
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         },
         {
           "kind": "Interface",
@@ -2321,6 +2327,7 @@
               "text": "export interface IDocInterface7 "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IDocInterface7",
           "preserveMemberOrder": false,
@@ -2434,8 +2441,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         },
         {
           "kind": "Namespace",
@@ -2545,6 +2551,7 @@
               "text": "export declare class SystemEvent "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "SystemEvent",
           "preserveMemberOrder": false,

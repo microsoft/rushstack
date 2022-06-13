@@ -43,7 +43,8 @@ import {
   ApiOptionalMixin,
   ApiInitializerMixin,
   ApiProtectedMixin,
-  ApiReadonlyMixin
+  ApiReadonlyMixin,
+  ApiExtendsMixin
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -328,35 +329,7 @@ export class MarkdownDocumenter {
   private _writeHeritageTypes(output: DocSection, apiItem: ApiDeclaredItem): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    if (apiItem instanceof ApiClass) {
-      if (apiItem.extendsType) {
-        const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
-          new DocEmphasisSpan({ configuration, bold: true }, [
-            new DocPlainText({ configuration, text: 'Extends: ' })
-          ])
-        ]);
-        this._appendExcerptWithHyperlinks(extendsParagraph, apiItem.extendsType.excerpt);
-        output.appendNode(extendsParagraph);
-      }
-      if (apiItem.implementsTypes.length > 0) {
-        const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
-          new DocEmphasisSpan({ configuration, bold: true }, [
-            new DocPlainText({ configuration, text: 'Implements: ' })
-          ])
-        ]);
-        let needsComma: boolean = false;
-        for (const implementsType of apiItem.implementsTypes) {
-          if (needsComma) {
-            extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
-          }
-          this._appendExcerptWithHyperlinks(extendsParagraph, implementsType.excerpt);
-          needsComma = true;
-        }
-        output.appendNode(extendsParagraph);
-      }
-    }
-
-    if (apiItem instanceof ApiInterface) {
+    if (ApiExtendsMixin.isBaseClassOf(apiItem)) {
       if (apiItem.extendsTypes.length > 0) {
         const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
           new DocEmphasisSpan({ configuration, bold: true }, [
@@ -369,6 +342,25 @@ export class MarkdownDocumenter {
             extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
           }
           this._appendExcerptWithHyperlinks(extendsParagraph, extendsType.excerpt);
+          needsComma = true;
+        }
+        output.appendNode(extendsParagraph);
+      }
+    }
+
+    if (apiItem instanceof ApiClass) {
+      if (apiItem.implementsTypes.length > 0) {
+        const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'Implements: ' })
+          ])
+        ]);
+        let needsComma: boolean = false;
+        for (const implementsType of apiItem.implementsTypes) {
+          if (needsComma) {
+            extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
+          }
+          this._appendExcerptWithHyperlinks(extendsParagraph, implementsType.excerpt);
           needsComma = true;
         }
         output.appendNode(extendsParagraph);

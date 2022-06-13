@@ -182,6 +182,7 @@
               "text": "export declare class ClassWithGenericMethod "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "ClassWithGenericMethod",
           "preserveMemberOrder": false,
@@ -242,6 +243,7 @@
               "text": "export declare class GenericClass<T> "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -279,6 +281,7 @@
               "text": "> "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -316,6 +319,7 @@
               "text": "> "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -385,6 +389,7 @@
               "text": "export interface GenericInterface<T> "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -401,8 +406,7 @@
           ],
           "name": "GenericInterface",
           "preserveMemberOrder": false,
-          "members": [],
-          "extendsTokenRanges": []
+          "members": []
         },
         {
           "kind": "TypeAlias",
@@ -452,6 +456,7 @@
               "text": "export interface InterfaceWithGenericCallSignature "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "InterfaceWithGenericCallSignature",
           "preserveMemberOrder": false,
@@ -495,8 +500,7 @@
                 }
               ]
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         },
         {
           "kind": "Interface",
@@ -508,6 +512,7 @@
               "text": "export interface InterfaceWithGenericConstructSignature "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "InterfaceWithGenericConstructSignature",
           "preserveMemberOrder": false,
@@ -551,8 +556,7 @@
                 }
               ]
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         }
       ]
     }

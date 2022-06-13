@@ -182,6 +182,7 @@
               "text": "export declare class CyclicA "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "CyclicA",
           "preserveMemberOrder": false,
@@ -259,6 +260,7 @@
               "text": "export declare class CyclicB "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "CyclicB",
           "preserveMemberOrder": false,
@@ -336,6 +338,7 @@
               "text": "export declare class FailWithSelfReference "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "FailWithSelfReference",
           "preserveMemberOrder": false,

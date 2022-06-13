@@ -182,6 +182,7 @@
               "text": "export interface A "
             }
           ],
+          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -213,8 +214,7 @@
                 "endIndex": 2
               }
             }
-          ],
-          "extendsTokenRanges": []
+          ]
         },
         {
           "kind": "Namespace",
@@ -240,6 +240,7 @@
                   "text": "class B "
                 }
               ],
+              "extendsTokenRanges": [],
               "releaseTag": "Public",
               "name": "B",
               "preserveMemberOrder": false,

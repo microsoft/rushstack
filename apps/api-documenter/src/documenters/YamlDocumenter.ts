@@ -37,7 +37,8 @@ import {
   ExcerptTokenKind,
   HeritageType,
   ApiVariable,
-  ApiTypeAlias
+  ApiTypeAlias,
+  ApiExtendsMixin
 } from '@microsoft/api-extractor-model';
 import {
   DeclarationReference,
@@ -559,17 +560,15 @@ export class YamlDocumenter {
     apiItem: ApiClass | ApiInterface
   ): void {
     if (apiItem instanceof ApiClass) {
-      if (apiItem.extendsType) {
-        yamlItem.extends = [this._renderType(uid, apiItem.extendsType.excerpt)];
-        yamlItem.inheritance = this._renderInheritance(uid, [apiItem.extendsType]);
-      }
       if (apiItem.implementsTypes.length > 0) {
         yamlItem.implements = [];
         for (const implementsType of apiItem.implementsTypes) {
           yamlItem.implements.push(this._renderType(uid, implementsType.excerpt));
         }
       }
-    } else if (apiItem instanceof ApiInterface) {
+    }
+
+    if (ApiExtendsMixin.isBaseClassOf(apiItem)) {
       if (apiItem.extendsTypes.length > 0) {
         yamlItem.extends = [];
         for (const extendsType of apiItem.extendsTypes) {
@@ -577,11 +576,11 @@ export class YamlDocumenter {
         }
         yamlItem.inheritance = this._renderInheritance(uid, apiItem.extendsTypes);
       }
+    }
 
-      const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(uid, apiItem);
-      if (typeParameters.length) {
-        yamlItem.syntax = { typeParameters };
-      }
+    const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(uid, apiItem);
+    if (typeParameters.length) {
+      yamlItem.syntax = { typeParameters };
     }
 
     if (apiItem.tsdocComment) {
@@ -819,13 +818,7 @@ export class YamlDocumenter {
       const yamlInheritance: IYamlInheritanceTree = { type };
       const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(type);
       if (apiItem) {
-        if (apiItem instanceof ApiClass) {
-          if (apiItem.extendsType) {
-            yamlInheritance.inheritance = this._renderInheritance(this._getUidObject(apiItem), [
-              apiItem.extendsType
-            ]);
-          }
-        } else if (apiItem instanceof ApiInterface) {
+        if (ApiExtendsMixin.isBaseClassOf(apiItem)) {
           if (apiItem.extendsTypes.length > 0) {
             yamlInheritance.inheritance = this._renderInheritance(
               this._getUidObject(apiItem),

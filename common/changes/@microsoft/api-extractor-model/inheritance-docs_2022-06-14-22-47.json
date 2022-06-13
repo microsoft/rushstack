@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Adds a new ApiExtendsMixin and associated findMembersWithInheritance method to easily find an item's inherited members.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}

@@ -191,16 +191,16 @@
               "text": " "
             }
           ],
-          "releaseTag": "Public",
-          "name": "A",
-          "preserveMemberOrder": false,
-          "members": [],
           "extendsTokenRanges": [
             {
               "startIndex": 1,
               "endIndex": 2
             }
-          ]
+          ],
+          "releaseTag": "Public",
+          "name": "A",
+          "preserveMemberOrder": false,
+          "members": []
         },
         {
           "kind": "Interface",
@@ -221,16 +221,16 @@
               "text": " "
             }
           ],
-          "releaseTag": "Public",
-          "name": "B",
-          "preserveMemberOrder": false,
-          "members": [],
           "extendsTokenRanges": [
             {
               "startIndex": 1,
               "endIndex": 2
             }
-          ]
+          ],
+          "releaseTag": "Public",
+          "name": "B",
+          "preserveMemberOrder": false,
+          "members": []
         },
         {
           "kind": "Interface",
@@ -251,16 +251,16 @@
               "text": " "
             }
           ],
-          "releaseTag": "Public",
-          "name": "C",
-          "preserveMemberOrder": false,
-          "members": [],
           "extendsTokenRanges": [
             {
               "startIndex": 1,
               "endIndex": 2
             }
-          ]
+          ],
+          "releaseTag": "Public",
+          "name": "C",
+          "preserveMemberOrder": false,
+          "members": []
         }
       ]
     }
