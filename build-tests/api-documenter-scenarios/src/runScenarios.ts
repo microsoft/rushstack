@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import child_process = require('child_process');
 import { AlreadyExistsBehavior, FileSystem, JsonFile } from '@rushstack/node-core-library';
 import {
   Extractor,
@@ -36,8 +37,12 @@ export function runScenarios(buildConfigPath: string): void {
     const entryPoint: string = path.resolve(`./lib/${scenarioFolderName}/index.d.ts`);
     entryPoints.push(entryPoint);
 
-    const overridesPath = path.resolve(`./src/${scenarioFolderName}/config/api-extractor-overrides.json`);
-    const apiExtractorJsonOverrides = FileSystem.exists(overridesPath) ? JsonFile.load(overridesPath) : {};
+    const apiExtractorOverridesPath = path.resolve(
+      `./src/${scenarioFolderName}/config/api-extractor-overrides.json`
+    );
+    const apiExtractorJsonOverrides = FileSystem.exists(apiExtractorOverridesPath)
+      ? JsonFile.load(apiExtractorOverridesPath)
+      : {};
     const apiExtractorJson = {
       $schema: 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
 
@@ -58,21 +63,6 @@ export function runScenarios(buildConfigPath: string): void {
         apiJsonFilePath: `<projectFolder>/etc/${scenarioFolderName}/<unscopedPackageName>.api.json`
       },
 
-      messages: {
-        extractorMessageReporting: {
-          // For test purposes, write these warnings into .api.md
-          // TODO: Capture the full list of warnings in the tracked test output file
-          'ae-cyclic-inherit-doc': {
-            logLevel: 'warning',
-            addToApiReportFile: true
-          },
-          'ae-unresolved-link': {
-            logLevel: 'warning',
-            addToApiReportFile: true
-          }
-        }
-      },
-
       testMode: true,
       ...apiExtractorJsonOverrides
     };
@@ -82,6 +72,8 @@ export function runScenarios(buildConfigPath: string): void {
     JsonFile.save(apiExtractorJson, apiExtractorJsonPath, { ensureFolderExists: true });
   }
 
+  const apiDocumenterJsonPath: string = `./config/api-documenter.json`;
+
   let compilerState: CompilerState | undefined = undefined;
   let anyErrors: boolean = false;
   process.exitCode = 1;
@@ -89,7 +81,7 @@ export function runScenarios(buildConfigPath: string): void {
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
     console.log('Scenario: ' + scenarioFolderName);
 
-    // Run the API Extractor programmatically
+    // Run the API Extractor programmtically
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath);
 
@@ -120,9 +112,42 @@ export function runScenarios(buildConfigPath: string): void {
     if (extractorResult.errorCount > 0) {
       anyErrors = true;
     }
+
+    // API Documenter will always look for a config file in the same place (it cannot be configured), so this script
+    // manually overwrites the API documenter config for each scenario. This is in contrast to the separate config files
+    // created when invoking API Extractor above.
+    const apiDocumenterOverridesPath = path.resolve(
+      `./src/${scenarioFolderName}/config/api-documenter-overrides.json`
+    );
+    const apiDocumenterJsonOverrides = FileSystem.exists(apiDocumenterOverridesPath)
+      ? JsonFile.load(apiDocumenterOverridesPath)
+      : {};
+    const apiDocumenterJson = {
+      $schema: 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-documenter.schema.json',
+      outputTarget: 'markdown',
+      tableOfContents: {},
+      ...apiDocumenterJsonOverrides
+    };
+
+    JsonFile.save(apiDocumenterJson, apiDocumenterJsonPath, { ensureFolderExists: true });
+
+    // Run the API Documenter command-line
+    executeCommand(
+      'node node_modules/@microsoft/api-documenter/lib/start ' +
+        `generate --input-folder etc/${scenarioFolderName} --output-folder etc/${scenarioFolderName}/markdown`
+    );
   }
+
+  // Delete the transient `api-documenter.json` file before completing, as it'll just be whatever the last scenario
+  // was, and shouldn't be committed.
+  FileSystem.deleteFile(apiDocumenterJsonPath);
 
   if (!anyErrors) {
     process.exitCode = 0;
   }
+}
+
+function executeCommand(command) {
+  console.log('---> ' + command);
+  child_process.execSync(command, { stdio: 'inherit' });
 }
