@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Sanitize projectName in scoped packages",
+      "comment": "When the `projectName:normalize` token is used in a cache ID, remove the `@` character from the scope.",
       "type": "none"
     }
   ],
