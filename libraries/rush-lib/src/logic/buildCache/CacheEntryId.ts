@@ -94,7 +94,7 @@ export class CacheEntryId {
               }
 
               case 'normalize': {
-                return `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace(/\\+/g, '++').replace(/\\/\/g, '+')}`;
+                return `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace('@','').replace(/\\+/g, '++').replace(/\\/\/g, '+')}`;
               }
 
               default: {
