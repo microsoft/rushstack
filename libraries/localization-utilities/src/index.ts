@@ -5,7 +5,8 @@ export type {
   ILocalizationFile,
   ILocalizedString,
   IPseudolocaleOptions,
-  IParseFileOptions
+  IParseFileOptions,
+  IgnoreStringFunction
 } from './interfaces';
 export { parseLocJson } from './parsers/parseLocJson';
 export { parseResJson } from './parsers/parseResJson';

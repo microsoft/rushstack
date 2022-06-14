@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPseudolocaleOptions } from '@rushstack/localization-utilities';
+import { IgnoreStringFunction, IPseudolocaleOptions } from '@rushstack/localization-utilities';
 
 /**
  * Options for the passthrough locale.
@@ -44,8 +44,11 @@ export interface ITypingsGenerationOptions {
   exportAsDefault?: boolean;
 
   /**
-   * Optionally, provide a function that will be called for each string. If the function returns `true`
-   * the string will not be included in the typings.
+   * @deprecated
+   * Use {@link ILocalizationPluginOptions.ignoreString} instead.
+   *
+   * @internalRemarks
+   * TODO: Remove when version 1.0.0 is released.
    */
   ignoreString?: (resxFilePath: string, stringName: string) => boolean;
 
@@ -179,8 +182,16 @@ export interface ILocalizationPluginOptions {
   typingsOptions?: ITypingsGenerationOptions;
 
   /**
+   * Optionally, provide a function that will be called for each string. If the function returns `true`
+   * the string will not be included.
+   */
+  ignoreString?: IgnoreStringFunction;
+
+  /**
    * @deprecated
+   * Use {@link ILocalizationPluginOptions.globsToIgnore} instead.
    *
+   * @internalRemarks
    * TODO: Remove when version 1.0.0 is released.
    */
   filesToIgnore?: string[];

@@ -4,10 +4,12 @@
 import { loader } from 'webpack';
 import * as loaderUtils from 'loader-utils';
 import { NewlineKind } from '@rushstack/node-core-library';
+import type { IgnoreStringFunction } from '@rushstack/localization-utilities';
 
 export interface IBaseLoaderOptions {
   resxNewlineNormalization: NewlineKind | undefined;
   ignoreMissingResxComments: boolean | undefined;
+  ignoreString: IgnoreStringFunction | undefined;
 }
 
 export interface ILoaderResult {

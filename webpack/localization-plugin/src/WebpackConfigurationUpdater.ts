@@ -7,6 +7,7 @@ import * as Webpack from 'webpack';
 import * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
 import { NewlineKind } from '@rushstack/node-core-library';
 import * as lodash from 'lodash';
+import { IgnoreStringFunction } from '@rushstack/localization-utilities';
 
 import { Constants } from './utilities/Constants';
 import { LocalizationPlugin } from './LocalizationPlugin';
@@ -20,6 +21,7 @@ export interface IWebpackConfigurationUpdaterOptions {
   localeNameOrPlaceholder: string;
   resxNewlineNormalization: NewlineKind | undefined;
   ignoreMissingResxComments: boolean | undefined;
+  ignoreString: IgnoreStringFunction | undefined;
 }
 
 const FILE_TOKEN_REGEX: RegExp = new RegExp(lodash.escapeRegExp('[file]'));
@@ -30,7 +32,8 @@ export class WebpackConfigurationUpdater {
     const loaderOptions: ILocLoaderOptions = {
       pluginInstance: options.pluginInstance,
       resxNewlineNormalization: options.resxNewlineNormalization,
-      ignoreMissingResxComments: options.ignoreMissingResxComments
+      ignoreMissingResxComments: options.ignoreMissingResxComments,
+      ignoreString: options.ignoreString
     };
 
     WebpackConfigurationUpdater._addLoadersForLocFiles(options, loader, loaderOptions);
@@ -46,7 +49,8 @@ export class WebpackConfigurationUpdater {
     const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
     const loaderOptions: IBaseLoaderOptions = {
       resxNewlineNormalization: options.resxNewlineNormalization,
-      ignoreMissingResxComments: options.ignoreMissingResxComments
+      ignoreMissingResxComments: options.ignoreMissingResxComments,
+      ignoreString: options.ignoreString
     };
 
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [

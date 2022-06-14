@@ -12,6 +12,9 @@ import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 export function getPseudolocalizer(options: IPseudolocaleOptions): (str: string) => string;
 
 // @public (undocumented)
+export type IgnoreStringFunction = (filePath: string, stringName: string) => boolean;
+
+// @public (undocumented)
 export interface ILocalizationFile {
     // (undocumented)
     [stringName: string]: ILocalizedString;
@@ -31,14 +34,11 @@ export interface IParseFileOptions {
     content: string;
     // (undocumented)
     filePath: string;
+    ignoreString?: IgnoreStringFunction;
 }
 
 // @public (undocumented)
-export interface IParseLocFileOptions {
-    // (undocumented)
-    content: string;
-    // (undocumented)
-    filePath: string;
+export interface IParseLocFileOptions extends IParseFileOptions {
     // (undocumented)
     ignoreMissingResxComments: boolean | undefined;
     // (undocumented)
@@ -69,6 +69,7 @@ export interface IPseudolocaleOptions {
 
 // @public (undocumented)
 export interface IResxReaderOptions {
+    ignoreString?: IgnoreStringFunction;
     // (undocumented)
     newlineNormalization: NewlineKind | undefined;
     // (undocumented)
@@ -90,7 +91,7 @@ export interface ITypingsGeneratorOptions {
     // (undocumented)
     ignoreMissingResxComments?: boolean | undefined;
     // (undocumented)
-    ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+    ignoreString?: IgnoreStringFunction;
     // (undocumented)
     processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
     // (undocumented)
@@ -105,10 +106,10 @@ export interface ITypingsGeneratorOptions {
 export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile;
 
 // @public (undocumented)
-export function parseLocJson(options: IParseFileOptions): ILocalizationFile;
+export function parseLocJson({ content, filePath, ignoreString }: IParseFileOptions): ILocalizationFile;
 
 // @public (undocumented)
-export function parseResJson(options: IParseFileOptions): ILocalizationFile;
+export function parseResJson({ content, ignoreString, filePath }: IParseFileOptions): ILocalizationFile;
 
 // @public (undocumented)
 export type ParserKind = 'resx' | 'loc.json' | 'resjson';
