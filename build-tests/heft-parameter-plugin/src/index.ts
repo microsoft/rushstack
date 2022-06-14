@@ -4,12 +4,12 @@
 import { FileSystem } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
-  HeftTaskSession,
+  IHeftTaskSession,
   IHeftTaskPlugin,
+  IHeftTaskRunHookOptions,
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter,
-  IHeftTaskRunHookOptions,
   CommandLineStringListParameter,
   CommandLineChoiceListParameter,
   CommandLineIntegerParameter,
@@ -19,7 +19,7 @@ import type {
 const PLUGIN_NAME: string = 'heft-action-plugin';
 
 export default class HeftParameterPlugin implements IHeftTaskPlugin {
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     const customParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
       '--custom-parameter'
     ) as CommandLineFlagParameter;

@@ -1,4 +1,4 @@
-import type { HeftTaskSession, HeftConfiguration, IHeftTaskPlugin } from '@rushstack/heft';
+import type { IHeftTaskSession, HeftConfiguration, IHeftTaskPlugin } from '@rushstack/heft';
 import { PluginNames as OtherPluginNames, IExamplePlugin01Accessor } from 'heft-example-plugin-01';
 
 const enum PluginNames {
@@ -8,7 +8,7 @@ const enum PluginNames {
 export default class ExamplePlugin02 implements IHeftTaskPlugin {
   public pluginName: string = PluginNames.ExamplePlugin02;
 
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     taskSession.requestAccessToPluginByName(
       'heft-example-plugin-01',
       OtherPluginNames.ExamplePlugin01,

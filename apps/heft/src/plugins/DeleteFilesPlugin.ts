@@ -8,7 +8,7 @@ import { Constants } from '../utilities/Constants';
 import { getRelativeFilePathsAsync, type IFileGlobSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
+import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
 /**
@@ -86,7 +86,7 @@ export async function deleteFilesAsync(
 
 export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOptions> {
   public apply(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     pluginOptions: IDeleteFilesPluginOptions
   ): void {

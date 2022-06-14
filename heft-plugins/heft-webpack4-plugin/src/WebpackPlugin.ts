@@ -7,7 +7,7 @@ import type TWebpackDevServer from 'webpack-dev-server';
 import { Import, IPackageJson, LegacyAdapters, PackageJsonLookup } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
-  HeftTaskSession,
+  IHeftTaskSession,
   IHeftTaskCleanHookOptions,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
@@ -44,7 +44,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
     onEmitStatsHook: new AsyncParallelHook(['webpackStats'])
   };
 
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     // These get set in the run hook and used in the onConfigureWebpackHook
     let production: boolean;
     let serveMode: boolean;
@@ -154,7 +154,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
   }
 
   private async _runWebpackAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     webpackConfiguration: IWebpackConfiguration | null,
     serveMode: boolean,

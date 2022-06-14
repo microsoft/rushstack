@@ -4,7 +4,7 @@
 import { CertificateManager } from '@rushstack/debug-certificate-manager';
 import type {
   HeftConfiguration,
-  HeftTaskSession,
+  IHeftTaskSession,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions
 } from '@rushstack/heft';
@@ -20,7 +20,7 @@ export default class TrustDevCertificatePlugin implements IHeftTaskPlugin {
     this._trustDevCert = trustDevCert;
   }
 
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     taskSession.hooks.run.tapPromise(this._pluginName, async (runOptions: IHeftTaskRunHookOptions) => {
       const { logger } = taskSession;
       const certificateManager: CertificateManager = new CertificateManager();

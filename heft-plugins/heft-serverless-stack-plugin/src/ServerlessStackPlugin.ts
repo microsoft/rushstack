@@ -8,7 +8,7 @@ import type {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   HeftConfiguration,
-  HeftTaskSession,
+  IHeftTaskSession,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IScopedLogger
@@ -34,7 +34,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin<IServerles
   private _logger!: IScopedLogger;
 
   public apply(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IServerlessStackPluginOptions
   ): void {
@@ -101,7 +101,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin<IServerles
   }
 
   private async _runServerlessStackAsync(options: {
-    taskSession: HeftTaskSession;
+    taskSession: IHeftTaskSession;
     heftConfiguration: HeftConfiguration;
     sstStage?: string;
     debugMode?: boolean;

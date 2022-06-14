@@ -13,7 +13,7 @@ import { trueCasePathSync } from 'true-case-path';
 import { RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
-import { RigToolResolver } from './RigToolResolver';
+import { RigToolResolver, type IRigToolResolver } from './RigToolResolver';
 
 /**
  * @internal
@@ -105,7 +105,7 @@ export class HeftConfiguration {
     return this._rigConfig;
   }
 
-  public get rigToolResolver(): RigToolResolver {
+  public get rigToolResolver(): IRigToolResolver {
     if (!this._rigToolResolver) {
       this._rigToolResolver = new RigToolResolver({
         buildFolder: this.buildFolder,

@@ -3,7 +3,7 @@
 
 import type {
   HeftConfiguration,
-  HeftTaskSession,
+  IHeftTaskSession,
   IHeftPlugin,
   IHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
@@ -26,7 +26,7 @@ export default class SassTypingsPlugin implements IHeftPlugin {
   /**
    * Generate typings for Sass files before TypeScript compilation.
    */
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       // No-op. Currently relies on the TypeScript plugin to clean up the generated typings.
     });
@@ -38,7 +38,7 @@ export default class SassTypingsPlugin implements IHeftPlugin {
   }
 
   private async _runSassTypingsGeneratorAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     isWatchMode: boolean
   ): Promise<void> {

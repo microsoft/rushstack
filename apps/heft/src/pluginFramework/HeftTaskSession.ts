@@ -6,12 +6,70 @@ import type { AsyncParallelHook } from 'tapable';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import type { MetricsCollector } from '../metrics/MetricsCollector';
-import type { ScopedLogger } from './logging/ScopedLogger';
+import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
 import type { HeftTask } from './HeftTask';
 import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
 import type { RequestAccessToPluginByNameCallback } from './HeftPluginHost';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
+
+/**
+ * @public
+ */
+export interface IHeftTaskSession {
+  /**
+   * @public
+   */
+  readonly taskName: string;
+
+  /**
+   * @public
+   */
+  readonly hooks: IHeftTaskHooks;
+
+  /**
+   * @public
+   */
+  readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+
+  /**
+   * If set to true, the build is running with the --debug flag
+   *
+   * @public
+   */
+  readonly debugMode: boolean;
+
+  /**
+   * @public
+   */
+  readonly cacheFolder: string;
+
+  /**
+   * @public
+   */
+  readonly tempFolder: string;
+
+  /**
+   * @public
+   */
+  readonly logger: IScopedLogger;
+
+  /**
+   * Call this function to receive a callback with the plugin if and after the specified plugin
+   * has been applied. This is used to tap hooks on another plugin.
+   *
+   * @public
+   */
+  readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+}
+
+/**
+ * @public
+ */
+export interface IHeftTaskHooks {
+  clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
+  run: AsyncParallelHook<IHeftTaskRunHookOptions>;
+}
 
 /**
  * @public
@@ -35,17 +93,6 @@ export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {
   addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
-/**
- * @public
- */
-export interface IHeftTaskHooks {
-  clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
-  run: AsyncParallelHook<IHeftTaskRunHookOptions>;
-}
-
-/**
- * @internal
- */
 export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
   logger: ScopedLogger;
   task: HeftTask;
@@ -54,60 +101,17 @@ export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
   requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
 }
 
-/**
- * @public
- */
-export class HeftTaskSession {
+export class HeftTaskSession implements IHeftTaskSession {
   private _options: IHeftTaskSessionOptions;
 
-  /**
-   * @public
-   */
   public readonly taskName: string;
-
-  /**
-   * @public
-   */
   public readonly hooks: IHeftTaskHooks;
-
-  /**
-   * @public
-   */
   public readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
-
-  /**
-   * @public
-   */
   public readonly cacheFolder: string;
-
-  /**
-   * @public
-   */
   public readonly tempFolder: string;
-
-  /**
-   * @public
-   */
-  public readonly logger: ScopedLogger;
-
-  /**
-   * @internal
-   */
-  public readonly metricsCollector: MetricsCollector;
-
-  /**
-   * Call this function to receive a callback with the plugin if and after the specified plugin
-   * has been applied. This is used to tap hooks on another plugin.
-   *
-   * @public
-   */
+  public readonly logger: IScopedLogger;
   public readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
 
-  /**
-   * If set to true, the build is running with the --debug flag
-   *
-   * @public
-   */
   public get debugMode(): boolean {
     return this._options.getIsDebugMode();
   }
@@ -115,6 +119,8 @@ export class HeftTaskSession {
   /**
    * @internal
    */
+  public readonly metricsCollector: MetricsCollector;
+
   public constructor(options: IHeftTaskSessionOptions) {
     this._options = options;
     this.logger = options.logger;

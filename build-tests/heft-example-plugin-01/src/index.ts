@@ -1,7 +1,7 @@
 import { SyncHook } from 'tapable';
 import type {
   IHeftTaskPlugin,
-  HeftTaskSession,
+  IHeftTaskSession,
   HeftConfiguration,
   IHeftTaskRunHookOptions
 } from '@rushstack/heft';
@@ -23,7 +23,7 @@ export default class ExamplePlugin01 implements IHeftTaskPlugin {
     return this._accessor;
   }
 
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     this._accessor = {
       exampleHook: new SyncHook()
     };

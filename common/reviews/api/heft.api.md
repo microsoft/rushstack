@@ -11,10 +11,8 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerListParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameter } from '@rushstack/ts-command-line';
-import type { CommandLineParameterProvider } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { FileErrorFormat } from '@rushstack/node-core-library';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
@@ -51,51 +49,9 @@ export class HeftConfiguration {
     get projectPackageJson(): IPackageJson;
     get rigConfig(): RigConfig;
     // (undocumented)
-    get rigToolResolver(): RigToolResolver;
+    get rigToolResolver(): IRigToolResolver;
     get tempFolder(): string;
     get terminalProvider(): ITerminalProvider;
-}
-
-// @public (undocumented)
-export class HeftLifecycleSession {
-    // @internal
-    constructor(options: _IHeftLifecycleSessionOptions);
-    // (undocumented)
-    readonly cacheFolder: string;
-    get debugMode(): boolean;
-    // (undocumented)
-    readonly hooks: IHeftLifecycleHooks;
-    // (undocumented)
-    readonly logger: ScopedLogger;
-    // @internal (undocumented)
-    readonly metricsCollector: _MetricsCollector;
-    // (undocumented)
-    readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
-    readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
-    // (undocumented)
-    readonly tempFolder: string;
-}
-
-// @public (undocumented)
-export class HeftTaskSession {
-    // @internal
-    constructor(options: _IHeftTaskSessionOptions);
-    // (undocumented)
-    readonly cacheFolder: string;
-    get debugMode(): boolean;
-    // (undocumented)
-    readonly hooks: IHeftTaskHooks;
-    // (undocumented)
-    readonly logger: ScopedLogger;
-    // @internal (undocumented)
-    readonly metricsCollector: _MetricsCollector;
-    // (undocumented)
-    readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
-    readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
-    // (undocumented)
-    readonly taskName: string;
-    // (undocumented)
-    readonly tempFolder: string;
 }
 
 // @public
@@ -150,23 +106,23 @@ export interface IHeftLifecycleHooks {
 }
 
 // @public (undocumented)
-export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<HeftLifecycleSession, TOptions> {
+export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeftLifecycleSession, TOptions> {
 }
 
-// @internal (undocumented)
-export interface _IHeftLifecycleSessionOptions extends _IInternalHeftSessionOptions {
+// @public (undocumented)
+export interface IHeftLifecycleSession {
     // (undocumented)
-    lifecycleHooks: IHeftLifecycleHooks;
+    readonly cacheFolder: string;
+    readonly debugMode: boolean;
     // (undocumented)
-    logger: ScopedLogger;
+    readonly hooks: IHeftLifecycleHooks;
     // (undocumented)
-    parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
-    // Warning: (ae-forgotten-export) The symbol "HeftPluginDefinitionBase" needs to be exported by the entry point index.d.ts
-    //
+    readonly logger: IScopedLogger;
     // (undocumented)
-    pluginDefinition: HeftPluginDefinitionBase;
+    readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+    readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     // (undocumented)
-    requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+    readonly tempFolder: string;
 }
 
 // @public (undocumented)
@@ -178,7 +134,7 @@ export interface IHeftLifecycleToolStopHookOptions extends IHeftLifecycleHookOpt
 }
 
 // @public (undocumented)
-export interface IHeftPlugin<TSession extends HeftLifecycleSession | HeftTaskSession = HeftLifecycleSession | HeftTaskSession, TOptions = void> {
+export interface IHeftPlugin<TSession extends IHeftLifecycleSession | IHeftTaskSession = IHeftLifecycleSession | IHeftTaskSession, TOptions = void> {
     // (undocumented)
     readonly accessor?: object;
     // (undocumented)
@@ -216,9 +172,7 @@ export interface IHeftTaskHooks {
 }
 
 // @public (undocumented)
-export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<HeftTaskSession, TOptions> {
-    // (undocumented)
-    apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration, pluginOptions?: TOptions): void;
+export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskSession, TOptions> {
 }
 
 // @public (undocumented)
@@ -227,36 +181,22 @@ export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {
     addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
-// Warning: (ae-forgotten-export) The symbol "IHeftPhaseSessionOptions" needs to be exported by the entry point index.d.ts
-//
-// @internal (undocumented)
-export interface _IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
+// @public (undocumented)
+export interface IHeftTaskSession {
     // (undocumented)
-    logger: ScopedLogger;
+    readonly cacheFolder: string;
+    readonly debugMode: boolean;
     // (undocumented)
-    parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+    readonly hooks: IHeftTaskHooks;
     // (undocumented)
-    requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
-    // Warning: (ae-forgotten-export) The symbol "HeftTask" needs to be exported by the entry point index.d.ts
-    //
+    readonly logger: IScopedLogger;
     // (undocumented)
-    task: HeftTask;
+    readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+    readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     // (undocumented)
-    taskHooks: IHeftTaskHooks;
-}
-
-// @internal (undocumented)
-export interface _IInternalHeftSessionOptions {
+    readonly taskName: string;
     // (undocumented)
-    getIsDebugMode(): boolean;
-    // (undocumented)
-    heftConfiguration: HeftConfiguration;
-    // Warning: (ae-forgotten-export) The symbol "LoggingManager" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    loggingManager: LoggingManager;
-    // (undocumented)
-    metricsCollector: _MetricsCollector;
+    readonly tempFolder: string;
 }
 
 // @public (undocumented)
@@ -280,14 +220,10 @@ export interface _IPerformanceData {
     taskTotalExecutionMs: number;
 }
 
-// @internal (undocumented)
-export interface _IRigToolResolverOptions {
+// @public (undocumented)
+export interface IRigToolResolver {
     // (undocumented)
-    buildFolder: string;
-    // (undocumented)
-    projectPackageJson: IPackageJson;
-    // (undocumented)
-    rigConfig: RigConfig;
+    resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
 }
 
 // @beta
@@ -301,7 +237,7 @@ export interface IRunScriptOptions {
     // (undocumented)
     heftConfiguration: HeftConfiguration;
     // (undocumented)
-    heftTaskSession: HeftTaskSession;
+    heftTaskSession: IHeftTaskSession;
     // (undocumented)
     runOptions: IHeftTaskRunHookOptions;
     // (undocumented)
@@ -316,18 +252,6 @@ export interface IScopedLogger {
     readonly terminal: Terminal;
 }
 
-// @public (undocumented)
-export interface IScopedLoggerOptions {
-    // (undocumented)
-    errorHasBeenEmittedCallback: () => void;
-    // (undocumented)
-    getShouldPrintStacks: () => boolean;
-    // (undocumented)
-    loggerName: string;
-    // (undocumented)
-    terminalProvider: ITerminalProvider;
-}
-
 // @internal
 export class _MetricsCollector {
     recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
@@ -338,32 +262,6 @@ export class _MetricsCollector {
 
 // @public (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;
-
-// @public (undocumented)
-export class RigToolResolver {
-    // @internal
-    constructor(options: _IRigToolResolverOptions);
-    // (undocumented)
-    resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
-}
-
-// @public (undocumented)
-export class ScopedLogger implements IScopedLogger {
-    // @internal
-    constructor(options: IScopedLoggerOptions);
-    emitError(error: Error): void;
-    emitWarning(warning: Error): void;
-    // (undocumented)
-    get errors(): ReadonlyArray<Error>;
-    // (undocumented)
-    readonly loggerName: string;
-    // (undocumented)
-    readonly terminal: Terminal;
-    // (undocumented)
-    readonly terminalProvider: ITerminalProvider;
-    // (undocumented)
-    get warnings(): ReadonlyArray<Error>;
-}
 
 // (No @packageDocumentation comment for this package)
 

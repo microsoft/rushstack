@@ -12,7 +12,7 @@ import { mergeWith, isObject } from 'lodash';
 import type {
   HeftConfiguration,
   IHeftTaskPlugin,
-  HeftTaskSession,
+  IHeftTaskSession,
   IHeftTaskRunHookOptions,
   IHeftTaskCleanHookOptions,
   CommandLineFlagParameter,
@@ -110,7 +110,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
    * @override
    */
   public apply(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     pluginOptions?: IJestPluginOptions
   ): void {
@@ -190,7 +190,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
    * Write the data file used by the BuildTransformer
    */
   private async _setupJestAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options?: IJestPluginOptions
   ): Promise<void> {
@@ -221,7 +221,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
    * Runs Jest using the provided options.
    */
   private async _runJestAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options?: IJestPluginOptions
   ): Promise<void> {
@@ -565,7 +565,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   }
 
   private _extractHeftJestReporters(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     config: IHeftJestConfiguration,
     projectRelativeFilePath: string

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
-import type { HeftConfiguration, HeftTaskSession, IHeftTaskPlugin, IScopedLogger } from '@rushstack/heft';
+import type { HeftConfiguration, IHeftTaskSession, IHeftTaskPlugin, IScopedLogger } from '@rushstack/heft';
 import {
   PluginName as Webpack4PluginName,
   type IWebpackConfiguration as IWebpack4Configuration,
@@ -21,7 +21,7 @@ import {
 const PLUGIN_NAME: string = 'ConfigureDevServerPlugin';
 
 export default class ConfigureWebpackDevServerPlugin implements IHeftTaskPlugin {
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     taskSession.requestAccessToPluginByName(
       '@rushstack/heft-webpack4-plugin',
       Webpack4PluginName,

@@ -3,7 +3,7 @@
 
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
+import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
 
 interface IRunScriptPluginOptions {
   scriptPath: string;
@@ -16,7 +16,7 @@ interface IRunScriptPluginOptions {
  * @beta
  */
 export interface IRunScriptOptions {
-  heftTaskSession: HeftTaskSession;
+  heftTaskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
   runOptions: IHeftTaskRunHookOptions;
   scriptOptions: Record<string, unknown>;
@@ -33,7 +33,7 @@ export interface IRunScript {
 
 export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions> {
   public apply(
-    heftTaskSession: HeftTaskSession,
+    heftTaskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     pluginOptions: IRunScriptPluginOptions
   ): void {
@@ -46,7 +46,7 @@ export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPlugin
   }
 
   private async _runScriptAsync(
-    heftTaskSession: HeftTaskSession,
+    heftTaskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     pluginOptions: IRunScriptPluginOptions,
     runOptions: IHeftTaskRunHookOptions

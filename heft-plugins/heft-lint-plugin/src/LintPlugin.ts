@@ -5,7 +5,7 @@ import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
-  HeftTaskSession,
+  IHeftTaskSession,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IScopedLogger
@@ -35,7 +35,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
   private _tslintToolPath: string | undefined;
   private _tslintConfigFilePath: string | undefined;
 
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     // Use the changed files hook to kick off linting asynchronously
     taskSession.requestAccessToPluginByName(
       '@rushstack/heft-typescript-plugin',
@@ -77,7 +77,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
   }
 
   private async _initAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
     // Make sure that we only ever init once by memoizing the init promise
@@ -118,7 +118,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
   }
 
   private async _lintAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     tsProgram: IExtendedProgram,
     changedFiles?: Set<IExtendedSourceFile>
@@ -161,7 +161,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
   }
 
   private async _runEslintAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     eslintToolPath: string,
     eslintConfigFilePath: string,
@@ -190,7 +190,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
   }
 
   private async _runTslintAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     tslintToolPath: string,
     tslintConfigFilePath: string,

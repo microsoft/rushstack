@@ -6,7 +6,7 @@ import type * as TApiExtractor from '@microsoft/api-extractor';
 import type {
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
-  HeftTaskSession,
+  IHeftTaskSession,
   HeftConfiguration,
   IHeftTaskCleanHookOptions
 } from '@rushstack/heft';
@@ -39,7 +39,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     | Promise<IApiExtractorPluginConfiguration | undefined>
     | undefined;
 
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       // Load up the configuration, but ignore if target files are missing, since we will be deleting
       // them anyway.
@@ -84,7 +84,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   }
 
   private async _getApiExtractorConfigurationAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     ignoreMissingConfigTargets?: boolean
   ): Promise<TApiExtractor.ExtractorConfig | undefined> {
@@ -112,7 +112,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   }
 
   private async _getApiExtractorAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<typeof TApiExtractor | undefined> {
     if (!this._apiExtractorPromise) {
@@ -122,7 +122,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   }
 
   private async _getApiExtractorInnerAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<typeof TApiExtractor | undefined> {
     // API Extractor provides an ExtractorConfig.tryLoadForFolder() API that will probe for api-extractor.json
@@ -177,7 +177,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   }
 
   private async _getApiExtractorTaskConfigurationAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<IApiExtractorPluginConfiguration | undefined> {
     if (!this._apiExtractorTaskConfigurationPromise) {
@@ -191,7 +191,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   }
 
   private async _getApiExtractorTaskConfigurationInnerAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<IApiExtractorPluginConfiguration | undefined> {
     const apiExtractorTaskConfigurationFileLoader: ConfigurationFile<IApiExtractorPluginConfiguration> =
@@ -208,7 +208,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   }
 
   private async _runApiExtractorAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     runOptions: IHeftTaskRunHookOptions,
     apiExtractor: typeof TApiExtractor,

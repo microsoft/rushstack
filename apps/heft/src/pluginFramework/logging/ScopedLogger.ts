@@ -9,16 +9,6 @@ import { LoggingManager } from './LoggingManager';
 /**
  * @public
  */
-export interface IScopedLoggerOptions {
-  loggerName: string;
-  terminalProvider: ITerminalProvider;
-  getShouldPrintStacks: () => boolean;
-  errorHasBeenEmittedCallback: () => void;
-}
-
-/**
- * @public
- */
 export interface IScopedLogger {
   readonly terminal: Terminal;
 
@@ -33,9 +23,13 @@ export interface IScopedLogger {
   emitWarning(warning: Error): void;
 }
 
-/**
- * @public
- */
+export interface IScopedLoggerOptions {
+  loggerName: string;
+  terminalProvider: ITerminalProvider;
+  getShouldPrintStacks: () => boolean;
+  errorHasBeenEmittedCallback: () => void;
+}
+
 export class ScopedLogger implements IScopedLogger {
   private readonly _options: IScopedLoggerOptions;
   private readonly _errors: Error[] = [];

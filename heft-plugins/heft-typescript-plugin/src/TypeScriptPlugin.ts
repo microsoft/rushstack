@@ -12,7 +12,7 @@ import {
 } from '@rushstack/heft-config-file';
 import type {
   HeftConfiguration,
-  HeftTaskSession,
+  IHeftTaskSession,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IHeftTaskCleanHookOptions
@@ -238,7 +238,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     onChangedFilesHook: new SyncHook<IChangedFilesHookOptions>(['changedFilesHookOptions'])
   };
 
-  public apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       await this._updateClean(taskSession, heftConfiguration, cleanOptions);
     });
@@ -250,7 +250,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   }
 
   private async _updateClean(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     cleanOptions: IHeftTaskCleanHookOptions
   ): Promise<void> {
@@ -278,7 +278,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   }
 
   private async _updateStaticAssetsToCopy(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     runOptions: IHeftTaskRunHookOptions
   ): Promise<void> {
@@ -319,7 +319,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   }
 
   private async _runTypeScriptAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
     const terminal: ITerminal = taskSession.logger.terminal;
@@ -372,7 +372,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   }
 
   private async _getTsconfigOutDirAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     typeScriptConfiguration: ITypeScriptConfigurationJson | undefined
   ): Promise<string | undefined> {

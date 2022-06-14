@@ -11,7 +11,7 @@ import {
 } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
-  HeftTaskSession,
+  IHeftTaskSession,
   IScopedLogger,
   IHeftTaskPlugin,
   CommandLineFlagParameter,
@@ -83,7 +83,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
    * Generate typings for Sass files before TypeScript compilation.
    */
   public apply(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IStorybookPluginOptions
   ): void {
@@ -148,7 +148,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
   }
 
   private async _prepareStorybookAsync(
-    taskSession: HeftTaskSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
     this._logger.terminal.writeVerboseLine(`Probing for "${this._storykitPackageName}"`);

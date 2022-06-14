@@ -6,11 +6,66 @@ import type { AsyncParallelHook } from 'tapable';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
-import type { ScopedLogger } from './logging/ScopedLogger';
+import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
 import type { RequestAccessToPluginByNameCallback } from './HeftPluginHost';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
+
+/**
+ * @public
+ */
+export interface IHeftLifecycleSession {
+  /**
+   * @public
+   */
+  readonly hooks: IHeftLifecycleHooks;
+
+  /**
+   * @public
+   */
+  readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+
+  /**
+   * @public
+   */
+  readonly cacheFolder: string;
+
+  /**
+   * @public
+   */
+  readonly tempFolder: string;
+
+  /**
+   * If set to true, the build is running with the --debug flag
+   *
+   * @public
+   */
+  readonly debugMode: boolean;
+
+  /**
+   * @public
+   */
+  readonly logger: IScopedLogger;
+
+  /**
+   * Call this function to receive a callback with the plugin if and after the specified plugin
+   * has been applied. This is used to tap hooks on another plugin.
+   *
+   * @public
+   */
+  readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+}
+
+/**
+ * @public
+ */
+export interface IHeftLifecycleHooks {
+  clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
+  toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
+  toolStop: AsyncParallelHook<IHeftLifecycleToolStopHookOptions>;
+  recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+}
 
 /**
  * @public
@@ -37,19 +92,6 @@ export interface IHeftLifecycleToolStartHookOptions extends IHeftLifecycleHookOp
  */
 export interface IHeftLifecycleToolStopHookOptions extends IHeftLifecycleHookOptions {}
 
-/**
- * @public
- */
-export interface IHeftLifecycleHooks {
-  clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
-  toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
-  toolStop: AsyncParallelHook<IHeftLifecycleToolStopHookOptions>;
-  recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
-}
-
-/**
- * @internal
- */
 export interface IHeftLifecycleSessionOptions extends IInternalHeftSessionOptions {
   logger: ScopedLogger;
   lifecycleHooks: IHeftLifecycleHooks;
@@ -58,55 +100,16 @@ export interface IHeftLifecycleSessionOptions extends IInternalHeftSessionOption
   requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
 }
 
-/**
- * @public
- */
-export class HeftLifecycleSession {
+export class HeftLifecycleSession implements IHeftLifecycleSession {
   private _options: IHeftLifecycleSessionOptions;
 
-  /**
-   * @public
-   */
   public readonly hooks: IHeftLifecycleHooks;
-
-  /**
-   * @public
-   */
   public readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
-
-  /**
-   * @public
-   */
   public readonly cacheFolder: string;
-
-  /**
-   * @public
-   */
   public readonly tempFolder: string;
-
-  /**
-   * @public
-   */
-  public readonly logger: ScopedLogger;
-
-  /**
-   * @internal
-   */
-  public readonly metricsCollector: MetricsCollector;
-
-  /**
-   * Call this function to receive a callback with the plugin if and after the specified plugin
-   * has been applied. This is used to tap hooks on another plugin.
-   *
-   * @public
-   */
+  public readonly logger: IScopedLogger;
   public readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
 
-  /**
-   * If set to true, the build is running with the --debug flag
-   *
-   * @public
-   */
   public get debugMode(): boolean {
     return this._options.getIsDebugMode();
   }
@@ -114,6 +117,8 @@ export class HeftLifecycleSession {
   /**
    * @internal
    */
+  public readonly metricsCollector: MetricsCollector;
+
   public constructor(options: IHeftLifecycleSessionOptions) {
     this._options = options;
     this.logger = options.logger;

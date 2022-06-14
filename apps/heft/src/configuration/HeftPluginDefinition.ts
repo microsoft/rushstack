@@ -2,7 +2,7 @@ import * as path from 'path';
 import { InternalError, JsonSchema } from '@rushstack/node-core-library';
 
 import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
-import type { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import type { HeftLifecycleSession } from '../pluginFramework/HeftLifecycleSession';
 import type { HeftTaskSession } from '../pluginFramework/HeftTaskSession';
 
@@ -248,7 +248,7 @@ export abstract class HeftPluginDefinitionBase {
     return this._heftPluginDefinitionJson.parameters || [];
   }
 
-  public async loadPluginAsync(logger: ScopedLogger): Promise<IHeftPlugin> {
+  public async loadPluginAsync(logger: IScopedLogger): Promise<IHeftPlugin> {
     // Do not memoize the plugin here, since we want a new instance of the plugin each time it is loaded
     // from the definition
     let heftPlugin: IHeftPlugin | undefined;
@@ -313,7 +313,7 @@ export class HeftLifecyclePluginDefinition extends HeftPluginDefinitionBase {
   /**
    * @override
    */
-  public loadPluginAsync(logger: ScopedLogger): Promise<IHeftPlugin<HeftLifecycleSession, object | void>> {
+  public loadPluginAsync(logger: IScopedLogger): Promise<IHeftPlugin<HeftLifecycleSession, object | void>> {
     return super.loadPluginAsync(logger);
   }
 }
@@ -326,7 +326,7 @@ export class HeftTaskPluginDefinition extends HeftPluginDefinitionBase {
   /**
    * @override
    */
-  public loadPluginAsync(logger: ScopedLogger): Promise<IHeftPlugin<HeftTaskSession, object | void>> {
+  public loadPluginAsync(logger: IScopedLogger): Promise<IHeftPlugin<HeftTaskSession, object | void>> {
     return super.loadPluginAsync(logger);
   }
 }

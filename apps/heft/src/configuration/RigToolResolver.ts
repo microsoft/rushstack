@@ -12,18 +12,19 @@ import {
 import type { RigConfig } from '@rushstack/rig-package';
 
 /**
- * @internal
+ * @public
  */
+export interface IRigToolResolver {
+  resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
+}
+
 export interface IRigToolResolverOptions {
   buildFolder: string;
   projectPackageJson: IPackageJson;
   rigConfig: RigConfig;
 }
 
-/**
- * @public
- */
-export class RigToolResolver {
+export class RigToolResolver implements IRigToolResolver {
   private _buildFolder: string;
   private _projectPackageJson: IPackageJson;
   private _rigConfig: RigConfig;

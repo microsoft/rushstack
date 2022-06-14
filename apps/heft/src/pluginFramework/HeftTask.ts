@@ -14,7 +14,7 @@ import type {
   IHeftConfigurationJsonPluginSpecifier
 } from '../utilities/CoreConfigFiles';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
 const RESERVED_TASK_NAMES: Set<string> = new Set(['clean']);
 
@@ -115,7 +115,7 @@ export class HeftTask {
     }
   }
 
-  public async getPluginAsync(logger: ScopedLogger): Promise<IHeftTaskPlugin<object | void>> {
+  public async getPluginAsync(logger: IScopedLogger): Promise<IHeftTaskPlugin<object | void>> {
     await this.ensureInitializedAsync();
     if (!this._taskPlugin) {
       this._taskPlugin = await this._taskPluginDefinition!.loadPluginAsync(logger);

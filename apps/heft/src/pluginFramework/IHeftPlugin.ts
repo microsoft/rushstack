@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { HeftTaskSession } from './HeftTaskSession';
-import type { HeftLifecycleSession } from './HeftLifecycleSession';
+import type { IHeftTaskSession } from './HeftTaskSession';
+import type { IHeftLifecycleSession } from './HeftLifecycleSession';
 
 /**
  * @public
  */
 export interface IHeftPlugin<
-  TSession extends HeftLifecycleSession | HeftTaskSession = HeftLifecycleSession | HeftTaskSession,
+  TSession extends IHeftLifecycleSession | IHeftTaskSession = IHeftLifecycleSession | IHeftTaskSession,
   TOptions = void
 > {
   readonly accessor?: object;
@@ -19,11 +19,9 @@ export interface IHeftPlugin<
 /**
  * @public
  */
-export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<HeftLifecycleSession, TOptions> {}
+export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeftLifecycleSession, TOptions> {}
 
 /**
  * @public
  */
-export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<HeftTaskSession, TOptions> {
-  apply(taskSession: HeftTaskSession, heftConfiguration: HeftConfiguration, pluginOptions?: TOptions): void;
-}
+export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskSession, TOptions> {}
