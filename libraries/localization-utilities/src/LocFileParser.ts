@@ -49,37 +49,50 @@ export function selectParserByFilePath(filePath: string): ParserKind {
 export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
   const { parser = selectParserByFilePath(options.filePath) } = options;
 
-  if (parser === 'resx') {
-    const fileCacheKey: string = `${options.filePath}?${options.resxNewlineNormalization || 'none'}`;
-    const parseCacheEntry: IParseCacheEntry | undefined = parseCache.get(fileCacheKey);
-    if (parseCacheEntry) {
-      if (
-        parseCacheEntry.content === options.content &&
-        parseCacheEntry.ignoreString === options.ignoreString
-      ) {
-        return parseCacheEntry.parsedFile;
-      }
+  const fileCacheKey: string = `${options.filePath}?${parser}&${options.resxNewlineNormalization || 'none'}`;
+  const parseCacheEntry: IParseCacheEntry | undefined = parseCache.get(fileCacheKey);
+  if (parseCacheEntry) {
+    if (
+      parseCacheEntry.content === options.content &&
+      parseCacheEntry.ignoreString === options.ignoreString
+    ) {
+      return parseCacheEntry.parsedFile;
+    }
+  }
+
+  let parsedFile: ILocalizationFile;
+  switch (parser) {
+    case 'resx': {
+      parsedFile = readResxAsLocFile(options.content, {
+        terminal: options.terminal,
+        resxFilePath: options.filePath,
+        newlineNormalization: options.resxNewlineNormalization,
+        warnOnMissingComment: !options.ignoreMissingResxComments,
+        ignoreString: options.ignoreString
+      });
+      break;
     }
 
-    const parsedFile: ILocalizationFile = readResxAsLocFile(options.content, {
-      terminal: options.terminal,
-      resxFilePath: options.filePath,
-      newlineNormalization: options.resxNewlineNormalization,
-      warnOnMissingComment: !options.ignoreMissingResxComments,
-      ignoreString: options.ignoreString
-    });
-    parseCache.set(fileCacheKey, {
-      content: options.content,
-      parsedFile,
-      ignoreString: options.ignoreString
-    });
+    case 'loc.json': {
+      parsedFile = parseLocJson(options);
+      break;
+    }
 
-    return parsedFile;
-  } else if (parser === 'loc.json') {
-    return parseLocJson(options);
-  } else if (parser === 'resjson') {
-    return parseResJson(options);
-  } else {
-    throw new Error(`Unsupported parser: ${parser}`);
+    case 'resjson': {
+      parsedFile = parseResJson(options);
+      break;
+    }
+
+    default: {
+      throw new Error(`Unsupported parser: ${parser}`);
+    }
   }
+
+  parseCache.set(fileCacheKey, {
+    content: options.content,
+    parsedFile,
+    ignoreString: options.ignoreString
+  });
+
+  return parsedFile;
 }
