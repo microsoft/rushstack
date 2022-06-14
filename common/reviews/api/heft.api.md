@@ -133,6 +133,8 @@ export interface IHeftLifecycleCleanHookOptions extends IHeftLifecycleHookOption
 export interface IHeftLifecycleHookOptions {
     // (undocumented)
     production: boolean;
+    // (undocumented)
+    verbose: boolean;
 }
 
 // @public (undocumented)
@@ -201,6 +203,8 @@ export interface IHeftTaskCleanHookOptions extends IHeftTaskHookOptions {
 export interface IHeftTaskHookOptions {
     // (undocumented)
     production: boolean;
+    // (undocumented)
+    verbose: boolean;
 }
 
 // @public (undocumented)
