@@ -20,6 +20,8 @@
     "@rushstack/heft": "^0.45.3"
   },
   "dependencies": {
+    "@rushstack/heft-webpack4-plugin": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {

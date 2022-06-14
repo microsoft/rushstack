@@ -5,142 +5,152 @@ import * as path from 'path';
 import * as process from 'process';
 import * as child_process from 'child_process';
 import type {
+  CommandLineFlagParameter,
+  CommandLineStringParameter,
   HeftConfiguration,
-  HeftSession,
-  IBuildStageContext,
-  IBundleSubstage,
-  IHeftFlagParameter,
-  IHeftPlugin,
-  IHeftStringParameter,
-  ScopedLogger
+  HeftTaskSession,
+  IHeftTaskPlugin,
+  IHeftTaskRunHookOptions,
+  IScopedLogger
 } from '@rushstack/heft';
-// TODO: Expose this API
-import { SubprocessTerminator } from '@rushstack/heft/lib/utilities/subprocess/SubprocessTerminator';
-import { FileSystem, Import } from '@rushstack/node-core-library';
+import { FileSystem, Import, SubprocessTerminator } from '@rushstack/node-core-library';
+import { PluginName as Webpack4PluginName } from '@rushstack/heft-webpack4-plugin';
+import type {
+  IWebpackPluginAccessor as IWebpack4PluginAccessor,
+  IWebpackConfiguration as IWebpack4Configuration
+} from '@rushstack/heft-webpack4-plugin';
+import { PluginName as Webpack5PluginName } from '@rushstack/heft-webpack5-plugin';
+import type {
+  IWebpackPluginAccessor as IWebpack5PluginAccessor,
+  IWebpackConfiguration as IWebpack5Configuration
+} from '@rushstack/heft-webpack5-plugin';
 
 const PLUGIN_NAME: string = 'ServerlessStackPlugin';
-const TASK_NAME: string = 'heft-serverless-stack';
 const SST_CLI_PACKAGE_NAME: string = '@serverless-stack/cli';
 
-/**
- * Options for `ServerlessStackPlugin`.
- *
- * @public
- */
 export interface IServerlessStackPluginOptions {}
 
-/** @public */
-export class ServerlessStackPlugin implements IHeftPlugin<IServerlessStackPluginOptions> {
-  public readonly pluginName: string = PLUGIN_NAME;
-
-  private _logger!: ScopedLogger;
+export default class ServerlessStackPlugin implements IHeftTaskPlugin<IServerlessStackPluginOptions> {
+  private _logger!: IScopedLogger;
 
   public apply(
-    heftSession: HeftSession,
+    taskSession: HeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IServerlessStackPluginOptions
   ): void {
-    this._logger = heftSession.requestScopedLogger(TASK_NAME);
+    this._logger = taskSession.logger;
 
-    const sstParameter: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
-      associatedActionNames: ['test', 'build', 'start'],
-      parameterLongName: '--sst',
-      // Once https://github.com/serverless-stack/serverless-stack/issues/1537 is fixed, we may be
-      // eliminate the need for this parameter.
-      description: 'Invokes the SST postprocessing - requires AWS credentials'
-    });
+    // Once https://github.com/serverless-stack/serverless-stack/issues/1537 is fixed, we may be
+    // eliminate the need for this parameter.
+    const sstParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
+      '--sst'
+    ) as CommandLineFlagParameter;
 
-    const sstStageParameter: IHeftStringParameter = heftSession.commandLine.registerStringParameter({
-      associatedActionNames: ['test', 'build', 'start'],
-      parameterLongName: '--sst-stage',
-      argumentName: 'STAGE_NAME',
-      description:
-        'Specifies the Serverless Stack stage; equivalent to to the "--stage" parameter from the "sst" CLI'
-    });
+    const sstStageParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
+      '--sst-stage'
+    ) as CommandLineStringParameter;
 
+    // Only tap if the --sst flag is set.
+    if (sstParameter.value) {
+      taskSession.requestAccessToPluginByName(
+        '@rushstack/heft-webpack4-plugin',
+        Webpack4PluginName,
+        async (accessor: IWebpack4PluginAccessor) => {
+          accessor.onConfigureWebpackHook?.tapPromise(
+            { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
+            async (config: IWebpack4Configuration | null) => {
+              // Discard Webpack's configuration to prevent Webpack from running
+              this._logger.terminal.writeVerboseLine(
+                'The command line includes "--sst", redirecting Webpack to Serverless Stack'
+              );
+              return null;
+            }
+          );
+        }
+      );
+
+      taskSession.requestAccessToPluginByName(
+        '@rushstack/heft-webpack5-plugin',
+        Webpack5PluginName,
+        async (accessor: IWebpack5PluginAccessor) => {
+          accessor.onConfigureWebpackHook?.tapPromise(
+            { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
+            async (config: IWebpack5Configuration | null) => {
+              // Discard Webpack's configuration to prevent Webpack from running
+              this._logger.terminal.writeVerboseLine(
+                'The command line includes "--sst", redirecting Webpack to Serverless Stack'
+              );
+              return null;
+            }
+          );
+        }
+      );
+
+      taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
+        // TODO: Handle watch / serve mode
+        await this._runServerlessStackAsync({
+          taskSession,
+          heftConfiguration,
+          sstStage: sstStageParameter.value,
+          debugMode: taskSession.debugMode,
+          // serveMode:
+          verbose: runOptions.verbose
+        });
+      });
+    }
+  }
+
+  private async _runServerlessStackAsync(options: {
+    taskSession: HeftTaskSession;
+    heftConfiguration: HeftConfiguration;
+    sstStage?: string;
+    debugMode?: boolean;
+    serveMode?: boolean;
+    verbose?: boolean;
+  }): Promise<void> {
     let sstCliPackagePath: string;
-
     try {
       sstCliPackagePath = Import.resolvePackage({
         packageName: SST_CLI_PACKAGE_NAME,
-        baseFolderPath: heftConfiguration.buildFolder
+        baseFolderPath: options.heftConfiguration.buildFolder
       });
     } catch (e) {
       throw new Error(
-        `The ${TASK_NAME} task cannot start because your project does not seem to have a dependency on the` +
-          ` "${SST_CLI_PACKAGE_NAME}" package: ` +
+        `The ${options.taskSession.taskName} task cannot start because your project does not seem to have ` +
+          `a dependency on the "${SST_CLI_PACKAGE_NAME}" package: ` +
           e.message
       );
     }
 
     const sstCliEntryPoint: string = path.join(sstCliPackagePath, 'bin/scripts.js');
-    if (!FileSystem.exists(sstCliEntryPoint)) {
+    if (!(await FileSystem.existsAsync(sstCliEntryPoint))) {
       throw new Error(
-        `The ${TASK_NAME} task cannot start because the entry point was not found:\n` + sstCliEntryPoint
+        `The ${options.taskSession.taskName} task cannot start because the entry point was not found:\n` +
+          sstCliEntryPoint
       );
     }
 
     this._logger.terminal.writeVerboseLine('Found SST package in' + sstCliPackagePath);
 
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        if (!sstParameter.value) {
-          bundle.hooks.configureWebpack.tap(
-            { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-            (webpackConfiguration: unknown) => {
-              // Discard Webpack's configuration to prevent Webpack from running
-              return null;
-            }
-          );
-        }
-
-        bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          if (!sstParameter.value) {
-            this._logger.terminal.writeLine(
-              'Skipping SST operations because the "--sst" command-line parameter was not specified.'
-            );
-          } else {
-            await this._onBundleRunAsync({
-              heftSession,
-              heftConfiguration,
-              serveMode: build.properties.serveMode,
-              sstCliEntryPoint,
-              sstCliPackagePath,
-              sstStageParameter
-            });
-          }
-        });
-      });
-    });
-  }
-
-  private async _onBundleRunAsync(options: {
-    heftSession: HeftSession;
-    heftConfiguration: HeftConfiguration;
-    serveMode: boolean;
-    sstCliEntryPoint: string;
-    sstCliPackagePath: string;
-    sstStageParameter: IHeftStringParameter;
-  }): Promise<void> {
     const sstCommandArgs: string[] = [];
-    sstCommandArgs.push(options.sstCliEntryPoint);
+    sstCommandArgs.push(sstCliEntryPoint);
 
     if (options.serveMode) {
       sstCommandArgs.push('start');
     } else {
       sstCommandArgs.push('build');
     }
-    if (options.heftSession.debugMode) {
+    if (options.debugMode) {
       sstCommandArgs.push('--verbose');
     }
-    if (options.sstStageParameter.value) {
+    if (options.sstStage) {
       sstCommandArgs.push('--stage');
-      sstCommandArgs.push(options.sstStageParameter.value);
+      sstCommandArgs.push(options.sstStage);
     }
 
     this._logger.terminal.writeVerboseLine('Launching child process: ' + JSON.stringify(sstCommandArgs));
 
-    const sstCommandEnv: NodeJS.ProcessEnv = this._getWorkaroundEnvironment(options.sstCliPackagePath);
+    const sstCommandEnv: NodeJS.ProcessEnv = this._getWorkaroundEnvironment(sstCliPackagePath);
 
     const sstCommandResult: child_process.ChildProcess = child_process.spawn(
       process.execPath,
