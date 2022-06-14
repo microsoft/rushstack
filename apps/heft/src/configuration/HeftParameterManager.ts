@@ -98,7 +98,7 @@ export class HeftParameterManager {
     // Synonym used to avoid conflicts with other parameters.
     const synonym: string = this._generateScopedParameterLongName(parameterConfiguration);
     const parameterLongName: string = useSynonymForLongName ? synonym : parameter.longName;
-    // Only use undocumented synonyms when the long name isn't already being set to the synonym.
+    // Only use synonyms when the long name isn't already being set to the synonym.
     const synonyms: string[] | undefined = useSynonymForLongName ? undefined : [synonym];
 
     // Short names are excluded since it would be difficult and confusing to de-dupe/handle shortname conflicts
