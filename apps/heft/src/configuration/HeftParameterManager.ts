@@ -193,7 +193,7 @@ export class HeftParameterManager {
     if (pluginParameters.has(parameter.longName)) {
       throw new Error(
         `Parameter "${parameter.longName}" is defined multiple times by the providing plugin ` +
-          `"${pluginDefinition.pluginName}".`
+          `"${pluginDefinition.pluginName}" in package "${pluginDefinition.pluginPackageName}".`
       );
     }
     // Add the parameter to the map using the original long name, so that it can be retrieved by plugins
@@ -202,6 +202,7 @@ export class HeftParameterManager {
   }
 
   private _generateScopedParameterLongName(parameterConfiguration: IParameterConfiguration): string {
+    // Scoped long name is guranteed to be unique since plugin names must be unique.
     let parameterLongName: string = parameterConfiguration.parameter.longName;
     if (parameterLongName.startsWith('--')) {
       parameterLongName = parameterLongName.slice(2);
