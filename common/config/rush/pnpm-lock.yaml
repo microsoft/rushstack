@@ -1664,7 +1664,6 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@types/tapable': 1.0.6
-      '@types/webpack': 4.41.24
       '@types/webpack-dev-server': 3.11.3
       tapable: 1.1.3
       webpack-dev-server: 3.11.3_webpack@4.44.2
@@ -1673,6 +1672,7 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
+      '@types/webpack': 4.41.24
       webpack: 4.44.2
 
   ../../heft-plugins/heft-webpack5-plugin:
