@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add FileError class to enable throwing TypeScript-style error messages. Add SubprocessTerminator class to provide utilities for ending a child_process and all its children.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

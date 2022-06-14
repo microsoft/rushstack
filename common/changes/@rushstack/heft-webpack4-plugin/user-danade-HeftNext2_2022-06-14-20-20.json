@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "comment": "Updated for compatibility with the latest version of Heft",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin"
+}

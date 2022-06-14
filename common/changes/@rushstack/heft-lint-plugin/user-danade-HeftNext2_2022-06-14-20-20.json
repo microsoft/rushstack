@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Updated for compatibility with the latest version of Heft",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}

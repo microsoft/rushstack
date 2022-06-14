@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "BREAKING CHANGES - Heft has been rewritten to improve performance and enable more extensive configuration. For more information on the included changes, see the PR notes: https://github.com/microsoft/rushstack/pull/3468",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

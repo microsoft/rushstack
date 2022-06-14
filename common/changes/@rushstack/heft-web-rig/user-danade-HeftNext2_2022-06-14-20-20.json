@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Updated for compatibility with the latest version of Heft",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

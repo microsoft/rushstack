@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Allow API Extractor configuration to be loaded regardless of the existence of target typings files",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Add parameter synonyms. Similar to undocumented synonyms, synonyms allow referencing a parameter by an alternate name. Synonyms will also appear in the \"--help\" text.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}
