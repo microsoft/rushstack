@@ -41,6 +41,13 @@ function readPackage(packageJson, context) {
       delete packageJson.dependencies['lerna'];
       break;
     }
+
+    case '@jest/test-result': {
+      // The `@jest/test-result` package takes undeclared dependencies on `jest-haste-map`
+      // and `jest-resolve`
+      packageJson.dependencies['jest-haste-map'] = packageJson.version;
+      packageJson.dependencies['jest-resolve'] = packageJson.version;
+    }
   }
 
   return packageJson;
