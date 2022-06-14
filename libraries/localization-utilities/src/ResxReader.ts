@@ -4,7 +4,7 @@
 import { FileSystem, ITerminal, Text, NewlineKind } from '@rushstack/node-core-library';
 import { XmlDocument, XmlElement } from 'xmldoc';
 
-import { ILocalizedString, ILocalizationFile } from './interfaces';
+import type { ILocalizedString, ILocalizationFile, IgnoreStringFunction } from './interfaces';
 
 const STRING_NAME_RESX: RegExp = /^[A-z_$][A-z0-9_$]*$/;
 
@@ -16,6 +16,11 @@ export interface IResxReaderOptions {
   terminal: ITerminal;
   newlineNormalization: NewlineKind | undefined;
   warnOnMissingComment: boolean;
+  /**
+   * Optionally, provide a function that will be called for each string. If the function returns `true`
+   * the string will not be included.
+   */
+  ignoreString?: IgnoreStringFunction;
 }
 
 interface ILoggingFunctions {
@@ -63,6 +68,7 @@ export function readResxAsLocFile(resxContents: string, options: IResxReaderOpti
 }
 
 function _readResxAsLocFileInternal(options: IResxReaderOptionsInternal): ILocalizationFile {
+  const { ignoreString } = options;
   const xmlDocument: XmlDocument = new XmlDocument(options.resxContents);
 
   if (xmlDocument.name !== 'root') {
@@ -92,7 +98,7 @@ function _readResxAsLocFileInternal(options: IResxReaderOptionsInternal): ILocal
 
               const locString: ILocalizedString | undefined = _readDataElement(options, childNode);
 
-              if (locString) {
+              if (locString && !ignoreString?.(options.resxFilePath, stringName)) {
                 locFile[stringName] = locString;
               }
             }

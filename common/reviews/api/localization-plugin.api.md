@@ -4,6 +4,7 @@
 
 ```ts
 
+import { IgnoreStringFunction } from '@rushstack/localization-utilities';
 import { ILocalizationFile } from '@rushstack/localization-utilities';
 import { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 import { ITerminal } from '@rushstack/node-core-library';
@@ -38,6 +39,7 @@ export interface ILocalizationPluginOptions {
     // @deprecated (undocumented)
     filesToIgnore?: string[];
     globsToIgnore?: string[];
+    ignoreString?: IgnoreStringFunction;
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
@@ -129,6 +131,7 @@ export interface _IStringPlaceholder {
 export interface ITypingsGenerationOptions {
     exportAsDefault?: boolean;
     generatedTsFolder: string;
+    // @deprecated (undocumented)
     ignoreString?: (resxFilePath: string, stringName: string) => boolean;
     processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
     sourceRoot?: string;

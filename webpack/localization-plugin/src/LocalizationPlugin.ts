@@ -130,6 +130,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
       throw new Error('The filesToIgnore option is no longer supported. Please use globsToIgnore instead.');
     }
 
+    if (options.typingsOptions?.ignoreString) {
+      throw new Error(
+        'The typingsOptions.ignoreString option is no longer supported. Please use the ignoreString ' +
+          'option directly on the constructor options object instead.'
+      );
+    }
+
     this._options = options;
   }
 
@@ -174,7 +181,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
         exportAsDefault: this._options.typingsOptions.exportAsDefault,
         globsToIgnore: this._options.globsToIgnore,
-        ignoreString: this._options.typingsOptions.ignoreString,
+        ignoreString: this._options.ignoreString,
         processComment: this._options.typingsOptions.processComment
       });
     } else {
@@ -187,7 +194,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
       globsToIgnore: this._globsToIgnore,
       localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER,
       resxNewlineNormalization: this._resxNewlineNormalization,
-      ignoreMissingResxComments: this._ignoreMissingResxComments
+      ignoreMissingResxComments: this._ignoreMissingResxComments,
+      ignoreString: this._options.ignoreString
     };
 
     if (errors.length > 0 || warnings.length > 0) {

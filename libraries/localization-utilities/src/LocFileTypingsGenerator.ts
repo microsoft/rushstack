@@ -4,7 +4,7 @@
 import { StringValuesTypingsGenerator, IStringValueTyping } from '@rushstack/typings-generator';
 import { ITerminal, NewlineKind } from '@rushstack/node-core-library';
 
-import { ILocalizationFile } from './interfaces';
+import type { IgnoreStringFunction, ILocalizationFile } from './interfaces';
 import { parseLocFile } from './LocFileParser';
 
 /**
@@ -18,7 +18,7 @@ export interface ITypingsGeneratorOptions {
   globsToIgnore?: string[];
   resxNewlineNormalization?: NewlineKind | undefined;
   ignoreMissingResxComments?: boolean | undefined;
-  ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+  ignoreString?: IgnoreStringFunction;
   processComment?: (
     comment: string | undefined,
     resxFilePath: string,
@@ -43,23 +43,23 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
           content: fileContents,
           terminal: this._options.terminal!,
           resxNewlineNormalization: options.resxNewlineNormalization,
-          ignoreMissingResxComments: options.ignoreMissingResxComments
+          ignoreMissingResxComments: options.ignoreMissingResxComments,
+          ignoreString
         });
 
         const typings: IStringValueTyping[] = [];
 
         // eslint-disable-next-line guard-for-in
         for (const stringName in locFileData) {
-          if (!ignoreString?.(resxFilePath, stringName)) {
-            let comment: string | undefined = locFileData[stringName].comment;
-            if (processComment) {
-              comment = processComment(comment, resxFilePath, stringName);
-            }
-            typings.push({
-              exportName: stringName,
-              comment
-            });
+          let comment: string | undefined = locFileData[stringName].comment;
+          if (processComment) {
+            comment = processComment(comment, resxFilePath, stringName);
           }
+
+          typings.push({
+            exportName: stringName,
+            comment
+          });
         }
 
         return { typings };

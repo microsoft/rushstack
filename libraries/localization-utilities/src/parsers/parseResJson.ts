@@ -8,8 +8,8 @@ import { ILocalizationFile, IParseFileOptions } from '../interfaces';
 /**
  * @public
  */
-export function parseResJson(options: IParseFileOptions): ILocalizationFile {
-  const resjsonFile: Record<string, string> = JsonFile.parseString(options.content);
+export function parseResJson({ content, ignoreString, filePath }: IParseFileOptions): ILocalizationFile {
+  const resjsonFile: Record<string, string> = JsonFile.parseString(content);
   const parsedFile: ILocalizationFile = {};
 
   const usedComments: Map<string, boolean> = new Map();
@@ -22,7 +22,10 @@ export function parseResJson(options: IParseFileOptions): ILocalizationFile {
       const commentKey: string = `_${key}.comment`;
       const comment: string | undefined = resjsonFile[commentKey];
       usedComments.set(commentKey, true);
-      parsedFile[key] = { value, comment };
+
+      if (!ignoreString?.(filePath, key)) {
+        parsedFile[key] = { value, comment };
+      }
     }
   }
 

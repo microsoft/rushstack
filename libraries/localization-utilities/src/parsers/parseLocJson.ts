@@ -13,12 +13,24 @@ const LOC_JSON_SCHEMA: JsonSchema = JsonSchema.fromFile(LOC_JSON_SCHEMA_PATH);
 /**
  * @public
  */
-export function parseLocJson(options: IParseFileOptions): ILocalizationFile {
-  const parsedFile: ILocalizationFile = JsonFile.parseString(options.content);
+export function parseLocJson({ content, filePath, ignoreString }: IParseFileOptions): ILocalizationFile {
+  const parsedFile: ILocalizationFile = JsonFile.parseString(content);
   try {
-    LOC_JSON_SCHEMA.validateObject(parsedFile, options.filePath);
+    LOC_JSON_SCHEMA.validateObject(parsedFile, filePath);
   } catch (e) {
     throw new Error(`The loc file is invalid. Error: ${e}`);
   }
-  return parsedFile;
+
+  if (ignoreString) {
+    const newParsedFile: ILocalizationFile = {};
+    for (const [key, stringData] of Object.entries(parsedFile)) {
+      if (!ignoreString(filePath, key)) {
+        newParsedFile[key] = stringData;
+      }
+    }
+
+    return newParsedFile;
+  } else {
+    return parsedFile;
+  }
 }
