@@ -1,14 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`parseLocJson parses a valid file 1`] = `
-Object {
-  "foo": Object {
-    "comment": "A string",
-    "value": "Foo",
-  },
-}
-`;
-
 exports[`parseLocJson throws on invalid file 1`] = `
 "The loc file is invalid. Error: Error: JSON validation failed:
 test.loc.json
