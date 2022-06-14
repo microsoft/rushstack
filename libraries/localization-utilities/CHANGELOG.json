@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/localization-utilities_v0.4.0",
+      "date": "Tue, 14 Jun 2022 23:11:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the ability to ignore strings from loc file parsing."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@rushstack/localization-utilities_v0.3.0",
       "date": "Tue, 14 Jun 2022 00:17:29 GMT",

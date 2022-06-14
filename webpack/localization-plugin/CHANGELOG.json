@@ -2,6 +2,23 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@rushstack/localization-plugin_v0.14.0",
+      "date": "Tue, 14 Jun 2022 23:11:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Move the `ignoreString` option from the `typingsGeneration` object to the root of the options object. It is now used to remove strings from both typings and from loc file parsing."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.2",
       "tag": "@rushstack/localization-plugin_v0.13.2",
       "date": "Tue, 14 Jun 2022 00:17:29 GMT",

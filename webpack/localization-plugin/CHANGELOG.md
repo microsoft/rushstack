@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Tue, 14 Jun 2022 00:17:29 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Jun 2022 23:11:36 GMT and should not be manually modified.
+
+## 0.14.0
+Tue, 14 Jun 2022 23:11:36 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Move the `ignoreString` option from the `typingsGeneration` object to the root of the options object. It is now used to remove strings from both typings and from loc file parsing.
 
 ## 0.13.2
 Tue, 14 Jun 2022 00:17:29 GMT

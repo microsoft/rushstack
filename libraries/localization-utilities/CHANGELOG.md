@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Tue, 14 Jun 2022 00:17:29 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Jun 2022 23:11:36 GMT and should not be manually modified.
+
+## 0.4.0
+Tue, 14 Jun 2022 23:11:36 GMT
+
+### Minor changes
+
+- Add the ability to ignore strings from loc file parsing.
 
 ## 0.3.0
 Tue, 14 Jun 2022 00:17:29 GMT
