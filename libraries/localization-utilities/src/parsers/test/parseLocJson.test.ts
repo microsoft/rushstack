@@ -3,7 +3,6 @@
 
 import { IgnoreStringFunction } from '../../interfaces';
 import { parseLocJson } from '../parseLocJson';
-import { serializeLocFile } from './serializeLocFile';
 
 describe(parseLocJson.name, () => {
   it('parses a valid file', () => {
@@ -19,18 +18,11 @@ describe(parseLocJson.name, () => {
     });
 
     expect(
-      serializeLocFile(
-        parseLocJson({
-          content,
-          filePath: 'test.loc.json'
-        })
-      )
-    ).toMatchInlineSnapshot(`
-      "key | value | comment
-      ------------------------------
-       foo | Foo   | A string
-       bar | Bar   | Another string"
-    `);
+      parseLocJson({
+        content,
+        filePath: 'test.loc.json'
+      })
+    ).toMatchSnapshot();
   });
 
   it('throws on invalid file', () => {
@@ -68,30 +60,15 @@ describe(parseLocJson.name, () => {
       );
 
     expect(
-      serializeLocFile(
-        parseLocJson({
-          content,
-          filePath: 'test.loc.json',
-          ignoreString: ignoredStringFunction as IgnoreStringFunction
-        })
-      )
-    ).toMatchInlineSnapshot(`
-      "key | value | comment
-      ------------------------
-       foo | Foo   | A string"
-    `);
+      parseLocJson({
+        content,
+        filePath: 'test.loc.json',
+        ignoreString: ignoredStringFunction as IgnoreStringFunction
+      })
+    ).toMatchSnapshot('Loc file');
 
-    expect((ignoredStringFunction as unknown as jest.SpyInstance).mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "test.loc.json",
-          "foo",
-        ],
-        Array [
-          "test.loc.json",
-          "bar",
-        ],
-      ]
-    `);
+    expect((ignoredStringFunction as unknown as jest.SpyInstance).mock.calls).toMatchSnapshot(
+      'ignoreStrings calls'
+    );
   });
 });
