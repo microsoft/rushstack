@@ -53,9 +53,10 @@ function fixup(packageJson, dependencies) {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
+  // No need to fixup peerDependencies because these are just a version specifier
+  // and do not control which version is installed.
   fixup(packageJson, packageJson.dependencies);
   fixup(packageJson, packageJson.devDependencies);
-  fixup(packageJson, packageJson.peerDependencies);
   fixup(packageJson, packageJson.optionalDependencies);
   return packageJson;
 }
