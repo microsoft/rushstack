@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getPseudolocalizer gets distinct pseudolocalizers: bar 1`] = `"-Bar-ţēxţ-Bar-"`;
+
+exports[`getPseudolocalizer gets distinct pseudolocalizers: foo 1`] = `"-Foo-ţēxţ-Foo-"`;

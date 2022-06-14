@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 10 May 2022 01:20:43 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jun 2022 09:37:04 GMT and should not be manually modified.
+
+## 7.18.0
+Tue, 07 Jun 2022 09:37:04 GMT
+
+### Minor changes
+
+- Add an "isReadonly" field to ApiProperty, ApiPropertySignature, and ApiVariable
+- Add an "isProtected" field to ApiConstructor, ApiMethod, and ApiProperty
 
 ## 7.17.3
 Tue, 10 May 2022 01:20:43 GMT

@@ -5,17 +5,13 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.45.3.tgz
-      '@rushstack/heft-lint-plugin': file:rushstack-heft-lint-plugin-0.1.0.tgz
-      '@rushstack/heft-typescript-plugin': file:rushstack-heft-typescript-plugin-0.1.0.tgz
+      '@rushstack/heft': file:rushstack-heft-0.45.5.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.6.3
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.0.tgz_eslint@8.7.0+typescript@4.6.3
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.3.tgz
-      '@rushstack/heft-lint-plugin': file:../temp/tarballs/rushstack-heft-lint-plugin-0.1.0.tgz_@rushstack+heft@0.45.3
-      '@rushstack/heft-typescript-plugin': file:../temp/tarballs/rushstack-heft-typescript-plugin-0.1.0.tgz_@rushstack+heft@0.45.3
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.5.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.6.3
       typescript: 4.6.3
@@ -23,17 +19,13 @@ importers:
   typescript-v3-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.45.3.tgz
-      '@rushstack/heft-lint-plugin': file:rushstack-heft-lint-plugin-0.1.0.tgz
-      '@rushstack/heft-typescript-plugin': file:rushstack-heft-typescript-plugin-0.1.0.tgz
+      '@rushstack/heft': file:rushstack-heft-0.45.5.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.6.3
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.0.tgz_eslint@8.7.0+typescript@4.6.3
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.3.tgz
-      '@rushstack/heft-lint-plugin': file:../temp/tarballs/rushstack-heft-lint-plugin-0.1.0.tgz_@rushstack+heft@0.45.3
-      '@rushstack/heft-typescript-plugin': file:../temp/tarballs/rushstack-heft-typescript-plugin-0.1.0.tgz_@rushstack+heft@0.45.3
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.5.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.6.3
       typescript: 4.6.3
@@ -838,7 +830,7 @@ packages:
     dev: true
 
   /glob-escape/0.0.2:
-    resolution: {integrity: sha1-nCf3gh7RwTd1gvPv2VWOP2dWKO0=}
+    resolution: {integrity: sha512-L/cXYz8x7qer1HAyUQ+mbjcUsJVdpRxpAf7CwqHoNBs9vTpABlGfNN4tzkDxt+u3Z7ZncVyKlCNPtzb0R/7WbA==}
     engines: {node: '>= 0.10'}
     dev: true
 
@@ -854,6 +846,17 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       is-glob: 4.0.3
+    dev: true
+
+  /glob/7.0.6:
+    resolution: {integrity: sha512-f8c0rE8JiCxpa52kWPAOa3ZaYEnzofDzCQLCn3Vdk0Z5OVLq3BsRFJI4S4ykpeVW6QMGBUkMeUpoEgWnMTnw5Q==}
+    dependencies:
+      fs.realpath: 1.0.0
+      inflight: 1.0.6
+      inherits: 2.0.4
+      minimatch: 3.0.4
+      once: 1.4.0
+      path-is-absolute: 1.0.1
     dev: true
 
   /glob/7.1.7:
@@ -1069,7 +1072,7 @@ packages:
     dev: true
 
   /jju/1.4.0:
-    resolution: {integrity: sha1-o6vicYryQaKykE+EpiWXDzia4yo=}
+    resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==}
     dev: true
 
   /js-tokens/4.0.0:
@@ -1100,7 +1103,7 @@ packages:
     dev: true
 
   /jsonfile/4.0.0:
-    resolution: {integrity: sha1-h3Gq4HmbZAdrdmQPygWPnBDjPss=}
+    resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
     optionalDependencies:
       graceful-fs: 4.2.6
     dev: true
@@ -1127,11 +1130,11 @@ packages:
     dev: true
 
   /lodash.get/4.4.2:
-    resolution: {integrity: sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=}
+    resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
     dev: true
 
   /lodash.isequal/4.5.0:
-    resolution: {integrity: sha1-QVxEePK8wwEgwizhDtMib30+GOA=}
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
     dev: true
 
   /lodash.merge/4.6.2:
@@ -1196,7 +1199,7 @@ packages:
     dev: true
 
   /object-assign/4.1.1:
-    resolution: {integrity: sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM=}
+    resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
     dev: true
 
@@ -1254,7 +1257,7 @@ packages:
     dev: true
 
   /once/1.4.0:
-    resolution: {integrity: sha1-WDsap3WWHUsROsF9nFC6753Xa9E=}
+    resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
     dependencies:
       wrappy: 1.0.2
     dev: true
@@ -1743,10 +1746,10 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.45.3.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.45.3.tgz}
+  file:../temp/tarballs/rushstack-heft-0.45.5.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.45.5.tgz}
     name: '@rushstack/heft'
-    version: 0.45.3
+    version: 0.45.5
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:

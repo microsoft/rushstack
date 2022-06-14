@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1005,
+    "schemaVersion": 1006,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -276,13 +276,13 @@
                       "text": ";"
                     }
                   ],
-                  "isOptional": false,
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 3,
                     "endIndex": 4
                   },
                   "releaseTag": "Beta",
+                  "isProtected": false,
                   "overloadIndex": 1,
                   "parameters": [
                     {
@@ -294,6 +294,7 @@
                       "isOptional": false
                     }
                   ],
+                  "isOptional": false,
                   "name": "myMethod"
                 }
               ],

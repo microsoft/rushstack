@@ -36,6 +36,7 @@
     "internationalCharacters",
     "namedDefaultImport",
     "preapproved",
+    "readonlyDeclarations",
     "spanSorting",
     "typeOf",
     "typeOf2",

@@ -21,13 +21,16 @@ import {
   STAGE_BEFORE,
   STAGE_AFTER
 } from './Constants';
-import { getIdentifier } from './MinifiedIdentifier';
-import {
+import type {
   IMinifierConnection,
   IModuleMinifier,
-  IModuleMinifierPluginOptions,
   IModuleMinificationResult,
-  IModuleMinificationErrorResult,
+  IModuleMinificationErrorResult
+} from '@rushstack/module-minifier';
+import { getIdentifier } from '@rushstack/module-minifier';
+
+import {
+  IModuleMinifierPluginOptions,
   IModuleMap,
   IAssetMap,
   IExtendedModule,
@@ -41,6 +44,8 @@ import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
 import { AsyncImportCompressionPlugin } from './AsyncImportCompressionPlugin';
 import { PortableMinifierModuleIdsPlugin } from './PortableMinifierIdsPlugin';
+
+import './OverrideWebpackIdentifierAllocation';
 
 // The name of the plugin, for use in taps
 const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
@@ -241,9 +246,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
         const getRealId: (id: number | string) => number | string | undefined = (id: number | string) =>
           this.hooks.finalModuleId.call(id, compilation);
 
-        const postProcessCode: (code: ReplaceSource, context: IPostProcessFragmentContext) => ReplaceSource =
-          (code: ReplaceSource, context: IPostProcessFragmentContext) =>
-            this.hooks.postProcessCodeFragment.call(code, context);
+        const postProcessCode: (
+          code: ReplaceSource,
+          context: IPostProcessFragmentContext
+        ) => ReplaceSource = (code: ReplaceSource, context: IPostProcessFragmentContext) =>
+          this.hooks.postProcessCodeFragment.call(code, context);
 
         /**
          * Callback to invoke when a file has finished minifying.

@@ -2,6 +2,50 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.25.0",
+      "tag": "@microsoft/api-extractor_v7.25.0",
+      "date": "Tue, 07 Jun 2022 09:37:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an \"isReadonly\" field to the doc model to indicate whether a property or variable is readonly"
+          },
+          {
+            "comment": "Add an \"isProtected\" field to the doc model to indicate protected class members"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.18.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.24.2",
+      "tag": "@microsoft/api-extractor_v7.24.2",
+      "date": "Wed, 25 May 2022 22:25:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where API Extractor would fail to run on a project where `\"moduleResolution\"` is set to `\"Node16\"` in `tsconfig.json`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.24.1",
+      "tag": "@microsoft/api-extractor_v7.24.1",
+      "date": "Thu, 19 May 2022 15:13:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a recent regression that produced an error \"Cannot read properties of undefined\" (GitHub #3423)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.24.0",
       "tag": "@microsoft/api-extractor_v7.24.0",
       "date": "Sat, 14 May 2022 03:01:27 GMT",

@@ -1,6 +1,28 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 14 May 2022 03:01:27 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jun 2022 09:37:04 GMT and should not be manually modified.
+
+## 7.25.0
+Tue, 07 Jun 2022 09:37:04 GMT
+
+### Minor changes
+
+- Add an "isReadonly" field to the doc model to indicate whether a property or variable is readonly
+- Add an "isProtected" field to the doc model to indicate protected class members
+
+## 7.24.2
+Wed, 25 May 2022 22:25:07 GMT
+
+### Patches
+
+- Fix an issue where API Extractor would fail to run on a project where `"moduleResolution"` is set to `"Node16"` in `tsconfig.json`
+
+## 7.24.1
+Thu, 19 May 2022 15:13:20 GMT
+
+### Patches
+
+- Fix a recent regression that produced an error "Cannot read properties of undefined" (GitHub #3423)
 
 ## 7.24.0
 Sat, 14 May 2022 03:01:27 GMT

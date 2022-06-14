@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import * as path from 'path';
 import * as rushLib from '@microsoft/rush-lib';
 
-type CommandName = 'rush' | 'rushx' | undefined;
+type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
 
 /**
  * Both "rush" and "rushx" share the same src/start.ts entry point.  This makes it
@@ -16,9 +16,10 @@ type CommandName = 'rush' | 'rushx' | undefined;
  */
 export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
-    if (RushCommandSelector._getCommandName() === 'rushx') {
+    const commandName: CommandName = RushCommandSelector._getCommandName();
+    if (commandName !== 'rush' && commandName !== undefined) {
       RushCommandSelector._failWithError(
-        `This repository is using Rush version ${version} which does not support the "rushx" command`
+        `This repository is using Rush version ${version} which does not support the ${commandName} command`
       );
     }
   }
@@ -36,7 +37,20 @@ export class RushCommandSelector {
       RushCommandSelector._failWithError(`Unable to find the "Rush" entry point in @microsoft/rush-lib`);
     }
 
-    if (RushCommandSelector._getCommandName() === 'rushx') {
+    const commandName: CommandName = RushCommandSelector._getCommandName();
+
+    if (commandName === 'rush-pnpm') {
+      if (!Rush.launchRushPnpm) {
+        RushCommandSelector._failWithError(
+          `This repository is using Rush version ${Rush.version}` +
+            ` which does not support the "rush-pnpm" command`
+        );
+      }
+      Rush.launchRushPnpm(launcherVersion, {
+        isManaged: options.isManaged,
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      });
+    } else if (commandName === 'rushx') {
       if (!Rush.launchRushX) {
         RushCommandSelector._failWithError(
           `This repository is using Rush version ${Rush.version}` +
@@ -60,11 +74,14 @@ export class RushCommandSelector {
       // argv[0]: "C:\\Program Files\\nodejs\\node.exe"
       // argv[1]: "C:\\Program Files\\nodejs\\node_modules\\@microsoft\\rush\\bin\\rushx"
       const basename: string = path.basename(process.argv[1]).toUpperCase();
-      if (basename === 'RUSHX') {
-        return 'rushx';
-      }
       if (basename === 'RUSH') {
         return 'rush';
+      }
+      if (basename === 'RUSH-PNPM') {
+        return 'rush-pnpm';
+      }
+      if (basename === 'RUSHX') {
+        return 'rushx';
       }
     }
     return undefined;

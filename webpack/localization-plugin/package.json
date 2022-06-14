@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/localization-plugin",
-  "version": "0.10.20",
+  "version": "0.13.2",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "dist/localization-plugin.d.ts",
@@ -15,7 +15,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/set-webpack-public-path-plugin": "^3.3.36",
+    "@rushstack/set-webpack-public-path-plugin": "^3.3.39",
     "@types/webpack": "^4.39.0",
     "webpack": "^4.31.0"
   },
@@ -28,16 +28,13 @@
     }
   },
   "dependencies": {
+    "@rushstack/localization-utilities": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/typings-generator": "workspace:*",
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
-    "decache": "~4.5.1",
     "loader-utils": "~1.1.0",
     "lodash": "~4.17.15",
-    "minimatch": "~3.0.3",
-    "pseudolocale": "~1.1.0",
-    "xmldoc": "~1.1.2"
+    "minimatch": "~3.0.3"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
@@ -48,7 +45,6 @@
     "@types/lodash": "4.14.116",
     "@types/minimatch": "3.0.5",
     "@types/webpack": "4.41.24",
-    "@types/xmldoc": "1.1.4",
     "webpack": "~4.44.2"
   }
 }

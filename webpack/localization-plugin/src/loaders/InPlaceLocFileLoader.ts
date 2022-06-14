@@ -3,9 +3,8 @@
 
 import { loader } from 'webpack';
 import { Terminal } from '@rushstack/node-core-library';
+import { ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
-import { ILocalizationFile } from '../interfaces';
-import { LocFileParser } from '../utilities/LocFileParser';
 import { loaderFactory, IBaseLoaderOptions } from './LoaderFactory';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 
@@ -15,7 +14,7 @@ export default loaderFactory(function (
   content: string,
   options: IBaseLoaderOptions
 ) {
-  const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
+  const locFileData: ILocalizationFile = parseLocFile({
     ...options,
     content,
     filePath: locFilePath,

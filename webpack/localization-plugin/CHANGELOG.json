@@ -2,6 +2,139 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.13.2",
+      "tag": "@rushstack/localization-plugin_v0.13.2",
+      "date": "Tue, 14 Jun 2022 00:17:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.1",
+      "tag": "@rushstack/localization-plugin_v0.13.1",
+      "date": "Tue, 07 Jun 2022 09:37:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.39`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.38` to `^3.3.39`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.0",
+      "tag": "@rushstack/localization-plugin_v0.13.0",
+      "date": "Fri, 03 Jun 2022 00:11:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the ability to tweak string comments in generated typings."
+          },
+          {
+            "comment": "Include an option to ignore strings from typings generation."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.0",
+      "tag": "@rushstack/localization-plugin_v0.12.0",
+      "date": "Wed, 01 Jun 2022 23:31:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extract utilities to @rushstack/localization-utilitiles."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.1",
+      "tag": "@rushstack/localization-plugin_v0.11.1",
+      "date": "Wed, 25 May 2022 22:25:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.37` to `^3.3.38`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@rushstack/localization-plugin_v0.11.0",
+      "date": "Tue, 24 May 2022 15:12:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for .resjson files"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.21",
+      "tag": "@rushstack/localization-plugin_v0.10.21",
+      "date": "Thu, 19 May 2022 15:13:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.36` to `^3.3.37`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.20",
       "tag": "@rushstack/localization-plugin_v0.10.20",
       "date": "Wed, 18 May 2022 15:10:56 GMT",

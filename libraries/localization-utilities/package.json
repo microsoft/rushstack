@@ -1,0 +1,32 @@
+{
+  "name": "@rushstack/localization-utilities",
+  "version": "0.3.0",
+  "description": "This plugin contains some useful functions for localization.",
+  "main": "lib/index.js",
+  "typings": "dist/localization-utilities.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "libraries/localization-utilities"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/typings-generator": "workspace:*",
+    "pseudolocale": "~1.1.0",
+    "xmldoc": "~1.1.2"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24",
+    "@types/xmldoc": "1.1.4"
+  }
+}

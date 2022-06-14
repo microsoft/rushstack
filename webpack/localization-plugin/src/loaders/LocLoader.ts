@@ -3,10 +3,9 @@
 
 import { loader } from 'webpack';
 import { Terminal } from '@rushstack/node-core-library';
+import { ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
-import { ILocalizationFile } from '../interfaces';
-import { LocFileParser } from '../utilities/LocFileParser';
 import { loaderFactory, IBaseLoaderOptions } from './LoaderFactory';
 import { EntityMarker } from '../utilities/EntityMarker';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
@@ -23,7 +22,7 @@ export default loaderFactory(function (
 ) {
   const { pluginInstance } = options;
   const terminal: Terminal = new Terminal(LoaderTerminalProvider.getTerminalProviderForLoader(this));
-  const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
+  const locFileData: ILocalizationFile = parseLocFile({
     ...options,
     content,
     terminal,

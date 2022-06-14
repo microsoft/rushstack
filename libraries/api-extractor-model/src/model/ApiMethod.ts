@@ -8,6 +8,7 @@ import {
   Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
+import { ApiProtectedMixin, IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
@@ -26,12 +27,13 @@ import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptiona
  */
 export interface IApiMethodOptions
   extends IApiNameMixinOptions,
-    IApiTypeParameterListMixinOptions,
+    IApiOptionalMixinOptions,
     IApiParameterListMixinOptions,
+    IApiProtectedMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiReturnTypeMixinOptions,
     IApiStaticMixinOptions,
-    IApiOptionalMixinOptions,
+    IApiTypeParameterListMixinOptions,
     IApiDeclaredItemOptions {}
 
 /**
@@ -56,9 +58,11 @@ export interface IApiMethodOptions
  * @public
  */
 export class ApiMethod extends ApiNameMixin(
-  ApiTypeParameterListMixin(
+  ApiOptionalMixin(
     ApiParameterListMixin(
-      ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiOptionalMixin(ApiDeclaredItem))))
+      ApiProtectedMixin(
+        ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiTypeParameterListMixin(ApiDeclaredItem))))
+      )
     )
   )
 ) {

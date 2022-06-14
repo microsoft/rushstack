@@ -3,7 +3,7 @@
 
 import webpack = require('webpack');
 import * as workerThreads from 'worker_threads';
-import { MessagePortMinifier } from '../MessagePortMinifier';
+import { MessagePortMinifier } from '@rushstack/module-minifier';
 import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
 import '../OverrideWebpackIdentifierAllocation';
 

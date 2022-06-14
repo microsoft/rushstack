@@ -163,6 +163,14 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/localization-utilities",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/module-minifier",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/module-minifier-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -216,6 +224,14 @@
     },
     {
       "name": "@rushstack/webpack-plugin-utilities",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/webpack5-module-minifier-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/worker-pool",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -537,6 +553,10 @@
     {
       "name": "long",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "memfs",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "mini-css-extract-plugin",

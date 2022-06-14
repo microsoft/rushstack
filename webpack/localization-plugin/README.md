@@ -16,7 +16,7 @@ There are three example projects in this repository that make use of this plugin
 
 - [Project 1](https://github.com/microsoft/rushstack/tree/main/build-tests/localization-plugin-test-01)
   - This project contains two webpack entrypoints (one with an async chunk, one without), without any localized
-  resources
+    resources
   - The output is a single, non-localized variant
 - [Project 2](https://github.com/microsoft/rushstack/tree/main/build-tests/localization-plugin-test-02)
   - This project contains three webpack entrypoints:
@@ -33,7 +33,7 @@ There are three example projects in this repository that make use of this plugin
 - [Project 3](https://github.com/microsoft/rushstack/tree/main/build-tests/localization-plugin-test-03)
   - This project contains four webpack entrypoints:
     - [`indexA.ts`](https://github.com/microsoft/rushstack/tree/main/build-tests/localization-plugin-test-03/src/indexA.ts)
-      directly references one `.loc.json` file, one `.resx.json` file, and one `.resx` file, and dynamically imports an async chunk with
+      directly references one `.loc.json` file, one `.resx.json` file, one `.resx` file, and one `.resjson` file, and dynamically imports an async chunk with
       localized data, and an async chunk without localized data
     - [`indexB.ts`](https://github.com/microsoft/rushstack/tree/main/build-tests/localization-plugin-test-03/src/indexB.ts)
       directly references one `.loc.json` file and one `.resx.json` file
@@ -45,7 +45,7 @@ There are three example projects in this repository that make use of this plugin
   - The output contains English, Spanish, "passthrough," and two pseudo-localized variants of files that contain
     localized data, and a non-localized variant of the files that do not contain localized data
 
-### `.resx` vs `.loc.json`
+### `.resx` vs `.loc.json` vs `.resjson`
 
 [`.resx`](https://docs.microsoft.com/en-us/dotnet/framework/resources/creating-resource-files-for-desktop-apps#resources-in-resx-files)
 is an XML format for resource data. It is primarily used in .NET development, and it is supported by
@@ -58,6 +58,9 @@ are supported by this plugin.
 `.loc.json` is a very simple `JSON` schema for specifying localized string and translator comments.
 See an example of a `.loc.json` file
 [here](https://github.com/microsoft/rushstack/tree/main/build-tests/localization-plugin-test-02/src/strings3.loc.json).
+
+`.resjson` is another simple `JSON` schema for specifying localized string and translator comments.
+See [here](https://lingohub.com/developers/resource-files/resjson-localization) for documentation on `.resjson`
 
 For most projects, `.loc.json` is a simpler format to use. However for large projects, projects that already use
 translation services that support `.resx`, or engineers who are already experienced .NET developers, `.resx`
@@ -101,6 +104,7 @@ this option is unset or set to `false`, an error will be emitted if a string is 
 
 This option is used to specify the localization data to be used in the build. This object has the following
 structure:
+
 - Locale name
   - Compilation context-relative or absolute localization file path
     - Translated strings
