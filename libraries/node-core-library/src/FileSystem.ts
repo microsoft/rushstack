@@ -1343,6 +1343,13 @@ export class FileSystem {
   // ===============
 
   /**
+   * Returns true if the error object indicates the target is a directory (`EISDIR`).
+   */
+  public static isDirectoryError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && error.code === 'EISDIR';
+  }
+
+  /**
    * Returns true if the error object indicates the file or folder already exists (`EEXIST`).
    */
   public static isExistError(error: Error): boolean {

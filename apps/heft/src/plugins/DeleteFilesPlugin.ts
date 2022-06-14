@@ -60,10 +60,12 @@ export async function deleteFilesAsync(
         logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
         deletedFiles++;
       } catch (error) {
-        // If it doesn't exist, we can ignore the error
+        // If it doesn't exist, we can ignore the error.
         if (!FileSystem.isNotExistError(error)) {
-          // Happens when trying to delete a folder as if it was a file
-          if (FileSystem.isUnlinkNotPermittedError(error)) {
+          // When we encounter an error relating to deleting a directory as if it was a file,
+          // attempt to delete the folder. Windows throws the unlink not permitted error, while
+          // linux throws the EISDIR error.
+          if (FileSystem.isUnlinkNotPermittedError(error) || FileSystem.isDirectoryError(error)) {
             await FileSystem.deleteFolderAsync(pathToDelete);
             logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
             deletedFolders++;
