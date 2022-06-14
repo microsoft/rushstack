@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Tue, 07 Jun 2022 09:37:05 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Jun 2022 00:17:29 GMT and should not be manually modified.
+
+## 0.3.0
+Tue, 14 Jun 2022 00:17:29 GMT
+
+### Minor changes
+
+- Expose each parser directly so that they can be used with arbitrary file extensions.
 
 ## 0.2.1
 Tue, 07 Jun 2022 09:37:05 GMT
