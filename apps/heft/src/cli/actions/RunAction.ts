@@ -152,6 +152,7 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
           selectedPhases: this._selectedPhases!,
           terminal: this.terminal,
           production: this._productionFlag.value,
+          verbose: this._verboseFlag.value,
           clean: this._cleanFlag.value,
           cleanCache: this._cleanCacheFlag.value
         });

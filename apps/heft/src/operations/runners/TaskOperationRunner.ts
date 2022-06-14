@@ -36,6 +36,11 @@ export interface ITaskOperationRunnerOptions {
    *
    */
   production: boolean;
+
+  /**
+   *
+   */
+  verbose: boolean;
 }
 
 /**
@@ -59,7 +64,7 @@ export class TaskOperationRunner implements IOperationRunner {
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    const { internalHeftSession, task, phase, production } = this._options;
+    const { internalHeftSession, task, phase, production, verbose } = this._options;
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(phase);
     const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
 
@@ -72,6 +77,7 @@ export class TaskOperationRunner implements IOperationRunner {
       // Create the options and provide a utility method to obtain paths to copy
       const runHookOptions: IHeftTaskRunHookOptions = {
         production,
+        verbose,
         addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
           copyOperations.push(...copyOperationsToAdd)
       };

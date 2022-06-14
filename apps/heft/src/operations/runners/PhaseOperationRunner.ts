@@ -41,6 +41,11 @@ export interface IPhaseOperationRunnerOptions {
    *
    */
   production: boolean;
+
+  /**
+   *
+   */
+  verbose: boolean;
 }
 
 /**
@@ -65,7 +70,7 @@ export class PhaseOperationRunner implements IOperationRunner {
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     // Load and apply the plugins for this phase only
-    const { internalHeftSession, phase, production, clean, cleanCache } = this._options;
+    const { internalHeftSession, phase, production, verbose, clean, cleanCache } = this._options;
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(phase);
     const phaseLogger: ScopedLogger = phaseSession.loggingManager.requestScopedLogger(phase.phaseName);
     phaseLogger.terminal.writeVerboseLine('Applying task plugins');
@@ -96,6 +101,7 @@ export class PhaseOperationRunner implements IOperationRunner {
       // Create the options and provide a utility method to obtain paths to delete
       const cleanHookOptions: IHeftTaskCleanHookOptions = {
         production,
+        verbose,
         addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
           deleteOperations.push(...deleteOperationsToAdd)
       };

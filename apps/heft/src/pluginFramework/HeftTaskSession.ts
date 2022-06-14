@@ -18,6 +18,7 @@ import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
  */
 export interface IHeftTaskHookOptions {
   production: boolean;
+  verbose: boolean;
 }
 
 /**

@@ -35,6 +35,7 @@ export interface ICreateOperationsOptions {
   selectedPhases: Set<HeftPhase>;
   terminal: ITerminal;
   production: boolean;
+  verbose: boolean;
   clean: boolean;
   cleanCache: boolean;
 }
@@ -120,6 +121,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
         runner: new LifecycleOperationRunner({
           internalHeftSession: options.internalHeftSession,
           production: options.production,
+          verbose: options.verbose,
           clean: options.clean,
           cleanCache: options.cleanCache,
           type
@@ -139,6 +141,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
         runner: new PhaseOperationRunner({
           internalHeftSession: options.internalHeftSession,
           production: options.production,
+          verbose: options.verbose,
           clean: options.clean,
           cleanCache: options.cleanCache,
           phase
@@ -157,6 +160,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
         runner: new TaskOperationRunner({
           internalHeftSession: options.internalHeftSession,
           production: options.production,
+          verbose: options.verbose,
           phase: task.parentPhase,
           task
         })

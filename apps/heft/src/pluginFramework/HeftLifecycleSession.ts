@@ -17,6 +17,7 @@ import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefini
  */
 export interface IHeftLifecycleHookOptions {
   production: boolean;
+  verbose: boolean;
 }
 
 /**
