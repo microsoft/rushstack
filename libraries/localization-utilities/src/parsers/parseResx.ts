@@ -1,26 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, ITerminal, Text, NewlineKind } from '@rushstack/node-core-library';
+import { ITerminal, Text, NewlineKind } from '@rushstack/node-core-library';
 import { XmlDocument, XmlElement } from 'xmldoc';
 
-import type { ILocalizedString, ILocalizationFile, IgnoreStringFunction } from './interfaces';
+import type { ILocalizedString, ILocalizationFile, IParseFileOptions } from '../interfaces';
 
 const STRING_NAME_RESX: RegExp = /^[A-z_$][A-z0-9_$]*$/;
 
 /**
  * @public
  */
-export interface IResxReaderOptions {
-  resxFilePath: string;
+export interface IParseResxOptions extends IParseFileOptions, IParseResxOptionsBase {}
+
+/**
+ * @public
+ */
+export interface IParseResxOptionsBase {
   terminal: ITerminal;
-  newlineNormalization: NewlineKind | undefined;
-  warnOnMissingComment: boolean;
-  /**
-   * Optionally, provide a function that will be called for each string. If the function returns `true`
-   * the string will not be included.
-   */
-  ignoreString?: IgnoreStringFunction;
+  resxNewlineNormalization: NewlineKind | undefined;
+  ignoreMissingResxComments: boolean | undefined;
 }
 
 interface ILoggingFunctions {
@@ -30,23 +29,14 @@ interface ILoggingFunctions {
   logFileWarning: (message: string, filePath: string, line?: number, position?: number) => void;
 }
 
-interface IResxReaderOptionsInternal extends Omit<IResxReaderOptions, 'terminal'> {
-  resxContents: string;
+interface IResxReaderOptionsInternal extends Omit<IParseResxOptions, 'terminal'> {
   loggingFunctions: ILoggingFunctions;
 }
 
 /**
  * @public
  */
-export function readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile {
-  const resxContents: string = FileSystem.readFile(options.resxFilePath);
-  return readResxAsLocFile(resxContents, options);
-}
-
-/**
- * @public
- */
-export function readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocalizationFile {
+export function parseResx(options: IParseResxOptions): ILocalizationFile {
   const writeError: (message: string) => void = options.terminal.writeErrorLine.bind(options.terminal);
   const writeWarning: (message: string) => void = options.terminal.writeWarningLine.bind(options.terminal);
   const loggingFunctions: ILoggingFunctions = {
@@ -62,14 +52,13 @@ export function readResxAsLocFile(resxContents: string, options: IResxReaderOpti
 
   return _readResxAsLocFileInternal({
     ...options,
-    resxContents,
     loggingFunctions
   });
 }
 
 function _readResxAsLocFileInternal(options: IResxReaderOptionsInternal): ILocalizationFile {
   const { ignoreString } = options;
-  const xmlDocument: XmlDocument = new XmlDocument(options.resxContents);
+  const xmlDocument: XmlDocument = new XmlDocument(options.content);
 
   if (xmlDocument.name !== 'root') {
     _logErrorWithLocation(
@@ -98,7 +87,7 @@ function _readResxAsLocFileInternal(options: IResxReaderOptionsInternal): ILocal
 
               const locString: ILocalizedString | undefined = _readDataElement(options, childNode);
 
-              if (locString && !ignoreString?.(options.resxFilePath, stringName)) {
+              if (locString && !ignoreString?.(options.filePath, stringName)) {
                 locFile[stringName] = locString;
               }
             }
@@ -157,8 +146,8 @@ function _readDataElement(
             } else {
               foundValueElement = true;
               value = _readTextElement(options, childNode);
-              if (value && options.newlineNormalization) {
-                value = Text.convertTo(value, options.newlineNormalization);
+              if (value && options.resxNewlineNormalization) {
+                value = Text.convertTo(value, options.resxNewlineNormalization);
               }
             }
 
@@ -211,7 +200,7 @@ function _readDataElement(
   if (!foundValueElement) {
     _logErrorWithLocation(options, 'Missing string value in <data> element', dataElement);
   } else {
-    if (comment === undefined && options.warnOnMissingComment) {
+    if (comment === undefined && options.ignoreMissingResxComments === false) {
       _logWarningWithLocation(options, 'Missing string comment in <data> element', dataElement);
     }
 
@@ -260,14 +249,9 @@ function _logErrorWithLocation(
   element?: XmlElement | XmlDocument
 ): void {
   if (element) {
-    options.loggingFunctions.logFileError(
-      message,
-      options.resxFilePath,
-      element.line + 1,
-      element.column + 1
-    );
+    options.loggingFunctions.logFileError(message, options.filePath, element.line + 1, element.column + 1);
   } else {
-    options.loggingFunctions.logFileError(message, options.resxFilePath);
+    options.loggingFunctions.logFileError(message, options.filePath);
   }
 }
 
@@ -277,14 +261,9 @@ function _logWarningWithLocation(
   element?: XmlElement | XmlDocument
 ): void {
   if (element) {
-    options.loggingFunctions.logFileWarning(
-      message,
-      options.resxFilePath,
-      element.line + 1,
-      element.column + 1
-    );
+    options.loggingFunctions.logFileWarning(message, options.filePath, element.line + 1, element.column + 1);
   } else {
-    options.loggingFunctions.logFileWarning(message, options.resxFilePath);
+    options.loggingFunctions.logFileWarning(message, options.filePath);
   }
 }
 

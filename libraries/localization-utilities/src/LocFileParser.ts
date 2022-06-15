@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal, NewlineKind } from '@rushstack/node-core-library';
-
 import type { IgnoreStringFunction, ILocalizationFile, IParseFileOptions } from './interfaces';
 import { parseLocJson } from './parsers/parseLocJson';
 import { parseResJson } from './parsers/parseResJson';
-import { readResxAsLocFile } from './ResxReader';
+import { IParseResxOptionsBase, parseResx } from './parsers/parseResx';
 
 /**
  * @public
@@ -16,11 +14,8 @@ export type ParserKind = 'resx' | 'loc.json' | 'resjson';
 /**
  * @public
  */
-export interface IParseLocFileOptions extends IParseFileOptions {
-  terminal: ITerminal;
+export interface IParseLocFileOptions extends IParseFileOptions, IParseResxOptionsBase {
   parser?: ParserKind;
-  resxNewlineNormalization: NewlineKind | undefined;
-  ignoreMissingResxComments: boolean | undefined;
 }
 
 interface IParseCacheEntry {
@@ -63,13 +58,7 @@ export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
   let parsedFile: ILocalizationFile;
   switch (parser) {
     case 'resx': {
-      parsedFile = readResxAsLocFile(options.content, {
-        terminal: options.terminal,
-        resxFilePath: options.filePath,
-        newlineNormalization: options.resxNewlineNormalization,
-        warnOnMissingComment: !options.ignoreMissingResxComments,
-        ignoreString: options.ignoreString
-      });
+      parsedFile = parseResx(options);
       break;
     }
 

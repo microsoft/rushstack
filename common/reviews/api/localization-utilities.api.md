@@ -38,11 +38,19 @@ export interface IParseFileOptions {
 }
 
 // @public (undocumented)
-export interface IParseLocFileOptions extends IParseFileOptions {
-    // (undocumented)
-    ignoreMissingResxComments: boolean | undefined;
+export interface IParseLocFileOptions extends IParseFileOptions, IParseResxOptionsBase {
     // (undocumented)
     parser?: ParserKind;
+}
+
+// @public (undocumented)
+export interface IParseResxOptions extends IParseFileOptions, IParseResxOptionsBase {
+}
+
+// @public (undocumented)
+export interface IParseResxOptionsBase {
+    // (undocumented)
+    ignoreMissingResxComments: boolean | undefined;
     // (undocumented)
     resxNewlineNormalization: NewlineKind | undefined;
     // (undocumented)
@@ -67,7 +75,7 @@ export interface IPseudolocaleOptions {
     startDelimiter?: string;
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface IResxReaderOptions {
     ignoreString?: IgnoreStringFunction;
     // (undocumented)
@@ -112,12 +120,15 @@ export function parseLocJson({ content, filePath, ignoreString }: IParseFileOpti
 export function parseResJson({ content, ignoreString, filePath }: IParseFileOptions): ILocalizationFile;
 
 // @public (undocumented)
+export function parseResx(options: IParseResxOptions): ILocalizationFile;
+
+// @public (undocumented)
 export type ParserKind = 'resx' | 'loc.json' | 'resjson';
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export function readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocalizationFile;
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export function readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile;
 
 // @public
