@@ -185,6 +185,23 @@ export enum FileConstants {
 }
 
 // @public
+export class FileError extends Error {
+    // (undocumented)
+    static [Symbol.hasInstance](instance: object): boolean;
+    constructor(message: string, filePath: string, line?: number, column?: number);
+    // (undocumented)
+    readonly column: number | undefined;
+    readonly filePath: string;
+    // (undocumented)
+    readonly line: number | undefined;
+    // @override (undocumented)
+    toString(format?: FileErrorFormat): string;
+}
+
+// @public
+export type FileErrorFormat = 'Unix' | 'VisualStudio';
+
+// @public
 export class FileSystem {
     static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;

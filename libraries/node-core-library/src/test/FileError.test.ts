@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileError, FileErrorFormat } from '../FileError';
+import { FileError } from '../FileError';
 
 describe(FileError.name, () => {
   it('normalizes slashes in file paths', () => {
@@ -14,23 +14,23 @@ describe(FileError.name, () => {
 
   it('correctly performs Unix-style file path formatting', () => {
     const error1: FileError = new FileError('message', 'path/to/file', 5, 12);
-    expect(error1.toString(FileErrorFormat.Unix)).toEqual('path/to/file:5:12 - message');
+    expect(error1.toString('Unix')).toEqual('path/to/file:5:12 - message');
 
     const error2: FileError = new FileError('message', 'path/to/file', 5);
-    expect(error2.toString(FileErrorFormat.Unix)).toEqual('path/to/file:5 - message');
+    expect(error2.toString('Unix')).toEqual('path/to/file:5 - message');
 
     const error3: FileError = new FileError('message', 'path/to/file');
-    expect(error3.toString(FileErrorFormat.Unix)).toEqual('path/to/file - message');
+    expect(error3.toString('Unix')).toEqual('path/to/file - message');
   });
 
   it('correctly performs Unix-style file path formatting', () => {
     const error1: FileError = new FileError('message', 'path/to/file', 5, 12);
-    expect(error1.toString(FileErrorFormat.VisualStudio)).toEqual('path/to/file(5,12) - message');
+    expect(error1.toString('VisualStudio')).toEqual('path/to/file(5,12) - message');
 
     const error2: FileError = new FileError('message', 'path/to/file', 5);
-    expect(error2.toString(FileErrorFormat.VisualStudio)).toEqual('path/to/file(5) - message');
+    expect(error2.toString('VisualStudio')).toEqual('path/to/file(5) - message');
 
     const error3: FileError = new FileError('message', 'path/to/file');
-    expect(error3.toString(FileErrorFormat.VisualStudio)).toEqual('path/to/file - message');
+    expect(error3.toString('VisualStudio')).toEqual('path/to/file - message');
   });
 });

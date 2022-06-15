@@ -3,8 +3,7 @@
 
 import { IHeftPlugin } from '../IHeftPlugin';
 import { ScopedLogger } from './ScopedLogger';
-import { ITerminalProvider } from '@rushstack/node-core-library';
-import { FileErrorFormat, FileError } from './FileError';
+import { ITerminalProvider, FileError, FileErrorFormat } from '@rushstack/node-core-library';
 
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;

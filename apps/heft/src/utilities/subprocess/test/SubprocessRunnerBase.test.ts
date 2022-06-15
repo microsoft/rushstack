@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { FileError } from '@rushstack/node-core-library';
+
 import { SubprocessRunnerBase } from '../SubprocessRunnerBase';
-import { FileError } from '../../../pluginFramework/logging/FileError';
 
 describe(SubprocessRunnerBase.name, () => {
   it(`${SubprocessRunnerBase.serializeForIpcMessage.name} correctly serializes objects`, () => {

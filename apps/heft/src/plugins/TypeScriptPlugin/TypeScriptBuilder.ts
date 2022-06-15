@@ -12,7 +12,8 @@ import {
   ITerminalProvider,
   FileSystem,
   Path,
-  Async
+  Async,
+  FileError
 } from '@rushstack/node-core-library';
 import type * as TTypescript from 'typescript';
 import {
@@ -29,7 +30,6 @@ import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/P
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-import { FileError } from '../../pluginFramework/logging/FileError';
 
 import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 import { HeftSession } from '../../pluginFramework/HeftSession';

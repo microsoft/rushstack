@@ -5,10 +5,10 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as semver from 'semver';
 import * as TEslint from 'eslint';
+import { FileError } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
 import { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
-import { FileError } from '../../pluginFramework/logging/FileError';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;

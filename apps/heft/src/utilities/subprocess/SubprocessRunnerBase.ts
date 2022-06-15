@@ -3,7 +3,7 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import { ITerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
+import { ITerminalProvider, ITerminal, Terminal, FileError } from '@rushstack/node-core-library';
 
 import {
   ISubprocessMessageBase,
@@ -21,7 +21,6 @@ import {
 } from './SubprocessCommunicationManagerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { SubprocessLoggerManager } from './SubprocessLoggerManager';
-import { FileError } from '../../pluginFramework/logging/FileError';
 import { SubprocessTerminator } from './SubprocessTerminator';
 
 export interface ISubprocessInnerConfiguration {

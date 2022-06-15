@@ -4,12 +4,11 @@
 import * as path from 'path';
 import type * as TTslint from 'tslint';
 import * as crypto from 'crypto';
-import { Import, ITerminal, JsonFile } from '@rushstack/node-core-library';
+import { Import, ITerminal, JsonFile, FileError } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
-import { FileError } from '../../pluginFramework/logging/FileError';
 import { TypeScriptCachedFileSystem } from '../../utilities/fileSystem/TypeScriptCachedFileSystem';
 
 interface ITslintOptions extends ILinterBaseOptions {

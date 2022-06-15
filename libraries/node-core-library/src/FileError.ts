@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import { Path, TypeUuid } from '@rushstack/node-core-library';
+import { Path } from './Path';
+import { TypeUuid } from './TypeUuid';
 
-export const enum FileErrorFormat {
-  Unix,
-  VisualStudio
-}
+/**
+ * The format that the FileError message should conform to. The supported formats are:
+ *  - Unix: \<filePath\>:\<line\>:\<column\> - \<message\>
+ *  - VisualStudio: \<filePath\>(\<line\>,\<column\>) - \<message\>
+ *
+ * @public
+ */
+export type FileErrorFormat = 'Unix' | 'VisualStudio';
 
 const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
 
@@ -43,10 +48,10 @@ export class FileError extends Error {
   }
 
   /** @override */
-  public toString(format: FileErrorFormat = FileErrorFormat.Unix): string {
+  public toString(format: FileErrorFormat = 'Unix'): string {
     let formattedFileLocation: string;
     switch (format) {
-      case FileErrorFormat.Unix: {
+      case 'Unix': {
         if (this.column !== undefined) {
           formattedFileLocation = `:${this.line}:${this.column}`;
         } else if (this.line !== undefined) {
@@ -58,7 +63,7 @@ export class FileError extends Error {
         break;
       }
 
-      case FileErrorFormat.VisualStudio: {
+      case 'VisualStudio': {
         if (this.column !== undefined) {
           formattedFileLocation = `(${this.line},${this.column})`;
         } else if (this.line !== undefined) {
