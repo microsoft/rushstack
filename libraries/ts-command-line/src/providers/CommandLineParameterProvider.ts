@@ -394,6 +394,9 @@ export abstract class CommandLineParameterProvider {
       names.push(parameter.shortName);
     }
     names.push(parameter.longName);
+    if (parameter.synonyms) {
+      names.push(...parameter.synonyms);
+    }
 
     parameter._parserKey = this._generateKey();
 
