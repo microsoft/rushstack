@@ -172,7 +172,7 @@
       "members": [
         {
           "kind": "Variable",
-          "canonicalReference": "api-extractor-scenarios!defaultFunctionStatement:var",
+          "canonicalReference": "api-extractor-scenarios!default:var",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -186,7 +186,7 @@
           ],
           "isReadonly": true,
           "releaseTag": "Public",
-          "name": "defaultFunctionStatement",
+          "name": "default",
           "variableTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
