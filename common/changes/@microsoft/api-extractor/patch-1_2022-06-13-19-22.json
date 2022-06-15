@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "fixed wrongly documented default value for reportFolder",
+      "comment": "Fix a mistake in the config/api-extractor.json template's default.",
       "type": "none"
     }
   ],
