@@ -53,7 +53,7 @@ describe(parseResJson.name, () => {
       parseResJson({
         content,
         filePath: 'test.resjson',
-        ignoreString: ignoredStringFunction as IgnoreStringFunction
+        ignoreString: ignoredStringFunction
       })
     ).toMatchSnapshot('Loc file');
 
