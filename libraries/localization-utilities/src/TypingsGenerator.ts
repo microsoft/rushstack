@@ -31,7 +31,7 @@ export interface ITypingsGeneratorOptions {
  *
  * @public
  */
-export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
+export class TypingsGenerator extends StringValuesTypingsGenerator {
   public constructor(options: ITypingsGeneratorOptions) {
     const { ignoreString, processComment } = options;
     super({

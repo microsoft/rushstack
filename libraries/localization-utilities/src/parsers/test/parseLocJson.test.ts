@@ -63,7 +63,7 @@ describe(parseLocJson.name, () => {
       parseLocJson({
         content,
         filePath: 'test.loc.json',
-        ignoreString: ignoredStringFunction as IgnoreStringFunction
+        ignoreString: ignoredStringFunction
       })
     ).toMatchSnapshot('Loc file');
 
