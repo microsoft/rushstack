@@ -133,9 +133,9 @@
      * prepend a folder token such as "<projectFolder>".
      *
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
-     * DEFAULT VALUE: "<projectFolder>/etc/"
+     * DEFAULT VALUE: "<projectFolder>/temp/"
      */
-    // "reportFolder": "<projectFolder>/etc/",
+    // "reportFolder": "<projectFolder>/temp/",
 
     /**
      * Specifies the folder where the temporary report file is written.  The file name portion is determined by

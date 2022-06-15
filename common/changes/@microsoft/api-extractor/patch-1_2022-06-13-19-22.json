@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix a mistake in the config/api-extractor.json template's default.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
