@@ -167,6 +167,37 @@ describe('LockFile', () => {
         // this lock should be undefined since there is an existing lock
         expect(lock).toBeUndefined();
       });
+      test('cannot acquire a lock if another valid lock exists with the same start time', () => {
+        // ensure test folder is clean
+        const testFolder: string = path.join(__dirname, '3');
+        FileSystem.ensureEmptyFolder(testFolder);
+
+        const otherPid: number = 1; // low pid so the other lock is before us
+        const otherPidStartTime: string = '2012-01-02 12:53:12';
+        const thisPidStartTime: string = otherPidStartTime;
+
+        const resourceName: string = 'test';
+
+        const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
+
+        setLockFileGetProcessStartTime((pid: number) => {
+          return pid === process.pid ? thisPidStartTime : otherPidStartTime;
+        });
+
+        // create an open lockfile
+        const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
+        lockFileHandle.write(otherPidStartTime);
+        lockFileHandle.close();
+        FileSystem.updateTimes(otherPidLockFileName, {
+          accessedTime: 10000,
+          modifiedTime: 10000
+        });
+
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+        // this lock should be undefined since there is an existing lock
+        expect(lock).toBeUndefined();
+      });
     });
   }
 

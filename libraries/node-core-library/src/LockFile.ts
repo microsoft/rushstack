@@ -336,9 +336,16 @@ export class LockFile {
           // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
           // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
           // this is a lockfile pointing at something valid
-          if (otherBirthtimeMs !== undefined && otherBirthtimeMs < smallestBirthTimeMs) {
-            smallestBirthTimeMs = otherBirthtimeMs;
-            smallestBirthTimePid = otherPid;
+          if (otherBirthtimeMs !== undefined) {
+            // the other lock file was created before the current earliest lock file
+            // or the other lock file was created at the same exact time, but has earlier pid
+            if (
+              otherBirthtimeMs < smallestBirthTimeMs ||
+              (otherBirthtimeMs === smallestBirthTimeMs && otherPid < smallestBirthTimePid)
+            ) {
+              smallestBirthTimeMs = otherBirthtimeMs;
+              smallestBirthTimePid = otherPid;
+            }
           }
         }
       }
