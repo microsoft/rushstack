@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Allow the package to be webpacked.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}
