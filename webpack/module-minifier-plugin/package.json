@@ -20,11 +20,15 @@
   },
   "peerDependencies": {
     "@types/webpack": "*",
+    "@types/webpack-sources": "*",
     "webpack": "^4.31.0",
     "webpack-sources": "~1.4.3"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
+      "optional": true
+    },
+    "@types/webpack-sources": {
       "optional": true
     }
   },

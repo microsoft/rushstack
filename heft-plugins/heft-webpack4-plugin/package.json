@@ -20,11 +20,15 @@
   "peerDependenciesMeta": {
     "@types/webpack": {
       "optional": true
+    },
+    "@types/webpack-dev-server": {
+      "optional": true
     }
   },
   "peerDependencies": {
     "@rushstack/heft": "^0.45.6",
     "@types/webpack": "^4",
+    "@types/webpack-dev-server": "^3",
     "webpack": "~4.44.2"
   },
   "dependencies": {
