@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "comment": "Bump @types/webpack",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin"
+}

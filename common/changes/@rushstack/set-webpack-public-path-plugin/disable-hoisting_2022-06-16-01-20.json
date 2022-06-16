@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Bump @types/webpack",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin"
+}

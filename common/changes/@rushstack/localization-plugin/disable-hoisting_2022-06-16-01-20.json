@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Bump @types/webpack",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin"
+}
