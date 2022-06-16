@@ -12,6 +12,7 @@ import { PackageManager } from './PackageManager';
  */
 export class PnpmPackageManager extends PackageManager {
   protected _pnpmfileFilename: string;
+  protected _globalPnpmfileFilename: string;
 
   // example: node_modules/.pnpm/lock.yaml
   public readonly internalShrinkwrapRelativePath: string;
@@ -29,6 +30,8 @@ export class PnpmPackageManager extends PackageManager {
       this._pnpmfileFilename = RushConstants.pnpmfileV1Filename;
     }
 
+    this._globalPnpmfileFilename = RushConstants.globalPnpmfileFilename;
+
     this._shrinkwrapFilename = RushConstants.pnpmV3ShrinkwrapFilename;
 
     // node_modules/.pnpm/lock.yaml
@@ -44,5 +47,15 @@ export class PnpmPackageManager extends PackageManager {
    */
   public get pnpmfileFilename(): string {
     return this._pnpmfileFilename;
+  }
+
+  /**
+   * The filename of the global shrinkwrap file that is used by the package manager.
+   *
+   * @remarks
+   * Example: `global-pnpmfile.cjs`
+   */
+  public get globalPnpmfileFilename(): string {
+    return this._globalPnpmfileFilename;
   }
 }

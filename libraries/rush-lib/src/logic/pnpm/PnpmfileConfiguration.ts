@@ -9,7 +9,12 @@ import { PnpmOptionsConfiguration, RushConfiguration } from '../../api/RushConfi
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import * as pnpmfile from './PnpmfileShim';
 
-import type { IPnpmfileContext, IPnpmfileShimSettings } from './IPnpmfile';
+import type {
+  IPnpmfileContext,
+  IPnpmfileShimSettings,
+  ISplitWorkspaceGlobalPnpmfileShimSettings,
+  WorkspaceProjectInfo
+} from './IPnpmfile';
 
 /**
  * Options used when generating the pnpmfile shim settings file.
@@ -78,6 +83,40 @@ export class PnpmfileConfiguration {
     });
   }
 
+  public static async writeCommonTempSplitGlobalPnpmfileAsync(
+    rushConfiguration: RushConfiguration
+  ): Promise<void> {
+    if (rushConfiguration.packageManager !== 'pnpm') {
+      throw new Error(
+        `PnpmfileConfiguration cannot be used with package manager "${rushConfiguration.packageManager}"`
+      );
+    }
+
+    const targetDir: string = rushConfiguration.commonTempSplitFolder;
+    const pnpmfilePath: string = path.join(
+      targetDir,
+      (rushConfiguration.packageManagerWrapper as PnpmPackageManager).globalPnpmfileFilename
+    );
+
+    // Write the shim itself
+    await FileSystem.copyFileAsync({
+      sourcePath: path.join(__dirname, 'SplitWorkspaceGlobalPnpmfileShim.js'),
+      destinationPath: pnpmfilePath
+    });
+
+    const splitWorkspaceGlobalPnpmfileShimSettings: ISplitWorkspaceGlobalPnpmfileShimSettings =
+      PnpmfileConfiguration._getSplitWorkspaceGlobalPnpmfileShimSettings(rushConfiguration);
+
+    // Write the settings file used by the shim
+    await JsonFile.saveAsync(
+      splitWorkspaceGlobalPnpmfileShimSettings,
+      path.join(targetDir, 'globalPnpmfileSettings.json'),
+      {
+        ensureFolderExists: true
+      }
+    );
+  }
+
   private static _getPnpmfileShimSettings(
     rushConfiguration: RushConfiguration,
     options?: IPnpmfileShimOptions
@@ -117,6 +156,28 @@ export class PnpmfileConfiguration {
     }
 
     return settings;
+  }
+
+  private static _getSplitWorkspaceGlobalPnpmfileShimSettings(
+    rushConfiguration: RushConfiguration
+  ): ISplitWorkspaceGlobalPnpmfileShimSettings {
+    const workspaceProjects: Record<string, WorkspaceProjectInfo> = {};
+    const splitWorkspaceProjects: Record<string, WorkspaceProjectInfo> = {};
+    for (const project of rushConfiguration.projects) {
+      const { packageName, projectRelativeFolder, packageJson } = project;
+      const workspaceProjectInfo: WorkspaceProjectInfo = {
+        packageName,
+        projectRelativeFolder,
+        packageVersion: packageJson.version
+      };
+      (project.splitWorkspace ? splitWorkspaceProjects : workspaceProjects)[packageName] =
+        workspaceProjectInfo;
+    }
+
+    return {
+      workspaceProjects,
+      splitWorkspaceProjects
+    };
   }
 
   /**

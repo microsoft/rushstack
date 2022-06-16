@@ -99,6 +99,11 @@ export class RushConstants {
   public static readonly pnpmfileV6Filename: string = '.pnpmfile.cjs';
 
   /**
+   * The filename ("global-pnpmfile.cjs") used to add custom configuration to PNPM (PNPM version 6.x and later).
+   */
+  public static readonly globalPnpmfileFilename: string = 'global-pnpmfile.cjs';
+
+  /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm
    */
   public static readonly yarnShrinkwrapFilename: string = 'yarn.lock';

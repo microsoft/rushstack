@@ -3,6 +3,7 @@
 
 import type { LogBase } from '@pnpm/logger';
 import type { IPackageJson } from '@rushstack/node-core-library';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 
 /**
@@ -18,6 +19,16 @@ export interface IPnpmfileShimSettings {
    */
   workspaceVersions: Record<string, string>;
   userPnpmfilePath?: string;
+}
+
+export interface WorkspaceProjectInfo
+  extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
+  packageVersion: RushConfigurationProject['packageJson']['version'];
+}
+
+export interface ISplitWorkspaceGlobalPnpmfileShimSettings {
+  workspaceProjects: Record<string, WorkspaceProjectInfo>;
+  splitWorkspaceProjects: Record<string, WorkspaceProjectInfo>;
 }
 
 /**

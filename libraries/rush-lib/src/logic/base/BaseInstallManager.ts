@@ -507,6 +507,7 @@ export abstract class BaseInstallManager {
           destinationPath: commonRushConfigSplitWorkspaceNpmrcPath
         });
       }
+      process.env['_RUSH_COMMON_TEMP_SPLIT_FOLDER'] = this._rushConfiguration.commonTempSplitFolder;
       Utilities.syncNpmrc(
         this._rushConfiguration.commonRushConfigFolder,
         this._rushConfiguration.commonTempSplitFolder,
@@ -521,8 +522,8 @@ export abstract class BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(this.rushConfiguration, this.options);
 
-      // FIXME: Shim for split workspace???
-      // FIXME: TODO global-pnpmfile.js
+      // FIXME: Pnpmfile shim for split workspace???
+      await PnpmfileConfiguration.writeCommonTempSplitGlobalPnpmfileAsync(this.rushConfiguration);
     }
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
