@@ -348,9 +348,7 @@ export abstract class CommandLineParameterProvider {
   public getParameterStringMap(): Record<string, string> {
     const parameterMap: Record<string, string> = {};
     for (const parameter of this.parameters) {
-      const parameterName: string = parameter.parameterScope
-        ? this._generateScopedLongName(parameter)
-        : parameter.longName;
+      const parameterName: string = this.getScopedLongName(parameter);
       switch (parameter.kind) {
         case CommandLineParameterKind.Flag:
         case CommandLineParameterKind.Choice:
@@ -380,6 +378,21 @@ export abstract class CommandLineParameterProvider {
       }
     }
     return parameterMap;
+  }
+
+  /**
+   * Returns the scoped long name for the specified parameter. If no scope is specified, the long name
+   * will be returned as-is.
+   */
+  public getScopedLongName(parameter: CommandLineParameter): string {
+    if (!parameter.parameterScope) {
+      return parameter.longName;
+    }
+
+    // Parameter long name is guranteed to start with '--' since this is validated in the
+    // CommandLineParameter constructor.
+    const unprefixedLongName: string = parameter.longName.slice(2);
+    return `--${parameter.parameterScope}:${unprefixedLongName}`;
   }
 
   /**
@@ -502,7 +515,7 @@ export abstract class CommandLineParameterProvider {
 
     // Add the scoped long name if it exists
     if (parameter.parameterScope) {
-      names.push(this._generateScopedLongName(parameter));
+      names.push(this.getScopedLongName(parameter));
     }
 
     let finalDescription: string = parameter.description;
@@ -590,17 +603,6 @@ export abstract class CommandLineParameterProvider {
 
   private _generateKey(): string {
     return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
-  }
-
-  private _generateScopedLongName(parameter: CommandLineParameter): string {
-    if (!parameter.parameterScope) {
-      throw new Error(`Cannot generate scoped long name for parameter without scope "${parameter.longName}"`);
-    }
-
-    // Parameter long name is guranteed to start with '--' since this is validated in the
-    // CommandLineParameter constructor.
-    const unprefixedLongName: string = parameter.longName.slice(2);
-    return `--${parameter.parameterScope}:${unprefixedLongName}`;
   }
 
   private _getParameter<T extends CommandLineParameter>(

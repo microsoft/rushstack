@@ -162,6 +162,7 @@ export abstract class CommandLineParameterProvider {
     getIntegerListParameter(parameterLongName: string, parameterScope?: string): CommandLineIntegerListParameter;
     getIntegerParameter(parameterLongName: string, parameterScope?: string): CommandLineIntegerParameter;
     getParameterStringMap(): Record<string, string>;
+    getScopedLongName(parameter: CommandLineParameter): string;
     getStringListParameter(parameterLongName: string, parameterScope?: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string, parameterScope?: string): CommandLineStringParameter;
     protected abstract onDefineParameters(): void;
