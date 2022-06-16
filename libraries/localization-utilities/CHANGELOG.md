@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Tue, 14 Jun 2022 23:11:36 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Jun 2022 00:20:22 GMT and should not be manually modified.
+
+## 0.5.0
+Thu, 16 Jun 2022 00:20:22 GMT
+
+### Minor changes
+
+- Refactor the RESX parser to follow a similar API as the other parsers.
 
 ## 0.4.0
 Tue, 14 Jun 2022 23:11:36 GMT

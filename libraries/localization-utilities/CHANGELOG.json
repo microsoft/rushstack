@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/localization-utilities_v0.5.0",
+      "date": "Thu, 16 Jun 2022 00:20:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Refactor the RESX parser to follow a similar API as the other parsers."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@rushstack/localization-utilities_v0.4.0",
       "date": "Tue, 14 Jun 2022 23:11:36 GMT",
