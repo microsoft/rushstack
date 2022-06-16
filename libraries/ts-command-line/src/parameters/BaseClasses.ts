@@ -57,6 +57,9 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.parameterGroup} */
   public readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
 
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterScope} */
+  public readonly parameterScope: string | undefined;
+
   /** {@inheritDoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
 
@@ -66,9 +69,6 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.environmentVariable} */
   public readonly environmentVariable: string | undefined;
 
-  /** {@inheritDoc IBaseCommandLineDefinition.synonyms} */
-  public readonly synonyms: string[] | undefined;
-
   /** {@inheritDoc IBaseCommandLineDefinition.undocumentedSynonyms } */
   public readonly undocumentedSynonyms: string[] | undefined;
 
@@ -77,25 +77,17 @@ export abstract class CommandLineParameter {
     this.longName = definition.parameterLongName;
     this.shortName = definition.parameterShortName;
     this.parameterGroup = definition.parameterGroup;
+    this.parameterScope = definition.parameterScope;
     this.description = definition.description;
     this.required = !!definition.required;
     this.environmentVariable = definition.environmentVariable;
-    this.synonyms = definition.synonyms;
     this.undocumentedSynonyms = definition.undocumentedSynonyms;
 
-    const longNameValidator: (value: string) => boolean =
-      definition.customNameValidator ??
-      ((longName: string) => CommandLineParameter._longNameRegExp.test(longName));
-
-    for (const longName of [this.longName, ...(this.synonyms || [])]) {
-      if (!longNameValidator(longName)) {
-        throw new Error(
-          `Invalid name: "${longName}".` +
-            (definition.customNameValidator
-              ? ''
-              : ' The parameter long name must be lower-case and use dash delimiters (e.g. "--do-a-thing")')
-        );
-      }
+    if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
+      throw new Error(
+        `Invalid name: "${this.longName}". The parameter long name must be lower-case and use dash ` +
+          'delimiters (e.g. "--do-a-thing")'
+      );
     }
 
     if (this.shortName) {
@@ -132,12 +124,10 @@ export abstract class CommandLineParameter {
             `Invalid name: "${undocumentedSynonym}". Undocumented synonyms must not be the same` +
               ` as the the long name.`
           );
-        } else if (!longNameValidator(undocumentedSynonym)) {
+        } else if (!CommandLineParameter._longNameRegExp.test(undocumentedSynonym)) {
           throw new Error(
-            `Invalid name: "${undocumentedSynonym}".` +
-              (definition.customNameValidator
-                ? ''
-                : ' All undocumented synonyms name must be lower-case and use dash delimiters (e.g. "--do-a-thing")')
+            `Invalid name: "${undocumentedSynonym}". All undocumented synonyms name must be lower-case and ` +
+              'use dash delimiters (e.g. "--do-a-thing")'
           );
         }
       }
