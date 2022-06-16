@@ -2,6 +2,23 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/localization-utilities_v0.6.0",
+      "date": "Thu, 16 Jun 2022 22:49:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow the package to be webpacked."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Remove the validation of RESX string names."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@rushstack/localization-utilities_v0.5.0",
       "date": "Thu, 16 Jun 2022 00:20:22 GMT",

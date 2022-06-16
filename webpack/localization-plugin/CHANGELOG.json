@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.14.2",
+      "tag": "@rushstack/localization-plugin_v0.14.2",
+      "date": "Thu, 16 Jun 2022 22:49:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.1",
       "tag": "@rushstack/localization-plugin_v0.14.1",
       "date": "Thu, 16 Jun 2022 00:20:22 GMT",
