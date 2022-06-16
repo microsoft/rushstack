@@ -13,5 +13,4 @@ export { parseResJson } from './parsers/parseResJson';
 export { parseResx, IParseResxOptions, IParseResxOptionsBase } from './parsers/parseResx';
 export { parseLocFile, IParseLocFileOptions, ParserKind } from './LocFileParser';
 export { ITypingsGeneratorOptions, TypingsGenerator } from './TypingsGenerator';
-export { readResxFileAsLocFile, readResxAsLocFile, IResxReaderOptions } from './LegacyResxReader';
 export { getPseudolocalizer } from './Pseudolocalization';
