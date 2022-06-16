@@ -299,6 +299,10 @@
               "type": "string",
               "pattern": "^[A-Za-z0-9_@/.$-]+$"
             }
+          },
+          "splitWorkspace": {
+            "description": "If true, then this project will be split out into a separate workspace folder. The default value is false.",
+            "type": "boolean"
           }
         },
         "additionalProperties": false,

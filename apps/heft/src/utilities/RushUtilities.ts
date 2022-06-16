@@ -38,6 +38,11 @@ export function getRushCommonTempFolder(): string {
   return path.join(rushJsonFolder, 'common', 'temp');
 }
 
+export function getRushCommonTempSplitFolder(): string {
+  const rushJsonFolder: string = findRushJsonFolder();
+  return path.join(rushJsonFolder, 'common', 'temp-split');
+}
+
 export function getRushConfigFolder(): string {
   const rushJsonFolder: string = findRushJsonFolder();
   return path.join(rushJsonFolder, 'common', 'config');

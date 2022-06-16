@@ -126,12 +126,17 @@ function _syncNpmrc(
   logger: ILogger,
   sourceNpmrcFolder: string,
   targetNpmrcFolder: string,
-  useNpmrcPublish?: boolean
+  useNpmrcPublish?: boolean,
+  sourceNpmrcFilename?: string
 ): void {
-  const sourceNpmrcPath: string = path.join(
-    sourceNpmrcFolder,
-    !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
-  );
+  let resolvedSourceNpmrcFilename: string = '.npmrc';
+  if (useNpmrcPublish) {
+    resolvedSourceNpmrcFilename = '.npmrc-publish';
+  }
+  if (sourceNpmrcFilename) {
+    resolvedSourceNpmrcFilename = sourceNpmrcFilename;
+  }
+  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, resolvedSourceNpmrcFilename);
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
     if (fs.existsSync(sourceNpmrcPath)) {

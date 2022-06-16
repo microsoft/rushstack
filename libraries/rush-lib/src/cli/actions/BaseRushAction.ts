@@ -98,6 +98,9 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
       // eslint-disable-next-line dot-notation
       process.env['PATH'] = environmentPath;
     }
+
+    // FIXME: Do we need to ensure `common/temp-split` folder if there are split workspace projects?
+    // If so, we need to add the `common/temp-split` folder to the `PATH` environment variable **correctly**.
   }
 }
 

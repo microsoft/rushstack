@@ -16,6 +16,7 @@ export class PurgeManager {
   private _rushConfiguration: RushConfiguration;
   private _rushGlobalFolder: RushGlobalFolder;
   private _commonTempFolderRecycler: AsyncRecycler;
+  private _commonTempSplitFolderRecycler: AsyncRecycler;
   private _rushUserFolderRecycler: AsyncRecycler;
 
   public constructor(rushConfiguration: RushConfiguration, rushGlobalFolder: RushGlobalFolder) {
@@ -27,6 +28,12 @@ export class PurgeManager {
       RushConstants.rushRecyclerFolderName
     );
     this._commonTempFolderRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
+
+    const commonSplitAsyncRecyclerPath: string = path.join(
+      this._rushConfiguration.commonTempSplitFolder,
+      RushConstants.rushRecyclerFolderName
+    );
+    this._commonTempSplitFolderRecycler = new AsyncRecycler(commonSplitAsyncRecyclerPath);
 
     const rushUserAsyncRecyclerPath: string = path.join(
       this._rushGlobalFolder.path,
@@ -57,6 +64,11 @@ export class PurgeManager {
 
     this._commonTempFolderRecycler.moveAllItemsInFolder(
       this._rushConfiguration.commonTempFolder,
+      this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true)
+    );
+
+    this._commonTempSplitFolderRecycler.moveAllItemsInFolder(
+      this._rushConfiguration.commonTempSplitFolder,
       this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true)
     );
   }

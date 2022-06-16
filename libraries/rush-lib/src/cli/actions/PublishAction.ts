@@ -216,6 +216,9 @@ export class PublishAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
+    // FIXME: How to publish for packages in split workspace?
+    // Or, maybe we can not publish packages in split workspace (?)
+
     // Example: "common\temp\publish-home"
     this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
@@ -520,6 +523,8 @@ export class PublishAction extends BaseRushAction {
       const destFolder: string = this._releaseFolder.value
         ? this._releaseFolder.value
         : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
+
+      // FIXME: split workspace???
 
       FileSystem.move({
         sourcePath: tarballPath,

@@ -26,6 +26,7 @@ export interface IRushConfigurationProjectJson {
   skipRushCheck?: boolean;
   publishFolder?: string;
   tags?: string[];
+  splitWorkspace?: boolean;
 }
 
 /**
@@ -73,6 +74,7 @@ export class RushConfigurationProject {
   private readonly _publishFolder: string;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _tags: Set<string>;
+  private readonly _splitWorkspace: boolean;
 
   private _versionPolicy: VersionPolicy | undefined = undefined;
   private _dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
@@ -201,6 +203,8 @@ export class RushConfigurationProject {
     } else {
       this._tags = new Set(projectJson.tags);
     }
+
+    this._splitWorkspace = Boolean(projectJson.splitWorkspace);
   }
 
   /**
@@ -497,5 +501,13 @@ export class RushConfigurationProject {
    */
   public get tags(): ReadonlySet<string> {
     return this._tags;
+  }
+
+  /**
+   * Whether this project is a split workspace project.
+   * @beta
+   */
+  public get splitWorkspace(): boolean {
+    return this._splitWorkspace;
   }
 }

@@ -39,6 +39,7 @@ export class UnlinkManager {
       throw new AlreadyReportedError();
     }
 
+    // FIXME: Link is unrelated with split workspace (?)
     LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).clear();
     return this._deleteProjectFiles();
   }

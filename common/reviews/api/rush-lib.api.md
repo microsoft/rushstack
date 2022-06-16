@@ -662,7 +662,7 @@ export class PhasedCommandHooks {
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
-    constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
+    constructor(json: _IPnpmOptionsJson, commonTempFolder: string, commonTempSplitFolder: string);
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
@@ -719,6 +719,7 @@ export class RushConfiguration {
     get commonRushConfigFolder(): string;
     get commonScriptsFolder(): string;
     get commonTempFolder(): string;
+    get commonTempSplitFolder(): string;
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
@@ -731,6 +732,7 @@ export class RushConfiguration {
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
+    getCommittedSplitWorkspaceShrinkwrapFilename(): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
@@ -745,6 +747,7 @@ export class RushConfiguration {
     get gitSampleEmail(): string;
     get gitTagSeparator(): string | undefined;
     get gitVersionBumpCommitMessage(): string | undefined;
+    get hasSplitWorkspaceProject(): boolean;
     get hotfixChangeEnabled(): boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
@@ -767,6 +770,8 @@ export class RushConfiguration {
     // (undocumented)
     get projectsByName(): Map<string, RushConfigurationProject>;
     // @beta
+    get projectsBySplitWorkspace(): ReadonlyMap<boolean, ReadonlySet<RushConfigurationProject>>;
+    // @beta
     get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
     get repositoryDefaultBranch(): string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
@@ -785,11 +790,14 @@ export class RushConfiguration {
     get _rushPluginsConfiguration(): RushPluginsConfiguration;
     get shrinkwrapFilename(): string;
     get shrinkwrapFilePhrase(): string;
+    // (undocumented)
+    get splitWorkspaceShrinkwrapFilename(): string;
     get suppressNodeLtsWarning(): boolean;
     // @beta
     get telemetryEnabled(): boolean;
     get tempShrinkwrapFilename(): string;
     get tempShrinkwrapPreinstallFilename(): string;
+    get tempSplitWorkspaceShrinkwrapFilename(): string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
@@ -830,6 +838,8 @@ export class RushConfigurationProject {
     get rushConfiguration(): RushConfiguration;
     get shouldPublish(): boolean;
     get skipRushCheck(): boolean;
+    // @beta
+    get splitWorkspace(): boolean;
     // @beta
     get tags(): ReadonlySet<string>;
     get tempProjectName(): string;
@@ -879,6 +889,7 @@ export class RushConstants {
     static readonly rushTempFolderName: string;
     static readonly rushTempNpmScope: string;
     static readonly rushTempProjectsFolderName: string;
+    static readonly rushTempSplitFolderName: string;
     static readonly rushUserConfigurationFolderName: string;
     static readonly rushVariantsFolderName: string;
     static readonly rushWebSiteUrl: string;

@@ -371,7 +371,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly useWorkspaces: boolean;
 
   /** @internal */
-  public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
+  public constructor(json: IPnpmOptionsJson, commonTempFolder: string, commonTempSplitFolder: string) {
     super(json);
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
@@ -381,6 +381,9 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     } else {
       this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
     }
+    // FIXME: 1. What happens if we use global pnpmStore? Is global pnpm store working for both?
+    // FIXME: I choose to ignore global pnpm store for split workspace for now
+    // FIXME: 2. Is it necessary to create a new pnpm store for split workspace? Choosing to reuse pnpm store for now
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
@@ -444,6 +447,7 @@ export class RushConfiguration {
   private _changesFolder: string;
   private _commonFolder: string;
   private _commonTempFolder: string;
+  private _commonTempSplitFolder: string;
   private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager!: PackageManagerName;
@@ -452,8 +456,10 @@ export class RushConfiguration {
   private _npmTmpFolder: string;
   private _yarnCacheFolder: string;
   private _shrinkwrapFilename: string;
+  private _splitWorkspaceShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _tempShrinkwrapPreinstallFilename: string;
+  private _tempSplitWorkspaceShrinkwrapFilename: string;
   private _currentVariantJsonFilename: string;
   private _packageManagerToolVersion: string;
   private _packageManagerToolFilename: string;
@@ -503,6 +509,11 @@ export class RushConfiguration {
 
   // Lazily loaded when the projectsByTag() getter is called.
   private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
+
+  // Lazily loaded when the projectsBySplitWorkspace() getter is called.
+  private _projectsBySplitWorkspace: ReadonlyMap<boolean, ReadonlySet<RushConfigurationProject>> | undefined;
+
+  private _hasSplitWorkspaceProject: boolean | undefined;
 
   // variant -> common-versions configuration
   private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
@@ -554,6 +565,10 @@ export class RushConfiguration {
       EnvironmentConfiguration.rushTempFolderOverride ||
       path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
+    // FIXME: Do we need EnvironmentConfiguration.commonTempSplitFolderOverride?
+    // FIXME: Override commonTempFolder by env var doesn't work with WorkspaceInstallManager, so it's right to NOT have one (?)
+    this._commonTempSplitFolder = path.join(this._commonFolder, RushConstants.rushTempSplitFolderName);
+
     this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
@@ -563,6 +578,7 @@ export class RushConfiguration {
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
 
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
+    // FIXME: Do we need to make variant work for split workspace? I choose not to for now.
 
     this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
@@ -583,7 +599,8 @@ export class RushConfiguration {
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(
       rushConfigurationJson.pnpmOptions || {},
-      this._commonTempFolder
+      this._commonTempFolder,
+      this._commonTempSplitFolder
     );
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
 
@@ -632,7 +649,18 @@ export class RushConfiguration {
 
     this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
 
+    /// From "pnpm-lock.yaml" --> "split-workspace-pnpm-lock.yaml"
+    const shrinkwrapFilenameParsedPath: path.ParsedPath = path.parse(this._shrinkwrapFilename);
+    this._splitWorkspaceShrinkwrapFilename = path.join(
+      shrinkwrapFilenameParsedPath.dir,
+      'split-workspace-' + shrinkwrapFilenameParsedPath.name + shrinkwrapFilenameParsedPath.ext
+    );
+
     this._tempShrinkwrapFilename = path.join(this._commonTempFolder, this._shrinkwrapFilename);
+    this._tempSplitWorkspaceShrinkwrapFilename = path.join(
+      this._commonTempSplitFolder,
+      this._shrinkwrapFilename
+    );
     this._packageManagerToolFilename = path.resolve(
       path.join(
         this._commonTempFolder,
@@ -649,6 +677,8 @@ export class RushConfiguration {
       parsedPath.dir,
       parsedPath.name + '-preinstall' + parsedPath.ext
     );
+
+    // FIXME: Ignore "preinstall" in split workspace case, that means no tempSplitShrinkwrapPreinstall
 
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
@@ -999,7 +1029,18 @@ export class RushConfiguration {
 
       // If the package manager is pnpm, then also add the pnpm file to the known set.
       if (packageManagerWrapper.packageManager === 'pnpm') {
-        knownSet.add((packageManagerWrapper as PnpmPackageManager).pnpmfileFilename.toUpperCase());
+        const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
+        knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
+
+        /// From "pnpm-lock.yaml" --> "split-workspace-pnpm-lock.yaml"
+        const shrinkwrapFilenameParsedPath: path.ParsedPath = path.parse(
+          pnpmPackageManager.shrinkwrapFilename
+        );
+        const splitWorkspaceShrinkwrapFilename: string = path.join(
+          shrinkwrapFilenameParsedPath.dir,
+          'split-workspace-' + shrinkwrapFilenameParsedPath.name + shrinkwrapFilenameParsedPath.ext
+        );
+        knownSet.add(splitWorkspaceShrinkwrapFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.
@@ -1106,6 +1147,15 @@ export class RushConfiguration {
   }
 
   /**
+   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
+   * under the common folder.
+   * Example: `C:\MyRepo\common\temp`
+   */
+  public get commonTempSplitFolder(): string {
+    return this._commonTempSplitFolder;
+  }
+
+  /**
    * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
    * under the common folder.
    * Example: `C:\MyRepo\common\scripts`
@@ -1186,6 +1236,10 @@ export class RushConfiguration {
     return this._shrinkwrapFilename;
   }
 
+  public get splitWorkspaceShrinkwrapFilename(): string {
+    return this._splitWorkspaceShrinkwrapFilename;
+  }
+
   /**
    * The full path of the temporary shrinkwrap file that is used during "rush install".
    * This file may get rewritten by the package manager during installation.
@@ -1195,6 +1249,17 @@ export class RushConfiguration {
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
+  }
+
+  /**
+   * The full path of the temporary shrinkwrap file for split workspace that is used during
+   * "rush install". This file may get rewritten by the package manager during installation.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: `C:\MyRepo\common\temp-split\pnpm-lock.yaml`
+   */
+  public get tempSplitWorkspaceShrinkwrapFilename(): string {
+    return this._tempSplitWorkspaceShrinkwrapFilename;
   }
 
   /**
@@ -1465,6 +1530,27 @@ export class RushConfiguration {
   }
 
   /**
+   * Obtains the mapping from splitWorkspace to projects.
+   * @beta
+   */
+  public get projectsBySplitWorkspace(): ReadonlyMap<boolean, ReadonlySet<RushConfigurationProject>> {
+    if (!this._projectsBySplitWorkspace) {
+      const projectsBySplitWorkspace: Map<boolean, Set<RushConfigurationProject>> = new Map();
+      for (const project of this.projects) {
+        let collection: Set<RushConfigurationProject> | undefined = projectsBySplitWorkspace.get(
+          project.splitWorkspace
+        );
+        if (!collection) {
+          projectsBySplitWorkspace.set(true, (collection = new Set()));
+        }
+        collection.add(project);
+      }
+      this._projectsBySplitWorkspace = projectsBySplitWorkspace;
+    }
+    return this._projectsBySplitWorkspace;
+  }
+
+  /**
    * {@inheritDoc NpmOptionsConfiguration}
    */
   public get npmOptions(): NpmOptionsConfiguration {
@@ -1540,6 +1626,18 @@ export class RushConfiguration {
    */
   public get packageNameParser(): PackageNameParser {
     return this._packageNameParser;
+  }
+
+  /**
+   * Is there any split workspace project.
+   */
+  public get hasSplitWorkspaceProject(): boolean {
+    if (undefined === this._hasSplitWorkspaceProject) {
+      const splitWorkspaceProjects: ReadonlySet<RushConfigurationProject> | undefined =
+        this.projectsBySplitWorkspace.get(true);
+      this._hasSplitWorkspaceProject = !!splitWorkspaceProjects && splitWorkspaceProjects.size > 0;
+    }
+    return this._hasSplitWorkspaceProject;
   }
 
   /**
@@ -1634,6 +1732,14 @@ export class RushConfiguration {
     const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
 
     return path.join(variantConfigFolderPath, this._shrinkwrapFilename);
+  }
+
+  /**
+   * Gets the committed shrinkwrap file name for split workspace.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getCommittedSplitWorkspaceShrinkwrapFilename(): string {
+    return path.join(this._commonRushConfigFolder, this._splitWorkspaceShrinkwrapFilename);
   }
 
   /**
