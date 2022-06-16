@@ -30,6 +30,25 @@ import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
 
 /**
+ * The result containing the parsed paramter long name and scope. Returned when calling
+ * {@link CommandLineParameterProvider.parseScopedLongName}.
+ *
+ * @public
+ */
+export interface IScopedLongNameParseResult {
+  /**
+   * The long name parsed from the scoped long name, e.g. "--my-scope:my-parameter" -\> "my-parameter"
+   */
+  longName: string;
+
+  /**
+   * The scope parsed from the scoped long name or undefined if no scope was found,
+   * e.g. "--my-scope:my-parameter" -\> "my-scope"
+   */
+  scope: string | undefined;
+}
+
+/**
  * This is the argparse result data object
  * @internal
  */
@@ -45,6 +64,10 @@ export interface ICommandLineParserData {
  * @public
  */
 export abstract class CommandLineParameterProvider {
+  private static readonly _scopeGroupName: string = 'scope';
+  private static readonly _songNameGroupName: string = 'longName';
+  private static readonly _scopedLongNameRegex: RegExp =
+    /^--((?<scope>[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
   private static _keyCounter: number = 0;
 
   private _parameters: CommandLineParameter[];
@@ -359,6 +382,21 @@ export abstract class CommandLineParameterProvider {
     return parameterMap;
   }
 
+  /**
+   * Returns an object with the parsed scope (if present) and the long name of the parameter.
+   */
+  public parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult {
+    const result: RegExpExecArray | null =
+      CommandLineParameterProvider._scopedLongNameRegex.exec(scopedLongName);
+    if (!result || !result.groups) {
+      throw new Error(`The parameter long name "${scopedLongName}" is not valid.`);
+    }
+    return {
+      longName: result.groups[CommandLineParameterProvider._songNameGroupName],
+      scope: result.groups[CommandLineParameterProvider._scopeGroupName]
+    };
+  }
+
   /** @internal */
   public _registerDefinedParameters(): void {
     if (this._parametersRegistered) {
@@ -369,9 +407,15 @@ export abstract class CommandLineParameterProvider {
     this._parametersRegistered = true;
 
     for (const longNameParameters of this._parametersByLongName.values()) {
-      const isConflicting: boolean = longNameParameters.length > 1;
+      const useScopedLongName: boolean = longNameParameters.length > 1;
       for (const parameter of longNameParameters) {
-        this._registerParameter(parameter, isConflicting);
+        if (useScopedLongName && !parameter.parameterScope) {
+          throw new Error(
+            `The parameter "${parameter.longName}" is defined multiple times with the same long name. ` +
+              'Parameters with the same long name must define a scope.'
+          );
+        }
+        this._registerParameter(parameter, useScopedLongName);
       }
     }
 
@@ -445,17 +489,14 @@ export abstract class CommandLineParameterProvider {
   }
 
   /** @internal */
-  protected _registerParameter(parameter: CommandLineParameter, isConflicting: boolean): void {
+  protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean): void {
     const names: string[] = [];
     if (parameter.shortName) {
       names.push(parameter.shortName);
     }
 
-    // Only use the original long name if:
-    // - there is no conflict, or
-    // - there is a conflict and the parameter is not scoped
-    // We will rely on argparse throwing an error in the latter case if the long name is not unique.
-    if (!isConflicting || (isConflicting && !parameter.parameterScope)) {
+    // Use the original long name unless otherwise requested
+    if (!useScopedLongName) {
       names.push(parameter.longName);
     }
 
@@ -567,6 +608,11 @@ export abstract class CommandLineParameterProvider {
     expectedKind: CommandLineParameterKind,
     parameterScope?: string
   ): T {
+    // Support the parameter long name being prefixed with the scope
+    const { scope, longName } = this.parseScopedLongName(parameterLongName);
+    parameterLongName = `--${longName}`;
+    parameterScope = scope ?? parameterScope;
+
     const parameters: CommandLineParameter[] | undefined = this._parametersByLongName.get(parameterLongName);
     if (!parameters) {
       throw new Error(`The parameter "${parameterLongName}" is not defined`);

@@ -4,10 +4,10 @@
 import { CommandLineAction } from '../providers/CommandLineAction';
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
+import { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
-  private _unscopedArg!: CommandLineStringParameter;
   private _scope1Arg!: CommandLineStringParameter;
   private _scope2Arg!: CommandLineStringParameter;
   private _nonConflictingArg!: CommandLineStringParameter;
@@ -21,7 +21,6 @@ class TestAction extends CommandLineAction {
   }
 
   protected async onExecute(): Promise<void> {
-    expect(this._unscopedArg.value).toEqual('unscopedvalue');
     expect(this._scope1Arg.value).toEqual('scope1value');
     expect(this._scope2Arg.value).toEqual('scope2value');
     expect(this._nonConflictingArg.value).toEqual('nonconflictingvalue');
@@ -29,12 +28,6 @@ class TestAction extends CommandLineAction {
   }
 
   protected onDefineParameters(): void {
-    // Used to validate that conflicting parameters with different scopes return different values
-    this._unscopedArg = this.defineStringParameter({
-      parameterLongName: '--arg',
-      argumentName: 'ARG',
-      description: 'The argument'
-    });
     // Used to validate that conflicting parameters with different scopes return different values
     this._scope1Arg = this.defineStringParameter({
       parameterLongName: '--arg',
@@ -81,8 +74,6 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
 
     await commandLineParser.execute([
       'do:the-job',
-      '--arg',
-      'unscopedvalue',
       '--scope1:arg',
       'scope1value',
       '--scope2:arg',
@@ -99,5 +90,21 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
 
     expect(action.renderHelpText()).toMatchSnapshot();
     expect(action.getParameterStringMap()).toMatchSnapshot();
+  });
+
+  it('parses the scope out of a long name correctly', async () => {
+    const commandLineParser: TestCommandLine = new TestCommandLine();
+
+    let result: IScopedLongNameParseResult = commandLineParser.parseScopedLongName('--scope1:arg');
+    expect(result.scope).toEqual('scope1');
+    expect(result.longName).toEqual('arg');
+
+    result = commandLineParser.parseScopedLongName('--arg');
+    expect(result.scope).toBeUndefined();
+    expect(result.longName).toEqual('arg');
+
+    result = commandLineParser.parseScopedLongName('--my-scope:my-arg');
+    expect(result.scope).toEqual('my-scope');
+    expect(result.longName).toEqual('my-arg');
   });
 });

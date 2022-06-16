@@ -36,6 +36,9 @@ export abstract class CommandLineParameter {
   // Example: "-d"
   private static _shortNameRegExp: RegExp = /^-[a-zA-Z]$/;
 
+  // Example: "My-Scope"
+  private static _scopeRegExp: RegExp = /^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*)$/;
+
   // "Environment variable names used by the utilities in the Shell and Utilities volume of
   // IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
   // from the characters defined in Portable Character Set and do not begin with a digit."
@@ -95,6 +98,15 @@ export abstract class CommandLineParameter {
         throw new Error(
           `Invalid name: "${this.shortName}". The parameter short name must be` +
             ` a dash followed by a single upper-case or lower-case letter (e.g. "-a")`
+        );
+      }
+    }
+
+    if (this.parameterScope) {
+      if (!CommandLineParameter._scopeRegExp.test(this.parameterScope)) {
+        throw new Error(
+          `Invalid scope: "${this.parameterScope}". The parameter scope must only use alpha-numeric characters ` +
+            'and dash delimiters (e.g. "My-Scope")'
         );
       }
     }

@@ -167,12 +167,13 @@ export abstract class CommandLineParameterProvider {
     protected abstract onDefineParameters(): void;
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
+    parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
     // @internal (undocumented)
     protected _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     // @internal (undocumented)
     _registerDefinedParameters(): void;
     // @internal (undocumented)
-    protected _registerParameter(parameter: CommandLineParameter, isConflicting: boolean): void;
+    protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean): void;
     get remainder(): CommandLineRemainder | undefined;
     renderHelpText(): string;
     renderUsageText(): string;
@@ -335,6 +336,12 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 
 // @public
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
+}
+
+// @public
+export interface IScopedLongNameParseResult {
+    longName: string;
+    scope: string | undefined;
 }
 
 // @public
