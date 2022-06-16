@@ -1,6 +1,17 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Thu, 16 Jun 2022 00:20:22 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Jun 2022 22:49:55 GMT and should not be manually modified.
+
+## 0.6.0
+Thu, 16 Jun 2022 22:49:55 GMT
+
+### Minor changes
+
+- Remove the validation of RESX string names.
+
+### Patches
+
+- Allow the package to be webpacked.
 
 ## 0.5.0
 Thu, 16 Jun 2022 00:20:22 GMT
