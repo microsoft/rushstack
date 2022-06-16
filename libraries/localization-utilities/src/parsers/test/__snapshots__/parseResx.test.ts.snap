@@ -24,6 +24,33 @@ Array [
 
 exports[`parseResx correctly ignores a string: terminal output 1`] = `Object {}`;
 
+exports[`parseResx ignoreInvalidResxStringNames when set to false, errors on invalid string names: Loc file 1`] = `Object {}`;
+
+exports[`parseResx ignoreInvalidResxStringNames when set to false, errors on invalid string names: terminal output 1`] = `
+Object {
+  "errorOutput": "test.resx(3,45): Invalid string name \\"foo;bar\\"[n]",
+}
+`;
+
+exports[`parseResx ignoreInvalidResxStringNames when set to true, ignores invalid string names: Loc file 1`] = `
+Object {
+  "foo;bar": Object {
+    "comment": "Foobar",
+    "value": "foobar",
+  },
+}
+`;
+
+exports[`parseResx ignoreInvalidResxStringNames when set to true, ignores invalid string names: terminal output 1`] = `Object {}`;
+
+exports[`parseResx ignoreInvalidResxStringNames when set to undefined, errors on invalid string names: Loc file 1`] = `Object {}`;
+
+exports[`parseResx ignoreInvalidResxStringNames when set to undefined, errors on invalid string names: terminal output 1`] = `
+Object {
+  "errorOutput": "test.resx(3,45): Invalid string name \\"foo;bar\\"[n]",
+}
+`;
+
 exports[`parseResx ignoreMissingResxComments when set to false, warns on a missing comment: Loc file 1`] = `
 Object {
   "stringWithoutAComment": Object {

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Remove the validation of RESX string names.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}
