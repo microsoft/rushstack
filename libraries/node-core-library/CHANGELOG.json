@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.45.7",
+      "tag": "@rushstack/node-core-library_v3.45.7",
+      "date": "Fri, 17 Jun 2022 09:17:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a race condition affecting the LockFile API on the Linux operating system"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.45.6",
       "tag": "@rushstack/node-core-library_v3.45.6",
       "date": "Fri, 17 Jun 2022 00:16:18 GMT",

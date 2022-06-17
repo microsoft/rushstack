@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 09:17:54 GMT and should not be manually modified.
+
+## 3.45.7
+Fri, 17 Jun 2022 09:17:54 GMT
+
+### Patches
+
+- Fix a race condition affecting the LockFile API on the Linux operating system
 
 ## 3.45.6
 Fri, 17 Jun 2022 00:16:18 GMT

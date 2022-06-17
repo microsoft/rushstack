@@ -2,6 +2,30 @@
   "name": "@rushstack/rush-serve-plugin",
   "entries": [
     {
+      "version": "0.1.18",
+      "tag": "@rushstack/rush-serve-plugin_v0.1.18",
+      "date": "Fri, 17 Jun 2022 09:17:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.1.49`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.17",
       "tag": "@rushstack/rush-serve-plugin_v0.1.17",
       "date": "Fri, 17 Jun 2022 00:16:18 GMT",
