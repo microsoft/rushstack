@@ -339,6 +339,14 @@ export class LockFile {
           if (otherBirthtimeMs !== undefined) {
             // the other lock file was created before the current earliest lock file
             // or the other lock file was created at the same exact time, but has earlier pid
+
+            // note that it is acceptable to do a direct comparison of the PIDs in this case
+            // since we are establishing a consistent order to apply to the lock files in all
+            // execution instances.
+
+            // it doesn't matter that the PIDs roll over, we've already
+            // established that these processes all started at the same time, so we just
+            // need to get all instances of the lock test to agree which one won.
             if (
               otherBirthtimeMs < smallestBirthTimeMs ||
               (otherBirthtimeMs === smallestBirthTimeMs && otherPid < smallestBirthTimePid)
