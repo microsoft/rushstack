@@ -40,12 +40,12 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     malformedEvent: SystemEvent;
     // @eventProperty
     readonly modifiedEvent: SystemEvent;
+    protected static readonly multipleModifiersProperty: boolean;
     optionalParamFunction(x?: number): void;
+    protected protectedProperty: string;
     // (undocumented)
     get readonlyProperty(): string;
     regularProperty: SystemEvent;
-    // (undocumented)
-    static readonly staticReadonlyThing: boolean;
     static sumWithExample(x: number, y: number): number;
     tableExample(): void;
     // (undocumented)

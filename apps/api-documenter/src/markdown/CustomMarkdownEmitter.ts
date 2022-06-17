@@ -147,7 +147,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
         break;
       }
       default:
-        super.writeNode(docNode, context, false);
+        super.writeNode(docNode, context, docNodeSiblings);
     }
   }
 

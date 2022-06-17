@@ -705,6 +705,35 @@
               "isProtected": false
             },
             {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1.multipleModifiersProperty:member",
+              "docComment": "/**\n * Some property with multiple modifiers.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected static readonly multipleModifiersProperty: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": true,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "multipleModifiersProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": true,
+              "isProtected": true
+            },
+            {
               "kind": "Method",
               "canonicalReference": "api-documenter-test!DocClass1#optionalParamFunction:member(1)",
               "docComment": "/**\n * This is a function with an optional parameter.\n *\n * @param x - the number\n */\n",
@@ -750,6 +779,35 @@
               ],
               "isOptional": false,
               "name": "optionalParamFunction"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#protectedProperty:member",
+              "docComment": "/**\n * Some protected property.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected protectedProperty: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "protectedProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": true
             },
             {
               "kind": "Property",
@@ -808,35 +866,6 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
-            },
-            {
-              "kind": "Property",
-              "canonicalReference": "api-documenter-test!DocClass1.staticReadonlyThing:member",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "static readonly staticReadonlyThing: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "boolean"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "isReadonly": true,
-              "isOptional": false,
-              "releaseTag": "Public",
-              "name": "staticReadonlyThing",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              },
-              "isStatic": true,
               "isProtected": false
             },
             {
@@ -1766,6 +1795,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4

@@ -46,6 +46,9 @@ export class IndentedWriter {
   private readonly _indentStack: string[];
   private _indentText: string;
 
+  private _deferredChunks: string[];
+  private _isWritingDeferred: boolean;
+
   public constructor(builder?: IStringBuilder) {
     this._builder = builder === undefined ? new StringBuilder() : builder;
 
@@ -55,6 +58,9 @@ export class IndentedWriter {
 
     this._indentStack = [];
     this._indentText = '';
+
+    this._deferredChunks = [];
+    this._isWritingDeferred = false;
   }
 
   /**
@@ -150,11 +156,37 @@ export class IndentedWriter {
   }
 
   /**
+   * Defers a message to be written to the internal string buffer on the next call to either
+   * `write` or `writeLine`.
+   */
+  public deferredWrite(message: string): void {
+    this._deferredChunks.push(message);
+  }
+
+  /**
+   * Returns whether or not there exist deferred messages to be written.
+   */
+  public get hasDeferred(): boolean {
+    return this._deferredChunks.length > 0;
+  }
+
+  /**
+   * Clears any deferred messages to be written.
+   */
+  public clearDeferred(): void {
+    this._deferredChunks = [];
+  }
+
+  /**
    * Writes some text to the internal string buffer, applying indentation according
    * to the current indentation level.  If the string contains multiple newlines,
    * each line will be indented separately.
    */
   public write(message: string): void {
+    if (!this._isWritingDeferred) {
+      this._writeDeferred();
+    }
+
     if (message.length === 0) {
       return;
     }
@@ -186,7 +218,10 @@ export class IndentedWriter {
   public writeLine(message: string = ''): void {
     if (message.length > 0) {
       this.write(message);
+    } else if (!this._isWritingDeferred) {
+      this._writeDeferred();
     }
+
     this._writeNewLine();
   }
 
@@ -216,6 +251,20 @@ export class IndentedWriter {
     this._previousChunk = this._latestChunk;
     this._latestChunk = s;
     this._builder.append(s);
+  }
+
+  /**
+   * Writes each deferred message, processing the messages in FIFO order.
+   */
+  private _writeDeferred(): void {
+    this._isWritingDeferred = true;
+
+    for (const chunk of this._deferredChunks) {
+      this.write(chunk);
+    }
+
+    this._isWritingDeferred = false;
+    this.clearDeferred();
   }
 
   private _updateIndentText(): void {

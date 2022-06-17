@@ -258,17 +258,16 @@
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!MyClass#_onlyHasGetterThing:member",
+              "canonicalReference": "api-extractor-scenarios!MyClass#_onlyGetter:member",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "get _onlyHasGetterThing(): "
+                  "text": "get _onlyGetter(): "
                 },
                 {
-                  "kind": "Reference",
-                  "text": "_IInternalThing",
-                  "canonicalReference": "api-extractor-scenarios!_IInternalThing:interface"
+                  "kind": "Content",
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
@@ -278,7 +277,7 @@
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
-              "name": "_onlyHasGetterThing",
+              "name": "_onlyGetter",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -288,40 +287,26 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!MyClass#_writableThing:member",
+              "canonicalReference": "api-extractor-scenarios!MyClass#readonlyModifier:member",
               "docComment": "",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "get _writableThing(): "
+                  "text": "readonly readonlyModifier: "
                 },
                 {
-                  "kind": "Reference",
-                  "text": "_IInternalThing",
-                  "canonicalReference": "api-extractor-scenarios!_IInternalThing:interface"
+                  "kind": "Content",
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
                   "text": ";"
-                },
-                {
-                  "kind": "Content",
-                  "text": "\n\nset _writableThing(value: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "_IInternalThing",
-                  "canonicalReference": "api-extractor-scenarios!_IInternalThing:interface"
-                },
-                {
-                  "kind": "Content",
-                  "text": ");"
                 }
               ],
-              "isReadonly": false,
+              "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
-              "name": "_writableThing",
+              "name": "readonlyModifier",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -331,17 +316,16 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!MyClass.declaredReadonlyThing:member",
-              "docComment": "",
+              "canonicalReference": "api-extractor-scenarios!MyClass#tsDocReadonly:member",
+              "docComment": "/**\n * @readonly\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "static readonly declaredReadonlyThing: "
+                  "text": "tsDocReadonly: "
                 },
                 {
-                  "kind": "Reference",
-                  "text": "_IInternalThing",
-                  "canonicalReference": "api-extractor-scenarios!_IInternalThing:interface"
+                  "kind": "Content",
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
@@ -351,37 +335,7 @@
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
-              "name": "declaredReadonlyThing",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              },
-              "isStatic": true,
-              "isProtected": false
-            },
-            {
-              "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!MyClass#tsDocReadonlyThing:member",
-              "docComment": "/**\n * Technically isn't but for testing purposes\n *\n * @readonly\n */\n",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "tsDocReadonlyThing: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "_IInternalThing",
-                  "canonicalReference": "api-extractor-scenarios!_IInternalThing:interface"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "isReadonly": true,
-              "isOptional": false,
-              "releaseTag": "Public",
-              "name": "tsDocReadonlyThing",
+              "name": "tsDocReadonly",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -391,6 +345,191 @@
             }
           ],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!MyInterface:interface",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface MyInterface "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "MyInterface",
+          "members": [
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!MyInterface#_onlyGetter:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "get _onlyGetter(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": true,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "_onlyGetter",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": false
+            },
+            {
+              "kind": "IndexSignature",
+              "canonicalReference": "api-extractor-scenarios!MyInterface:index(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "readonly [x: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": true,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": false
+                }
+              ]
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!MyInterface#readonlyModifier:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "readonly readonlyModifier: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": true,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "readonlyModifier",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-extractor-scenarios!MyInterface#tsDocReadonly:member",
+              "docComment": "/**\n * @readonly\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "set tsDocReadonly(value: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ");"
+                }
+              ],
+              "isReadonly": true,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "tsDocReadonly",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": false
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!READONLY_VARIABLE:var",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "READONLY_VARIABLE = \"Hello world!\""
+            }
+          ],
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "READONLY_VARIABLE",
+          "variableTypeTokenRange": {
+            "startIndex": 0,
+            "endIndex": 0
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!TSDOC_READONLY_VARIABLE:var",
+          "docComment": "/**\n * @public @readonly\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "TSDOC_READONLY_VARIABLE: "
+            },
+            {
+              "kind": "Content",
+              "text": "string"
+            }
+          ],
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "TSDOC_READONLY_VARIABLE",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
         }
       ]
     }
