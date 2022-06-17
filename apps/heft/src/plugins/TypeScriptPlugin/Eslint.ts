@@ -52,7 +52,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
         'Heft requires ESLint 7 or newer.  Your ESLint version is too old:\n' + this._eslintPackagePath
       );
     }
-    if (majorVersion > 7) {
+    if (majorVersion > 8) {
       // We don't use writeWarningLine() here because, if the person wants to take their chances with
       // a newer ESLint release, their build should be allowed to succeed.
       this._terminal.writeLine(

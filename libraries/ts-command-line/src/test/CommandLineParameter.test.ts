@@ -3,7 +3,11 @@
 
 import * as colors from 'colors';
 
-import { CommandLineAction, CommandLineParser, DynamicCommandLineParser, DynamicCommandLineAction } from '..';
+import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
+import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
+import { CommandLineParameter } from '../parameters/BaseClasses';
+import { CommandLineParser } from '../providers/CommandLineParser';
+import { CommandLineAction } from '../providers/CommandLineAction';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
@@ -147,7 +151,7 @@ const snapshotPropertyNames: string[] = [
   'values'
 ];
 
-describe('CommandLineParameter', () => {
+describe(CommandLineParameter.name, () => {
   it('prints the global help', () => {
     const commandLineParser: CommandLineParser = createParser();
     const helpText: string = colors.stripColors(commandLineParser.renderHelpText());
@@ -357,31 +361,34 @@ describe('CommandLineParameter', () => {
       return commandLineParser;
     }
 
-    it('raises an error if env var value is not valid json', () => {
+    it('raises an error if env var value is not valid json', async () => {
       const commandLineParser: CommandLineParser = createHelloWorldParser();
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = '[u';
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
+      await expect(
+        commandLineParser.executeWithoutErrorHandling(args)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
-    it('raises an error if env var value is json containing non-scalars', () => {
+    it('raises an error if env var value is json containing non-scalars', async () => {
       const commandLineParser: CommandLineParser = createHelloWorldParser();
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = '[{}]';
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
+      await expect(
+        commandLineParser.executeWithoutErrorHandling(args)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
-    it('raises an error if env var value is not a valid choice', () => {
+    it('raises an error if env var value is not a valid choice', async () => {
       const commandLineParser: CommandLineParser = createHelloWorldParser();
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = 'oblong';
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
+      await expect(
+        commandLineParser.executeWithoutErrorHandling(args)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 });

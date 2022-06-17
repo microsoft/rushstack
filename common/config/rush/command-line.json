@@ -11,6 +11,48 @@
    * "rush my-global-command --help".
    */
   "commands": [
+    {
+      "commandKind": "phased",
+      "name": "build",
+      "phases": ["_phase:build"]
+    },
+
+    {
+      "commandKind": "phased",
+      "name": "test",
+      "summary": "Builds all projects and runs their tests.",
+      "phases": ["_phase:build", "_phase:test"],
+      "enableParallelism": true,
+      "incremental": true
+    },
+
+    {
+      "commandKind": "phased",
+      "name": "retest",
+      "summary": "Rebuilds all projects and reruns their tests.",
+      "phases": ["_phase:build", "_phase:test"],
+      "enableParallelism": true,
+      "incremental": false
+    },
+
+    {
+      "commandKind": "phased",
+      "name": "start",
+      "summary": "Build all projects, then watch for changes, build and test.",
+      "description": "Build all projects, then watches for changes and builds and runs tests for affected projects.",
+      "safeForSimultaneousRushProcesses": false,
+
+      "enableParallelism": true,
+      "incremental": true,
+      // Initial execution only uses the build phase so that all dependencies of watch phases have been built
+      "phases": ["_phase:build"],
+      "watchOptions": {
+        // Act as though `--watch` is always passed. If false, adds support for passing `--watch`.
+        "alwaysWatch": true,
+        // During watch recompilation run both build and test for affected projects
+        "watchPhases": ["_phase:build", "_phase:test"]
+      }
+    },
     // {
     //   /**
     //    * (Required) Determines the type of custom command.
@@ -92,7 +134,7 @@
     //    *
     //    * Thus, warnings do not interfere with local development, but they will cause a CI job to fail, because
     //    * the Rush process itself returns a nonzero exit code if there are any warnings or errors. This is by design.
-    //    * In an active monorepo, we've found that if you allow any warnings in your master branch, it inadvertently
+    //    * In an active monorepo, we've found that if you allow any warnings in your main branch, it inadvertently
     //    * teaches developers to ignore warnings, which quickly leads to a situation where so many "expected" warnings
     //    * have accumulated that warnings no longer serve any useful purpose.
     //    *
@@ -178,6 +220,25 @@
       "shellCommand": "pretty-quick --staged",
 
       "safeForSimultaneousRushProcesses": true
+    }
+  ],
+
+  "phases": [
+    {
+      "name": "_phase:build",
+      "dependencies": {
+        "upstream": ["_phase:build"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:test",
+      "dependencies": {
+        "self": ["_phase:build"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
     }
   ],
 
@@ -310,13 +371,22 @@
       "longName": "--no-color",
       "parameterKind": "flag",
       "description": "disable colors in the build log, defaults to 'true'",
-      "associatedCommands": ["build", "rebuild"]
+      "associatedPhases": ["_phase:build", "_phase:test"],
+      "associatedCommands": ["build", "rebuild", "test", "retest"]
+    },
+    {
+      "longName": "--update-snapshots",
+      "parameterKind": "flag",
+      "description": "Update Jest snapshots",
+      "associatedPhases": ["_phase:test"],
+      "associatedCommands": ["test", "retest"]
     },
     {
       "longName": "--production",
       "parameterKind": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "associatedCommands": ["build", "rebuild"]
+      "associatedPhases": ["_phase:build", "_phase:test"],
+      "associatedCommands": ["build", "rebuild", "test", "retest"]
     }
   ]
 }

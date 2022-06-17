@@ -35,9 +35,11 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)
+    getAdditionalOutputFiles?: (relativePath: string) => string[];
+    // (undocumented)
     globsToIgnore?: string[];
     // (undocumented)
-    parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult | Promise<TTypingsResult>;
+    parseAndGenerateTypings: (fileContents: string, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
     // (undocumented)
     srcFolder: string;
     // (undocumented)
@@ -55,8 +57,10 @@ export class TypingsGenerator {
     // (undocumented)
     generateTypingsAsync(): Promise<void>;
     // (undocumented)
+    getOutputFilePaths(relativePath: string): string[];
+    // (undocumented)
     protected _options: ITypingsGeneratorOptions;
-    registerDependency(target: string, dependency: string): void;
+    registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
 }

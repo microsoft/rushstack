@@ -2,6 +2,569 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.6.27",
+      "tag": "@rushstack/typings-generator_v0.6.27",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.26",
+      "tag": "@rushstack/typings-generator_v0.6.26",
+      "date": "Tue, 07 Jun 2022 09:37:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.25",
+      "tag": "@rushstack/typings-generator_v0.6.25",
+      "date": "Wed, 25 May 2022 22:25:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.24",
+      "tag": "@rushstack/typings-generator_v0.6.24",
+      "date": "Thu, 19 May 2022 15:13:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.23",
+      "tag": "@rushstack/typings-generator_v0.6.23",
+      "date": "Sat, 14 May 2022 03:01:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.22",
+      "tag": "@rushstack/typings-generator_v0.6.22",
+      "date": "Tue, 10 May 2022 01:20:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.21",
+      "tag": "@rushstack/typings-generator_v0.6.21",
+      "date": "Wed, 04 May 2022 23:29:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.20",
+      "tag": "@rushstack/typings-generator_v0.6.20",
+      "date": "Tue, 26 Apr 2022 00:10:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.19",
+      "tag": "@rushstack/typings-generator_v0.6.19",
+      "date": "Sat, 23 Apr 2022 02:13:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.18",
+      "tag": "@rushstack/typings-generator_v0.6.18",
+      "date": "Fri, 15 Apr 2022 00:12:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.17",
+      "tag": "@rushstack/typings-generator_v0.6.17",
+      "date": "Wed, 13 Apr 2022 15:12:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.16",
+      "tag": "@rushstack/typings-generator_v0.6.16",
+      "date": "Tue, 12 Apr 2022 23:29:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.15",
+      "tag": "@rushstack/typings-generator_v0.6.15",
+      "date": "Tue, 12 Apr 2022 02:58:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.14",
+      "tag": "@rushstack/typings-generator_v0.6.14",
+      "date": "Sat, 09 Apr 2022 19:07:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.13",
+      "tag": "@rushstack/typings-generator_v0.6.13",
+      "date": "Sat, 09 Apr 2022 02:24:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.12",
+      "tag": "@rushstack/typings-generator_v0.6.12",
+      "date": "Fri, 08 Apr 2022 20:05:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.11",
+      "tag": "@rushstack/typings-generator_v0.6.11",
+      "date": "Wed, 06 Apr 2022 22:35:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.10",
+      "tag": "@rushstack/typings-generator_v0.6.10",
+      "date": "Thu, 31 Mar 2022 02:06:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.9",
+      "tag": "@rushstack/typings-generator_v0.6.9",
+      "date": "Sat, 19 Mar 2022 08:05:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.8",
+      "tag": "@rushstack/typings-generator_v0.6.8",
+      "date": "Tue, 15 Mar 2022 19:15:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.7",
+      "tag": "@rushstack/typings-generator_v0.6.7",
+      "date": "Fri, 11 Feb 2022 10:30:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.6",
+      "tag": "@rushstack/typings-generator_v0.6.6",
+      "date": "Tue, 25 Jan 2022 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.7.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.5",
+      "tag": "@rushstack/typings-generator_v0.6.5",
+      "date": "Fri, 21 Jan 2022 01:10:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.7.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.4",
+      "tag": "@rushstack/typings-generator_v0.6.4",
+      "date": "Thu, 20 Jan 2022 02:43:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.3",
+      "tag": "@rushstack/typings-generator_v0.6.3",
+      "date": "Wed, 05 Jan 2022 16:07:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.2",
+      "tag": "@rushstack/typings-generator_v0.6.2",
+      "date": "Mon, 27 Dec 2021 16:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.1",
+      "tag": "@rushstack/typings-generator_v0.6.1",
+      "date": "Tue, 14 Dec 2021 19:27:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0",
+      "tag": "@rushstack/typings-generator_v0.6.0",
+      "date": "Fri, 10 Dec 2021 01:09:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support additional output files beyond the typings files."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.7",
+      "tag": "@rushstack/typings-generator_v0.5.7",
+      "date": "Thu, 09 Dec 2021 20:34:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.43.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.6",
+      "tag": "@rushstack/typings-generator_v0.5.6",
+      "date": "Thu, 09 Dec 2021 00:21:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.43.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.5",
+      "tag": "@rushstack/typings-generator_v0.5.5",
+      "date": "Wed, 08 Dec 2021 19:05:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.43.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.4",
+      "tag": "@rushstack/typings-generator_v0.5.4",
+      "date": "Wed, 08 Dec 2021 16:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.3",
+      "tag": "@rushstack/typings-generator_v0.5.3",
+      "date": "Mon, 06 Dec 2021 16:08:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.2",
+      "tag": "@rushstack/typings-generator_v0.5.2",
+      "date": "Fri, 03 Dec 2021 03:05:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.33`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.1",
+      "tag": "@rushstack/typings-generator_v0.5.1",
+      "date": "Tue, 30 Nov 2021 20:18:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.32`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@rushstack/typings-generator_v0.5.0",
       "date": "Mon, 29 Nov 2021 07:26:16 GMT",

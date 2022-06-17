@@ -1,0 +1,31 @@
+{
+  "name": "@rushstack/heft-serverless-stack-plugin",
+  "version": "0.1.18",
+  "description": "Heft plugin for building apps using the Serverless Stack (SST) framework",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-serverless-stack-plugin"
+  },
+  "main": "lib/index.js",
+  "types": "dist/heft-serverless-stack-plugin.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^0.45.7"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/node": "12.20.24"
+  }
+}

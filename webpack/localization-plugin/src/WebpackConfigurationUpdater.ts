@@ -7,6 +7,7 @@ import * as Webpack from 'webpack';
 import * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
 import { NewlineKind } from '@rushstack/node-core-library';
 import * as lodash from 'lodash';
+import { IgnoreStringFunction } from '@rushstack/localization-utilities';
 
 import { Constants } from './utilities/Constants';
 import { LocalizationPlugin } from './LocalizationPlugin';
@@ -19,6 +20,8 @@ export interface IWebpackConfigurationUpdaterOptions {
   globsToIgnore: string[] | undefined;
   localeNameOrPlaceholder: string;
   resxNewlineNormalization: NewlineKind | undefined;
+  ignoreMissingResxComments: boolean | undefined;
+  ignoreString: IgnoreStringFunction | undefined;
 }
 
 const FILE_TOKEN_REGEX: RegExp = new RegExp(lodash.escapeRegExp('[file]'));
@@ -28,7 +31,9 @@ export class WebpackConfigurationUpdater {
     const loader: string = path.resolve(__dirname, 'loaders', 'LocLoader.js');
     const loaderOptions: ILocLoaderOptions = {
       pluginInstance: options.pluginInstance,
-      resxNewlineNormalization: options.resxNewlineNormalization
+      resxNewlineNormalization: options.resxNewlineNormalization,
+      ignoreMissingResxComments: options.ignoreMissingResxComments,
+      ignoreString: options.ignoreString
     };
 
     WebpackConfigurationUpdater._addLoadersForLocFiles(options, loader, loaderOptions);
@@ -43,12 +48,14 @@ export class WebpackConfigurationUpdater {
   ): void {
     const loader: string = path.resolve(__dirname, 'loaders', 'InPlaceLocFileLoader.js');
     const loaderOptions: IBaseLoaderOptions = {
-      resxNewlineNormalization: options.resxNewlineNormalization
+      resxNewlineNormalization: options.resxNewlineNormalization,
+      ignoreMissingResxComments: options.ignoreMissingResxComments,
+      ignoreString: options.ignoreString
     };
 
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
       {
-        test: Constants.RESX_OR_LOC_JSON_REGEX,
+        test: Constants.RESOURCE_FILE_NAME_REGEXP,
         use: [
           {
             loader: loader,
@@ -98,11 +105,11 @@ export class WebpackConfigurationUpdater {
     const rules: Webpack.RuleSetCondition =
       globsToIgnore && globsToIgnore.length > 0
         ? {
-            include: Constants.RESX_OR_LOC_JSON_REGEX,
+            include: Constants.RESOURCE_FILE_NAME_REGEXP,
             exclude: (filePath: string): boolean =>
               globsToIgnore.some((glob: string): boolean => minimatch(filePath, glob))
           }
-        : Constants.RESX_OR_LOC_JSON_REGEX;
+        : Constants.RESOURCE_FILE_NAME_REGEXP;
     WebpackConfigurationUpdater._addRulesToConfiguration(configuration, [
       {
         test: rules,

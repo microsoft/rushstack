@@ -28,10 +28,10 @@
     // From the allowedAlternativeVersions list below, this should be the TypeScript version that's used to
     // build most of the projects in the repo.  Preferring it avoids errors for indirect dependencies
     // that request it as a peer dependency.
-    "typescript": "~4.4.2",
+    "typescript": "~4.5.2",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
-    "eslint": "~7.30.0"
+    "eslint": "~8.7.0"
   },
 
   /**
@@ -60,41 +60,47 @@
    */
   "allowedAlternativeVersions": {
     /**
+     * Used by build-tests/eslint-7-test
+     */
+    "eslint": ["~7.30.0"],
+
+    /**
      * For example, allow some projects to use an older TypeScript compiler
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
     "typescript": [
-      // "~4.4.2" is the (inferred, not alternative) range used by most projects in this repo
+      // "~4.5.2" is the (inferred, not alternative) range used by most projects in this repo
 
       // The oldest supported compiler, used by build-tests/api-extractor-lib1-test
       "~2.9.2",
 
       // The newest supported compiler, used by most build tests and used as the bundled compiler
       // engine for API Extractor.
-      "~4.4.2"
+      "~4.5.2"
     ],
 
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
     ],
 
-    "webpack": ["~5.35.1"],
-
-    // Use two different versions of @types/webpack-dev-server to allow pnpmfile.js to bring in
-    // two different versions of the webpack typings
-    "@types/webpack-dev-server": ["3.11.3"],
-
-    "webpack-dev-server": [
-      "~3.11.0" // heft-plugins/heft-webpack4-plugin is using an older version of webpack-dev-server for compatibility
-    ],
-
-    "html-webpack-plugin": [
-      "~4.5.0" // Some test projects are still on Webpack 4 because some of our plugins don't support Webpack 5 yet
-    ],
+    // heft-plugins/heft-webpack4-plugin is using an older version of webpack-dev-server for compatibility
+    "webpack-dev-server": ["~3.11.0"],
 
     "tapable": [
       "2.2.1",
       "1.1.3" // heft plugin is using an older version of tapable
-    ]
+    ],
+
+    // --- For Webpack 4 projects ----
+    "css-loader": ["~5.2.7"],
+    "html-webpack-plugin": ["~4.5.2"],
+    "postcss-loader": ["~4.1.0"],
+    "sass-loader": ["~10.0.0"],
+    "sass": ["~1.3.0"],
+    "source-map-loader": ["~1.1.3"],
+    "style-loader": ["~2.0.0"],
+    "terser-webpack-plugin": ["~3.0.8"],
+    "terser": ["~4.8.0"],
+    "webpack": ["~4.44.2"]
   }
 }

@@ -48,20 +48,21 @@ export interface IJsonPathsMetadata {
 export enum InheritanceType {
     append = "append",
     custom = "custom",
+    merge = "merge",
     replace = "replace"
 }
 
 // @beta (undocumented)
 export interface IOriginalValueOptions<TParentProperty> {
     // (undocumented)
-    parentObject: TParentProperty;
+    parentObject: Partial<TParentProperty>;
     // (undocumented)
     propertyName: keyof TParentProperty;
 }
 
 // @beta (undocumented)
 export type IPropertiesInheritance<TConfigurationFile> = {
-    [propertyName in keyof TConfigurationFile]?: IPropertyInheritance<InheritanceType.append | InheritanceType.replace> | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
+    [propertyName in keyof TConfigurationFile]?: IPropertyInheritance<InheritanceType.append | InheritanceType.merge | InheritanceType.replace> | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
 };
 
 // @beta (undocumented)

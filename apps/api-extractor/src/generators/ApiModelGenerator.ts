@@ -43,6 +43,7 @@ import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule } from '../analyzer/AstModule';
+import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -202,6 +203,10 @@ export class ApiModelGenerator {
         this._processApiProperty(astDeclaration, exportedName, parentApiItem);
         break;
 
+      case ts.SyntaxKind.SetAccessor:
+        this._processApiProperty(astDeclaration, exportedName, parentApiItem);
+        break;
+
       case ts.SyntaxKind.IndexSignature:
         this._processApiIndexSignature(astDeclaration, exportedName, parentApiItem);
         break;
@@ -330,10 +335,12 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
 
       apiConstructor = new ApiConstructor({
         docComment,
         releaseTag,
+        isProtected,
         parameters,
         overloadIndex,
         excerptTokens
@@ -705,11 +712,13 @@ export class ApiModelGenerator {
       }
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
 
       apiMethod = new ApiMethod({
         name,
         docComment,
         releaseTag,
+        isProtected,
         isStatic,
         isOptional,
         typeParameters,
@@ -817,13 +826,24 @@ export class ApiModelGenerator {
     let apiProperty: ApiProperty | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiProperty;
 
     if (apiProperty === undefined) {
-      const propertyDeclaration: ts.PropertyDeclaration =
-        astDeclaration.declaration as ts.PropertyDeclaration;
-
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: propertyDeclaration.type, tokenRange: propertyTypeTokenRange });
+      let propertyTypeNode: ts.TypeNode | undefined;
+
+      if (
+        ts.isPropertyDeclaration(astDeclaration.declaration) ||
+        ts.isGetAccessorDeclaration(astDeclaration.declaration)
+      ) {
+        propertyTypeNode = astDeclaration.declaration.type;
+      }
+
+      if (ts.isSetAccessorDeclaration(astDeclaration.declaration)) {
+        // Note that TypeScript always reports an error if a setter does not have exactly one parameter.
+        propertyTypeNode = astDeclaration.declaration.parameters[0].type;
+      }
+
+      nodesToCapture.push({ node: propertyTypeNode, tokenRange: propertyTypeTokenRange });
 
       const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
@@ -831,13 +851,17 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiProperty = new ApiProperty({
         name,
         docComment,
         releaseTag,
+        isProtected,
         isStatic,
         isOptional,
+        isReadonly,
         excerptTokens,
         propertyTypeTokenRange
       });
@@ -874,6 +898,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
       apiPropertySignature = new ApiPropertySignature({
         name,
@@ -881,7 +906,8 @@ export class ApiModelGenerator {
         releaseTag,
         isOptional,
         excerptTokens,
-        propertyTypeTokenRange
+        propertyTypeTokenRange,
+        isReadonly
       });
 
       parentApiItem.addMember(apiPropertySignature);
@@ -960,8 +986,16 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isReadonly: boolean = this._determineReadonly(astDeclaration);
 
-      apiVariable = new ApiVariable({ name, docComment, releaseTag, excerptTokens, variableTypeTokenRange });
+      apiVariable = new ApiVariable({
+        name,
+        docComment,
+        releaseTag,
+        excerptTokens,
+        variableTypeTokenRange,
+        isReadonly
+      });
 
       parentApiItem.addMember(apiVariable);
     }
@@ -1028,9 +1062,28 @@ export class ApiModelGenerator {
       nodesToCapture.push({ node: parameter.type, tokenRange: parameterTypeTokenRange });
       parameters.push({
         parameterName: parameter.name.getText().trim(),
-        parameterTypeTokenRange
+        parameterTypeTokenRange,
+        isOptional: this._collector.typeChecker.isOptionalParameter(parameter)
       });
     }
     return parameters;
+  }
+
+  private _determineReadonly(astDeclaration: AstDeclaration): boolean {
+    const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
+    const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
+    const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(astDeclaration);
+    //Line 1: sees whether the readonly or const modifiers are present
+    //Line 2: sees if the TSDoc comment for @readonly is present
+    //Line 3: sees whether a getter is present for a property with no setter
+    //Line 4: sees if the var declaration has Const keyword
+    return (
+      (astDeclaration.modifierFlags & (ts.ModifierFlags.Readonly + ts.ModifierFlags.Const)) !== 0 ||
+      (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly')) ||
+      (declarationMetadata.ancillaryDeclarations.length === 0 &&
+        astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) ||
+      (ts.isVariableDeclaration(astDeclaration.declaration) &&
+        TypeScriptInternals.isVarConst(astDeclaration.declaration))
+    );
   }
 }

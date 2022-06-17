@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush experiments.json config file",
+  "description": "For use with the Rush tool, this file allows repo maintainers to enable and disable experimental Rush features.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "usePnpmFrozenLockfileForRushInstall": {
+      "description": "By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'. Set this option to true to pass '--frozen-lockfile' instead.",
+      "type": "boolean"
+    },
+    "usePnpmPreferFrozenLockfileForRushUpdate": {
+      "description": "By default, 'rush update' passes --no-prefer-frozen-lockfile to 'pnpm install'. Set this option to true to pass '--prefer-frozen-lockfile' instead.",
+      "type": "boolean"
+    },
+    "omitImportersFromPreventManualShrinkwrapChanges": {
+      "description": "If using the 'preventManualShrinkwrapChanges' option, only prevent manual changes to the total set of external dependencies referenced by the repository, not which projects reference which dependencies. This offers a balance between lockfile integrity and merge conflicts.",
+      "type": "boolean"
+    },
+    "noChmodFieldInTarHeaderNormalization": {
+      "description": "If true, the chmod field in temporary project tar headers will not be normalized. This normalization can help ensure consistent tarball integrity across platforms.",
+      "type": "boolean"
+    },
+    "buildCacheWithAllowWarningsInSuccessfulBuild": {
+      "description": "If true, build caching will respect the allowWarningsInSuccessfulBuild flag and cache builds with warnings. This will not replay warnings from the cached build.",
+      "type": "boolean"
+    },
+    "phasedCommands": {
+      "description": "If true, the phased commands feature is enabled. To use this feature, create a \"phased\" command in common/config/rush/command-line.json.",
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

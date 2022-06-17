@@ -1,10 +1,11 @@
 {
   "name": "@rushstack/heft-web-rig",
-  "version": "0.4.32",
+  "version": "0.10.10",
   "description": "A rig package for web browser projects that build using Heft",
   "license": "MIT",
   "scripts": {
-    "build": ""
+    "build": "",
+    "_phase:build": ""
   },
   "repository": {
     "type": "git",
@@ -12,15 +13,32 @@
     "directory": "rigs/heft-web-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.42.3"
+    "@rushstack/heft": "^0.45.7"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-sass-plugin": "workspace:*",
-    "@rushstack/heft-webpack4-plugin": "workspace:*",
-    "eslint": "~7.30.0",
-    "typescript": "~4.4.2"
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "autoprefixer": "~10.4.2",
+    "css-loader": "~6.6.0",
+    "css-minimizer-webpack-plugin": "~3.4.1",
+    "eslint": "~8.7.0",
+    "html-webpack-plugin": "~5.5.0",
+    "jest-environment-jsdom": "~27.4.2",
+    "mini-css-extract-plugin": "~2.5.3",
+    "postcss-loader": "~6.2.1",
+    "postcss": "~8.4.6",
+    "sass-loader": "~12.4.0",
+    "sass": "~1.49.7",
+    "source-map-loader": "~3.0.1",
+    "style-loader": "~3.3.1",
+    "terser-webpack-plugin": "~5.3.1",
+    "typescript": "~4.6.3",
+    "url-loader": "~4.1.1",
+    "webpack-bundle-analyzer": "~4.5.0",
+    "webpack-merge": "~5.8.0",
+    "webpack": "~5.68.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"

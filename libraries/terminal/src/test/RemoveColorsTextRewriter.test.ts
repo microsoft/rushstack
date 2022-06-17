@@ -23,7 +23,7 @@ function testCase(inputs: string[]): void {
   }).toMatchSnapshot();
 }
 
-describe('RemoveColorsTextRewriter', () => {
+describe(RemoveColorsTextRewriter.name, () => {
   let initialColorsEnabled: boolean;
 
   beforeAll(() => {

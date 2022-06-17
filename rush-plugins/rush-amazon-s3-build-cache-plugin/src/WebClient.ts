@@ -19,11 +19,15 @@ const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('h
 
 /**
  * For use with {@link WebClient}.
+ *
+ * @public
  */
 export type WebClientResponse = fetch.Response;
 
 /**
  * For use with {@link WebClient}.
+ *
+ * @public
  */
 export interface IWebFetchOptionsBase {
   timeoutMs?: number;
@@ -33,6 +37,8 @@ export interface IWebFetchOptionsBase {
 
 /**
  * For use with {@link WebClient}.
+ *
+ * @public
  */
 export interface IGetFetchOptions extends IWebFetchOptionsBase {
   verb: 'GET' | never;
@@ -40,6 +46,8 @@ export interface IGetFetchOptions extends IWebFetchOptionsBase {
 
 /**
  * For use with {@link WebClient}.
+ *
+ * @public
  */
 export interface IPutFetchOptions extends IWebFetchOptionsBase {
   verb: 'PUT';
@@ -48,6 +56,7 @@ export interface IPutFetchOptions extends IWebFetchOptionsBase {
 
 /**
  * For use with {@link WebClient}.
+ * @public
  */
 export enum WebClientProxy {
   None,
@@ -57,6 +66,8 @@ export enum WebClientProxy {
 
 /**
  * A helper for issuing HTTP requests.
+ *
+ * @public
  */
 export class WebClient {
   public readonly standardHeaders: fetch.Headers = new fetch.Headers();

@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1004,
+    "schemaVersion": 1006,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -156,7 +156,8 @@
         "@betaDocumentation": true,
         "@internalRemarks": true,
         "@preapproved": true
-      }
+      },
+      "reportUnsupportedHtmlElements": false
     }
   },
   "kind": "Package",
@@ -275,13 +276,13 @@
                       "text": ";"
                     }
                   ],
-                  "isOptional": false,
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 3,
                     "endIndex": 4
                   },
                   "releaseTag": "Beta",
+                  "isProtected": false,
                   "overloadIndex": 1,
                   "parameters": [
                     {
@@ -289,9 +290,11 @@
                       "parameterTypeTokenRange": {
                         "startIndex": 1,
                         "endIndex": 2
-                      }
+                      },
+                      "isOptional": false
                     }
                   ],
+                  "isOptional": false,
                   "name": "myMethod"
                 }
               ],

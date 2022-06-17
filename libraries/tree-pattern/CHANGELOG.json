@@ -2,6 +2,30 @@
   "name": "@rushstack/tree-pattern",
   "entries": [
     {
+      "version": "0.2.4",
+      "tag": "@rushstack/tree-pattern_v0.2.4",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing types"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.3",
+      "tag": "@rushstack/tree-pattern_v0.2.3",
+      "date": "Sat, 09 Apr 2022 02:24:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@rushstack/tree-pattern_v0.2.2",
       "date": "Wed, 27 Oct 2021 00:08:15 GMT",

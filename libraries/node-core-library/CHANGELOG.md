@@ -1,6 +1,72 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 06 Nov 2021 00:09:13 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+
+## 3.45.6
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 3.45.5
+Tue, 10 May 2022 01:20:43 GMT
+
+### Patches
+
+- Fix and issue where Async.forEachAsync with an async iterator can overflow the max concurrency
+
+## 3.45.4
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 3.45.3
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 3.45.2
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 3.45.1
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 3.45.0
+Wed, 05 Jan 2022 16:07:47 GMT
+
+### Minor changes
+
+- Expose a FileSystem.readFolderItems and FileSystem.readFolderItemsAsync API to get folder entries with types in a single API call.
+- Deprecate FileSystem.readFolder in favor of FileSystem.readFolderItemNames.
+
+## 3.44.3
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 3.44.2
+Thu, 09 Dec 2021 20:34:41 GMT
+
+### Patches
+
+- Update z-schema to ~5.0.2.
+
+## 3.44.1
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 3.44.0
+Fri, 03 Dec 2021 03:05:22 GMT
+
+### Minor changes
+
+- Replace const enums with conventional enums to allow for compatability with JavaScript consumers.
 
 ## 3.43.2
 Sat, 06 Nov 2021 00:09:13 GMT

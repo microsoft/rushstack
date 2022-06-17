@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When the `projectName:normalize` token is used in a cache ID, remove the `@` character from the scope.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

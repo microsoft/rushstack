@@ -30,7 +30,7 @@ function getRelevantEntries(results: Map<string, string>): Map<string, string> {
   return relevantResults;
 }
 
-describe(`getRepoRoot`, () => {
+describe(getRepoRoot.name, () => {
   it(`returns the correct directory`, () => {
     const root: string = getRepoRoot(__dirname);
     const expectedRoot: string = path.resolve(__dirname, '../../../..').replace(/\\/g, '/');
@@ -38,7 +38,7 @@ describe(`getRepoRoot`, () => {
   });
 });
 
-describe('parseGitLsTree', () => {
+describe(parseGitLsTree.name, () => {
   it('can handle a blob', () => {
     const filename: string = 'src/typings/tsd.d.ts';
     const hash: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
@@ -77,7 +77,7 @@ describe('parseGitLsTree', () => {
   });
 });
 
-describe('getPackageDeps', () => {
+describe(getRepoState.name, () => {
   it('can parse committed files', () => {
     const results: Map<string, string> = getRepoState(__dirname);
     const filteredResults: Map<string, string> = getRelevantEntries(results);

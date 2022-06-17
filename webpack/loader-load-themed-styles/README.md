@@ -87,7 +87,7 @@ changes to the DOM.
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/webpack/loader-load-themed-styles/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/webpack/loader-load-themed-styles/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@microsoft/loader-load-themed-styles` is part of the [Rush Stack](https://rushstack.io/) family of projects.

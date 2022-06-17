@@ -5,8 +5,58 @@
 ```ts
 
 import type { IRushPlugin } from '@rushstack/rush-sdk';
+import type { ITerminal } from '@rushstack/node-core-library';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
+
+// @public (undocumented)
+export enum AzureAuthorityHosts {
+    // (undocumented)
+    AzureChina = "https://login.chinacloudapi.cn",
+    // (undocumented)
+    AzureGermany = "https://login.microsoftonline.de",
+    // (undocumented)
+    AzureGovernment = "https://login.microsoftonline.us",
+    // (undocumented)
+    AzurePublicCloud = "https://login.microsoftonline.com"
+}
+
+// @public (undocumented)
+export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
+
+// @public (undocumented)
+export class AzureStorageAuthentication {
+    constructor(options: IAzureStorageAuthenticationOptions);
+    // (undocumented)
+    protected readonly _azureEnvironment: AzureEnvironmentNames;
+    // (undocumented)
+    deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
+    // (undocumented)
+    protected readonly _isCacheWriteAllowedByConfiguration: boolean;
+    // (undocumented)
+    protected readonly _storageAccountName: string;
+    // (undocumented)
+    protected get _storageAccountUrl(): string;
+    // (undocumented)
+    protected readonly _storageContainerName: string;
+    // (undocumented)
+    tryGetCachedCredentialAsync(): Promise<string | undefined>;
+    // (undocumented)
+    updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
+    updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void>;
+}
+
+// @public (undocumented)
+export interface IAzureStorageAuthenticationOptions {
+    // (undocumented)
+    azureEnvironment?: AzureEnvironmentNames;
+    // (undocumented)
+    isCacheWriteAllowed: boolean;
+    // (undocumented)
+    storageAccountName: string;
+    // (undocumented)
+    storageContainerName: string;
+}
 
 // @public (undocumented)
 class RushAzureStorageBuildCachePlugin implements IRushPlugin {

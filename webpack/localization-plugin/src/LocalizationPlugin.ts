@@ -5,6 +5,12 @@ import { JsonFile, FileSystem, ITerminal, NewlineKind } from '@rushstack/node-co
 import * as Webpack from 'webpack';
 import * as path from 'path';
 import * as Tapable from 'tapable';
+import {
+  getPseudolocalizer,
+  ILocalizationFile,
+  parseLocFile,
+  TypingsGenerator
+} from '@rushstack/localization-utilities';
 
 import { Constants } from './utilities/Constants';
 import {
@@ -15,17 +21,13 @@ import {
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocaleFileData,
-  ILocalizationFile,
   ILocaleElementMap,
   ILocalizedStrings,
   IResolvedMissingTranslations
 } from './interfaces';
 import { ILocalizedWebpackChunk } from './webpackInterfaces';
-import { LocFileTypingsGenerator } from './LocFileTypingsGenerator';
-import { Pseudolocalization } from './Pseudolocalization';
 import { EntityMarker } from './utilities/EntityMarker';
 import { IAsset, IProcessAssetResult, AssetProcessor, PLACEHOLDER_REGEX } from './AssetProcessor';
-import { LocFileParser } from './utilities/LocFileParser';
 
 /**
  * @internal
@@ -111,6 +113,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     (str: string) => string
   >();
   private _resxNewlineNormalization: NewlineKind | undefined;
+  private _ignoreMissingResxComments: boolean | undefined;
 
   /**
    * The outermost map's keys are the locale names.
@@ -125,6 +128,13 @@ export class LocalizationPlugin implements Webpack.Plugin {
   public constructor(options: ILocalizationPluginOptions) {
     if (options.filesToIgnore) {
       throw new Error('The filesToIgnore option is no longer supported. Please use globsToIgnore instead.');
+    }
+
+    if (options.typingsOptions?.ignoreString) {
+      throw new Error(
+        'The typingsOptions.ignoreString option is no longer supported. Please use the ignoreString ' +
+          'option directly on the constructor options object instead.'
+      );
     }
 
     this._options = options;
@@ -164,13 +174,15 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     const { errors, warnings } = this._initializeAndValidateOptions(compiler.options, isWebpackDevServer);
 
-    let typingsPreprocessor: LocFileTypingsGenerator | undefined;
+    let typingsPreprocessor: TypingsGenerator | undefined;
     if (this._options.typingsOptions) {
-      typingsPreprocessor = new LocFileTypingsGenerator({
+      typingsPreprocessor = new TypingsGenerator({
         srcFolder: this._options.typingsOptions.sourceRoot || compiler.context,
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
         exportAsDefault: this._options.typingsOptions.exportAsDefault,
-        globsToIgnore: this._options.globsToIgnore
+        globsToIgnore: this._options.globsToIgnore,
+        ignoreString: this._options.ignoreString,
+        processComment: this._options.typingsOptions.processComment
       });
     } else {
       typingsPreprocessor = undefined;
@@ -181,7 +193,9 @@ export class LocalizationPlugin implements Webpack.Plugin {
       configuration: compiler.options,
       globsToIgnore: this._globsToIgnore,
       localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER,
-      resxNewlineNormalization: this._resxNewlineNormalization
+      resxNewlineNormalization: this._resxNewlineNormalization,
+      ignoreMissingResxComments: this._ignoreMissingResxComments,
+      ignoreString: this._options.ignoreString
     };
 
     if (errors.length > 0 || warnings.length > 0) {
@@ -480,11 +494,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
     ) => {
       if (typeof localizedData === 'string') {
         additionalLoadedFilePaths.push(localizedData);
-        const localizationFile: ILocalizationFile = LocFileParser.parseLocFile({
+        const localizationFile: ILocalizationFile = parseLocFile({
           filePath: localizedData,
           content: FileSystem.readFile(localizedData),
           terminal: terminal,
-          resxNewlineNormalization: this._resxNewlineNormalization
+          resxNewlineNormalization: this._resxNewlineNormalization,
+          ignoreMissingResxComments: this._ignoreMissingResxComments
         });
 
         return this._convertLocalizationFileToLocData(localizationFile);
@@ -626,6 +641,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     // START options.localizedData
     if (this._options.localizedData) {
+      this._ignoreMissingResxComments = this._options.localizedData.ignoreMissingResxComments;
+
       // START options.localizedData.passthroughLocale
       if (this._options.localizedData.passthroughLocale) {
         const { usePassthroughLocale, passthroughLocaleName = 'passthrough' } =
@@ -737,10 +754,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
             return { errors, warnings };
           }
 
-          this._pseudolocalizers.set(
-            pseudolocaleName,
-            Pseudolocalization.getPseudolocalizer(pseudoLocaleOpts)
-          );
+          this._pseudolocalizers.set(pseudolocaleName, getPseudolocalizer(pseudoLocaleOpts));
           this._locales.add(pseudolocaleName);
           this._resolvedLocalizedStrings.set(pseudolocaleName, new Map<string, Map<string, string>>());
         }

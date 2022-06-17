@@ -93,6 +93,9 @@ function generateConfiguration(mode, outputFolderName) {
               },
               './src/chunks/strings6.resx': {
                 string: 'cadena de texto RESX'
+              },
+              './src/strings7.resjson': {
+                string: 'cadena resjson'
               }
             }
           },

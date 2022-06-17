@@ -1,6 +1,43 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Fri, 05 Nov 2021 15:09:18 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+
+## 0.3.12
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 0.3.11
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 0.3.10
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 0.3.9
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 0.3.8
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 0.3.7
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.3.6
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
 
 ## 0.3.5
 Fri, 05 Nov 2021 15:09:18 GMT

@@ -3,7 +3,7 @@
 
 import { FileError, FileErrorFormat } from '../FileError';
 
-describe('FileError', () => {
+describe(FileError.name, () => {
   it('normalizes slashes in file paths', () => {
     const error1: FileError = new FileError('message', 'path\\to\\file', 0);
     expect(error1.filePath).toEqual('path/to/file');

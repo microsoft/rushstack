@@ -1,0 +1,41 @@
+{
+  "name": "@rushstack/webpack5-module-minifier-plugin",
+  "entries": [
+    {
+      "version": "5.1.1",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.1",
+      "date": "Tue, 07 Jun 2022 09:37:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.0",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.0",
+      "date": "Thu, 02 Jun 2022 15:13:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial implementation of @rushstack/webpack5-module-minifier-plugin. Supports externals, inline modules, concatenation, and recording of minified module sizes."
+          }
+        ]
+      }
+    }
+  ]
+}

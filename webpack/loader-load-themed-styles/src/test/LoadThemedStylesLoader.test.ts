@@ -11,7 +11,7 @@ function wrapResult(loaderResult: string): string {
   module;`;
 }
 
-describe('LoadThemedStylesLoader', () => {
+describe(LoadThemedStylesLoader.name, () => {
   beforeEach(() => {
     LoadThemedStylesLoader.resetLoadedThemedStylesPath();
     LoadThemedStylesMock.loadedData = [];

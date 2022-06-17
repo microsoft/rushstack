@@ -5,8 +5,8 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-lib
 
 import { PrintUtilities } from '../PrintUtilities';
 
-describe('PrintUtilities', () => {
-  describe('printMessageInBox', () => {
+describe(PrintUtilities.name, () => {
+  describe(PrintUtilities.printMessageInBox.name, () => {
     const MESSAGE: string =
       'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.';
 

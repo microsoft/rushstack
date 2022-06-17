@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IgnoreStringFunction, IPseudolocaleOptions } from '@rushstack/localization-utilities';
+
 /**
  * Options for the passthrough locale.
  *
@@ -40,6 +42,25 @@ export interface ITypingsGenerationOptions {
    * If this option is set to `true`, loc modules typings will be exported wrapped in a `default` property.
    */
   exportAsDefault?: boolean;
+
+  /**
+   * @deprecated
+   * Use {@link ILocalizationPluginOptions.ignoreString} instead.
+   *
+   * @internalRemarks
+   * TODO: Remove when version 1.0.0 is released.
+   */
+  ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+
+  /**
+   * Optionally, provide a function that will process string comments. The returned value will become the
+   * TSDoc comment for the string in the typings.
+   */
+  processComment?: (
+    comment: string | undefined,
+    resxFilePath: string,
+    stringName: string
+  ) => string | undefined;
 }
 
 /**
@@ -48,7 +69,7 @@ export interface ITypingsGenerationOptions {
 export interface IDefaultLocaleOptions {
   /**
    * This required property specifies the name of the locale used in the
-   * `.resx` and `.loc.json` files in the source
+   * `.resx`, `.loc.json`, and `.resjson` files in the source
    */
   localeName: string;
 
@@ -57,24 +78,6 @@ export interface IDefaultLocaleOptions {
    * `localizedData.translatedStrings` will be provided by the default locale
    */
   fillMissingTranslationStrings?: boolean;
-}
-
-/**
- * Options for the pseudolocale library.
- *
- * @internalRemarks
- * Eventually this should be replaced with DefinitelyTyped types.
- *
- * @public
- */
-export interface IPseudolocaleOptions {
-  prepend?: string;
-  append?: string;
-  delimiter?: string;
-  startDelimiter?: string;
-  endDelimiter?: string;
-  extend?: number;
-  override?: string;
 }
 
 /**
@@ -120,6 +123,11 @@ export interface ILocalizedData {
    * Normalize newlines in RESX files to either CRLF (Windows-style) or LF ('nix style)
    */
   normalizeResxNewlines?: 'lf' | 'crlf';
+
+  /**
+   * If set to true, do not warn on missing RESX `<data>` element comments.
+   */
+  ignoreMissingResxComments?: boolean;
 }
 
 /**
@@ -153,7 +161,7 @@ export interface ILocalizationPluginOptions {
   localizedData: ILocalizedData;
 
   /**
-   * This option is used to specify `.resx`, `.resx.json` and `.loc.json` files that should not be processed by
+   * This option is used to specify `.resx`, `.resx.json`, and `.loc.json` files that should not be processed by
    * this plugin.
    */
   globsToIgnore?: string[];
@@ -174,26 +182,19 @@ export interface ILocalizationPluginOptions {
   typingsOptions?: ITypingsGenerationOptions;
 
   /**
+   * Optionally, provide a function that will be called for each string. If the function returns `true`
+   * the string will not be included.
+   */
+  ignoreString?: IgnoreStringFunction;
+
+  /**
    * @deprecated
+   * Use {@link ILocalizationPluginOptions.globsToIgnore} instead.
    *
+   * @internalRemarks
    * TODO: Remove when version 1.0.0 is released.
    */
   filesToIgnore?: string[];
-}
-
-/**
- * @internal
- */
-export interface ILocalizationFile {
-  [stringName: string]: ILocalizedString;
-}
-
-/**
- * @internal
- */
-export interface ILocalizedString {
-  value: string;
-  comment?: string;
 }
 
 /**

@@ -12,7 +12,10 @@ async function runAsync(): Promise<void> {
 
   const changedProjects: Set<RushConfigurationProject> = await projectChangeAnalyzer.getChangedProjectsAsync({
     targetBranchName: rushConfiguration.repositoryDefaultBranch,
-    terminal
+    terminal,
+
+    includeExternalDependencies: true,
+    enableFiltering: false
   });
   //#endregion
 

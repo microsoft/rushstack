@@ -39,8 +39,12 @@ items:
         items:
           - name: InjectedCustomItem
             uid: customUrl
+          - name: Constraint
+            uid: 'api-documenter-test!Constraint:interface'
           - name: DecoratorExample
             uid: 'api-documenter-test!DecoratorExample:class'
+          - name: DefaultType
+            uid: 'api-documenter-test!DefaultType:interface'
           - name: DocClassInterfaceMerge (Class)
             uid: 'api-documenter-test!DocClassInterfaceMerge:class'
           - name: DocClassInterfaceMerge (Interface)
@@ -53,8 +57,16 @@ items:
             uid: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
           - name: EcmaSmbols
             uid: 'api-documenter-test!EcmaSmbols:namespace'
+          - name: ExampleDuplicateTypeAlias
+            uid: 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+          - name: ExampleTypeAlias
+            uid: 'api-documenter-test!ExampleTypeAlias:type'
+          - name: ExampleUnionTypeAlias
+            uid: 'api-documenter-test!ExampleUnionTypeAlias:type'
           - name: Generic
             uid: 'api-documenter-test!Generic:class'
+          - name: GenericTypeAlias
+            uid: 'api-documenter-test!GenericTypeAlias:type'
           - name: IDocInterface7
             uid: 'api-documenter-test!IDocInterface7:interface'
           - name: OuterNamespace
@@ -63,3 +75,5 @@ items:
             uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
           - name: SystemEvent
             uid: 'api-documenter-test!SystemEvent:class'
+          - name: TypeAlias
+            uid: 'api-documenter-test!TypeAlias:type'

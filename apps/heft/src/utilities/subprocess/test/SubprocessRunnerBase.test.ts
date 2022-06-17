@@ -4,7 +4,7 @@
 import { SubprocessRunnerBase } from '../SubprocessRunnerBase';
 import { FileError } from '../../../pluginFramework/logging/FileError';
 
-describe('SubprocessRunnerBase', () => {
+describe(SubprocessRunnerBase.name, () => {
   it(`${SubprocessRunnerBase.serializeForIpcMessage.name} correctly serializes objects`, () => {
     expect(SubprocessRunnerBase.serializeForIpcMessage(1)).toMatchSnapshot();
     expect(SubprocessRunnerBase.serializeForIpcMessage(false)).toMatchSnapshot();

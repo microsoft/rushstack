@@ -1,0 +1,112 @@
+/**
+ * This configuration file defines custom commands for the "rush" command-line.
+ * More documentation is available on the Rush website: https://rushjs.io
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+
+  /**
+   * Custom "commands" introduce new verbs for the command-line.  To see the help for these
+   * example commands, try "rush --help", "rush my-bulk-command --help", or
+   * "rush my-global-command --help".
+   */
+  "commands": [
+    {
+      "commandKind": "phased",
+      "name": "build",
+      "summary": "Phased build",
+      "description": "Ditto",
+      "safeForSimultaneousRushProcesses": false,
+
+      "enableParallelism": true,
+      "incremental": true,
+      "phases": [
+        "_phase:no-deps",
+        "_phase:upstream-self",
+        "_phase:upstream-1",
+        "_phase:upstream-2",
+        "_phase:upstream-3",
+        "_phase:upstream-1-self",
+        "_phase:upstream-2-self",
+        "_phase:upstream-1-self-upstream",
+        "_phase:complex"
+      ]
+    }
+  ],
+
+  /* PHASES */
+  "phases": [
+    {
+      "name": "_phase:no-deps",
+      "dependencies": {},
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:upstream-self",
+      "dependencies": {
+        "self": ["_phase:no-deps"],
+        "upstream": ["_phase:upstream-self"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:upstream-1",
+      "dependencies": {
+        "upstream": ["_phase:no-deps"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:upstream-2",
+      "dependencies": {
+        "upstream": ["_phase:upstream-1"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:upstream-3",
+      "dependencies": {
+        "upstream": ["_phase:upstream-2"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:upstream-1-self",
+      "dependencies": {
+        "self": ["_phase:upstream-1"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:upstream-2-self",
+      "dependencies": {
+        "self": ["_phase:upstream-2"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:upstream-1-self-upstream",
+      "dependencies": {
+        "upstream": ["_phase:upstream-1-self"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    },
+    {
+      "name": "_phase:complex",
+      "dependencies": {
+        "self": ["_phase:upstream-3"],
+        "upstream": ["_phase:upstream-1-self-upstream", "_phase:upstream-2-self"]
+      },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    }
+  ]
+}

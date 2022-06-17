@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
 import {
   Encoding,
   Text,
@@ -12,7 +11,8 @@ import {
   IFileSystemCreateLinkOptions,
   FileSystem,
   FileSystemStats,
-  Sort
+  Sort,
+  FolderItem
 } from '@rushstack/node-core-library';
 
 export interface IReadFolderFilesAndDirectoriesResult {
@@ -163,15 +163,14 @@ export class TypeScriptCachedFileSystem {
     return this._withCaching(
       folderPath,
       (path: string) => {
-        // TODO: Replace this with a FileSystem API
-        const folderEntries: fs.Dirent[] = fs.readdirSync(path, { withFileTypes: true });
+        const folderEntries: FolderItem[] = FileSystem.readFolderItems(path);
         return this._sortFolderEntries(folderEntries);
       },
       this._readFolderCache
     );
   };
 
-  private _sortFolderEntries(folderEntries: fs.Dirent[]): IReadFolderFilesAndDirectoriesResult {
+  private _sortFolderEntries(folderEntries: FolderItem[]): IReadFolderFilesAndDirectoriesResult {
     // TypeScript expects entries sorted ordinally by name
     // In practice this might not matter
     folderEntries.sort((a, b) => Sort.compareByValue(a, b));

@@ -20,7 +20,7 @@ const rushSession = new RushSession({
   getIsDebugMode: () => false
 });
 
-describe('AmazonS3BuildCacheProvider', () => {
+describe(AmazonS3BuildCacheProvider.name, () => {
   beforeEach(() => {
     jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
     jest.spyOn(EnvironmentConfiguration, 'buildCacheEnabled', 'get').mockReturnValue(undefined);
@@ -39,9 +39,10 @@ describe('AmazonS3BuildCacheProvider', () => {
       jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(envVarValue);
       return new AmazonS3BuildCacheProvider(
         {
+          s3Endpoint: 'localhost:9000',
           s3Region: 'region-name',
-          s3Bucket: 'bucket-name',
-          isCacheWriteAllowed: optionValue
+          isCacheWriteAllowed: optionValue,
+          s3Prefix: undefined
         },
         rushSession
       );
@@ -71,9 +72,10 @@ describe('AmazonS3BuildCacheProvider', () => {
   async function testCredentialCache(isCacheWriteAllowed: boolean): Promise<void> {
     const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider(
       {
+        s3Endpoint: 'localhost:9000',
         s3Region: 'region-name',
-        s3Bucket: 'bucket-name',
-        isCacheWriteAllowed
+        isCacheWriteAllowed,
+        s3Prefix: undefined
       },
       rushSession
     );

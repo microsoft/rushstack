@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1004,
+    "schemaVersion": 1006,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -166,7 +166,8 @@
         "@preapproved": true,
         "@docCategory": true,
         "@myCustomTag": true
-      }
+      },
+      "reportUnsupportedHtmlElements": false
     }
   },
   "kind": "Package",
@@ -179,6 +180,21 @@
       "canonicalReference": "api-documenter-test!",
       "name": "",
       "members": [
+        {
+          "kind": "Interface",
+          "canonicalReference": "api-documenter-test!Constraint:interface",
+          "docComment": "/**\n * Type parameter constraint used by test case below.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface Constraint "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Constraint",
+          "members": [],
+          "extendsTokenRanges": []
+        },
         {
           "kind": "Variable",
           "canonicalReference": "api-documenter-test!constVariable:var",
@@ -193,6 +209,7 @@
               "text": "number"
             }
           ],
+          "isReadonly": true,
           "releaseTag": "Public",
           "name": "constVariable",
           "variableTypeTokenRange": {
@@ -232,6 +249,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "creationDate",
@@ -239,10 +257,26 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             }
           ],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "api-documenter-test!DefaultType:interface",
+          "docComment": "/**\n * Type parameter default type used by test case below.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface DefaultType "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "DefaultType",
+          "members": [],
+          "extendsTokenRanges": []
         },
         {
           "kind": "Class",
@@ -268,6 +302,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": []
             },
@@ -290,6 +325,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 2,
               "parameters": [
                 {
@@ -297,7 +333,8 @@
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
-                  }
+                  },
+                  "isOptional": false
                 }
               ]
             }
@@ -366,15 +403,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "deprecatedExample"
             },
             {
@@ -411,13 +449,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -425,16 +463,19 @@
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
-                  }
+                  },
+                  "isOptional": false
                 },
                 {
                   "parameterName": "b",
                   "parameterTypeTokenRange": {
                     "startIndex": 3,
                     "endIndex": 4
-                  }
+                  },
+                  "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "exampleFunction"
             },
             {
@@ -463,13 +504,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 2,
               "parameters": [
                 {
@@ -477,10 +518,94 @@
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
+                  },
+                  "isOptional": false
+                }
+              ],
+              "isOptional": false,
+              "name": "exampleFunction"
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#genericWithConstraintAndDefault:member(1)",
+              "docComment": "/**\n * This is a method with a complex type parameter.\n *\n * @param x - some generic parameter.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "genericWithConstraintAndDefault<T extends "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Constraint",
+                  "canonicalReference": "api-documenter-test!Constraint:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " "
+                },
+                {
+                  "kind": "Content",
+                  "text": "= "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DefaultType",
+                  "canonicalReference": "api-documenter-test!DefaultType:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(x: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "T",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 5
                   }
                 }
               ],
-              "name": "exampleFunction"
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 8,
+                "endIndex": 9
+              },
+              "releaseTag": "Public",
+              "isProtected": false,
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 7
+                  },
+                  "isOptional": false
+                }
+              ],
+              "isOptional": false,
+              "name": "genericWithConstraintAndDefault"
             },
             {
               "kind": "Method",
@@ -500,15 +625,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "interestingEdgeCases"
             },
             {
@@ -530,6 +656,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "malformedEvent",
@@ -537,7 +664,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -558,6 +686,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "modifiedEvent",
@@ -565,7 +694,55 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#optionalParamFunction:member(1)",
+              "docComment": "/**\n * This is a function with an optional parameter.\n *\n * @param x - the number\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "optionalParamFunction(x?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "isProtected": false,
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": true
+                }
+              ],
+              "isOptional": false,
+              "name": "optionalParamFunction"
             },
             {
               "kind": "Property",
@@ -585,6 +762,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "readonlyProperty",
@@ -592,7 +770,8 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -613,6 +792,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "regularProperty",
@@ -620,7 +800,37 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1.staticReadonlyThing:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "static readonly staticReadonlyThing: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": true,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "staticReadonlyThing",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": true,
+              "isProtected": false
             },
             {
               "kind": "Method",
@@ -656,13 +866,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": true,
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -670,16 +880,19 @@
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
-                  }
+                  },
+                  "isOptional": false
                 },
                 {
                   "parameterName": "y",
                   "parameterTypeTokenRange": {
                     "startIndex": 3,
                     "endIndex": 4
-                  }
+                  },
+                  "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "sumWithExample"
             },
             {
@@ -700,15 +913,16 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [],
+              "isOptional": false,
               "name": "tableExample"
             },
             {
@@ -733,6 +947,7 @@
                   "text": "\n\nset writeableProperty(value: string);"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "writeableProperty",
@@ -740,12 +955,42 @@
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": false
+              "isStatic": false,
+              "isProtected": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#writeonlyProperty:member",
+              "docComment": "/**\n * API Extractor will surface an `ae-missing-getter` finding for this property.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "set writeonlyProperty(value: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ");"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "writeonlyProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": false
             }
           ],
           "extendsTokenRange": {
             "startIndex": 1,
-            "endIndex": 3
+            "endIndex": 2
           },
           "implementsTokenRanges": [
             {
@@ -754,7 +999,7 @@
             },
             {
               "startIndex": 6,
-              "endIndex": 8
+              "endIndex": 7
             }
           ]
         },
@@ -992,6 +1237,7 @@
                   "text": "unique symbol"
                 }
               ],
+              "isReadonly": true,
               "releaseTag": "Public",
               "name": "example",
               "variableTypeTokenRange": {
@@ -1084,14 +1330,16 @@
               "parameterTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "isOptional": false
             },
             {
               "parameterName": "y",
               "parameterTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
-              }
+              },
+              "isOptional": false
             }
           ],
           "name": "exampleFunction"
@@ -1259,6 +1507,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "regularProperty",
@@ -1324,7 +1573,7 @@
           "extendsTokenRanges": [
             {
               "startIndex": 1,
-              "endIndex": 3
+              "endIndex": 2
             }
           ]
         },
@@ -1359,6 +1608,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "\"[not.a.symbol]\"",
@@ -1394,6 +1644,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "[EcmaSmbols.example]",
@@ -1440,7 +1691,8 @@
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
-                  }
+                  },
+                  "isOptional": false
                 }
               ]
             },
@@ -1509,7 +1761,8 @@
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
-                  }
+                  },
+                  "isOptional": false
                 }
               ]
             },
@@ -1531,6 +1784,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "redundantQuotes",
@@ -1573,6 +1827,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "Context",
@@ -1604,6 +1859,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "generic",
@@ -1630,6 +1886,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "numberOrFunction",
@@ -1656,6 +1913,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "stringOrNumber",
@@ -1698,6 +1956,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "regularProperty",
@@ -1745,6 +2004,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "arrayProperty",
@@ -1792,7 +2052,8 @@
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
-                  }
+                  },
+                  "isOptional": false
                 }
               ],
               "typeParameters": [
@@ -1838,6 +2099,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "intersectionProperty",
@@ -1864,6 +2126,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "regularProperty",
@@ -1908,6 +2171,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "tupleProperty",
@@ -1948,6 +2212,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "typeReferenceProperty",
@@ -1984,6 +2249,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
               "name": "unionProperty",
@@ -2026,6 +2292,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": true,
               "releaseTag": "Public",
               "name": "optionalField",
@@ -2080,6 +2347,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": true,
               "isOptional": true,
               "releaseTag": "Public",
               "name": "optionalReadonlyField",
@@ -2106,6 +2374,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "isOptional": true,
               "releaseTag": "Public",
               "name": "optionalUndocumentedField",
@@ -2181,7 +2450,8 @@
                       "parameterTypeTokenRange": {
                         "startIndex": 1,
                         "endIndex": 2
-                      }
+                      },
+                      "isOptional": false
                     }
                   ],
                   "name": "nestedFunction"
@@ -2202,6 +2472,7 @@
                   "text": "boolean"
                 }
               ],
+              "isReadonly": false,
               "releaseTag": "Public",
               "name": "nestedVariable",
               "variableTypeTokenRange": {
@@ -2250,13 +2521,13 @@
                   "text": ";"
                 }
               ],
-              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
               },
               "releaseTag": "Public",
+              "isProtected": false,
               "overloadIndex": 1,
               "parameters": [
                 {
@@ -2264,9 +2535,11 @@
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
-                  }
+                  },
+                  "isOptional": false
                 }
               ],
+              "isOptional": false,
               "name": "addHandler"
             }
           ],

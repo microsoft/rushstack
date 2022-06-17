@@ -22,7 +22,7 @@ enum MixedEnum {
   Banana = 'banana'
 }
 
-describe('Enum', () => {
+describe(Enum.name, () => {
   test('tryGetValueByKey', () => {
     // NumericEnum
     const numeric1: NumericEnum | undefined = Enum.tryGetValueByKey(NumericEnum, 'Apple');

@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: DecoratorExample
 summary: ''
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: class
@@ -15,6 +16,7 @@ properties:
     fullName: creationDate
     summary: The date when the record was created.
     remarks: Here is a longer description of the property.
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

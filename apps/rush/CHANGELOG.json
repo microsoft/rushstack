@@ -2,6 +2,604 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.74.0",
+      "tag": "@microsoft/rush_v5.74.0",
+      "date": "Fri, 10 Jun 2022 22:17:51 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.73.0",
+      "tag": "@microsoft/rush_v5.73.0",
+      "date": "Fri, 10 Jun 2022 21:54:49 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.72.0",
+      "tag": "@microsoft/rush_v5.72.0",
+      "date": "Fri, 10 Jun 2022 20:01:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Introduce a \"rush-pnpm\" shell command for invoking native PNPM commands in a Rush workspace"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.71.0",
+      "tag": "@microsoft/rush_v5.71.0",
+      "date": "Fri, 27 May 2022 00:50:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Write local telemetry for all phased commands, including partial runs when running in watch mode."
+          },
+          {
+            "comment": "Export the list of workspace packages to the pnpmfile shim."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.70.0",
+      "tag": "@microsoft/rush_v5.70.0",
+      "date": "Wed, 11 May 2022 22:21:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new `afterExecuteOperations` hook to phased command execution. This hook is used for the console timeline view and the standard result summary."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.69.0",
+      "tag": "@microsoft/rush_v5.69.0",
+      "date": "Tue, 10 May 2022 01:20:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix handling of erroneous undefined values when printing `rush list --detailed`"
+          },
+          {
+            "comment": "Update watcher to only schedule operations impacted by the detected change. A behavior difference will only be observed for repositories that define a phase with no dependencies."
+          },
+          {
+            "comment": "Fix handing of the `strictPeerDependencies` option when using PNPM >= 7.0.0."
+          },
+          {
+            "comment": "Update the `postRushInstall` hook to always run, and move its execution to after telemetry is written."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the \"xstitchPreferredVersions\" property from common-versions.json and the CommonVersionsConfiguration API."
+          },
+          {
+            "comment": "Correct a warning that is printed during \"rush change\" to only be concerned with unstaged changes."
+          },
+          {
+            "comment": "Include tags in the `rush list` output."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.68.2",
+      "tag": "@microsoft/rush_v5.68.2",
+      "date": "Fri, 06 May 2022 18:54:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Provide ability for phased script commands to internally invoke \"rush install\" prior to execution."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.68.1",
+      "tag": "@microsoft/rush_v5.68.1",
+      "date": "Tue, 03 May 2022 21:52:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush list --json\" prints non-json output in a repo that uses rush plugins with autoinstallers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.68.0",
+      "tag": "@microsoft/rush_v5.68.0",
+      "date": "Fri, 29 Apr 2022 05:22:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable legacy skip logic when build cache is enabled."
+          },
+          {
+            "comment": "Report status of projects with an empty script as \"did not define any work,\" instead of as \"from cache.\""
+          },
+          {
+            "comment": "Add a -- parameter to git command invocations that accept user input to prevent arbitrary arguments from being passed."
+          },
+          {
+            "comment": "Remove the @deprecated label from `RushConfigurationProject.packageJson`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.67.0",
+      "tag": "@microsoft/rush_v5.67.0",
+      "date": "Sat, 23 Apr 2022 02:13:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Upgrade \"tar\" dependency to eliminate spurious security vulnerability for \"minimist\" package"
+          },
+          {
+            "comment": "Remove requirement that custom parameters associated with a phased command must also be associated with one or more phases. This allows for custom parameters that will only be interpreted by plugins."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.66.2",
+      "tag": "@microsoft/rush_v5.66.2",
+      "date": "Tue, 12 Apr 2022 02:58:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where running the \"install-run-rush\" script with the \"--help\" parameter won't install Rush."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.66.1",
+      "tag": "@microsoft/rush_v5.66.1",
+      "date": "Tue, 12 Apr 2022 01:52:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix watch-mode phased commands when rush.json is not in the repository root. Fix watch-mode change detection on Linux."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.66.0",
+      "tag": "@microsoft/rush_v5.66.0",
+      "date": "Sat, 09 Apr 2022 02:24:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(BREAKING CHANGE) Update references to the default branch to reference \"main\" instead of \"master\"."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.65.1",
+      "tag": "@microsoft/rush_v5.65.1",
+      "date": "Fri, 08 Apr 2022 23:10:18 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.65.0",
+      "tag": "@microsoft/rush_v5.65.0",
+      "date": "Fri, 08 Apr 2022 06:16:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Expose APIs for managing Azure credentials from @rushstack/rush-azure-storage-build-cache-plugin."
+          },
+          {
+            "comment": "Add flushTelemetry hook"
+          },
+          {
+            "comment": "Fix an edge case where `rush update` fails in a PNPM workspaces repo with no dependencies."
+          },
+          {
+            "comment": "Fix some issues with \"rush add\"'s ability to determine which version to use when adding a dependency that is already present in the repo."
+          },
+          {
+            "comment": "Add support for percentage values for --parallelism flag, eg. \"50%\"."
+          },
+          {
+            "comment": "Improve retry logic in the Amazon S3 cloud cache plugin and improve reporting when the user is not authenticated."
+          },
+          {
+            "comment": "Add an additional plugin to rush-azure-storage-build-cache-plugin that can be used to prompt for Azure authentication before a command runs."
+          },
+          {
+            "comment": "Change the way \"rush change\" prints long lists of package names to include an \"(and <count> more)\" line after the first five listed by name."
+          },
+          {
+            "comment": "Add a \"tags\" field to project definitions in rush.json. These may be used to select projects, for example, \"rush list --only tag:my-custom-tag\"."
+          },
+          {
+            "comment": "Fix a typo in output of `rush change -v`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.64.0",
+      "tag": "@microsoft/rush_v5.64.0",
+      "date": "Fri, 01 Apr 2022 04:51:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for suppressing startup information to invocations of `rush`, `rushx`, and the `install-run-rush` scripts."
+          },
+          {
+            "comment": "Add --timeline option for more detail generated at end of rush build"
+          },
+          {
+            "comment": "Expose plugin hooks for phased command execution: the \"createOperations\" hook allows customizing the set of operations to execute, and the \"waitingForChanges\" hook gives plugins an opportunity to display data to the console while output is paused."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.63.1",
+      "tag": "@microsoft/rush_v5.63.1",
+      "date": "Sat, 26 Mar 2022 00:47:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the build cache is never written to."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Fix broken README links for @microsoft/rush-lib documentation and API reference."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.63.0",
+      "tag": "@microsoft/rush_v5.63.0",
+      "date": "Tue, 15 Mar 2022 19:18:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Reinstall automatically if monorepo folder is moved"
+          },
+          {
+            "comment": "Fix resolution of change file paths when rush.json is not in the root of the Git repository."
+          },
+          {
+            "comment": "Fix the \"selected operations\" logging for commands that skipped projects to only display the operations that will be executed."
+          },
+          {
+            "comment": "For watch mode commands, allow the command to continue even if the initial build fails."
+          },
+          {
+            "comment": "Allow adding of aliased child packages."
+          },
+          {
+            "comment": "Add plugin hooks for global and phased commands and allow plugins to tap into command execution by command name, or into the execution of any command by command kind."
+          },
+          {
+            "comment": "Fix a typo in the \"rush add\" command-line help."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.62.4",
+      "tag": "@microsoft/rush_v5.62.4",
+      "date": "Tue, 15 Feb 2022 01:40:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the lib/index.mjs file from the @rushstack/rush-sdk package. This package must be CommonJS."
+          },
+          {
+            "comment": "Do not load the PowerShell User Profile for running the AsyncRecycler task"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.62.3",
+      "tag": "@microsoft/rush_v5.62.3",
+      "date": "Fri, 11 Feb 2022 02:18:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the git tag would not include the prerelease portion of the version, which will cause subsequent publishes of the same version to not be tagged."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.62.2",
+      "tag": "@microsoft/rush_v5.62.2",
+      "date": "Thu, 10 Feb 2022 03:21:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add the ability to forcibly replace bad cache entries generated by issues in a previous Rush release."
+          },
+          {
+            "comment": "Fix an issue where the dependencies of lockstep-versioned projects aren't bumped when the lockstep-versioned projects' versions are bumped. This issue only arose in the scenario when the lockstep-versioned projects' version bumps are driven by the change type in the changefiles and not by the \"nextBump\" property in \"common/config/rush/version-policies.json\""
+          },
+          {
+            "comment": "Fix an issue where \"rush setup\" reported a TypeError when invoked from Git Bash"
+          },
+          {
+            "comment": "Fix a bug where `rush change --verify` would not find the correct `common/changes` folder if the `rush.json` is not in the Git repo's root folder."
+          },
+          {
+            "comment": "Add support for rush-sdk to be bundled with Webpack."
+          },
+          {
+            "comment": "Add watch mode support to \"phased\" command definitions via the \"watchOptions\" property with a subfield \"watchPhases\". This separates the initial command phases from the phases run by the file watcher, e.g. so that the initial execution can pull from cache and the watch mode execution can use a separate incremental build phase."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.62.1",
+      "tag": "@microsoft/rush_v5.62.1",
+      "date": "Sun, 06 Feb 2022 04:59:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where cache entries in certain circumstances would be missing files in nested subfolders. For full details see https://github.com/microsoft/rushstack/pull/3211."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.62.0",
+      "tag": "@microsoft/rush_v5.62.0",
+      "date": "Sat, 05 Feb 2022 00:55:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for directly invoking a script that depends on `rush-sdk` from inside a Rush repo."
+          },
+          {
+            "comment": "Add support for a new URL-based version specifier in PNPM lockfiles."
+          },
+          {
+            "comment": "Add support for specifying a custom S3 endpoint. This is useful for using a custom S3 provider."
+          },
+          {
+            "comment": "Optimize invocation of tar to use stdin instead of a temporary file."
+          },
+          {
+            "comment": "Revise architecture of symbolic link scan to use a queue and parallel file system calls."
+          },
+          {
+            "comment": "Create separate tar logs per phase based on cache id."
+          },
+          {
+            "comment": "Pack tar to a temp file, then move into the cache to ensure cache integrity."
+          },
+          {
+            "comment": "Fix git-hooks folder check failing when compared paths have different drive letter casing"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.61.4",
+      "tag": "@microsoft/rush_v5.61.4",
+      "date": "Wed, 02 Feb 2022 04:03:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump tar dependency to have a minimum version of 5.0.10."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.61.3",
+      "tag": "@microsoft/rush_v5.61.3",
+      "date": "Fri, 28 Jan 2022 21:03:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the built-in cache provider plugins (rush-amazon-s3-build-cache-plugin and rush-azure-storage-build-cache-plugin) to apply for all commands, enabling cloud caching for custom phased and bulk commands."
+          },
+          {
+            "comment": "Allow build cache to be enabled for custom bulk commands."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.61.2",
+      "tag": "@microsoft/rush_v5.61.2",
+      "date": "Thu, 27 Jan 2022 02:30:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update node-fetch dependency version to address CVE-2022-0235"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.61.1",
+      "tag": "@microsoft/rush_v5.61.1",
+      "date": "Sat, 22 Jan 2022 04:22:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Allow common/config/rush/command-line.json to specify the build command as a phased command without specifying all of the options required by the schema. The remaining options will come from the default. This is already supported when a partially-specified build command has \"commandKind\" set to \"bulk\"."
+          },
+          {
+            "comment": "Fix an issue where Git Bash \"tar\" does not handle Windows paths correctly."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Improve the RUSH_BUILD_CACHE_WRITE_ALLOWED environment variable behavior so that it also affects the local build cache. This saves CPU cycles on CI machines that only run a single build. It also avoids cache writes for watch mode commands."
+          },
+          {
+            "comment": "Refactoring to support upcoming watch mode improvements: Rework the task execution engine to interact with the task queue using the ECMAScript async iteration protocol (GitHub #3043)"
+          },
+          {
+            "comment": "Fix project change detection when a new project is added to a repo that uses PNPM with useWorkspaces=false (GitHub #3183)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.61.0",
+      "tag": "@microsoft/rush_v5.61.0",
+      "date": "Sat, 22 Jan 2022 03:17:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Fix a regression for the plugins feature, which caused an error message \"command-line.json defines a command 'build' using a name that already exists\" (GitHub #3155)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.60.0",
+      "tag": "@microsoft/rush_v5.60.0",
+      "date": "Thu, 20 Jan 2022 02:46:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix the \"allowWarningsInSuccessfulBuild\" option in bulk commands defined in common/config/command-line.json."
+          },
+          {
+            "comment": "(BREAKING CHANGE) The experimental config file options \"skipPhasesForCommand\" and \"addPhasesToCommand\" have been temporarily removed until their design can be better formalized."
+          },
+          {
+            "comment": "Include NodeJS 16 in the range of supported versions (`nodeSupportedVersionRange`) in the `rush.json` file generated by `rush init`."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Some experimental fields have been renamed in \"config/rush-project.json\". Please see UPGRADING.md for details."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.59.2",
+      "tag": "@microsoft/rush_v5.59.2",
+      "date": "Fri, 07 Jan 2022 02:34:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes a regression that broke \"rush build\" completely when not using the \"--only\" parameter."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.59.1",
+      "tag": "@microsoft/rush_v5.59.1",
+      "date": "Fri, 07 Jan 2022 01:21:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes a regression in bulk command execution when using \"unsafe\" selector parameters, e.g. \"--only\". Ensures that only the projects selected by the parameters get included in the build, rather that forcibly including all dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.59.0",
+      "tag": "@microsoft/rush_v5.59.0",
+      "date": "Thu, 06 Jan 2022 22:18:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue that occurs when running a command with a selection argument with a Git ref (like `--from git:main`) in a repo with a pnpm lockfile larger than 1MB."
+          },
+          {
+            "comment": "Fix an issue with installing Git hooks that occurs when the rush.json folder isn't at the repo's root."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the experimental command \"rush write-build-cache\", since it is no longer needed and would be incompatible with phased builds. If you need this command for some reason, please create a GitHub issue."
+          },
+          {
+            "comment": "Add support for phased commands behind the multiPhaseCommands experiment."
+          },
+          {
+            "comment": "Update \"rush init\" to write files with OS-default line endings (CRLF on Windows, LF otherwise) instead of always writing CRLF line endings."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Update the \"rush init\" template to enable pnpm workspaces and to merge the pnpm-lock.yaml file as text."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.58.0",
+      "tag": "@microsoft/rush_v5.58.0",
+      "date": "Thu, 16 Dec 2021 05:39:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush's Git hooks were broken if another tool such as Husky had tampered with the `core.hooksPath` (GitHub #3004)"
+          },
+          {
+            "comment": "Provide a more useful error message if the git version is too old."
+          },
+          {
+            "comment": "Allow \"rush list\" to be invoked while other rush processes are running in the same repo."
+          },
+          {
+            "comment": "For project selection parameters such as \"rush build --to git:REF\", improve the diff analysis to detect which individual projects are impacted by a modification of the PNPM lockfile (GitHub #3050)"
+          },
+          {
+            "comment": "Allow multiple remote URLs to be specified in the rush.json in the new repository.urls field."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Replace the RushConfiguration repositoryUrl field with repositoryUrls to support multiple remote URLs specified in rush.json."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.57.1",
+      "tag": "@microsoft/rush_v5.57.1",
+      "date": "Thu, 09 Dec 2021 00:24:47 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.57.0",
+      "tag": "@microsoft/rush_v5.57.0",
+      "date": "Fri, 03 Dec 2021 02:16:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for the \"filterLog\" hook in common/config/rush/.pnpmfile.cjs"
+          },
+          {
+            "comment": "(EXPERIMENTAL) Ability to load third-party plugin packages that customize the behavior of Rush"
+          },
+          {
+            "comment": "Fix an issue where parameter values containing spaces are incorrectly passed to global scripts."
+          },
+          {
+            "comment": "Parameters such as \"--to\" and \"--from\" now accept selector expressions: \"version-policy:NAME\" indicates the set of projects belonging to a publishing version policy. \"git:REF\" detects the set of projects that have been modified since the specified Git revision; for example, this allows a Rush command to process only the projects modified by a PR branch. (GitHub #2968)"
+          },
+          {
+            "comment": "Improved the change detection logic to work correctly when a second rush.json appears in a subfolder."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Add a new NPM package \"@rushstack/rush-sdk\" for use by Rush plugins"
+          },
+          {
+            "comment": "Stop deleting the pnpm-store after failed workspace installs. Usually a multiple failure is due to a network error or a package that does not exist in the registry, not an issue with the pnpm-store."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.56.0",
       "tag": "@microsoft/rush_v5.56.0",
       "date": "Thu, 28 Oct 2021 23:49:31 GMT",

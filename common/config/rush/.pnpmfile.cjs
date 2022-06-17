@@ -27,51 +27,97 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  // schema-utils (dependency of webpack-dev-server) has an unfulfilled peer dependency
-  if (packageJson.name === 'schema-utils') {
-    if (!packageJson.dependencies) {
-      packageJson.dependencies = {};
+  switch (packageJson.name) {
+    case '@emotion/core':
+    case '@emotion/styled':
+    case '@emotion/styled-base':
+    case '@emotion/theming':
+    case '@storybook/addons':
+    case '@storybook/api':
+    case '@storybook/router':
+    case 'emotion-theming':
+    case 'react-router-dom':
+    case 'react-router': {
+      // This package reexports types from `react`
+      packageJson.peerDependencies['@types/react'] = '>=16';
+      break;
     }
 
-    packageJson.dependencies['ajv'] = '~6.12.5';
-  } else if (packageJson.name === '@types/webpack-dev-server') {
-    delete packageJson.dependencies['@types/webpack'];
-
-    if (!packageJson.peerDependencies) {
-      packageJson.peerDependencies = {};
+    case '@jest/reporters': {
+      // The `@jest/reporters` package reexports types from `istanbul-lib-coverage`
+      packageJson.dependencies['@types/istanbul-lib-coverage'] = '2.0.4';
+      break;
     }
 
-    switch (packageJson.version) {
-      case '3.11.3': {
-        // This is for heft-webpack4-plugin and the other projects that use Webpack 4
-        packageJson.peerDependencies['@types/webpack'] = '^4.0.0';
-        break;
-      }
-
-      case '4.0.0': {
-        // This is for heft-webpack5-plugin and the other projects that use Webpack 5.
-        // Webpack 5 brings its own typings
-        packageJson.peerDependencies['webpack'] = '^5.0.0';
-        break;
-      }
-
-      default: {
-        throw new Error(
-          `Unexpected version of @types/webpack-dev-server: "${packageJson.version}". ` +
-            'Update pnpmfile.js to add support for this version.'
-        );
-      }
+    case '@jest/test-result': {
+      // The `@jest/test-result` package takes undeclared dependencies on `jest-haste-map`
+      // and `jest-resolve`
+      packageJson.dependencies['jest-haste-map'] = packageJson.version;
+      packageJson.dependencies['jest-resolve'] = packageJson.version;
     }
-  } else if (
-    packageJson.name === '@typescript-eslint/types' ||
-    packageJson.name === 'tslint-microsoft-contrib'
-  ) {
-    // The `@typescript-eslint/types` check is a workaround for https://github.com/typescript-eslint/typescript-eslint/issues/3622.
-    // The `tslint-microsoft-contrib` repo is archived so it can't be updated to TS 4.4+.
-    if (!packageJson.peerDependencies) {
-      packageJson.peerDependencies = {};
+
+    case '@serverless-stack/core': {
+      delete packageJson.dependencies['@typescript-eslint/eslint-plugin'];
+      delete packageJson.dependencies['eslint-config-serverless-stack'];
+      delete packageJson.dependencies['lerna'];
+      break;
     }
-    packageJson.peerDependencies['typescript'] = '*';
+
+    case '@serverless-stack/resources': {
+      packageJson.dependencies.esbuild = '*';
+      break;
+    }
+
+    case '@storybook/react': {
+      // This package reexports types from `react`
+      packageJson.peerDependencies['@types/node'] = '>=12';
+      packageJson.peerDependencies['@types/react'] = '>=16';
+      break;
+    }
+
+    case '@storybook/theming': {
+      packageJson.dependencies['@emotion/serialize'] = '*';
+      packageJson.dependencies['@emotion/utils'] = '*';
+      break;
+    }
+
+    case '@types/webpack': {
+      packageJson.dependencies.anymatch = '^3';
+      break;
+    }
+
+    case '@typescript-eslint/types': {
+      // `@typescript-eslint/types` reexports types from `typescript`
+      packageJson.peerDependencies = { typescript: '*' };
+      break;
+    }
+
+    case 'collect-v8-coverage': {
+      // The `collect-v8-coverage` package references `node` in its typings
+      packageJson.peerDependencies = {
+        '@types/node': '>=12'
+      };
+      break;
+    }
+
+    case 'http-proxy-middleware': {
+      packageJson.dependencies['@types/express'] = '*';
+      break;
+    }
+
+    case 'tslint-microsoft-contrib': {
+      // The `tslint-microsoft-contrib` repo is archived so it can't be updated to TS 4.4+.
+      // unmet peer typescript@"^2.1.0 || ^3.0.0": found 4.5.5
+      packageJson.peerDependencies['typescript'] = '*';
+      break;
+    }
+
+    case 'webpack-dev-server': {
+      packageJson.dependencies.anymatch = '^3';
+      packageJson.dependencies['@types/express-serve-static-core'] = '*';
+      packageJson.dependencies['@types/serve-static'] = '*';
+      break;
+    }
   }
 
   return packageJson;

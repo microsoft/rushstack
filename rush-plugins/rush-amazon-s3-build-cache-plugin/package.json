@@ -1,24 +1,28 @@
 {
   "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
-  "version": "0.0.1",
+  "version": "5.74.0",
   "description": "Rush plugin for Amazon S3 cloud build cache",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/heft-plugins/heft-webpack5-plugin"
+    "url": "https://github.com/microsoft/rushstack",
+    "directory": "rush-plugins/rush-amazon-s3-build-cache-plugin"
   },
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean",
-    "start": "heft test --clean --watch"
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch",
+    "test": "heft test",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "https-proxy-agent": "~5.0.0",
-    "node-fetch": "2.6.2"
+    "node-fetch": "2.6.7"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",

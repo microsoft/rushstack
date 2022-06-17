@@ -1,3 +1,8 @@
 {
-  "projectOutputFolderNames": ["lib"]
+  "operationSettings": [
+    {
+      "operationName": "build",
+      "outputFolderNames": ["lib"]
+    }
+  ]
 }

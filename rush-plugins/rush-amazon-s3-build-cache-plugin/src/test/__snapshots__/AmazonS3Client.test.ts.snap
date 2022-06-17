@@ -4,12 +4,12 @@ exports[`AmazonS3Client Does not allow upload without credentials 1`] = `[Error:
 
 exports[`AmazonS3Client Making requests Getting an object With credentials Can get an object 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=11441edef046611ecf352daa2bcae55584d302a31b3390ee865781671caf791a",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
         ],
         "x-amz-content-sha256": Array [
           "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -26,12 +26,12 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object With credentials Can get an object from a different region 1`] = `
 Array [
-  "https://test-s3-bucket.s3-us-west-1.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=19d94ed314002214315e8e9816ca31c97e7c834f7494c3c61046550f12358c21",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=fa88dc2c0877d83d442298fd51281eeffa1196436397832a794b89a079302d71",
         ],
         "x-amz-content-sha256": Array [
           "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -48,12 +48,12 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object With credentials Handles a 403 error 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=11441edef046611ecf352daa2bcae55584d302a31b3390ee865781671caf791a",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
         ],
         "x-amz-content-sha256": Array [
           "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -72,12 +72,12 @@ exports[`AmazonS3Client Making requests Getting an object With credentials Handl
 
 exports[`AmazonS3Client Making requests Getting an object With credentials Handles a missing object 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=11441edef046611ecf352daa2bcae55584d302a31b3390ee865781671caf791a",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
         ],
         "x-amz-content-sha256": Array [
           "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -94,12 +94,12 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object With credentials Handles an unexpected error 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=11441edef046611ecf352daa2bcae55584d302a31b3390ee865781671caf791a",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
         ],
         "x-amz-content-sha256": Array [
           "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -118,12 +118,12 @@ exports[`AmazonS3Client Making requests Getting an object With credentials Handl
 
 exports[`AmazonS3Client Making requests Getting an object With credentials including a session token Can get an object 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=242129cdc7470382920680b887e5899a56eb94103e11ef9b96a45ee0d2bff5c7",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
         ],
         "X-Amz-Security-Token": Array [
           "sessionToken",
@@ -143,12 +143,12 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object With credentials including a session token Can get an object from a different region 1`] = `
 Array [
-  "https://test-s3-bucket.s3-us-west-1.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=b3f43b86838b915e38f9900e5049870ca53db5792b578403f2d46185cc6bb3f1",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=c3e1597c716ad0146d1a0eca844194b3120f8d8f07cf0a2c402f0b4f2148de12",
         ],
         "X-Amz-Security-Token": Array [
           "sessionToken",
@@ -168,12 +168,12 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object With credentials including a session token Handles a 403 error 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=242129cdc7470382920680b887e5899a56eb94103e11ef9b96a45ee0d2bff5c7",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
         ],
         "X-Amz-Security-Token": Array [
           "sessionToken",
@@ -195,12 +195,12 @@ exports[`AmazonS3Client Making requests Getting an object With credentials inclu
 
 exports[`AmazonS3Client Making requests Getting an object With credentials including a session token Handles a missing object 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=242129cdc7470382920680b887e5899a56eb94103e11ef9b96a45ee0d2bff5c7",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
         ],
         "X-Amz-Security-Token": Array [
           "sessionToken",
@@ -220,12 +220,12 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object With credentials including a session token Handles an unexpected error 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=242129cdc7470382920680b887e5899a56eb94103e11ef9b96a45ee0d2bff5c7",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
         ],
         "X-Amz-Security-Token": Array [
           "sessionToken",
@@ -245,9 +245,111 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object With credentials including a session token Handles an unexpected error 2`] = `[Error: Amazon S3 responded with status code 500 (Server Error)]`;
 
+exports[`AmazonS3Client Making requests Getting an object With credentials including a session token should not retry on 400 error 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "Authorization": Array [
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+        ],
+        "X-Amz-Security-Token": Array [
+          "sessionToken",
+        ],
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials including a session token should not retry on 400 error 2`] = `[Error: Amazon S3 responded with status code 400 (Bad Request)]`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials including a session token should not retry on 401 error 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "Authorization": Array [
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=2a4b8f28b1bdd37af6bb0fd79212c223e2c28e4f94bfb5d1c94a16bb056d5624",
+        ],
+        "X-Amz-Security-Token": Array [
+          "sessionToken",
+        ],
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials including a session token should not retry on 401 error 2`] = `[Error: Amazon S3 responded with status code 401 (Unauthorized)]`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials should not retry on 400 error 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "Authorization": Array [
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+        ],
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials should not retry on 400 error 2`] = `[Error: Amazon S3 responded with status code 400 (Bad Request)]`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials should not retry on 401 error 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "Authorization": Array [
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=194608e9e7ba6d8aa4a019b3b6fd237e6b09ef1f45ff7fa60cbb81c1875538be",
+        ],
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object With credentials should not retry on 401 error 2`] = `[Error: Amazon S3 responded with status code 401 (Unauthorized)]`;
+
 exports[`AmazonS3Client Making requests Getting an object Without credentials Can get an object 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
@@ -266,7 +368,7 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object Without credentials Can get an object from a different region 1`] = `
 Array [
-  "https://test-s3-bucket.s3-us-west-1.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
@@ -285,7 +387,7 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object Without credentials Handles a missing object 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
@@ -304,7 +406,7 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object Without credentials Handles an unexpected error 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
@@ -323,9 +425,47 @@ Array [
 
 exports[`AmazonS3Client Making requests Getting an object Without credentials Handles an unexpected error 2`] = `[Error: Amazon S3 responded with status code 500 (Server Error)]`;
 
-exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object 1`] = `
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 400 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 401 1`] = `
+Array [
+  "http://localhost:9000/abc123",
+  Object {
+    "headers": Headers {
+      Symbol(map): Object {
+        "x-amz-content-sha256": Array [
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ],
+        "x-amz-date": Array [
+          "20200418T123242Z",
+        ],
+      },
+    },
+    "verb": "GET",
+  },
+]
+`;
+
+exports[`AmazonS3Client Making requests Getting an object Without credentials Handles missing credentials object when 403 1`] = `
+Array [
+  "http://localhost:9000/abc123",
   Object {
     "headers": Headers {
       Symbol(map): Object {
@@ -346,7 +486,7 @@ exports[`AmazonS3Client Making requests Uploading an object Throws an error if c
 
 exports[`AmazonS3Client Making requests Uploading an object With credentials Handles an unexpected error code 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "body": Object {
       "data": Array [
@@ -371,7 +511,7 @@ Array [
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=1db5024ed7d91ac512762a2c70490754def64dc5ed61e3e98d090233ebe0f79c",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=1255739559ef86e1cc1e733fa9e13aa4990c6f1fb1ae821653540d401c48c5e1",
         ],
         "x-amz-content-sha256": Array [
           "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
@@ -390,7 +530,7 @@ exports[`AmazonS3Client Making requests Uploading an object With credentials Han
 
 exports[`AmazonS3Client Making requests Uploading an object With credentials Uploads an object 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "body": Object {
       "data": Array [
@@ -415,7 +555,7 @@ Array [
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=1db5024ed7d91ac512762a2c70490754def64dc5ed61e3e98d090233ebe0f79c",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=1255739559ef86e1cc1e733fa9e13aa4990c6f1fb1ae821653540d401c48c5e1",
         ],
         "x-amz-content-sha256": Array [
           "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
@@ -432,7 +572,7 @@ Array [
 
 exports[`AmazonS3Client Making requests Uploading an object With credentials Uploads an object to a different region 1`] = `
 Array [
-  "https://test-s3-bucket.s3-us-west-1.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "body": Object {
       "data": Array [
@@ -457,7 +597,7 @@ Array [
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=35a4edef214657ec5799666681f637951d01b3cbf9ec3754f858ce8b722c026c",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=66e311b6c1987dd62cb3bfec416b9129c966d1d15075d1ebf852433062bf4281",
         ],
         "x-amz-content-sha256": Array [
           "f8e4bdb2ca9c0f90b0fe56e32bf509ba44b73e2f52af123832f9ddbfe7e8fafa",
@@ -474,7 +614,7 @@ Array [
 
 exports[`AmazonS3Client Making requests Uploading an object With credentials including a session token Handles an unexpected error code 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "body": Object {
       "data": Array [
@@ -499,7 +639,7 @@ Array [
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=f50f9b3a7b33b58809a8da7216b68ca8730fd157cc7aef4c945fa5df1a22cd03",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=0ed8d55f5a3265d967092faf7e3ca7acd08ff3566651dc7c7363d60118c11528",
         ],
         "X-Amz-Security-Token": Array [
           "sessionToken",
@@ -521,7 +661,7 @@ exports[`AmazonS3Client Making requests Uploading an object With credentials inc
 
 exports[`AmazonS3Client Making requests Uploading an object With credentials including a session token Uploads an object 1`] = `
 Array [
-  "https://test-s3-bucket.s3.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "body": Object {
       "data": Array [
@@ -546,7 +686,7 @@ Array [
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=f50f9b3a7b33b58809a8da7216b68ca8730fd157cc7aef4c945fa5df1a22cd03",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-east-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=0ed8d55f5a3265d967092faf7e3ca7acd08ff3566651dc7c7363d60118c11528",
         ],
         "X-Amz-Security-Token": Array [
           "sessionToken",
@@ -566,7 +706,7 @@ Array [
 
 exports[`AmazonS3Client Making requests Uploading an object With credentials including a session token Uploads an object to a different region 1`] = `
 Array [
-  "https://test-s3-bucket.s3-us-west-1.amazonaws.com/abc123",
+  "http://localhost:9000/abc123",
   Object {
     "body": Object {
       "data": Array [
@@ -591,7 +731,7 @@ Array [
     "headers": Headers {
       Symbol(map): Object {
         "Authorization": Array [
-          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=e846064053af5730311f5a8dd565139c9fdc9de4f9d1c12b8f2f77f619b7d2e1",
+          "AWS4-HMAC-SHA256 Credential=accessKeyId/20200418/us-west-1/s3/aws4_request,SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token,Signature=8e2cd7b6241780b51b1d15f428c43179d389b106be9a572e0def4cad6a5ba1e5",
         ],
         "X-Amz-Security-Token": Array [
           "sessionToken",
@@ -609,20 +749,24 @@ Array [
 ]
 `;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 1`] = `"A S3 bucket name must be provided"`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 1`] = `"A S3 endpoint must be provided"`;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 2`] = `"The bucket name \\"-abc\\" is invalid. A S3 bucket name must start with a lowercase alphanumerical character."`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 2`] = `"The S3 endpoint must start with https:// or http://"`;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 3`] = `"The bucket name \\"a!bc\\" is invalid. A S3 bucket name must only contain lowercase alphanumerical characters, dashes, and periods and must be between 3 and 63 characters long."`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 3`] = `"The path should be omitted from the endpoint. Use s3Prefix to specify a path"`;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 4`] = `"The bucket name \\"a\\" is invalid. A S3 bucket name must only contain lowercase alphanumerical characters, dashes, and periods and must be between 3 and 63 characters long."`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 4`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 5`] = `"The bucket name \\"10.10.10.10\\" is invalid. A S3 bucket name must not be formatted as an IP address."`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 5`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 6`] = `"The bucket name \\"abc..d\\" is invalid. A S3 bucket name must not have consecutive periods or dashes adjacent to periods."`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 6`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 7`] = `"The bucket name \\"abc.-d\\" is invalid. A S3 bucket name must not have consecutive periods or dashes adjacent to periods."`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 7`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 8`] = `"The bucket name \\"abc-.d\\" is invalid. A S3 bucket name must not have consecutive periods or dashes adjacent to periods."`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 8`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
 
-exports[`AmazonS3Client Rejects invalid S3 bucket names 9`] = `"The bucket name \\"abc-\\" is invalid. A S3 bucket name must not end in a dash."`;
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 9`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
+
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 10`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;
+
+exports[`AmazonS3Client Rejects invalid S3 endpoint values 11`] = `"Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long"`;

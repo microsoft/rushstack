@@ -1,6 +1,194 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+
+## 3.2.22
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 3.2.21
+Tue, 07 Jun 2022 09:37:05 GMT
+
+_Version update only_
+
+## 3.2.20
+Wed, 25 May 2022 22:25:08 GMT
+
+_Version update only_
+
+## 3.2.19
+Thu, 19 May 2022 15:13:21 GMT
+
+_Version update only_
+
+## 3.2.18
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 3.2.17
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 3.2.16
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 3.2.15
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 3.2.14
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 3.2.13
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 3.2.12
+Wed, 13 Apr 2022 15:12:41 GMT
+
+_Version update only_
+
+## 3.2.11
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 3.2.10
+Tue, 12 Apr 2022 02:58:32 GMT
+
+_Version update only_
+
+## 3.2.9
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 3.2.8
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 3.2.7
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 3.2.6
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 3.2.5
+Thu, 31 Mar 2022 02:06:05 GMT
+
+_Version update only_
+
+## 3.2.4
+Sat, 19 Mar 2022 08:05:38 GMT
+
+_Version update only_
+
+## 3.2.3
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 3.2.2
+Fri, 11 Feb 2022 10:30:26 GMT
+
+_Version update only_
+
+## 3.2.1
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 3.2.0
+Fri, 21 Jan 2022 01:10:41 GMT
+
+### Minor changes
+
+- Remove `--merge-base` from `getRepoChanges` and document the need to manually acquire merge-base commit if comparing against a separate branch.
+- Reduce minimum Git version to 2.20.
+
+### Patches
+
+- Fix incorrect parsing in `parseGitStatus`.
+
+## 3.1.13
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 3.1.12
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 3.1.11
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 3.1.10
+Thu, 16 Dec 2021 05:38:20 GMT
+
+### Patches
+
+- Provide a more useful error message if the git version is too old.
+
+## 3.1.9
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 3.1.8
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 3.1.7
+Thu, 09 Dec 2021 00:21:54 GMT
+
+### Patches
+
+- When detecting changes relative to a target branch, use the merge base between the target branch and the current commit as the comparison ref.
+
+## 3.1.6
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 3.1.5
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 3.1.4
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 3.1.3
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 3.1.2
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
 
 ## 3.1.1
 Mon, 29 Nov 2021 07:26:16 GMT

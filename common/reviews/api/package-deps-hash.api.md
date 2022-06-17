@@ -5,6 +5,9 @@
 ```ts
 
 // @public
+export function ensureGitMinimumVersion(gitPath?: string): void;
+
+// @public
 export function getGitHashForFiles(filesToHash: string[], packagePath: string, gitPath?: string): Map<string, string>;
 
 // @public

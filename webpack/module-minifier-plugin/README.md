@@ -13,6 +13,9 @@ This improves minification time by:
 - Handing smaller code chunks to the minifier at a time (AST analysis is superlinear in size of the AST)
 - Even single asset builds will likely still contain multiple modules in the final output, which can be split across available CPU cores
 
+## Use with `[hash]` and `[contenthash]` tokens
+The plugin will do its best to update webpack hashes if changing the direct inputs (`useSourceMap`, `compressAsyncImports` or `usePortableModules`) to the plugin, but if altering the `minifier` property itself, you may need to use the `output.hashSalt` property to force a change to the hashes, especially if leverging the `MessagePortMinifier` or similar, since it has no direct access to the configuration of the minifier.
+
 ## Parallel execution
 If running on node 10, you will need to ensure that the `--experimental-workers` flag is enabled.
 
@@ -52,7 +55,7 @@ optimization: {
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/webpack/module-minifier-plugin/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/webpack/module-minifier-plugin/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/module-minifier-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

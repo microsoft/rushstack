@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-deps-hash",
-  "version": "3.1.1",
+  "version": "3.2.22",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -11,7 +11,9 @@
     "directory": "libraries/package-deps-hash"
   },
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

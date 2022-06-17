@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { render, Result } from 'node-sass';
-import postcss from 'postcss';
+import { render, Result, SassError } from 'node-sass';
+import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
-import { LegacyAdapters } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
@@ -25,7 +25,12 @@ export interface ISassConfiguration {
   generatedTsFolder?: string;
 
   /**
-   * Determines if export values are wrapped in a default property, or not.
+   * Output directories for compiled CSS
+   */
+  cssOutputFolders?: string[] | undefined;
+
+  /**
+   * Determines whether export values are wrapped in a default property, or not.
    * Defaults to true.
    */
   exportAsDefault?: boolean;
@@ -61,13 +66,6 @@ interface IClassMap {
   [className: string]: string;
 }
 
-interface ICssModulesOptions {
-  getJSON(cssFileName: string, json: IClassMap): void;
-  generateScopeName(name: string): string;
-}
-
-type TCssModules = (options: ICssModulesOptions) => TCssModules;
-
 /**
  * Generates type files (.d.ts) for Sass/SCSS/CSS files.
  *
@@ -87,6 +85,17 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
     const exportAsDefaultInterfaceName: string = 'IExportStyles';
     const fileExtensions: string[] = sassConfiguration.fileExtensions || ['.sass', '.scss', '.css'];
+    const { cssOutputFolders } = sassConfiguration;
+
+    const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
+      ? (relativePath: string): string[] => {
+          return cssOutputFolders.map(
+            (folder: string) =>
+              `${folder}/${relativePath.endsWith('.css') ? relativePath : `${relativePath}.css`}`
+          );
+        }
+      : undefined;
+
     super({
       srcFolder,
       generatedTsFolder,
@@ -95,24 +104,55 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       fileExtensions,
       filesToIgnore: sassConfiguration.excludeFiles,
 
+      getAdditionalOutputFiles: getCssPaths,
+
       // Generate typings function
-      parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
+      parseAndGenerateTypings: async (fileContents: string, filePath: string, relativePath: string) => {
         if (this._isSassPartial(filePath)) {
           // Do not generate typings for Sass partials.
           return;
         }
+
         const css: string = await this._transpileSassAsync(
           fileContents,
           filePath,
           buildFolder,
           sassConfiguration.importIncludePaths
         );
-        const classNames: string[] = await this._getClassNamesFromCSSAsync(css, filePath);
-        const sortedClassNames: string[] = classNames.sort((a, b) => a.localeCompare(b));
-        const sassTypings: IStringValueTypings = { typings: [] };
-        for (const exportName of sortedClassNames) {
-          sassTypings.typings.push({ exportName });
+
+        let classMap: IClassMap = {};
+        const cssModulesClassMapPlugin: postcss.Plugin = cssModules({
+          getJSON: (cssFileName: string, json: IClassMap) => {
+            // This callback will be invoked durint the promise evaluation of the postcss process() function.
+            classMap = json;
+          },
+          // Avoid unnecessary name hashing.
+          generateScopedName: (name: string) => name
+        });
+
+        await postcss.default([cssModulesClassMapPlugin]).process(css, { from: filePath });
+
+        if (getCssPaths) {
+          await Promise.all(
+            getCssPaths(relativePath).map(async (cssFile: string) => {
+              // The typings generator processes files serially and the number of output folders is expected to be small,
+              // thus throttling here is not currently a concern.
+              await FileSystem.writeFileAsync(cssFile, css, {
+                ensureFolderExists: true
+              });
+            })
+          );
         }
+
+        const sortedClassNames: string[] = Object.keys(classMap).sort();
+
+        const sassTypings: IStringValueTypings = {
+          typings: sortedClassNames.map((exportName: string) => {
+            return {
+              exportName
+            };
+          })
+        };
 
         return sassTypings;
       }
@@ -133,20 +173,33 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
     buildFolder: string,
     importIncludePaths: string[] | undefined
   ): Promise<string> {
-    const result: Result = await LegacyAdapters.convertCallbackToPromise(render, {
-      data: fileContents,
-      file: filePath,
-      importer: (url: string) => ({ file: this._patchSassUrl(url) }),
-      includePaths: importIncludePaths
-        ? importIncludePaths
-        : [path.join(buildFolder, 'node_modules'), path.join(buildFolder, 'src')],
-      indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
-    });
+    const result: Result = await new Promise(
+      (resolve: (result: Result) => void, reject: (err: Error) => void) => {
+        render(
+          {
+            data: fileContents,
+            file: filePath,
+            importer: (url: string) => ({ file: this._patchSassUrl(url) }),
+            includePaths: importIncludePaths
+              ? importIncludePaths
+              : [path.join(buildFolder, 'node_modules'), path.join(buildFolder, 'src')],
+            indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
+          },
+          (err: SassError, result: Result) => {
+            if (err) {
+              // Extract location information and format into the error message until we have a concept
+              // of location-aware diagnostics in Heft.
+              return reject(new Error(`${err.file}(${err.column},${err.line}): ${err.message}`));
+            }
+            resolve(result);
+          }
+        );
+      }
+    );
 
     // Register any @import files as dependencies.
-    const target: string = result.stats.entry;
     for (const dependency of result.stats.includedFiles) {
-      this.registerDependency(target, dependency);
+      this.registerDependency(filePath, dependency);
     }
 
     return result.css.toString();
@@ -154,24 +207,9 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
 
   private _patchSassUrl(url: string): string {
     if (url[0] === '~') {
-      return 'node_modules/' + url.substr(1);
+      return 'node_modules/' + url.slice(1);
     }
 
     return url;
-  }
-
-  private async _getClassNamesFromCSSAsync(css: string, filePath: string): Promise<string[]> {
-    let classMap: IClassMap = {};
-    const cssModulesClassMapPlugin: postcss.Plugin<TCssModules> = cssModules({
-      getJSON: (cssFileName: string, json: IClassMap) => {
-        classMap = json;
-      },
-      // Avoid unnecessary name hashing.
-      generateScopedName: (name: string) => name
-    });
-    await postcss([cssModulesClassMapPlugin]).process(css, { from: filePath });
-    const classNames: string[] = Object.keys(classMap);
-
-    return classNames;
   }
 }

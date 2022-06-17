@@ -10,8 +10,10 @@
   "main": "lib/index.js",
   "typings": "dist/rushell.d.ts",
   "scripts": {
-    "build": "heft test --clean",
-    "start": "heft test --watch"
+    "build": "heft build --clean",
+    "start": "heft test --watch",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "license": "MIT",
   "dependencies": {

@@ -1,0 +1,10 @@
+{
+  "$schema": "http://schema.net/",
+
+  "extends": "./simpleInheritanceTypeConfigFileA.json",
+
+  "$c.inheritanceType": "append",
+  "c": {
+    "d": [{ "e": "B" }]
+  }
+}

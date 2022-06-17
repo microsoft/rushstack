@@ -1,0 +1,65 @@
+{
+  "name": "@rushstack/worker-pool",
+  "entries": [
+    {
+      "version": "0.1.3",
+      "tag": "@rushstack/worker-pool_v0.1.3",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/worker-pool_v0.1.2",
+      "date": "Tue, 07 Jun 2022 09:37:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/worker-pool_v0.1.1",
+      "date": "Wed, 25 May 2022 22:25:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/worker-pool_v0.1.0",
+      "date": "Fri, 20 May 2022 00:11:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Factor out WorkerPool from @rushstack/module-minifier-plugin."
+          }
+        ]
+      }
+    }
+  ]
+}

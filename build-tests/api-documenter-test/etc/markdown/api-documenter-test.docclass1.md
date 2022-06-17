@@ -37,7 +37,9 @@ The constructor for this class is marked as internal. Third-party code should no
 |  --- | --- | --- | --- |
 |  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) |  | string |  |
 |  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |
+|  [staticReadonlyThing](./api-documenter-test.docclass1.staticreadonlything.md) | <code>static</code> | boolean |  |
 |  [writeableProperty](./api-documenter-test.docclass1.writeableproperty.md) |  | string |  |
+|  [writeonlyProperty](./api-documenter-test.docclass1.writeonlyproperty.md) |  | string | API Extractor will surface an <code>ae-missing-getter</code> finding for this property. |
 
 ## Methods
 
@@ -46,7 +48,9 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [deprecatedExample()](./api-documenter-test.docclass1.deprecatedexample.md) |  |  |
 |  [exampleFunction(a, b)](./api-documenter-test.docclass1.examplefunction.md) |  | This is an overloaded function. |
 |  [exampleFunction(x)](./api-documenter-test.docclass1.examplefunction_1.md) |  | This is also an overloaded function. |
+|  [genericWithConstraintAndDefault(x)](./api-documenter-test.docclass1.genericwithconstraintanddefault.md) |  | This is a method with a complex type parameter. |
 |  [interestingEdgeCases()](./api-documenter-test.docclass1.interestingedgecases.md) |  | Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"<!-- -->The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/ |
+|  [optionalParamFunction(x)](./api-documenter-test.docclass1.optionalparamfunction.md) |  | This is a function with an optional parameter. |
 |  [sumWithExample(x, y)](./api-documenter-test.docclass1.sumwithexample.md) | <code>static</code> | Returns the sum of two numbers. |
 |  [tableExample()](./api-documenter-test.docclass1.tableexample.md) |  | An example with tables: |
 

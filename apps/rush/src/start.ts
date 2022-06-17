@@ -22,7 +22,12 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as semver from 'semver';
 
-import { Text, PackageJsonLookup } from '@rushstack/node-core-library';
+import {
+  ConsoleTerminalProvider,
+  Text,
+  PackageJsonLookup,
+  ITerminalProvider
+} from '@rushstack/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
@@ -82,7 +87,10 @@ if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
 
 // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
 const isManaged: boolean = !!configuration;
-const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTooNewError };
+
+const terminalProvider: ITerminalProvider = new ConsoleTerminalProvider();
+
+const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTooNewError, terminalProvider };
 
 // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
 // install it

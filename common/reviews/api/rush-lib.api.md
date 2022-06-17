@@ -6,12 +6,19 @@
 
 /// <reference types="node" />
 
+import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
+import { AsyncSeriesWaterfallHook } from 'tapable';
+import type { CollatedWriter } from '@rushstack/stream-collator';
+import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import type { StdioSummarizer } from '@rushstack/terminal';
+import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
 
 // @public
@@ -50,6 +57,18 @@ export class ApprovedPackagesPolicy {
     get reviewCategories(): Set<string>;
 }
 
+// @beta
+export class BuildCacheConfiguration {
+    readonly buildCacheEnabled: boolean;
+    cacheWriteEnabled: boolean;
+    readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
+    static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string;
+    readonly getCacheEntryId: GetCacheEntryIdFunction;
+    static loadAndRequireEnabledAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration>;
+    readonly localCacheProvider: FileSystemBuildCacheProvider;
+    static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration | undefined>;
+}
+
 // @public
 export enum BumpType {
     // (undocumented)
@@ -86,7 +105,6 @@ export class CommonVersionsConfiguration {
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     get preferredVersions(): Map<string, string>;
     save(): boolean;
-    get xstitchPreferredVersions(): Map<string, string>;
 }
 
 // @beta (undocumented)
@@ -191,6 +209,23 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
+// @beta
+export class FileSystemBuildCacheProvider {
+    constructor(options: IFileSystemBuildCacheProviderOptions);
+    getCacheEntryPath(cacheId: string): string;
+    tryGetCacheEntryPathByIdAsync(terminal: ITerminal, cacheId: string): Promise<string | undefined>;
+    trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<string>;
+}
+
+// @beta
+export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
+
+// @internal (undocumented)
+export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
+    // (undocumented)
+    pluginPackageFolder: string;
+}
+
 // @beta (undocumented)
 export interface ICloudBuildCacheProvider {
     // (undocumented)
@@ -218,6 +253,20 @@ export interface IConfigurationEnvironmentVariable {
     value: string;
 }
 
+// @alpha
+export interface ICreateOperationsContext {
+    readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+    readonly isIncrementalBuildAllowed: boolean;
+    readonly isInitial: boolean;
+    readonly isWatch: boolean;
+    readonly phaseSelection: ReadonlySet<IPhase>;
+    readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
+    readonly projectSelection: ReadonlySet<RushConfigurationProject>;
+    readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
+    readonly rushConfiguration: RushConfiguration;
+}
+
 // @beta (undocumented)
 export interface ICredentialCacheEntry {
     // (undocumented)
@@ -238,18 +287,39 @@ export interface IEnvironmentConfigurationInitializeOptions {
     doNotNormalizePaths?: boolean;
 }
 
+// @alpha
+export interface IExecutionResult {
+    readonly operationResults: ReadonlyMap<Operation, IOperationExecutionResult>;
+    readonly status: OperationStatus;
+}
+
 // @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
-    _multiPhaseCommands?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
+    phasedCommands?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
 
+// @beta
+export interface IFileSystemBuildCacheProviderOptions {
+    rushConfiguration: RushConfiguration;
+    rushUserConfiguration: RushUserConfiguration;
+}
+
+// @beta
+export interface IGenerateCacheEntryIdOptions {
+    phaseName: string;
+    projectName: string;
+    projectStateHash: string;
+}
+
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
+    enableFiltering: boolean;
+    includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
     // (undocumented)
@@ -258,10 +328,17 @@ export interface IGetChangedProjectsOptions {
     terminal: ITerminal;
 }
 
+// @beta
+export interface IGlobalCommand extends IRushCommand {
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
+    // @internal
+    builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
+    terminalProvider?: ITerminalProvider;
 }
 
 // @beta (undocumented)
@@ -290,9 +367,63 @@ export class IndividualVersionPolicy extends VersionPolicy {
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
+// @alpha
+export interface IOperationExecutionResult {
+    readonly error: Error | undefined;
+    readonly status: OperationStatus;
+    readonly stdioSummarizer: StdioSummarizer;
+    readonly stopwatch: IStopwatchResult;
+}
+
+// @alpha
+export interface IOperationOptions {
+    phase?: IPhase | undefined;
+    project?: RushConfigurationProject | undefined;
+    runner?: IOperationRunner | undefined;
+}
+
+// @beta
+export interface IOperationRunner {
+    executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+    isCacheWriteAllowed: boolean;
+    isSkipAllowed: boolean;
+    readonly name: string;
+    reportTiming: boolean;
+    silent: boolean;
+    warningsAreAllowed: boolean;
+}
+
+// @beta
+export interface IOperationRunnerContext {
+    collatedWriter: CollatedWriter;
+    debugMode: boolean;
+    quietMode: boolean;
+    stdioSummarizer: StdioSummarizer;
+}
+
 // @public
 export interface IPackageManagerOptionsJsonBase {
     environmentVariables?: IConfigurationEnvironment;
+}
+
+// @alpha
+export interface IPhase {
+    allowWarningsOnSuccess: boolean;
+    associatedParameters: Set<CommandLineParameter>;
+    dependencies: {
+        self: Set<IPhase>;
+        upstream: Set<IPhase>;
+    };
+    ignoreMissingScript: boolean;
+    isSynthetic: boolean;
+    logFilenameIdentifier: string;
+    name: string;
+}
+
+// @beta
+export interface IPhasedCommand extends IRushCommand {
+    // @alpha
+    readonly hooks: PhasedCommandHooks;
 }
 
 // @internal
@@ -303,10 +434,23 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     useWorkspaces?: boolean;
 }
 
+// @beta
+export interface IRushCommand {
+    readonly actionName: string;
+}
+
 // @beta (undocumented)
 export interface IRushPlugin {
     // (undocumented)
     apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void;
+}
+
+// @internal (undocumented)
+export interface _IRushPluginConfigurationBase {
+    // (undocumented)
+    packageName: string;
+    // (undocumented)
+    pluginName: string;
 }
 
 // @beta (undocumented)
@@ -315,6 +459,28 @@ export interface IRushSessionOptions {
     getIsDebugMode: () => boolean;
     // (undocumented)
     terminalProvider: ITerminalProvider;
+}
+
+// @alpha
+export interface IStopwatchResult {
+    get duration(): number;
+    get endTime(): number | undefined;
+    get startTime(): number | undefined;
+    toString(): string;
+}
+
+// @beta (undocumented)
+export interface ITelemetryData {
+    readonly durationInSeconds: number;
+    // (undocumented)
+    readonly extraData?: {
+        [key: string]: string | number | boolean;
+    };
+    readonly name: string;
+    readonly platform?: string;
+    readonly result: 'Succeeded' | 'Failed';
+    readonly rushVersion?: string;
+    readonly timestamp?: number;
 }
 
 // @public
@@ -350,7 +516,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     // @internal
     get _json(): ILockStepVersionJson;
     get mainProject(): string | undefined;
-    get nextBump(): BumpType;
+    get nextBump(): BumpType | undefined;
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;
@@ -371,6 +537,33 @@ export class LookupByPath<TItem> {
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
     constructor(json: _INpmOptionsJson);
+}
+
+// @alpha
+export class Operation {
+    constructor(options?: IOperationOptions);
+    addDependency(dependency: Operation): void;
+    readonly associatedPhase: IPhase | undefined;
+    readonly associatedProject: RushConfigurationProject | undefined;
+    readonly consumers: ReadonlySet<Operation>;
+    deleteDependency(dependency: Operation): void;
+    readonly dependencies: ReadonlySet<Operation>;
+    get name(): string | undefined;
+    runner: IOperationRunner | undefined;
+    weight: number;
+}
+
+// @beta
+export enum OperationStatus {
+    Blocked = "BLOCKED",
+    Executing = "EXECUTING",
+    Failure = "FAILURE",
+    FromCache = "FROM CACHE",
+    NoOp = "NO OP",
+    Ready = "READY",
+    Skipped = "SKIPPED",
+    Success = "SUCCESS",
+    SuccessWithWarning = "SUCCESS WITH WARNINGS"
 }
 
 // @public (undocumented)
@@ -433,6 +626,13 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
     readonly environmentVariables?: IConfigurationEnvironment;
 }
 
+// @alpha
+export class PhasedCommandHooks {
+    readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
+    readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
+    readonly waitingForChanges: SyncHook<void>;
+}
+
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
@@ -472,6 +672,7 @@ export class RepoStateFile {
 // @public
 export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
+    static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static get version(): string;
 }
@@ -535,10 +736,12 @@ export class RushConfiguration {
     get projects(): RushConfigurationProject[];
     // (undocumented)
     get projectsByName(): Map<string, RushConfigurationProject>;
+    // @beta
+    get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
     get repositoryDefaultBranch(): string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
     get repositoryDefaultRemote(): string;
-    get repositoryUrl(): string | undefined;
+    get repositoryUrls(): string[];
     // @internal
     get rushConfigurationJson(): IRushConfigurationJson;
     get rushJsonFile(): string;
@@ -569,12 +772,10 @@ export class RushConfiguration {
 
 // @public
 export class RushConfigurationProject {
-    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectJson" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectOptions" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
-    // @internal
-    readonly _consumingProjectNames: Set<string>;
+    constructor(options: IRushConfigurationProjectOptions);
     get consumingProjects(): ReadonlySet<RushConfigurationProject>;
     get cyclicDependencyProjects(): Set<string>;
     get dependencyProjects(): ReadonlySet<RushConfigurationProject>;
@@ -584,7 +785,6 @@ export class RushConfigurationProject {
     get isMainProject(): boolean;
     // @deprecated
     get localDependencyProjects(): ReadonlyArray<RushConfigurationProject>;
-    // @deprecated
     get packageJson(): IPackageJson;
     // @beta
     get packageJsonEditor(): PackageJsonEditor;
@@ -598,6 +798,8 @@ export class RushConfigurationProject {
     get rushConfiguration(): RushConfiguration;
     get shouldPublish(): boolean;
     get skipRushCheck(): boolean;
+    // @beta
+    get tags(): ReadonlySet<string>;
     get tempProjectName(): string;
     get unscopedTempProjectName(): string;
     // @beta
@@ -611,6 +813,7 @@ export class RushConstants {
     static readonly artifactoryFilename: string;
     static readonly browserApprovedPackagesFilename: string;
     static readonly buildCacheFilename: string;
+    static readonly buildCacheVersion: number;
     static readonly buildCommandName: string;
     static readonly bulkCommandKind: 'bulk';
     static readonly changeFilesFolderName: string;
@@ -625,6 +828,7 @@ export class RushConstants {
     static readonly nonbrowserApprovedPackagesFilename: string;
     static readonly npmShrinkwrapFilename: string;
     static readonly phasedCommandKind: 'phased';
+    static readonly phaseNamePrefix: '_phase:';
     // @deprecated
     static readonly pinnedVersionsFilename: string;
     static readonly pnpmfileV1Filename: string;
@@ -634,6 +838,7 @@ export class RushConstants {
     static readonly projectShrinkwrapFilename: string;
     static readonly rebuildCommandName: string;
     static readonly repoStateFilename: string;
+    static readonly rushLogsFolderName: string;
     static readonly rushPackageName: string;
     static readonly rushPluginManifestFilename: string;
     static readonly rushPluginsConfigFilename: string;
@@ -659,9 +864,14 @@ export class _RushGlobalFolder {
     get path(): string;
 }
 
-// @beta (undocumented)
+// @beta
 export class RushLifecycleHooks {
-    initialize: AsyncSeriesHook<void>;
+    flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
+    initialize: AsyncSeriesHook<IRushCommand>;
+    runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
+    runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;
+    runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>>;
+    runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>>;
 }
 
 // @beta (undocumented)
@@ -716,7 +926,7 @@ export class VersionPolicyConfiguration {
     constructor(jsonFileName: string);
     bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
     getVersionPolicy(policyName: string): VersionPolicy;
-    update(versionPolicyName: string, newVersion: string): void;
+    update(versionPolicyName: string, newVersion: string, shouldCommit?: boolean): void;
     validate(projectsByName: Map<string, RushConfigurationProject>): void;
     get versionPolicies(): Map<string, VersionPolicy>;
 }

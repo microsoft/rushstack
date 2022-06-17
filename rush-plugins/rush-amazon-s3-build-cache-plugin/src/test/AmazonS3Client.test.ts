@@ -1,23 +1,36 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { Response, ResponseInit } from 'node-fetch';
 
-import { IAmazonS3BuildCacheProviderOptions } from '../AmazonS3BuildCacheProvider';
+import { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
 import { AmazonS3Client, IAmazonS3Credentials } from '../AmazonS3Client';
 import { WebClient } from '../WebClient';
 
 const webClient = new WebClient();
 
-const DUMMY_OPTIONS_WITHOUT_BUCKET: Omit<IAmazonS3BuildCacheProviderOptions, 's3Bucket'> = {
+const DUMMY_OPTIONS_WITHOUT_ENDPOINT: Omit<IAmazonS3BuildCacheProviderOptionsAdvanced, 's3Endpoint'> = {
   s3Region: 'us-east-1',
-  isCacheWriteAllowed: true
+  isCacheWriteAllowed: true,
+  s3Prefix: undefined
 };
 
-const DUMMY_OPTIONS: IAmazonS3BuildCacheProviderOptions = {
-  ...DUMMY_OPTIONS_WITHOUT_BUCKET,
-  s3Bucket: 'test-s3-bucket'
+const DUMMY_OPTIONS: IAmazonS3BuildCacheProviderOptionsAdvanced = {
+  ...DUMMY_OPTIONS_WITHOUT_ENDPOINT,
+  s3Endpoint: 'http://localhost:9000'
 };
+
+const terminal = new Terminal(
+  new ConsoleTerminalProvider({
+    verboseEnabled: false,
+    debugEnabled: false
+  })
+);
+
+interface ITestOptions {
+  shouldRetry: boolean;
+}
 
 class MockedDate extends Date {
   public constructor() {
@@ -29,64 +42,158 @@ class MockedDate extends Date {
   }
 }
 
-describe('AmazonS3Client', () => {
-  it('Rejects invalid S3 bucket names', () => {
+describe(AmazonS3Client.name, () => {
+  it('Rejects invalid S3 endpoint values', () => {
     expect(
       () =>
-        new AmazonS3Client(undefined, { s3Bucket: undefined!, ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
-    ).toThrowErrorMatchingSnapshot();
-
-    expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: '-abc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
-    ).toThrowErrorMatchingSnapshot();
-
-    expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'a!bc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
-    ).toThrowErrorMatchingSnapshot();
-
-    expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'a', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: undefined!, ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
       () =>
-        new AmazonS3Client(undefined, { s3Bucket: '10.10.10.10', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'abc', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc..d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://address.com/', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc.-d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://-abc', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc-.d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc.--.invalid', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc-', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'https://?', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://10.10.10.10:abcd', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc..d', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc.-d', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc-.d', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).toThrowErrorMatchingSnapshot();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: `http://abc.${new Array(100).join('a')}.def:123`, ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).toThrowErrorMatchingSnapshot();
   });
 
   it('Accepts valid S3 bucket names', () => {
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc123', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
-    ).not.toThrow();
-
-    expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'https://abc123', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).not.toThrow();
 
     expect(
       () =>
-        new AmazonS3Client(undefined, { s3Bucket: 'foo-bar-baz', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'http://abc', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).not.toThrow();
 
     expect(
       () =>
-        new AmazonS3Client(undefined, { s3Bucket: 'foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'https://foo-bar-baz:9000', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
+    ).not.toThrow();
+
+    expect(
+      () =>
+        new AmazonS3Client(
+          undefined,
+          { s3Endpoint: 'https://foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_ENDPOINT },
+          webClient,
+          terminal
+        )
     ).not.toThrow();
   });
 
@@ -94,10 +201,11 @@ describe('AmazonS3Client', () => {
     const client: AmazonS3Client = new AmazonS3Client(
       undefined,
       {
-        s3Bucket: 'foo.bar.baz',
-        ...DUMMY_OPTIONS_WITHOUT_BUCKET
+        s3Endpoint: 'http://foo.bar.baz',
+        ...DUMMY_OPTIONS_WITHOUT_ENDPOINT
       },
-      webClient
+      webClient,
+      terminal
     );
     try {
       await client.uploadObjectAsync('temp', undefined!);
@@ -114,27 +222,37 @@ describe('AmazonS3Client', () => {
     }
 
     let realDate: typeof Date;
+    let realSetTimeout: typeof setTimeout;
     beforeEach(() => {
+      // mock date
       realDate = global.Date;
       global.Date = MockedDate as typeof Date;
+
+      // mock setTimeout
+      realSetTimeout = global.setTimeout;
+      global.setTimeout = ((callback: () => void, time: number) => {
+        return realSetTimeout(callback, 1);
+      }).bind(global) as typeof global.setTimeout;
     });
 
     afterEach(() => {
       jest.restoreAllMocks();
       global.Date = realDate;
+      global.setTimeout = realSetTimeout.bind(global);
     });
 
     async function makeS3ClientRequestAsync<TResponse>(
       credentials: IAmazonS3Credentials | undefined,
-      options: IAmazonS3BuildCacheProviderOptions,
+      options: IAmazonS3BuildCacheProviderOptionsAdvanced,
       request: (s3Client: AmazonS3Client) => Promise<TResponse>,
-      response: IResponseOptions
+      response: IResponseOptions,
+      testOptions: ITestOptions
     ): Promise<TResponse> {
       const spy: jest.SpyInstance = jest
         .spyOn(WebClient.prototype, 'fetchAsync')
         .mockReturnValue(Promise.resolve(new Response(response.body, response.responseInit)));
 
-      const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient);
+      const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient, terminal);
       let result: TResponse;
       let error: Error | undefined;
       try {
@@ -143,8 +261,13 @@ describe('AmazonS3Client', () => {
         error = e as Error;
       }
 
-      expect(spy).toHaveBeenCalledTimes(1);
+      if (testOptions.shouldRetry) {
+        expect(spy).toHaveBeenCalledTimes(4);
+      } else {
+        expect(spy).toHaveBeenCalledTimes(1);
+      }
       expect(spy.mock.calls[0]).toMatchSnapshot();
+      spy.mockRestore();
 
       if (error) {
         throw error;
@@ -156,7 +279,7 @@ describe('AmazonS3Client', () => {
     async function runAndExpectErrorAsync(fnAsync: () => Promise<unknown>): Promise<void> {
       try {
         await fnAsync();
-        fail('Expected an error to be thrown');
+        throw new Error('Expected an error to be thrown');
       } catch (e) {
         // The way an error is formatted changed in Node 16. Normalize, so snapshots match.
         (e as Error).message = (e as Error).message.replace(
@@ -171,9 +294,10 @@ describe('AmazonS3Client', () => {
     describe('Getting an object', () => {
       async function makeGetRequestAsync(
         credentials: IAmazonS3Credentials | undefined,
-        options: IAmazonS3BuildCacheProviderOptions,
+        options: IAmazonS3BuildCacheProviderOptionsAdvanced,
         objectName: string,
-        response: IResponseOptions
+        response: IResponseOptions,
+        testOptions: ITestOptions
       ): Promise<Buffer | undefined> {
         return await makeS3ClientRequestAsync(
           credentials,
@@ -181,7 +305,8 @@ describe('AmazonS3Client', () => {
           async (s3Client) => {
             return await s3Client.getObjectAsync(objectName);
           },
-          response
+          response,
+          testOptions
         );
       }
 
@@ -189,12 +314,20 @@ describe('AmazonS3Client', () => {
         it('Can get an object', async () => {
           const expectedContents: string = 'abc123-contents';
 
-          const result: Buffer | undefined = await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-            body: expectedContents,
-            responseInit: {
-              status: 200
+          const result: Buffer | undefined = await makeGetRequestAsync(
+            credentials,
+            DUMMY_OPTIONS,
+            'abc123',
+            {
+              body: expectedContents,
+              responseInit: {
+                status: 200
+              }
+            },
+            {
+              shouldRetry: false
             }
-          });
+          );
           expect(result).toBeDefined();
           expect(result?.toString()).toBe(expectedContents);
         });
@@ -211,47 +344,145 @@ describe('AmazonS3Client', () => {
               responseInit: {
                 status: 200
               }
-            }
+            },
+            { shouldRetry: false }
           );
           expect(result).toBeDefined();
           expect(result?.toString()).toBe(expectedContents);
         });
 
         it('Handles a missing object', async () => {
-          const result: Buffer | undefined = await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-            responseInit: {
-              status: 404,
-              statusText: 'Not Found'
+          const result: Buffer | undefined = await makeGetRequestAsync(
+            credentials,
+            DUMMY_OPTIONS,
+            'abc123',
+            {
+              responseInit: {
+                status: 404,
+                statusText: 'Not Found'
+              }
+            },
+            {
+              shouldRetry: false
             }
-          });
+          );
           expect(result).toBeUndefined();
         });
 
         it('Handles an unexpected error', async () => {
+          const spy = jest.spyOn(global, 'setTimeout');
           await runAndExpectErrorAsync(
             async () =>
-              await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-                responseInit: {
-                  status: 500,
-                  statusText: 'Server Error'
+              await makeGetRequestAsync(
+                credentials,
+                DUMMY_OPTIONS,
+                'abc123',
+                {
+                  responseInit: {
+                    status: 500,
+                    statusText: 'Server Error'
+                  }
+                },
+                {
+                  shouldRetry: true
                 }
-              })
+              )
           );
+          expect(setTimeout).toHaveBeenCalledTimes(3);
+          expect(setTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), 4000);
+          expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 8000);
+          expect(setTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 16000);
+          spy.mockReset();
+          spy.mockRestore();
         });
+
+        if (credentials) {
+          it('should not retry on 400 error', async () => {
+            const spy = jest.spyOn(global, 'setTimeout');
+            await runAndExpectErrorAsync(
+              async () =>
+                await makeGetRequestAsync(
+                  credentials,
+                  DUMMY_OPTIONS,
+                  'abc123',
+                  {
+                    responseInit: {
+                      status: 400,
+                      statusText: 'Bad Request'
+                    }
+                  },
+                  {
+                    shouldRetry: false
+                  }
+                )
+            );
+            expect(setTimeout).toHaveBeenCalledTimes(0);
+            spy.mockReset();
+            spy.mockRestore();
+          });
+
+          it('should not retry on 401 error', async () => {
+            const spy = jest.spyOn(global, 'setTimeout');
+            await runAndExpectErrorAsync(
+              async () =>
+                await makeGetRequestAsync(
+                  credentials,
+                  DUMMY_OPTIONS,
+                  'abc123',
+                  {
+                    responseInit: {
+                      status: 401,
+                      statusText: 'Unauthorized'
+                    }
+                  },
+                  {
+                    shouldRetry: false
+                  }
+                )
+            );
+            expect(setTimeout).toHaveBeenCalledTimes(0);
+            spy.mockReset();
+            spy.mockRestore();
+          });
+        }
       }
 
       describe('Without credentials', () => {
         registerGetTests(undefined);
 
-        it('Handles missing credentials object', async () => {
-          const result: Buffer | undefined = await makeGetRequestAsync(undefined, DUMMY_OPTIONS, 'abc123', {
-            responseInit: {
-              status: 403,
-              statusText: 'Unauthorized'
-            }
+        for (const code of [400, 401, 403]) {
+          it(`Handles missing credentials object when ${code}`, async () => {
+            let warningSpy: jest.SpyInstance<unknown, unknown[]> | undefined;
+            const result: Buffer | undefined = await makeS3ClientRequestAsync(
+              undefined,
+              DUMMY_OPTIONS,
+              async (s3Client) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (s3Client as any)._writeWarningLine = () => {};
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                warningSpy = jest.spyOn(s3Client as any, '_writeWarningLine');
+                return await s3Client.getObjectAsync('abc123');
+              },
+              {
+                responseInit: {
+                  status: code,
+                  statusText: 'Unauthorized'
+                }
+              },
+              {
+                shouldRetry: false
+              }
+            );
+            expect(result).toBeUndefined();
+            expect(warningSpy).toHaveBeenNthCalledWith(
+              1,
+              `No credentials found and received a ${code}`,
+              ' response code from the cloud storage.',
+              ' Maybe run rush update-cloud-credentials',
+              ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
+            );
           });
-          expect(result).toBeUndefined();
-        });
+        }
       });
 
       function registerGetWithCredentialsTests(credentials: IAmazonS3Credentials): void {
@@ -260,12 +491,20 @@ describe('AmazonS3Client', () => {
         it('Handles a 403 error', async () => {
           await runAndExpectErrorAsync(
             async () =>
-              await makeGetRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', {
-                responseInit: {
-                  status: 403,
-                  statusText: 'Unauthorized'
+              await makeGetRequestAsync(
+                credentials,
+                DUMMY_OPTIONS,
+                'abc123',
+                {
+                  responseInit: {
+                    status: 403,
+                    statusText: 'Unauthorized'
+                  }
+                },
+                {
+                  shouldRetry: false
                 }
-              })
+              )
           );
         });
       }
@@ -290,10 +529,11 @@ describe('AmazonS3Client', () => {
     describe('Uploading an object', () => {
       async function makeUploadRequestAsync(
         credentials: IAmazonS3Credentials | undefined,
-        options: IAmazonS3BuildCacheProviderOptions,
+        options: IAmazonS3BuildCacheProviderOptionsAdvanced,
         objectName: string,
         objectContents: string,
-        response: IResponseOptions
+        response: IResponseOptions,
+        testOptions: ITestOptions
       ): Promise<void> {
         return await makeS3ClientRequestAsync(
           credentials,
@@ -301,24 +541,34 @@ describe('AmazonS3Client', () => {
           async (s3Client) => {
             return await s3Client.uploadObjectAsync(objectName, Buffer.from(objectContents));
           },
-          response
+          response,
+          testOptions
         );
       }
 
       it('Throws an error if credentials are not provided', async () => {
         await runAndExpectErrorAsync(
           async () =>
-            await makeUploadRequestAsync(undefined, DUMMY_OPTIONS, 'abc123', 'abc123-contents', undefined!)
+            await makeUploadRequestAsync(undefined, DUMMY_OPTIONS, 'abc123', 'abc123-contents', undefined!, {
+              shouldRetry: false
+            })
         );
       });
 
       function registerUploadTests(credentials: IAmazonS3Credentials): void {
         it('Uploads an object', async () => {
-          await makeUploadRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', 'abc123-contents', {
-            responseInit: {
-              status: 200
-            }
-          });
+          await makeUploadRequestAsync(
+            credentials,
+            DUMMY_OPTIONS,
+            'abc123',
+            'abc123-contents',
+            {
+              responseInit: {
+                status: 200
+              }
+            },
+            { shouldRetry: false }
+          );
         });
 
         it('Uploads an object to a different region', async () => {
@@ -331,19 +581,27 @@ describe('AmazonS3Client', () => {
               responseInit: {
                 status: 200
               }
-            }
+            },
+            { shouldRetry: false }
           );
         });
 
         it('Handles an unexpected error code', async () => {
           await runAndExpectErrorAsync(
             async () =>
-              await makeUploadRequestAsync(credentials, DUMMY_OPTIONS, 'abc123', 'abc123-contents', {
-                responseInit: {
-                  status: 500,
-                  statusText: 'Server Error'
-                }
-              })
+              await makeUploadRequestAsync(
+                credentials,
+                DUMMY_OPTIONS,
+                'abc123',
+                'abc123-contents',
+                {
+                  responseInit: {
+                    status: 500,
+                    statusText: 'Server Error'
+                  }
+                },
+                { shouldRetry: true }
+              )
           );
         });
       }
@@ -363,6 +621,18 @@ describe('AmazonS3Client', () => {
           sessionToken: 'sessionToken'
         });
       });
+    });
+  });
+
+  describe(AmazonS3Client.UriEncode.name, () => {
+    it('can encode', () => {
+      expect(
+        AmazonS3Client.UriEncode(
+          '/@rushstack+rush-azure-storage-build-cache-plugin-_phase_test-5d4149e2298bc927fd33355fb168e6a89ba88fa6'
+        )
+      ).toBe(
+        '/%40rushstack%2Brush-azure-storage-build-cache-plugin-_phase_test-5d4149e2298bc927fd33355fb168e6a89ba88fa6'
+      );
     });
   });
 });

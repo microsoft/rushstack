@@ -1,6 +1,196 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+
+## 0.4.22
+Fri, 17 Jun 2022 00:16:18 GMT
+
+### Patches
+
+- Bump @types/webpack
+
+## 0.4.21
+Tue, 14 Jun 2022 00:17:29 GMT
+
+### Patches
+
+- add optional peer depedency on webpack types
+
+## 0.4.20
+Tue, 07 Jun 2022 09:37:05 GMT
+
+_Version update only_
+
+## 0.4.19
+Wed, 25 May 2022 22:25:07 GMT
+
+_Version update only_
+
+## 0.4.18
+Thu, 19 May 2022 15:13:20 GMT
+
+_Version update only_
+
+## 0.4.17
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 0.4.16
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 0.4.15
+Fri, 06 May 2022 18:54:42 GMT
+
+### Patches
+
+- Fix an issue where Heft will crash if the Webpack configuration is an empty array.
+
+## 0.4.14
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 0.4.13
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 0.4.12
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 0.4.11
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 0.4.10
+Wed, 13 Apr 2022 15:12:41 GMT
+
+_Version update only_
+
+## 0.4.9
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 0.4.8
+Tue, 12 Apr 2022 02:58:32 GMT
+
+_Version update only_
+
+## 0.4.7
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 0.4.6
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 0.4.5
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 0.4.4
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 0.4.3
+Thu, 31 Mar 2022 02:06:05 GMT
+
+_Version update only_
+
+## 0.4.2
+Sat, 19 Mar 2022 08:05:38 GMT
+
+_Version update only_
+
+## 0.4.1
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 0.4.0
+Fri, 11 Feb 2022 10:30:25 GMT
+
+### Minor changes
+
+- Change "webpack" to be a peer dependency instead of a regular dependency; this avoids a situation where Heft might import a different version of Webpack from the consuming project or its rig
+
+## 0.3.32
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 0.3.31
+Fri, 21 Jan 2022 01:10:41 GMT
+
+_Version update only_
+
+## 0.3.30
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 0.3.29
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.3.28
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.3.27
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 0.3.26
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.3.25
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.3.24
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 0.3.23
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.3.22
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 0.3.21
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.3.20
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
 
 ## 0.3.19
 Mon, 29 Nov 2021 07:26:16 GMT

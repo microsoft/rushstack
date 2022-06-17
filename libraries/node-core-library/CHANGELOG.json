@@ -2,6 +2,146 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.45.6",
+      "tag": "@rushstack/node-core-library_v3.45.6",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.45.5",
+      "tag": "@rushstack/node-core-library_v3.45.5",
+      "date": "Tue, 10 May 2022 01:20:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix and issue where Async.forEachAsync with an async iterator can overflow the max concurrency"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.45.4",
+      "tag": "@rushstack/node-core-library_v3.45.4",
+      "date": "Sat, 23 Apr 2022 02:13:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.45.3",
+      "tag": "@rushstack/node-core-library_v3.45.3",
+      "date": "Fri, 15 Apr 2022 00:12:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.45.2",
+      "tag": "@rushstack/node-core-library_v3.45.2",
+      "date": "Sat, 09 Apr 2022 02:24:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.45.1",
+      "tag": "@rushstack/node-core-library_v3.45.1",
+      "date": "Tue, 15 Mar 2022 19:15:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.45.0",
+      "tag": "@rushstack/node-core-library_v3.45.0",
+      "date": "Wed, 05 Jan 2022 16:07:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose a FileSystem.readFolderItems and FileSystem.readFolderItemsAsync API to get folder entries with types in a single API call."
+          },
+          {
+            "comment": "Deprecate FileSystem.readFolder in favor of FileSystem.readFolderItemNames."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.44.3",
+      "tag": "@rushstack/node-core-library_v3.44.3",
+      "date": "Mon, 27 Dec 2021 16:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.44.2",
+      "tag": "@rushstack/node-core-library_v3.44.2",
+      "date": "Thu, 09 Dec 2021 20:34:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update z-schema to ~5.0.2."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.44.1",
+      "tag": "@rushstack/node-core-library_v3.44.1",
+      "date": "Mon, 06 Dec 2021 16:08:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.44.0",
+      "tag": "@rushstack/node-core-library_v3.44.0",
+      "date": "Fri, 03 Dec 2021 03:05:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace const enums with conventional enums to allow for compatability with JavaScript consumers."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.43.2",
       "tag": "@rushstack/node-core-library_v3.43.2",
       "date": "Sat, 06 Nov 2021 00:09:13 GMT",

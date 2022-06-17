@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start"
+    "start": "heft start",
+    "_phase:build": "heft build --clean"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",

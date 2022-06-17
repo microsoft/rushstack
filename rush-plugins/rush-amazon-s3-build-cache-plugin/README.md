@@ -5,5 +5,5 @@ This is a Rush plugin for using Amazon S3 as cloud build cache provider during t
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/rush-plugins/rush-amazon-s3-build-cache-plugin/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/rush-plugins/rush-amazon-s3-build-cache-plugin/CHANGELOG.md) - Find
   out what's new in the latest version

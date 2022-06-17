@@ -149,6 +149,17 @@ export interface IConfigDtsRollup {
   untrimmedFilePath?: string;
 
   /**
+   * Specifies the output path for a .d.ts rollup file to be generated with trimming for an "alpha" release.
+   *
+   * @remarks
+   * This file will include only declarations that are marked as `@public`, `@beta`, or `@alpha`.
+   *
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
+   */
+  alphaTrimmedFilePath?: string;
+
+  /**
    * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "beta" release.
    *
    * @remarks

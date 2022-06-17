@@ -54,6 +54,12 @@ interface IBuildSpanState {
    * setting this flag.  After the new token is added, this flag is cleared.
    */
   disableMergingForNextToken: boolean;
+
+  /**
+   * Tracks whether the last appended token was a separator. If so, and we're in the middle of
+   * capturing a token range, then omit the separator from the range.
+   */
+  lastAppendedTokenIsSeparator: boolean;
 }
 
 export class ExcerptBuilder {
@@ -113,7 +119,8 @@ export class ExcerptBuilder {
       startingNode: span.node,
       stopBeforeChildKind,
       tokenRangesByNode,
-      disableMergingForNextToken: false
+      disableMergingForNextToken: false,
+      lastAppendedTokenIsSeparator: false
     });
   }
 
@@ -158,12 +165,13 @@ export class ExcerptBuilder {
       } else {
         ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.prefix, state);
       }
+      state.lastAppendedTokenIsSeparator = false;
     }
 
     for (const child of span.children) {
       if (span.node === state.startingNode) {
         if (state.stopBeforeChildKind && child.kind === state.stopBeforeChildKind) {
-          // We reached the a child whose kind is stopBeforeChildKind, so stop traversing
+          // We reached a child whose kind is stopBeforeChildKind, so stop traversing
           return false;
         }
       }
@@ -175,17 +183,26 @@ export class ExcerptBuilder {
 
     if (span.suffix) {
       ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.suffix, state);
+      state.lastAppendedTokenIsSeparator = false;
     }
     if (span.separator) {
       ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.separator, state);
+      state.lastAppendedTokenIsSeparator = true;
     }
 
     // Are we building a excerpt?  If so, set its range
     if (capturedTokenRange) {
       capturedTokenRange.startIndex = excerptStartIndex;
 
-      // We will assign capturedTokenRange.startIndex to be the index after the last token that was appended so far
-      capturedTokenRange.endIndex = excerptTokens.length;
+      // We will assign capturedTokenRange.startIndex to be the index after the last token
+      // that was appended so far. However, if the last appended token was a separator and
+      // there is no additional spaces, omit it from the range.
+      let excerptEndIndex: number = excerptTokens.length;
+      if (state.lastAppendedTokenIsSeparator && excerptEndIndex > excerptStartIndex + 1) {
+        excerptEndIndex--;
+      }
+
+      capturedTokenRange.endIndex = excerptEndIndex;
 
       state.disableMergingForNextToken = true;
     }

@@ -1,6 +1,207 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+
+## 7.17.18
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 7.17.17
+Tue, 07 Jun 2022 09:37:04 GMT
+
+_Version update only_
+
+## 7.17.16
+Wed, 25 May 2022 22:25:07 GMT
+
+_Version update only_
+
+## 7.17.15
+Thu, 19 May 2022 15:13:20 GMT
+
+_Version update only_
+
+## 7.17.14
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 7.17.13
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 7.17.12
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 7.17.11
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 7.17.10
+Sat, 23 Apr 2022 02:13:06 GMT
+
+_Version update only_
+
+## 7.17.9
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 7.17.8
+Wed, 13 Apr 2022 15:12:40 GMT
+
+_Version update only_
+
+## 7.17.7
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 7.17.6
+Tue, 12 Apr 2022 02:58:32 GMT
+
+### Patches
+
+- Update TSDoc dependencies.
+
+## 7.17.5
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 7.17.4
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 7.17.3
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 7.17.2
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 7.17.1
+Tue, 05 Apr 2022 15:12:22 GMT
+
+### Patches
+
+- Update requirement set links in OfficeYamlDocumenter
+
+## 7.17.0
+Thu, 31 Mar 2022 02:06:05 GMT
+
+### Minor changes
+
+- Updated api-documenter to surface whether a parameter is optional.
+
+## 7.16.0
+Sat, 19 Mar 2022 08:05:37 GMT
+
+### Minor changes
+
+- Add --yaml-format flag for `api-documenter yaml` command, which allows for choosing between UDP (DocFX 2.x) and SDP (DocFX 3.x)
+
+## 7.15.4
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 7.15.3
+Fri, 11 Feb 2022 10:30:25 GMT
+
+_Version update only_
+
+## 7.15.2
+Wed, 09 Feb 2022 16:18:11 GMT
+
+### Patches
+
+- Adding PowerPoint option to OfficeYamlDocumenter API set mapping
+
+## 7.15.1
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 7.15.0
+Fri, 21 Jan 2022 01:10:41 GMT
+
+### Minor changes
+
+- Add support for type aliases to the YAML output format.
+
+## 7.14.2
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 7.14.1
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 7.14.0
+Wed, 05 Jan 2022 01:09:53 GMT
+
+### Minor changes
+
+- Add support for @example when generating yaml
+
+## 7.13.78
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 7.13.77
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 7.13.76
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 7.13.75
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 7.13.74
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 7.13.73
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 7.13.72
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
+
+## 7.13.71
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 7.13.70
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
 
 ## 7.13.69
 Mon, 29 Nov 2021 07:26:16 GMT

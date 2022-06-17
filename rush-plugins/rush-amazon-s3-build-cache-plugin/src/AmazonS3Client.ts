@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Async, Colors, IColorableSequence, ITerminal } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
 
-import { IAmazonS3BuildCacheProviderOptions } from './AmazonS3BuildCacheProvider';
+import { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
 import { IGetFetchOptions, IPutFetchOptions, WebClient } from './WebClient';
 
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
@@ -12,8 +13,11 @@ const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';
 const HOST_HEADER_NAME: 'host' = 'host';
 const SECURITY_TOKEN_HEADER_NAME: 'x-amz-security-token' = 'x-amz-security-token';
 
-const DEFAULT_S3_REGION: 'us-east-1' = 'us-east-1';
-
+/**
+ * Credentials for authorizing and signing requests to an Amazon S3 endpoint.
+ *
+ * @public
+ */
 export interface IAmazonS3Credentials {
   accessKeyId: string;
   secretAccessKey: string;
@@ -25,26 +29,88 @@ interface IIsoDateString {
   dateTime: string;
 }
 
+type RetryableRequestResponse<T> =
+  | {
+      hasNetworkError: true;
+      error: Error;
+    }
+  | {
+      hasNetworkError: false;
+      response: T;
+    };
+
+const protocolRegex: RegExp = /^https?:\/\//;
+const portRegex: RegExp = /:(\d{1,5})$/;
+
+// Similar to https://docs.microsoft.com/en-us/javascript/api/@azure/storage-blob/storageretrypolicytype?view=azure-node-latest
+enum StorageRetryPolicyType {
+  EXPONENTIAL = 0,
+  FIXED = 1
+}
+
+// Similar to https://docs.microsoft.com/en-us/javascript/api/@azure/storage-blob/storageretryoptions?view=azure-node-latest
+interface IStorageRetryOptions {
+  maxRetryDelayInMs: number;
+  maxTries: number;
+  retryDelayInMs: number;
+  retryPolicyType: StorageRetryPolicyType;
+}
+
+const storageRetryOptions: IStorageRetryOptions = {
+  maxRetryDelayInMs: 120 * 1000,
+  maxTries: 4,
+  retryDelayInMs: 4 * 1000,
+  retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
+};
+
+/**
+ * A helper for reading and updating objects on Amazon S3
+ *
+ * @public
+ */
 export class AmazonS3Client {
   private readonly _credentials: IAmazonS3Credentials | undefined;
-  private readonly _s3Bucket: string;
+  private readonly _s3Endpoint: string;
   private readonly _s3Region: string;
 
   private readonly _webClient: WebClient;
 
+  private readonly _terminal: ITerminal;
+
   public constructor(
     credentials: IAmazonS3Credentials | undefined,
-    options: IAmazonS3BuildCacheProviderOptions,
-    webClient: WebClient
+    options: IAmazonS3BuildCacheProviderOptionsAdvanced,
+    webClient: WebClient,
+    terminal: ITerminal
   ) {
     this._credentials = credentials;
+    this._terminal = terminal;
 
-    this._validateBucketName(options.s3Bucket);
+    this._validateEndpoint(options.s3Endpoint);
 
-    this._s3Bucket = options.s3Bucket;
+    this._s3Endpoint = options.s3Endpoint;
     this._s3Region = options.s3Region;
 
     this._webClient = webClient;
+  }
+
+  // https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html#create-signature-presign-entire-payload
+  // We want to keep all slashes non encoded
+  public static UriEncode(input: string): string {
+    let output: string = '';
+    for (let i: number = 0; i < input.length; i += 1) {
+      const ch: string = input[i];
+      if (ch.match(/[A-Za-z0-9~._-]|\//)) {
+        output += ch;
+      } else {
+        if (ch === ' ') {
+          output += '%20';
+        } else {
+          output += `%${ch.charCodeAt(0).toString(16).toUpperCase()}`;
+        }
+      }
+    }
+    return output;
   }
 
   public static tryDeserializeCredentials(
@@ -67,16 +133,45 @@ export class AmazonS3Client {
   }
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
-    const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
-    if (response.ok) {
-      return await response.buffer();
-    } else if (response.status === 404) {
-      return undefined;
-    } else if (response.status === 403 && !this._credentials) {
-      return undefined;
-    } else {
-      this._throwS3Error(response);
-    }
+    this._writeDebugLine('Reading object from S3');
+    return await this._sendCacheRequestWithRetries(async () => {
+      const response: fetch.Response = await this._makeRequestAsync('GET', objectName);
+      if (response.ok) {
+        return {
+          hasNetworkError: false,
+          response: await response.buffer()
+        };
+      } else if (response.status === 404) {
+        return {
+          hasNetworkError: false,
+          response: undefined
+        };
+      } else if (
+        (response.status === 400 || response.status === 401 || response.status === 403) &&
+        !this._credentials
+      ) {
+        // unauthorized due to not providing credentials,
+        // silence error for better DX when e.g. running locally without credentials
+        this._writeWarningLine(
+          `No credentials found and received a ${response.status}`,
+          ' response code from the cloud storage.',
+          ' Maybe run rush update-cloud-credentials',
+          ' or set the RUSH_BUILD_CACHE_CREDENTIAL env'
+        );
+        return {
+          hasNetworkError: false,
+          response: undefined
+        };
+      } else if (response.status === 400 || response.status === 401 || response.status === 403) {
+        throw await this._getS3ErrorAsync(response);
+      } else {
+        const error: Error = await this._getS3ErrorAsync(response);
+        return {
+          hasNetworkError: true,
+          error
+        };
+      }
+    });
   }
 
   public async uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void> {
@@ -84,9 +179,36 @@ export class AmazonS3Client {
       throw new Error('Credentials are required to upload objects to S3.');
     }
 
-    const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
-    if (!response.ok) {
-      this._throwS3Error(response);
+    await this._sendCacheRequestWithRetries(async () => {
+      const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
+      if (!response.ok) {
+        return {
+          hasNetworkError: true,
+          error: await this._getS3ErrorAsync(response)
+        };
+      }
+      return {
+        hasNetworkError: false,
+        response: undefined
+      };
+    });
+  }
+
+  private _writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
+    // if the terminal has been closed then don't bother sending a debug message
+    try {
+      this._terminal.writeDebugLine(...messageParts);
+    } catch (err) {
+      // ignore error
+    }
+  }
+
+  private _writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
+    // if the terminal has been closed then don't bother sending a warning message
+    try {
+      this._terminal.writeWarningLine(...messageParts);
+    } catch (err) {
+      // ignore error
     }
   }
 
@@ -97,14 +219,17 @@ export class AmazonS3Client {
   ): Promise<fetch.Response> {
     const isoDateString: IIsoDateString = this._getIsoDateString();
     const bodyHash: string = this._getSha256(body);
-    const host: string = this._getHost();
     const headers: fetch.Headers = new fetch.Headers();
     headers.set(DATE_HEADER_NAME, isoDateString.dateTime);
     headers.set(CONTENT_HASH_HEADER_NAME, bodyHash);
 
+    // the host can be e.g. https://s3.aws.com or http://localhost:9000
+    const host: string = this._s3Endpoint.replace(protocolRegex, '');
+    const canonicalUri: string = AmazonS3Client.UriEncode(`/${objectName}`);
+    this._writeDebugLine(Colors.bold('Canonical URI: '), canonicalUri);
+
     if (this._credentials) {
       // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
-      const signedHeaderNames: string[] = [HOST_HEADER_NAME, CONTENT_HASH_HEADER_NAME, DATE_HEADER_NAME];
       const canonicalHeaders: string[] = [
         `${HOST_HEADER_NAME}:${host}`,
         `${CONTENT_HASH_HEADER_NAME}:${bodyHash}`,
@@ -113,11 +238,29 @@ export class AmazonS3Client {
 
       // Handle signing with temporary credentials (via sts:assume-role)
       if (this._credentials.sessionToken) {
-        signedHeaderNames.push(SECURITY_TOKEN_HEADER_NAME);
         canonicalHeaders.push(`${SECURITY_TOKEN_HEADER_NAME}:${this._credentials.sessionToken}`);
       }
 
-      const signedHeaderNamesString: string = signedHeaderNames.join(';');
+      // the canonical headers must be sorted by header name
+      canonicalHeaders.sort((aHeader, bHeader) => {
+        const aHeaderName: string = aHeader.split(':')[0];
+        const bHeaderName: string = bHeader.split(':')[0];
+        if (aHeaderName < bHeaderName) {
+          return -1;
+        }
+        if (aHeaderName > bHeaderName) {
+          return 1;
+        }
+        return 0;
+      });
+
+      // the singed header names are derived from the canonicalHeaders
+      const signedHeaderNamesString: string = canonicalHeaders
+        .map((header) => {
+          const headerName: string = header.split(':')[0];
+          return headerName;
+        })
+        .join(';');
 
       // The canonical request looks like this:
       //  GET
@@ -132,7 +275,7 @@ export class AmazonS3Client {
       // e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
       const canonicalRequest: string = [
         verb,
-        `/${objectName}`,
+        canonicalUri,
         '', // we don't use query strings for these requests
         ...canonicalHeaders,
         '',
@@ -180,10 +323,16 @@ export class AmazonS3Client {
       (webFetchOptions as IPutFetchOptions).body = body;
     }
 
-    const response: fetch.Response = await this._webClient.fetchAsync(
-      `https://${host}/${objectName}`,
-      webFetchOptions
-    );
+    const url: string = `${this._s3Endpoint}${canonicalUri}`;
+
+    this._writeDebugLine(Colors.bold(Colors.underline('Sending request to S3')));
+    this._writeDebugLine(Colors.bold('HOST: '), url);
+    this._writeDebugLine(Colors.bold('Headers: '));
+    headers.forEach((value, name) => {
+      this._writeDebugLine(Colors.cyan(`\t${name}: ${value}`));
+    });
+
+    const response: fetch.Response = await this._webClient.fetchAsync(url, webFetchOptions);
 
     return response;
   }
@@ -224,58 +373,124 @@ export class AmazonS3Client {
     };
   }
 
-  private _throwS3Error(response: fetch.Response): never {
-    throw new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`);
+  private async _safeReadResponseText(response: fetch.Response): Promise<string | undefined> {
+    try {
+      return await response.text();
+    } catch (err) {
+      // ignore the error
+    }
+    return undefined;
   }
 
-  private _getHost(): string {
-    if (this._s3Region === DEFAULT_S3_REGION) {
-      return `${this._s3Bucket}.s3.amazonaws.com`;
-    } else {
-      return `${this._s3Bucket}.s3-${this._s3Region}.amazonaws.com`;
-    }
+  private async _getS3ErrorAsync(response: fetch.Response): Promise<Error> {
+    const text: string | undefined = await this._safeReadResponseText(response);
+    return new Error(
+      `Amazon S3 responded with status code ${response.status} (${response.statusText})${
+        text ? `\n${text}` : ''
+      }`
+    );
   }
 
   /**
-   * Validates a S3 bucket name.
-   * {@link https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-s3-bucket-naming-requirements.html}
+   * Validates a S3 endpoint which is http(s):// + hostname + port. Hostname validated according to RFC 1123
+   * {@link https://docs.aws.amazon.com/general/latest/gr/s3.html}
    */
-  private _validateBucketName(s3BucketName: string): void {
-    if (!s3BucketName) {
-      throw new Error('A S3 bucket name must be provided');
+  private _validateEndpoint(s3Endpoint: string): void {
+    let host: string = s3Endpoint;
+
+    if (!s3Endpoint) {
+      throw new Error('A S3 endpoint must be provided');
     }
 
-    if (!s3BucketName.match(/^[a-z\d-.]{3,63}$/)) {
+    if (!s3Endpoint.match(protocolRegex)) {
+      throw new Error('The S3 endpoint must start with https:// or http://');
+    }
+
+    host = host.replace(protocolRegex, '');
+
+    if (host.match(/\//)) {
+      throw new Error('The path should be omitted from the endpoint. Use s3Prefix to specify a path');
+    }
+
+    const portMatch: RegExpMatchArray | null = s3Endpoint.match(portRegex);
+    if (portMatch) {
+      const port: number = Number(portMatch[1]);
+      if (Number.isNaN(port) || port > 65535) {
+        throw new Error(`Port: ${port} is an invalid port number`);
+      }
+      host = host.replace(portRegex, '');
+    }
+
+    if (host.endsWith('.')) {
+      host = host.slice(0, host.length - 1);
+    }
+
+    if (host.length > 253) {
       throw new Error(
-        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must only contain lowercase ` +
-          'alphanumerical characters, dashes, and periods and must be between 3 and 63 characters long.'
+        'The S3 endpoint is too long. RFC 1123 specifies a hostname should be no longer than 253 characters.'
       );
     }
 
-    if (!s3BucketName.match(/^[a-z\d]/)) {
-      throw new Error(
-        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must start with a lowercase ` +
-          'alphanumerical character.'
+    const subDomains: string[] = host.split('.');
+
+    const subDomainRegex: RegExp = /^[a-zA-Z0-9-]+$/;
+    const isValid: boolean = subDomains.every((subDomain) => {
+      return (
+        subDomainRegex.test(subDomain) &&
+        subDomain.length < 64 &&
+        !subDomain.startsWith('-') &&
+        !subDomain.endsWith('-')
       );
+    });
+
+    if (!isValid) {
+      throw new Error(
+        'Invalid S3 endpoint. Some part of the hostname contains invalid characters or is too long'
+      );
+    }
+  }
+
+  private async _sendCacheRequestWithRetries<T>(
+    sendRequest: () => Promise<RetryableRequestResponse<T>>
+  ): Promise<T> {
+    const response: RetryableRequestResponse<T> = await sendRequest();
+
+    const log: (...messageParts: (string | IColorableSequence)[]) => void = this._writeDebugLine.bind(this);
+
+    if (response.hasNetworkError) {
+      if (storageRetryOptions && storageRetryOptions.maxTries > 1) {
+        log('Network request failed. Will retry request as specified in storageRetryOptions');
+        async function retry(retryAttempt: number): Promise<T> {
+          const { retryDelayInMs, retryPolicyType, maxTries, maxRetryDelayInMs } = storageRetryOptions;
+          let delay: number = retryDelayInMs;
+          if (retryPolicyType === StorageRetryPolicyType.EXPONENTIAL) {
+            delay = retryDelayInMs * Math.pow(2, retryAttempt - 1);
+          }
+          delay = Math.min(maxRetryDelayInMs, delay);
+
+          log(`Will retry request in ${delay}s...`);
+          await Async.sleep(delay);
+          const response: RetryableRequestResponse<T> = await sendRequest();
+
+          if (response.hasNetworkError) {
+            if (retryAttempt < maxTries - 1) {
+              log('The retried request failed, will try again');
+              return retry(retryAttempt + 1);
+            } else {
+              log('The retried request failed and has reached the maxTries limit');
+              throw response.error;
+            }
+          }
+
+          return response.response;
+        }
+        return retry(1);
+      } else {
+        log('Network request failed and storageRetryOptions is not specified');
+        throw response.error;
+      }
     }
 
-    if (s3BucketName.match(/-$/)) {
-      throw new Error(
-        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must not end in a dash.`
-      );
-    }
-
-    if (s3BucketName.match(/(\.\.)|(\.-)|(-\.)/)) {
-      throw new Error(
-        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must not have consecutive periods or ` +
-          'dashes adjacent to periods.'
-      );
-    }
-
-    if (s3BucketName.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
-      throw new Error(
-        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must not be formatted as an IP address.`
-      );
-    }
+    return response.response;
   }
 }

@@ -5,11 +5,19 @@
 ```ts
 
 // @public
+export interface Constraint {
+}
+
+// @public
 export const constVariable: number;
 
 // @public (undocumented)
 export class DecoratorExample {
     creationDate: Date;
+}
+
+// @public
+export interface DefaultType {
 }
 
 // @public
@@ -26,19 +34,24 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     deprecatedExample(): void;
     exampleFunction(a: string, b: string): string;
     exampleFunction(x: number): number;
+    genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T): void;
     interestingEdgeCases(): void;
     // @eventProperty
     malformedEvent: SystemEvent;
     // @eventProperty
     readonly modifiedEvent: SystemEvent;
+    optionalParamFunction(x?: number): void;
     // (undocumented)
     get readonlyProperty(): string;
     regularProperty: SystemEvent;
+    // (undocumented)
+    static readonly staticReadonlyThing: boolean;
     static sumWithExample(x: number, y: number): number;
     tableExample(): void;
     // (undocumented)
     get writeableProperty(): string;
     set writeableProperty(value: string);
+    set writeonlyProperty(value: string);
 }
 
 // @public
@@ -175,6 +188,5 @@ export type TypeAlias = number;
 
 // @public (undocumented)
 export function yamlReferenceUniquenessTest(): IDocInterface1;
-
 
 ```

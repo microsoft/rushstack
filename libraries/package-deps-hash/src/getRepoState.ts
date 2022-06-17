@@ -4,6 +4,18 @@
 import type * as child_process from 'child_process';
 import { Executable } from '@rushstack/node-core-library';
 
+export interface IGitVersion {
+  major: number;
+  minor: number;
+  patch: number;
+}
+
+const MINIMUM_GIT_VERSION: IGitVersion = {
+  major: 2,
+  minor: 20,
+  patch: 0
+};
+
 /**
  * Parses the output of the "git ls-tree -r -z" command
  * @internal
@@ -91,7 +103,7 @@ export function parseGitDiffIndex(output: string): Map<string, IFileDiffStatus> 
 }
 
 /**
- * Parses the output of `git status -z -u`
+ * Parses the output of `git status -z -u` to extract the set of files that have changed since HEAD.
  *
  * @param output - The raw output from Git
  * @returns a map of file path to if it exists
@@ -106,19 +118,21 @@ export function parseGitStatus(output: string): Map<string, boolean> {
   // XY <path>\0
   //  M tools/prettier-git/prettier-git.js\0
 
-  let last: number = 0;
-  let index: number = output.indexOf('\0', last);
-  while (index >= 0) {
+  let startOfLine: number = 0;
+  let eolIndex: number = output.indexOf('\0', startOfLine);
+  while (eolIndex >= 0) {
     // We passed --no-renames above, so a rename will be a delete of the old location and an add at the new.
-    const workingTreeStatus: string = output.charAt(last + 2);
-    const exists: boolean =
-      workingTreeStatus !== 'D' && (workingTreeStatus !== ' ' || output.charAt(last + 1) !== 'D');
-    const filePath: string = output.slice(last + 3, index);
+    // charAt(startOfLine) is the index status, charAt(startOfLine + 1) is the working tree status
+    const workingTreeStatus: string = output.charAt(startOfLine + 1);
+    // Deleted in working tree, or not modified in working tree and deleted in index
+    const deleted: boolean =
+      workingTreeStatus === 'D' || (workingTreeStatus === ' ' && output.charAt(startOfLine) === 'D');
 
-    result.set(filePath, exists);
+    const filePath: string = output.slice(startOfLine + 3, eolIndex);
+    result.set(filePath, !deleted);
 
-    last = index + 1;
-    index = output.indexOf('\0', last);
+    startOfLine = eolIndex + 1;
+    eolIndex = output.indexOf('\0', startOfLine);
   }
 
   return result;
@@ -147,6 +161,8 @@ export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): 
     );
 
     if (result.status !== 0) {
+      ensureGitMinimumVersion(gitPath);
+
       throw new Error(`git rev-parse exited with status ${result.status}: ${result.stderr}`);
     }
 
@@ -177,6 +193,8 @@ export function applyWorkingTreeState(
   );
 
   if (statusResult.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git status exited with status ${statusResult.status}: ${statusResult.stderr}`);
   }
 
@@ -201,6 +219,8 @@ export function applyWorkingTreeState(
     );
 
     if (hashObjectResult.status !== 0) {
+      ensureGitMinimumVersion(gitPath);
+
       throw new Error(
         `git hash-object exited with status ${hashObjectResult.status}: ${hashObjectResult.stderr}`
       );
@@ -244,6 +264,8 @@ export function getRepoState(currentWorkingDirectory: string, gitPath?: string):
   );
 
   if (lsTreeResult.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git ls-tree exited with status ${lsTreeResult.status}: ${lsTreeResult.stderr}`);
   }
 
@@ -258,6 +280,7 @@ export function getRepoState(currentWorkingDirectory: string, gitPath?: string):
  * Find all changed files tracked by Git, their current hashes, and the nature of the change. Only useful if all changes are staged or committed.
  * @param currentWorkingDirectory - The working directory. Only used to find the repository root.
  * @param revision - The Git revision specifier to detect changes relative to. Defaults to HEAD (i.e. will compare staged vs. committed)
+ *   If comparing against a different branch, call `git merge-base` first to find the target commit.
  * @param gitPath - The path to the Git executable
  * @returns A map from the Git file path to the corresponding file change metadata
  * @beta
@@ -288,10 +311,74 @@ export function getRepoChanges(
   );
 
   if (result.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git diff-index exited with status ${result.status}: ${result.stderr}`);
   }
 
   const changes: Map<string, IFileDiffStatus> = parseGitDiffIndex(result.stdout);
 
   return changes;
+}
+
+/**
+ * Checks the git version and throws an error if it is less than the minimum required version.
+ *
+ * @public
+ */
+export function ensureGitMinimumVersion(gitPath?: string): void {
+  const gitVersion: IGitVersion = getGitVersion(gitPath);
+  if (
+    gitVersion.major < MINIMUM_GIT_VERSION.major ||
+    (gitVersion.major === MINIMUM_GIT_VERSION.major && gitVersion.minor < MINIMUM_GIT_VERSION.minor) ||
+    (gitVersion.major === MINIMUM_GIT_VERSION.major &&
+      gitVersion.minor === MINIMUM_GIT_VERSION.minor &&
+      gitVersion.patch < MINIMUM_GIT_VERSION.patch)
+  ) {
+    throw new Error(
+      `The minimum Git version required is ` +
+        `${MINIMUM_GIT_VERSION.major}.${MINIMUM_GIT_VERSION.minor}.${MINIMUM_GIT_VERSION.patch}. ` +
+        `Your version is ${gitVersion.major}.${gitVersion.minor}.${gitVersion.patch}.`
+    );
+  }
+}
+
+function getGitVersion(gitPath?: string): IGitVersion {
+  const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(gitPath || 'git', ['version']);
+
+  if (result.status !== 0) {
+    throw new Error(
+      `While validating the Git installation, the "git version" command failed with ` +
+        `status ${result.status}: ${result.stderr}`
+    );
+  }
+
+  return parseGitVersion(result.stdout);
+}
+
+export function parseGitVersion(gitVersionOutput: string): IGitVersion {
+  // This regexp matches output of "git version" that looks like `git version <number>.<number>.<number>(+whatever)`
+  // Examples:
+  // - git version 1.2.3
+  // - git version 1.2.3.4.5
+  // - git version 1.2.3windows.1
+  // - git version 1.2.3.windows.1
+  const versionRegex: RegExp = /^git version (\d+)\.(\d+)\.(\d+)/;
+  const match: RegExpMatchArray | null = versionRegex.exec(gitVersionOutput);
+  if (!match) {
+    throw new Error(
+      `While validating the Git installation, the "git version" command produced ` +
+        `unexpected output: "${gitVersionOutput}"`
+    );
+  }
+
+  const major: number = parseInt(match[1], 10);
+  const minor: number = parseInt(match[2], 10);
+  const patch: number = parseInt(match[3], 10);
+
+  return {
+    major,
+    minor,
+    patch
+  };
 }

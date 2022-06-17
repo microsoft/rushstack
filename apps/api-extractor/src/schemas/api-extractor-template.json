@@ -133,9 +133,9 @@
      * prepend a folder token such as "<projectFolder>".
      *
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
-     * DEFAULT VALUE: "<projectFolder>/etc/"
+     * DEFAULT VALUE: "<projectFolder>/temp/"
      */
-    // "reportFolder": "<projectFolder>/etc/",
+    // "reportFolder": "<projectFolder>/temp/",
 
     /**
      * Specifies the folder where the temporary report file is written.  The file name portion is determined by
@@ -196,6 +196,18 @@
      * DEFAULT VALUE: "<projectFolder>/dist/<unscopedPackageName>.d.ts"
      */
     // "untrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts",
+
+    /**
+     * Specifies the output path for a .d.ts rollup file to be generated with trimming for an "alpha" release.
+     * This file will include only declarations that are marked as "@public", "@beta", or "@alpha".
+     *
+     * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+     * prepend a folder token such as "<projectFolder>".
+     *
+     * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
+     * DEFAULT VALUE: ""
+     */
+    // "alphaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-alpha.d.ts",
 
     /**
      * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "beta" release.

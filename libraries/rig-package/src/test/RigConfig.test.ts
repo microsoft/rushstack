@@ -16,7 +16,7 @@ function expectEqualPaths(path1: string, path2: string): void {
   }
 }
 
-describe('RigConfig tests', () => {
+describe(RigConfig.name, () => {
   describe('loads a rig.json file', () => {
     function validate(rigConfig: RigConfig): void {
       expectEqualPaths(rigConfig.projectFolderPath, testProjectFolder);
@@ -91,7 +91,7 @@ describe('RigConfig tests', () => {
     });
   });
 
-  describe(`resolves the profile path`, () => {
+  describe('resolves the profile path', () => {
     it('synchronously', () => {
       const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
         projectFolderPath: testProjectFolder
@@ -119,7 +119,7 @@ describe('RigConfig tests', () => {
     });
   });
 
-  describe(`reports an undefined profile`, () => {
+  describe('reports an undefined profile', () => {
     it('synchronously', () => {
       const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
         projectFolderPath: testProjectFolder,
@@ -151,7 +151,7 @@ describe('RigConfig tests', () => {
     });
   });
 
-  describe(`resolves a config file path`, () => {
+  describe('resolves a config file path', () => {
     it('synchronously', () => {
       const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
         projectFolderPath: testProjectFolder,

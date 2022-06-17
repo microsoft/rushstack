@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "cyclic-dep-explicit-1",
+      "type": "major",
+      "comment": "Major change to cyclic dep"
+    }
+  ]
+}

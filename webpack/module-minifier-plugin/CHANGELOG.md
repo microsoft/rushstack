@@ -1,6 +1,194 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Jun 2022 09:37:05 GMT and should not be manually modified.
+
+## 0.9.2
+Tue, 07 Jun 2022 09:37:05 GMT
+
+_Version update only_
+
+## 0.9.1
+Wed, 25 May 2022 22:25:07 GMT
+
+_Version update only_
+
+## 0.9.0
+Fri, 20 May 2022 00:11:55 GMT
+
+### Minor changes
+
+- Factor out minifiers into @rushstack/module-minifier.
+
+## 0.8.17
+Thu, 19 May 2022 15:13:20 GMT
+
+_Version update only_
+
+## 0.8.16
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 0.8.15
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 0.8.14
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 0.8.13
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 0.8.12
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 0.8.11
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 0.8.10
+Wed, 13 Apr 2022 15:12:41 GMT
+
+_Version update only_
+
+## 0.8.9
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 0.8.8
+Tue, 12 Apr 2022 02:58:32 GMT
+
+_Version update only_
+
+## 0.8.7
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 0.8.6
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 0.8.5
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 0.8.4
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 0.8.3
+Thu, 31 Mar 2022 02:06:05 GMT
+
+_Version update only_
+
+## 0.8.2
+Sat, 19 Mar 2022 08:05:38 GMT
+
+_Version update only_
+
+## 0.8.1
+Tue, 15 Mar 2022 19:15:54 GMT
+
+_Version update only_
+
+## 0.8.0
+Thu, 17 Feb 2022 00:32:30 GMT
+
+### Minor changes
+
+- Include plugin state in webpack hash calculations, such that updating the plugin options changes the compilation and chunk hashes.
+
+## 0.7.1
+Fri, 11 Feb 2022 10:30:25 GMT
+
+_Version update only_
+
+## 0.7.0
+Fri, 11 Feb 2022 01:12:20 GMT
+
+### Minor changes
+
+- Add support for `compressAsyncImports` flag. Modify `usePortableModules` option to use `module.identifier()` instead of `module.resource` so that loader configuration is accounted for during deduplication. Switch to overriding the render function on the JavaScript module template to deduplicate rendering across chunks.
+
+## 0.6.14
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 0.6.13
+Fri, 21 Jan 2022 01:10:41 GMT
+
+_Version update only_
+
+## 0.6.12
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 0.6.11
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.6.10
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.6.9
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 0.6.8
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.6.7
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.6.6
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 0.6.5
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.6.4
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 0.6.3
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.6.2
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
 
 ## 0.6.1
 Mon, 29 Nov 2021 07:26:16 GMT

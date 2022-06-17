@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JsonSchema validateObjectWithCallback successfully reports a compound validation error 1`] = `
+Array [
+  "
+Error: #/exampleOneOf (Description for exampleOneOf - this i...)
+       Data does not match any schemas from 'oneOf'
+  Error: #/exampleOneOf (Description for type1)
+         Additional properties not allowed: field2
+  Error: #/exampleOneOf (Description for type2)
+         Missing required property: field3",
+]
+`;

@@ -1,0 +1,13 @@
+[
+  {
+    "policyName": "testPolicy1",
+    "definitionName": "lockStepVersion",
+    "version": "1.1.0",
+    "nextBump": "patch"
+  },
+  {
+    "policyName": "testPolicy2",
+    "definitionName": "lockStepVersion",
+    "version": "1.2.0"
+  }
+]

@@ -3,7 +3,7 @@
 
 import { Import } from '@rushstack/node-core-library';
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
-import type { AzureEnvironmentNames } from './AzureStorageBuildCacheProvider';
+import type { AzureEnvironmentNames } from './AzureStorageAuthentication';
 
 const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCacheProvider') = Import.lazy(
   './AzureStorageBuildCacheProvider',
@@ -55,16 +55,13 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
           azureBlobStorageConfiguration: IAzureBlobStorageConfigurationJson;
         };
         const { azureBlobStorageConfiguration } = buildCacheConfig as IBuildCache;
-        return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider(
-          {
-            storageAccountName: azureBlobStorageConfiguration.storageAccountName,
-            storageContainerName: azureBlobStorageConfiguration.storageContainerName,
-            azureEnvironment: azureBlobStorageConfiguration.azureEnvironment,
-            blobPrefix: azureBlobStorageConfiguration.blobPrefix,
-            isCacheWriteAllowed: !!azureBlobStorageConfiguration.isCacheWriteAllowed
-          },
-          rushSession
-        );
+        return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider({
+          storageAccountName: azureBlobStorageConfiguration.storageAccountName,
+          storageContainerName: azureBlobStorageConfiguration.storageContainerName,
+          azureEnvironment: azureBlobStorageConfiguration.azureEnvironment,
+          blobPrefix: azureBlobStorageConfiguration.blobPrefix,
+          isCacheWriteAllowed: !!azureBlobStorageConfiguration.isCacheWriteAllowed
+        });
       });
     });
   }

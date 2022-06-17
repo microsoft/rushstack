@@ -1,6 +1,315 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 28 Oct 2021 23:49:31 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Jun 2022 22:17:51 GMT and should not be manually modified.
+
+## 5.74.0
+Fri, 10 Jun 2022 22:17:51 GMT
+
+_Version update only_
+
+## 5.73.0
+Fri, 10 Jun 2022 21:54:49 GMT
+
+_Version update only_
+
+## 5.72.0
+Fri, 10 Jun 2022 20:01:47 GMT
+
+### Updates
+
+- Introduce a "rush-pnpm" shell command for invoking native PNPM commands in a Rush workspace
+
+## 5.71.0
+Fri, 27 May 2022 00:50:06 GMT
+
+### Updates
+
+- Write local telemetry for all phased commands, including partial runs when running in watch mode.
+- Export the list of workspace packages to the pnpmfile shim.
+
+## 5.70.0
+Wed, 11 May 2022 22:21:40 GMT
+
+### Updates
+
+- Add a new `afterExecuteOperations` hook to phased command execution. This hook is used for the console timeline view and the standard result summary.
+
+## 5.69.0
+Tue, 10 May 2022 01:20:58 GMT
+
+### Updates
+
+- Fix handling of erroneous undefined values when printing `rush list --detailed`
+- Update watcher to only schedule operations impacted by the detected change. A behavior difference will only be observed for repositories that define a phase with no dependencies.
+- Fix handing of the `strictPeerDependencies` option when using PNPM >= 7.0.0.
+- Update the `postRushInstall` hook to always run, and move its execution to after telemetry is written.
+- (BREAKING CHANGE) Remove the "xstitchPreferredVersions" property from common-versions.json and the CommonVersionsConfiguration API.
+- Correct a warning that is printed during "rush change" to only be concerned with unstaged changes.
+- Include tags in the `rush list` output.
+
+## 5.68.2
+Fri, 06 May 2022 18:54:55 GMT
+
+### Updates
+
+- Provide ability for phased script commands to internally invoke "rush install" prior to execution.
+
+## 5.68.1
+Tue, 03 May 2022 21:52:56 GMT
+
+### Updates
+
+- Fix an issue where "rush list --json" prints non-json output in a repo that uses rush plugins with autoinstallers.
+
+## 5.68.0
+Fri, 29 Apr 2022 05:22:05 GMT
+
+### Updates
+
+- Disable legacy skip logic when build cache is enabled.
+- Report status of projects with an empty script as "did not define any work," instead of as "from cache."
+- Add a -- parameter to git command invocations that accept user input to prevent arbitrary arguments from being passed.
+- Remove the @deprecated label from `RushConfigurationProject.packageJson`.
+
+## 5.67.0
+Sat, 23 Apr 2022 02:13:20 GMT
+
+### Updates
+
+- Upgrade "tar" dependency to eliminate spurious security vulnerability for "minimist" package
+- Remove requirement that custom parameters associated with a phased command must also be associated with one or more phases. This allows for custom parameters that will only be interpreted by plugins.
+
+## 5.66.2
+Tue, 12 Apr 2022 02:58:47 GMT
+
+### Updates
+
+- Fix an issue where running the "install-run-rush" script with the "--help" parameter won't install Rush.
+
+## 5.66.1
+Tue, 12 Apr 2022 01:52:38 GMT
+
+### Updates
+
+- Fix watch-mode phased commands when rush.json is not in the repository root. Fix watch-mode change detection on Linux.
+
+## 5.66.0
+Sat, 09 Apr 2022 02:24:40 GMT
+
+### Updates
+
+- (BREAKING CHANGE) Update references to the default branch to reference "main" instead of "master".
+
+## 5.65.1
+Fri, 08 Apr 2022 23:10:18 GMT
+
+_Version update only_
+
+## 5.65.0
+Fri, 08 Apr 2022 06:16:59 GMT
+
+### Updates
+
+- Expose APIs for managing Azure credentials from @rushstack/rush-azure-storage-build-cache-plugin.
+- Add flushTelemetry hook
+- Fix an edge case where `rush update` fails in a PNPM workspaces repo with no dependencies.
+- Fix some issues with "rush add"'s ability to determine which version to use when adding a dependency that is already present in the repo.
+- Add support for percentage values for --parallelism flag, eg. "50%".
+- Improve retry logic in the Amazon S3 cloud cache plugin and improve reporting when the user is not authenticated.
+- Add an additional plugin to rush-azure-storage-build-cache-plugin that can be used to prompt for Azure authentication before a command runs.
+- Change the way "rush change" prints long lists of package names to include an "(and <count> more)" line after the first five listed by name.
+- Add a "tags" field to project definitions in rush.json. These may be used to select projects, for example, "rush list --only tag:my-custom-tag".
+- Fix a typo in output of `rush change -v`
+
+## 5.64.0
+Fri, 01 Apr 2022 04:51:31 GMT
+
+### Updates
+
+- Add support for suppressing startup information to invocations of `rush`, `rushx`, and the `install-run-rush` scripts.
+- Add --timeline option for more detail generated at end of rush build
+- Expose plugin hooks for phased command execution: the "createOperations" hook allows customizing the set of operations to execute, and the "waitingForChanges" hook gives plugins an opportunity to display data to the console while output is paused.
+
+## 5.63.1
+Sat, 26 Mar 2022 00:47:39 GMT
+
+### Patches
+
+- Fix an issue where the build cache is never written to.
+
+### Updates
+
+- Fix broken README links for @microsoft/rush-lib documentation and API reference.
+
+## 5.63.0
+Tue, 15 Mar 2022 19:18:12 GMT
+
+### Updates
+
+- Reinstall automatically if monorepo folder is moved
+- Fix resolution of change file paths when rush.json is not in the root of the Git repository.
+- Fix the "selected operations" logging for commands that skipped projects to only display the operations that will be executed.
+- For watch mode commands, allow the command to continue even if the initial build fails.
+- Allow adding of aliased child packages.
+- Add plugin hooks for global and phased commands and allow plugins to tap into command execution by command name, or into the execution of any command by command kind.
+- Fix a typo in the "rush add" command-line help.
+
+## 5.62.4
+Tue, 15 Feb 2022 01:40:57 GMT
+
+### Updates
+
+- Remove the lib/index.mjs file from the @rushstack/rush-sdk package. This package must be CommonJS.
+- Do not load the PowerShell User Profile for running the AsyncRecycler task
+
+## 5.62.3
+Fri, 11 Feb 2022 02:18:05 GMT
+
+### Updates
+
+- Fix an issue where the git tag would not include the prerelease portion of the version, which will cause subsequent publishes of the same version to not be tagged.
+
+## 5.62.2
+Thu, 10 Feb 2022 03:21:41 GMT
+
+### Updates
+
+- Add the ability to forcibly replace bad cache entries generated by issues in a previous Rush release.
+- Fix an issue where the dependencies of lockstep-versioned projects aren't bumped when the lockstep-versioned projects' versions are bumped. This issue only arose in the scenario when the lockstep-versioned projects' version bumps are driven by the change type in the changefiles and not by the "nextBump" property in "common/config/rush/version-policies.json"
+- Fix an issue where "rush setup" reported a TypeError when invoked from Git Bash
+- Fix a bug where `rush change --verify` would not find the correct `common/changes` folder if the `rush.json` is not in the Git repo's root folder.
+- Add support for rush-sdk to be bundled with Webpack.
+- Add watch mode support to "phased" command definitions via the "watchOptions" property with a subfield "watchPhases". This separates the initial command phases from the phases run by the file watcher, e.g. so that the initial execution can pull from cache and the watch mode execution can use a separate incremental build phase.
+
+## 5.62.1
+Sun, 06 Feb 2022 04:59:08 GMT
+
+### Updates
+
+- Fix an issue where cache entries in certain circumstances would be missing files in nested subfolders. For full details see https://github.com/microsoft/rushstack/pull/3211.
+
+## 5.62.0
+Sat, 05 Feb 2022 00:55:18 GMT
+
+### Updates
+
+- Add support for directly invoking a script that depends on `rush-sdk` from inside a Rush repo.
+- Add support for a new URL-based version specifier in PNPM lockfiles.
+- Add support for specifying a custom S3 endpoint. This is useful for using a custom S3 provider.
+- Optimize invocation of tar to use stdin instead of a temporary file.
+- Revise architecture of symbolic link scan to use a queue and parallel file system calls.
+- Create separate tar logs per phase based on cache id.
+- Pack tar to a temp file, then move into the cache to ensure cache integrity.
+- Fix git-hooks folder check failing when compared paths have different drive letter casing
+
+## 5.61.4
+Wed, 02 Feb 2022 04:03:24 GMT
+
+### Updates
+
+- Bump tar dependency to have a minimum version of 5.0.10.
+
+## 5.61.3
+Fri, 28 Jan 2022 21:03:58 GMT
+
+### Updates
+
+- Update the built-in cache provider plugins (rush-amazon-s3-build-cache-plugin and rush-azure-storage-build-cache-plugin) to apply for all commands, enabling cloud caching for custom phased and bulk commands.
+- Allow build cache to be enabled for custom bulk commands.
+
+## 5.61.2
+Thu, 27 Jan 2022 02:30:10 GMT
+
+### Updates
+
+- Update node-fetch dependency version to address CVE-2022-0235
+
+## 5.61.1
+Sat, 22 Jan 2022 04:22:52 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Allow common/config/rush/command-line.json to specify the build command as a phased command without specifying all of the options required by the schema. The remaining options will come from the default. This is already supported when a partially-specified build command has "commandKind" set to "bulk".
+- Fix an issue where Git Bash "tar" does not handle Windows paths correctly.
+- (EXPERIMENTAL) Improve the RUSH_BUILD_CACHE_WRITE_ALLOWED environment variable behavior so that it also affects the local build cache. This saves CPU cycles on CI machines that only run a single build. It also avoids cache writes for watch mode commands.
+- Refactoring to support upcoming watch mode improvements: Rework the task execution engine to interact with the task queue using the ECMAScript async iteration protocol (GitHub #3043)
+- Fix project change detection when a new project is added to a repo that uses PNPM with useWorkspaces=false (GitHub #3183)
+
+## 5.61.0
+Sat, 22 Jan 2022 03:17:59 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Fix a regression for the plugins feature, which caused an error message "command-line.json defines a command 'build' using a name that already exists" (GitHub #3155)
+
+## 5.60.0
+Thu, 20 Jan 2022 02:46:15 GMT
+
+### Updates
+
+- Fix the "allowWarningsInSuccessfulBuild" option in bulk commands defined in common/config/command-line.json.
+- (BREAKING CHANGE) The experimental config file options "skipPhasesForCommand" and "addPhasesToCommand" have been temporarily removed until their design can be better formalized.
+- Include NodeJS 16 in the range of supported versions (`nodeSupportedVersionRange`) in the `rush.json` file generated by `rush init`.
+- (BREAKING CHANGE) Some experimental fields have been renamed in "config/rush-project.json". Please see UPGRADING.md for details.
+
+## 5.59.2
+Fri, 07 Jan 2022 02:34:59 GMT
+
+### Updates
+
+- Fixes a regression that broke "rush build" completely when not using the "--only" parameter.
+
+## 5.59.1
+Fri, 07 Jan 2022 01:21:44 GMT
+
+### Patches
+
+- Fixes a regression in bulk command execution when using "unsafe" selector parameters, e.g. "--only". Ensures that only the projects selected by the parameters get included in the build, rather that forcibly including all dependencies.
+
+## 5.59.0
+Thu, 06 Jan 2022 22:18:13 GMT
+
+### Minor changes
+
+- Update the "rush init" template to enable pnpm workspaces and to merge the pnpm-lock.yaml file as text.
+
+### Updates
+
+- Fix an issue that occurs when running a command with a selection argument with a Git ref (like `--from git:main`) in a repo with a pnpm lockfile larger than 1MB.
+- Fix an issue with installing Git hooks that occurs when the rush.json folder isn't at the repo's root.
+- (BREAKING CHANGE) Remove the experimental command "rush write-build-cache", since it is no longer needed and would be incompatible with phased builds. If you need this command for some reason, please create a GitHub issue.
+- Add support for phased commands behind the multiPhaseCommands experiment.
+- Update "rush init" to write files with OS-default line endings (CRLF on Windows, LF otherwise) instead of always writing CRLF line endings.
+
+## 5.58.0
+Thu, 16 Dec 2021 05:39:21 GMT
+
+### Updates
+
+- Fix an issue where Rush's Git hooks were broken if another tool such as Husky had tampered with the `core.hooksPath` (GitHub #3004)
+- Provide a more useful error message if the git version is too old.
+- Allow "rush list" to be invoked while other rush processes are running in the same repo.
+- For project selection parameters such as "rush build --to git:REF", improve the diff analysis to detect which individual projects are impacted by a modification of the PNPM lockfile (GitHub #3050)
+- Allow multiple remote URLs to be specified in the rush.json in the new repository.urls field.
+- (BREAKING CHANGE) Replace the RushConfiguration repositoryUrl field with repositoryUrls to support multiple remote URLs specified in rush.json.
+
+## 5.57.1
+Thu, 09 Dec 2021 00:24:47 GMT
+
+_Version update only_
+
+## 5.57.0
+Fri, 03 Dec 2021 02:16:10 GMT
+
+### Updates
+
+- Add support for the "filterLog" hook in common/config/rush/.pnpmfile.cjs
+- (EXPERIMENTAL) Ability to load third-party plugin packages that customize the behavior of Rush
+- Fix an issue where parameter values containing spaces are incorrectly passed to global scripts.
+- Parameters such as "--to" and "--from" now accept selector expressions: "version-policy:NAME" indicates the set of projects belonging to a publishing version policy. "git:REF" detects the set of projects that have been modified since the specified Git revision; for example, this allows a Rush command to process only the projects modified by a PR branch. (GitHub #2968)
+- Improved the change detection logic to work correctly when a second rush.json appears in a subfolder.
+- (EXPERIMENTAL) Add a new NPM package "@rushstack/rush-sdk" for use by Rush plugins
+- Stop deleting the pnpm-store after failed workspace installs. Usually a multiple failure is due to a network error or a package that does not exist in the registry, not an issue with the pnpm-store.
 
 ## 5.56.0
 Thu, 28 Oct 2021 23:49:31 GMT

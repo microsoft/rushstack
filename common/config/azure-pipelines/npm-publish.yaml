@@ -7,6 +7,10 @@ steps:
   - checkout: self
     persistCredentials: true
   - template: templates/build.yaml
+  - template: templates/bump-versions.yaml
+    parameters:
+      VersionPolicyName: noRush
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: noRush
+  - template: templates/record-published-versions.yaml

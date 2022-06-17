@@ -46,7 +46,8 @@ function generateConfiguration(mode, outputFolderName) {
             verbose: true
           }),
           sourceMap: true,
-          usePortableModules: true
+          usePortableModules: true,
+          compressAsyncImports: true
         })
       ]
     },
@@ -77,15 +78,18 @@ function generateConfiguration(mode, outputFolderName) {
             usePassthroughLocale: true,
             passthroughLocaleName: 'default'
           },
-          normalizeResxNewlines: 'crlf'
+          normalizeResxNewlines: 'crlf',
+          ignoreMissingResxComments: true
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
-          sourceRoot: path.resolve(__dirname, 'src')
+          sourceRoot: path.resolve(__dirname, 'src'),
+          processComment: (comment) => (comment ? `${comment} (processed)` : comment)
         },
         localizationStats: {
           dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
-        }
+        },
+        ignoreString: (filePath, stringName) => stringName === '__IGNORED_STRING__'
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,

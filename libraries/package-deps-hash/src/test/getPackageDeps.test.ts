@@ -13,8 +13,8 @@ const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'
 const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 const NESTED_TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'nestedTestProject');
 
-describe('parseGitFilename', () => {
-  it('can parse backslash-escaped filenames', (done) => {
+describe(parseGitFilename.name, () => {
+  it('can parse backslash-escaped filenames', () => {
     expect(parseGitFilename('some/path/to/a/file name')).toEqual('some/path/to/a/file name');
     expect(parseGitFilename('"some/path/to/a/file?name"')).toEqual('some/path/to/a/file?name');
     expect(parseGitFilename('"some/path/to/a/file\\\\name"')).toEqual('some/path/to/a/file\\name');
@@ -29,12 +29,11 @@ describe('parseGitFilename', () => {
     expect(parseGitFilename('"some/path/to/a/file\\\\\\347\\275\\221\\347\\275\\221name"')).toEqual(
       'some/path/to/a/file\\网网name'
     );
-    done();
   });
 });
 
-describe('parseGitLsTree', () => {
-  it('can handle a blob', (done) => {
+describe(parseGitLsTree.name, () => {
+  it('can handle a blob', () => {
     const filename: string = 'src/typings/tsd.d.ts';
     const hash: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
 
@@ -43,10 +42,9 @@ describe('parseGitLsTree', () => {
 
     expect(changes.size).toEqual(1); // Expect there to be exactly 1 change
     expect(changes.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
-    done();
   });
 
-  it('can handle a submodule', (done) => {
+  it('can handle a submodule', () => {
     const filename: string = 'rushstack';
     const hash: string = 'c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac';
 
@@ -55,10 +53,9 @@ describe('parseGitLsTree', () => {
 
     expect(changes.size).toEqual(1); // Expect there to be exactly 1 change
     expect(changes.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
-    done();
   });
 
-  it('can handle multiple lines', (done) => {
+  it('can handle multiple lines', () => {
     const filename1: string = 'src/typings/tsd.d.ts';
     const hash1: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
 
@@ -71,61 +68,42 @@ describe('parseGitLsTree', () => {
     expect(changes.size).toEqual(2); // Expect there to be exactly 2 changes
     expect(changes.get(filename1)).toEqual(hash1); // Expect the hash to be ${hash1}
     expect(changes.get(filename2)).toEqual(hash2); // Expect the hash to be ${hash2}
-    done();
   });
 
-  it('throws with malformed input', (done) => {
+  it('throws with malformed input', () => {
     expect(parseGitLsTree.bind(undefined, 'some super malformed input')).toThrow();
-    done();
   });
 });
 
-describe('getPackageDeps', () => {
-  it('can parse committed file', (done) => {
+describe(getPackageDeps.name, () => {
+  it('can parse committed file', () => {
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
-    try {
-      const expectedFiles: { [key: string]: string } = {
-        'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-        'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-      };
-      const filePaths: string[] = Array.from(results.keys()).sort();
+    const expectedFiles: { [key: string]: string } = {
+      'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+      'file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+      'file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
+      [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
+    };
+    const filePaths: string[] = Array.from(results.keys()).sort();
 
-      filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return done(e);
-    }
-
-    done();
+    filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
   });
 
-  it('can handle files in subfolders', (done) => {
+  it('can handle files in subfolders', () => {
     const results: Map<string, string> = getPackageDeps(NESTED_TEST_PROJECT_PATH);
-    try {
-      const expectedFiles: { [key: string]: string } = {
-        'src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-      };
-      const filePaths: string[] = Array.from(results.keys()).sort();
+    const expectedFiles: { [key: string]: string } = {
+      'src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+      [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
+    };
+    const filePaths: string[] = Array.from(results.keys()).sort();
 
-      filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return done(e);
-    }
-
-    done();
+    filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
   });
 
-  it('can handle adding one file', (done) => {
+  it('can handle adding one file', () => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
-
-    function _done(e?: Error): void {
-      FileSystem.deleteFile(tempFilePath);
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     try {
@@ -139,25 +117,17 @@ describe('getPackageDeps', () => {
       const filePaths: string[] = Array.from(results.keys()).sort();
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      FileSystem.deleteFile(tempFilePath);
     }
-
-    _done();
   });
 
-  it('can handle adding two files', (done) => {
+  it('can handle adding two files', () => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'b.txt');
 
     FileSystem.writeFile(tempFilePath1, 'a');
     FileSystem.writeFile(tempFilePath2, 'a');
-
-    function _done(e?: Error): void {
-      FileSystem.deleteFile(tempFilePath1);
-      FileSystem.deleteFile(tempFilePath2);
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     try {
@@ -172,22 +142,16 @@ describe('getPackageDeps', () => {
       const filePaths: string[] = Array.from(results.keys()).sort();
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      FileSystem.deleteFile(tempFilePath1);
+      FileSystem.deleteFile(tempFilePath2);
     }
-
-    _done();
   });
 
-  it('can handle removing one file', (done) => {
+  it('can handle removing one file', () => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.deleteFile(testFilePath);
-
-    function _done(e?: Error): void {
-      execSync(`git checkout ${testFilePath}`, { stdio: 'ignore' });
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     try {
@@ -199,22 +163,15 @@ describe('getPackageDeps', () => {
       const filePaths: string[] = Array.from(results.keys()).sort();
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      execSync(`git checkout ${testFilePath}`, { stdio: 'ignore' });
     }
-
-    _done();
   });
 
-  it('can handle changing one file', (done) => {
+  it('can handle changing one file', () => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.writeFile(testFilePath, 'abc');
-
-    function _done(e?: Error): void {
-      execSync(`git checkout ${testFilePath}`, { stdio: 'ignore' });
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     try {
@@ -227,42 +184,30 @@ describe('getPackageDeps', () => {
       const filePaths: string[] = Array.from(results.keys()).sort();
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      execSync(`git checkout ${testFilePath}`, { stdio: 'ignore' });
     }
-
-    _done();
   });
 
-  it('can exclude a committed file', (done) => {
+  it('can exclude a committed file', () => {
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH, [
       'file1.txt',
       'file  2.txt',
       'file蝴蝶.txt'
     ]);
-    try {
-      const expectedFiles: { [key: string]: string } = {
-        [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-      };
-      const filePaths: string[] = Array.from(results.keys()).sort();
 
-      filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return done(e);
-    }
+    const expectedFiles: { [key: string]: string } = {
+      [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
+    };
+    const filePaths: string[] = Array.from(results.keys()).sort();
 
-    done();
+    filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
   });
 
-  it('can exclude an added file', (done) => {
+  it('can exclude an added file', () => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
-
-    function _done(e?: Error): void {
-      FileSystem.deleteFile(tempFilePath);
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH, ['a.txt']);
     try {
@@ -277,22 +222,15 @@ describe('getPackageDeps', () => {
       expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      FileSystem.deleteFile(tempFilePath);
     }
-
-    _done();
   });
 
-  it('can handle a filename with spaces', (done) => {
+  it('can handle a filename with spaces', () => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a file.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
-
-    function _done(e?: Error): void {
-      FileSystem.deleteFile(tempFilePath);
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     try {
@@ -308,22 +246,15 @@ describe('getPackageDeps', () => {
       expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      FileSystem.deleteFile(tempFilePath);
     }
-
-    _done();
   });
 
-  it('can handle a filename with multiple spaces', (done) => {
+  it('can handle a filename with multiple spaces', () => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a  file name.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
-
-    function _done(e?: Error): void {
-      FileSystem.deleteFile(tempFilePath);
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     try {
@@ -339,22 +270,15 @@ describe('getPackageDeps', () => {
       expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      FileSystem.deleteFile(tempFilePath);
     }
-
-    _done();
   });
 
-  it('can handle a filename with non-standard characters', (done) => {
+  it('can handle a filename with non-standard characters', () => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'newFile批把.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
-
-    function _done(e?: Error): void {
-      FileSystem.deleteFile(tempFilePath);
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     try {
@@ -370,22 +294,15 @@ describe('getPackageDeps', () => {
       expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      FileSystem.deleteFile(tempFilePath);
     }
-
-    _done();
   });
 
-  it('can handle a filename with non-standard characters', (done) => {
+  it('can handle a filename with non-standard characters', () => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'newFile批把.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
-
-    function _done(e?: Error): void {
-      FileSystem.deleteFile(tempFilePath);
-      done(e);
-    }
 
     const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH);
     try {
@@ -401,10 +318,8 @@ describe('getPackageDeps', () => {
       expect(filePaths).toHaveLength(Object.keys(expectedFiles).length);
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
-    } catch (e) {
-      return _done(e as Error);
+    } finally {
+      FileSystem.deleteFile(tempFilePath);
     }
-
-    _done();
   });
 });

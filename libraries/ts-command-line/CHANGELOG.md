@@ -1,6 +1,50 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 05 Nov 2021 15:09:18 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+
+## 4.11.1
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 4.11.0
+Tue, 10 May 2022 01:20:43 GMT
+
+### Minor changes
+
+- Add ScopedCommandLineAction class, which allows for the definition of actions that have dynamic arguments whose definition depends on a provided scope. See https://github.com/microsoft/rushstack/pull/3364
+
+## 4.10.10
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 4.10.9
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 4.10.8
+Sat, 09 Apr 2022 02:24:27 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 4.10.7
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 4.10.6
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 4.10.5
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
 
 ## 4.10.4
 Fri, 05 Nov 2021 15:09:18 GMT

@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.55.0",
+  "rushVersion": "5.74.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,9 +26,9 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "6.7.1",
+  "pnpmVersion": "6.29.1",
 
-  // "npmVersion": "4.5.0",
+  // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
 
   /**
@@ -62,7 +62,7 @@
      * The default value is false to avoid legacy compatibility issues.
      * It is strongly recommended to set strictPeerDependencies=true.
      */
-    // "strictPeerDependencies": true,
+    "strictPeerDependencies": true,
 
     /**
      * Configures the strategy used to select versions during installation.
@@ -257,7 +257,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "versionBumpCommitMessage": "Applying package updates. [skip-ci]",
+    // "versionBumpCommitMessage": "Bump versions [skip ci]",
 
     /**
      * The commit message to use when committing changes during 'rush version'.
@@ -266,7 +266,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "changeLogUpdateCommitMessage": "Deleting change files and updating change logs for package updates. [skip-ci]"
+    // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]"
   },
 
   "repository": {
@@ -274,24 +274,24 @@
      * The URL of this Git repository, used by "rush change" to determine the base branch for your PR.
      *
      * The "rush change" command needs to determine which files are affected by your PR diff.
-     * If you merged or cherry-picked commits from the master branch into your PR branch, those commits
+     * If you merged or cherry-picked commits from the main branch into your PR branch, those commits
      * should be excluded from this diff (since they belong to some other PR).  In order to do that,
      * Rush needs to know where to find the base branch for your PR.  This information cannot be
      * determined from Git alone, since the "pull request" feature is not a Git concept.  Ideally
      * Rush would use a vendor-specific protocol to query the information from GitHub, Azure DevOps, etc.
-     * But to keep things simple, "rush change" simply assumes that your PR is against the "master" branch
+     * But to keep things simple, "rush change" simply assumes that your PR is against the "main" branch
      * of the Git remote indicated by the repository.url setting in rush.json.  If you are working in
      * a GitHub "fork" of the real repo, this setting will be different from the repository URL of your
      * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
-     * to retrieve the latest activity for the remote master branch.
+     * to retrieve the latest activity for the remote main branch.
      */
-    "url": "https://github.com/microsoft/rushstack.git"
+    "urls": ["https://github.com/microsoft/rushstack.git"],
 
     /**
      * The default branch name. This tells "rush change" which remote branch to compare against.
-     * The default value is "master"
+     * The default value is "main"
      */
-    // "defaultBranch": "master",
+    "defaultBranch": "main"
 
     /**
      * The default remote. This tells "rush change" which remote to compare against if the remote URL is
@@ -440,7 +440,6 @@
     //    */
     //   // "versionPolicyName": ""
     // },
-    //
 
     // "apps" folder (alphabetical order)
     {
@@ -452,13 +451,6 @@
     {
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "apps/api-extractor",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/api-extractor-model",
-      "projectFolder": "apps/api-extractor-model",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
@@ -483,17 +475,10 @@
       "versionPolicyName": "rush"
     },
     {
-      "packageName": "@microsoft/rush-lib",
-      "projectFolder": "apps/rush-lib",
-      "reviewCategory": "libraries",
-      "versionPolicyName": "rush"
-    },
-    {
       "packageName": "@rushstack/rush-sdk",
       "projectFolder": "libraries/rush-sdk",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
 
     // "build-tests" folder (alphabetical order)
@@ -551,6 +536,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "eslint-7-test",
+      "projectFolder": "build-tests/eslint-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "build-tests-samples" folder (alphabetical order)
     {
@@ -568,6 +559,12 @@
     {
       "packageName": "heft-node-rig-tutorial",
       "projectFolder": "build-tests-samples/heft-node-rig-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-serverless-stack-tutorial",
+      "projectFolder": "build-tests-samples/heft-serverless-stack-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -590,10 +587,58 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-web-rig-app-tutorial",
+      "projectFolder": "build-tests-samples/heft-web-rig-app-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-web-rig-library-tutorial",
+      "projectFolder": "build-tests-samples/heft-web-rig-library-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "packlets-tutorial",
       "projectFolder": "build-tests-samples/packlets-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
+    },
+
+    // "eslint" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/eslint-config",
+      "projectFolder": "eslint/eslint-config",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "projectFolder": "eslint/eslint-patch",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "projectFolder": "eslint/eslint-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "projectFolder": "eslint/eslint-plugin-packlets",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin-security",
+      "projectFolder": "eslint/eslint-plugin-security",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
 
     // heft-* projects
@@ -705,7 +750,18 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-
+    {
+      "packageName": "hashed-folder-copy-plugin-webpack4-test",
+      "projectFolder": "build-tests/hashed-folder-copy-plugin-webpack4-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "hashed-folder-copy-plugin-webpack5-test",
+      "projectFolder": "build-tests/hashed-folder-copy-plugin-webpack5-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "install-test-workspace",
       "projectFolder": "build-tests/install-test-workspace",
@@ -727,6 +783,12 @@
     {
       "packageName": "localization-plugin-test-03",
       "projectFolder": "build-tests/localization-plugin-test-03",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "rush-amazon-s3-build-cache-plugin-integration-test",
+      "projectFolder": "build-tests/rush-amazon-s3-build-cache-plugin-integration-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -769,6 +831,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-serverless-stack-plugin",
+      "projectFolder": "heft-plugins/heft-serverless-stack-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-storybook-plugin",
       "projectFolder": "heft-plugins/heft-storybook-plugin",
       "reviewCategory": "libraries",
@@ -789,6 +857,13 @@
 
     // "libraries" folder (alphabetical order)
     {
+      "packageName": "@microsoft/api-extractor-model",
+      "projectFolder": "libraries/api-extractor-model",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
       "packageName": "@rushstack/debug-certificate-manager",
       "projectFolder": "libraries/debug-certificate-manager",
       "reviewCategory": "libraries",
@@ -804,6 +879,18 @@
     {
       "packageName": "@microsoft/load-themed-styles",
       "projectFolder": "libraries/load-themed-styles",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "projectFolder": "libraries/localization-utilities",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/module-minifier",
+      "projectFolder": "libraries/module-minifier",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -826,6 +913,18 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/worker-pool",
+      "projectFolder": "libraries/worker-pool",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@microsoft/rush-lib",
+      "projectFolder": "libraries/rush-lib",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@microsoft/rushell",
@@ -905,57 +1004,43 @@
       "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
+      "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/rush-litewatch-plugin",
+      "projectFolder": "rush-plugins/rush-litewatch-plugin",
+      "reviewCategory": "libraries",
       "shouldPublish": false
     },
-
-    // "stack" folder (alphabetical order)
     {
-      "packageName": "@rushstack/eslint-config",
-      "projectFolder": "stack/eslint-config",
+      "packageName": "@rushstack/rush-serve-plugin",
+      "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/eslint-patch",
-      "projectFolder": "stack/eslint-patch",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin",
-      "projectFolder": "stack/eslint-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin-packlets",
-      "projectFolder": "stack/eslint-plugin-packlets",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin-security",
-      "projectFolder": "stack/eslint-plugin-security",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
 
     // "webpack" folder (alphabetical order)
     {
+      "packageName": "@rushstack/webpack-plugin-utilities",
+      "projectFolder": "webpack/webpack-plugin-utilities",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/loader-load-themed-styles",
       "projectFolder": "webpack/loader-load-themed-styles",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "projectFolder": "webpack/hashed-folder-copy-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -974,6 +1059,18 @@
     {
       "packageName": "@rushstack/module-minifier-plugin",
       "projectFolder": "webpack/module-minifier-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/webpack5-module-minifier-plugin",
+      "projectFolder": "webpack/module-minifier-plugin-5",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "projectFolder": "webpack/preserve-dynamic-require-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

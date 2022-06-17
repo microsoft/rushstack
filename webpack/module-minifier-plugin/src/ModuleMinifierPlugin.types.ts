@@ -1,93 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { RawSourceMap } from 'source-map';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook } from 'tapable';
-import * as webpack from 'webpack';
-import { ReplaceSource, Source } from 'webpack-sources';
-
-/**
- * Request to the minifier
- * @public
- */
-export interface IModuleMinificationRequest {
-  /**
-   * Identity of the request. Will be included in the response.
-   */
-  hash: string;
-  /**
-   * The raw code fragment
-   */
-  code: string;
-  /**
-   * File name to show for the source code in the source map
-   */
-  nameForMap: string | undefined;
-  /**
-   * Reserved variable names, e.g. __WEBPACK_EXTERNAL_MODULE_1__
-   */
-  externals: string[] | undefined;
-}
-
-/**
- * Result from the minifier function when an error is encountered.
- * @public
- */
-export interface IModuleMinificationErrorResult {
-  /**
-   * Identity of the request
-   */
-  hash: string;
-  /**
-   * The error encountered, to be added to the current compilation's error collection.
-   */
-  error: Error;
-  /**
-   * Marker property to always return the same result shape.
-   */
-  code?: undefined;
-  /**
-   * Marker property to always return the same result shape.
-   */
-  map?: undefined;
-}
-
-/**
- * Result from the minifier on a successful minification.
- * @public
- */
-export interface IModuleMinificationSuccessResult {
-  /**
-   * Identity of the request
-   */
-  hash: string;
-  /**
-   * The error property being `undefined` indicates success.
-   */
-  error: undefined;
-  /**
-   * The minified code.
-   */
-  code: string;
-  /**
-   * Marker property to always return the same result shape.
-   */
-  map?: RawSourceMap;
-}
-
-/**
- * Result from the minifier.
- * @public
- */
-export type IModuleMinificationResult = IModuleMinificationErrorResult | IModuleMinificationSuccessResult;
-
-/**
- * Callback passed to a minifier function
- * @public
- */
-export interface IModuleMinificationCallback {
-  (result: IModuleMinificationResult): void;
-}
+import type { IModuleMinifier } from '@rushstack/module-minifier';
+import type { AsyncSeriesWaterfallHook, SyncWaterfallHook } from 'tapable';
+import type * as webpack from 'webpack';
+import type { ReplaceSource, Source } from 'webpack-sources';
 
 /**
  * Information about a dehydrated webpack ECMAScript asset
@@ -149,6 +66,10 @@ export interface IExtendedModule extends webpack.compilation.Module {
    * Concatenated modules
    */
   modules?: IExtendedModule[];
+  /**
+   * Recursively scan the dependencies of a module
+   */
+  hasDependencies(callback: (dep: webpack.compilation.Dependency) => boolean | void): boolean;
   /**
    * Id for the module
    */
@@ -233,29 +154,6 @@ export type IAssetMap = Map<string, IAssetInfo>;
 export type IModuleMap = Map<string | number, IModuleInfo>;
 
 /**
- * An async function called to minify a module (or dehydrated chunk)
- * @public
- */
-export interface IModuleMinifierFunction {
-  (request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-}
-
-/**
- * Object that can be invoked to minify code.
- * @public
- */
-export interface IModuleMinifier {
-  minify: IModuleMinifierFunction;
-
-  /**
-   * Prevents the minifier from shutting down until the returned callback is invoked.
-   * The callback may be used to surface errors encountered by the minifier that may not be relevant to a specific file.
-   * It should be called to allow the minifier to cleanup
-   */
-  ref?(): () => Promise<void>;
-}
-
-/**
  * Options to the ModuleMinifierPlugin constructor
  * @public
  */
@@ -275,6 +173,11 @@ export interface IModuleMinifierPluginOptions {
    * Instructs the plugin to alter the code of modules to maximize portability across compilations.
    */
   usePortableModules?: boolean;
+
+  /**
+   * Instructs the plugin to alter the code of async import statements to compress better and be portable across compilations.
+   */
+  compressAsyncImports?: boolean;
 }
 
 /**
@@ -294,6 +197,25 @@ export interface IDehydratedAssets {
 }
 
 /**
+ * Argument to the postProcessCodeFragment hook for the current execution context
+ * @public
+ */
+export interface IPostProcessFragmentContext {
+  /**
+   * The current webpack compilation, for error reporting
+   */
+  compilation: webpack.compilation.Compilation;
+  /**
+   * A name to use for logging
+   */
+  loggingName: string;
+  /**
+   * The current module being processed, or `undefined` if not in a module (e.g. the bootstrapper)
+   */
+  module: webpack.compilation.Module | undefined;
+}
+
+/**
  * Hooks provided by the ModuleMinifierPlugin
  * @public
  */
@@ -306,12 +228,12 @@ export interface IModuleMinifierPluginHooks {
   /**
    * Hook invoked on a module id to get the final rendered id.
    */
-  finalModuleId: SyncWaterfallHook<string | number | undefined>;
+  finalModuleId: SyncWaterfallHook<string | number | undefined, webpack.compilation.Compilation>;
 
   /**
    * Hook invoked on code after it has been returned from the minifier.
    */
-  postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, string>;
+  postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, IPostProcessFragmentContext>;
 }
 
 /**

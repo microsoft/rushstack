@@ -23,7 +23,7 @@ export class AedocDefinitions {
     static readonly preapprovedTag: TSDocTagDefinition;
     // (undocumented)
     static get tsdocConfiguration(): TSDocConfiguration;
-    }
+}
 
 // Warning: (ae-forgotten-export) The symbol "ApiCallSignature_base" needs to be exported by the entry point index.d.ts
 //
@@ -122,7 +122,7 @@ export class ApiDocumentedItem extends ApiItem {
     serializeInto(jsonObject: Partial<IApiDocumentedItemJson>): void;
     // (undocumented)
     get tsdocComment(): tsdoc.DocComment | undefined;
-    }
+}
 
 // Warning: (ae-forgotten-export) The symbol "ApiEntryPoint_base" needs to be exported by the entry point index.d.ts
 //
@@ -284,7 +284,7 @@ export namespace ApiItemContainerMixin {
 }
 
 // @public
-export const enum ApiItemKind {
+export enum ApiItemKind {
     // (undocumented)
     CallSignature = "CallSignature",
     // (undocumented)
@@ -446,7 +446,7 @@ export class ApiPackage extends ApiPackage_base {
     // (undocumented)
     saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
     get tsdocConfiguration(): TSDocConfiguration;
-    }
+}
 
 // @public
 export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiParameterListMixin);
@@ -505,6 +505,36 @@ export class ApiPropertySignature extends ApiPropertyItem {
     static getContainerKey(name: string): string;
     // @override (undocumented)
     get kind(): ApiItemKind;
+}
+
+// @public
+export function ApiProtectedMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiProtectedMixin);
+
+// @public
+export interface ApiProtectedMixin extends ApiItem {
+    readonly isProtected: boolean;
+    // @override (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+// @public
+export namespace ApiProtectedMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiProtectedMixin;
+}
+
+// @public
+export function ApiReadonlyMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiReadonlyMixin);
+
+// @public
+export interface ApiReadonlyMixin extends ApiItem {
+    readonly isReadonly: boolean;
+    // (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+// @public
+export namespace ApiReadonlyMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiReadonlyMixin;
 }
 
 // @public
@@ -632,10 +662,10 @@ export class ExcerptToken {
     get canonicalReference(): DeclarationReference | undefined;
     get kind(): ExcerptTokenKind;
     get text(): string;
-    }
+}
 
 // @public (undocumented)
-export const enum ExcerptTokenKind {
+export enum ExcerptTokenKind {
     Content = "Content",
     Reference = "Reference"
 }
@@ -659,7 +689,7 @@ export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNam
 }
 
 // @public
-export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiProtectedMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -721,7 +751,7 @@ export interface IApiItemOptions {
 }
 
 // @public
-export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodOptions extends IApiNameMixinOptions, IApiOptionalMixinOptions, IApiParameterListMixinOptions, IApiProtectedMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiTypeParameterListMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public (undocumented)
@@ -768,23 +798,37 @@ export interface IApiParameterListMixinOptions extends IApiItemOptions {
 // @public
 export interface IApiParameterOptions {
     // (undocumented)
+    isOptional: boolean;
+    // (undocumented)
     parameterName: string;
     // (undocumented)
     parameterTypeTokenRange: IExcerptTokenRange;
 }
 
 // @public
-export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
+export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiOptionalMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     propertyTypeTokenRange: IExcerptTokenRange;
 }
 
 // @public
-export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiStaticMixinOptions {
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiProtectedMixinOptions, IApiStaticMixinOptions {
 }
 
 // @public
 export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
+}
+
+// @public
+export interface IApiProtectedMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    isProtected: boolean;
+}
+
+// @public
+export interface IApiReadonlyMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    isReadonly: boolean;
 }
 
 // @public
@@ -828,7 +872,7 @@ export interface IApiTypeParameterOptions {
 }
 
 // @public
-export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     variableTypeTokenRange: IExcerptTokenRange;
 }
@@ -852,6 +896,8 @@ export interface IExcerptTokenRange {
 // @public
 export interface IParameterOptions {
     // (undocumented)
+    isOptional: boolean;
+    // (undocumented)
     name: string;
     // (undocumented)
     parameterTypeExcerpt: Excerpt;
@@ -872,6 +918,8 @@ export interface ITypeParameterOptions {
     // (undocumented)
     defaultTypeExcerpt: Excerpt;
     // (undocumented)
+    isOptional: boolean;
+    // (undocumented)
     name: string;
     // (undocumented)
     parent: ApiTypeParameterListMixin;
@@ -880,6 +928,7 @@ export interface ITypeParameterOptions {
 // @public
 export class Parameter {
     constructor(options: IParameterOptions);
+    isOptional: boolean;
     name: string;
     readonly parameterTypeExcerpt: Excerpt;
     get tsdocParamBlock(): tsdoc.DocParamBlock | undefined;
@@ -910,9 +959,9 @@ export class TypeParameter {
     constructor(options: ITypeParameterOptions);
     readonly constraintExcerpt: Excerpt;
     readonly defaultTypeExcerpt: Excerpt;
+    isOptional: boolean;
     name: string;
     get tsdocTypeParamBlock(): tsdoc.DocParamBlock | undefined;
 }
-
 
 ```

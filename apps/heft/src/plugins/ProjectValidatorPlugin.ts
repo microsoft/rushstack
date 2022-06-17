@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
-import { FileSystem, LegacyAdapters, Path } from '@rushstack/node-core-library';
+import { FileSystem, Path, FolderItem } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { Constants } from '../utilities/Constants';
@@ -99,17 +98,9 @@ export class ProjectValidatorPlugin implements IHeftPlugin {
     logger: ScopedLogger,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
-    // TODO: Replace this with a FileSystem API
-    let heftDataFolderContents: fs.Dirent[];
+    let heftDataFolderContents: FolderItem[];
     try {
-      // Use this instead of fs.promises to avoid a warning in older versions of Node
-      heftDataFolderContents = await LegacyAdapters.convertCallbackToPromise(
-        fs.readdir,
-        heftConfiguration.projectHeftDataFolder,
-        {
-          withFileTypes: true
-        }
-      );
+      heftDataFolderContents = await FileSystem.readFolderItemsAsync(heftConfiguration.projectHeftDataFolder);
     } catch (e) {
       if (!FileSystem.isNotExistError(e as Error)) {
         throw e;

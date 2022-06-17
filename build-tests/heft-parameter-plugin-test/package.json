@@ -5,7 +5,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean --custom-parameter --custom-string-parameter test --custom-number-parameter 5 --custom-string-list-parameter eevee -x togepi -x mareep --custom-choice-parameter red --custom-choice-list-parameter totodile -y gudetama -y wobbuffet"
+    "build": "heft test --clean --custom-parameter --custom-string-parameter test --custom-number-parameter 5 --custom-string-list-parameter eevee -x togepi -x mareep --custom-choice-parameter red --custom-choice-list-parameter totodile -y gudetama -y wobbuffet",
+    "_phase:build": "",
+    "_phase:test": "heft test --custom-parameter --custom-string-parameter test --custom-number-parameter 5 --custom-string-list-parameter eevee -x togepi -x mareep --custom-choice-parameter red --custom-choice-list-parameter totodile -y gudetama -y wobbuffet"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
@@ -13,6 +15,6 @@
     "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "heft-parameter-plugin": "workspace:*",
-    "typescript": "~4.4.2"
+    "typescript": "~4.6.3"
   }
 }

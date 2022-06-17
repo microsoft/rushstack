@@ -5,7 +5,8 @@
   "description": "Used to generate API docs for the rushstack.io website",
   "license": "MIT",
   "scripts": {
-    "build": ""
+    "build": "",
+    "_phase:build": ""
   },
   "devDependencies": {
     "@microsoft/api-documenter": "workspace:*",

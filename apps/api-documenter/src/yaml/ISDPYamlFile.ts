@@ -11,6 +11,7 @@ export type CommonYamlModel = IBaseYamlModel & {
   isPreview?: boolean;
   isDeprecated?: boolean;
   remarks?: string;
+  example?: string[];
   customDeprecatedMessage?: string;
 };
 

@@ -106,7 +106,7 @@ const dotPnpmFolderPath = path.resolve(__dirname, 'workspace/node_modules/.pnpm'
 
 console.log('\nCleaning cached tarballs...');
 if (FileSystem.exists(dotPnpmFolderPath)) {
-  for (const filename of FileSystem.readFolder(dotPnpmFolderPath)) {
+  for (const filename of FileSystem.readFolderItemNames(dotPnpmFolderPath)) {
     if (filename.startsWith('local+')) {
       const filePath = path.join(dotPnpmFolderPath, filename);
       console.log('  Deleting ' + filePath);

@@ -1,8 +1,6 @@
 # @microsoft/load-themed-styles
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Fload-themed-styles)
 
-[![Build Status](https://travis-ci.org/Microsoft/load-themed-styles.svg?branch=master)](https://travis-ci.org/Microsoft/load-themed-styles) [![Dependencies](https://david-dm.org/Microsoft/load-themed-styles.svg)](https://david-dm.org/Microsoft/load-themed-styles)
-
 > Loads a string of style rules, but supports detokenizing theme constants built within it.
 
 ## Install
@@ -62,7 +60,7 @@ window.CSPSettings = {
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/libraries/load-themed-styles/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/libraries/load-themed-styles/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@microsoft/load-themed-styles` is part of the [Rush Stack](https://rushstack.io/) family of projects.

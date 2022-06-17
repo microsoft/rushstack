@@ -1,0 +1,6 @@
+steps:
+  - script: 'node repo-scripts/repo-toolbox/lib/start.js record-versions --out-file $(Build.ArtifactStagingDirectory)/published-versions/published-versions.json'
+    displayName: 'Record Published Versions'
+  - publish: $(Build.ArtifactStagingDirectory)/published-versions
+    artifact: published-versions
+    displayName: 'Publish Artifact: published-versions'

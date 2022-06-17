@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.13.69",
+  "version": "7.17.18",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
@@ -10,7 +10,9 @@
   "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "bin": {
     "api-documenter": "./bin/api-documenter"
@@ -19,7 +21,7 @@
   "typings": "dist/rollup.d.ts",
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "0.13.2",
+    "@microsoft/tsdoc": "0.14.1",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "colors": "~1.2.1",
@@ -33,7 +35,6 @@
     "@types/heft-jest": "1.0.1",
     "@types/js-yaml": "3.12.1",
     "@types/node": "12.20.24",
-    "@types/resolve": "1.17.1",
-    "jest": "~25.4.0"
+    "@types/resolve": "1.17.1"
   }
 }

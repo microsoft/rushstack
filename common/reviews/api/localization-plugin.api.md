@@ -4,9 +4,10 @@
 
 ```ts
 
+import { IgnoreStringFunction } from '@rushstack/localization-utilities';
+import { ILocalizationFile } from '@rushstack/localization-utilities';
+import { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 import { ITerminal } from '@rushstack/node-core-library';
-import { NewlineKind } from '@rushstack/node-core-library';
-import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)
@@ -33,17 +34,12 @@ export interface ILocaleFileData {
     [stringName: string]: string;
 }
 
-// @internal (undocumented)
-export interface _ILocalizationFile {
-    // (undocumented)
-    [stringName: string]: _ILocalizedString;
-}
-
 // @public
 export interface ILocalizationPluginOptions {
     // @deprecated (undocumented)
     filesToIgnore?: string[];
     globsToIgnore?: string[];
+    ignoreString?: IgnoreStringFunction;
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
@@ -83,19 +79,12 @@ export interface ILocalizationStatsOptions {
 // @public (undocumented)
 export interface ILocalizedData {
     defaultLocale: IDefaultLocaleOptions;
+    ignoreMissingResxComments?: boolean;
     normalizeResxNewlines?: 'lf' | 'crlf';
     passthroughLocale?: IPassthroughLocaleOptions;
     pseudolocales?: IPseudolocalesOptions;
     resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
     translatedStrings: ILocalizedStrings;
-}
-
-// @internal (undocumented)
-export interface _ILocalizedString {
-    // (undocumented)
-    comment?: string;
-    // (undocumented)
-    value: string;
 }
 
 // @public (undocumented)
@@ -112,40 +101,10 @@ export interface ILocalizedWebpackChunk extends Webpack.compilation.Chunk {
     };
 }
 
-// @internal (undocumented)
-export interface _IParseLocFileOptions {
-    // (undocumented)
-    content: string;
-    // (undocumented)
-    filePath: string;
-    // (undocumented)
-    resxNewlineNormalization: NewlineKind | undefined;
-    // (undocumented)
-    terminal: ITerminal;
-}
-
 // @public
 export interface IPassthroughLocaleOptions {
     passthroughLocaleName?: string;
     usePassthroughLocale?: boolean;
-}
-
-// @public
-export interface IPseudolocaleOptions {
-    // (undocumented)
-    append?: string;
-    // (undocumented)
-    delimiter?: string;
-    // (undocumented)
-    endDelimiter?: string;
-    // (undocumented)
-    extend?: number;
-    // (undocumented)
-    override?: string;
-    // (undocumented)
-    prepend?: string;
-    // (undocumented)
-    startDelimiter?: string;
 }
 
 // @public
@@ -172,23 +131,10 @@ export interface _IStringPlaceholder {
 export interface ITypingsGenerationOptions {
     exportAsDefault?: boolean;
     generatedTsFolder: string;
+    // @deprecated (undocumented)
+    ignoreString?: (resxFilePath: string, stringName: string) => boolean;
+    processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
     sourceRoot?: string;
-}
-
-// @public (undocumented)
-export interface ITypingsGeneratorOptions {
-    // (undocumented)
-    exportAsDefault?: boolean;
-    // (undocumented)
-    generatedTsFolder: string;
-    // (undocumented)
-    globsToIgnore?: string[];
-    // (undocumented)
-    resxNewlineNormalization?: NewlineKind | undefined;
-    // (undocumented)
-    srcFolder: string;
-    // (undocumented)
-    terminal?: ITerminal;
 }
 
 // @public
@@ -197,7 +143,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // Warning: (ae-forgotten-export) The symbol "IAddDefaultLocFileResult" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
-    addDefaultLocFile(terminal: ITerminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile): IAddDefaultLocFileResult;
+    addDefaultLocFile(terminal: ITerminal, localizedResourcePath: string, localizedResourceData: ILocalizationFile): IAddDefaultLocFileResult;
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
     // Warning: (ae-forgotten-export) The symbol "IStringSerialNumberData" needs to be exported by the entry point index.d.ts
@@ -206,17 +152,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
     getDataForSerialNumber(serialNumber: string): IStringSerialNumberData | undefined;
     // @internal (undocumented)
     stringKeys: Map<string, _IStringPlaceholder>;
-}
-
-// @internal (undocumented)
-export class _LocFileParser {
-    // (undocumented)
-    static parseLocFile(options: _IParseLocFileOptions): _ILocalizationFile;
-}
-
-// @public
-export class TypingsGenerator extends StringValuesTypingsGenerator {
-    constructor(options: ITypingsGeneratorOptions);
 }
 
 // (No @packageDocumentation comment for this package)

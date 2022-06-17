@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rig-package",
-  "version": "0.3.5",
+  "version": "0.3.12",
   "description": "A system for sharing tool configurations between projects without duplicating config files.",
   "main": "lib/index.js",
   "typings": "dist/rig-package.d.ts",
@@ -11,7 +11,9 @@
     "directory": "libraries/rig-package"
   },
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "dependencies": {
     "resolve": "~1.17.0",
@@ -19,8 +21,8 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "1.2.25",
-    "@rushstack/heft": "0.41.6",
+    "@rushstack/heft-node-rig": "1.9.7",
+    "@rushstack/heft": "0.45.6",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@types/resolve": "1.17.1",

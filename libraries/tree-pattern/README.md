@@ -141,7 +141,7 @@ separate patterns.
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/libraries/tree-pattern/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/libraries/tree-pattern/CHANGELOG.md) - Find
   out what's new in the latest version
 - [API Reference](https://rushstack.io/pages/api/tree-pattern/)
 
