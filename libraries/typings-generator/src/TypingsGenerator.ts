@@ -107,17 +107,13 @@ export class TypingsGenerator {
   public async generateTypingsAsync(): Promise<void> {
     await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
 
-    const filePaths: string[] = await LegacyAdapters.convertCallbackToPromise(
-      glob,
-      this._fileGlob,
-      {
-        cwd: this._options.srcFolder,
-        absolute: true,
-        nosort: true,
-        nodir: true,
-        ignore: this._options.globsToIgnore
-      }
-    );
+    const filePaths: string[] = await LegacyAdapters.convertCallbackToPromise(glob, this._fileGlob, {
+      cwd: this._options.srcFolder,
+      absolute: true,
+      nosort: true,
+      nodir: true,
+      ignore: this._options.globsToIgnore
+    });
 
     await this._reprocessFiles(filePaths);
   }
@@ -126,13 +122,10 @@ export class TypingsGenerator {
     await FileSystem.ensureFolderAsync(this._options.generatedTsFolder);
 
     await new Promise((resolve, reject): void => {
-      const watcher: chokidar.FSWatcher = chokidar.watch(
-        this._fileGlob,
-        {
-          cwd: this._options.srcFolder,
-          ignored: this._options.globsToIgnore
-        }
-      );
+      const watcher: chokidar.FSWatcher = chokidar.watch(this._fileGlob, {
+        cwd: this._options.srcFolder,
+        ignored: this._options.globsToIgnore
+      });
 
       const queue: Set<string> = new Set();
       let timeout: NodeJS.Timeout | undefined;
