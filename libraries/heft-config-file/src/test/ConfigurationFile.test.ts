@@ -62,11 +62,11 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
-      await expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
         nodeJsPath.resolve(__dirname, projectRelativeFilePath)
       );
-      await expect(
+      expect(
         configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
       ).toEqual('A');
     });
@@ -87,11 +87,11 @@ describe('ConfigurationFile', () => {
       const expectedConfigFile: ISimplestConfigFile = {
         thing: nodeJsPath.resolve(__dirname, configFileFolderName, 'A')
       };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
-      await expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
         nodeJsPath.resolve(__dirname, projectRelativeFilePath)
       );
-      await expect(
+      expect(
         configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
       ).toEqual('A');
     });
@@ -112,11 +112,11 @@ describe('ConfigurationFile', () => {
       const expectedConfigFile: ISimplestConfigFile = {
         thing: nodeJsPath.resolve(projectRoot, 'A')
       };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
-      await expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
         nodeJsPath.resolve(__dirname, projectRelativeFilePath)
       );
-      await expect(
+      expect(
         configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
       ).toEqual('A');
     });
@@ -148,7 +148,7 @@ describe('ConfigurationFile', () => {
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C'], booleanProp: true };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
@@ -175,7 +175,7 @@ describe('ConfigurationFile', () => {
         ],
         booleanProp: true
       };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly resolves paths relative to the project root', async () => {
@@ -202,7 +202,7 @@ describe('ConfigurationFile', () => {
         ],
         booleanProp: true
       };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
   });
 
@@ -232,7 +232,7 @@ describe('ConfigurationFile', () => {
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C', 'D', 'E'], booleanProp: false };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly loads the config file with "append" in config meta', async () => {
@@ -252,7 +252,7 @@ describe('ConfigurationFile', () => {
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C', 'D', 'E'], booleanProp: false };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly loads the config file with "replace" in config meta', async () => {
@@ -272,7 +272,7 @@ describe('ConfigurationFile', () => {
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['D', 'E'], booleanProp: false };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly loads the config file with "custom" in config meta', async () => {
@@ -293,7 +293,7 @@ describe('ConfigurationFile', () => {
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['X', 'Y', 'Z'], booleanProp: false };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
@@ -329,7 +329,7 @@ describe('ConfigurationFile', () => {
         ],
         booleanProp: false
       };
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
   });
 
@@ -387,34 +387,34 @@ describe('ConfigurationFile', () => {
         ]
       };
 
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
 
-      await expect(
+      expect(
         configFileLoader.getPropertyOriginalValue({
           parentObject: loadedConfigFile.plugins[0],
           propertyName: 'plugin'
         })
       ).toEqual('@rushstack/node-core-library');
-      await expect(
+      expect(
         configFileLoader.getPropertyOriginalValue({
           parentObject: loadedConfigFile.plugins[1],
           propertyName: 'plugin'
         })
       ).toEqual('@rushstack/heft');
-      await expect(
+      expect(
         configFileLoader.getPropertyOriginalValue({
           parentObject: loadedConfigFile.plugins[2],
           propertyName: 'plugin'
         })
       ).toEqual('@rushstack/eslint-config');
 
-      await expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[0])).toEqual(
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[0])).toEqual(
         rootConfigFilePath
       );
-      await expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[1])).toEqual(
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[1])).toEqual(
         nodeJsPath.resolve(__dirname, secondConfigFilePath)
       );
-      await expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[2])).toEqual(
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[2])).toEqual(
         nodeJsPath.resolve(__dirname, secondConfigFilePath)
       );
     });
@@ -445,8 +445,8 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, projectFolder, rigConfig);
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
-      await expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
         nodeJsPath.resolve(
           projectFolder,
           'node_modules',
@@ -456,7 +456,7 @@ describe('ConfigurationFile', () => {
           projectRelativeFilePath
         )
       );
-      await expect(
+      expect(
         configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
       ).toEqual('A');
     });
@@ -472,9 +472,9 @@ describe('ConfigurationFile', () => {
         await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, projectFolder, rigConfig);
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
-      await expect(loadedConfigFile).not.toBeUndefined();
-      await expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
-      await expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile!)).toEqual(
+      expect(loadedConfigFile).not.toBeUndefined();
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile!)).toEqual(
         nodeJsPath.resolve(
           projectFolder,
           'node_modules',
@@ -484,7 +484,7 @@ describe('ConfigurationFile', () => {
           projectRelativeFilePath
         )
       );
-      await expect(
+      expect(
         configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile!, propertyName: 'thing' })
       ).toEqual('A');
     });
@@ -498,7 +498,7 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, projectFolder, rigConfig);
         fail();
       } catch (e) {
-        await expect(e).toMatchSnapshot();
+        expect(e).toMatchSnapshot();
       }
     });
   });
@@ -521,7 +521,7 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
-        await expect(e).toMatchSnapshot();
+        expect(e).toMatchSnapshot();
       }
     });
 
@@ -536,7 +536,7 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      await expect(
+      expect(
         await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, __dirname)
       ).toBeUndefined();
     });
@@ -552,7 +552,7 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      await expect(async () => {
+      expect(async () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
         // Example:
@@ -579,7 +579,7 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
-        await expect(e).toMatchSnapshot();
+        expect(e).toMatchSnapshot();
       }
     });
 
@@ -598,7 +598,7 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
-        await expect(e).toMatchSnapshot();
+        expect(e).toMatchSnapshot();
       }
     });
 
@@ -617,7 +617,7 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
-        await expect(e).toMatchSnapshot();
+        expect(e).toMatchSnapshot();
       }
     });
 
@@ -637,7 +637,7 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
-        await expect(e).toMatchSnapshot();
+        expect(e).toMatchSnapshot();
       }
     });
 
@@ -656,7 +656,7 @@ describe('ConfigurationFile', () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
-        await expect(e).toMatchSnapshot();
+        expect(e).toMatchSnapshot();
       }
     });
   });
