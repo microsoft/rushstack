@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Tue, 10 May 2022 01:20:43 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+
+## 0.8.5
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
 
 ## 0.8.4
 Tue, 10 May 2022 01:20:43 GMT

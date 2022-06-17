@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-utilities
 
-This log was last generated on Thu, 16 Jun 2022 22:49:55 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+
+## 0.7.0
+Fri, 17 Jun 2022 00:16:18 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove the legacy RESX reader functions.
 
 ## 0.6.0
 Thu, 16 Jun 2022 22:49:55 GMT
