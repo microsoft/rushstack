@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Fixes race condition bug in LockFile",
+      "comment": "Fix a race condition affecting the LockFile API on the Linux operating system",
       "type": "patch"
     }
   ],
