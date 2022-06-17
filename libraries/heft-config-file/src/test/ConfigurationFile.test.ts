@@ -552,7 +552,7 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      expect(async () => {
+      await expect(async () => {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
         // Example:
