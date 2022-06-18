@@ -5,12 +5,10 @@
 			"name": "Rush Debug",
 			"type": "node",
 			"request": "launch",
-			"program": "${workspaceRoot}/libraries/rush-lib/lib/start.js",
+			"program": "${workspaceRoot}/apps/rush/lib/start-dev.js",
 			"stopOnEntry": true,
 			"args": [
-				"rebuild",
-				"-o",
-				"api-extractor-scenarios"
+				"start"
 			],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
