@@ -1541,7 +1541,7 @@ export class RushConfiguration {
           project.splitWorkspace
         );
         if (!collection) {
-          projectsBySplitWorkspace.set(true, (collection = new Set()));
+          projectsBySplitWorkspace.set(project.splitWorkspace, (collection = new Set()));
         }
         collection.add(project);
       }
