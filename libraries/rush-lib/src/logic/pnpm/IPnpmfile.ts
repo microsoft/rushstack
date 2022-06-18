@@ -38,6 +38,7 @@ export interface ISplitWorkspaceGlobalPnpmfileShimSettings {
 export interface IPnpmfileContext {
   log: (message: string) => void;
   pnpmfileShimSettings?: IPnpmfileShimSettings;
+  splitWorkspaceGlobalPnpmfileShimSettings?: ISplitWorkspaceGlobalPnpmfileShimSettings;
 }
 
 /**
