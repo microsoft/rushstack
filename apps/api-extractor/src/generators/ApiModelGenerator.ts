@@ -829,24 +829,28 @@ export class ApiModelGenerator {
     let apiProperty: ApiProperty | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiProperty;
 
     if (apiProperty === undefined) {
+      const declaration: ts.Declaration = astDeclaration.declaration;
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
       const propertyTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       let propertyTypeNode: ts.TypeNode | undefined;
 
-      if (
-        ts.isPropertyDeclaration(astDeclaration.declaration) ||
-        ts.isGetAccessorDeclaration(astDeclaration.declaration)
-      ) {
-        propertyTypeNode = astDeclaration.declaration.type;
+      if (ts.isPropertyDeclaration(declaration) || ts.isGetAccessorDeclaration(declaration)) {
+        propertyTypeNode = declaration.type;
       }
 
-      if (ts.isSetAccessorDeclaration(astDeclaration.declaration)) {
+      if (ts.isSetAccessorDeclaration(declaration)) {
         // Note that TypeScript always reports an error if a setter does not have exactly one parameter.
-        propertyTypeNode = astDeclaration.declaration.parameters[0].type;
+        propertyTypeNode = declaration.parameters[0].type;
       }
 
       nodesToCapture.push({ node: propertyTypeNode, tokenRange: propertyTypeTokenRange });
+
+      let initializerTokenRange: IExcerptTokenRange | undefined = undefined;
+      if (ts.isPropertyDeclaration(declaration) && declaration.initializer) {
+        initializerTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        nodesToCapture.push({ node: declaration.initializer, tokenRange: initializerTokenRange });
+      }
 
       const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
@@ -866,7 +870,8 @@ export class ApiModelGenerator {
         isOptional,
         isReadonly,
         excerptTokens,
-        propertyTypeTokenRange
+        propertyTypeTokenRange,
+        initializerTokenRange
       });
       parentApiItem.addMember(apiProperty);
     } else {
@@ -985,6 +990,12 @@ export class ApiModelGenerator {
       const variableTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: variableDeclaration.type, tokenRange: variableTypeTokenRange });
 
+      let initializerTokenRange: IExcerptTokenRange | undefined = undefined;
+      if (variableDeclaration.initializer) {
+        initializerTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        nodesToCapture.push({ node: variableDeclaration.initializer, tokenRange: initializerTokenRange });
+      }
+
       const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
@@ -997,6 +1008,7 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         variableTypeTokenRange,
+        initializerTokenRange,
         isReadonly
       });
 

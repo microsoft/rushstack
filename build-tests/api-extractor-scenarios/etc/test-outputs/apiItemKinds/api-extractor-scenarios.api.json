@@ -323,6 +323,28 @@
           "implementsTokenRanges": []
         },
         {
+          "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!CONST_VARIABLE:var",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "CONST_VARIABLE: "
+            },
+            {
+              "kind": "Content",
+              "text": "string"
+            }
+          ],
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "CONST_VARIABLE",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
           "kind": "Enum",
           "canonicalReference": "api-extractor-scenarios!ConstEnum:enum",
           "docComment": "/**\n * @public\n */\n",
@@ -504,6 +526,28 @@
               }
             }
           ]
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!nonConstVariable:var",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "nonConstVariable: "
+            },
+            {
+              "kind": "Content",
+              "text": "string"
+            }
+          ],
+          "isReadonly": false,
+          "releaseTag": "Public",
+          "name": "nonConstVariable",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
         },
         {
           "kind": "Enum",
@@ -711,7 +755,15 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "readonly someReadonlyProp = 5;"
+                  "text": "readonly someReadonlyProp = "
+                },
+                {
+                  "kind": "Content",
+                  "text": "5"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
                 }
               ],
               "isReadonly": true,
@@ -723,7 +775,11 @@
                 "endIndex": 0
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "initializerTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
             },
             {
               "kind": "Property",
@@ -792,22 +848,26 @@
         },
         {
           "kind": "Variable",
-          "canonicalReference": "api-extractor-scenarios!VARIABLE:var",
+          "canonicalReference": "api-extractor-scenarios!VARIABLE_WITHOUT_EXPLICIT_TYPE:var",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "VARIABLE: "
+              "text": "VARIABLE_WITHOUT_EXPLICIT_TYPE = "
             },
             {
               "kind": "Content",
-              "text": "string"
+              "text": "\"hello\""
             }
           ],
           "isReadonly": true,
           "releaseTag": "Public",
-          "name": "VARIABLE",
+          "name": "VARIABLE_WITHOUT_EXPLICIT_TYPE",
           "variableTypeTokenRange": {
+            "startIndex": 0,
+            "endIndex": 0
+          },
+          "initializerTokenRange": {
             "startIndex": 1,
             "endIndex": 2
           }

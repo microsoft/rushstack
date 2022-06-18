@@ -25,10 +25,12 @@ export interface IApiVariableOptions
     IApiReadonlyMixinOptions,
     IApiDeclaredItemOptions {
   variableTypeTokenRange: IExcerptTokenRange;
+  initializerTokenRange?: IExcerptTokenRange;
 }
 
 export interface IApiVariableJson extends IApiDeclaredItemJson {
   variableTypeTokenRange: IExcerptTokenRange;
+  initializerTokenRange?: IExcerptTokenRange;
 }
 
 /**
@@ -57,10 +59,19 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiReadonlyMixi
    */
   public readonly variableTypeExcerpt: Excerpt;
 
+  /**
+   * An {@link Excerpt} that describes the variable's initializer.
+   */
+  public readonly initializerExcerpt?: Excerpt;
+
   public constructor(options: IApiVariableOptions) {
     super(options);
 
     this.variableTypeExcerpt = this.buildExcerpt(options.variableTypeTokenRange);
+
+    if (options.initializerTokenRange) {
+      this.initializerExcerpt = this.buildExcerpt(options.initializerTokenRange);
+    }
   }
 
   /** @override */
@@ -72,6 +83,7 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiReadonlyMixi
     super.onDeserializeInto(options, context, jsonObject);
 
     options.variableTypeTokenRange = jsonObject.variableTypeTokenRange;
+    options.initializerTokenRange = jsonObject.initializerTokenRange;
   }
 
   public static getContainerKey(name: string): string {
@@ -93,6 +105,11 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiReadonlyMixi
     super.serializeInto(jsonObject);
 
     jsonObject.variableTypeTokenRange = this.variableTypeExcerpt.tokenRange;
+
+    // Note that JSON does not support the "undefined" value, so we simply omit the field entirely if it is undefined
+    if (this.initializerExcerpt) {
+      jsonObject.initializerTokenRange = this.initializerExcerpt.tokenRange;
+    }
   }
 
   /** @beta @override */

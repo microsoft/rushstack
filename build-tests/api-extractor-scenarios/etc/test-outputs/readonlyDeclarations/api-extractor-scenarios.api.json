@@ -223,7 +223,11 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "FOO = \"foo\""
+              "text": "FOO = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"foo\""
             }
           ],
           "isReadonly": true,
@@ -232,6 +236,10 @@
           "variableTypeTokenRange": {
             "startIndex": 0,
             "endIndex": 0
+          },
+          "initializerTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
           }
         },
         {
