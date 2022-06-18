@@ -48,6 +48,7 @@ export class PurgeManager {
    */
   public deleteAll(): void {
     this._commonTempFolderRecycler.deleteAll();
+    this._commonTempSplitFolderRecycler.deleteAll();
     this._rushUserFolderRecycler.deleteAll();
   }
 
