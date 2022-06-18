@@ -22,6 +22,8 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import { PnpmProjectShrinkwrapFile } from '../pnpm/PnpmProjectShrinkwrapFile';
+import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -106,7 +108,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     if (this.rushConfiguration.hasSplitWorkspaceProject) {
       if (!splitWorkspaceShrinkwrapFile) {
-        shrinkwrapIsUpToDate = false;
+        // There are chances that shared-workspace-lockfile=false,
+        // so individual shrinkwrap for each split workspace project
       } else {
         if (!splitWorkspaceShrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
           console.log();
@@ -271,11 +274,28 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Now validate that the shrinkwrap file matches what is in the package.json
       if (rushProject.splitWorkspace) {
-        if (splitWorkspaceShrinkwrapFile?.isWorkspaceProjectModified(rushProject)) {
-          shrinkwrapWarnings.push(
-            `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
+        if (splitWorkspaceShrinkwrapFile) {
+          if (splitWorkspaceShrinkwrapFile.isWorkspaceProjectModified(rushProject)) {
+            shrinkwrapWarnings.push(
+              `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
+            );
+            shrinkwrapIsUpToDate = false;
+          }
+        } else {
+          const splitWorkspaceProjectShrinkwrapFilepath: string = path.join(
+            rushProject.projectFolder,
+            RushConstants.pnpmV3ShrinkwrapFilename
           );
-          shrinkwrapIsUpToDate = false;
+          const splitWorkspaceProjectShrinkwrapFile: PnpmShrinkwrapFile | undefined =
+            PnpmShrinkwrapFile.loadFromFile(splitWorkspaceProjectShrinkwrapFilepath);
+          if (!splitWorkspaceProjectShrinkwrapFile) {
+            shrinkwrapIsUpToDate = false;
+          } else {
+            splitWorkspaceProjectShrinkwrapFile.setIndividualPackage(rushProject.packageName);
+            if (splitWorkspaceProjectShrinkwrapFile.isSplitWorkspaceIndividualProjectModified(rushProject)) {
+              shrinkwrapIsUpToDate = false;
+            }
+          }
         }
       } else {
         if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject, this.options.variant)) {
@@ -579,11 +599,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this.rushConfiguration.pnpmOptions?.useWorkspaces
       ) {
         // If we're in PNPM workspace mode and PNPM didn't create a shrinkwrap file,
-        // there are no dependencies. Generate empty shrinkwrap files for all projects.
+        // there are individual workspace shrinkwrap for each project.
         await Async.forEachAsync(
           this.rushConfiguration.projectsBySplitWorkspace.get(true) || [],
           async (project) => {
-            await BaseProjectShrinkwrapFile.saveEmptyProjectShrinkwrapFileAsync(project);
+            await PnpmProjectShrinkwrapFile.generateIndividualProjectShrinkwrapAsync(project);
           },
           { concurrency: 10 }
         );

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'crypto';
+import * as path from 'path';
 import { InternalError, JsonFile } from '@rushstack/node-core-library';
 
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
@@ -9,10 +10,36 @@ import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkw
 import { DependencySpecifier } from '../DependencySpecifier';
 import { RushConstants } from '../RushConstants';
 
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+
 /**
  *
  */
 export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
+  /**
+   * When split workspace projects turn off shared-workspace-lockfiles, Pnpm creates individual
+   * shrinkwrap files for each project.
+   */
+  public static async generateIndividualProjectShrinkwrapAsync(
+    project: RushConfigurationProject
+  ): Promise<void> {
+    const shrinkwrapPath: string = path.join(project.projectFolder, RushConstants.pnpmV3ShrinkwrapFilename);
+    const shrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(shrinkwrapPath);
+    if (!shrinkwrapFile) {
+      // Individual shrinkwrap may does not exist when partial install.
+      return;
+    }
+
+    shrinkwrapFile.setIndividualPackage(project.packageName);
+
+    const projectShrinkwrapFile: PnpmProjectShrinkwrapFile = new PnpmProjectShrinkwrapFile(
+      shrinkwrapFile,
+      project
+    );
+
+    await projectShrinkwrapFile.updateProjectShrinkwrapAsync();
+  }
+
   /**
    * Generate and write the project shrinkwrap file to <project>/.rush/temp/shrinkwrap-deps.json.
    * @returns True if the project shrinkwrap was created or updated, false otherwise.
@@ -59,9 +86,15 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
    * Generate the project shrinkwrap file content
    */
   protected generateProjectShrinkwrapMap(): Map<string, string> | undefined {
-    const projectShrinkwrapMap: Map<string, string> | undefined = this.shrinkwrapFile.isWorkspaceCompatible
-      ? this.generateWorkspaceProjectShrinkwrapMap()
-      : this.generateLegacyProjectShrinkwrapMap();
+    let projectShrinkwrapMap: Map<string, string> | undefined = undefined;
+
+    if (this.shrinkwrapFile.isIndividual) {
+      projectShrinkwrapMap = this.generateIndividualProjectShrinkwrapMap();
+    } else if (this.shrinkwrapFile.isWorkspaceCompatible) {
+      projectShrinkwrapMap = this.generateWorkspaceProjectShrinkwrapMap();
+    } else {
+      projectShrinkwrapMap = this.generateLegacyProjectShrinkwrapMap();
+    }
 
     return projectShrinkwrapMap;
   }
@@ -107,6 +140,11 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
     // we need to resolve and add these dependencies directly
     this._resolveAndAddPeerDependencies(projectShrinkwrapMap, parentShrinkwrapEntry);
 
+    return projectShrinkwrapMap;
+  }
+
+  protected generateIndividualProjectShrinkwrapMap(): Map<string, string> {
+    const projectShrinkwrapMap: Map<string, string> = this.shrinkwrapFile.getIntegrityForIndividualProject();
     return projectShrinkwrapMap;
   }
 

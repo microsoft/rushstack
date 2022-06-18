@@ -6,7 +6,14 @@ import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
 import colors from 'colors/safe';
-import { FileSystem, AlreadyReportedError, Import, Path, IPackageJson } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  AlreadyReportedError,
+  Import,
+  Path,
+  IPackageJson,
+  MapExtensions
+} from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -23,6 +30,7 @@ import { DependencyType, PackageJsonDependency, PackageJsonEditor } from '../../
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
+import { SplitWorkspacePnpmfileConfiguration } from './SplitWorkspacePnpmfileConfiguration';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -96,6 +104,10 @@ export interface IPnpmShrinkwrapImporterYaml {
 export interface IPnpmShrinkwrapYaml {
   /** The list of resolved version numbers for direct dependencies */
   dependencies: { [dependency: string]: string };
+  /** The list of resolved version numbers for develop dependencies */
+  devDependencies: { [dependency: string]: string };
+  /** The list of resolved version numbers for optional dependencies */
+  optionalDependencies: { [dependency: string]: string };
   /** The list of importers for local workspace projects */
   importers: { [relativePath: string]: IPnpmShrinkwrapImporterYaml };
   /** The description of the solved graph */
@@ -203,6 +215,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly isWorkspaceCompatible: boolean;
   public readonly registry: string;
   public readonly dependencies: ReadonlyMap<string, string>;
+  public readonly devDependencies: ReadonlyMap<string, string>;
+  public readonly optionalDependencies: ReadonlyMap<string, string>;
   public readonly importers: ReadonlyMap<string, IPnpmShrinkwrapImporterYaml>;
   public readonly specifiers: ReadonlyMap<string, string>;
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
@@ -210,6 +224,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private readonly _integrities: Map<string, Map<string, string>>;
   private _pnpmfileConfiguration: PnpmfileConfiguration | undefined;
+  private _splitWorkspaceGlobalPnpmfileConfiguration: SplitWorkspacePnpmfileConfiguration | undefined;
+  private _individualPackageName: string | undefined;
+  private _individualShrinkwrapImporter: IPnpmShrinkwrapImporterYaml | undefined;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
     super();
@@ -218,6 +235,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Normalize the data
     this.registry = shrinkwrapJson.registry || '';
     this.dependencies = new Map(Object.entries(shrinkwrapJson.dependencies || {}));
+    this.devDependencies = new Map(Object.entries(shrinkwrapJson.devDependencies || {}));
+    this.optionalDependencies = new Map(Object.entries(shrinkwrapJson.optionalDependencies || {}));
     this.importers = new Map(Object.entries(shrinkwrapJson.importers || {}));
     this.specifiers = new Map(Object.entries(shrinkwrapJson.specifiers || {}));
     this.packages = new Map(Object.entries(shrinkwrapJson.packages || {}));
@@ -243,6 +262,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public static loadFromString(shrinkwrapContent: string): PnpmShrinkwrapFile {
     const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
     return new PnpmShrinkwrapFile(parsedData);
+  }
+
+  public setIndividualPackage(packageName: string): void {
+    this._individualPackageName = packageName;
+  }
+
+  public get isIndividual(): boolean {
+    return this._individualPackageName !== undefined;
   }
 
   public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
@@ -547,6 +574,43 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return integrityMap;
   }
 
+  public getIntegrityForIndividualProject(): Map<string, string> {
+    const packageName: string | undefined = this._individualPackageName;
+    if (undefined === packageName) {
+      throw new Error(`Can not generate integrities for shared shrinkwrap file`);
+    }
+    let integrityMap: Map<string, string> | undefined = this._integrities.get(packageName);
+    if (!integrityMap) {
+      integrityMap = new Map<string, string>();
+      this._integrities.set(packageName, integrityMap);
+      const shrinkwrapHash: string = this.getShrinkwrapHash();
+      const selfIntegrity: string = `${packageName}:${shrinkwrapHash}:`;
+      integrityMap.set(packageName, selfIntegrity);
+
+      const { dependencies, devDependencies, optionalDependencies } = this.getIndividualShrinkwrapImporter();
+
+      const externalFilter: (name: string, version: string) => boolean = (
+        name: string,
+        version: string
+      ): boolean => {
+        return !version.includes('link:');
+      };
+
+      if (dependencies) {
+        this._addIntegrities(integrityMap, dependencies, false, externalFilter);
+      }
+
+      if (devDependencies) {
+        this._addIntegrities(integrityMap, devDependencies, false, externalFilter);
+      }
+
+      if (optionalDependencies) {
+        this._addIntegrities(integrityMap, optionalDependencies, true, externalFilter);
+      }
+    }
+    return integrityMap;
+  }
+
   /** @override */
   public isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean {
     const importerKey: string = this.getImporterKeyByPath(
@@ -568,10 +632,71 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
     // found versions much simpler.
-    const { dependencyList, devDependencyList } = PackageJsonEditor.fromObject(
+    const transformedPackageJsonEditor: PackageJsonEditor = PackageJsonEditor.fromObject(
       this._pnpmfileConfiguration.transform(packageJson),
       project.packageJsonEditor.filePath
     );
+
+    return this._isProjectModified(transformedPackageJsonEditor, importer);
+  }
+
+  public isSplitWorkspaceProjectModified(project: RushConfigurationProject): boolean {
+    const importerKey: string = this.getImporterKeyByPath(
+      project.rushConfiguration.commonTempSplitFolder,
+      project.projectFolder
+    );
+
+    const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
+    if (!importer) {
+      return true;
+    }
+
+    if (!this._splitWorkspaceGlobalPnpmfileConfiguration) {
+      this._splitWorkspaceGlobalPnpmfileConfiguration = new SplitWorkspacePnpmfileConfiguration(
+        project.rushConfiguration
+      );
+    }
+
+    const packageJson: IPackageJson = project.packageJsonEditor.saveToObject();
+
+    // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
+    // found versions much simpler.
+    const transformedPackageJsonEditor: PackageJsonEditor = PackageJsonEditor.fromObject(
+      this._splitWorkspaceGlobalPnpmfileConfiguration.transform(packageJson),
+      project.packageJsonEditor.filePath
+    );
+
+    return this._isProjectModified(transformedPackageJsonEditor, importer);
+  }
+
+  public isSplitWorkspaceIndividualProjectModified(project: RushConfigurationProject): boolean {
+    if (!this.isIndividual) {
+      throw new Error(`Can not calculate modified for shared workspace shrinkwrap file`);
+    }
+
+    if (!this._splitWorkspaceGlobalPnpmfileConfiguration) {
+      this._splitWorkspaceGlobalPnpmfileConfiguration = new SplitWorkspacePnpmfileConfiguration(
+        project.rushConfiguration
+      );
+    }
+
+    const packageJson: IPackageJson = project.packageJsonEditor.saveToObject();
+
+    // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
+    // found versions much simpler.
+    const transformedPackageJsonEditor: PackageJsonEditor = PackageJsonEditor.fromObject(
+      this._splitWorkspaceGlobalPnpmfileConfiguration.transform(packageJson),
+      project.packageJsonEditor.filePath
+    );
+
+    return this._isProjectModified(transformedPackageJsonEditor, this.getIndividualShrinkwrapImporter());
+  }
+
+  private _isProjectModified(
+    packageJsonEditor: PackageJsonEditor,
+    projectShrinkwrap: IPnpmShrinkwrapImporterYaml
+  ): boolean {
+    const { dependencyList, devDependencyList } = packageJsonEditor;
 
     // Then get the unique package names and map them to package versions.
     const dependencyVersions: Map<string, PackageJsonDependency> = new Map();
@@ -610,26 +735,36 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     for (const dependencyVersion of dependencyVersions.values()) {
       switch (dependencyVersion.dependencyType) {
         case DependencyType.Optional:
-          if (!importer.optionalDependencies || !importer.optionalDependencies[dependencyVersion.name])
+          if (
+            !projectShrinkwrap.optionalDependencies ||
+            !projectShrinkwrap.optionalDependencies[dependencyVersion.name]
+          )
             return true;
           break;
         case DependencyType.Regular:
-          if (!importer.dependencies || !importer.dependencies[dependencyVersion.name]) return true;
+          if (!projectShrinkwrap.dependencies || !projectShrinkwrap.dependencies[dependencyVersion.name])
+            return true;
           break;
         case DependencyType.Dev:
-          if (!importer.devDependencies || !importer.devDependencies[dependencyVersion.name]) return true;
+          if (
+            !projectShrinkwrap.devDependencies ||
+            !projectShrinkwrap.devDependencies[dependencyVersion.name]
+          )
+            return true;
           break;
       }
     }
 
     // Then validate the length matches between the importer and the dependency list, since duplicates are
     // a valid use-case. Importers will only take one of these values, so no need to do more work here.
-    if (dependencyVersions.size !== Object.keys(importer.specifiers).length) {
+    if (dependencyVersions.size !== Object.keys(projectShrinkwrap.specifiers).length) {
       return true;
     }
 
     // Finally, validate that all values in the importer are also present in the dependency list.
-    for (const [importerPackageName, importerVersionSpecifier] of Object.entries(importer.specifiers)) {
+    for (const [importerPackageName, importerVersionSpecifier] of Object.entries(
+      projectShrinkwrap.specifiers
+    )) {
       const foundDependency: PackageJsonDependency | undefined = dependencyVersions.get(importerPackageName);
       if (!foundDependency || foundDependency.version !== importerVersionSpecifier) {
         return true;
@@ -772,5 +907,29 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
+  }
+
+  private getIndividualShrinkwrapImporter(): IPnpmShrinkwrapImporterYaml {
+    if (!this._individualShrinkwrapImporter) {
+      const dependencies: Record<string, string> = MapExtensions.toObject(
+        this.dependencies as Map<string, string>
+      );
+      const devDependencies: Record<string, string> = MapExtensions.toObject(
+        this.devDependencies as Map<string, string>
+      );
+      const optionalDependencies: Record<string, string> = MapExtensions.toObject(
+        this.optionalDependencies as Map<string, string>
+      );
+      const specifiers: Record<string, string> = MapExtensions.toObject(
+        this.specifiers as Map<string, string>
+      );
+      this._individualShrinkwrapImporter = {
+        dependencies,
+        devDependencies,
+        optionalDependencies,
+        specifiers
+      };
+    }
+    return this._individualShrinkwrapImporter;
   }
 }
