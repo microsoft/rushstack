@@ -441,7 +441,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Run "npm install" in the common folder
       const installArgs: string[] = ['install'];
-      this.pushConfigurationArgs(installArgs, this.options);
+      this.pushConfigurationArgsForSplitWorkspace(installArgs, this.options);
 
       console.log(
         os.EOL +
@@ -515,6 +515,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   protected async postInstallAsync(): Promise<void> {
     if (this.deferredInstallationScripts) {
       this.commonTempInstallFlag.saveIfModified();
+      this.commonTempSplitInstallFlag?.saveIfModified();
     }
 
     // Grab the temp shrinkwrap, as this was the most recently completed install. It may also be
@@ -645,6 +646,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       } finally {
         // Always save after pnpm rebuild to update timestamp of last install flag file.
         this.commonTempInstallFlag.create();
+        this.commonTempSplitInstallFlag?.create();
       }
     }
   }
@@ -687,6 +689,21 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     for (const arg of this.options.pnpmFilterArguments) {
       args.push(arg);
+    }
+  }
+
+  // Push installArgs for split workspace
+  protected pushConfigurationArgsForSplitWorkspace(args: string[], options: IInstallManagerOptions): void {
+    super.pushConfigurationArgs(args, options);
+
+    // Add workspace-specific args
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      args.push('--recursive');
+      args.push('--link-workspace-packages', 'false');
+
+      for (const arg of this.options.splitWorkspacePnpmFilterArguments) {
+        args.push(arg);
+      }
     }
   }
 }

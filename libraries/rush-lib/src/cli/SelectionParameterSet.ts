@@ -268,13 +268,19 @@ export class SelectionParameterSet {
    */
   public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<{
     pnpmFilterArguments: string[];
+    splitWorkspacePnpmFilterArguments: string[];
     selectedProjects: Set<RushConfigurationProject> | undefined;
   }> {
     const pnpmFilterArguments: string[] = [];
+    const splitWorkspacePnpmFilterArguments: string[] = [];
 
     // Include exactly these projects (--only)
     for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
-      pnpmFilterArguments.push('--filter', project.packageName);
+      if (project.splitWorkspace) {
+        splitWorkspacePnpmFilterArguments.push('--filter', project.packageName);
+      } else {
+        pnpmFilterArguments.push('--filter', project.packageName);
+      }
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
@@ -284,44 +290,54 @@ export class SelectionParameterSet {
     );
 
     // All specified projects and all projects that they depend on
-    for (const project of Selection.union(
-      // --to
-      await this._evaluateProjectParameterAsync(this._toProject, terminal),
-      // --from / --from-version-policy
-      Selection.expandAllConsumers(fromProjects)
-    )) {
-      pnpmFilterArguments.push('--filter', `${project.packageName}...`);
-    }
+    this._pushPnpmFilterArgumentsByToProjects({
+      projects: Selection.union(
+        // --to
+        await this._evaluateProjectParameterAsync(this._toProject, terminal),
+        // --from / --from-version-policy
+        Selection.expandAllConsumers(fromProjects)
+      ),
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      excludeSelf: false
+    });
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
-      pnpmFilterArguments.push('--filter', `${project.packageName}^...`);
-    }
+    this._pushPnpmFilterArgumentsByToProjects({
+      projects: await this._evaluateProjectParameterAsync(this._toExceptProject, terminal),
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      excludeSelf: true
+    });
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
-      pnpmFilterArguments.push('--filter', `...${project.packageName}`);
-    }
+    this._pushPnpmFilterArgumentsByFromProjects({
+      projects: await this._evaluateProjectParameterAsync(this._impactedByProject, terminal),
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      excludeSelf: false
+    });
 
     // --impacted-by-except
     // All projects that directly or indirectly declare the specified project as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(
-      this._impactedByExceptProject,
-      terminal
-    )) {
-      pnpmFilterArguments.push('--filter', `...^${project.packageName}`);
-    }
+    this._pushPnpmFilterArgumentsByFromProjects({
+      projects: await this._evaluateProjectParameterAsync(this._impactedByExceptProject, terminal),
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      excludeSelf: true
+    });
 
     // Undefined when full install
     let selectedProjects: Set<RushConfigurationProject> | undefined;
-    if (pnpmFilterArguments.length > 0) {
+    if (pnpmFilterArguments.length > 0 || splitWorkspacePnpmFilterArguments.length > 0) {
       selectedProjects = await this.getSelectedProjectsAsync(terminal);
     }
 
     return {
       pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
       selectedProjects
     };
   }
@@ -412,5 +428,155 @@ export class SelectionParameterSet {
     }
 
     return selection;
+  }
+
+  private _pushPnpmFilterArgumentsByToProjects({
+    projects,
+    pnpmFilterArguments,
+    splitWorkspacePnpmFilterArguments,
+    excludeSelf
+  }: {
+    projects: Set<RushConfigurationProject>;
+    pnpmFilterArguments: string[];
+    splitWorkspacePnpmFilterArguments: string[];
+    excludeSelf: boolean;
+  }): void {
+    if (projects.size === 0) {
+      return;
+    }
+    const visited: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    const patched: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    /**
+     * Assuming:
+     *
+     *       A - splitWorkspace
+     *      / \
+     *     B   C - splitWorkspace
+     *    / \ / \
+     *   D  E F  G - splitWorkspace
+     *
+     * When --to A is passed, the filter arguments are:
+     * 1. A is a split workspace project. C, G are covered by A.
+     *   splitWorkspace: --filter A...
+     * 2. B, F are workspace projects. D, E are covered by B.
+     *   workspace: --filter B... --filter F...
+     *
+     * NOTE: Workspace project can **NOT** depend on a split workspace project.
+     */
+    for (const project of projects) {
+      if (visited.has(project)) {
+        continue;
+      }
+      if (project.splitWorkspace) {
+        splitWorkspacePnpmFilterArguments.push(
+          '--filter',
+          `${project.packageName}${excludeSelf ? '^' : ''}...`
+        );
+        if (!excludeSelf) {
+          patched.add(project);
+        }
+        const queue: RushConfigurationProject[] = [project];
+        while (queue.length > 0) {
+          const project = queue.shift() as RushConfigurationProject;
+          const { dependencyProjects } = project;
+          for (const dependencyProject of dependencyProjects) {
+            if (dependencyProject.splitWorkspace) {
+              if (!visited.has(dependencyProject)) {
+                queue.push(dependencyProject);
+              }
+            } else {
+              if (!patched.has(dependencyProject)) {
+                pnpmFilterArguments.push('--filter', `${dependencyProject.packageName}...`);
+                patched.add(dependencyProject);
+              }
+            }
+            visited.add(dependencyProject);
+          }
+        }
+      } else {
+        pnpmFilterArguments.push('--filter', `${project.packageName}${excludeSelf ? '^' : ''}...`);
+        if (!excludeSelf) {
+          patched.add(project);
+        }
+      }
+      visited.add(project);
+    }
+  }
+
+  private _pushPnpmFilterArgumentsByFromProjects({
+    projects,
+    pnpmFilterArguments,
+    splitWorkspacePnpmFilterArguments,
+    excludeSelf
+  }: {
+    projects: Set<RushConfigurationProject>;
+    pnpmFilterArguments: string[];
+    splitWorkspacePnpmFilterArguments: string[];
+    excludeSelf: boolean;
+  }): void {
+    if (projects.size === 0) {
+      return;
+    }
+    const visited: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    const patched: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    /**
+     * Assuming:
+     *
+     *       A - splitWorkspace
+     *      / \
+     *     B   C - splitWorkspace
+     *    / \ / \
+     *   D  E F  G - splitWorkspace
+     *
+     * When --from G is passed, G is a split workspace project, so all its
+     * dependents are covered from G
+     *    splitWorkspace: --filter G...
+     *
+     * When --from D is passed,
+     * 1. D is workspace project. B is covered by D.
+     *    workspace: --filter ...D
+     * 2. A is a split workspace project.
+     *    splitWorkspace: --filter ...A
+     *
+     * NOTE: Workspace project can **NOT** depend on a split workspace project.
+     */
+    for (const project of projects) {
+      if (visited.has(project)) {
+        continue;
+      }
+      if (project.splitWorkspace) {
+        splitWorkspacePnpmFilterArguments.push(
+          '--filter',
+          `...${excludeSelf ? '^' : ''}${project.packageName}`
+        );
+        if (!excludeSelf) {
+          patched.add(project);
+        }
+      } else {
+        pnpmFilterArguments.push('--filter', `...${excludeSelf ? '^' : ''}${project.packageName}`);
+        if (!excludeSelf) {
+          patched.add(project);
+        }
+        const queue: RushConfigurationProject[] = [project];
+        while (queue.length > 0) {
+          const project = queue.shift() as RushConfigurationProject;
+          const { consumingProjects } = project;
+          for (const consumingProject of consumingProjects) {
+            if (consumingProject.splitWorkspace) {
+              if (!patched.has(consumingProject)) {
+                splitWorkspacePnpmFilterArguments.push('--filter', `...${consumingProject.packageName}`);
+                patched.add(consumingProject);
+              }
+            } else {
+              if (!visited.has(consumingProject)) {
+                queue.push(consumingProject);
+              }
+            }
+            visited.add(consumingProject);
+          }
+        }
+      }
+      visited.add(project);
+    }
   }
 }

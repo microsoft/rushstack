@@ -118,6 +118,11 @@ export interface IInstallManagerOptions {
   pnpmFilterArguments: string[];
 
   /**
+   * Filters to be passed to PNPM during installation for split workspace.
+   */
+  splitWorkspacePnpmFilterArguments: string[];
+
+  /**
    * Selected projects during partial install.
    */
   selectedProjects?: Set<RushConfigurationProject>;
@@ -186,12 +191,17 @@ export abstract class BaseInstallManager {
     return this._commonTempInstallFlag;
   }
 
+  protected get commonTempSplitInstallFlag(): LastInstallFlag | undefined {
+    return this._commonTempSplitInstallFlag;
+  }
+
   protected get deferredInstallationScripts(): boolean {
     return this._deferredInstallationScripts;
   }
 
   public async doInstallAsync(): Promise<void> {
-    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
+    const isFilteredInstall: boolean =
+      this.options.pnpmFilterArguments.length + this.options.splitWorkspacePnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
@@ -240,12 +250,24 @@ export abstract class BaseInstallManager {
     );
 
     if (this.options.selectedProjects) {
-      this._commonTempInstallFlag.mergeFromObject({
-        selectedProjectNames: Array.from(this.options.selectedProjects).map((project) => project.packageName)
-      });
+      if (this.rushConfiguration.hasSplitWorkspaceProject) {
+        this._commonTempInstallFlag.mergeFromObject({
+          selectedProjectNames: Array.from(this.options.selectedProjects).filter((project) => !project.splitWorkspace).map((project) => project.packageName)
+        });
+        this._commonTempSplitInstallFlag?.mergeFromObject({
+          selectedProjectNames: Array.from(this.options.selectedProjects).filter(project => project.splitWorkspace).map((project) => project.packageName)
+        });
+      } else {
+        this._commonTempInstallFlag.mergeFromObject({
+          selectedProjectNames: Array.from(this.options.selectedProjects).map((project) => project.packageName)
+        });
+      }
     }
     if (this._deferredInstallationScripts || this.options.ignoreScripts) {
       this.commonTempInstallFlag.mergeFromObject({
+        ignoreScripts: true
+      });
+      this.commonTempSplitInstallFlag?.mergeFromObject({
         ignoreScripts: true
       });
     }

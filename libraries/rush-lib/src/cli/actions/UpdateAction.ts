@@ -93,6 +93,7 @@ export class UpdateAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       pnpmFilterArguments: [],
+      splitWorkspacePnpmFilterArguments: [],
       checkOnly: false
     };
   }

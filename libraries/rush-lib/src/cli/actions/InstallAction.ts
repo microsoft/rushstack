@@ -66,7 +66,7 @@ export class InstallAction extends BaseInstallAction {
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
-    const { pnpmFilterArguments, selectedProjects } =
+    const { pnpmFilterArguments, splitWorkspacePnpmFilterArguments, selectedProjects } =
       await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal);
 
     return {
@@ -86,6 +86,7 @@ export class InstallAction extends BaseInstallAction {
       // These are derived independently of the selection for command line brevity
       pnpmFilterArguments,
       selectedProjects,
+      splitWorkspacePnpmFilterArguments,
       checkOnly: this._checkOnlyParameter.value
     };
   }
