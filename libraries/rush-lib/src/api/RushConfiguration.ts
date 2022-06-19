@@ -1028,6 +1028,7 @@ export class RushConfiguration {
       if (packageManagerWrapper.packageManager === 'pnpm') {
         const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
         knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
+        knownSet.add(pnpmPackageManager.splitWorkspacePnpmfileFilename.toUpperCase());
 
         /// From "pnpm-lock.yaml" --> "split-workspace-pnpm-lock.yaml"
         const shrinkwrapFilenameParsedPath: path.ParsedPath = path.parse(

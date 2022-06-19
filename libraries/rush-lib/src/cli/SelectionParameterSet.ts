@@ -477,7 +477,7 @@ export class SelectionParameterSet {
         }
         const queue: RushConfigurationProject[] = [project];
         while (queue.length > 0) {
-          const project = queue.shift() as RushConfigurationProject;
+          const project: RushConfigurationProject = queue.shift() as RushConfigurationProject;
           const { dependencyProjects } = project;
           for (const dependencyProject of dependencyProjects) {
             if (dependencyProject.splitWorkspace) {
@@ -559,7 +559,7 @@ export class SelectionParameterSet {
         }
         const queue: RushConfigurationProject[] = [project];
         while (queue.length > 0) {
-          const project = queue.shift() as RushConfigurationProject;
+          const project: RushConfigurationProject = queue.shift() as RushConfigurationProject;
           const { consumingProjects } = project;
           for (const consumingProject of consumingProjects) {
             if (consumingProject.splitWorkspace) {

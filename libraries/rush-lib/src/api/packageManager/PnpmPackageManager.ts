@@ -12,7 +12,7 @@ import { PackageManager } from './PackageManager';
  */
 export class PnpmPackageManager extends PackageManager {
   protected _pnpmfileFilename: string;
-  protected _globalPnpmfileFilename: string;
+  protected _splitWorkspacePnpmfileFilename: string;
 
   // example: node_modules/.pnpm/lock.yaml
   public readonly internalShrinkwrapRelativePath: string;
@@ -30,7 +30,7 @@ export class PnpmPackageManager extends PackageManager {
       this._pnpmfileFilename = RushConstants.pnpmfileV1Filename;
     }
 
-    this._globalPnpmfileFilename = RushConstants.globalPnpmfileFilename;
+    this._splitWorkspacePnpmfileFilename = '.pnpmfile-split-workspace.cjs';
 
     this._shrinkwrapFilename = RushConstants.pnpmV3ShrinkwrapFilename;
 
@@ -53,9 +53,9 @@ export class PnpmPackageManager extends PackageManager {
    * The filename of the global shrinkwrap file that is used by the package manager.
    *
    * @remarks
-   * Example: `global-pnpmfile.cjs`
+   * Example: `.pnpmfile-split-workspace.cjs`
    */
-  public get globalPnpmfileFilename(): string {
-    return this._globalPnpmfileFilename;
+  public get splitWorkspacePnpmfileFilename(): string {
+    return this._splitWorkspacePnpmfileFilename;
   }
 }

@@ -587,7 +587,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       const selfIntegrity: string = `${packageName}:${shrinkwrapHash}:`;
       integrityMap.set(packageName, selfIntegrity);
 
-      const { dependencies, devDependencies, optionalDependencies } = this.getIndividualShrinkwrapImporter();
+      const { dependencies, devDependencies, optionalDependencies } = this._getIndividualShrinkwrapImporter();
 
       const externalFilter: (name: string, version: string) => boolean = (
         name: string,
@@ -689,7 +689,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       project.packageJsonEditor.filePath
     );
 
-    return this._isProjectModified(transformedPackageJsonEditor, this.getIndividualShrinkwrapImporter());
+    return this._isProjectModified(transformedPackageJsonEditor, this._getIndividualShrinkwrapImporter());
   }
 
   private _isProjectModified(
@@ -909,7 +909,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 
-  private getIndividualShrinkwrapImporter(): IPnpmShrinkwrapImporterYaml {
+  private _getIndividualShrinkwrapImporter(): IPnpmShrinkwrapImporterYaml {
     if (!this._individualShrinkwrapImporter) {
       const dependencies: Record<string, string> = MapExtensions.toObject(
         this.dependencies as Map<string, string>

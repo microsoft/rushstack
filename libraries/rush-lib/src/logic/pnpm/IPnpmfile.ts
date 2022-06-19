@@ -21,14 +21,20 @@ export interface IPnpmfileShimSettings {
   userPnpmfilePath?: string;
 }
 
-export interface WorkspaceProjectInfo
+export interface IWorkspaceProjectInfo
   extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
   packageVersion: RushConfigurationProject['packageJson']['version'];
 }
 
-export interface ISplitWorkspaceGlobalPnpmfileShimSettings {
-  workspaceProjects: Record<string, WorkspaceProjectInfo>;
-  splitWorkspaceProjects: Record<string, WorkspaceProjectInfo>;
+/**
+ * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and
+ * {@link IPnpmfileShim.hooks.afterAllResolved}.
+ */
+export interface ISplitWorkspacePnpmfileShimSettings {
+  semverPath: string;
+  workspaceProjects: Record<string, IWorkspaceProjectInfo>;
+  splitWorkspaceProjects: Record<string, IWorkspaceProjectInfo>;
+  userPnpmfilePath?: string;
 }
 
 /**
@@ -38,7 +44,7 @@ export interface ISplitWorkspaceGlobalPnpmfileShimSettings {
 export interface IPnpmfileContext {
   log: (message: string) => void;
   pnpmfileShimSettings?: IPnpmfileShimSettings;
-  splitWorkspaceGlobalPnpmfileShimSettings?: ISplitWorkspaceGlobalPnpmfileShimSettings;
+  splitWorkspacePnpmfileShimSettings?: ISplitWorkspacePnpmfileShimSettings;
 }
 
 /**
