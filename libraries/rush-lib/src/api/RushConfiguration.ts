@@ -825,6 +825,7 @@ export class RushConfiguration {
       this._projectsByName.set(project.packageName, project);
     }
 
+    this._hasSplitWorkspaceProject = false;
     for (const project of this._projects) {
       project.decoupledLocalDependencies.forEach((decoupledLocalDependency: string) => {
         if (!this.getProjectByName(decoupledLocalDependency)) {
@@ -837,6 +838,10 @@ export class RushConfiguration {
       this._versionPolicyConfiguration.validate(this.projectsByName);
 
       // Consumer relationships will be established the first time one is requested
+    }
+
+    if (this.hasSplitWorkspaceProject) {
+      this._validateSplitWorkspaceRelationships();
     }
   }
 
@@ -1876,5 +1881,23 @@ export class RushConfiguration {
       this._commonRushConfigFolder,
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : [])
     );
+  }
+
+  /**
+   * The workspace project can NOT depend on a split workspace project.
+   * The split workspace project CAN depend on a workspace project.
+   */
+  private _validateSplitWorkspaceRelationships(): void {
+    for (const project of this.projects) {
+      if (!project.splitWorkspace) {
+        for (const dependencyProject of project.dependencyProjects) {
+          if (dependencyProject.splitWorkspace) {
+            throw new Error(
+              `Split workspace project ${dependencyProject.packageName} is not allowed to be dependency of project ${project.packageName}`
+            );
+          }
+        }
+      }
+    }
   }
 }
