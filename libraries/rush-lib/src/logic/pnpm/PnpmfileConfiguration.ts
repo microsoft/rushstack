@@ -98,7 +98,6 @@ export class PnpmfileConfiguration {
       );
 
       for (const project of rushConfiguration.projects) {
-        // FIXME: Do we need to validate here where no version specified in package.json?
         workspaceVersions[project.packageName] = project.packageJson.version;
       }
     }

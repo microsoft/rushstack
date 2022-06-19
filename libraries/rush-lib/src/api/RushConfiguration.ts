@@ -381,9 +381,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     } else {
       this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
     }
-    // FIXME: 1. What happens if we use global pnpmStore? Is global pnpm store working for both?
-    // FIXME: I choose to ignore global pnpm store for split workspace for now
-    // FIXME: 2. Is it necessary to create a new pnpm store for split workspace? Choosing to reuse pnpm store for now
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
@@ -565,8 +562,6 @@ export class RushConfiguration {
       EnvironmentConfiguration.rushTempFolderOverride ||
       path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
-    // FIXME: Do we need EnvironmentConfiguration.commonTempSplitFolderOverride?
-    // FIXME: Override commonTempFolder by env var doesn't work with WorkspaceInstallManager, so it's right to NOT have one (?)
     this._commonTempSplitFolder = path.join(this._commonFolder, RushConstants.rushTempSplitFolderName);
 
     this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
@@ -578,7 +573,6 @@ export class RushConfiguration {
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
 
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
-    // FIXME: Do we need to make variant work for split workspace? I choose not to for now.
 
     this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
@@ -677,8 +671,6 @@ export class RushConfiguration {
       parsedPath.dir,
       parsedPath.name + '-preinstall' + parsedPath.ext
     );
-
-    // FIXME: Ignore "preinstall" in split workspace case, that means no tempSplitShrinkwrapPreinstall
 
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,

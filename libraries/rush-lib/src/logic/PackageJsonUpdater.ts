@@ -432,7 +432,6 @@ export class PackageJsonUpdater {
         const allVersions: string = Utilities.executeCommandAndCaptureOutput(
           this._rushConfiguration.packageManagerToolFilename,
           commandArgs,
-          // FIXME: commonSplitFolder? It seems it's right to get all versions ONLY from commonTempFolder (?)
           this._rushConfiguration.commonTempFolder
         );
 
@@ -492,7 +491,6 @@ export class PackageJsonUpdater {
         selectedVersion = Utilities.executeCommandAndCaptureOutput(
           this._rushConfiguration.packageManagerToolFilename,
           commandArgs,
-          // FIXME: commonSplitFolder? It seems it's right to get version ONLY from commonTempFolder (?)
           this._rushConfiguration.commonTempFolder
         ).trim();
       }

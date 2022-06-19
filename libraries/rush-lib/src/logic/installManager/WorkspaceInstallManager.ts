@@ -122,7 +122,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           throw new AlreadyReportedError();
         }
 
-        // FIXME: is this check necessary?
         // If there are orphaned projects, we need to update
         const orphanedProjects: ReadonlyArray<string> = splitWorkspaceShrinkwrapFile.findOrphanedProjects(
           this.rushConfiguration
@@ -184,9 +183,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         targetWorkspaceFile = splitWorkspaceFile;
       }
       targetWorkspaceFile.addPackage(rushProject.projectFolder);
-
-      // FIXME: If i understand the proposal correctly, the projects in common/temp can not depends on the projects in common/temp-split
-      // If so, it's better to add validation here.
 
       for (const { name, version, dependencyType } of [
         ...packageJson.dependencyList,

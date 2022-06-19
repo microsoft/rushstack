@@ -108,8 +108,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
       StandardScriptUpdater.validate(this.rushConfiguration);
     }
 
-    // FIXME: Pre/Post rushInstall only happens under commonTempFolder, does commonTempSplitFolder bother?
-
     this.eventHooksManager.handle(
       Event.preRushInstall,
       this.parser.isDebug,
