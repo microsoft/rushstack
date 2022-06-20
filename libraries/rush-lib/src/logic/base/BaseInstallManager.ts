@@ -530,6 +530,11 @@ export abstract class BaseInstallManager {
           destinationPath: commonRushConfigSplitWorkspaceNpmrcPath
         });
       }
+      /**
+       * _RUSH_COMMON_TEMP_SPLIT_FOLDER is used in .npmrc for splitWorkspace.
+       * When shared-workspace-lockfiles=false, .npmrc gets resolved with a different CWD for each project folder.
+       * With this environment variable, .npmrc can resolve the same global pnpmfile path for all projects.
+       */
       process.env['_RUSH_COMMON_TEMP_SPLIT_FOLDER'] = this._rushConfiguration.commonTempSplitFolder;
       Utilities.syncNpmrc(
         this._rushConfiguration.commonRushConfigFolder,
