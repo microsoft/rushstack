@@ -1147,7 +1147,7 @@ export class RushConfiguration {
   /**
    * The folder where temporary files will be stored.  This is always a subfolder called "temp"
    * under the common folder.
-   * Example: `C:\MyRepo\common\temp`
+   * Example: `C:\MyRepo\common\temp-split`
    */
   public get commonTempSplitFolder(): string {
     return this._commonTempSplitFolder;
