@@ -662,7 +662,7 @@ export class PhasedCommandHooks {
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
-    constructor(json: _IPnpmOptionsJson, commonTempFolder: string, commonTempSplitFolder: string);
+    constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
@@ -735,6 +735,10 @@ export class RushConfiguration {
     getCommittedSplitWorkspaceShrinkwrapFilename(): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
+    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectsFilter" needs to be exported by the entry point index.d.ts
+    //
+    // @beta
+    getFilteredProjects(filter: IRushConfigurationProjectsFilter): RushConfigurationProject[];
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
@@ -769,8 +773,6 @@ export class RushConfiguration {
     get projects(): RushConfigurationProject[];
     // (undocumented)
     get projectsByName(): Map<string, RushConfigurationProject>;
-    // @beta
-    get projectsBySplitWorkspace(): ReadonlyMap<boolean, ReadonlySet<RushConfigurationProject>>;
     // @beta
     get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
     get repositoryDefaultBranch(): string;

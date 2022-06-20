@@ -271,6 +271,16 @@ export interface ICurrentVariantJson {
 }
 
 /**
+ * The filter parameters to search from all projects.
+ */
+export interface IRushConfigurationProjectsFilter {
+  /**
+   * If true, filter out projects that specify splitWorkspace as true.
+   */
+  splitWorkspace: boolean;
+}
+
+/**
  * Options that all package managers share.
  *
  * @public
@@ -507,8 +517,8 @@ export class RushConfiguration {
   // Lazily loaded when the projectsByTag() getter is called.
   private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
 
-  // Lazily loaded when the projectsBySplitWorkspace() getter is called.
-  private _projectsBySplitWorkspace: ReadonlyMap<boolean, ReadonlySet<RushConfigurationProject>> | undefined;
+  // Cache results when the getFilteredProjects() is called.
+  private _filteredProjectsCache: Map<string, RushConfigurationProject[]>;
 
   private _hasSplitWorkspaceProject: boolean | undefined;
 
@@ -577,6 +587,8 @@ export class RushConfiguration {
     this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
+
+    this._filteredProjectsCache = new Map<string, RushConfigurationProject[]>();
 
     const experimentsConfigFile: string = path.join(
       this._commonRushConfigFolder,
@@ -1527,24 +1539,21 @@ export class RushConfiguration {
   }
 
   /**
-   * Obtains the mapping from splitWorkspace to projects.
+   * Search for projects according to filter
    * @beta
    */
-  public get projectsBySplitWorkspace(): ReadonlyMap<boolean, ReadonlySet<RushConfigurationProject>> {
-    if (!this._projectsBySplitWorkspace) {
-      const projectsBySplitWorkspace: Map<boolean, Set<RushConfigurationProject>> = new Map();
-      for (const project of this.projects) {
-        let collection: Set<RushConfigurationProject> | undefined = projectsBySplitWorkspace.get(
-          project.splitWorkspace
-        );
-        if (!collection) {
-          projectsBySplitWorkspace.set(project.splitWorkspace, (collection = new Set()));
-        }
-        collection.add(project);
-      }
-      this._projectsBySplitWorkspace = projectsBySplitWorkspace;
+  public getFilteredProjects(filter: IRushConfigurationProjectsFilter): RushConfigurationProject[] {
+    const { splitWorkspace } = filter;
+    const cacheKey: string = `${splitWorkspace}`;
+
+    let filteredProjects: RushConfigurationProject[] | undefined = this._filteredProjectsCache.get(cacheKey);
+    if (!filteredProjects) {
+      filteredProjects = this.projects.filter((project: RushConfigurationProject) =>
+        Boolean(project.splitWorkspace)
+      );
+      this._filteredProjectsCache.set(cacheKey, filteredProjects);
     }
-    return this._projectsBySplitWorkspace;
+    return filteredProjects;
   }
 
   /**
@@ -1630,9 +1639,10 @@ export class RushConfiguration {
    */
   public get hasSplitWorkspaceProject(): boolean {
     if (undefined === this._hasSplitWorkspaceProject) {
-      const splitWorkspaceProjects: ReadonlySet<RushConfigurationProject> | undefined =
-        this.projectsBySplitWorkspace.get(true);
-      this._hasSplitWorkspaceProject = !!splitWorkspaceProjects && splitWorkspaceProjects.size > 0;
+      const splitWorkspaceProjects: RushConfigurationProject[] = this.getFilteredProjects({
+        splitWorkspace: true
+      });
+      this._hasSplitWorkspaceProject = splitWorkspaceProjects.length > 0;
     }
     return this._hasSplitWorkspaceProject;
   }
