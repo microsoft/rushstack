@@ -52,7 +52,7 @@ export class SplitWorkspacePnpmfileConfiguration {
     const targetDir: string = rushConfiguration.commonTempSplitFolder;
     const splitWorkspaceGlobalPnpmfilePath: string = path.join(
       targetDir,
-      (rushConfiguration.packageManagerWrapper as PnpmPackageManager).splitWorkspacePnpmfileFilename
+      (rushConfiguration.packageManagerWrapper as PnpmPackageManager).globalPnpmfileFilename
     );
 
     // Write the shim itself

@@ -53,6 +53,16 @@ export class PnpmPackageManager extends PackageManager {
    * The filename of the global shrinkwrap file that is used by the package manager.
    *
    * @remarks
+   * Example: `global-pnpmfile.cjs`
+   */
+  public get globalPnpmfileFilename(): string {
+    return 'global-pnpmfile.cjs';
+  }
+
+  /**
+   * The filename of the global shrinkwrap file that is used by the package manager.
+   *
+   * @remarks
    * Example: `.pnpmfile-split-workspace.cjs`
    */
   public get splitWorkspacePnpmfileFilename(): string {

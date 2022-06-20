@@ -104,11 +104,6 @@ export class DependencyAnalyzer {
             // For now, ignore local dependencies (that aren't cyclic dependencies).
             continue;
           }
-
-          if (localProject.splitWorkspace) {
-            // Ignore split workspace project
-            continue;
-          }
         }
 
         let allVersionForDependency: Set<string> | undefined = allVersionsByPackageName.get(dependencyName);
