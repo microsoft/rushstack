@@ -524,8 +524,6 @@ export class PublishAction extends BaseRushAction {
         ? this._releaseFolder.value
         : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
 
-      // FIXME: split workspace???
-
       FileSystem.move({
         sourcePath: tarballPath,
         destinationPath: path.join(destFolder, tarballName),
