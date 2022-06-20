@@ -545,6 +545,11 @@ export abstract class BaseInstallManager {
     }
     this._syncNpmrcAlreadyCalled = true;
 
+    // Delete commonTempSplitFolder if no split workspace projects to avoid confusion
+    if (!this.rushConfiguration.hasSplitWorkspaceProject) {
+      FileSystem.deleteFolder(this.rushConfiguration.commonTempSplitFolder);
+    }
+
     // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
     // Additionally when in workspaces, the shim implements support for common versions.
     if (this.rushConfiguration.packageManager === 'pnpm') {
