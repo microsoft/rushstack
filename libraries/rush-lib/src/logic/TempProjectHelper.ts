@@ -20,7 +20,6 @@ export class TempProjectHelper {
    * Deletes the existing tarball and creates a tarball for the given rush project
    */
   public createTempProjectTarball(rushProject: RushConfigurationProject): void {
-    // FIXME: ignore for now, since WorkspaceInstallManager takes responsible for installing for split workspace packages, which is not related with this helper
     FileSystem.ensureFolder(path.resolve(this._rushConfiguration.commonTempFolder, 'projects'));
     const tarballFile: string = this.getTarballFilePath(rushProject);
     const tempProjectFolder: string = this.getTempProjectFolder(rushProject);

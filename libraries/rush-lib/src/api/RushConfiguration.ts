@@ -371,7 +371,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly useWorkspaces: boolean;
 
   /** @internal */
-  public constructor(json: IPnpmOptionsJson, commonTempFolder: string, commonTempSplitFolder: string) {
+  public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     super(json);
     this.pnpmStore = json.pnpmStore || 'local';
     if (EnvironmentConfiguration.pnpmStorePathOverride) {
@@ -593,8 +593,7 @@ export class RushConfiguration {
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(
       rushConfigurationJson.pnpmOptions || {},
-      this._commonTempFolder,
-      this._commonTempSplitFolder
+      this._commonTempFolder
     );
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
 
@@ -1885,10 +1884,17 @@ export class RushConfiguration {
   }
 
   /**
+   * Split workspace can only works on PNPM with "useWorkspaces" enabled.
    * The workspace project can NOT depend on a split workspace project.
    * The split workspace project CAN depend on a workspace project.
    */
   private _validateSplitWorkspaceRelationships(): void {
+    if (this._packageManager !== 'pnpm' || !this._pnpmOptions.useWorkspaces) {
+      throw new Error(
+        `Split workspace is only supported on PNPM with "useWorkspaces" enabled. Please specify "pnpmVersion" and set "useWorkspaces": true in your rush.json.`
+      );
+    }
+
     for (const project of this.projects) {
       if (!project.splitWorkspace) {
         for (const dependencyProject of project.dependencyProjects) {
