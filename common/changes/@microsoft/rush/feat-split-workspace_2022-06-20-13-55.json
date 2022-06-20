@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add split workspace feature. Projects specified \"splitWorkspace\": \"true\" in rush.json are managed in a secondary workspace.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
