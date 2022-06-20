@@ -1904,6 +1904,15 @@ export class RushConfiguration {
             );
           }
         }
+
+        // For regular workspace project has a shrinkwrap file in its project folder, print a warning about this to avoid confusion.
+        if (
+          FileSystem.exists(path.join(project.projectFolder, this.packageManagerWrapper.shrinkwrapFilename))
+        ) {
+          console.warn(
+            `Project ${project.packageName} has a ${this.packageManagerWrapper.shrinkwrapFilename} file in its project folder. Please consider to delete it to avoid confusion.`
+          );
+        }
       }
     }
   }
