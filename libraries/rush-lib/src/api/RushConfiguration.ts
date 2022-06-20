@@ -1894,7 +1894,7 @@ export class RushConfiguration {
         for (const dependencyProject of project.dependencyProjects) {
           if (dependencyProject.splitWorkspace) {
             throw new Error(
-              `Split workspace project ${dependencyProject.packageName} is not allowed to be dependency of project ${project.packageName}`
+              `The "${project.packageName}" cannot depend on "${dependencyProject.packageName}" because regular workspace projects cannot depend on projects from the split workspace.`
             );
           }
         }
