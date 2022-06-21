@@ -1,14 +1,14 @@
 {
-  "name": "@rushstack/module-minifier-plugin",
+  "name": "@rushstack/webpack4-module-minifier-plugin",
   "version": "0.9.3",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "lib/index.js",
-  "typings": "dist/module-minifier-plugin.d.ts",
+  "typings": "dist/webpack4-module-minifier-plugin.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "webpack/module-minifier-plugin"
+    "directory": "webpack/module-minifier-plugin-4"
   },
   "engines": {
     "node": ">=10.17.1"

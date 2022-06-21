@@ -4,7 +4,7 @@ const path = require('path');
 const webpack = require('webpack');
 const { JsonFile } = require('@rushstack/node-core-library');
 
-const { LocalizationPlugin } = require('@rushstack/localization-plugin');
+const { LocalizationPlugin } = require('@rushstack/webpack4-localization-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');

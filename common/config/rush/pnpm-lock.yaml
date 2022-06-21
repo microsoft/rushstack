@@ -650,7 +650,7 @@ importers:
       '@rushstack/hashed-folder-copy-plugin': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
-      '@rushstack/module-minifier-plugin': workspace:*
+      '@rushstack/webpack4-module-minifier-plugin': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: ~4.5.2
@@ -661,7 +661,7 @@ importers:
       '@rushstack/hashed-folder-copy-plugin': link:../../webpack/hashed-folder-copy-plugin
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
-      '@rushstack/module-minifier-plugin': link:../../webpack/module-minifier-plugin
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/module-minifier-plugin-4
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
@@ -1066,8 +1066,8 @@ importers:
 
   ../../build-tests/localization-plugin-test-01:
     specifiers:
-      '@rushstack/localization-plugin': workspace:*
-      '@rushstack/module-minifier-plugin': workspace:*
+      '@rushstack/webpack4-localization-plugin': workspace:*
+      '@rushstack/webpack4-module-minifier-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@types/webpack-env': 1.13.0
@@ -1079,8 +1079,8 @@ importers:
       webpack-cli: ~3.3.2
       webpack-dev-server: ~3.11.0
     dependencies:
-      '@rushstack/localization-plugin': link:../../webpack/localization-plugin
-      '@rushstack/module-minifier-plugin': link:../../webpack/module-minifier-plugin
+      '@rushstack/webpack4-localization-plugin': link:../../webpack/localization-plugin-4
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/module-minifier-plugin-4
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@types/webpack-env': 1.13.0
@@ -1094,8 +1094,8 @@ importers:
 
   ../../build-tests/localization-plugin-test-02:
     specifiers:
-      '@rushstack/localization-plugin': workspace:*
-      '@rushstack/module-minifier-plugin': workspace:*
+      '@rushstack/webpack4-localization-plugin': workspace:*
+      '@rushstack/webpack4-module-minifier-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@types/lodash': 4.14.116
@@ -1109,8 +1109,8 @@ importers:
       webpack-cli: ~3.3.2
       webpack-dev-server: ~3.11.0
     dependencies:
-      '@rushstack/localization-plugin': link:../../webpack/localization-plugin
-      '@rushstack/module-minifier-plugin': link:../../webpack/module-minifier-plugin
+      '@rushstack/webpack4-localization-plugin': link:../../webpack/localization-plugin-4
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/module-minifier-plugin-4
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@types/lodash': 4.14.116
@@ -1126,7 +1126,7 @@ importers:
 
   ../../build-tests/localization-plugin-test-03:
     specifiers:
-      '@rushstack/localization-plugin': workspace:*
+      '@rushstack/webpack4-localization-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@types/webpack-env': 1.13.0
@@ -1138,7 +1138,7 @@ importers:
       webpack-cli: ~3.3.2
       webpack-dev-server: ~3.11.0
     dependencies:
-      '@rushstack/localization-plugin': link:../../webpack/localization-plugin
+      '@rushstack/webpack4-localization-plugin': link:../../webpack/localization-plugin-4
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@types/webpack-env': 1.13.0
@@ -2317,7 +2317,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
 
-  ../../webpack/localization-plugin:
+  ../../webpack/localization-plugin-4:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
@@ -2354,7 +2354,7 @@ importers:
       '@types/webpack': 4.41.32
       webpack: 4.44.2
 
-  ../../webpack/module-minifier-plugin:
+  ../../webpack/module-minifier-plugin-4:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*

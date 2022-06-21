@@ -1,8 +1,8 @@
-# @rushstack/localization-plugin
+# @rushstack/webpack4-localization-plugin
 
 ## Installation
 
-`npm install @rushstack/localization-plugin --save-dev`
+`npm install @rushstack/webpack4-localization-plugin --save-dev`
 
 ## Overview
 
@@ -71,7 +71,7 @@ may be more convenient.
 To use the plugin, add it to the `plugins` array of your Webpack config. For example:
 
 ```JavaScript
-import { LocalizationPlugin } from '@rushstack/localization-plugin';
+import { LocalizationPlugin } from '@rushstack/webpack4-localization-plugin';
 
 {
   plugins: [
@@ -289,4 +289,4 @@ syntax. This option is not recommended.
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/webpack/localization-plugin/CHANGELOG.md) - Find
   out what's new in the latest version
 
-`@rushstack/localization-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.
+`@rushstack/webpack4-localization-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

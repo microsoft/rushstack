@@ -1,5 +1,5 @@
 {
-  "name": "@rushstack/localization-plugin",
+  "name": "@rushstack/webpack4-localization-plugin",
   "entries": [
     {
       "version": "0.14.4",
