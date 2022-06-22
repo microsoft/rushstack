@@ -431,10 +431,7 @@ export class PublishAction extends BaseRushAction {
   private async _updateBeforePublish(): Promise<void> {
     if (!this._update.value) return;
 
-    const purgeManager: typeof PurgeManager.prototype = new PurgeManager(
-      this.rushConfiguration,
-      this.rushGlobalFolder
-    );
+    const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
     const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this.rushConfiguration,
@@ -457,8 +454,8 @@ export class PublishAction extends BaseRushAction {
 
     try {
       await installManager.doInstallAsync();
-    } catch {
-      throw new Error(`"update" failed to run before "publish" was run`);
+    } catch (error) {
+      throw new Error(`"update" failed to run before "publish" was run. Failed with: ${error}`);
     }
   }
 
