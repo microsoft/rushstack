@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Initial publish of webpack 5 compatible localization plugin.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}

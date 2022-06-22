@@ -1051,6 +1051,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "projectFolder": "webpack/localization-plugin-5",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
       "reviewCategory": "libraries",
