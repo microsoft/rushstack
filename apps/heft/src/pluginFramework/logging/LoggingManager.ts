@@ -3,7 +3,12 @@
 
 import { IHeftPlugin } from '../IHeftPlugin';
 import { ScopedLogger } from './ScopedLogger';
-import { ITerminalProvider, FileError, FileErrorFormat } from '@rushstack/node-core-library';
+import {
+  ITerminalProvider,
+  FileError,
+  FileErrorFormat,
+  IFileErrorFormattingOptions
+} from '@rushstack/node-core-library';
 
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;
@@ -53,7 +58,9 @@ export class LoggingManager {
     for (const scopedLogger of this._scopedLoggers.values()) {
       result.push(
         ...scopedLogger.errors.map(
-          (error) => `[${scopedLogger.loggerName}] ${LoggingManager.getErrorMessage(error, fileErrorFormat)}`
+          (error) =>
+            `[${scopedLogger.loggerName}] ` +
+            LoggingManager.getErrorMessage(error, { format: fileErrorFormat, isWarning: false })
         )
       );
     }
@@ -68,7 +75,8 @@ export class LoggingManager {
       result.push(
         ...scopedLogger.warnings.map(
           (warning) =>
-            `[${scopedLogger.loggerName}] ${LoggingManager.getErrorMessage(warning, fileErrorFormat)}`
+            `[${scopedLogger.loggerName}] ` +
+            LoggingManager.getErrorMessage(warning, { format: fileErrorFormat, isWarning: true })
         )
       );
     }
@@ -76,9 +84,9 @@ export class LoggingManager {
     return result;
   }
 
-  public static getErrorMessage(error: Error, fileErrorFormat?: FileErrorFormat): string {
+  public static getErrorMessage(error: Error, options?: IFileErrorFormattingOptions): string {
     if (error instanceof FileError) {
-      return error.toString(fileErrorFormat);
+      return error.toString(options);
     } else {
       return error.message;
     }
