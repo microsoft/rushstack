@@ -421,13 +421,17 @@ export class ShellOperationRunner implements IOperationRunner {
           } else {
             const operationSettings: IOperationSettings | undefined =
               projectConfiguration.operationSettingsByOperationName.get(this._commandName);
-            if (operationSettings?.disableBuildCacheForOperation) {
+            if (!operationSettings) {
+              terminal.writeVerboseLine(
+                `This project does not define the caching behavior of the "${this._commandName}" command, so caching has been disabled.`
+              );
+            } else if (operationSettings.disableBuildCacheForOperation) {
               terminal.writeVerboseLine(
                 `Caching has been disabled for this project's "${this._commandName}" command.`
               );
             } else {
               const projectOutputFolderNames: ReadonlyArray<string> =
-                operationSettings?.outputFolderNames || [];
+                operationSettings.outputFolderNames || [];
               this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
                 projectConfiguration,
                 projectOutputFolderNames,
