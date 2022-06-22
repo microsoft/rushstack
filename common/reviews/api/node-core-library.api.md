@@ -188,16 +188,12 @@ export enum FileConstants {
 export class FileError extends Error {
     // (undocumented)
     static [Symbol.hasInstance](instance: object): boolean;
-    constructor(message: string, options: IFileErrorOptions);
-    // (undocumented)
+    constructor(message: string, filePath: string, line?: number, column?: number);
     readonly column: number | undefined;
     readonly filePath: string;
-    // (undocumented)
-    readonly isWarning: boolean | undefined;
-    // (undocumented)
     readonly line: number | undefined;
-    // @override (undocumented)
-    toString(format?: FileErrorFormat): string;
+    // @override
+    toString(options?: IFileErrorFormattingOptions): string;
 }
 
 // @public
@@ -351,11 +347,9 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 }
 
 // @public
-export interface IFileErrorOptions {
-    column?: number;
-    filePath: string;
+export interface IFileErrorFormattingOptions {
+    format?: FileErrorFormat;
     isWarning?: boolean;
-    line?: number;
 }
 
 // @public (undocumented)

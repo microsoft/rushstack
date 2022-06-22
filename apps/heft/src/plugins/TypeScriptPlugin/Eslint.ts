@@ -68,10 +68,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     const warnings: Error[] = [];
 
     for (const eslintFileResult of this._lintResult) {
-      const buildFolderRelativeFilePath: string = path.relative(
-        this._buildFolderPath,
-        eslintFileResult.filePath
-      );
       for (const message of eslintFileResult.messages) {
         eslintFailureCount++;
         // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
@@ -80,7 +76,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
           : message.message;
         const errorObject: FileError = new FileError(
           formattedMessage,
-          buildFolderRelativeFilePath,
+          eslintFileResult.filePath,
           message.line,
           message.column
         );
