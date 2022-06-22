@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Tue, 07 Jun 2022 09:37:05 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Jun 2022 20:27:19 GMT and should not be manually modified.
+
+## 0.9.3
+Tue, 21 Jun 2022 20:27:19 GMT
+
+### Patches
+
+- Upgrade @types/webpack and add missing optional peer dependency.
 
 ## 0.9.2
 Tue, 07 Jun 2022 09:37:05 GMT

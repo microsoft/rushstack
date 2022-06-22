@@ -75,19 +75,6 @@ export interface IPseudolocaleOptions {
     startDelimiter?: string;
 }
 
-// @public @deprecated (undocumented)
-export interface IResxReaderOptions {
-    ignoreString?: IgnoreStringFunction;
-    // (undocumented)
-    newlineNormalization: NewlineKind | undefined;
-    // (undocumented)
-    resxFilePath: string;
-    // (undocumented)
-    terminal: ITerminal;
-    // (undocumented)
-    warnOnMissingComment: boolean;
-}
-
 // @public (undocumented)
 export interface ITypingsGeneratorOptions {
     // (undocumented)
@@ -124,12 +111,6 @@ export function parseResx(options: IParseResxOptions): ILocalizationFile;
 
 // @public (undocumented)
 export type ParserKind = 'resx' | 'loc.json' | 'resjson';
-
-// @public @deprecated (undocumented)
-export function readResxAsLocFile(resxContents: string, options: IResxReaderOptions): ILocalizationFile;
-
-// @public @deprecated (undocumented)
-export function readResxFileAsLocFile(options: IResxReaderOptions): ILocalizationFile;
 
 // @public
 export class TypingsGenerator extends StringValuesTypingsGenerator {

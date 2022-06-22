@@ -6,8 +6,6 @@ import { XmlDocument, XmlElement } from 'xmldoc';
 
 import type { ILocalizedString, ILocalizationFile, IParseFileOptions } from '../interfaces';
 
-const STRING_NAME_RESX: RegExp = /^[A-z_$][A-z0-9_$]*$/;
-
 /**
  * @public
  */
@@ -78,8 +76,6 @@ function _readResxAsLocFileInternal(options: IResxReaderOptionsInternal): ILocal
             const stringName: string = childNode.attr.name;
             if (!stringName) {
               _logErrorWithLocation(options, 'Unexpected missing or empty string name', childNode);
-            } else if (!STRING_NAME_RESX.test(stringName)) {
-              _logErrorWithLocation(options, `Invalid string name "${stringName}"`, childNode);
             } else {
               if (locFile.hasOwnProperty(stringName)) {
                 _logErrorWithLocation(options, `Duplicate string value "${stringName}"`, childNode);
