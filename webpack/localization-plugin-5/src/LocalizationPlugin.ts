@@ -29,7 +29,6 @@ import type {
 import type { IAssetPathOptions } from './webpackInterfaces';
 import { markEntity, getMark } from './utilities/EntityMarker';
 import { processLocalizedAsset, processNonLocalizedAsset } from './AssetProcessor';
-import { createHash } from 'crypto';
 
 /**
  * @public
@@ -86,6 +85,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     string,
     Map<string, ILocaleFileObject | string | ReadonlyMap<string, string>>
   > = new Map();
+  private _stringPlaceholderCounter: number = 0;
   private readonly _stringPlaceholderMap: Map<string, IStringPlaceholder> = new Map();
   private _passthroughLocaleName!: string;
   private _defaultLocale!: string;
@@ -487,7 +487,8 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       const stringKey: string = `${localizedFileKey}?${stringName}`;
       let placeholder: IStringPlaceholder | undefined = this._stringKeys.get(stringKey);
       if (!placeholder) {
-        const suffix: string = _hashKey(stringKey);
+        // TODO: This may need to be a deterministic identifier to support watch / incremental compilation
+        const suffix: string = `${this._stringPlaceholderCounter++}`;
 
         const values: Map<string, string> = new Map();
         values.set(this._passthroughLocaleName, stringName);
@@ -794,8 +795,4 @@ async function normalizeLocalizedData(
   } else {
     return localizedData instanceof Map ? localizedData : new Map(Object.entries(localizedData));
   }
-}
-
-function _hashKey(key: string): string {
-  return createHash('md4').update(key).digest('hex');
 }
