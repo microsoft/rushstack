@@ -21,6 +21,7 @@ import { ICommandLineFlagDefinition } from '@rushstack/ts-command-line';
 import { ICommandLineIntegerDefinition } from '@rushstack/ts-command-line';
 import { ICommandLineStringDefinition } from '@rushstack/ts-command-line';
 import { ICommandLineStringListDefinition } from '@rushstack/ts-command-line';
+import { IFileErrorFormattingOptions } from '@rushstack/node-core-library';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
