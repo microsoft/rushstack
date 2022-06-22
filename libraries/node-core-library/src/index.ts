@@ -22,7 +22,7 @@ export {
   IExecutableSpawnOptions,
   Executable
 } from './Executable';
-export { FileError, FileErrorFormat } from './FileError';
+export { IFileErrorOptions, FileError, FileErrorFormat } from './FileError';
 export {
   INodePackageJson,
   IPackageJson,

@@ -188,10 +188,12 @@ export enum FileConstants {
 export class FileError extends Error {
     // (undocumented)
     static [Symbol.hasInstance](instance: object): boolean;
-    constructor(message: string, filePath: string, line?: number, column?: number);
+    constructor(message: string, options: IFileErrorOptions);
     // (undocumented)
     readonly column: number | undefined;
     readonly filePath: string;
+    // (undocumented)
+    readonly isWarning: boolean | undefined;
     // (undocumented)
     readonly line: number | undefined;
     // @override (undocumented)
@@ -199,7 +201,7 @@ export class FileError extends Error {
 }
 
 // @public
-export type FileErrorFormat = 'Unix' | 'VisualStudio';
+export type FileErrorFormat = 'Unix' | 'VisualStudio' | 'AzureDevOps';
 
 // @public
 export class FileSystem {
@@ -346,6 +348,14 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
     maxBuffer?: number;
     stdio?: ExecutableStdioMapping;
     timeoutMs?: number;
+}
+
+// @public
+export interface IFileErrorOptions {
+    column?: number;
+    filePath: string;
+    isWarning?: boolean;
+    line?: number;
 }
 
 // @public (undocumented)
