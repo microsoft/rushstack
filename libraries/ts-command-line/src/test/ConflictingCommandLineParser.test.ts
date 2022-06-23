@@ -97,14 +97,14 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
 
     let result: IScopedLongNameParseResult = commandLineParser.parseScopedLongName('--scope1:arg');
     expect(result.scope).toEqual('scope1');
-    expect(result.longName).toEqual('arg');
+    expect(result.longName).toEqual('--arg');
 
     result = commandLineParser.parseScopedLongName('--arg');
     expect(result.scope).toBeUndefined();
-    expect(result.longName).toEqual('arg');
+    expect(result.longName).toEqual('--arg');
 
     result = commandLineParser.parseScopedLongName('--my-scope:my-arg');
     expect(result.scope).toEqual('my-scope');
-    expect(result.longName).toEqual('my-arg');
+    expect(result.longName).toEqual('--my-arg');
   });
 });
