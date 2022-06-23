@@ -68,7 +68,8 @@ async function testLocalizedRuntimeInner(minimize: boolean): Promise<void> {
       ]
     },
     optimization: {
-      minimize
+      minimize,
+      moduleIds: 'named'
     },
     context: '/',
     mode: 'production',

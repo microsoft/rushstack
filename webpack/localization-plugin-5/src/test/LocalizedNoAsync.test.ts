@@ -80,7 +80,8 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
       ]
     },
     optimization: {
-      minimize
+      minimize,
+      moduleIds: 'named'
     },
     context: '/',
     mode: 'production',

@@ -39,7 +39,8 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
     },
     context: '/',
     optimization: {
-      minimize
+      minimize,
+      moduleIds: 'named'
     },
     mode: 'production',
     plugins: [localizationPlugin]

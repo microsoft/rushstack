@@ -77,7 +77,8 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
       ]
     },
     optimization: {
-      minimize
+      minimize,
+      moduleIds: 'named'
     },
     context: '/',
     mode: 'production',
