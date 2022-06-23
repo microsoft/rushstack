@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Add parameter scopes. Parameter scopes allow for behind-the-scenes conflict resolution between parameters with the same long name. For example, when provided scope \"my-scope\", a parameter can be referenced on the CLI as \"--my-parameter\" or as \"--my-scope:my-parameter\". In the case that multiple parameters are registered with the same long name but different scopes, the parameters can only be referenced by their scoped long names, eg. \"--my-scope:my-parameter\" and \"--my-other-scope:my-parameter\".",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}

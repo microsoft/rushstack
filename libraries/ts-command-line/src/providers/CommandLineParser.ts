@@ -197,6 +197,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 
       this._validateDefinitions();
 
+      // Register the parameters before we print help or parse the CLI
+      this._registerDefinedParameters();
+
       if (!args) {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);
@@ -238,6 +241,14 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       throw err;
+    }
+  }
+
+  /** @internal */
+  public _registerDefinedParameters(): void {
+    super._registerDefinedParameters();
+    for (const action of this._actions) {
+      action._registerDefinedParameters();
     }
   }
 
