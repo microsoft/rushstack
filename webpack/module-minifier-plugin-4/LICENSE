@@ -1,4 +1,4 @@
-@rushstack/module-minifier-plugin
+@rushstack/webpack4-module-minifier-plugin
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 

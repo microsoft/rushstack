@@ -1,14 +1,14 @@
 {
-  "name": "@rushstack/localization-plugin",
+  "name": "@rushstack/webpack4-localization-plugin",
   "version": "0.14.4",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
-  "typings": "dist/localization-plugin.d.ts",
+  "typings": "dist/webpack4-localization-plugin.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "webpack/localization-plugin"
+    "directory": "webpack/localization-plugin-4"
   },
   "scripts": {
     "build": "heft build --clean",

@@ -3,8 +3,8 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const { LocalizationPlugin } = require('@rushstack/localization-plugin');
-const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/module-minifier-plugin');
+const { LocalizationPlugin } = require('@rushstack/webpack4-localization-plugin');
+const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');

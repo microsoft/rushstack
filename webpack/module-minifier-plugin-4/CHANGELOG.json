@@ -1,5 +1,5 @@
 {
-  "name": "@rushstack/module-minifier-plugin",
+  "name": "@rushstack/webpack4-module-minifier-plugin",
   "entries": [
     {
       "version": "0.9.3",

@@ -1,4 +1,4 @@
-# Change Log - @rushstack/localization-plugin
+# Change Log - @rushstack/webpack4-localization-plugin
 
 This log was last generated on Fri, 17 Jun 2022 09:17:54 GMT and should not be manually modified.
 

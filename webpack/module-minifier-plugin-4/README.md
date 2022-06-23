@@ -1,8 +1,8 @@
-# @rushstack/module-minifier-plugin
+# @rushstack/webpack4-module-minifier-plugin
 
 ## Installation
 
-`npm install @rushstack/module-minifier-plugin --save-dev`
+`npm install @rushstack/webpack4-module-minifier-plugin --save-dev`
 
 ## Overview
 
@@ -20,7 +20,7 @@ The plugin will do its best to update webpack hashes if changing the direct inpu
 If running on node 10, you will need to ensure that the `--experimental-workers` flag is enabled.
 
 ```js
-const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/module-minifier-plugin');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 
 // In your webpack options:
 optimization: {
@@ -40,7 +40,7 @@ You can also run the ModuleMinifierPlugin in a single-threaded configuration.
 
 ```js
 // webpack.config.js
-const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/module-minifier-plugin');
+const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 
 // In your webpack options:
 optimization: {
@@ -58,4 +58,4 @@ optimization: {
   https://github.com/microsoft/rushstack/blob/main/webpack/module-minifier-plugin/CHANGELOG.md) - Find
   out what's new in the latest version
 
-`@rushstack/module-minifier-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.
+`@rushstack/webpack4-module-minifier-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.
