@@ -68,6 +68,51 @@ class TestCommandLine extends CommandLineParser {
   }
 }
 
+class BrokenTestAction extends CommandLineAction {
+  public constructor() {
+    super({
+      actionName: 'do:the-job',
+      summary: 'does the job',
+      documentation: 'a longer description'
+    });
+  }
+
+  protected async onExecute(): Promise<void> {
+    throw new Error('This action should not be executed');
+  }
+
+  protected onDefineParameters(): void {
+    // Used to validate that conflicting parameters with at least one being unscoped fails
+    this.defineStringParameter({
+      parameterLongName: '--arg',
+      argumentName: 'ARG',
+      description: 'The argument'
+    });
+    // Used to validate that conflicting parameters with at least one being unscoped fails
+    this.defineStringParameter({
+      parameterLongName: '--arg',
+      parameterScope: 'scope',
+      argumentName: 'ARG',
+      description: 'The argument'
+    });
+  }
+}
+
+class BrokenTestCommandLine extends CommandLineParser {
+  public constructor() {
+    super({
+      toolFilename: 'example',
+      toolDescription: 'An example project'
+    });
+
+    this.addAction(new BrokenTestAction());
+  }
+
+  protected onDefineParameters(): void {
+    // no parameters
+  }
+}
+
 describe(`Conflicting ${CommandLineParser.name}`, () => {
   it('executes an action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
@@ -90,6 +135,14 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
 
     expect(action.renderHelpText()).toMatchSnapshot();
     expect(action.getParameterStringMap()).toMatchSnapshot();
+  });
+
+  it('fails to execute an action when some conflicting parameters are unscoped', async () => {
+    const commandLineParser: BrokenTestCommandLine = new BrokenTestCommandLine();
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'value', '--scope:arg', 'value'])
+    ).rejects.toThrowError(/The parameter "--arg" is defined multiple times with the same long name/);
   });
 
   it('parses the scope out of a long name correctly', async () => {
