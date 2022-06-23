@@ -37,7 +37,7 @@ import { SCOPING_PARAMETER_GROUP } from '../Constants';
  */
 export interface IScopedLongNameParseResult {
   /**
-   * The long name parsed from the scoped long name, e.g. "--my-scope:my-parameter" -\> "my-parameter"
+   * The long name parsed from the scoped long name, e.g. "--my-scope:my-parameter" -\> "--my-parameter"
    */
   longName: string;
 
@@ -65,9 +65,9 @@ export interface ICommandLineParserData {
  */
 export abstract class CommandLineParameterProvider {
   private static readonly _scopeGroupName: string = 'scope';
-  private static readonly _songNameGroupName: string = 'longName';
-  private static readonly _scopedLongNameRegex: RegExp =
-    /^--((?<scope>[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
+  private static readonly _longNameGroupName: string = 'longName';
+  private static readonly _possiblyScopedLongNameRegex: RegExp =
+    /^--((?<scope>[a-z0-9]+(-[a-z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
   private static _keyCounter: number = 0;
 
   private _parameters: CommandLineParameter[];
@@ -85,6 +85,21 @@ export abstract class CommandLineParameterProvider {
     this._parameterGroupsByName = new Map();
     this._parametersRegistered = false;
     this._parametersProcessed = false;
+  }
+
+  /**
+   * Returns an object with the parsed scope (if present) and the long name of the parameter.
+   */
+  public static parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult {
+    const result: RegExpExecArray | null =
+      CommandLineParameterProvider._possiblyScopedLongNameRegex.exec(scopedLongName);
+    if (!result || !result.groups) {
+      throw new Error(`The parameter long name "${scopedLongName}" is not valid.`);
+    }
+    return {
+      longName: `--${result.groups[CommandLineParameterProvider._longNameGroupName]}`,
+      scope: result.groups[CommandLineParameterProvider._scopeGroupName]
+    };
   }
 
   /**
@@ -348,7 +363,7 @@ export abstract class CommandLineParameterProvider {
   public getParameterStringMap(): Record<string, string> {
     const parameterMap: Record<string, string> = {};
     for (const parameter of this.parameters) {
-      const parameterName: string = this.getScopedLongName(parameter);
+      const parameterName: string = parameter.scopedLongName || parameter.longName;
       switch (parameter.kind) {
         case CommandLineParameterKind.Flag:
         case CommandLineParameterKind.Choice:
@@ -378,36 +393,6 @@ export abstract class CommandLineParameterProvider {
       }
     }
     return parameterMap;
-  }
-
-  /**
-   * Returns the scoped long name for the specified parameter. If no scope is specified, the long name
-   * will be returned as-is.
-   */
-  public getScopedLongName(parameter: CommandLineParameter): string {
-    if (!parameter.parameterScope) {
-      return parameter.longName;
-    }
-
-    // Parameter long name is guranteed to start with '--' since this is validated in the
-    // CommandLineParameter constructor.
-    const unprefixedLongName: string = parameter.longName.slice(2);
-    return `--${parameter.parameterScope}:${unprefixedLongName}`;
-  }
-
-  /**
-   * Returns an object with the parsed scope (if present) and the long name of the parameter.
-   */
-  public parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult {
-    const result: RegExpExecArray | null =
-      CommandLineParameterProvider._scopedLongNameRegex.exec(scopedLongName);
-    if (!result || !result.groups) {
-      throw new Error(`The parameter long name "${scopedLongName}" is not valid.`);
-    }
-    return {
-      longName: result.groups[CommandLineParameterProvider._songNameGroupName],
-      scope: result.groups[CommandLineParameterProvider._scopeGroupName]
-    };
   }
 
   /** @internal */
@@ -514,8 +499,8 @@ export abstract class CommandLineParameterProvider {
     }
 
     // Add the scoped long name if it exists
-    if (parameter.parameterScope) {
-      names.push(this.getScopedLongName(parameter));
+    if (parameter.scopedLongName) {
+      names.push(parameter.scopedLongName);
     }
 
     let finalDescription: string = parameter.description;
@@ -611,9 +596,9 @@ export abstract class CommandLineParameterProvider {
     parameterScope?: string
   ): T {
     // Support the parameter long name being prefixed with the scope
-    const { scope, longName } = this.parseScopedLongName(parameterLongName);
-    parameterLongName = `--${longName}`;
-    parameterScope = scope ?? parameterScope;
+    const { scope, longName } = CommandLineParameterProvider.parseScopedLongName(parameterLongName);
+    parameterLongName = longName;
+    parameterScope = scope || parameterScope;
 
     const parameters: CommandLineParameter[] | undefined = this._parametersByLongName.get(parameterLongName);
     if (!parameters) {

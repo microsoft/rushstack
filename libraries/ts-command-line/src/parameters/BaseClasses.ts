@@ -30,14 +30,17 @@ export enum CommandLineParameterKind {
  * @public
  */
 export abstract class CommandLineParameter {
+  // Matches kebab-case formatted strings prefixed with double dashes.
   // Example: "--do-something"
   private static _longNameRegExp: RegExp = /^-(-[a-z0-9]+)+$/;
 
+  // Matches a single upper-case or lower-case letter prefixed with a dash.
   // Example: "-d"
   private static _shortNameRegExp: RegExp = /^-[a-zA-Z]$/;
 
-  // Example: "My-Scope"
-  private static _scopeRegExp: RegExp = /^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*)$/;
+  // Matches kebab-case formatted strings
+  // Example: "my-scope"
+  private static _scopeRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
   // "Environment variable names used by the utilities in the Shell and Utilities volume of
   // IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
@@ -53,6 +56,12 @@ export abstract class CommandLineParameter {
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;
+
+  /**
+   * If a parameterScope is provided, returns the scope-prefixed long name of the flag,
+   * including double dashes, eg. "--scope:do-something". Otherwise undefined.
+   */
+  public readonly scopedLongName: string | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
   public readonly shortName: string | undefined;
@@ -88,8 +97,8 @@ export abstract class CommandLineParameter {
 
     if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
       throw new Error(
-        `Invalid name: "${this.longName}". The parameter long name must be lower-case and use dash ` +
-          'delimiters (e.g. "--do-a-thing")'
+        `Invalid name: "${this.longName}". The parameter long name must be` +
+          ` lower-case and use dash delimiters (e.g. "--do-a-thing")`
       );
     }
 
@@ -105,10 +114,13 @@ export abstract class CommandLineParameter {
     if (this.parameterScope) {
       if (!CommandLineParameter._scopeRegExp.test(this.parameterScope)) {
         throw new Error(
-          `Invalid scope: "${this.parameterScope}". The parameter scope must only use alpha-numeric characters ` +
-            'and dash delimiters (e.g. "My-Scope")'
+          `Invalid scope: "${this.parameterScope}". The parameter scope name must be` +
+            ` lower-case and use dash delimiters (e.g. "my-scope")`
         );
       }
+      // Parameter long name is guranteed to start with '--' since this is validated above
+      const unprefixedLongName: string = this.longName.slice(2);
+      this.scopedLongName = `--${this.parameterScope}:${unprefixedLongName}`;
     }
 
     if (this.environmentVariable) {
