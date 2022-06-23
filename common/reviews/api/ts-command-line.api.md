@@ -121,6 +121,7 @@ export abstract class CommandLineParameter {
     _parserKey: string | undefined;
     protected reportInvalidData(data: any): never;
     readonly required: boolean;
+    readonly scopedLongName: string | undefined;
     // @internal
     abstract _setValue(data: any): void;
     readonly shortName: string | undefined;
@@ -162,7 +163,6 @@ export abstract class CommandLineParameterProvider {
     getIntegerListParameter(parameterLongName: string, parameterScope?: string): CommandLineIntegerListParameter;
     getIntegerParameter(parameterLongName: string, parameterScope?: string): CommandLineIntegerParameter;
     getParameterStringMap(): Record<string, string>;
-    getScopedLongName(parameter: CommandLineParameter): string;
     getStringListParameter(parameterLongName: string, parameterScope?: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string, parameterScope?: string): CommandLineStringParameter;
     protected abstract onDefineParameters(): void;

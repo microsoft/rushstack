@@ -88,21 +88,6 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * Returns an object with the parsed scope (if present) and the long name of the parameter.
-   */
-  public static parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult {
-    const result: RegExpExecArray | null =
-      CommandLineParameterProvider._possiblyScopedLongNameRegex.exec(scopedLongName);
-    if (!result || !result.groups) {
-      throw new Error(`The parameter long name "${scopedLongName}" is not valid.`);
-    }
-    return {
-      longName: `--${result.groups[CommandLineParameterProvider._longNameGroupName]}`,
-      scope: result.groups[CommandLineParameterProvider._scopeGroupName]
-    };
-  }
-
-  /**
    * Returns a collection of the parameters that were defined for this object.
    */
   public get parameters(): ReadonlyArray<CommandLineParameter> {
@@ -395,6 +380,21 @@ export abstract class CommandLineParameterProvider {
     return parameterMap;
   }
 
+  /**
+   * Returns an object with the parsed scope (if present) and the long name of the parameter.
+   */
+  public parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult {
+    const result: RegExpExecArray | null =
+      CommandLineParameterProvider._possiblyScopedLongNameRegex.exec(scopedLongName);
+    if (!result || !result.groups) {
+      throw new Error(`The parameter long name "${scopedLongName}" is not valid.`);
+    }
+    return {
+      longName: `--${result.groups[CommandLineParameterProvider._longNameGroupName]}`,
+      scope: result.groups[CommandLineParameterProvider._scopeGroupName]
+    };
+  }
+
   /** @internal */
   public _registerDefinedParameters(): void {
     if (this._parametersRegistered) {
@@ -596,7 +596,7 @@ export abstract class CommandLineParameterProvider {
     parameterScope?: string
   ): T {
     // Support the parameter long name being prefixed with the scope
-    const { scope, longName } = CommandLineParameterProvider.parseScopedLongName(parameterLongName);
+    const { scope, longName } = this.parseScopedLongName(parameterLongName);
     parameterLongName = longName;
     parameterScope = scope || parameterScope;
 
