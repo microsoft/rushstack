@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Conflicting CommandLineParser executes an action 1`] = `
+"usage: example do:the-job [-h] [--scope1:arg ARG] [--scope2:arg ARG]
+                          [--non-conflicting-arg ARG]
+                          
+
+a longer description
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --scope1:arg ARG      The argument
+  --scope2:arg ARG      The argument
+  --non-conflicting-arg ARG, --scope3:non-conflicting-arg ARG
+                        The argument
+"
+`;
+
+exports[`Conflicting CommandLineParser executes an action 2`] = `
+Object {
+  "--scope1:arg": "\\"scope1value\\"",
+  "--scope2:arg": "\\"scope2value\\"",
+  "--scope3:non-conflicting-arg": "\\"nonconflictingvalue\\"",
+}
+`;

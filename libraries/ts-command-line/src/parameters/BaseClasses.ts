@@ -30,11 +30,17 @@ export enum CommandLineParameterKind {
  * @public
  */
 export abstract class CommandLineParameter {
+  // Matches kebab-case formatted strings prefixed with double dashes.
   // Example: "--do-something"
   private static _longNameRegExp: RegExp = /^-(-[a-z0-9]+)+$/;
 
+  // Matches a single upper-case or lower-case letter prefixed with a dash.
   // Example: "-d"
   private static _shortNameRegExp: RegExp = /^-[a-zA-Z]$/;
+
+  // Matches kebab-case formatted strings
+  // Example: "my-scope"
+  private static _scopeRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
   // "Environment variable names used by the utilities in the Shell and Utilities volume of
   // IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
@@ -51,11 +57,20 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;
 
+  /**
+   * If a parameterScope is provided, returns the scope-prefixed long name of the flag,
+   * including double dashes, eg. "--scope:do-something". Otherwise undefined.
+   */
+  public readonly scopedLongName: string | undefined;
+
   /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
   public readonly shortName: string | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterGroup} */
   public readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
+
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterScope} */
+  public readonly parameterScope: string | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
@@ -74,6 +89,7 @@ export abstract class CommandLineParameter {
     this.longName = definition.parameterLongName;
     this.shortName = definition.parameterShortName;
     this.parameterGroup = definition.parameterGroup;
+    this.parameterScope = definition.parameterScope;
     this.description = definition.description;
     this.required = !!definition.required;
     this.environmentVariable = definition.environmentVariable;
@@ -95,6 +111,18 @@ export abstract class CommandLineParameter {
       }
     }
 
+    if (this.parameterScope) {
+      if (!CommandLineParameter._scopeRegExp.test(this.parameterScope)) {
+        throw new Error(
+          `Invalid scope: "${this.parameterScope}". The parameter scope name must be` +
+            ` lower-case and use dash delimiters (e.g. "my-scope")`
+        );
+      }
+      // Parameter long name is guranteed to start with '--' since this is validated above
+      const unprefixedLongName: string = this.longName.slice(2);
+      this.scopedLongName = `--${this.parameterScope}:${unprefixedLongName}`;
+    }
+
     if (this.environmentVariable) {
       if (this.required) {
         // TODO: This constraint is imposed only because argparse enforces "required" parameters, but
@@ -114,20 +142,16 @@ export abstract class CommandLineParameter {
     }
 
     if (this.undocumentedSynonyms && this.undocumentedSynonyms.length > 0) {
-      if (this.required) {
-        throw new Error('Undocumented synonyms are not allowed on required parameters.');
-      }
-
       for (const undocumentedSynonym of this.undocumentedSynonyms) {
         if (this.longName === undocumentedSynonym) {
           throw new Error(
-            `Invalid name: "${undocumentedSynonym}". Undocumented Synonyms must not be the same` +
+            `Invalid name: "${undocumentedSynonym}". Undocumented synonyms must not be the same` +
               ` as the the long name.`
           );
         } else if (!CommandLineParameter._longNameRegExp.test(undocumentedSynonym)) {
           throw new Error(
-            `Invalid name: "${undocumentedSynonym}". All undocumented Synonyms name must be` +
-              ` lower-case and use dash delimiters (e.g. "--do-a-thing")`
+            `Invalid name: "${undocumentedSynonym}". All undocumented synonyms name must be lower-case and ` +
+              'use dash delimiters (e.g. "--do-a-thing")'
           );
         }
       }
