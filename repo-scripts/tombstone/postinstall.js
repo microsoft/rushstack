@@ -6,7 +6,7 @@ function writeErrorInRed(message) {
 writeErrorInRed(`* * * * * * * * * * * * * THIS PACKAGE WAS DEPRECATED! * * * * * * * * * * * * * *`);
 
 console.error(`
-@rushstack/module-minifier-plugin has been renamed to @rushstack/webpack4-module-minifier-plugin.`);
+@rushstack/localization-plugin has been renamed to @rushstack/webpack4-localization-plugin.`);
 
 writeErrorInRed(`* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n`);
 
