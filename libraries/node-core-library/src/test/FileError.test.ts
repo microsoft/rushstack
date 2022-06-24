@@ -6,17 +6,26 @@ import * as path from 'path';
 import { FileError } from '../FileError';
 
 describe(FileError.name, () => {
+  let originalValue: string | undefined;
+
   beforeEach(() => {
+    originalValue = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
+    delete process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     FileError._sanitizedEnvironmentVariable = undefined;
     FileError._environmentVariableIsAbsolutePath = false;
   });
 
-  it('normalizes slashes in file paths', () => {
-    const error1: FileError = new FileError('message', {
-      absolutePath: `/path/to/project/path/to/file`,
-      projectFolder: '/path/to/project'
-    });
+  afterEach(() => {
+    if (originalValue) {
+      process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    }
+  });
 
+  it('normalizes slashes in relative file paths', () => {
+    const error1: FileError = new FileError('message', {
+      absolutePath: `C:\\path\\to\\project\\path\\to\\file`,
+      projectFolder: 'C:\\path\\to\\project'
+    });
     expect(error1.toString()).toEqual('./path/to/file - message');
 
     const error2: FileError = new FileError('message', {
@@ -206,7 +215,9 @@ describe(`${FileError.name} using arbitrary base folder`, () => {
   });
 
   afterEach(() => {
-    process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    if (originalValue) {
+      process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    }
   });
 
   it('correctly performs Unix-style file path formatting', () => {
@@ -233,7 +244,9 @@ describe(`${FileError.name} using PROJECT_FOLDER base folder`, () => {
   });
 
   afterEach(() => {
-    process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    if (originalValue) {
+      process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    }
   });
 
   it('correctly performs Unix-style file path formatting', () => {
@@ -258,7 +271,9 @@ describe(`${FileError.name} using ABSOLUTE_PATH base folder`, () => {
   });
 
   afterEach(() => {
-    process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    if (originalValue) {
+      process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    }
   });
 
   it('correctly performs Unix-style file path formatting', () => {
@@ -288,7 +303,9 @@ describe(`${FileError.name} using unsupported base folder token`, () => {
   });
 
   afterEach(() => {
-    process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    if (originalValue) {
+      process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    }
   });
 
   it('throws when performing Unix-style file path formatting', () => {
