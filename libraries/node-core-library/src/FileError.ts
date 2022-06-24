@@ -159,17 +159,17 @@ export class FileError extends Error {
     } else if (result.index !== 0) {
       // Currently only support the token being first in the string.
       throw new Error(
-        `The ${baseFolderEnvVar} environment variable contains text before ` + `the token "${result[0]}".`
+        `The ${baseFolderEnvVar} environment variable contains text before the token "${result[0]}".`
       );
     } else if (result[0].length !== FileError._sanitizedEnvironmentVariable!.length) {
       // Currently only support the token being the entire string.
       throw new Error(
-        `The ${baseFolderEnvVar} environment variable contains text after ` + `the token "${result[0]}".`
+        `The ${baseFolderEnvVar} environment variable contains text after the token "${result[0]}".`
       );
     } else {
       throw new Error(
-        `The ${baseFolderEnvVar} environment variable contains a token "${result[0]}", ` +
-          'which is not supported.'
+        `The ${baseFolderEnvVar} environment variable contains a token "${result[0]}", which is not ` +
+          'supported.'
       );
     }
   }
