@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1006,
+    "schemaVersion": 1007,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -174,11 +174,13 @@
   "canonicalReference": "api-documenter-test!",
   "docComment": "/**\n * api-extractor-test-05\n *\n * This project tests various documentation generation scenarios and doc comment syntaxes.\n *\n * @packageDocumentation\n */\n",
   "name": "api-documenter-test",
+  "preserveMemberOrder": false,
   "members": [
     {
       "kind": "EntryPoint",
       "canonicalReference": "api-documenter-test!",
       "name": "",
+      "preserveMemberOrder": false,
       "members": [
         {
           "kind": "Interface",
@@ -192,6 +194,7 @@
           ],
           "releaseTag": "Public",
           "name": "Constraint",
+          "preserveMemberOrder": false,
           "members": [],
           "extendsTokenRanges": []
         },
@@ -229,6 +232,7 @@
           ],
           "releaseTag": "Public",
           "name": "DecoratorExample",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Property",
@@ -275,6 +279,7 @@
           ],
           "releaseTag": "Public",
           "name": "DefaultType",
+          "preserveMemberOrder": false,
           "members": [],
           "extendsTokenRanges": []
         },
@@ -290,6 +295,7 @@
           ],
           "releaseTag": "Public",
           "name": "DocBaseClass",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Constructor",
@@ -384,6 +390,7 @@
           ],
           "releaseTag": "Public",
           "name": "DocClass1",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Method",
@@ -1015,6 +1022,7 @@
           ],
           "releaseTag": "Public",
           "name": "DocClassInterfaceMerge",
+          "preserveMemberOrder": false,
           "members": [],
           "implementsTokenRanges": []
         },
@@ -1030,6 +1038,7 @@
           ],
           "releaseTag": "Public",
           "name": "DocClassInterfaceMerge",
+          "preserveMemberOrder": false,
           "members": [],
           "extendsTokenRanges": []
         },
@@ -1045,6 +1054,7 @@
           ],
           "releaseTag": "Public",
           "name": "DocEnum",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "EnumMember",
@@ -1123,6 +1133,7 @@
           ],
           "releaseTag": "Public",
           "name": "DocEnumNamespaceMerge",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "EnumMember",
@@ -1180,6 +1191,7 @@
           ],
           "releaseTag": "Public",
           "name": "DocEnumNamespaceMerge",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Function",
@@ -1222,6 +1234,7 @@
           ],
           "releaseTag": "Public",
           "name": "EcmaSmbols",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Variable",
@@ -1434,6 +1447,7 @@
             }
           ],
           "name": "Generic",
+          "preserveMemberOrder": false,
           "members": [],
           "implementsTokenRanges": []
         },
@@ -1487,6 +1501,7 @@
           ],
           "releaseTag": "Public",
           "name": "IDocInterface1",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "PropertySignature",
@@ -1540,6 +1555,7 @@
           ],
           "releaseTag": "Public",
           "name": "IDocInterface2",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "MethodSignature",
@@ -1589,6 +1605,7 @@
           ],
           "releaseTag": "Public",
           "name": "IDocInterface3",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "PropertySignature",
@@ -1808,6 +1825,7 @@
           ],
           "releaseTag": "Public",
           "name": "IDocInterface4",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "PropertySignature",
@@ -1937,6 +1955,7 @@
           ],
           "releaseTag": "Public",
           "name": "IDocInterface5",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "PropertySignature",
@@ -1980,6 +1999,7 @@
           ],
           "releaseTag": "Public",
           "name": "IDocInterface6",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "PropertySignature",
@@ -2273,6 +2293,7 @@
           ],
           "releaseTag": "Public",
           "name": "IDocInterface7",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "PropertySignature",
@@ -2398,6 +2419,7 @@
           ],
           "releaseTag": "Public",
           "name": "OuterNamespace",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Namespace",
@@ -2411,6 +2433,7 @@
               ],
               "releaseTag": "Public",
               "name": "InnerNamespace",
+              "preserveMemberOrder": false,
               "members": [
                 {
                   "kind": "Function",
@@ -2494,6 +2517,7 @@
           ],
           "releaseTag": "Public",
           "name": "SystemEvent",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Method",

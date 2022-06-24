@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1006,
+    "schemaVersion": 1007,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -164,11 +164,13 @@
   "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
+  "preserveMemberOrder": false,
   "members": [
     {
       "kind": "EntryPoint",
       "canonicalReference": "api-extractor-scenarios!",
       "name": "",
+      "preserveMemberOrder": false,
       "members": [
         {
           "kind": "Interface",
@@ -182,6 +184,7 @@
           ],
           "releaseTag": "Public",
           "name": "DefaultImportTypes",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "PropertySignature",

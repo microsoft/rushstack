@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1005,
+    "schemaVersion": 1007,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -164,11 +164,13 @@
   "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
+  "preserveMemberOrder": false,
   "members": [
     {
       "kind": "EntryPoint",
       "canonicalReference": "api-extractor-scenarios!",
       "name": "",
+      "preserveMemberOrder": false,
       "members": [
         {
           "kind": "Enum",
@@ -182,6 +184,7 @@
           ],
           "releaseTag": "Public",
           "name": "ConstEnum",
+          "preserveMemberOrder": true,
           "members": [
             {
               "kind": "EnumMember",
@@ -260,6 +263,7 @@
           ],
           "releaseTag": "Public",
           "name": "RegularEnum",
+          "preserveMemberOrder": true,
           "members": [
             {
               "kind": "EnumMember",
