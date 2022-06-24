@@ -84,30 +84,55 @@ function rewriteRushProjectVersions(
   }
 
   for (const dependencyName of Object.keys(dependencies)) {
-    const workspaceProjectInfo: IWorkspaceProjectInfo | undefined =
-      settings.workspaceProjects[dependencyName];
-    if (!workspaceProjectInfo) {
-      continue;
-    }
-
     const currentVersion: string = dependencies[dependencyName];
-    if (!currentVersion.startsWith('workspace:')) {
-      continue;
+
+    if (currentVersion.startsWith('workspace:')) {
+      const workspaceProjectInfo: IWorkspaceProjectInfo | undefined =
+        settings.workspaceProjects[dependencyName];
+      if (workspaceProjectInfo) {
+        // Case 1. "<package_name>": "workspace:*"
+        const relativePath: string = path.relative(
+          splitWorkspaceProject.projectRelativeFolder,
+          workspaceProjectInfo.projectRelativeFolder
+        );
+        const newVersion: string = 'link:' + relativePath;
+        dependencies[dependencyName] = newVersion;
+      } else {
+        // Case 2. "<alias>": "workspace:<aliased_package_name>@<version>"
+        const packageSpec: string = currentVersion.slice('workspace:'.length);
+        const nameEndsAt =
+          packageSpec[0] === '@' ? packageSpec.slice(1).indexOf('@') + 1 : packageSpec.indexOf('@');
+        const aliasedPackageName: string = nameEndsAt > 0 ? packageSpec.slice(0, nameEndsAt) : packageSpec;
+        // const depVersion: string = nameEndsAt > 0 ? packageSpec.slice(nameEndsAt + 1) : '';
+        const aliasedWorkspaceProjectInfo: IWorkspaceProjectInfo | undefined =
+          settings.workspaceProjects[aliasedPackageName];
+        if (aliasedWorkspaceProjectInfo) {
+          const relativePath: string = path.relative(
+            splitWorkspaceProject.projectRelativeFolder,
+            aliasedWorkspaceProjectInfo.projectRelativeFolder
+          );
+          const newVersion: string = 'link:' + relativePath;
+          dependencies[dependencyName] = newVersion;
+        }
+      }
+    } else if (currentVersion.startsWith('npm:')) {
+      // Case 3. "<alias>": "npm:<package_name>@<dep_version>"
+      const packageSpec: string = currentVersion.slice('npm:'.length);
+      const nameEndsAt =
+        packageSpec[0] === '@' ? packageSpec.slice(1).indexOf('@') + 1 : packageSpec.indexOf('@');
+      const aliasedPackageName: string = nameEndsAt > 0 ? packageSpec.slice(0, nameEndsAt) : packageSpec;
+      // const depVersion: string = nameEndsAt > 0 ? packageSpec.slice(nameEndsAt + 1) : '';
+      const aliasedWorkspaceProjectInfo: IWorkspaceProjectInfo | undefined =
+        settings.workspaceProjects[aliasedPackageName];
+      if (aliasedWorkspaceProjectInfo) {
+        const relativePath: string = path.relative(
+          splitWorkspaceProject.projectRelativeFolder,
+          aliasedWorkspaceProjectInfo.projectRelativeFolder
+        );
+        const newVersion: string = 'link:' + relativePath;
+        dependencies[dependencyName] = newVersion;
+      }
     }
-
-    // FIXME: Is it necessary to check version range here?
-    // const versionRange: string = currentVersion.slice('workspace:'.length);
-    // if (semver && versionRange !== '*') {
-    //   if (!semver.satisfies(workspaceProjectInfo.packageVersion, versionRange)) {
-    //   };
-    // }
-
-    const relativePath: string = path.relative(
-      splitWorkspaceProject.projectRelativeFolder,
-      workspaceProjectInfo.projectRelativeFolder
-    );
-    const newVersion: string = 'link:' + relativePath;
-    dependencies[dependencyName] = newVersion;
   }
 }
 
