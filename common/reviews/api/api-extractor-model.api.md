@@ -250,7 +250,7 @@ export class ApiItem {
     getHierarchy(): ReadonlyArray<ApiItem>;
     getMergedSiblings(): ReadonlyArray<ApiItem>;
     getScopedNameWithinPackage(): string;
-    // @virtual (undocumented)
+    // @virtual
     getSortKey(): string;
     // @virtual
     get kind(): ApiItemKind;
@@ -649,9 +649,7 @@ export type Constructor<T = {}> = new (...args: any[]) => T;
 
 // @public
 export enum EnumMemberOrder {
-    // (undocumented)
     ByName = "by-name",
-    // (undocumented)
     Preserve = "preserve"
 }
 
