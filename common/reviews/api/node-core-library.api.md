@@ -191,9 +191,13 @@ export class FileError extends Error {
     constructor(message: string, options: IFileErrorOptions);
     readonly absolutePath: string;
     readonly column: number | undefined;
+    // @internal (undocumented)
+    static _environmentVariableIsAbsolutePath: boolean;
     getFormattedErrorMessage(options?: IFileErrorFormattingOptions): string;
     readonly line: number | undefined;
     readonly projectFolder: string;
+    // @internal (undocumented)
+    static _sanitizedEnvironmentVariable: string | undefined;
     // @override
     toString(): string;
 }

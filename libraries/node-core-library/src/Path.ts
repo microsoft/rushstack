@@ -157,16 +157,16 @@ export class Path {
    * Backslashes will be converted to slashes, unless the path starts with an OS-specific string like `C:\`.
    */
   public static formatFileLocation(options: IPathFormatFileLocationOptions): string {
-    const { message, format, line, column } = options;
+    const { message, format, pathToFormat, baseFolder, line, column } = options;
 
     // Convert the path to be relative to the base folder, if specified. Otherwise, use
     // the path as-is.
-    const filePath: string = options.baseFolder
+    const filePath: string = baseFolder
       ? Path.formatConcisely({
-          pathToConvert: options.pathToFormat,
-          baseFolder: options.baseFolder
+          pathToConvert: pathToFormat,
+          baseFolder
         })
-      : path.resolve(options.pathToFormat);
+      : path.resolve(pathToFormat);
 
     let formattedFileLocation: string;
     switch (format) {

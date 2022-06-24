@@ -54,6 +54,20 @@ const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
  * @public
  */
 export class FileError extends Error {
+  /** @internal */
+  public static _sanitizedEnvironmentVariable: string | undefined;
+  /** @internal */
+  public static _environmentVariableIsAbsolutePath: boolean = false;
+
+  private static _environmentVariableBasePathFnMap: ReadonlyMap<
+    string | undefined,
+    (fileError: FileError) => string | undefined
+  > = new Map([
+    [undefined, (fileError: FileError) => fileError.projectFolder],
+    ['{PROJECT_FOLDER}', (fileError: FileError) => fileError.projectFolder],
+    ['{ABSOLUTE_PATH}', (fileError: FileError) => undefined as string | undefined]
+  ]);
+
   /** {@inheritdoc IFileErrorOptions.absolutePath} */
   public readonly absolutePath: string;
   /** {@inheritdoc IFileErrorOptions.projectFolder} */
@@ -111,50 +125,52 @@ export class FileError extends Error {
   }
 
   private _evaluateBaseFolder(): string | undefined {
-    // If the environment variable isn't defined, we will return the project folder by default
-    if (!process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER) {
-      return this.projectFolder;
+    if (!FileError._sanitizedEnvironmentVariable) {
+      if (process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER) {
+        // Strip leading and trailing quotes, if present.
+        FileError._sanitizedEnvironmentVariable = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER.replace(
+          /^("|')|("|')$/g,
+          ''
+        );
+      }
     }
 
-    // Strip leading and trailing quotes, if present.
-    const rawBaseFolderEnvVariable: string = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER.replace(
-      /^("|')|("|')$/g,
-      ''
-    );
+    if (FileError._environmentVariableIsAbsolutePath) {
+      return FileError._sanitizedEnvironmentVariable;
+    }
+
+    // undefined environment variable has a mapping to the project folder
+    const baseFolderFn: ((fileError: FileError) => string | undefined) | undefined =
+      FileError._environmentVariableBasePathFnMap.get(FileError._sanitizedEnvironmentVariable);
+    if (baseFolderFn) {
+      return baseFolderFn(this);
+    }
 
     const baseFolderTokenRegex: RegExp = /{([^}]+)}/g;
-    const result: RegExpExecArray | null = baseFolderTokenRegex.exec(rawBaseFolderEnvVariable);
+    const result: RegExpExecArray | null = baseFolderTokenRegex.exec(
+      FileError._sanitizedEnvironmentVariable!
+    );
     if (!result) {
-      // No tokens, it's some absolute path. Return the value as-is.
-      return rawBaseFolderEnvVariable;
+      // No tokens, assume absolute path
+      FileError._environmentVariableIsAbsolutePath = true;
+      return FileError._sanitizedEnvironmentVariable;
     } else if (result.index !== 0) {
       // Currently only support the token being first in the string.
       throw new Error(
         'The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains text before ' +
           `the token "${result[0]}".`
       );
-    } else if (result[0].length !== rawBaseFolderEnvVariable.length) {
+    } else if (result[0].length !== FileError._sanitizedEnvironmentVariable!.length) {
       // Currently only support the token being the entire string.
       throw new Error(
         'The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains text after ' +
           `the token "${result[0]}".`
       );
-    }
-
-    const token: string = result[1];
-    switch (token) {
-      case 'ABSOLUTE_PATH': {
-        return undefined;
-      }
-      case 'PROJECT_FOLDER': {
-        return this.projectFolder;
-      }
-      default: {
-        throw new Error(
-          `The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains a token "${result[0]}", ` +
-            'which is not supported.'
-        );
-      }
+    } else {
+      throw new Error(
+        `The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains a token "${result[0]}", ` +
+          'which is not supported.'
+      );
     }
   }
 

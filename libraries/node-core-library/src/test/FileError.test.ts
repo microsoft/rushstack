@@ -6,6 +6,11 @@ import * as path from 'path';
 import { FileError } from '../FileError';
 
 describe(FileError.name, () => {
+  beforeEach(() => {
+    FileError._sanitizedEnvironmentVariable = undefined;
+    FileError._environmentVariableIsAbsolutePath = false;
+  });
+
   it('normalizes slashes in file paths', () => {
     const error1: FileError = new FileError('message', {
       absolutePath: `/path/to/project/path/to/file`,
@@ -194,6 +199,8 @@ describe(`${FileError.name} using arbitrary base folder`, () => {
   let originalValue: string | undefined;
 
   beforeEach(() => {
+    FileError._sanitizedEnvironmentVariable = undefined;
+    FileError._environmentVariableIsAbsolutePath = false;
     originalValue = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = '/path';
   });
@@ -219,6 +226,8 @@ describe(`${FileError.name} using PROJECT_FOLDER base folder`, () => {
   let originalValue: string | undefined;
 
   beforeEach(() => {
+    FileError._sanitizedEnvironmentVariable = undefined;
+    FileError._environmentVariableIsAbsolutePath = false;
     originalValue = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = '{PROJECT_FOLDER}';
   });
@@ -242,6 +251,8 @@ describe(`${FileError.name} using ABSOLUTE_PATH base folder`, () => {
   let originalValue: string | undefined;
 
   beforeEach(() => {
+    FileError._sanitizedEnvironmentVariable = undefined;
+    FileError._environmentVariableIsAbsolutePath = false;
     originalValue = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = '{ABSOLUTE_PATH}';
   });
@@ -270,6 +281,8 @@ describe(`${FileError.name} using unsupported base folder token`, () => {
   let originalValue: string | undefined;
 
   beforeEach(() => {
+    FileError._sanitizedEnvironmentVariable = undefined;
+    FileError._environmentVariableIsAbsolutePath = false;
     originalValue = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = '{SOME_TOKEN}';
   });
