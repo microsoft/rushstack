@@ -44,6 +44,8 @@ export interface IFileErrorFormattingOptions {
 
 const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
 
+const baseFolderEnvVar: string = 'RUSHSTACK_FILE_ERROR_BASE_FOLDER';
+
 /**
  * An `Error` subclass that should be thrown to report an unexpected state that specifically references
  * a location in a file.
@@ -130,13 +132,10 @@ export class FileError extends Error {
     // of being able to cache absolute paths, since that is only able to be determined after
     // running the regex, which is expensive. Since this would be a common execution path for
     // tools like Rush, we should optimize for that.
-    if (!FileError._sanitizedEnvironmentVariable && process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER) {
+    if (!FileError._sanitizedEnvironmentVariable && process.env[baseFolderEnvVar]) {
       // Strip leading and trailing quotes, if present.
-      FileError._sanitizedEnvironmentVariable = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER.replace(
-        /^("|')|("|')$/g,
-        ''
-      );
-  }
+      FileError._sanitizedEnvironmentVariable = process.env[baseFolderEnvVar]!.replace(/^("|')|("|')$/g, '');
+    }
 
     if (FileError._environmentVariableIsAbsolutePath) {
       return FileError._sanitizedEnvironmentVariable;
@@ -160,18 +159,16 @@ export class FileError extends Error {
     } else if (result.index !== 0) {
       // Currently only support the token being first in the string.
       throw new Error(
-        'The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains text before ' +
-          `the token "${result[0]}".`
+        `The ${baseFolderEnvVar} environment variable contains text before ` + `the token "${result[0]}".`
       );
     } else if (result[0].length !== FileError._sanitizedEnvironmentVariable!.length) {
       // Currently only support the token being the entire string.
       throw new Error(
-        'The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains text after ' +
-          `the token "${result[0]}".`
+        `The ${baseFolderEnvVar} environment variable contains text after ` + `the token "${result[0]}".`
       );
     } else {
       throw new Error(
-        `The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains a token "${result[0]}", ` +
+        `The ${baseFolderEnvVar} environment variable contains a token "${result[0]}", ` +
           'which is not supported.'
       );
     }
