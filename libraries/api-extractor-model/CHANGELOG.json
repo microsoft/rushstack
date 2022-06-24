@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.19.0",
+      "tag": "@microsoft/api-extractor-model_v7.19.0",
+      "date": "Fri, 24 Jun 2022 07:16:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added new configuration for ItemContainerMixin member ordering"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.18.2",
       "tag": "@microsoft/api-extractor-model_v7.18.2",
       "date": "Fri, 17 Jun 2022 09:17:54 GMT",
