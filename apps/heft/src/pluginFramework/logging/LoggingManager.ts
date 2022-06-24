@@ -86,7 +86,7 @@ export class LoggingManager {
 
   public static getErrorMessage(error: Error, options?: IFileErrorFormattingOptions): string {
     if (error instanceof FileError) {
-      return (error as FileError).getFormattedErrorMessage(options);
+      return error.getFormattedErrorMessage(options);
     } else {
       return error.message;
     }
