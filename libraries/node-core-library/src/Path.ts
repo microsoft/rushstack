@@ -44,13 +44,6 @@ export interface IPathFormatFileLocationOptions {
    * in the formatted string.
    */
   column?: number;
-  /**
-   * Whether or not the formatted location should be a warning.
-   *
-   * @remarks This is only used for the Azure DevOps format, since referencing the location
-   * must be done as either a warning or an error. If false, it is assumed to be an error.
-   */
-  isWarning?: boolean;
 }
 
 /**

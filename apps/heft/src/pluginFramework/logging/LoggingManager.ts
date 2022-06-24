@@ -60,7 +60,7 @@ export class LoggingManager {
         ...scopedLogger.errors.map(
           (error) =>
             `[${scopedLogger.loggerName}] ` +
-            LoggingManager.getErrorMessage(error, { format: fileLocationStyle, isWarning: false })
+            LoggingManager.getErrorMessage(error, { format: fileLocationStyle })
         )
       );
     }
@@ -76,7 +76,7 @@ export class LoggingManager {
         ...scopedLogger.warnings.map(
           (warning) =>
             `[${scopedLogger.loggerName}] ` +
-            LoggingManager.getErrorMessage(warning, { format: fileErrorFormat, isWarning: true })
+            LoggingManager.getErrorMessage(warning, { format: fileErrorFormat })
         )
       );
     }

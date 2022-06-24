@@ -581,7 +581,6 @@ export interface IPathFormatFileLocationOptions {
     baseFolder?: string;
     column?: number;
     format: FileLocationStyle;
-    isWarning?: boolean;
     line?: number;
     message: string;
     pathToFormat: string;
