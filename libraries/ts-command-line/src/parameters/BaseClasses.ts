@@ -98,7 +98,7 @@ export abstract class CommandLineParameter {
     if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
       throw new Error(
         `Invalid name: "${this.longName}". The parameter long name must be` +
-          ' lower-case and use dash delimiters (e.g. "--do-a-thing")'
+          ` lower-case and use dash delimiters (e.g. "--do-a-thing")`
       );
     }
 
@@ -150,8 +150,8 @@ export abstract class CommandLineParameter {
           );
         } else if (!CommandLineParameter._longNameRegExp.test(undocumentedSynonym)) {
           throw new Error(
-            `Invalid name: "${undocumentedSynonym}". All undocumented synonyms name must be lower-case and` +
-              ' use dash delimiters (e.g. "--do-a-thing")'
+            `Invalid name: "${undocumentedSynonym}". All undocumented synonyms name must be lower-case and ` +
+              'use dash delimiters (e.g. "--do-a-thing")'
           );
         }
       }
