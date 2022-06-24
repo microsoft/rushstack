@@ -7,11 +7,10 @@ import * as path from 'path';
  * The format that the FileError message should conform to. The supported formats are:
  *  - Unix: `<path>:<line>:<column> - <message>`
  *  - VisualStudio: `<path>(<line>,<column>) - <message>`
- *  - AzureDevOps: `##vso[task.logissue type=<error|warning>;sourcepath=<path>;linenumber=<line>;columnnumber=<column>;]<message>`
  *
  * @public
  */
-export type FileLocationStyle = 'Unix' | 'VisualStudio' | 'AzureDevOps';
+export type FileLocationStyle = 'Unix' | 'VisualStudio';
 
 /**
  * Options for {@link Path.formatFileLocation}.

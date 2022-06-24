@@ -99,7 +99,7 @@ export class FileError extends Error {
    */
   public toString(): string {
     // Default to formatting in 'Unix' format, for consistency.
-    return this.getFormattedErrorMessage({ format: 'Unix' });
+    return this.getFormattedErrorMessage();
   }
 
   /**
@@ -108,24 +108,9 @@ export class FileError extends Error {
    * @param options - Options for the error message format.
    */
   public getFormattedErrorMessage(options?: IFileErrorFormattingOptions): string {
-    let format: FileLocationStyle | undefined = options?.format;
-    if (!format) {
-      // If no format is provided, check to see if we are running in Azure DevOps and adapt our output.
-      // Azure DevOps populates the TF_BUILD environment variable when running on an Azure DevOps agent.
-      // Otherwise, fallback to Unix format. For more information on TF_BUILD, see:
-      // https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#system-variables-devops-services
-      format = process.env.TF_BUILD === 'True' ? 'AzureDevOps' : 'Unix';
-    }
-
-    // Always use the absolute path for the formatted file location if the format is 'AzureDevOps'.
-    let baseFolder: string | undefined;
-    if (format !== 'AzureDevOps') {
-      baseFolder = this._evaluateBaseFolder();
-    }
-
     return Path.formatFileLocation({
-      format,
-      baseFolder,
+      format: options?.format || 'Unix',
+      baseFolder: this._evaluateBaseFolder(),
       pathToFormat: this.absolutePath,
       message: this.message,
       line: this.line,
