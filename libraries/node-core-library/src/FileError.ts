@@ -130,15 +130,13 @@ export class FileError extends Error {
     // of being able to cache absolute paths, since that is only able to be determined after
     // running the regex, which is expensive. Since this would be a common execution path for
     // tools like Rush, we should optimize for that.
-    if (!FileError._sanitizedEnvironmentVariable) {
-      if (process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER) {
-        // Strip leading and trailing quotes, if present.
-        FileError._sanitizedEnvironmentVariable = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER.replace(
-          /^("|')|("|')$/g,
-          ''
-        );
-      }
-    }
+    if (!FileError._sanitizedEnvironmentVariable && process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER) {
+      // Strip leading and trailing quotes, if present.
+      FileError._sanitizedEnvironmentVariable = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER.replace(
+        /^("|')|("|')$/g,
+        ''
+      );
+  }
 
     if (FileError._environmentVariableIsAbsolutePath) {
       return FileError._sanitizedEnvironmentVariable;
@@ -173,7 +171,7 @@ export class FileError extends Error {
       );
     } else {
       throw new Error(
-        `The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains a token "${result[0]}" ` +
+        `The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains a token "${result[0]}", ` +
           'which is not supported.'
       );
     }
