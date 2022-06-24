@@ -1,0 +1,28 @@
+{
+  "name": "@rushstack/webpack5-localization-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.0",
+      "date": "Thu, 23 Jun 2022 22:14:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial publish of webpack 5 compatible localization plugin."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.7.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.10`"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -92,6 +92,8 @@ const PACKAGE_CAPTUREGROUP: string = 'package';
 const PACKAGEDIR_REGEX: RegExp = /^<packageDir:\s*(?<package>[^\s>]+)\s*>/;
 const JSONPATHPROPERTY_REGEX: RegExp = /^\$\['([^']+)'\]/;
 
+const JEST_CONFIG_PACKAGE_FOLDER: string = path.dirname(require.resolve('jest-config'));
+
 /**
  * @internal
  */
@@ -436,6 +438,12 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         const configDir: string = path.dirname(configurationFilePath);
         const parsedPropertyName: string | undefined = propertyName?.match(JSONPATHPROPERTY_REGEX)?.[1];
 
+        function requireResolveFunction(request: string): string {
+          return require.resolve(request, {
+            paths: [configDir, PLUGIN_PACKAGE_FOLDER, JEST_CONFIG_PACKAGE_FOLDER]
+          });
+        }
+
         // Compare with replaceRootDirInPath() from here:
         // https://github.com/facebook/jest/blob/5f4dd187d89070d07617444186684c20d9213031/packages/jest-config/src/utils.ts#L58
         if (propertyValue.startsWith(ROOTDIR_TOKEN)) {
@@ -507,22 +515,26 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
           case 'testRunner':
             return resolveRunner(/*resolver:*/ undefined, {
               rootDir: configDir,
-              filePath: propertyValue
+              filePath: propertyValue,
+              requireResolveFunction
             });
           case 'testSequencer':
             return resolveSequencer(/*resolver:*/ undefined, {
               rootDir: configDir,
-              filePath: propertyValue
+              filePath: propertyValue,
+              requireResolveFunction
             });
           case 'testEnvironment':
             return resolveTestEnvironment({
               rootDir: configDir,
-              testEnvironment: propertyValue
+              testEnvironment: propertyValue,
+              requireResolveFunction
             });
           case 'watchPlugins':
             return resolveWatchPlugin(/*resolver:*/ undefined, {
               rootDir: configDir,
-              filePath: propertyValue
+              filePath: propertyValue,
+              requireResolveFunction
             });
           default:
             // We know the value will be non-null since resolve will throw an error if it is null

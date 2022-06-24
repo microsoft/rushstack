@@ -37,6 +37,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  --- | --- | --- | --- |
 |  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) |  | string |  |
 |  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |
+|  [staticReadonlyThing](./api-documenter-test.docclass1.staticreadonlything.md) | <code>static</code> | boolean |  |
 |  [writeableProperty](./api-documenter-test.docclass1.writeableproperty.md) |  | string |  |
 |  [writeonlyProperty](./api-documenter-test.docclass1.writeonlyproperty.md) |  | string | API Extractor will surface an <code>ae-missing-getter</code> finding for this property. |
 

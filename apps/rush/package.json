@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.70.0",
+  "version": "5.74.0",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -31,6 +31,7 @@
   },
   "bin": {
     "rush": "./bin/rush",
+    "rush-pnpm": "./bin/rush-pnpm",
     "rushx": "./bin/rushx"
   },
   "license": "MIT",

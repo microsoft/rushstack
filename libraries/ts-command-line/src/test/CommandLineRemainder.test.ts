@@ -37,6 +37,8 @@ function createParser(): DynamicCommandLineParser {
     description: 'The action remainder'
   });
 
+  commandLineParser._registerDefinedParameters();
+
   return commandLineParser;
 }
 

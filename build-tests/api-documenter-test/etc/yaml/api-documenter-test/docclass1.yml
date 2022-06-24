@@ -45,6 +45,19 @@ properties:
       content: 'regularProperty: SystemEvent;'
       return:
         type: '<xref uid="api-documenter-test!SystemEvent:class" />'
+  - name: staticReadonlyThing
+    uid: 'api-documenter-test!DocClass1.staticReadonlyThing:member'
+    package: api-documenter-test!
+    fullName: staticReadonlyThing
+    summary: ''
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'static readonly staticReadonlyThing: boolean;'
+      return:
+        type: boolean
   - name: writeableProperty
     uid: 'api-documenter-test!DocClass1#writeableProperty:member'
     package: api-documenter-test!

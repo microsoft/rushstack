@@ -1,6 +1,29 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 25 May 2022 22:25:07 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Jun 2022 22:14:24 GMT and should not be manually modified.
+
+## 7.25.3
+Thu, 23 Jun 2022 22:14:24 GMT
+
+_Version update only_
+
+## 7.25.2
+Fri, 17 Jun 2022 09:17:54 GMT
+
+_Version update only_
+
+## 7.25.1
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 7.25.0
+Tue, 07 Jun 2022 09:37:04 GMT
+
+### Minor changes
+
+- Add an "isReadonly" field to the doc model to indicate whether a property or variable is readonly
+- Add an "isProtected" field to the doc model to indicate protected class members
 
 ## 7.24.2
 Wed, 25 May 2022 22:25:07 GMT

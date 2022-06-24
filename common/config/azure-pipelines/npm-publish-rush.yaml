@@ -14,7 +14,7 @@ steps:
     parameters:
       VersionPolicyName: rush
   - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
-    displayName: 'Prepublish workaround'
+    displayName: 'Prepublish workaround for rush-lib'
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: noRush

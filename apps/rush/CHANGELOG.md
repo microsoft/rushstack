@@ -1,6 +1,31 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 11 May 2022 22:21:40 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Jun 2022 22:17:51 GMT and should not be manually modified.
+
+## 5.74.0
+Fri, 10 Jun 2022 22:17:51 GMT
+
+_Version update only_
+
+## 5.73.0
+Fri, 10 Jun 2022 21:54:49 GMT
+
+_Version update only_
+
+## 5.72.0
+Fri, 10 Jun 2022 20:01:47 GMT
+
+### Updates
+
+- Introduce a "rush-pnpm" shell command for invoking native PNPM commands in a Rush workspace
+
+## 5.71.0
+Fri, 27 May 2022 00:50:06 GMT
+
+### Updates
+
+- Write local telemetry for all phased commands, including partial runs when running in watch mode.
+- Export the list of workspace packages to the pnpmfile shim.
 
 ## 5.70.0
 Wed, 11 May 2022 22:21:40 GMT

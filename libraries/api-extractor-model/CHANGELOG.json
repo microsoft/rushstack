@@ -2,6 +2,48 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.18.2",
+      "tag": "@microsoft/api-extractor-model_v7.18.2",
+      "date": "Fri, 17 Jun 2022 09:17:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.1",
+      "tag": "@microsoft/api-extractor-model_v7.18.1",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.0",
+      "tag": "@microsoft/api-extractor-model_v7.18.0",
+      "date": "Tue, 07 Jun 2022 09:37:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an \"isReadonly\" field to ApiProperty, ApiPropertySignature, and ApiVariable"
+          },
+          {
+            "comment": "Add an \"isProtected\" field to ApiConstructor, ApiMethod, and ApiProperty"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.17.3",
       "tag": "@microsoft/api-extractor-model_v7.17.3",
       "date": "Tue, 10 May 2022 01:20:43 GMT",

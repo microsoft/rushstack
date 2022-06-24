@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PackageJsonLookup } from '@rushstack/node-core-library';
+import { ITerminalProvider, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushStartupBanner } from '../cli/RushStartupBanner';
@@ -9,6 +9,7 @@ import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -35,6 +36,11 @@ export interface ILaunchOptions {
    * @internal
    */
   builtInPluginConfigurations?: IBuiltInPluginConfiguration[];
+
+  /**
+   * Used to specify terminal how to write a message
+   */
+  terminalProvider?: ITerminalProvider;
 }
 
 /**
@@ -49,8 +55,6 @@ export class Rush {
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
    * and start a new Node.js process.
-   *
-   * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
    *
    * @remarks
    * Earlier versions of the rush frontend used a different API contract. In the old contract,
@@ -83,14 +87,22 @@ export class Rush {
    * This API is used by the `@microsoft/rush` front end to launch the "rushx" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rushx" binary
    * and start a new Node.js process.
-   *
-   * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
    */
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
 
     Rush._assignRushInvokedFolder();
     RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
+  }
+
+  /**
+   * This API is used by the `@microsoft/rush` front end to launch the "rush-pnpm" command-line.
+   * Third-party tools should not use this API.  Instead, they should execute the "rush-pnpm" binary
+   * and start a new Node.js process.
+   */
+  public static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void {
+    Rush._assignRushInvokedFolder();
+    RushPnpmCommandLine.launch(launcherVersion, { ...options });
   }
 
   /**

@@ -9,8 +9,8 @@
     "_phase:build": "node build.js"
   },
   "dependencies": {
-    "@rushstack/localization-plugin": "workspace:*",
-    "@rushstack/module-minifier-plugin": "workspace:*",
+    "@rushstack/webpack4-localization-plugin": "workspace:*",
+    "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",
     "@types/lodash": "4.14.116",
