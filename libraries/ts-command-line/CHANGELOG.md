@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Jun 2022 22:14:24 GMT and should not be manually modified.
+
+## 4.12.0
+Thu, 23 Jun 2022 22:14:24 GMT
+
+### Minor changes
+
+- Add parameter scopes. Parameter scopes allow for behind-the-scenes conflict resolution between parameters with the same long name. For example, when provided scope "my-scope", a parameter can be referenced on the CLI as "--my-parameter" or as "--my-scope:my-parameter". In the case that multiple parameters are registered with the same long name but different scopes, the parameters can only be referenced by their scoped long names, eg. "--my-scope:my-parameter" and "--my-other-scope:my-parameter".
 
 ## 4.11.1
 Fri, 17 Jun 2022 00:16:18 GMT

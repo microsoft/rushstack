@@ -4,7 +4,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const { HashedFolderCopyPlugin } = require('@rushstack/hashed-folder-copy-plugin');
-const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/module-minifier-plugin');
+const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');

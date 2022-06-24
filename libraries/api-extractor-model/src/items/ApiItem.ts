@@ -262,7 +262,17 @@ export class ApiItem {
     return undefined;
   }
 
-  /** @virtual */
+  /**
+   * A text string whose value determines the sort order that is automatically applied by the
+   * {@link (ApiItemContainerMixin:interface)} class.
+   *
+   * @remarks
+   * The value of this string is undocumented and may change at any time.
+   * If {@link (ApiItemContainerMixin:interface).preserveMemberOrder} is enabled for the `ApiItem`'s parent,
+   * then no sorting is performed, and this key is not used.
+   *
+   * @virtual
+   */
   public getSortKey(): string {
     return this.containerKey;
   }

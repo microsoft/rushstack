@@ -7,6 +7,8 @@
 
   "newlineKind": "crlf",
 
+  "enumMemberOrder": "by-name",
+
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/tsconfig.json",
     "skipLibCheck": false

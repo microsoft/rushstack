@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.26.0",
+      "tag": "@microsoft/api-extractor_v7.26.0",
+      "date": "Fri, 24 Jun 2022 07:16:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include new configuration option for preserving enum member order"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.19.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.25.3",
+      "tag": "@microsoft/api-extractor_v7.25.3",
+      "date": "Thu, 23 Jun 2022 22:14:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.12.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.25.2",
       "tag": "@microsoft/api-extractor_v7.25.2",
       "date": "Fri, 17 Jun 2022 09:17:54 GMT",

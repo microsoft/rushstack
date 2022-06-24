@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 17 Jun 2022 09:17:54 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jun 2022 07:16:47 GMT and should not be manually modified.
+
+## 7.26.0
+Fri, 24 Jun 2022 07:16:47 GMT
+
+### Minor changes
+
+- Include new configuration option for preserving enum member order
+
+## 7.25.3
+Thu, 23 Jun 2022 22:14:24 GMT
+
+_Version update only_
 
 ## 7.25.2
 Fri, 17 Jun 2022 09:17:54 GMT

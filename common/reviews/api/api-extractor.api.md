@@ -4,6 +4,7 @@
 
 ```ts
 
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { INodePackageJson } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
@@ -51,6 +52,7 @@ export class ExtractorConfig {
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
+    readonly enumMemberOrder: EnumMemberOrder;
     static readonly FILENAME: string;
     getDiagnosticDump(): string;
     // @internal
@@ -202,6 +204,7 @@ export interface IConfigFile {
     docModel?: IConfigDocModel;
     // @beta
     dtsRollup?: IConfigDtsRollup;
+    enumMemberOrder: EnumMemberOrder;
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;

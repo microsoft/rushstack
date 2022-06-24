@@ -250,7 +250,7 @@ export class ApiItem {
     getHierarchy(): ReadonlyArray<ApiItem>;
     getMergedSiblings(): ReadonlyArray<ApiItem>;
     getScopedNameWithinPackage(): string;
-    // @virtual (undocumented)
+    // @virtual
     getSortKey(): string;
     // @virtual
     get kind(): ApiItemKind;
@@ -273,6 +273,7 @@ export interface ApiItemContainerMixin extends ApiItem {
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
     // @internal
     _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
+    readonly preserveMemberOrder: boolean;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
     tryGetMemberByKey(containerKey: string): ApiItem | undefined;
@@ -647,6 +648,12 @@ export class ApiVariable extends ApiVariable_base {
 export type Constructor<T = {}> = new (...args: any[]) => T;
 
 // @public
+export enum EnumMemberOrder {
+    ByName = "by-name",
+    Preserve = "preserve"
+}
+
+// @public
 export class Excerpt {
     constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange);
     get isEmpty(): boolean;
@@ -744,6 +751,8 @@ export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<
 export interface IApiItemContainerMixinOptions extends IApiItemOptions {
     // (undocumented)
     members?: ApiItem[];
+    // (undocumented)
+    preserveMemberOrder?: boolean;
 }
 
 // @public

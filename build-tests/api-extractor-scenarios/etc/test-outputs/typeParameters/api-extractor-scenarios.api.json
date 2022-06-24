@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1006,
+    "schemaVersion": 1007,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -164,11 +164,13 @@
   "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
+  "preserveMemberOrder": false,
   "members": [
     {
       "kind": "EntryPoint",
       "canonicalReference": "api-extractor-scenarios!",
       "name": "",
+      "preserveMemberOrder": false,
       "members": [
         {
           "kind": "Class",
@@ -182,6 +184,7 @@
           ],
           "releaseTag": "Public",
           "name": "ClassWithGenericMethod",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Method",
@@ -254,6 +257,7 @@
             }
           ],
           "name": "GenericClass",
+          "preserveMemberOrder": false,
           "members": [],
           "implementsTokenRanges": []
         },
@@ -290,6 +294,7 @@
             }
           ],
           "name": "GenericClassWithConstraint",
+          "preserveMemberOrder": false,
           "members": [],
           "implementsTokenRanges": []
         },
@@ -326,6 +331,7 @@
             }
           ],
           "name": "GenericClassWithDefault",
+          "preserveMemberOrder": false,
           "members": [],
           "implementsTokenRanges": []
         },
@@ -394,6 +400,7 @@
             }
           ],
           "name": "GenericInterface",
+          "preserveMemberOrder": false,
           "members": [],
           "extendsTokenRanges": []
         },
@@ -447,6 +454,7 @@
           ],
           "releaseTag": "Public",
           "name": "InterfaceWithGenericCallSignature",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "CallSignature",
@@ -502,6 +510,7 @@
           ],
           "releaseTag": "Public",
           "name": "InterfaceWithGenericConstructSignature",
+          "preserveMemberOrder": false,
           "members": [
             {
               "kind": "ConstructSignature",

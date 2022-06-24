@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Fri, 17 Jun 2022 09:17:54 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jun 2022 07:16:47 GMT and should not be manually modified.
+
+## 7.19.0
+Fri, 24 Jun 2022 07:16:47 GMT
+
+### Minor changes
+
+- Added new configuration for ItemContainerMixin member ordering
 
 ## 7.18.2
 Fri, 17 Jun 2022 09:17:54 GMT

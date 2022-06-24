@@ -1,6 +1,6 @@
 # @rushstack/module-minifier
 
-This library wraps terser in convenient handles for parallelization. It powers @rushstack/module-minifier-plugin but has no coupling with webpack.
+This library wraps terser in convenient handles for parallelization. It powers @rushstack/webpack4-module-minifier-plugin and @rushstack/webpack5-module-minifier-plugin but has no coupling with webpack.
 
 ## Links
 

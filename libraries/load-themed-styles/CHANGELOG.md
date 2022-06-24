@@ -1,6 +1,16 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Fri, 17 Jun 2022 09:17:54 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Jun 2022 07:16:47 GMT and should not be manually modified.
+
+## 1.10.272
+Fri, 24 Jun 2022 07:16:47 GMT
+
+_Version update only_
+
+## 1.10.271
+Thu, 23 Jun 2022 22:14:24 GMT
+
+_Version update only_
 
 ## 1.10.270
 Fri, 17 Jun 2022 09:17:54 GMT

@@ -147,20 +147,12 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@rushstack/localization-plugin",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@rushstack/localization-utilities",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@rushstack/module-minifier-plugin",
-      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/node-core-library",
@@ -213,6 +205,14 @@
     {
       "name": "@rushstack/webpack-plugin-utilities",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/webpack4-localization-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/webpack4-module-minifier-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/webpack5-module-minifier-plugin",
