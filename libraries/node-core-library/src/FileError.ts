@@ -125,6 +125,11 @@ export class FileError extends Error {
   }
 
   private _evaluateBaseFolder(): string | undefined {
+    // Cache the sanitized environment variable. This means that we don't support changing
+    // the environment variable mid-execution. This is a reasonable tradeoff for the benefit
+    // of being able to cache absolute paths, since that is only able to be determined after
+    // running the regex, which is expensive. Since this would be a common execution path for
+    // tools like Rush, we should optimize for that.
     if (!FileError._sanitizedEnvironmentVariable) {
       if (process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER) {
         // Strip leading and trailing quotes, if present.
