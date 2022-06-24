@@ -98,6 +98,11 @@ export class PnpmfileConfiguration {
       );
 
       for (const project of rushConfiguration.projects) {
+        if (!project.packageJson.version) {
+          throw new Error(
+            `Missing version for the "${project.packageName}" project. Please specify "version" field in package.json under ${project.projectFolder}`
+          );
+        }
         workspaceVersions[project.packageName] = project.packageJson.version;
       }
     }
