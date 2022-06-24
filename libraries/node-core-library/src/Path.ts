@@ -194,20 +194,6 @@ export class Path {
         break;
       }
 
-      case 'AzureDevOps': {
-        // Implements the format used by the Azure DevOps pipeline to log errors
-        // https://docs.microsoft.com/en-us/azure/devops/pipelines/scripts/logging-commands?view=azure-devops&tabs=bash#logissue-log-an-error-or-warning
-        const isWarning: boolean = options?.isWarning || false;
-        return (
-          '##vso[task.logissue ' +
-          `type=${isWarning ? 'warning' : 'error'};` +
-          `sourcepath=${filePath};` +
-          (line !== undefined ? `linenumber=${line};` : '') +
-          (line !== undefined && column !== undefined ? `columnnumber=${column};` : '') +
-          `]${message}`
-        );
-      }
-
       default: {
         throw new Error(`Unknown format: ${format}`);
       }

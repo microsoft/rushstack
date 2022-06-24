@@ -199,7 +199,7 @@ export class FileError extends Error {
 }
 
 // @public
-export type FileLocationStyle = 'Unix' | 'VisualStudio' | 'AzureDevOps';
+export type FileLocationStyle = 'Unix' | 'VisualStudio';
 
 // @public
 export class FileSystem {

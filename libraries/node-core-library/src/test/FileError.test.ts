@@ -1,90 +1,112 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+
 import { FileError } from '../FileError';
 
 describe(FileError.name, () => {
   it('normalizes slashes in file paths', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: `C:\\path\\to\\project\\path\\to\\file`,
-      projectFolder: 'C:\\path\\to\\project'
+      absolutePath: `/path/to/project/path/to/file`,
+      projectFolder: '/path/to/project'
     });
 
     expect(error1.toString()).toEqual('./path/to/file - message');
 
     const error2: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project'
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project'
     });
     expect(error2.toString()).toEqual('./path/to/file - message');
   });
 
   it('correctly performs Unix-style relative file path formatting', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5,
       column: 12
     });
     expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file:5:12 - message');
 
     const error2: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5
     });
     expect(error2.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file:5 - message');
 
     const error3: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: undefined,
       column: 12
     });
     expect(error3.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file - message');
 
     const error4: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project'
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project'
     });
     expect(error4.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file - message');
   });
 
   it('correctly performs Unix-style file absolute path formatting', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5,
       column: 12
     });
-    expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toEqual('C:\\path\\to\\file:5:12 - message');
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error1Message: string = error1.getFormattedErrorMessage({ format: 'Unix' });
+    expect(error1Message).toMatch(/.+:5:12 - message$/);
+    const error1Path: string = error1Message.slice(0, error1Message.length - ':5:12 - message'.length);
+    expect(path.isAbsolute(error1Path)).toEqual(true);
 
     const error2: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5
     });
-    expect(error2.getFormattedErrorMessage({ format: 'Unix' })).toEqual('C:\\path\\to\\file:5 - message');
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error2Message: string = error2.getFormattedErrorMessage({ format: 'Unix' });
+    expect(error2Message).toMatch(/.+:5 - message$/);
+    const error2Path: string = error2Message.slice(0, error2Message.length - ':5 - message'.length);
+    expect(path.isAbsolute(error2Path)).toEqual(true);
 
     const error3: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/file',
+      projectFolder: '/path/to/project',
       line: undefined,
       column: 12
     });
-    expect(error3.getFormattedErrorMessage({ format: 'Unix' })).toEqual('C:\\path\\to\\file - message');
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error3Message: string = error3.getFormattedErrorMessage({ format: 'Unix' });
+    expect(error3Message).toMatch(/.+ - message$/);
+    const error3Path: string = error3Message.slice(0, error3Message.length - ' - message'.length);
+    expect(path.isAbsolute(error3Path)).toEqual(true);
 
     const error4: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/file',
-      projectFolder: 'C:/path/to/project'
+      absolutePath: '/path/to/file',
+      projectFolder: '/path/to/project'
     });
-    expect(error4.getFormattedErrorMessage({ format: 'Unix' })).toEqual('C:\\path\\to\\file - message');
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error4Message: string = error4.getFormattedErrorMessage({ format: 'Unix' });
+    expect(error4Message).toMatch(/.+ - message$/);
+    const error4Path: string = error4Message.slice(0, error4Message.length - ' - message'.length);
+    expect(path.isAbsolute(error4Path)).toEqual(true);
   });
 
   it('correctly performs Visual Studio-style relative file path formatting', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5,
       column: 12
     });
@@ -93,8 +115,8 @@ describe(FileError.name, () => {
     );
 
     const error2: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5
     });
     expect(error2.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual(
@@ -102,108 +124,69 @@ describe(FileError.name, () => {
     );
 
     const error3: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: undefined,
       column: 12
     });
     expect(error3.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual('./path/to/file - message');
 
     const error4: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project'
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project'
     });
     expect(error4.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual('./path/to/file - message');
   });
 
   it('correctly performs Visual Studio-style absolute file path formatting', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5,
       column: 12
     });
-    expect(error1.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual(
-      'C:\\path\\to\\file(5,12) - message'
-    );
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error1Message: string = error1.getFormattedErrorMessage({ format: 'VisualStudio' });
+    expect(error1Message).toMatch(/.+\(5,12\) - message$/);
+    const error1Path: string = error1Message.slice(0, error1Message.length - '(5,12) - message'.length);
+    expect(path.isAbsolute(error1Path)).toEqual(true);
 
     const error2: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5
     });
-    expect(error2.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual(
-      'C:\\path\\to\\file(5) - message'
-    );
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error2Message: string = error2.getFormattedErrorMessage({ format: 'VisualStudio' });
+    expect(error2Message).toMatch(/.+\(5\) - message$/);
+    const error2Path: string = error2Message.slice(0, error2Message.length - '(5) - message'.length);
+    expect(path.isAbsolute(error2Path)).toEqual(true);
 
     const error3: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/file',
+      projectFolder: '/path/to/project',
       line: undefined,
       column: 12
     });
-    expect(error3.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual(
-      'C:\\path\\to\\file - message'
-    );
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error3Message: string = error3.getFormattedErrorMessage({ format: 'VisualStudio' });
+    expect(error3Message).toMatch(/.+ - message$/);
+    const error3Path: string = error3Message.slice(0, error3Message.length - ' - message'.length);
+    expect(path.isAbsolute(error3Path)).toEqual(true);
 
     const error4: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/file',
-      projectFolder: 'C:/path/to/project'
+      absolutePath: '/path/to/file',
+      projectFolder: '/path/to/project'
     });
-    expect(error4.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual(
-      'C:\\path\\to\\file - message'
-    );
-  });
-
-  it('correctly performs Azure DevOps-style file path formatting', () => {
-    const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
-      line: 5,
-      column: 12
-    });
-    expect(error1.getFormattedErrorMessage({ format: 'AzureDevOps' })).toEqual(
-      '##vso[task.logissue type=error;sourcepath=C:\\path\\to\\project\\path\\to\\file;linenumber=5;columnnumber=12;]message'
-    );
-    expect(error1.getFormattedErrorMessage({ format: 'AzureDevOps', isWarning: true })).toEqual(
-      '##vso[task.logissue type=warning;sourcepath=C:\\path\\to\\project\\path\\to\\file;linenumber=5;columnnumber=12;]message'
-    );
-
-    const error2: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
-      line: 5
-    });
-    expect(error2.getFormattedErrorMessage({ format: 'AzureDevOps' })).toEqual(
-      '##vso[task.logissue type=error;sourcepath=C:\\path\\to\\project\\path\\to\\file;linenumber=5;]message'
-    );
-    expect(error2.getFormattedErrorMessage({ format: 'AzureDevOps', isWarning: true })).toEqual(
-      '##vso[task.logissue type=warning;sourcepath=C:\\path\\to\\project\\path\\to\\file;linenumber=5;]message'
-    );
-
-    const error3: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
-      line: undefined,
-      column: 12
-    });
-    expect(error3.getFormattedErrorMessage({ format: 'AzureDevOps' })).toEqual(
-      '##vso[task.logissue type=error;sourcepath=C:\\path\\to\\project\\path\\to\\file;]message'
-    );
-    expect(error3.getFormattedErrorMessage({ format: 'AzureDevOps', isWarning: true })).toEqual(
-      '##vso[task.logissue type=warning;sourcepath=C:\\path\\to\\project\\path\\to\\file;]message'
-    );
-
-    const error4: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project'
-    });
-    expect(error4.getFormattedErrorMessage({ format: 'AzureDevOps' })).toEqual(
-      '##vso[task.logissue type=error;sourcepath=C:\\path\\to\\project\\path\\to\\file;]message'
-    );
-    expect(error4.getFormattedErrorMessage({ format: 'AzureDevOps', isWarning: true })).toEqual(
-      '##vso[task.logissue type=warning;sourcepath=C:\\path\\to\\project\\path\\to\\file;]message'
-    );
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error4Message: string = error4.getFormattedErrorMessage({ format: 'VisualStudio' });
+    expect(error4Message).toMatch(/.+ - message$/);
+    const error4Path: string = error4Message.slice(0, error4Message.length - ' - message'.length);
+    expect(path.isAbsolute(error4Path)).toEqual(true);
   });
 });
 
@@ -212,7 +195,7 @@ describe(`${FileError.name} using arbitrary base folder`, () => {
 
   beforeEach(() => {
     originalValue = process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
-    process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = 'C:/path';
+    process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = '/path';
   });
 
   afterEach(() => {
@@ -221,8 +204,8 @@ describe(`${FileError.name} using arbitrary base folder`, () => {
 
   it('correctly performs Unix-style file path formatting', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5,
       column: 12
     });
@@ -246,8 +229,8 @@ describe(`${FileError.name} using PROJECT_FOLDER base folder`, () => {
 
   it('correctly performs Unix-style file path formatting', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5,
       column: 12
     });
@@ -255,7 +238,7 @@ describe(`${FileError.name} using PROJECT_FOLDER base folder`, () => {
   });
 });
 
-describe(`${FileError.name} using arbitrary base folder`, () => {
+describe(`${FileError.name} using ABSOLUTE_PATH base folder`, () => {
   let originalValue: string | undefined;
 
   beforeEach(() => {
@@ -269,14 +252,17 @@ describe(`${FileError.name} using arbitrary base folder`, () => {
 
   it('correctly performs Unix-style file path formatting', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5,
       column: 12
     });
-    expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toEqual(
-      'C:\\path\\to\\project\\path\\to\\file:5:12 - message'
-    );
+    // Because the file path is resolved on disk, the output will vary based on platform.
+    // Only check that it ends as expected and is an absolute path.
+    const error1Message: string = error1.getFormattedErrorMessage({ format: 'Unix' });
+    expect(error1Message).toMatch(/.+:5:12 - message$/);
+    const error1Path: string = error1Message.slice(0, error1Message.length - ':5:12 - message'.length);
+    expect(path.isAbsolute(error1Path)).toEqual(true);
   });
 });
 
@@ -294,8 +280,8 @@ describe(`${FileError.name} using unsupported base folder token`, () => {
 
   it('throws when performing Unix-style file path formatting', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: 'C:/path/to/project/path/to/file',
-      projectFolder: 'C:/path/to/project',
+      absolutePath: '/path/to/project/path/to/file',
+      projectFolder: '/path/to/project',
       line: 5,
       column: 12
     });
