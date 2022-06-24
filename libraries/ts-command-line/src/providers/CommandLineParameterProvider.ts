@@ -30,6 +30,25 @@ import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
 
 /**
+ * The result containing the parsed paramter long name and scope. Returned when calling
+ * {@link CommandLineParameterProvider.parseScopedLongName}.
+ *
+ * @public
+ */
+export interface IScopedLongNameParseResult {
+  /**
+   * The long name parsed from the scoped long name, e.g. "--my-scope:my-parameter" -\> "--my-parameter"
+   */
+  longName: string;
+
+  /**
+   * The scope parsed from the scoped long name or undefined if no scope was found,
+   * e.g. "--my-scope:my-parameter" -\> "my-scope"
+   */
+  scope: string | undefined;
+}
+
+/**
  * This is the argparse result data object
  * @internal
  */
@@ -45,11 +64,16 @@ export interface ICommandLineParserData {
  * @public
  */
 export abstract class CommandLineParameterProvider {
+  private static readonly _scopeGroupName: string = 'scope';
+  private static readonly _longNameGroupName: string = 'longName';
+  private static readonly _possiblyScopedLongNameRegex: RegExp =
+    /^--((?<scope>[a-z0-9]+(-[a-z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
   private static _keyCounter: number = 0;
 
   private _parameters: CommandLineParameter[];
-  private _parametersByLongName: Map<string, CommandLineParameter>;
+  private _parametersByLongName: Map<string, CommandLineParameter[]>;
   private _parameterGroupsByName: Map<string | typeof SCOPING_PARAMETER_GROUP, argparse.ArgumentGroup>;
+  private _parametersRegistered: boolean;
   private _parametersProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
 
@@ -59,6 +83,7 @@ export abstract class CommandLineParameterProvider {
     this._parameters = [];
     this._parametersByLongName = new Map();
     this._parameterGroupsByName = new Map();
+    this._parametersRegistered = false;
     this._parametersProcessed = false;
   }
 
@@ -105,8 +130,8 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * This method throws an exception if the parameter is not defined.
    */
-  public getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Choice);
+  public getChoiceParameter(parameterLongName: string, parameterScope?: string): CommandLineChoiceParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Choice, parameterScope);
   }
 
   /**
@@ -133,8 +158,11 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * This method throws an exception if the parameter is not defined.
    */
-  public getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.ChoiceList);
+  public getChoiceListParameter(
+    parameterLongName: string,
+    parameterScope?: string
+  ): CommandLineChoiceListParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.ChoiceList, parameterScope);
   }
 
   /**
@@ -158,8 +186,8 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * This method throws an exception if the parameter is not defined.
    */
-  public getFlagParameter(parameterLongName: string): CommandLineFlagParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Flag);
+  public getFlagParameter(parameterLongName: string, parameterScope?: string): CommandLineFlagParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Flag, parameterScope);
   }
 
   /**
@@ -182,8 +210,11 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * This method throws an exception if the parameter is not defined.
    */
-  public getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Integer);
+  public getIntegerParameter(
+    parameterLongName: string,
+    parameterScope?: string
+  ): CommandLineIntegerParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Integer, parameterScope);
   }
 
   /**
@@ -209,8 +240,11 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * This method throws an exception if the parameter is not defined.
    */
-  public getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.IntegerList);
+  public getIntegerListParameter(
+    parameterLongName: string,
+    parameterScope?: string
+  ): CommandLineIntegerListParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.IntegerList, parameterScope);
   }
 
   /**
@@ -233,8 +267,8 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * This method throws an exception if the parameter is not defined.
    */
-  public getStringParameter(parameterLongName: string): CommandLineStringParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.String);
+  public getStringParameter(parameterLongName: string, parameterScope?: string): CommandLineStringParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.String, parameterScope);
   }
 
   /**
@@ -275,15 +309,6 @@ export abstract class CommandLineParameterProvider {
       throw new Error('defineRemainingArguments() has already been called for this provider');
     }
     this._remainder = new CommandLineRemainder(definition);
-
-    const argparseOptions: argparse.ArgumentOptions = {
-      help: this._remainder.description,
-      nargs: argparse.Const.REMAINDER,
-      metavar: '"..."'
-    };
-
-    this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
-
     return this._remainder;
   }
 
@@ -292,14 +317,18 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * This method throws an exception if the parameter is not defined.
    */
-  public getStringListParameter(parameterLongName: string): CommandLineStringListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.StringList);
+  public getStringListParameter(
+    parameterLongName: string,
+    parameterScope?: string
+  ): CommandLineStringListParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.StringList, parameterScope);
   }
 
   /**
    * Generates the command-line help text.
    */
   public renderHelpText(): string {
+    this._registerDefinedParameters();
     return this._getArgumentParser().formatHelp();
   }
 
@@ -307,6 +336,7 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line usage text.
    */
   public renderUsageText(): string {
+    this._registerDefinedParameters();
     return this._getArgumentParser().formatUsage();
   }
 
@@ -318,12 +348,13 @@ export abstract class CommandLineParameterProvider {
   public getParameterStringMap(): Record<string, string> {
     const parameterMap: Record<string, string> = {};
     for (const parameter of this.parameters) {
+      const parameterName: string = parameter.scopedLongName || parameter.longName;
       switch (parameter.kind) {
         case CommandLineParameterKind.Flag:
         case CommandLineParameterKind.Choice:
         case CommandLineParameterKind.String:
         case CommandLineParameterKind.Integer:
-          parameterMap[parameter.longName] = JSON.stringify(
+          parameterMap[parameterName] = JSON.stringify(
             (
               parameter as
                 | CommandLineFlagParameter
@@ -342,11 +373,60 @@ export abstract class CommandLineParameterProvider {
               | CommandLineStringListParameter
               | CommandLineChoiceListParameter
           ).values;
-          parameterMap[parameter.longName] = arrayValue ? arrayValue.join(',') : '';
+          parameterMap[parameterName] = arrayValue ? arrayValue.join(',') : '';
           break;
       }
     }
     return parameterMap;
+  }
+
+  /**
+   * Returns an object with the parsed scope (if present) and the long name of the parameter.
+   */
+  public parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult {
+    const result: RegExpExecArray | null =
+      CommandLineParameterProvider._possiblyScopedLongNameRegex.exec(scopedLongName);
+    if (!result || !result.groups) {
+      throw new Error(`The parameter long name "${scopedLongName}" is not valid.`);
+    }
+    return {
+      longName: `--${result.groups[CommandLineParameterProvider._longNameGroupName]}`,
+      scope: result.groups[CommandLineParameterProvider._scopeGroupName]
+    };
+  }
+
+  /** @internal */
+  public _registerDefinedParameters(): void {
+    if (this._parametersRegistered) {
+      // We prevent new parameters from being defined after the first call to _registerDefinedParameters,
+      // so we can already ensure that all parameters were registered.
+      return;
+    }
+    this._parametersRegistered = true;
+
+    for (const longNameParameters of this._parametersByLongName.values()) {
+      const useScopedLongName: boolean = longNameParameters.length > 1;
+      for (const parameter of longNameParameters) {
+        if (useScopedLongName && !parameter.parameterScope) {
+          throw new Error(
+            `The parameter "${parameter.longName}" is defined multiple times with the same long name. ` +
+              'Parameters with the same long name must define a scope.'
+          );
+        }
+        this._registerParameter(parameter, useScopedLongName);
+      }
+    }
+
+    // Need to add the remainder parameter last
+    if (this._remainder) {
+      const argparseOptions: argparse.ArgumentOptions = {
+        help: this._remainder.description,
+        nargs: argparse.Const.REMAINDER,
+        metavar: '"..."'
+      };
+
+      this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
+    }
   }
 
   /**
@@ -363,6 +443,10 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   protected _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
+    if (!this._parametersRegistered) {
+      throw new Error('Parameters have not been registered');
+    }
+
     if (this._parametersProcessed) {
       throw new Error('Command Line Parser Data was already processed');
     }
@@ -382,23 +466,42 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   protected _defineParameter(parameter: CommandLineParameter): void {
-    if (this._remainder) {
-      throw new Error(
-        'defineCommandLineRemainder() was already called for this provider;' +
-          ' no further parameters can be defined'
-      );
+    if (this._parametersRegistered) {
+      throw new Error('Parameters have already been registered for this provider');
     }
 
+    // Generate and set the parser key at definition time
+    parameter._parserKey = this._generateKey();
+
+    this._parameters.push(parameter);
+
+    // Collect all parameters with the same long name. We will perform conflict resolution at registration.
+    let longNameParameters: CommandLineParameter[] | undefined = this._parametersByLongName.get(
+      parameter.longName
+    );
+    if (!longNameParameters) {
+      longNameParameters = [];
+      this._parametersByLongName.set(parameter.longName, longNameParameters);
+    }
+    longNameParameters.push(parameter);
+  }
+
+  /** @internal */
+  protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean): void {
     const names: string[] = [];
     if (parameter.shortName) {
       names.push(parameter.shortName);
     }
-    names.push(parameter.longName);
-    if (parameter.synonyms) {
-      names.push(...parameter.synonyms);
+
+    // Use the original long name unless otherwise requested
+    if (!useScopedLongName) {
+      names.push(parameter.longName);
     }
 
-    parameter._parserKey = this._generateKey();
+    // Add the scoped long name if it exists
+    if (parameter.scopedLongName) {
+      names.push(parameter.scopedLongName);
+    }
 
     let finalDescription: string = parameter.description;
 
@@ -481,9 +584,6 @@ export abstract class CommandLineParameterProvider {
         help: argparse.Const.SUPPRESS
       });
     }
-
-    this._parameters.push(parameter);
-    this._parametersByLongName.set(parameter.longName, parameter);
   }
 
   private _generateKey(): string {
@@ -492,12 +592,26 @@ export abstract class CommandLineParameterProvider {
 
   private _getParameter<T extends CommandLineParameter>(
     parameterLongName: string,
-    expectedKind: CommandLineParameterKind
+    expectedKind: CommandLineParameterKind,
+    parameterScope?: string
   ): T {
-    const parameter: CommandLineParameter | undefined = this._parametersByLongName.get(parameterLongName);
-    if (!parameter) {
+    // Support the parameter long name being prefixed with the scope
+    const { scope, longName } = this.parseScopedLongName(parameterLongName);
+    parameterLongName = longName;
+    parameterScope = scope || parameterScope;
+
+    const parameters: CommandLineParameter[] | undefined = this._parametersByLongName.get(parameterLongName);
+    if (!parameters) {
       throw new Error(`The parameter "${parameterLongName}" is not defined`);
     }
+
+    const parameter: CommandLineParameter | undefined = parameters.find(
+      (p) => p.parameterScope === parameterScope
+    );
+    if (!parameter) {
+      throw new Error(`The parameter "${parameterLongName}" with scope "${parameterScope}" is not defined.`);
+    }
+
     if (parameter.kind !== expectedKind) {
       throw new Error(
         `The parameter "${parameterLongName}" is of type "${CommandLineParameterKind[parameter.kind]}"` +

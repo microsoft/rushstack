@@ -3,8 +3,8 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const { LocalizationPlugin } = require('@rushstack/localization-plugin');
-const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/module-minifier-plugin');
+const { LocalizationPlugin } = require('@rushstack/webpack4-localization-plugin');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -84,12 +84,12 @@ function generateConfiguration(mode, outputFolderName) {
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
           sourceRoot: path.resolve(__dirname, 'src'),
-          ignoreString: (filePath, stringName) => stringName === '__IGNORED_STRING__',
           processComment: (comment) => (comment ? `${comment} (processed)` : comment)
         },
         localizationStats: {
           dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
-        }
+        },
+        ignoreString: (filePath, stringName) => stringName === '__IGNORED_STRING__'
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,

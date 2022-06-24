@@ -2,6 +2,117 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.3.30",
+      "tag": "@rushstack/heft-sass-plugin_v0.3.30",
+      "date": "Fri, 24 Jun 2022 07:16:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.30`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.26.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.45.9` to `^0.45.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.29",
+      "tag": "@rushstack/heft-sass-plugin_v0.3.29",
+      "date": "Thu, 23 Jun 2022 22:14:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.29`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.25.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.45.8` to `^0.45.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.28",
+      "tag": "@rushstack/heft-sass-plugin_v0.3.28",
+      "date": "Fri, 17 Jun 2022 09:17:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.25.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.45.7` to `^0.45.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.27",
+      "tag": "@rushstack/heft-sass-plugin_v0.3.27",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.45.6` to `^0.45.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.26",
       "tag": "@rushstack/heft-sass-plugin_v0.3.26",
       "date": "Tue, 07 Jun 2022 09:37:05 GMT",

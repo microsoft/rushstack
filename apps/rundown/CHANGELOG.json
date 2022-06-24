@@ -2,6 +2,81 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.196",
+      "tag": "@rushstack/rundown_v1.0.196",
+      "date": "Fri, 24 Jun 2022 07:16:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.195",
+      "tag": "@rushstack/rundown_v1.0.195",
+      "date": "Thu, 23 Jun 2022 22:14:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.194",
+      "tag": "@rushstack/rundown_v1.0.194",
+      "date": "Fri, 17 Jun 2022 09:17:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.193",
+      "tag": "@rushstack/rundown_v1.0.193",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.192",
       "tag": "@rushstack/rundown_v1.0.192",
       "date": "Tue, 07 Jun 2022 09:37:05 GMT",

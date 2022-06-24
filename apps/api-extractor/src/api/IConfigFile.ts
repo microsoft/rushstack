@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { ExtractorLogLevel } from './ExtractorLogLevel';
 
 /**
@@ -405,4 +406,15 @@ export interface IConfigFile {
    * to prevent spurious diffs in output files tracked for tests.
    */
   testMode?: boolean;
+
+  /**
+   * Specifies how API Extractor sorts members of an enum when generating api.json.
+   *
+   * @remarks
+   * By default, the output files will be sorted alphabetically, which is "by-name".
+   * To keep the ordering in the source code, specify "preserve".
+   *
+   * @defaultValue `by-name`
+   */
+  enumMemberOrder: EnumMemberOrder;
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IgnoreStringFunction } from '../../interfaces';
 import { parseLocJson } from '../parseLocJson';
 
 describe(parseLocJson.name, () => {
@@ -9,6 +10,10 @@ describe(parseLocJson.name, () => {
       foo: {
         value: 'Foo',
         comment: 'A string'
+      },
+      bar: {
+        value: 'Bar',
+        comment: 'Another string'
       }
     });
 
@@ -34,5 +39,36 @@ describe(parseLocJson.name, () => {
         filePath: 'test.loc.json'
       })
     ).toThrowErrorMatchingSnapshot();
+  });
+
+  it('correctly ignores a string', () => {
+    const content: string = JSON.stringify({
+      foo: {
+        value: 'Foo',
+        comment: 'A string'
+      },
+      bar: {
+        value: 'Bar',
+        comment: 'Another string'
+      }
+    });
+
+    const ignoredStringFunction: IgnoreStringFunction = jest
+      .fn()
+      .mockImplementation(
+        (fileName: string, stringName: string) => fileName === 'test.loc.json' && stringName === 'bar'
+      );
+
+    expect(
+      parseLocJson({
+        content,
+        filePath: 'test.loc.json',
+        ignoreString: ignoredStringFunction
+      })
+    ).toMatchSnapshot('Loc file');
+
+    expect((ignoredStringFunction as unknown as jest.SpyInstance).mock.calls).toMatchSnapshot(
+      'ignoreStrings calls'
+    );
   });
 });

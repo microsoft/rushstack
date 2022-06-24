@@ -21,6 +21,7 @@ import { RigConfig } from '@rushstack/rig-package';
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
@@ -171,6 +172,7 @@ interface IExtractorConfigParameters {
   newlineKind: NewlineKind;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
+  enumMemberOrder: EnumMemberOrder;
 }
 
 /**
@@ -289,6 +291,9 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.testMode} */
   public readonly testMode: boolean;
 
+  /** {@inheritDoc IConfigFile.enumMemberOrder} */
+  public readonly enumMemberOrder: EnumMemberOrder;
+
   private constructor(parameters: IExtractorConfigParameters) {
     this.projectFolder = parameters.projectFolder;
     this.packageJson = parameters.packageJson;
@@ -316,6 +321,7 @@ export class ExtractorConfig {
     this.newlineKind = parameters.newlineKind;
     this.messages = parameters.messages;
     this.testMode = parameters.testMode;
+    this.enumMemberOrder = parameters.enumMemberOrder;
   }
 
   /**
@@ -971,6 +977,9 @@ export class ExtractorConfig {
           newlineKind = NewlineKind.CrLf;
           break;
       }
+
+      const enumMemberOrder: EnumMemberOrder = configObject.enumMemberOrder ?? EnumMemberOrder.ByName;
+
       extractorConfigParameters = {
         projectFolder: projectFolder,
         packageJson,
@@ -995,7 +1004,8 @@ export class ExtractorConfig {
         tsdocMetadataFilePath,
         newlineKind,
         messages: configObject.messages || {},
-        testMode: !!configObject.testMode
+        testMode: !!configObject.testMode,
+        enumMemberOrder
       };
     } catch (e) {
       throw new Error(`Error parsing ${filenameForErrors}:\n` + (e as Error).message);

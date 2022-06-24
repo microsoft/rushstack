@@ -40,4 +40,14 @@ export interface ILocalizedString {
 export interface IParseFileOptions {
   content: string;
   filePath: string;
+  /**
+   * Optionally, provide a function that will be called for each string. If the function returns `true`
+   * the string will not be included.
+   */
+  ignoreString?: IgnoreStringFunction;
 }
+
+/**
+ * @public
+ */
+export type IgnoreStringFunction = (filePath: string, stringName: string) => boolean;

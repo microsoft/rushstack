@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal, NewlineKind } from '@rushstack/node-core-library';
-
-import { ILocalizationFile } from './interfaces';
+import type { IgnoreStringFunction, ILocalizationFile, IParseFileOptions } from './interfaces';
 import { parseLocJson } from './parsers/parseLocJson';
 import { parseResJson } from './parsers/parseResJson';
-import { readResxAsLocFile } from './ResxReader';
+import { IParseResxOptionsBase, parseResx } from './parsers/parseResx';
 
 /**
  * @public
@@ -16,18 +14,14 @@ export type ParserKind = 'resx' | 'loc.json' | 'resjson';
 /**
  * @public
  */
-export interface IParseLocFileOptions {
-  terminal: ITerminal;
-  filePath: string;
-  content: string;
+export interface IParseLocFileOptions extends IParseFileOptions, IParseResxOptionsBase {
   parser?: ParserKind;
-  resxNewlineNormalization: NewlineKind | undefined;
-  ignoreMissingResxComments: boolean | undefined;
 }
 
 interface IParseCacheEntry {
   content: string;
   parsedFile: ILocalizationFile;
+  ignoreString: IgnoreStringFunction | undefined;
 }
 
 const parseCache: Map<string, IParseCacheEntry> = new Map<string, IParseCacheEntry>();
@@ -50,29 +44,44 @@ export function selectParserByFilePath(filePath: string): ParserKind {
 export function parseLocFile(options: IParseLocFileOptions): ILocalizationFile {
   const { parser = selectParserByFilePath(options.filePath) } = options;
 
-  let parsedFile: ILocalizationFile;
-  if (parser === 'resx') {
-    const fileCacheKey: string = `${options.filePath}?${options.resxNewlineNormalization || 'none'}`;
-    if (parseCache.has(fileCacheKey)) {
-      const entry: IParseCacheEntry = parseCache.get(fileCacheKey)!;
-      if (entry.content === options.content) {
-        return entry.parsedFile;
-      }
+  const fileCacheKey: string = `${options.filePath}?${parser}&${options.resxNewlineNormalization || 'none'}`;
+  const parseCacheEntry: IParseCacheEntry | undefined = parseCache.get(fileCacheKey);
+  if (parseCacheEntry) {
+    if (
+      parseCacheEntry.content === options.content &&
+      parseCacheEntry.ignoreString === options.ignoreString
+    ) {
+      return parseCacheEntry.parsedFile;
     }
-    parsedFile = readResxAsLocFile(options.content, {
-      terminal: options.terminal,
-      resxFilePath: options.filePath,
-      newlineNormalization: options.resxNewlineNormalization,
-      warnOnMissingComment: !options.ignoreMissingResxComments
-    });
-    parseCache.set(fileCacheKey, { content: options.content, parsedFile });
-
-    return parsedFile;
-  } else if (parser === 'loc.json') {
-    return parseLocJson(options);
-  } else if (parser === 'resjson') {
-    return parseResJson(options);
-  } else {
-    throw new Error(`Unsupported parser: ${parser}`);
   }
+
+  let parsedFile: ILocalizationFile;
+  switch (parser) {
+    case 'resx': {
+      parsedFile = parseResx(options);
+      break;
+    }
+
+    case 'loc.json': {
+      parsedFile = parseLocJson(options);
+      break;
+    }
+
+    case 'resjson': {
+      parsedFile = parseResJson(options);
+      break;
+    }
+
+    default: {
+      throw new Error(`Unsupported parser: ${parser}`);
+    }
+  }
+
+  parseCache.set(fileCacheKey, {
+    content: options.content,
+    parsedFile,
+    ignoreString: options.ignoreString
+  });
+
+  return parsedFile;
 }

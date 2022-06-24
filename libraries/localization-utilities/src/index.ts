@@ -5,14 +5,12 @@ export type {
   ILocalizationFile,
   ILocalizedString,
   IPseudolocaleOptions,
-  IParseFileOptions
+  IParseFileOptions,
+  IgnoreStringFunction
 } from './interfaces';
 export { parseLocJson } from './parsers/parseLocJson';
 export { parseResJson } from './parsers/parseResJson';
+export { parseResx, IParseResxOptions, IParseResxOptionsBase } from './parsers/parseResx';
 export { parseLocFile, IParseLocFileOptions, ParserKind } from './LocFileParser';
-export {
-  ITypingsGeneratorOptions,
-  LocFileTypingsGenerator as TypingsGenerator
-} from './LocFileTypingsGenerator';
-export { readResxFileAsLocFile, readResxAsLocFile, IResxReaderOptions } from './ResxReader';
+export { ITypingsGeneratorOptions, TypingsGenerator } from './TypingsGenerator';
 export { getPseudolocalizer } from './Pseudolocalization';
