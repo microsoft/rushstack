@@ -74,12 +74,12 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
         const formattedMessage: string = message.ruleId
           ? `(${message.ruleId}) ${message.message}`
           : message.message;
-        const errorObject: FileError = new FileError(
-          formattedMessage,
-          eslintFileResult.filePath,
-          message.line,
-          message.column
-        );
+        const errorObject: FileError = new FileError(formattedMessage, {
+          absolutePath: eslintFileResult.filePath,
+          projectFolder: this._buildFolderPath,
+          line: message.line,
+          column: message.column
+        });
         switch (message.severity) {
           case EslintMessageSeverity.error: {
             errors.push(errorObject);

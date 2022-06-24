@@ -737,7 +737,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
       const message: string = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
       const formattedMessage: string = `(TS${diagnostic.code}) ${message}`;
-      errorObject = new FileError(formattedMessage, diagnostic.file.fileName, line + 1, character + 1);
+      errorObject = new FileError(formattedMessage, {
+        absolutePath: diagnostic.file.fileName,
+        projectFolder: this._configuration.buildFolder,
+        line: line + 1,
+        column: character + 1
+      });
       diagnosticMessage = errorObject.toString();
     } else {
       diagnosticMessage = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');

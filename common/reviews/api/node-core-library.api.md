@@ -188,16 +188,18 @@ export enum FileConstants {
 export class FileError extends Error {
     // (undocumented)
     static [Symbol.hasInstance](instance: object): boolean;
-    constructor(message: string, filePath: string, line?: number, column?: number);
+    constructor(message: string, options: IFileErrorOptions);
+    readonly absolutePath: string;
     readonly column: number | undefined;
-    readonly filePath: string;
+    getFormattedErrorMessage(options?: IFileErrorFormattingOptions): string;
     readonly line: number | undefined;
+    readonly projectFolder: string;
     // @override
-    toString(options?: IFileErrorFormattingOptions): string;
+    toString(): string;
 }
 
 // @public
-export type FileErrorFormat = 'Unix' | 'VisualStudio' | 'AzureDevOps';
+export type FileLocationStyle = 'Unix' | 'VisualStudio' | 'AzureDevOps';
 
 // @public
 export class FileSystem {
@@ -348,8 +350,16 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 
 // @public
 export interface IFileErrorFormattingOptions {
-    format?: FileErrorFormat;
+    format?: FileLocationStyle;
     isWarning?: boolean;
+}
+
+// @public
+export interface IFileErrorOptions {
+    absolutePath: string;
+    column?: number;
+    line?: number;
+    projectFolder: string;
 }
 
 // @public (undocumented)
@@ -564,6 +574,17 @@ export interface IPathFormatConciselyOptions {
 }
 
 // @public
+export interface IPathFormatFileLocationOptions {
+    baseFolder?: string;
+    column?: number;
+    format: FileLocationStyle;
+    isWarning?: boolean;
+    line?: number;
+    message: string;
+    pathToFormat: string;
+}
+
+// @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
@@ -724,6 +745,7 @@ export class Path {
     static convertToBackslashes(inputPath: string): string;
     static convertToSlashes(inputPath: string): string;
     static formatConcisely(options: IPathFormatConciselyOptions): string;
+    static formatFileLocation(options: IPathFormatFileLocationOptions): string;
     static isDownwardRelative(inputPath: string): boolean;
     static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;

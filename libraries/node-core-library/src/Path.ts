@@ -4,6 +4,57 @@
 import * as path from 'path';
 
 /**
+ * The format that the FileError message should conform to. The supported formats are:
+ *  - Unix: `<path>:<line>:<column> - <message>`
+ *  - VisualStudio: `<path>(<line>,<column>) - <message>`
+ *  - AzureDevOps: `##vso[task.logissue type=<error|warning>;sourcepath=<path>;linenumber=<line>;columnnumber=<column>;]<message>`
+ *
+ * @public
+ */
+export type FileLocationStyle = 'Unix' | 'VisualStudio' | 'AzureDevOps';
+
+/**
+ * Options for {@link Path.formatFileLocation}.
+ * @public
+ */
+export interface IPathFormatFileLocationOptions {
+  /**
+   * The base path to use when converting `pathToFormat` to a relative path. If not specified,
+   * `pathToFormat` will be used as-is.
+   */
+  baseFolder?: string;
+  /**
+   * The path that will be used to specify the file location.
+   */
+  pathToFormat: string;
+  /**
+   * The message related to the file location.
+   */
+  message: string;
+  /**
+   * The style of file location formatting to use.
+   */
+  format: FileLocationStyle;
+  /**
+   * The optional line number. If not specified, the line number will not be included
+   * in the formatted string.
+   */
+  line?: number;
+  /**
+   * The optional column number. If not specified, the column number will not be included
+   * in the formatted string.
+   */
+  column?: number;
+  /**
+   * Whether or not the formatted location should be a warning.
+   *
+   * @remarks This is only used for the Azure DevOps format, since referencing the location
+   * must be done as either a warning or an error. If false, it is assumed to be an error.
+   */
+  isWarning?: boolean;
+}
+
+/**
  * Options for {@link Path.formatConcisely}.
  * @public
  */
@@ -96,6 +147,74 @@ export class Path {
 
     const absolutePath: string = path.resolve(options.pathToConvert);
     return absolutePath;
+  }
+
+  /**
+   * Formats a file location to look nice for reporting purposes.
+   * @remarks
+   * If `pathToFormat` is under the `baseFolder`, then it will be converted to a relative with the `./` prefix.
+   * Otherwise, it will be converted to an absolute path.
+   *
+   * Backslashes will be converted to slashes, unless the path starts with an OS-specific string like `C:\`.
+   */
+  public static formatFileLocation(options: IPathFormatFileLocationOptions): string {
+    const { message, format, line, column } = options;
+
+    // Convert the path to be relative to the base folder, if specified. Otherwise, use
+    // the path as-is.
+    const filePath: string = options.baseFolder
+      ? Path.formatConcisely({
+          pathToConvert: options.pathToFormat,
+          baseFolder: options.baseFolder
+        })
+      : path.resolve(options.pathToFormat);
+
+    let formattedFileLocation: string;
+    switch (format) {
+      case 'Unix': {
+        if (line !== undefined && column !== undefined) {
+          formattedFileLocation = `:${line}:${column}`;
+        } else if (line !== undefined) {
+          formattedFileLocation = `:${line}`;
+        } else {
+          formattedFileLocation = '';
+        }
+
+        break;
+      }
+
+      case 'VisualStudio': {
+        if (line !== undefined && column !== undefined) {
+          formattedFileLocation = `(${line},${column})`;
+        } else if (line !== undefined) {
+          formattedFileLocation = `(${line})`;
+        } else {
+          formattedFileLocation = '';
+        }
+
+        break;
+      }
+
+      case 'AzureDevOps': {
+        // Implements the format used by the Azure DevOps pipeline to log errors
+        // https://docs.microsoft.com/en-us/azure/devops/pipelines/scripts/logging-commands?view=azure-devops&tabs=bash#logissue-log-an-error-or-warning
+        const isWarning: boolean = options?.isWarning || false;
+        return (
+          '##vso[task.logissue ' +
+          `type=${isWarning ? 'warning' : 'error'};` +
+          `sourcepath=${filePath};` +
+          (line !== undefined ? `linenumber=${line};` : '') +
+          (line !== undefined && column !== undefined ? `columnnumber=${column};` : '') +
+          `]${message}`
+        );
+      }
+
+      default: {
+        throw new Error(`Unknown format: ${format}`);
+      }
+    }
+
+    return `${filePath}${formattedFileLocation} - ${message}`;
   }
 
   /**

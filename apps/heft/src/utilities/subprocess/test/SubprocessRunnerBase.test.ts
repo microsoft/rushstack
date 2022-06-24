@@ -15,13 +15,25 @@ describe(SubprocessRunnerBase.name, () => {
     const error: Error = new Error();
     error.stack = 'ERROR STACK';
     expect(SubprocessRunnerBase.serializeForIpcMessage(error)).toMatchSnapshot();
-    const fileError1: FileError = new FileError('message', 'path/to/file', 4, 29);
+    const fileError1: FileError = new FileError('message', {
+      absolutePath: 'C:/path/to/project/path/to/file',
+      projectFolder: 'C:/path/to/project',
+      line: 4,
+      column: 29
+    });
     fileError1.stack = 'ERROR STACK';
     expect(SubprocessRunnerBase.serializeForIpcMessage(fileError1)).toMatchSnapshot();
-    const fileError2: FileError = new FileError('message', 'path/to/file', 4);
+    const fileError2: FileError = new FileError('message', {
+      absolutePath: 'C:/path/to/project/path/to/file',
+      projectFolder: 'C:/path/to/project',
+      line: 4
+    });
     fileError2.stack = 'ERROR STACK';
     expect(SubprocessRunnerBase.serializeForIpcMessage(fileError2)).toMatchSnapshot();
-    const fileError3: FileError = new FileError('message', 'path/to/file');
+    const fileError3: FileError = new FileError('message', {
+      absolutePath: 'C:/path/to/project/path/to/file',
+      projectFolder: 'C:/path/to/project'
+    });
     fileError3.stack = 'ERROR STACK';
     expect(SubprocessRunnerBase.serializeForIpcMessage(fileError3)).toMatchSnapshot();
   });
@@ -43,11 +55,23 @@ describe(SubprocessRunnerBase.name, () => {
     testDeserialization(null);
     testDeserialization(undefined);
     testDeserialization(new Error());
-    const fileError1: FileError = new FileError('message', 'path/to/file', 4, 29);
+    const fileError1: FileError = new FileError('message', {
+      absolutePath: 'C:/path/to/project/path/to/file',
+      projectFolder: 'C:/path/to/project',
+      line: 4,
+      column: 29
+    });
     testDeserialization(fileError1);
-    const fileError2: FileError = new FileError('message', 'path/to/file', 4);
+    const fileError2: FileError = new FileError('message', {
+      absolutePath: 'C:/path/to/project/path/to/file',
+      projectFolder: 'C:/path/to/project',
+      line: 4
+    });
     testDeserialization(fileError2);
-    const fileError3: FileError = new FileError('message', 'path/to/file');
+    const fileError3: FileError = new FileError('message', {
+      absolutePath: 'C:/path/to/project/path/to/file',
+      projectFolder: 'C:/path/to/project'
+    });
     testDeserialization(fileError3);
   });
 });

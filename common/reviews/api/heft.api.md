@@ -13,7 +13,7 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParser } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { FileErrorFormat } from '@rushstack/node-core-library';
+import { FileLocationStyle } from '@rushstack/node-core-library';
 import { IBaseCommandLineDefinition } from '@rushstack/ts-command-line';
 import { ICommandLineChoiceDefinition } from '@rushstack/ts-command-line';
 import { ICommandLineChoiceListDefinition } from '@rushstack/ts-command-line';

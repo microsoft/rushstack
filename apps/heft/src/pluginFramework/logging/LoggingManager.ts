@@ -4,9 +4,9 @@
 import { IHeftPlugin } from '../IHeftPlugin';
 import { ScopedLogger } from './ScopedLogger';
 import {
-  ITerminalProvider,
   FileError,
-  FileErrorFormat,
+  FileLocationStyle,
+  ITerminalProvider,
   IFileErrorFormattingOptions
 } from '@rushstack/node-core-library';
 
@@ -52,7 +52,7 @@ export class LoggingManager {
     }
   }
 
-  public getErrorStrings(fileErrorFormat?: FileErrorFormat): string[] {
+  public getErrorStrings(fileLocationStyle?: FileLocationStyle): string[] {
     const result: string[] = [];
 
     for (const scopedLogger of this._scopedLoggers.values()) {
@@ -60,7 +60,7 @@ export class LoggingManager {
         ...scopedLogger.errors.map(
           (error) =>
             `[${scopedLogger.loggerName}] ` +
-            LoggingManager.getErrorMessage(error, { format: fileErrorFormat, isWarning: false })
+            LoggingManager.getErrorMessage(error, { format: fileLocationStyle, isWarning: false })
         )
       );
     }
@@ -68,7 +68,7 @@ export class LoggingManager {
     return result;
   }
 
-  public getWarningStrings(fileErrorFormat?: FileErrorFormat): string[] {
+  public getWarningStrings(fileErrorFormat?: FileLocationStyle): string[] {
     const result: string[] = [];
 
     for (const scopedLogger of this._scopedLoggers.values()) {
@@ -86,7 +86,7 @@ export class LoggingManager {
 
   public static getErrorMessage(error: Error, options?: IFileErrorFormattingOptions): string {
     if (error instanceof FileError) {
-      return error.toString(options);
+      return (error as FileError).getFormattedErrorMessage(options);
     } else {
       return error.message;
     }

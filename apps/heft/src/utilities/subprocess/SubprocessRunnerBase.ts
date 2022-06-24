@@ -343,7 +343,8 @@ export abstract class SubprocessRunnerBase<
             value: {
               errorMessage: arg.message,
               errorStack: arg.stack,
-              filePath: arg.filePath,
+              absolutePath: arg.absolutePath,
+              projectFolder: arg.projectFolder,
               line: arg.line,
               column: arg.column
             }
@@ -401,12 +402,12 @@ export abstract class SubprocessRunnerBase<
       case SupportedSerializableArgType.FileError: {
         const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> =
           arg as ISubprocessApiCallArgWithValue<ISerializedFileErrorValue>;
-        const result: FileError = new FileError(
-          typedArg.value.errorMessage,
-          typedArg.value.filePath,
-          typedArg.value.line,
-          typedArg.value.column
-        );
+        const result: FileError = new FileError(typedArg.value.errorMessage, {
+          absolutePath: typedArg.value.absolutePath,
+          projectFolder: typedArg.value.projectFolder,
+          line: typedArg.value.line,
+          column: typedArg.value.column
+        });
         result.stack = typedArg.value.errorStack;
         return result;
       }
