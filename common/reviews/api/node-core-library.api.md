@@ -351,7 +351,6 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 // @public
 export interface IFileErrorFormattingOptions {
     format?: FileLocationStyle;
-    isWarning?: boolean;
 }
 
 // @public

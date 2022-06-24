@@ -38,16 +38,8 @@ export interface IFileErrorOptions {
 export interface IFileErrorFormattingOptions {
   /**
    * The format for the error message. If no format is provided, format 'Unix' is used by default.
-   *
-   * @remarks If no format is specified and the environment variable TF_BUILD is set to 'True'
-   * (such as on Azure DevOps pipeline agents), the format 'AzureDevOps' is used by default.
    */
   format?: FileLocationStyle;
-
-  /**
-   * Whether or not the error is a warning. Defaults to false.
-   */
-  isWarning?: boolean;
 }
 
 const uuidFileError: string = '37a4c772-2dc8-4c66-89ae-262f8cc1f0c1';
@@ -114,8 +106,7 @@ export class FileError extends Error {
       pathToFormat: this.absolutePath,
       message: this.message,
       line: this.line,
-      column: this.column,
-      isWarning: options?.isWarning
+      column: this.column
     });
   }
 
