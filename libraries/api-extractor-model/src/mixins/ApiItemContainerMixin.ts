@@ -18,10 +18,12 @@ import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
  * @public
  */
 export interface IApiItemContainerMixinOptions extends IApiItemOptions {
+  preserveMemberOrder?: boolean;
   members?: ApiItem[];
 }
 
 export interface IApiItemContainerJson extends IApiItemJson {
+  preserveMemberOrder?: boolean;
   members: IApiItemJson[];
 }
 
@@ -30,6 +32,7 @@ const _membersSorted: unique symbol = Symbol('ApiItemContainerMixin._membersSort
 const _membersByContainerKey: unique symbol = Symbol('ApiItemContainerMixin._membersByContainerKey');
 const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByName');
 const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKind');
+const _preserveMemberOrder: unique symbol = Symbol('ApiItemContainerMixin._preserveMemberOrder');
 
 /**
  * The mixin base class for API items that act as containers for other child items.
@@ -53,6 +56,21 @@ const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKi
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiItemContainerMixin extends ApiItem {
+  /**
+   * Disables automatic sorting of {@link ApiItem.members}.
+   *
+   * @remarks
+   * By default `ApiItemContainerMixin` will automatically sort its members according to their
+   * {@link ApiItem.getSortKey} string, which provides a standardized mostly alphabetical ordering
+   * that is appropriate for most API items.  When loading older .api.json files the automatic sorting
+   * is reapplied and may update the ordering.
+   *
+   * Set `preserveMemberOrder` to true to disable automatic sorting for this container; instead, the
+   * members will retain whatever ordering appeared in the {@link IApiItemContainerMixinOptions.members} array.
+   * The `preserveMemberOrder` option is saved in the .api.json file.
+   */
+  readonly preserveMemberOrder: boolean;
+
   /**
    * Adds a new member to the container.
    *
@@ -103,6 +121,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
     public readonly [_members]: ApiItem[];
     public [_membersSorted]: boolean;
     public [_membersByContainerKey]: Map<string, ApiItem>;
+    public [_preserveMemberOrder]: boolean;
 
     // For members of this container that extend ApiNameMixin, this stores the list of members with a given name.
     // Examples include merged declarations, overloaded functions, etc.
@@ -118,7 +137,9 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       const options: IApiItemContainerMixinOptions = args[0] as IApiItemContainerMixinOptions;
 
       this[_members] = [];
+      this[_membersSorted] = false;
       this[_membersByContainerKey] = new Map<string, ApiItem>();
+      this[_preserveMemberOrder] = options.preserveMemberOrder ?? false;
 
       if (options.members) {
         for (const member of options.members) {
@@ -134,7 +155,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       jsonObject: IApiItemContainerJson
     ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
-
+      options.preserveMemberOrder = jsonObject.preserveMemberOrder;
       options.members = [];
       for (const memberObject of jsonObject.members) {
         options.members.push(ApiItem.deserialize(memberObject, context));
@@ -143,12 +164,16 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
 
     /** @override */
     public get members(): ReadonlyArray<ApiItem> {
-      if (!this[_membersSorted]) {
+      if (!this[_membersSorted] && !this[_preserveMemberOrder]) {
         LegacyAdapters.sortStable(this[_members], (x, y) => x.getSortKey().localeCompare(y.getSortKey()));
         this[_membersSorted] = true;
       }
 
       return this[_members];
+    }
+
+    public get preserveMemberOrder(): boolean {
+      return this[_preserveMemberOrder];
     }
 
     public addMember(member: ApiItem): void {
@@ -243,6 +268,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
         memberObjects.push(memberJsonObject as IApiItemJson);
       }
 
+      jsonObject.preserveMemberOrder = this.preserveMemberOrder;
       jsonObject.members = memberObjects;
     }
   }

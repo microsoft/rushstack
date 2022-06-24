@@ -25,6 +25,34 @@ export interface IApiEnumMemberOptions
   initializerTokenRange: IExcerptTokenRange;
 }
 
+/**
+ * Options for customizing the sort order of {@link ApiEnum} members.
+ *
+ * @privateRemarks
+ * This enum is currently only used by the `@microsoft/api-extractor` package; it is declared here
+ * because we anticipate that if more options are added in the future, their sorting will be implemented
+ * by the `@microsoft/api-extractor-model` package.
+ *
+ * See https://github.com/microsoft/rushstack/issues/918 for details.
+ *
+ * @public
+ */
+export enum EnumMemberOrder {
+  /**
+   * `ApiEnumMember` items are sorted according to their {@link ApiItem.getSortKey}.  The order is
+   * basically alphabetical by identifier name, but otherwise unspecified to allow for cosmetic improvements.
+   *
+   * This is the default behavior.
+   */
+  ByName = 'by-name',
+
+  /**
+   * `ApiEnumMember` items preserve the original order of the declarations in the source file.
+   * (This disables the automatic sorting that is normally applied based on {@link ApiItem.getSortKey}.)
+   */
+  Preserve = 'preserve'
+}
+
 export interface IApiEnumMemberJson extends IApiDeclaredItemJson {
   initializerTokenRange: IExcerptTokenRange;
 }
