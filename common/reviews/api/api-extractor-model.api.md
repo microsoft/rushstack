@@ -273,6 +273,7 @@ export interface ApiItemContainerMixin extends ApiItem {
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
     // @internal
     _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
+    readonly preserveMemberOrder: boolean;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
     tryGetMemberByKey(containerKey: string): ApiItem | undefined;
@@ -753,7 +754,7 @@ export interface IApiItemContainerMixinOptions extends IApiItemOptions {
     // (undocumented)
     members?: ApiItem[];
     // (undocumented)
-    shouldSortMembers?: boolean;
+    preserveMemberOrder?: boolean;
 }
 
 // @public
