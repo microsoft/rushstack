@@ -168,7 +168,7 @@ export class FileError extends Error {
       );
     } else {
       throw new Error(
-        `The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains a token "${result[0]}", ` +
+        `The RUSHSTACK_FILE_ERROR_BASE_FOLDER environment variable contains a token "${result[0]}" ` +
           'which is not supported.'
       );
     }
