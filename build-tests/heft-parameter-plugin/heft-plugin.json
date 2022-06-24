@@ -5,6 +5,7 @@
     {
       "pluginName": "examplePlugin01",
       "entryPoint": "./lib/index",
+      "parameterScope": "example-plugin-01",
       "parameters": [
         {
           "longName": "--custom-parameter",

@@ -364,6 +364,13 @@
           "pattern": "[^\\\\]"
         },
 
+        "parameterScope": {
+          "title": "Parameter Scope",
+          "type": "string",
+          "description": "The scope of the parameters for the plugin. This scope is used to provide alternate names for parameters if there is a conflict between identical long names. For example, if scope \"my-scope\" is provided and parameter \"--parameter\" is defined, it may be referenced as \"--parameter\" or \"--my-scope:parameter\" on the CLI. When multiple \"--parameter\" parameters are defined with different scopes, they can only be referenced by their scoped long name.",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+
         "parameters": {
           "title": "Plugin Parameters",
           "description": "A list of command-line parameters.",

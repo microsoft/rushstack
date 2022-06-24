@@ -170,6 +170,7 @@ export interface IHeftPluginDefinitionJson {
   pluginName: string;
   entryPoint: string;
   optionsSchema?: string;
+  parameterScope?: string;
   parameters?: IParameterJson[];
 }
 
@@ -239,6 +240,13 @@ export abstract class HeftPluginDefinitionBase {
    */
   public get entryPoint(): string {
     return this._resolvedEntryPoint;
+  }
+
+  /**
+   * The scope for all parameters defined by this plugin.
+   */
+  public get pluginParameterScope(): string | undefined {
+    return this._heftPluginDefinitionJson.parameterScope;
   }
 
   /**

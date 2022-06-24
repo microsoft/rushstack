@@ -6,6 +6,8 @@
       "pluginName": "JestPlugin",
       "entryPoint": "./lib/JestPlugin",
       "optionsSchema": "./lib/schemas/heft-jest-plugin.schema.json",
+
+      "parameterScope": "jest",
       "parameters": [
         {
           "longName": "--config",

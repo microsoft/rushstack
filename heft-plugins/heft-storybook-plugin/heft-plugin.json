@@ -6,6 +6,8 @@
       "pluginName": "StorybookPlugin",
       "entryPoint": "./lib/StorybookPlugin",
       "optionsSchema": "./lib/schemas/storybook.schema.json",
+
+      "parameterScope": "storybook",
       "parameters": [
         {
           "longName": "--storybook",

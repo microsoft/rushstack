@@ -13,15 +13,9 @@ export interface IParameterConfiguration {
   parameter: IParameterJson;
 }
 
-// This regex maintains the base restrictions on parameter names (lower-case a-z, 0-9, and hyphens)
-// while allowing for a scoping prefix (e.g. "--MyPlugin:my-parameter") and enforcing the same
-// plugin name restrictions as the heft-plugin.json schema
-const SYNONYM_REGEX: RegExp = /^--([a-zA-Z][a-zA-Z0-9]*:)?[a-z0-9]+((-[a-z0-9]+)+)?$/;
-
 export class HeftParameterManager {
   private _isFinalized: boolean = false;
-  // parameter long name => unapplied parameters
-  private _parameterConfigurationsByName: Map<string, Set<IParameterConfiguration>> = new Map();
+  private _parameterConfigurations: Set<IParameterConfiguration> = new Set();
   // plugin definition => Map< parameter long name => applied parameter >
   private _parametersByDefinition: Map<HeftPluginDefinitionBase, Map<string, CommandLineParameter>> =
     new Map();
@@ -40,13 +34,7 @@ export class HeftParameterManager {
 
     // Add the parameters provided by the plugin. We will perform parameter conflict resolution when applying
     for (const parameter of pluginDefinition.pluginParameters) {
-      let existingParameters: Set<IParameterConfiguration> | undefined =
-        this._parameterConfigurationsByName.get(parameter.longName);
-      if (!existingParameters) {
-        existingParameters = new Set();
-        this._parameterConfigurationsByName.set(parameter.longName, existingParameters);
-      }
-      existingParameters.add({ parameter, pluginDefinition });
+      this._parameterConfigurations.add({ parameter, pluginDefinition });
     }
   }
 
@@ -56,20 +44,8 @@ export class HeftParameterManager {
     }
 
     this._isFinalized = true;
-    for (const parameterConfigurations of this._parameterConfigurationsByName.values()) {
-      if (parameterConfigurations.size === 1) {
-        this._addParameterToProvider([...parameterConfigurations][0], commandLineParameterProvider);
-      } else {
-        // Only define conflicting parameters using the generated synonym. This allows us to include
-        // multiple conflicting parameters.
-        for (const parameterConfiguration of parameterConfigurations) {
-          this._addParameterToProvider(
-            parameterConfiguration,
-            commandLineParameterProvider,
-            /* useSynonymForLongName: */ true
-          );
-        }
-      }
+    for (const parameterConfiguration of this._parameterConfigurations) {
+      this._addParameterToProvider(parameterConfiguration, commandLineParameterProvider);
     }
   }
 
@@ -91,15 +67,9 @@ export class HeftParameterManager {
 
   private _addParameterToProvider(
     parameterConfiguration: IParameterConfiguration,
-    commandLineParameterProvider: CommandLineParameterProvider,
-    useSynonymForLongName: boolean = false
+    commandLineParameterProvider: CommandLineParameterProvider
   ): void {
     const { parameter, pluginDefinition } = parameterConfiguration;
-    // Synonym used to avoid conflicts with other parameters.
-    const synonym: string = this._generateScopedParameterLongName(parameterConfiguration);
-    const parameterLongName: string = useSynonymForLongName ? synonym : parameter.longName;
-    // Only use synonyms when the long name isn't already being set to the synonym.
-    const synonyms: string[] | undefined = useSynonymForLongName ? undefined : [synonym];
 
     // Short names are excluded since it would be difficult and confusing to de-dupe/handle shortname conflicts
     // as well as longname conflicts
@@ -110,9 +80,8 @@ export class HeftParameterManager {
           description: parameter.description,
           required: parameter.required,
           alternatives: parameter.alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
-          customNameValidator: this._validateParameterName,
-          parameterLongName,
-          synonyms
+          parameterLongName: parameter.longName,
+          parameterScope: pluginDefinition.pluginParameterScope
         });
         break;
       }
@@ -122,9 +91,8 @@ export class HeftParameterManager {
           required: parameter.required,
           alternatives: parameter.alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
           defaultValue: parameter.defaultValue,
-          customNameValidator: this._validateParameterName,
-          parameterLongName,
-          synonyms
+          parameterLongName: parameter.longName,
+          parameterScope: pluginDefinition.pluginParameterScope
         });
         break;
       }
@@ -132,9 +100,8 @@ export class HeftParameterManager {
         definedParameter = commandLineParameterProvider.defineFlagParameter({
           description: parameter.description,
           required: parameter.required,
-          customNameValidator: this._validateParameterName,
-          parameterLongName,
-          synonyms
+          parameterLongName: parameter.longName,
+          parameterScope: pluginDefinition.pluginParameterScope
         });
         break;
       }
@@ -143,9 +110,8 @@ export class HeftParameterManager {
           description: parameter.description,
           required: parameter.required,
           argumentName: parameter.argumentName,
-          customNameValidator: this._validateParameterName,
-          parameterLongName,
-          synonyms
+          parameterLongName: parameter.longName,
+          parameterScope: pluginDefinition.pluginParameterScope
         });
         break;
       }
@@ -155,9 +121,8 @@ export class HeftParameterManager {
           required: parameter.required,
           argumentName: parameter.argumentName,
           defaultValue: parameter.defaultValue,
-          customNameValidator: this._validateParameterName,
-          parameterLongName,
-          synonyms
+          parameterLongName: parameter.longName,
+          parameterScope: pluginDefinition.pluginParameterScope
         });
         break;
       }
@@ -166,9 +131,8 @@ export class HeftParameterManager {
           description: parameter.description,
           required: parameter.required,
           argumentName: parameter.argumentName,
-          customNameValidator: this._validateParameterName,
-          parameterLongName,
-          synonyms
+          parameterLongName: parameter.longName,
+          parameterScope: pluginDefinition.pluginParameterScope
         });
         break;
       }
@@ -178,9 +142,8 @@ export class HeftParameterManager {
           required: parameter.required,
           argumentName: parameter.argumentName,
           defaultValue: parameter.defaultValue,
-          customNameValidator: this._validateParameterName,
-          parameterLongName,
-          synonyms
+          parameterLongName: parameter.longName,
+          parameterScope: pluginDefinition.pluginParameterScope
         });
         break;
       }
@@ -199,18 +162,5 @@ export class HeftParameterManager {
     // Add the parameter to the map using the original long name, so that it can be retrieved by plugins
     // under the original long name.
     pluginParameters.set(parameterConfiguration.parameter.longName, definedParameter);
-  }
-
-  private _generateScopedParameterLongName(parameterConfiguration: IParameterConfiguration): string {
-    // Scoped long name is guranteed to be unique since plugin names must be unique.
-    let parameterLongName: string = parameterConfiguration.parameter.longName;
-    if (parameterLongName.startsWith('--')) {
-      parameterLongName = parameterLongName.slice(2);
-    }
-    return `--${parameterConfiguration.pluginDefinition.pluginName}:${parameterLongName}`;
-  }
-
-  private _validateParameterName(longName: string): boolean {
-    return SYNONYM_REGEX.test(longName);
   }
 }

@@ -32,7 +32,7 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-legacy": "npm:@rushstack/heft@0.45.1",
-    "@rushstack/heft-node-rig": "1.9.2",
+    "@rushstack/heft-node-rig": "1.9.7",
     "@types/node": "12.20.24",
     "@types/semver": "7.3.5"
   }
