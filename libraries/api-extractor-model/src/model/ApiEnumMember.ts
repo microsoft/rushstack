@@ -8,11 +8,10 @@ import {
   Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { DeserializerContext } from './DeserializerContext';
+import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
 
 /**
  * Constructor options for {@link ApiEnumMember}.
@@ -21,9 +20,8 @@ import { DeserializerContext } from './DeserializerContext';
 export interface IApiEnumMemberOptions
   extends IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
-    IApiDeclaredItemOptions {
-  initializerTokenRange: IExcerptTokenRange;
-}
+    IApiDeclaredItemOptions,
+    IApiInitializerMixinOptions {}
 
 /**
  * Options for customizing the sort order of {@link ApiEnum} members.
@@ -53,10 +51,6 @@ export enum EnumMemberOrder {
   Preserve = 'preserve'
 }
 
-export interface IApiEnumMemberJson extends IApiDeclaredItemJson {
-  initializerTokenRange: IExcerptTokenRange;
-}
-
 /**
  * Represents a member of a TypeScript enum declaration.
  *
@@ -77,32 +71,14 @@ export interface IApiEnumMemberJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
-  /**
-   * An {@link Excerpt} that describes the value of the enum member.
-   */
-  public readonly initializerExcerpt: Excerpt;
-
+export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiInitializerMixin(ApiDeclaredItem))) {
   public constructor(options: IApiEnumMemberOptions) {
     super(options);
-
-    this.initializerExcerpt = this.buildExcerpt(options.initializerTokenRange);
   }
 
   public static getContainerKey(name: string): string {
     // No prefix needed, because ApiEnumMember is the only possible member of an ApiEnum
     return name;
-  }
-
-  /** @override */
-  public static onDeserializeInto(
-    options: Partial<IApiEnumMemberOptions>,
-    context: DeserializerContext,
-    jsonObject: IApiEnumMemberJson
-  ): void {
-    super.onDeserializeInto(options, context, jsonObject);
-
-    options.initializerTokenRange = jsonObject.initializerTokenRange;
   }
 
   /** @override */
@@ -113,13 +89,6 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
   /** @override */
   public get containerKey(): string {
     return ApiEnumMember.getContainerKey(this.name);
-  }
-
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiEnumMemberJson>): void {
-    super.serializeInto(jsonObject);
-
-    jsonObject.initializerTokenRange = this.initializerExcerpt.tokenRange;
   }
 
   /** @beta @override */

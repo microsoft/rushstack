@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1007,
+    "schemaVersion": 1008,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -223,9 +223,17 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "FOO = \"foo\""
+              "text": "FOO = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"foo\""
             }
           ],
+          "initializerTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "FOO",
