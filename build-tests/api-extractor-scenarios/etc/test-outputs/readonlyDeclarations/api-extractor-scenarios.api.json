@@ -230,16 +230,16 @@
               "text": "\"foo\""
             }
           ],
+          "initializerTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "FOO",
           "variableTypeTokenRange": {
             "startIndex": 0,
             "endIndex": 0
-          },
-          "initializerTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
           }
         },
         {

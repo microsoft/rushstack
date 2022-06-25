@@ -10,9 +10,8 @@ import {
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiProtectedMixin, IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { DeserializerContext } from '../model/DeserializerContext';
-import { ApiPropertyItem, IApiPropertyItemJson, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
-import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
+import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
+import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
 /**
  * Constructor options for {@link ApiProperty}.
@@ -21,13 +20,8 @@ import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 export interface IApiPropertyOptions
   extends IApiPropertyItemOptions,
     IApiProtectedMixinOptions,
-    IApiStaticMixinOptions {
-  initializerTokenRange?: IExcerptTokenRange;
-}
-
-export interface IApiPropertyJson extends IApiPropertyItemJson {
-  initializerTokenRange?: IExcerptTokenRange;
-}
+    IApiStaticMixinOptions,
+    IApiInitializerMixinOptions {}
 
 /**
  * Represents a TypeScript property declaration that belongs to an `ApiClass`.
@@ -63,29 +57,9 @@ export interface IApiPropertyJson extends IApiPropertyItemJson {
  *
  * @public
  */
-export class ApiProperty extends ApiProtectedMixin(ApiStaticMixin(ApiPropertyItem)) {
-  /**
-   * An {@link Excerpt} that describes the property's initializer.
-   */
-  public readonly initializerExcerpt: Excerpt | undefined;
-
+export class ApiProperty extends ApiProtectedMixin(ApiStaticMixin(ApiInitializerMixin(ApiPropertyItem))) {
   public constructor(options: IApiPropertyOptions) {
     super(options);
-
-    if (options.initializerTokenRange) {
-      this.initializerExcerpt = this.buildExcerpt(options.initializerTokenRange);
-    }
-  }
-
-  /** @override */
-  public static onDeserializeInto(
-    options: Partial<IApiPropertyOptions>,
-    context: DeserializerContext,
-    jsonObject: IApiPropertyJson
-  ): void {
-    super.onDeserializeInto(options, context, jsonObject);
-
-    options.initializerTokenRange = jsonObject.initializerTokenRange;
   }
 
   public static getContainerKey(name: string, isStatic: boolean): string {
@@ -104,16 +78,6 @@ export class ApiProperty extends ApiProtectedMixin(ApiStaticMixin(ApiPropertyIte
   /** @override */
   public get containerKey(): string {
     return ApiProperty.getContainerKey(this.name, this.isStatic);
-  }
-
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiPropertyJson>): void {
-    super.serializeInto(jsonObject);
-
-    // Note that JSON does not support the "undefined" value, so we simply omit the field entirely if it is undefined
-    if (this.initializerExcerpt) {
-      jsonObject.initializerTokenRange = this.initializerExcerpt.tokenRange;
-    }
   }
 
   /** @beta @override */

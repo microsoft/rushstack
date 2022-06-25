@@ -200,12 +200,12 @@
                   "text": "0"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "Zero",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "Zero"
             },
             {
               "kind": "EnumMember",
@@ -221,12 +221,12 @@
                   "text": "1"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "One",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "One"
             },
             {
               "kind": "EnumMember",
@@ -242,12 +242,12 @@
                   "text": "2"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "Two",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "Two"
             }
           ]
         },
@@ -279,12 +279,12 @@
                   "text": "0"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "Zero",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "Zero"
             },
             {
               "kind": "EnumMember",
@@ -300,12 +300,12 @@
                   "text": "1"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "One",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "One"
             },
             {
               "kind": "EnumMember",
@@ -321,12 +321,12 @@
                   "text": "2"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "Two",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "Two"
             }
           ]
         }

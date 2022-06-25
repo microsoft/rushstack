@@ -168,15 +168,8 @@ export class ApiEnumMember extends ApiEnumMember_base {
     get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string): string;
-    readonly initializerExcerpt: Excerpt;
     // @override (undocumented)
     get kind(): ApiItemKind;
-    // Warning: (ae-forgotten-export) The symbol "IApiEnumMemberJson" needs to be exported by the entry point index.d.ts
-    //
-    // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, context: DeserializerContext, jsonObject: IApiEnumMemberJson): void;
-    // @override (undocumented)
-    serializeInto(jsonObject: Partial<IApiEnumMemberJson>): void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiFunction_base" needs to be exported by the entry point index.d.ts
@@ -207,6 +200,23 @@ export class ApiIndexSignature extends ApiIndexSignature_base {
     static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     get kind(): ApiItemKind;
+}
+
+// @public
+export function ApiInitializerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiInitializerMixin);
+
+// @public
+export interface ApiInitializerMixin extends ApiItem {
+    readonly initializerExcerpt?: Excerpt;
+    // Warning: (ae-forgotten-export) The symbol "IApiInitializerMixinJson" needs to be exported by the entry point index.d.ts
+    //
+    // @override (undocumented)
+    serializeInto(jsonObject: Partial<IApiInitializerMixinJson>): void;
+}
+
+// @public
+export namespace ApiInitializerMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiInitializerMixin;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiInterface_base" needs to be exported by the entry point index.d.ts
@@ -476,15 +486,8 @@ export class ApiProperty extends ApiProperty_base {
     get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string, isStatic: boolean): string;
-    readonly initializerExcerpt: Excerpt | undefined;
     // @override (undocumented)
     get kind(): ApiItemKind;
-    // Warning: (ae-forgotten-export) The symbol "IApiPropertyJson" needs to be exported by the entry point index.d.ts
-    //
-    // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiPropertyOptions>, context: DeserializerContext, jsonObject: IApiPropertyJson): void;
-    // @override (undocumented)
-    serializeInto(jsonObject: Partial<IApiPropertyJson>): void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiPropertyItem_base" needs to be exported by the entry point index.d.ts
@@ -640,7 +643,6 @@ export class ApiVariable extends ApiVariable_base {
     get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string): string;
-    readonly initializerExcerpt?: Excerpt;
     // @override (undocumented)
     get kind(): ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiVariableJson" needs to be exported by the entry point index.d.ts
@@ -728,9 +730,7 @@ export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IA
 }
 
 // @public
-export interface IApiEnumMemberOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
-    // (undocumented)
-    initializerTokenRange: IExcerptTokenRange;
+export interface IApiEnumMemberOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiInitializerMixinOptions {
 }
 
 // @public
@@ -743,6 +743,12 @@ export interface IApiFunctionOptions extends IApiNameMixinOptions, IApiTypeParam
 
 // @public
 export interface IApiIndexSignatureOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+}
+
+// @public
+export interface IApiInitializerMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    initializerTokenRange?: IExcerptTokenRange;
 }
 
 // @public
@@ -829,9 +835,7 @@ export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiRelea
 }
 
 // @public
-export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiProtectedMixinOptions, IApiStaticMixinOptions {
-    // (undocumented)
-    initializerTokenRange?: IExcerptTokenRange;
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiProtectedMixinOptions, IApiStaticMixinOptions, IApiInitializerMixinOptions {
 }
 
 // @public
@@ -891,9 +895,7 @@ export interface IApiTypeParameterOptions {
 }
 
 // @public
-export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
-    // (undocumented)
-    initializerTokenRange?: IExcerptTokenRange;
+export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions, IApiInitializerMixinOptions {
     // (undocumented)
     variableTypeTokenRange: IExcerptTokenRange;
 }

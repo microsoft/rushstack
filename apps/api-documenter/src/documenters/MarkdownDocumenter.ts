@@ -40,7 +40,8 @@ import {
   IResolveDeclarationReferenceResult,
   ApiTypeAlias,
   ExcerptToken,
-  ApiOptionalMixin
+  ApiOptionalMixin,
+  ApiInitializerMixin
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -732,13 +733,7 @@ export class MarkdownDocumenter {
               new DocPlainText({ configuration, text: Utilities.getConciseSignature(apiEnumMember) })
             ])
           ]),
-
-          new DocTableCell({ configuration }, [
-            new DocParagraph({ configuration }, [
-              new DocCodeSpan({ configuration, code: apiEnumMember.initializerExcerpt.text })
-            ])
-          ]),
-
+          this._createInitializerCell(apiEnumMember),
           this._createDescriptionCell(apiEnumMember)
         ])
       );
@@ -1028,6 +1023,22 @@ export class MarkdownDocumenter {
 
     if (apiItem instanceof ApiPropertyItem) {
       section.appendNode(this._createParagraphForTypeExcerpt(apiItem.propertyTypeExcerpt));
+    }
+
+    return new DocTableCell({ configuration }, section.nodes);
+  }
+
+  private _createInitializerCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    const section: DocSection = new DocSection({ configuration });
+
+    if (ApiInitializerMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.initializerExcerpt) {
+        section.appendNodeInParagraph(
+          new DocCodeSpan({ configuration, code: apiItem.initializerExcerpt.text })
+        );
+      }
     }
 
     return new DocTableCell({ configuration }, section.nodes);

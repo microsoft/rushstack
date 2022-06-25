@@ -372,12 +372,12 @@
                   "text": "1"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "One",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "One"
             },
             {
               "kind": "EnumMember",
@@ -393,12 +393,12 @@
                   "text": "2"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "Two",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "Two"
             },
             {
               "kind": "EnumMember",
@@ -414,12 +414,12 @@
                   "text": "0"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "Zero",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "Zero"
             }
           ]
         },
@@ -577,12 +577,12 @@
                   "text": "1"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "One",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "One"
             },
             {
               "kind": "EnumMember",
@@ -598,12 +598,12 @@
                   "text": "2"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "Two",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "Two"
             },
             {
               "kind": "EnumMember",
@@ -619,12 +619,12 @@
                   "text": "0"
                 }
               ],
-              "releaseTag": "Public",
-              "name": "Zero",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "releaseTag": "Public",
+              "name": "Zero"
             }
           ]
         },
@@ -774,12 +774,12 @@
                 "startIndex": 0,
                 "endIndex": 0
               },
-              "isStatic": false,
-              "isProtected": false,
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              }
+              },
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Property",
@@ -860,16 +860,16 @@
               "text": "\"hello\""
             }
           ],
+          "initializerTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "VARIABLE_WITHOUT_EXPLICIT_TYPE",
           "variableTypeTokenRange": {
             "startIndex": 0,
             "endIndex": 0
-          },
-          "initializerTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
           }
         }
       ]
