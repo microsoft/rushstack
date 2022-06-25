@@ -185,6 +185,27 @@ export enum FileConstants {
 }
 
 // @public
+export class FileError extends Error {
+    // (undocumented)
+    static [Symbol.hasInstance](instance: object): boolean;
+    constructor(message: string, options: IFileErrorOptions);
+    readonly absolutePath: string;
+    readonly column: number | undefined;
+    // @internal (undocumented)
+    static _environmentVariableIsAbsolutePath: boolean;
+    getFormattedErrorMessage(options?: IFileErrorFormattingOptions): string;
+    readonly line: number | undefined;
+    readonly projectFolder: string;
+    // @internal (undocumented)
+    static _sanitizedEnvironmentVariable: string | undefined;
+    // @override
+    toString(): string;
+}
+
+// @public
+export type FileLocationStyle = 'Unix' | 'VisualStudio';
+
+// @public
 export class FileSystem {
     static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
@@ -329,6 +350,19 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
     maxBuffer?: number;
     stdio?: ExecutableStdioMapping;
     timeoutMs?: number;
+}
+
+// @public
+export interface IFileErrorFormattingOptions {
+    format?: FileLocationStyle;
+}
+
+// @public
+export interface IFileErrorOptions {
+    absolutePath: string;
+    column?: number;
+    line?: number;
+    projectFolder: string;
 }
 
 // @public (undocumented)
@@ -543,6 +577,16 @@ export interface IPathFormatConciselyOptions {
 }
 
 // @public
+export interface IPathFormatFileLocationOptions {
+    baseFolder?: string;
+    column?: number;
+    format: FileLocationStyle;
+    line?: number;
+    message: string;
+    pathToFormat: string;
+}
+
+// @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
@@ -703,6 +747,7 @@ export class Path {
     static convertToBackslashes(inputPath: string): string;
     static convertToSlashes(inputPath: string): string;
     static formatConcisely(options: IPathFormatConciselyOptions): string;
+    static formatFileLocation(options: IPathFormatFileLocationOptions): string;
     static isDownwardRelative(inputPath: string): boolean;
     static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;

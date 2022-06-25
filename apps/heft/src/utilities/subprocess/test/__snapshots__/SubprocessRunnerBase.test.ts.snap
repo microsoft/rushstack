@@ -47,11 +47,12 @@ exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes object
 Object {
   "type": 4,
   "value": Object {
+    "absolutePath": "/path/to/project/path/to/file",
     "column": 29,
     "errorMessage": "message",
     "errorStack": "ERROR STACK",
-    "filePath": "path/to/file",
     "line": 4,
+    "projectFolder": "/path/to/project",
   },
 }
 `;
@@ -60,11 +61,12 @@ exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes object
 Object {
   "type": 4,
   "value": Object {
+    "absolutePath": "/path/to/project/path/to/file",
     "column": undefined,
     "errorMessage": "message",
     "errorStack": "ERROR STACK",
-    "filePath": "path/to/file",
     "line": 4,
+    "projectFolder": "/path/to/project",
   },
 }
 `;
@@ -73,11 +75,12 @@ exports[`SubprocessRunnerBase serializeForIpcMessage correctly serializes object
 Object {
   "type": 4,
   "value": Object {
+    "absolutePath": "/path/to/project/path/to/file",
     "column": undefined,
     "errorMessage": "message",
     "errorStack": "ERROR STACK",
-    "filePath": "path/to/file",
     "line": undefined,
+    "projectFolder": "/path/to/project",
   },
 }
 `;

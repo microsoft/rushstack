@@ -22,6 +22,7 @@ export {
   IExecutableSpawnOptions,
   Executable
 } from './Executable';
+export { IFileErrorOptions, IFileErrorFormattingOptions, FileError } from './FileError';
 export {
   INodePackageJson,
   IPackageJson,
@@ -55,7 +56,7 @@ export {
   IParsedPackageName,
   IParsedPackageNameOrError
 } from './PackageName';
-export { Path, IPathFormatConciselyOptions } from './Path';
+export { Path, FileLocationStyle, IPathFormatFileLocationOptions, IPathFormatConciselyOptions } from './Path';
 export { Encoding, Text, NewlineKind } from './Text';
 export { Sort } from './Sort';
 export {

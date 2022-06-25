@@ -3,7 +3,7 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import { ITerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
+import { ITerminalProvider, ITerminal, Terminal, FileError } from '@rushstack/node-core-library';
 
 import {
   ISubprocessMessageBase,
@@ -21,7 +21,6 @@ import {
 } from './SubprocessCommunicationManagerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { SubprocessLoggerManager } from './SubprocessLoggerManager';
-import { FileError } from '../../pluginFramework/logging/FileError';
 import { SubprocessTerminator } from './SubprocessTerminator';
 
 export interface ISubprocessInnerConfiguration {
@@ -344,7 +343,8 @@ export abstract class SubprocessRunnerBase<
             value: {
               errorMessage: arg.message,
               errorStack: arg.stack,
-              filePath: arg.filePath,
+              absolutePath: arg.absolutePath,
+              projectFolder: arg.projectFolder,
               line: arg.line,
               column: arg.column
             }
@@ -402,12 +402,12 @@ export abstract class SubprocessRunnerBase<
       case SupportedSerializableArgType.FileError: {
         const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> =
           arg as ISubprocessApiCallArgWithValue<ISerializedFileErrorValue>;
-        const result: FileError = new FileError(
-          typedArg.value.errorMessage,
-          typedArg.value.filePath,
-          typedArg.value.line,
-          typedArg.value.column
-        );
+        const result: FileError = new FileError(typedArg.value.errorMessage, {
+          absolutePath: typedArg.value.absolutePath,
+          projectFolder: typedArg.value.projectFolder,
+          line: typedArg.value.line,
+          column: typedArg.value.column
+        });
         result.stack = typedArg.value.errorStack;
         return result;
       }

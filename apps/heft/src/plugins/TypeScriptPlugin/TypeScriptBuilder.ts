@@ -12,7 +12,8 @@ import {
   ITerminalProvider,
   FileSystem,
   Path,
-  Async
+  Async,
+  FileError
 } from '@rushstack/node-core-library';
 import type * as TTypescript from 'typescript';
 import {
@@ -29,7 +30,6 @@ import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/P
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-import { FileError } from '../../pluginFramework/logging/FileError';
 
 import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 import { HeftSession } from '../../pluginFramework/HeftSession';
@@ -736,12 +736,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     if (diagnostic.file) {
       const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
       const message: string = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-      const buildFolderRelativeFilename: string = path.relative(
-        this._configuration.buildFolder,
-        diagnostic.file.fileName
-      );
       const formattedMessage: string = `(TS${diagnostic.code}) ${message}`;
-      errorObject = new FileError(formattedMessage, buildFolderRelativeFilename, line + 1, character + 1);
+      errorObject = new FileError(formattedMessage, {
+        absolutePath: diagnostic.file.fileName,
+        projectFolder: this._configuration.buildFolder,
+        line: line + 1,
+        column: character + 1
+      });
       diagnosticMessage = errorObject.toString();
     } else {
       diagnosticMessage = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
