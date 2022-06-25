@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sat, 25 Jun 2022 01:54:29 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Jun 2022 21:00:40 GMT and should not be manually modified.
+
+## 7.17.23
+Sat, 25 Jun 2022 21:00:40 GMT
+
+### Patches
+
+- Minor change to support the new ApiInitializerMixin mixin.
 
 ## 7.17.22
 Sat, 25 Jun 2022 01:54:29 GMT

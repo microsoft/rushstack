@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.20.0",
+      "tag": "@microsoft/api-extractor-model_v7.20.0",
+      "date": "Sat, 25 Jun 2022 21:00:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new initializerTokenRange field to ApiProperty and ApiVariable items."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.19.1",
       "tag": "@microsoft/api-extractor-model_v7.19.1",
       "date": "Sat, 25 Jun 2022 01:54:29 GMT",

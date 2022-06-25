@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 25 Jun 2022 01:54:29 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Jun 2022 21:00:40 GMT and should not be manually modified.
+
+## 7.27.0
+Sat, 25 Jun 2022 21:00:40 GMT
+
+### Minor changes
+
+- API Extractor now populates an initializerTokenRange field for ApiProperty and ApiVariable items.
 
 ## 7.26.1
 Sat, 25 Jun 2022 01:54:29 GMT
