@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack4-localization-plugin",
+      "comment": "Add an option to output typings to additional output folders.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack4-localization-plugin"
+}

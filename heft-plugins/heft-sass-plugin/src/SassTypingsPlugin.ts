@@ -11,6 +11,7 @@ import type {
 } from '@rushstack/heft';
 import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
 import { JsonSchema } from '@rushstack/node-core-library';
+
 import { ISassConfiguration, SassTypingsGenerator } from './SassTypingsGenerator';
 import { Async } from './utilities/Async';
 

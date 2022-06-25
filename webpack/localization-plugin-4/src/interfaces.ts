@@ -33,6 +33,11 @@ export interface ITypingsGenerationOptions {
   generatedTsFolder: string;
 
   /**
+   * Optional additional folders into which `.d.ts` files for loc files should be dropped.
+   */
+  secondaryGeneratedTsFolders?: string[];
+
+  /**
    * This optional property overrides the compiler context for discovery of localization files
    * for which typings should be generated.
    */

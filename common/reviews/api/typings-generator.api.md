@@ -27,23 +27,29 @@ export interface IStringValueTypings {
 }
 
 // @public (undocumented)
-export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
+export interface ITypingsGeneratorBaseOptions {
+    // (undocumented)
+    generatedTsFolder: string;
+    // (undocumented)
+    globsToIgnore?: string[];
+    // (undocumented)
+    secondaryGeneratedTsFolders?: string[];
+    // (undocumented)
+    srcFolder: string;
+    // (undocumented)
+    terminal?: ITerminal;
+}
+
+// @public (undocumented)
+export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> extends ITypingsGeneratorBaseOptions {
     // (undocumented)
     fileExtensions: string[];
     // @deprecated (undocumented)
     filesToIgnore?: string[];
     // (undocumented)
-    generatedTsFolder: string;
-    // (undocumented)
     getAdditionalOutputFiles?: (relativePath: string) => string[];
     // (undocumented)
-    globsToIgnore?: string[];
-    // (undocumented)
     parseAndGenerateTypings: (fileContents: string, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
-    // (undocumented)
-    srcFolder: string;
-    // (undocumented)
-    terminal?: ITerminal;
 }
 
 // @public

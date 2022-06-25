@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-utilities",
+      "comment": "Add an option to output typings to additional output folders.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-utilities"
+}

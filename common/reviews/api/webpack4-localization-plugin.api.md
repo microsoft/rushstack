@@ -134,6 +134,7 @@ export interface ITypingsGenerationOptions {
     // @deprecated (undocumented)
     ignoreString?: (resxFilePath: string, stringName: string) => boolean;
     processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
+    secondaryGeneratedTsFolders?: string[];
     sourceRoot?: string;
 }
 

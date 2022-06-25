@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StringValuesTypingsGenerator, IStringValueTyping } from '@rushstack/typings-generator';
-import { ITerminal, NewlineKind } from '@rushstack/node-core-library';
+import {
+  StringValuesTypingsGenerator,
+  IStringValueTyping,
+  ITypingsGeneratorBaseOptions
+} from '@rushstack/typings-generator';
+import { NewlineKind } from '@rushstack/node-core-library';
 
 import type { IgnoreStringFunction, ILocalizationFile } from './interfaces';
 import { parseLocFile } from './LocFileParser';
@@ -10,12 +14,8 @@ import { parseLocFile } from './LocFileParser';
 /**
  * @public
  */
-export interface ITypingsGeneratorOptions {
-  srcFolder: string;
-  generatedTsFolder: string;
-  terminal?: ITerminal;
+export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
   exportAsDefault?: boolean;
-  globsToIgnore?: string[];
   resxNewlineNormalization?: NewlineKind | undefined;
   ignoreMissingResxComments?: boolean | undefined;
   ignoreString?: IgnoreStringFunction;

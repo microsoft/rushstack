@@ -117,6 +117,7 @@ function generateConfiguration(mode, outputFolderName) {
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
+          secondaryGeneratedTsFolders: ['lib'],
           sourceRoot: path.resolve(__dirname, 'src'),
           exportAsDefault: true
         },
