@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.46.0",
+      "tag": "@rushstack/node-core-library_v3.46.0",
+      "date": "Sat, 25 Jun 2022 01:54:29 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add FileError class. This error type can be thrown when encountering an error at a specific line and column of a target file."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.45.7",
       "tag": "@rushstack/node-core-library_v3.45.7",
       "date": "Fri, 17 Jun 2022 09:17:54 GMT",
