@@ -502,8 +502,11 @@ export class ApiModelGenerator {
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
-      const initializerTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: enumMember.initializer, tokenRange: initializerTokenRange });
+      let initializerTokenRange: IExcerptTokenRange | undefined = undefined;
+      if (enumMember.initializer) {
+        initializerTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        nodesToCapture.push({ node: enumMember.initializer, tokenRange: initializerTokenRange });
+      }
 
       const excerptTokens: IExcerptToken[] = this._buildExcerptTokens(astDeclaration, nodesToCapture);
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
