@@ -21,18 +21,12 @@ describe(FileError.name, () => {
     }
   });
 
-  it('normalizes slashes in relative file paths', () => {
+  it('returns Unix-style relative file path formatting for the to-string', () => {
     const error1: FileError = new FileError('message', {
-      absolutePath: `C:\\path\\to\\project\\path\\to\\file`,
-      projectFolder: 'C:\\path\\to\\project'
-    });
-    expect(error1.toString()).toEqual('./path/to/file - message');
-
-    const error2: FileError = new FileError('message', {
-      absolutePath: '/path/to/project/path/to/file',
+      absolutePath: `/path/to/project/path/to/file`,
       projectFolder: '/path/to/project'
     });
-    expect(error2.toString()).toEqual('./path/to/file - message');
+    expect(error1.toString()).toEqual('./path/to/file - message');
   });
 
   it('correctly performs Unix-style relative file path formatting', () => {
