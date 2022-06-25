@@ -18,6 +18,8 @@ describe(FileError.name, () => {
   afterEach(() => {
     if (originalValue) {
       process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    } else {
+      delete process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     }
   });
 
@@ -211,6 +213,8 @@ describe(`${FileError.name} using arbitrary base folder`, () => {
   afterEach(() => {
     if (originalValue) {
       process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    } else {
+      delete process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     }
   });
 
@@ -240,6 +244,8 @@ describe(`${FileError.name} using PROJECT_FOLDER base folder`, () => {
   afterEach(() => {
     if (originalValue) {
       process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    } else {
+      delete process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     }
   });
 
@@ -267,6 +273,8 @@ describe(`${FileError.name} using ABSOLUTE_PATH base folder`, () => {
   afterEach(() => {
     if (originalValue) {
       process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    } else {
+      delete process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     }
   });
 
@@ -299,6 +307,8 @@ describe(`${FileError.name} using unsupported base folder token`, () => {
   afterEach(() => {
     if (originalValue) {
       process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER = originalValue;
+    } else {
+      delete process.env.RUSHSTACK_FILE_ERROR_BASE_FOLDER;
     }
   });
 
