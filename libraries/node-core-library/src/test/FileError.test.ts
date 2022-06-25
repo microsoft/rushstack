@@ -21,7 +21,7 @@ describe(FileError.name, () => {
     }
   });
 
-  it('returns Unix-style relative file path formatting for the to-string', () => {
+  it('returns Unix-style relative file path formatting for the toString() method', () => {
     const error1: FileError = new FileError('message', {
       absolutePath: `/path/to/project/path/to/file`,
       projectFolder: '/path/to/project'
