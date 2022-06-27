@@ -47,7 +47,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
         await this._getApiExtractorConfigurationAsync(
           taskSession,
           heftConfiguration,
-          /* ignoreMissingConfigTargets: */ true
+          /* ignoreMissingEntryPoint: */ true
         );
       if (apiExtractorConfiguration) {
         await this._updateCleanOptionsAsync(cleanOptions, apiExtractorConfiguration);
@@ -86,7 +86,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   private async _getApiExtractorConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    ignoreMissingConfigTargets?: boolean
+    ignoreMissingEntryPoint?: boolean
   ): Promise<TApiExtractor.ExtractorConfig | undefined> {
     const configObjectFullPath: string | undefined = await this._getApiExtractorConfigurationFilePathAsync(
       heftConfiguration
@@ -105,7 +105,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     return apiExtractor.ExtractorConfig.prepare({
       configObject,
       configObjectFullPath,
-      ignoreMissingConfigTargets,
+      ignoreMissingEntryPoint,
       packageJsonFullPath: path.join(heftConfiguration.buildFolder, 'package.json'),
       projectFolderLookupToken: heftConfiguration.buildFolder
     });
