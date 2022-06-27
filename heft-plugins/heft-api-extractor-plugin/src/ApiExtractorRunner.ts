@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import * as path from 'path';
 import type { IScopedLogger } from '@rushstack/heft';
-import { type ITerminal, Path, FileError, InternalError } from '@rushstack/node-core-library';
+import { type ITerminal, FileError, InternalError } from '@rushstack/node-core-library';
 import type * as TApiExtractor from '@microsoft/api-extractor';
 
 export interface IApiExtractorRunnerConfiguration {
@@ -78,18 +77,12 @@ export class ApiExtractorRunner {
           case this._apiExtractor.ExtractorLogLevel.Warning: {
             let errorToEmit: Error | undefined;
             if (message.sourceFilePath) {
-              const filePathForLog: string = Path.isUnderOrEqual(
-                message.sourceFilePath,
-                this._configuration.buildFolder
-              )
-                ? path.relative(this._configuration.buildFolder, message.sourceFilePath)
-                : message.sourceFilePath;
-              errorToEmit = new FileError(
-                `(${message.messageId}) ${message.text}`,
-                filePathForLog,
-                message.sourceFileLine,
-                message.sourceFileColumn
-              );
+              errorToEmit = new FileError(`(${message.messageId}) ${message.text}`, {
+                absolutePath: message.sourceFilePath,
+                projectFolder: this._configuration.buildFolder,
+                line: message.sourceFileLine,
+                column: message.sourceFileColumn
+              });
             } else {
               errorToEmit = new Error(message.text);
             }

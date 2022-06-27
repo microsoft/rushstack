@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodePath from 'path';
 import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
@@ -10,8 +9,7 @@ import {
   Import,
   IPackageJson,
   LegacyAdapters,
-  PackageJsonLookup,
-  Path
+  PackageJsonLookup
 } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
@@ -325,12 +323,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
   private _normalizeError(buildFolder: string, error: TWebpack.StatsError): Error {
     if (error instanceof Error) {
       return error;
-    } else {
-      let moduleName: string | undefined = error.moduleName;
-      if (!moduleName && error.moduleIdentifier) {
-        moduleName = Path.convertToSlashes(nodePath.relative(buildFolder, error.moduleIdentifier));
-      }
-
+    } else if (error.moduleIdentifier) {
       let lineNumber: number | undefined;
       let columnNumber: number | undefined;
       if (error.loc) {
@@ -352,9 +345,14 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
         }
       }
 
-      return moduleName
-        ? new FileError(error.message, moduleName, lineNumber, columnNumber)
-        : new Error(error.message);
+      return new FileError(error.message, {
+        absolutePath: error.moduleIdentifier,
+        projectFolder: buildFolder,
+        line: lineNumber,
+        column: columnNumber
+      });
+    } else {
+      return new Error(error.message);
     }
   }
 }
