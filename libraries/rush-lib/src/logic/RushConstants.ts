@@ -73,7 +73,7 @@ export class RushConstants {
   /**
    * Number of installation attempts
    */
-  public static readonly defaultMaxInstallAttempts: number = 3;
+  public static readonly defaultMaxInstallAttempts: number = 1;
 
   /**
    * The filename ("pnpm-lock.yaml") used to store an installation plan for the PNPM package manger
