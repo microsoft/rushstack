@@ -243,7 +243,7 @@ export interface IExtractorConfigLoadForFolderOptions {
 export interface IExtractorConfigPrepareOptions {
     configObject: IConfigFile;
     configObjectFullPath: string | undefined;
-    ignoreMissingConfigTargets?: boolean;
+    ignoreMissingEntryPoint?: boolean;
     packageJson?: INodePackageJson | undefined;
     packageJsonFullPath: string | undefined;
     projectFolderLookupToken?: string;

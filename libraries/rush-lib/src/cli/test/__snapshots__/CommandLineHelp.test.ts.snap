@@ -589,7 +589,7 @@ Optional arguments:
                         a file when using this command.
   --max-install-attempts NUMBER
                         Overrides the default maximum number of install 
-                        attempts. The default value is 3.
+                        attempts. The default value is 1.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
@@ -1135,7 +1135,7 @@ Optional arguments:
                         a file when using this command.
   --max-install-attempts NUMBER
                         Overrides the default maximum number of install 
-                        attempts. The default value is 3.
+                        attempts. The default value is 1.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.

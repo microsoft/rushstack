@@ -89,21 +89,67 @@ describe(Path.name, () => {
     });
   });
   describe(Path.formatConcisely.name, () => {
-    test('tests', () => {
-      expect(
-        Path.formatConcisely({ pathToConvert: '/folder1/folder2/folder3', baseFolder: '/folder1' })
-      ).toEqual('./folder2/folder3');
-      expect(
-        path.isAbsolute(
-          Path.formatConcisely({ pathToConvert: '/folder1/folder2/folder3', baseFolder: '/folder4' })
-        )
-      ).toBe(true);
-      expect(
-        Path.formatConcisely({
+    describe('With trimLeadingDotSlash unset', () => {
+      it('Formats a path under a base folder', () => {
+        const result: string = Path.formatConcisely({
+          pathToConvert: '/folder1/folder2/folder3',
+          baseFolder: '/folder1'
+        });
+        expect(result).toMatchInlineSnapshot(`"./folder2/folder3"`);
+        expect(path.isAbsolute(result)).toBe(false);
+      });
+
+      it('Formats a path not under the base folder', () => {
+        const result: string = Path.formatConcisely({
+          pathToConvert: '/folder1/folder2/folder3',
+          baseFolder: '/folder4'
+        });
+        // We can't do a snapshot test here because the result is OS-specific
+        // expect(result).toMatchInlineSnapshot();
+        expect(path.isAbsolute(result)).toBe(true);
+      });
+
+      it('Formats a path containing a ".." under a base folder', () => {
+        const result: string = Path.formatConcisely({
           pathToConvert: '/folder1/folder2/folder3/folder4/../file.txt',
           baseFolder: '/folder1/folder2/folder3'
-        })
-      ).toEqual('./file.txt');
+        });
+        expect(result).toMatchInlineSnapshot(`"./file.txt"`);
+        expect(path.isAbsolute(result)).toBe(false);
+      });
+    });
+
+    describe('With trimLeadingDotSlash set to true', () => {
+      it('Formats a path under a base folder', () => {
+        const result: string = Path.formatConcisely({
+          pathToConvert: '/folder1/folder2/folder3',
+          baseFolder: '/folder1',
+          trimLeadingDotSlash: true
+        });
+        expect(result).toMatchInlineSnapshot(`"folder2/folder3"`);
+        expect(path.isAbsolute(result)).toBe(false);
+      });
+
+      it('Formats a path not under the base folder', () => {
+        const result: string = Path.formatConcisely({
+          pathToConvert: '/folder1/folder2/folder3',
+          baseFolder: '/folder4',
+          trimLeadingDotSlash: true
+        });
+        // We can't do a snapshot test here because the result is OS-specific
+        // expect(result).toMatchInlineSnapshot();
+        expect(path.isAbsolute(result)).toBe(true);
+      });
+
+      it('Formats a path containing a ".." under a base folder', () => {
+        const result: string = Path.formatConcisely({
+          pathToConvert: '/folder1/folder2/folder3/folder4/../file.txt',
+          baseFolder: '/folder1/folder2/folder3',
+          trimLeadingDotSlash: true
+        });
+        expect(result).toMatchInlineSnapshot(`"file.txt"`);
+        expect(path.isAbsolute(result)).toBe(false);
+      });
     });
   });
 });

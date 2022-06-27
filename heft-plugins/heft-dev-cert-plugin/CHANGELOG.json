@@ -2,6 +2,33 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.1.43",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.1.43",
+      "date": "Mon, 27 Jun 2022 18:43:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.1.54`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.47.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.27.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.45.12` to `^0.45.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.42",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.1.42",
       "date": "Sat, 25 Jun 2022 21:00:40 GMT",

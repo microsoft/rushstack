@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Add support for the \"ignoreMissingEntryPoint\" ExtractorConfig option to allow for loading an ExtractorConfig before the target project is built.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

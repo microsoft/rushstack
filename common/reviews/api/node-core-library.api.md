@@ -575,6 +575,7 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 export interface IPathFormatConciselyOptions {
     baseFolder: string;
     pathToConvert: string;
+    trimLeadingDotSlash?: boolean;
 }
 
 // @public

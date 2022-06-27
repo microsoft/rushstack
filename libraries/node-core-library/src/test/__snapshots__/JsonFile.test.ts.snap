@@ -25,29 +25,3 @@ exports[`JsonFile allows undefined values when asked 2`] = `
 "{}
 "
 `;
-
-exports[`JsonFile tests adds a header comment 1`] = `
-"// header
-// comment
-{
-  \\"abc\\": 123
-}
-"
-`;
-
-exports[`JsonFile tests adds an empty header comment 1`] = `
-"{
-  \\"abc\\": 123
-}
-"
-`;
-
-exports[`JsonFile tests allows undefined values when asked 1`] = `
-"{}
-"
-`;
-
-exports[`JsonFile tests allows undefined values when asked 2`] = `
-"{}
-"
-`;
