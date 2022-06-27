@@ -605,6 +605,11 @@ export interface IStringBuilder {
     toString(): string;
 }
 
+// @beta
+export interface ISubprocessOptions {
+    detached: boolean;
+}
+
 // @beta (undocumented)
 export interface ITerminal {
     registerProvider(provider: ITerminalProvider): void;
@@ -814,6 +819,13 @@ export class StringBuilder implements IStringBuilder {
     constructor();
     append(text: string): void;
     toString(): string;
+}
+
+// @beta
+export class SubprocessTerminator {
+    static killProcessTree(subprocess: child_process.ChildProcess, subprocessOptions: ISubprocessOptions): void;
+    static killProcessTreeOnExit(subprocess: child_process.ChildProcess, subprocessOptions: ISubprocessOptions): void;
+    static readonly RECOMMENDED_OPTIONS: ISubprocessOptions;
 }
 
 // @beta

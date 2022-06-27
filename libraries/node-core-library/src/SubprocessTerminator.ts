@@ -1,14 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Executable } from '@rushstack/node-core-library';
 import * as child_process from 'child_process';
 import process from 'process';
 
+import { Executable } from './Executable';
+
 /**
  * Details about how the `child_process.ChildProcess` was created.
+ *
+ * @beta
  */
 export interface ISubprocessOptions {
+  /**
+   * Whether or not the child process is detached.
+   *
+   * @remarks
+   * On POSIX systems, detached=true is required for killing the subtree. On Windows, detached=true
+   * creates a separate console window which is generally not the desired behavior.
+   */
   detached: boolean;
 }
 
@@ -27,6 +37,8 @@ interface ITrackedSubprocess {
  *
  * SubprocessTerminator doesn't do anything on Windows, since by default Windows automatically
  * terminates child processes when their parent is terminated.
+ *
+ * @beta
  */
 export class SubprocessTerminator {
   /**
@@ -42,9 +54,10 @@ export class SubprocessTerminator {
 
   private static readonly _isWindows: boolean = process.platform === 'win32';
 
+  /**
+   * The recommended options when creating a child process.
+   */
   public static readonly RECOMMENDED_OPTIONS: ISubprocessOptions = {
-    // On POSIX systems, detached=true is required for killing the subtree.
-    // On Windows, detached=true creates a separate console window which is generally not what we want
     detached: process.platform !== 'win32'
   };
 
@@ -82,6 +95,9 @@ export class SubprocessTerminator {
     SubprocessTerminator._logDebug(`tracking #${pid}`);
   }
 
+  /**
+   * Terminate the child process and all of its children.
+   */
   public static killProcessTree(
     subprocess: child_process.ChildProcess,
     subprocessOptions: ISubprocessOptions
