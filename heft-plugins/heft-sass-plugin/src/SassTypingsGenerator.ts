@@ -25,6 +25,11 @@ export interface ISassConfiguration {
   generatedTsFolder?: string;
 
   /**
+   * Optional additional folders to which Sass typings should be output.
+   */
+  secondaryGeneratedTsFolders?: string[];
+
+  /**
    * Output directories for compiled CSS
    */
   cssOutputFolders?: string[] | undefined;
@@ -103,6 +108,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       exportAsDefaultInterfaceName,
       fileExtensions,
       filesToIgnore: sassConfiguration.excludeFiles,
+      secondaryGeneratedTsFolders: sassConfiguration.secondaryGeneratedTsFolders,
 
       getAdditionalOutputFiles: getCssPaths,
 

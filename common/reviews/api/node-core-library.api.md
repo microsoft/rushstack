@@ -188,21 +188,22 @@ export enum FileConstants {
 export class FileError extends Error {
     // (undocumented)
     static [Symbol.hasInstance](instance: object): boolean;
-    constructor(message: string, filePath: string, line?: number, column?: number);
+    constructor(message: string, options: IFileErrorOptions);
+    readonly absolutePath: string;
     readonly column: number | undefined;
-    readonly filePath: string;
+    // @internal (undocumented)
+    static _environmentVariableIsAbsolutePath: boolean;
+    getFormattedErrorMessage(options?: IFileErrorFormattingOptions): string;
     readonly line: number | undefined;
-    // @override (undocumented)
-    toString(format?: FileErrorFormat): string;
+    readonly projectFolder: string;
+    // @internal (undocumented)
+    static _sanitizedEnvironmentVariable: string | undefined;
+    // @override
+    toString(): string;
 }
 
 // @public
-export const enum FileErrorFormat {
-    // (undocumented)
-    Unix = 0,
-    // (undocumented)
-    VisualStudio = 1
-}
+export type FileLocationStyle = 'Unix' | 'VisualStudio';
 
 // @public
 export class FileSystem {
@@ -350,6 +351,19 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
     maxBuffer?: number;
     stdio?: ExecutableStdioMapping;
     timeoutMs?: number;
+}
+
+// @public
+export interface IFileErrorFormattingOptions {
+    format?: FileLocationStyle;
+}
+
+// @public
+export interface IFileErrorOptions {
+    absolutePath: string;
+    column?: number;
+    line?: number;
+    projectFolder: string;
 }
 
 // @public (undocumented)
@@ -564,6 +578,16 @@ export interface IPathFormatConciselyOptions {
 }
 
 // @public
+export interface IPathFormatFileLocationOptions {
+    baseFolder?: string;
+    column?: number;
+    format: FileLocationStyle;
+    line?: number;
+    message: string;
+    pathToFormat: string;
+}
+
+// @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
@@ -729,6 +753,7 @@ export class Path {
     static convertToBackslashes(inputPath: string): string;
     static convertToSlashes(inputPath: string): string;
     static formatConcisely(options: IPathFormatConciselyOptions): string;
+    static formatFileLocation(options: IPathFormatFileLocationOptions): string;
     static isDownwardRelative(inputPath: string): boolean;
     static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;

@@ -18,6 +18,9 @@ export declare class ClassWithTypeLiterals {
 }
 
 /** @public */
+export declare const CONST_VARIABLE: string;
+
+/** @public */
 export declare const enum ConstEnum {
     Zero = 0,
     One = 1,
@@ -34,6 +37,9 @@ export declare namespace NamespaceContainingVariable {
     let variable: object[];
     let constVariable: object[];
 }
+
+/** @public */
+export declare let nonConstVariable: string;
 
 /** @public */
 export declare enum RegularEnum {
@@ -63,6 +69,6 @@ export declare class SimpleClass {
 }
 
 /** @public */
-export declare const VARIABLE: string;
+export declare const VARIABLE_WITHOUT_EXPLICIT_TYPE = "hello";
 
 export { }

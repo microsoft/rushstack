@@ -1,7 +1,7 @@
 {
-  "name": "@rushstack/module-minifier-plugin",
-  "version": "1.0.0",
-  "description": "@rushstack/module-minifier-plugin has been renamed to @rushstack/webpack4-module-minifier-plugin.",
+  "name": "@rushstack/localization-plugin",
+  "version": "0.15.0",
+  "description": "@rushstack/localization-plugin has been renamed to @rushstack/webpack4-localization-plugin.",
   "license": "MIT",
   "scripts": {
     "postinstall": "node postinstall.js"

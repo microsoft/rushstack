@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 17 Jun 2022 09:17:54 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Jun 2022 01:54:29 GMT and should not be manually modified.
+
+## 3.46.0
+Sat, 25 Jun 2022 01:54:29 GMT
+
+### Minor changes
+
+- Add FileError class. This error type can be thrown when encountering an error at a specific line and column of a target file.
 
 ## 3.45.7
 Fri, 17 Jun 2022 09:17:54 GMT

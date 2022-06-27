@@ -4,6 +4,49 @@
 import * as path from 'path';
 
 /**
+ * The format that the FileError message should conform to. The supported formats are:
+ *  - Unix: `<path>:<line>:<column> - <message>`
+ *  - VisualStudio: `<path>(<line>,<column>) - <message>`
+ *
+ * @public
+ */
+export type FileLocationStyle = 'Unix' | 'VisualStudio';
+
+/**
+ * Options for {@link Path.formatFileLocation}.
+ * @public
+ */
+export interface IPathFormatFileLocationOptions {
+  /**
+   * The base path to use when converting `pathToFormat` to a relative path. If not specified,
+   * `pathToFormat` will be used as-is.
+   */
+  baseFolder?: string;
+  /**
+   * The path that will be used to specify the file location.
+   */
+  pathToFormat: string;
+  /**
+   * The message related to the file location.
+   */
+  message: string;
+  /**
+   * The style of file location formatting to use.
+   */
+  format: FileLocationStyle;
+  /**
+   * The optional line number. If not specified, the line number will not be included
+   * in the formatted string.
+   */
+  line?: number;
+  /**
+   * The optional column number. If not specified, the column number will not be included
+   * in the formatted string.
+   */
+  column?: number;
+}
+
+/**
  * Options for {@link Path.formatConcisely}.
  * @public
  */
@@ -96,6 +139,60 @@ export class Path {
 
     const absolutePath: string = path.resolve(options.pathToConvert);
     return absolutePath;
+  }
+
+  /**
+   * Formats a file location to look nice for reporting purposes.
+   * @remarks
+   * If `pathToFormat` is under the `baseFolder`, then it will be converted to a relative with the `./` prefix.
+   * Otherwise, it will be converted to an absolute path.
+   *
+   * Backslashes will be converted to slashes, unless the path starts with an OS-specific string like `C:\`.
+   */
+  public static formatFileLocation(options: IPathFormatFileLocationOptions): string {
+    const { message, format, pathToFormat, baseFolder, line, column } = options;
+
+    // Convert the path to be relative to the base folder, if specified. Otherwise, use
+    // the path as-is.
+    const filePath: string = baseFolder
+      ? Path.formatConcisely({
+          pathToConvert: pathToFormat,
+          baseFolder
+        })
+      : path.resolve(pathToFormat);
+
+    let formattedFileLocation: string;
+    switch (format) {
+      case 'Unix': {
+        if (line !== undefined && column !== undefined) {
+          formattedFileLocation = `:${line}:${column}`;
+        } else if (line !== undefined) {
+          formattedFileLocation = `:${line}`;
+        } else {
+          formattedFileLocation = '';
+        }
+
+        break;
+      }
+
+      case 'VisualStudio': {
+        if (line !== undefined && column !== undefined) {
+          formattedFileLocation = `(${line},${column})`;
+        } else if (line !== undefined) {
+          formattedFileLocation = `(${line})`;
+        } else {
+          formattedFileLocation = '';
+        }
+
+        break;
+      }
+
+      default: {
+        throw new Error(`Unknown format: ${format}`);
+      }
+    }
+
+    return `${filePath}${formattedFileLocation} - ${message}`;
   }
 
   /**

@@ -27,6 +27,14 @@
       "description": "Output directory for generated Sass typings."
     },
 
+    "secondaryGeneratedTsFolders": {
+      "type": "array",
+      "description": "Optional additional folders to which Sass typings should be output.",
+      "items": {
+        "type": "string"
+      }
+    },
+
     "exportAsDefault": {
       "type": "boolean",
       "description": "Determines whether export values are wrapped in a default property, or not."

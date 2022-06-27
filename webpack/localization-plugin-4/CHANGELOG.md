@@ -1,6 +1,18 @@
 # Change Log - @rushstack/webpack4-localization-plugin
 
-This log was last generated on Fri, 24 Jun 2022 07:16:47 GMT and should not be manually modified.
+This log was last generated on Sat, 25 Jun 2022 21:00:40 GMT and should not be manually modified.
+
+## 0.15.1
+Sat, 25 Jun 2022 21:00:40 GMT
+
+_Version update only_
+
+## 0.15.0
+Sat, 25 Jun 2022 01:54:29 GMT
+
+### Minor changes
+
+- Add an option to output typings to additional output folders.
 
 ## 0.14.6
 Fri, 24 Jun 2022 07:16:47 GMT

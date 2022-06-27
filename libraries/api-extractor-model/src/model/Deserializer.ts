@@ -12,7 +12,7 @@ import { ApiInterface, IApiInterfaceOptions, IApiInterfaceJson } from './ApiInte
 import { ApiPropertySignature, IApiPropertySignatureOptions } from './ApiPropertySignature';
 import { ApiMethodSignature, IApiMethodSignatureOptions } from './ApiMethodSignature';
 import { ApiProperty, IApiPropertyOptions } from './ApiProperty';
-import { ApiEnumMember, IApiEnumMemberOptions, IApiEnumMemberJson } from './ApiEnumMember';
+import { ApiEnumMember, IApiEnumMemberOptions } from './ApiEnumMember';
 import { ApiEnum, IApiEnumOptions } from './ApiEnum';
 import { IApiPropertyItemJson } from '../items/ApiPropertyItem';
 import { ApiConstructor, IApiConstructorOptions } from './ApiConstructor';
@@ -49,7 +49,7 @@ export class Deserializer {
         ApiEnum.onDeserializeInto(options, context, jsonObject as IApiDeclaredItemJson);
         return new ApiEnum(options as IApiEnumOptions);
       case ApiItemKind.EnumMember:
-        ApiEnumMember.onDeserializeInto(options, context, jsonObject as IApiEnumMemberJson);
+        ApiEnumMember.onDeserializeInto(options, context, jsonObject as IApiDeclaredItemJson);
         return new ApiEnumMember(options as IApiEnumMemberOptions);
       case ApiItemKind.Function:
         ApiFunction.onDeserializeInto(options, context, jsonObject as IApiDeclaredItemJson);

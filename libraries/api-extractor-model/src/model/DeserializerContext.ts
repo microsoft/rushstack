@@ -61,12 +61,20 @@ export enum ApiJsonSchemaVersion {
   V_1007 = 1007,
 
   /**
+   * Add an `initializerTokenRange` field to `ApiProperty` and `ApiVariable` to track the item's
+   * initializer.
+   *
+   * When loading older JSON files, this range is empty.
+   */
+  V_1008 = 1008,
+
+  /**
    * The current latest .api.json schema version.
    *
    * IMPORTANT: When incrementing this number, consider whether `OLDEST_SUPPORTED` or `OLDEST_FORWARDS_COMPATIBLE`
    * should be updated.
    */
-  LATEST = V_1007,
+  LATEST = V_1008,
 
   /**
    * The oldest .api.json schema version that is still supported for backwards compatibility.

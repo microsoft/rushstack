@@ -98,18 +98,14 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
       );
 
       for (const tslintFailure of this._lintResult.failures) {
-        const buildFolderRelativeFilename: string = path.relative(
-          this._buildFolderPath,
-          tslintFailure.getFileName()
-        );
         const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
         const formattedFailure: string = `(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`;
-        const errorObject: FileError = new FileError(
-          formattedFailure,
-          buildFolderRelativeFilename,
-          line + 1,
-          character + 1
-        );
+        const errorObject: FileError = new FileError(formattedFailure, {
+          absolutePath: tslintFailure.getFileName(),
+          projectFolder: this._buildFolderPath,
+          line: line + 1,
+          column: character + 1
+        });
         switch (tslintFailure.getRuleSeverity()) {
           case 'error': {
             this._scopedLogger.emitError(errorObject);

@@ -12,6 +12,7 @@ import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { ApiReadonlyMixin, IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
 import { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
 import { DeserializerContext } from './DeserializerContext';
 
@@ -23,7 +24,8 @@ export interface IApiVariableOptions
   extends IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiReadonlyMixinOptions,
-    IApiDeclaredItemOptions {
+    IApiDeclaredItemOptions,
+    IApiInitializerMixinOptions {
   variableTypeTokenRange: IExcerptTokenRange;
 }
 
@@ -51,7 +53,9 @@ export interface IApiVariableJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiReadonlyMixin(ApiDeclaredItem))) {
+export class ApiVariable extends ApiNameMixin(
+  ApiReleaseTagMixin(ApiReadonlyMixin(ApiInitializerMixin(ApiDeclaredItem)))
+) {
   /**
    * An {@link Excerpt} that describes the type of the variable.
    */

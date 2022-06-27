@@ -456,7 +456,7 @@ export class YamlDocumenter {
         yamlItem.type = 'field';
         const enumMember: ApiEnumMember = apiItem as ApiEnumMember;
 
-        if (enumMember.initializerExcerpt.text.length > 0) {
+        if (enumMember.initializerExcerpt && enumMember.initializerExcerpt.text.length > 0) {
           yamlItem.numericValue = enumMember.initializerExcerpt.text;
         }
 

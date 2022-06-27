@@ -167,6 +167,17 @@ export class LocalizationPlugin implements Webpack.Plugin {
           this._options.typingsOptions.sourceRoot
         );
       }
+
+      const secondaryGeneratedTsFolders: string[] | undefined =
+        this._options.typingsOptions.secondaryGeneratedTsFolders;
+      if (secondaryGeneratedTsFolders) {
+        for (let i: number = 0; i < secondaryGeneratedTsFolders.length; i++) {
+          const secondaryGeneratedTsFolder: string = secondaryGeneratedTsFolders[i];
+          if (!path.isAbsolute(secondaryGeneratedTsFolder)) {
+            secondaryGeneratedTsFolders[i] = path.resolve(compiler.context, secondaryGeneratedTsFolder);
+          }
+        }
+      }
     }
 
     // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
@@ -179,6 +190,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       typingsPreprocessor = new TypingsGenerator({
         srcFolder: this._options.typingsOptions.sourceRoot || compiler.context,
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
+        secondaryGeneratedTsFolders: this._options.typingsOptions.secondaryGeneratedTsFolders,
         exportAsDefault: this._options.typingsOptions.exportAsDefault,
         globsToIgnore: this._options.globsToIgnore,
         ignoreString: this._options.ignoreString,

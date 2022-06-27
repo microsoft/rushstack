@@ -23,6 +23,9 @@ export class ClassWithTypeLiterals {
 }
 
 // @public (undocumented)
+export const CONST_VARIABLE: string;
+
+// @public (undocumented)
 export const enum ConstEnum {
     // (undocumented)
     One = 1,
@@ -45,6 +48,9 @@ export namespace NamespaceContainingVariable {
     let // (undocumented)
     constVariable: object[];
 }
+
+// @public (undocumented)
+export let nonConstVariable: string;
 
 // @public (undocumented)
 export enum RegularEnum {
@@ -71,7 +77,7 @@ export class SimpleClass {
 }
 
 // @public (undocumented)
-export const VARIABLE: string;
+export const VARIABLE_WITHOUT_EXPLICIT_TYPE = "hello";
 
 // (No @packageDocumentation comment for this package)
 

@@ -10,6 +10,7 @@ import {
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiProtectedMixin, IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
+import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
 /**
@@ -19,7 +20,8 @@ import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyIt
 export interface IApiPropertyOptions
   extends IApiPropertyItemOptions,
     IApiProtectedMixinOptions,
-    IApiStaticMixinOptions {}
+    IApiStaticMixinOptions,
+    IApiInitializerMixinOptions {}
 
 /**
  * Represents a TypeScript property declaration that belongs to an `ApiClass`.
@@ -55,7 +57,7 @@ export interface IApiPropertyOptions
  *
  * @public
  */
-export class ApiProperty extends ApiProtectedMixin(ApiStaticMixin(ApiPropertyItem)) {
+export class ApiProperty extends ApiProtectedMixin(ApiStaticMixin(ApiInitializerMixin(ApiPropertyItem))) {
   public constructor(options: IApiPropertyOptions) {
     super(options);
   }

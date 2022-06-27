@@ -5,6 +5,7 @@
 ```ts
 
 import { ITerminal } from '@rushstack/node-core-library';
+import { ITypingsGeneratorBaseOptions } from '@rushstack/typings-generator';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
@@ -76,13 +77,9 @@ export interface IPseudolocaleOptions {
 }
 
 // @public (undocumented)
-export interface ITypingsGeneratorOptions {
+export interface ITypingsGeneratorOptions extends ITypingsGeneratorBaseOptions {
     // (undocumented)
     exportAsDefault?: boolean;
-    // (undocumented)
-    generatedTsFolder: string;
-    // (undocumented)
-    globsToIgnore?: string[];
     // (undocumented)
     ignoreMissingResxComments?: boolean | undefined;
     // (undocumented)
@@ -91,10 +88,6 @@ export interface ITypingsGeneratorOptions {
     processComment?: (comment: string | undefined, resxFilePath: string, stringName: string) => string | undefined;
     // (undocumented)
     resxNewlineNormalization?: NewlineKind | undefined;
-    // (undocumented)
-    srcFolder: string;
-    // (undocumented)
-    terminal?: ITerminal;
 }
 
 // @public (undocumented)

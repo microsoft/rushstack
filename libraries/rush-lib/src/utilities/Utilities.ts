@@ -101,6 +101,7 @@ export interface IDisposable {
 }
 
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
+  rushJsonFolder: string | undefined;
   projectRoot: string | undefined;
   commonTempFolder: string | undefined;
 }
@@ -636,6 +637,7 @@ export class Utilities {
       initCwd: options.initCwd,
       pathOptions: {
         ...options.environmentPathOptions,
+        rushJsonFolder: options.rushConfiguration?.rushJsonFolder,
         projectRoot: options.workingDirectory,
         commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
       }
@@ -664,7 +666,12 @@ export class Utilities {
       options.initialEnvironment = process.env;
     }
 
+    // Set some defaults for the environment
     const environment: IEnvironment = {};
+    if (options.pathOptions?.rushJsonFolder) {
+      environment.RUSHSTACK_FILE_ERROR_BASE_FOLDER = options.pathOptions.rushJsonFolder;
+    }
+
     for (const key of Object.getOwnPropertyNames(options.initialEnvironment)) {
       const normalizedKey: string = os.platform() === 'win32' ? key.toUpperCase() : key;
 

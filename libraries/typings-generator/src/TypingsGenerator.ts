@@ -19,9 +19,19 @@ import * as chokidar from 'chokidar';
 /**
  * @public
  */
-export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
+export interface ITypingsGeneratorBaseOptions {
   srcFolder: string;
   generatedTsFolder: string;
+  secondaryGeneratedTsFolders?: string[];
+  globsToIgnore?: string[];
+  terminal?: ITerminal;
+}
+
+/**
+ * @public
+ */
+export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined>
+  extends ITypingsGeneratorBaseOptions {
   fileExtensions: string[];
   parseAndGenerateTypings: (
     fileContents: string,
@@ -29,8 +39,6 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
     relativePath: string
   ) => TTypingsResult | Promise<TTypingsResult>;
   getAdditionalOutputFiles?: (relativePath: string) => string[];
-  terminal?: ITerminal;
-  globsToIgnore?: string[];
   /**
    * @deprecated
    *
@@ -209,9 +217,9 @@ export class TypingsGenerator {
   }
 
   public getOutputFilePaths(relativePath: string): string[] {
-    const typingsFile: string = this._getTypingsFilePath(relativePath);
+    const typingsFilePaths: Iterable<string> = this._getTypingsFilePaths(relativePath);
     const additionalPaths: string[] | undefined = this._options.getAdditionalOutputFiles?.(relativePath);
-    return additionalPaths ? [typingsFile, ...additionalPaths] : [typingsFile];
+    return additionalPaths ? [...typingsFilePaths, ...additionalPaths] : Array.from(typingsFilePaths);
   }
 
   private async _reprocessFiles(relativePaths: Iterable<string>): Promise<void> {
@@ -271,12 +279,13 @@ export class TypingsGenerator {
         typingsData
       ].join(EOL);
 
-      const generatedTsFilePath: string = this._getTypingsFilePath(relativePath);
-
-      await FileSystem.writeFileAsync(generatedTsFilePath, prefixedTypingsData, {
-        ensureFolderExists: true,
-        convertLineEndings: NewlineKind.OsDefault
-      });
+      const generatedTsFilePaths: Iterable<string> = this._getTypingsFilePaths(relativePath);
+      for (const generatedTsFilePath of generatedTsFilePaths) {
+        await FileSystem.writeFileAsync(generatedTsFilePath, prefixedTypingsData, {
+          ensureFolderExists: true,
+          convertLineEndings: NewlineKind.OsDefault
+        });
+      }
     } catch (e) {
       this._options.terminal!.writeError(
         `Error occurred parsing and generating typings for file "${resolvedPath}": ${e}`
@@ -297,8 +306,15 @@ export class TypingsGenerator {
     }
   }
 
-  private _getTypingsFilePath(relativePath: string): string {
-    return path.resolve(this._options.generatedTsFolder, `${relativePath}.d.ts`);
+  private *_getTypingsFilePaths(relativePath: string): Iterable<string> {
+    const { generatedTsFolder, secondaryGeneratedTsFolders } = this._options;
+    const dtsFilename: string = `${relativePath}.d.ts`;
+    yield path.resolve(generatedTsFolder, dtsFilename);
+    if (secondaryGeneratedTsFolders) {
+      for (const secondaryGeneratedTsFolder of secondaryGeneratedTsFolders) {
+        yield path.resolve(secondaryGeneratedTsFolder, dtsFilename);
+      }
+    }
   }
 
   private _normalizeFileExtensions(fileExtensions: string[]): string[] {
