@@ -1510,6 +1510,9 @@ export class FileSystem {
       } else if (FileSystem.isUnlinkNotPermittedError(error)) {
         // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File or folder could not be deleted: ${error.path}\n${error.message}`;
+      } else if (FileSystem.isDirectoryError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `Target is a folder, not a file: ${error.path}\n${error.message}`;
       }
     }
   }
