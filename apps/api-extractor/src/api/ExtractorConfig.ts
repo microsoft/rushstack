@@ -139,9 +139,10 @@ export interface IExtractorConfigPrepareOptions {
   /**
    * When preparing the configuration object, folder and file paths referenced in the configuration are checked
    * for existence, and an error is reported if they are not found.  This option can be used to disable this
-   * check. This may be useful when preparing a configuration file for an un-built project.
+   * check for the main entry point module. This may be useful when preparing a configuration file for an
+   * un-built project.
    */
-  ignoreMissingConfigTargets?: boolean;
+  ignoreMissingEntryPoint?: boolean;
 }
 
 interface IExtractorConfigParameters {
@@ -739,7 +740,7 @@ export class ExtractorConfig {
           // Use the manually specified "<lookup>" value
           projectFolder = options.projectFolderLookupToken;
 
-          if (!options.ignoreMissingConfigTargets && !FileSystem.exists(options.projectFolderLookupToken)) {
+          if (!FileSystem.exists(options.projectFolderLookupToken)) {
             throw new Error(
               'The specified "projectFolderLookupToken" path does not exist: ' +
                 options.projectFolderLookupToken
@@ -778,7 +779,7 @@ export class ExtractorConfig {
       } else {
         ExtractorConfig._rejectAnyTokensInPath(configObject.projectFolder, 'projectFolder');
 
-        if (!options.ignoreMissingConfigTargets && !FileSystem.exists(configObject.projectFolder)) {
+        if (!FileSystem.exists(configObject.projectFolder)) {
           throw new Error('The specified "projectFolder" path does not exist: ' + configObject.projectFolder);
         }
 
@@ -812,7 +813,7 @@ export class ExtractorConfig {
         );
       }
 
-      if (!options.ignoreMissingConfigTargets && !FileSystem.exists(mainEntryPointFilePath)) {
+      if (!options.ignoreMissingEntryPoint && !FileSystem.exists(mainEntryPointFilePath)) {
         throw new Error('The "mainEntryPointFilePath" path does not exist: ' + mainEntryPointFilePath);
       }
 
@@ -833,7 +834,7 @@ export class ExtractorConfig {
         if (!tsconfigFilePath) {
           throw new Error('Either the "tsconfigFilePath" or "overrideTsconfig" setting must be specified');
         }
-        if (!options.ignoreMissingConfigTargets && !FileSystem.exists(tsconfigFilePath)) {
+        if (!FileSystem.exists(tsconfigFilePath)) {
           throw new Error('The file referenced by "tsconfigFilePath" does not exist: ' + tsconfigFilePath);
         }
       }
