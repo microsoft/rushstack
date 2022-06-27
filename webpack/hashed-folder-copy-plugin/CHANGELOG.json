@@ -2,6 +2,30 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "0.1.14",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.14",
+      "date": "Mon, 27 Jun 2022 18:43:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.47.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.28`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.13",
       "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.13",
       "date": "Sat, 25 Jun 2022 21:00:40 GMT",

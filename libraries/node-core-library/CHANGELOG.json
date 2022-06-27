@@ -2,6 +2,21 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.47.0",
+      "tag": "@rushstack/node-core-library_v3.47.0",
+      "date": "Mon, 27 Jun 2022 18:43:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a \"trimLeadingDotSlash\" option to the Path.formatConcisely function to not include the leading \"./\" in paths under the baseFolder."
+          },
+          {
+            "comment": "Change the FileError relative path output to not include the leading \"./\""
+          }
+        ]
+      }
+    },
+    {
       "version": "3.46.0",
       "tag": "@rushstack/node-core-library_v3.46.0",
       "date": "Sat, 25 Jun 2022 01:54:29 GMT",
