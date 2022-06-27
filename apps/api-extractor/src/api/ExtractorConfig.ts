@@ -136,6 +136,14 @@ export interface IExtractorConfigPrepareOptions {
    * `@microsoft/api-extractor/extends/tsdoc-base.json`.
    */
   tsdocConfigFile?: TSDocConfigFile;
+
+  /**
+   * When preparing the configuration object, folder and file paths referenced in the configuration are checked
+   * for existence, and an error is reported if they are not found.  This option can be used to disable this
+   * check for the main entry point module. This may be useful when preparing a configuration file for an
+   * un-built project.
+   */
+  ignoreMissingEntryPoint?: boolean;
 }
 
 interface IExtractorConfigParameters {
@@ -811,7 +819,7 @@ export class ExtractorConfig {
         );
       }
 
-      if (!FileSystem.exists(mainEntryPointFilePath)) {
+      if (!options.ignoreMissingEntryPoint && !FileSystem.exists(mainEntryPointFilePath)) {
         throw new Error('The "mainEntryPointFilePath" path does not exist: ' + mainEntryPointFilePath);
       }
 
