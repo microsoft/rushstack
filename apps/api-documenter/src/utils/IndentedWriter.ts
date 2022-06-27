@@ -46,8 +46,8 @@ export class IndentedWriter {
   private readonly _indentStack: string[];
   private _indentText: string;
 
-  private _deferredChunks: string[];
-  private _isWritingDeferred: boolean;
+  private _beforeStack: string[];
+  private _isWritingBeforeStack: boolean;
 
   public constructor(builder?: IStringBuilder) {
     this._builder = builder === undefined ? new StringBuilder() : builder;
@@ -59,8 +59,8 @@ export class IndentedWriter {
     this._indentStack = [];
     this._indentText = '';
 
-    this._deferredChunks = [];
-    this._isWritingDeferred = false;
+    this._beforeStack = [];
+    this._isWritingBeforeStack = false;
   }
 
   /**
@@ -156,25 +156,27 @@ export class IndentedWriter {
   }
 
   /**
-   * Defers a message to be written to the internal string buffer on the next call to either
-   * `write` or `writeLine`.
+   * Writes `before` and `after` messages if and only if `mayWrite` writes anything.
+   *
+   * If `mayWrite` writes "CONTENT", this method will write "<before>CONTENT<after>".
+   * If `mayWrite` writes nothing, this method will write nothing.
    */
-  public deferredWrite(message: string): void {
-    this._deferredChunks.push(message);
-  }
+  public writeTentative(before: string, after: string, mayWrite: () => void): void {
+    this._beforeStack.push(before);
 
-  /**
-   * Returns whether or not there exist deferred messages to be written.
-   */
-  public get hasDeferred(): boolean {
-    return this._deferredChunks.length > 0;
-  }
+    // If this function writes anything, then _all_ messages in the "before stack" will also be
+    // written. This means that the stack will be empty (as when we write a message from the stack,
+    // we remove it from the stack).
+    mayWrite();
 
-  /**
-   * Clears any deferred messages to be written.
-   */
-  public clearDeferred(): void {
-    this._deferredChunks = [];
+    // If the stack is not empty, it means that `mayWrite` didn't write anything. Pop the last-
+    // added message from the stack, we'll never write it. Otherwise, if the stack is empty, then
+    // write the "after" message.
+    if (this._beforeStack.length > 0) {
+      this._beforeStack.pop();
+    } else {
+      this.write(after);
+    }
   }
 
   /**
@@ -183,12 +185,12 @@ export class IndentedWriter {
    * each line will be indented separately.
    */
   public write(message: string): void {
-    if (!this._isWritingDeferred) {
-      this._writeDeferred();
-    }
-
     if (message.length === 0) {
       return;
+    }
+
+    if (!this._isWritingBeforeStack) {
+      this._writeBeforeStack();
     }
 
     // If there are no newline characters, then append the string verbatim
@@ -218,8 +220,8 @@ export class IndentedWriter {
   public writeLine(message: string = ''): void {
     if (message.length > 0) {
       this.write(message);
-    } else if (!this._isWritingDeferred) {
-      this._writeDeferred();
+    } else if (!this._isWritingBeforeStack) {
+      this._writeBeforeStack();
     }
 
     this._writeNewLine();
@@ -254,17 +256,18 @@ export class IndentedWriter {
   }
 
   /**
-   * Writes each deferred message, processing the messages in FIFO order.
+   * Writes all messages in our before stack, processing them in FIFO order. This stack is
+   * populated by the `writeTentative` method.
    */
-  private _writeDeferred(): void {
-    this._isWritingDeferred = true;
+  private _writeBeforeStack(): void {
+    this._isWritingBeforeStack = true;
 
-    for (const chunk of this._deferredChunks) {
-      this.write(chunk);
+    for (const message of this._beforeStack) {
+      this.write(message);
     }
 
-    this._isWritingDeferred = false;
-    this.clearDeferred();
+    this._isWritingBeforeStack = false;
+    this._beforeStack = [];
   }
 
   private _updateIndentText(): void {
