@@ -583,6 +583,9 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       // END options.localizedData.passthroughLocale
 
       // START options.localizedData.translatedStrings
+      const resolveRelativeToContext: (relative: string) => string = (
+        configuration.context?.startsWith('/') ? path.posix.resolve : path.resolve
+      ).bind(0, configuration.context!);
       const { translatedStrings } = localizedData;
       this._resolvedTranslatedStringsFromOptions.clear();
       if (translatedStrings) {
@@ -606,7 +609,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           this._resolvedTranslatedStringsFromOptions.set(localeName, resolvedFromOptionsForLocale);
 
           for (const [locFilePath, locFileDataFromOptions] of Object.entries(locale)) {
-            const normalizedLocFilePath: string = path.resolve(configuration.context!, locFilePath);
+            const normalizedLocFilePath: string = resolveRelativeToContext(locFilePath);
 
             if (resolvedFromOptionsForLocale.has(normalizedLocFilePath)) {
               errors.push(
@@ -620,7 +623,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
 
             const normalizedLocFileDataFromOptions: ILocaleFileData =
               typeof locFileDataFromOptions === 'string'
-                ? path.resolve(configuration.context!, locFileDataFromOptions)
+                ? resolveRelativeToContext(locFileDataFromOptions)
                 : locFileDataFromOptions;
 
             resolvedFromOptionsForLocale.set(normalizedLocFilePath, normalizedLocFileDataFromOptions);
