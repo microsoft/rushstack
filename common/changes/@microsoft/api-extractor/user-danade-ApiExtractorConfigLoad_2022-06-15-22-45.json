@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Add support for loading the ExtractorConfig without validating the existence of target typings files",
+      "comment": "Add support for the \"ignoreMissingEntryPoint\" ExtractorConfig option to allow for loading an ExtractorConfig before the target project is built.",
       "type": "minor"
     }
   ],
