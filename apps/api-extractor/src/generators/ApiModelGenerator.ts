@@ -1103,7 +1103,7 @@ export class ApiModelGenerator {
           this._collector.fetchDeclarationMetadata(astDeclaration);
 
         const hasReadonlyModifier: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Readonly) !== 0;
-        const hasReadonlyDocTag: boolean = !!docComment?.modifierTagSet.hasTagName('@readonly');
+        const hasReadonlyDocTag: boolean = !!docComment?.modifierTagSet?.hasTagName('@readonly');
         const isGetterWithNoSetter: boolean =
           ts.isGetAccessorDeclaration(astDeclaration.declaration) &&
           declarationMetadata.ancillaryDeclarations.length === 0;

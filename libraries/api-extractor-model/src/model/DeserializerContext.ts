@@ -49,14 +49,14 @@ export enum ApiJsonSchemaVersion {
    * Add an `isReadonly` field to `ApiProperty`, `ApiPropertySignature`, and `ApiVariable` to
    * track whether the item is readonly.
    *
-   * When loading older JSON files, the values default to `false`.
+   * When loading older JSON files, the values defaults to `false`.
    */
   V_1006 = 1006,
 
   /**
    * Add `ApiItemContainerMixin.preserveMemberOrder` to support enums that preserve their original sort order.
    *
-   * When loading older JSON files, the value default to `false`.
+   * When loading older JSON files, the value defaults to `false`.
    */
   V_1007 = 1007,
 
@@ -69,12 +69,19 @@ export enum ApiJsonSchemaVersion {
   V_1008 = 1008,
 
   /**
+   * Add an `isReadonly` field to `ApiIndexSignature` to track whether the item is readonly.
+   *
+   * When loading older JSON files, the values defaults to `false`.
+   */
+  V_1009 = 1009,
+
+  /**
    * The current latest .api.json schema version.
    *
    * IMPORTANT: When incrementing this number, consider whether `OLDEST_SUPPORTED` or `OLDEST_FORWARDS_COMPATIBLE`
    * should be updated.
    */
-  LATEST = V_1008,
+  LATEST = V_1009,
 
   /**
    * The oldest .api.json schema version that is still supported for backwards compatibility.
