@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Update the README to mention support for ESLint 8.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}
