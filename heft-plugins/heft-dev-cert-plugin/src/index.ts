@@ -8,10 +8,4 @@
  * @packageDocumentation
  */
 
-import type { IHeftPlugin } from '@rushstack/heft';
-import { DevCertPlugin } from './DevCertPlugin';
-
-/**
- * @internal
- */
-export default new DevCertPlugin() as IHeftPlugin;
+export {};
