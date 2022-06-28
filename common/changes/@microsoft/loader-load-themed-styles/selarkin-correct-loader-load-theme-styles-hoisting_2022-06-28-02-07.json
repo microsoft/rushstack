@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/loader-load-themed-styles",
-      "comment": "add optional peerdeps meta for types",
+      "comment": "Include a missing optional peer dependency on @types/webpack.",
       "type": "patch"
     }
   ],
