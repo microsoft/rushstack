@@ -100,7 +100,7 @@ function rewriteRushProjectVersions(
       } else {
         // Case 2. "<alias>": "workspace:<aliased_package_name>@<version>"
         const packageSpec: string = currentVersion.slice('workspace:'.length);
-        const nameEndsAt =
+        const nameEndsAt: number =
           packageSpec[0] === '@' ? packageSpec.slice(1).indexOf('@') + 1 : packageSpec.indexOf('@');
         const aliasedPackageName: string = nameEndsAt > 0 ? packageSpec.slice(0, nameEndsAt) : packageSpec;
         // const depVersion: string = nameEndsAt > 0 ? packageSpec.slice(nameEndsAt + 1) : '';
@@ -118,7 +118,7 @@ function rewriteRushProjectVersions(
     } else if (currentVersion.startsWith('npm:')) {
       // Case 3. "<alias>": "npm:<package_name>@<dep_version>"
       const packageSpec: string = currentVersion.slice('npm:'.length);
-      const nameEndsAt =
+      const nameEndsAt: number =
         packageSpec[0] === '@' ? packageSpec.slice(1).indexOf('@') + 1 : packageSpec.indexOf('@');
       const aliasedPackageName: string = nameEndsAt > 0 ? packageSpec.slice(0, nameEndsAt) : packageSpec;
       // const depVersion: string = nameEndsAt > 0 ? packageSpec.slice(nameEndsAt + 1) : '';
