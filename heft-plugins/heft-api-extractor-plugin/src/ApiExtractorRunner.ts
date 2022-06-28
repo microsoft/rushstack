@@ -2,30 +2,25 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import * as path from 'path';
-import { ITerminal, Path } from '@rushstack/node-core-library';
+import type { IScopedLogger } from '@rushstack/heft';
+import { type ITerminal, FileError, InternalError } from '@rushstack/node-core-library';
 import type * as TApiExtractor from '@microsoft/api-extractor';
 
-import {
-  ISubprocessRunnerBaseConfiguration,
-  SubprocessRunnerBase
-} from '../../utilities/subprocess/SubprocessRunnerBase';
-import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-
-export interface IApiExtractorRunnerConfiguration extends ISubprocessRunnerBaseConfiguration {
+export interface IApiExtractorRunnerConfiguration {
   /**
-   * The path to the Extractor's config file ("api-extractor.json")
-   *
-   * For example, /home/username/code/repo/project/config/api-extractor.json
+   * The root folder of the build.
    */
-  apiExtractorJsonFilePath: string;
+  buildFolder: string;
 
   /**
-   * The path to the @microsoft/api-extractor package
-   *
-   * For example, /home/username/code/repo/project/node_modules/@microsoft/api-extractor
+   * The loaded and prepared Extractor config file ("api-extractor.json")
    */
-  apiExtractorPackagePath: string;
+  apiExtractorConfiguration: TApiExtractor.ExtractorConfig;
+
+  /**
+   * The imported @microsoft/api-extractor package
+   */
+  apiExtractor: typeof TApiExtractor;
 
   /**
    * The path to the typescript package
@@ -38,25 +33,32 @@ export interface IApiExtractorRunnerConfiguration extends ISubprocessRunnerBaseC
    * If set to true, run API Extractor in production mode
    */
   production: boolean;
+
+  /**
+   * The scoped logger to use for logging
+   */
+  scopedLogger: IScopedLogger;
 }
 
-export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunnerConfiguration> {
-  private _scopedLogger!: IScopedLogger;
-  private _terminal!: ITerminal;
+export class ApiExtractorRunner {
+  private _configuration: IApiExtractorRunnerConfiguration;
+  private _scopedLogger: IScopedLogger;
+  private _terminal: ITerminal;
+  private _apiExtractor: typeof TApiExtractor;
 
-  public get filename(): string {
-    return __filename;
+  public constructor(configuration: IApiExtractorRunnerConfiguration) {
+    this._configuration = configuration;
+    this._apiExtractor = configuration.apiExtractor;
+    this._scopedLogger = configuration.scopedLogger;
+    this._terminal = configuration.scopedLogger.terminal;
   }
 
   public async invokeAsync(): Promise<void> {
-    this._scopedLogger = await this.requestScopedLoggerAsync('api-extractor');
-    this._terminal = this._scopedLogger.terminal;
+    this._scopedLogger.terminal.writeLine(
+      `Using API Extractor version ${this._apiExtractor.Extractor.version}`
+    );
 
-    const apiExtractor: typeof TApiExtractor = require(this._configuration.apiExtractorPackagePath);
-
-    this._scopedLogger.terminal.writeLine(`Using API Extractor version ${apiExtractor.Extractor.version}`);
-
-    const apiExtractorVersion: semver.SemVer | null = semver.parse(apiExtractor.Extractor.version);
+    const apiExtractorVersion: semver.SemVer | null = semver.parse(this._apiExtractor.Extractor.version);
     if (
       !apiExtractorVersion ||
       apiExtractorVersion.major < 7 ||
@@ -65,73 +67,48 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
       this._scopedLogger.emitWarning(new Error(`Heft requires API Extractor version 7.10.0 or newer`));
     }
 
-    const configObjectFullPath: string = this._configuration.apiExtractorJsonFilePath;
-    const configObject: TApiExtractor.IConfigFile =
-      apiExtractor.ExtractorConfig.loadFile(configObjectFullPath);
-
-    const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.prepare({
-      configObject,
-      configObjectFullPath,
-      packageJsonFullPath: path.join(this._configuration.buildFolder, 'package.json'),
-      projectFolderLookupToken: this._configuration.buildFolder
-    });
-
+    const extractorConfig: TApiExtractor.ExtractorConfig = this._configuration.apiExtractorConfiguration;
     const extractorOptions: TApiExtractor.IExtractorInvokeOptions = {
       localBuild: !this._configuration.production,
       typescriptCompilerFolder: this._configuration.typescriptPackagePath,
       messageCallback: (message: TApiExtractor.ExtractorMessage) => {
         switch (message.logLevel) {
-          case apiExtractor.ExtractorLogLevel.Error: {
-            let logMessage: string;
+          case this._apiExtractor.ExtractorLogLevel.Error:
+          case this._apiExtractor.ExtractorLogLevel.Warning: {
+            let errorToEmit: Error | undefined;
             if (message.sourceFilePath) {
-              const filePathForLog: string = Path.isUnderOrEqual(
-                message.sourceFilePath,
-                this._configuration.buildFolder
-              )
-                ? path.relative(this._configuration.buildFolder, message.sourceFilePath)
-                : message.sourceFilePath;
-              logMessage =
-                `${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn} - ` +
-                `(${message.category}) ${message.text}`;
+              errorToEmit = new FileError(`(${message.messageId}) ${message.text}`, {
+                absolutePath: message.sourceFilePath,
+                projectFolder: this._configuration.buildFolder,
+                line: message.sourceFileLine,
+                column: message.sourceFileColumn
+              });
             } else {
-              logMessage = message.text;
+              errorToEmit = new Error(message.text);
             }
 
-            this._scopedLogger.emitError(new Error(logMessage));
+            if (message.logLevel === this._apiExtractor.ExtractorLogLevel.Error) {
+              this._scopedLogger.emitError(errorToEmit);
+            } else if (message.logLevel === this._apiExtractor.ExtractorLogLevel.Warning) {
+              this._scopedLogger.emitWarning(errorToEmit);
+            } else {
+              // Should never happen, but just in case
+              throw new InternalError(`Unexpected log level: ${message.logLevel}`);
+            }
             break;
           }
 
-          case apiExtractor.ExtractorLogLevel.Warning: {
-            let logMessage: string;
-            if (message.sourceFilePath) {
-              const filePathForLog: string = Path.isUnderOrEqual(
-                message.sourceFilePath,
-                this._configuration.buildFolder
-              )
-                ? path.relative(this._configuration.buildFolder, message.sourceFilePath)
-                : message.sourceFilePath;
-              logMessage =
-                `${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn} - ` +
-                `(${message.messageId}) ${message.text}`;
-            } else {
-              logMessage = message.text;
-            }
-
-            this._scopedLogger.emitWarning(new Error(logMessage));
-            break;
-          }
-
-          case apiExtractor.ExtractorLogLevel.Verbose: {
+          case this._apiExtractor.ExtractorLogLevel.Verbose: {
             this._terminal.writeVerboseLine(message.text);
             break;
           }
 
-          case apiExtractor.ExtractorLogLevel.Info: {
+          case this._apiExtractor.ExtractorLogLevel.Info: {
             this._terminal.writeLine(message.text);
             break;
           }
 
-          case apiExtractor.ExtractorLogLevel.None: {
+          case this._apiExtractor.ExtractorLogLevel.None: {
             // Ignore messages with ExtractorLogLevel.None
             break;
           }
@@ -146,16 +123,18 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
       }
     };
 
-    const apiExtractorResult: TApiExtractor.ExtractorResult = apiExtractor.Extractor.invoke(
+    const apiExtractorResult: TApiExtractor.ExtractorResult = this._apiExtractor.Extractor.invoke(
       extractorConfig,
       extractorOptions
     );
 
     const { errorCount, warningCount } = apiExtractorResult;
     if (errorCount > 0) {
-      this._terminal.writeErrorLine(
-        `API Extractor completed with ${errorCount} error${errorCount > 1 ? 's' : ''}`
-      );
+      let message: string = `API Extractor completed with ${errorCount} error${errorCount > 1 ? 's' : ''}`;
+      if (warningCount > 0) {
+        message += ` and ${warningCount} warning${warningCount > 1 ? 's' : ''}`;
+      }
+      this._terminal.writeErrorLine(message);
     } else if (warningCount > 0) {
       this._terminal.writeWarningLine(
         `API Extractor completed with ${warningCount} warning${warningCount > 1 ? 's' : ''}`

@@ -1,16 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
-import { HeftSession } from '../../pluginFramework/HeftSession';
-import { HeftConfiguration } from '../../configuration/HeftConfiguration';
+import * as path from 'path';
+import type * as TApiExtractor from '@microsoft/api-extractor';
+import type {
+  IHeftTaskPlugin,
+  IHeftTaskRunHookOptions,
+  IHeftTaskSession,
+  HeftConfiguration,
+  IHeftTaskCleanHookOptions
+} from '@rushstack/heft';
+import { ConfigurationFile } from '@rushstack/heft-config-file';
+
 import { ApiExtractorRunner } from './ApiExtractorRunner';
-import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
-import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
-import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-import { IToolPackageResolution, ToolPackageResolver } from '../../utilities/ToolPackageResolver';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
+const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'api-extractor-task.schema.json');
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
 
 export interface IApiExtractorPluginConfiguration {
@@ -27,103 +32,215 @@ export interface IApiExtractorPluginConfiguration {
   useProjectTypescriptVersion?: boolean;
 }
 
-interface IRunApiExtractorOptions {
-  heftConfiguration: HeftConfiguration;
-  buildFolder: string;
-  debugMode: boolean;
-  watchMode: boolean;
-  production: boolean;
-  apiExtractorJsonFilePath: string;
-}
+export default class ApiExtractorPlugin implements IHeftTaskPlugin {
+  private _apiExtractorPromise: Promise<typeof TApiExtractor | undefined> | undefined;
+  private _apiExtractorConfigurationFilePathPromise: Promise<string | undefined> | undefined;
+  private _apiExtractorTaskConfigurationPromise:
+    | Promise<IApiExtractorPluginConfiguration | undefined>
+    | undefined;
 
-export class ApiExtractorPlugin implements IHeftPlugin {
-  public readonly pluginName: string = PLUGIN_NAME;
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
+      // Load up the configuration, but ignore if target files are missing, since we will be deleting
+      // them anyway.
+      const apiExtractorConfiguration: TApiExtractor.ExtractorConfig | undefined =
+        await this._getApiExtractorConfigurationAsync(
+          taskSession,
+          heftConfiguration,
+          /* ignoreMissingEntryPoint: */ true
+        );
+      if (apiExtractorConfiguration) {
+        await this._updateCleanOptionsAsync(cleanOptions, apiExtractorConfiguration);
+      }
+    });
 
-  private readonly _toolPackageResolver: ToolPackageResolver;
-
-  public constructor(taskPackageResolver: ToolPackageResolver) {
-    this._toolPackageResolver = taskPackageResolver;
-  }
-
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    const { buildFolder } = heftConfiguration;
-
-    heftSession.hooks.build.tap(PLUGIN_NAME, async (build: IBuildStageContext) => {
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          // API Extractor provides an ExtractorConfig.tryLoadForFolder() API that will probe for api-extractor.json
-          // including support for rig.json.  However, Heft does not load the @microsoft/api-extractor package at all
-          // unless it sees a config/api-extractor.json file.  Thus we need to do our own lookup here.
-          const apiExtractorJsonFilePath: string | undefined =
-            await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(CONFIG_FILE_LOCATION);
-
-          if (apiExtractorJsonFilePath !== undefined) {
-            await this._runApiExtractorAsync(heftSession, {
-              heftConfiguration,
-              buildFolder,
-              debugMode: heftSession.debugMode,
-              watchMode: build.properties.watchMode,
-              production: build.properties.production,
-              apiExtractorJsonFilePath: apiExtractorJsonFilePath
-            });
-          }
-        });
-      });
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
+      const apiExtractor: typeof TApiExtractor | undefined = await this._getApiExtractorAsync(
+        taskSession,
+        heftConfiguration
+      );
+      const apiExtractorConfiguration: TApiExtractor.ExtractorConfig | undefined =
+        await this._getApiExtractorConfigurationAsync(taskSession, heftConfiguration);
+      if (apiExtractor && apiExtractorConfiguration) {
+        await this._runApiExtractorAsync(
+          taskSession,
+          heftConfiguration,
+          runOptions,
+          apiExtractor,
+          apiExtractorConfiguration
+        );
+      }
     });
   }
 
-  private async _runApiExtractorAsync(
-    heftSession: HeftSession,
-    options: IRunApiExtractorOptions
-  ): Promise<void> {
-    const { heftConfiguration, buildFolder, debugMode, watchMode, production } = options;
+  private async _getApiExtractorConfigurationFilePathAsync(
+    heftConfiguration: HeftConfiguration
+  ): Promise<string | undefined> {
+    if (!this._apiExtractorConfigurationFilePathPromise) {
+      this._apiExtractorConfigurationFilePathPromise =
+        heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(CONFIG_FILE_LOCATION);
+    }
+    return await this._apiExtractorConfigurationFilePathPromise;
+  }
 
-    const logger: ScopedLogger = heftSession.requestScopedLogger('API Extractor Plugin');
+  private async _getApiExtractorConfigurationAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    ignoreMissingEntryPoint?: boolean
+  ): Promise<TApiExtractor.ExtractorConfig | undefined> {
+    const configObjectFullPath: string | undefined = await this._getApiExtractorConfigurationFilePathAsync(
+      heftConfiguration
+    );
+    if (!configObjectFullPath) {
+      return undefined;
+    }
+
+    const apiExtractor: typeof TApiExtractor = (await this._getApiExtractorAsync(
+      taskSession,
+      heftConfiguration
+    ))!;
+    const configObject: TApiExtractor.IConfigFile =
+      apiExtractor.ExtractorConfig.loadFile(configObjectFullPath);
+
+    return apiExtractor.ExtractorConfig.prepare({
+      configObject,
+      configObjectFullPath,
+      ignoreMissingEntryPoint,
+      packageJsonFullPath: path.join(heftConfiguration.buildFolder, 'package.json'),
+      projectFolderLookupToken: heftConfiguration.buildFolder
+    });
+  }
+
+  private async _getApiExtractorAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<typeof TApiExtractor | undefined> {
+    if (!this._apiExtractorPromise) {
+      this._apiExtractorPromise = this._getApiExtractorInnerAsync(taskSession, heftConfiguration);
+    }
+    return await this._apiExtractorPromise;
+  }
+
+  private async _getApiExtractorInnerAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<typeof TApiExtractor | undefined> {
+    // API Extractor provides an ExtractorConfig.tryLoadForFolder() API that will probe for api-extractor.json
+    // including support for rig.json.  However, Heft does not load the @microsoft/api-extractor package at all
+    // unless it sees a config/api-extractor.json file.  Thus we need to do our own lookup here.
+    const apiExtractorConfigurationFilePath: string | undefined =
+      await this._getApiExtractorConfigurationFilePathAsync(heftConfiguration);
+    if (!apiExtractorConfigurationFilePath) {
+      return undefined;
+    }
+
+    const apiExtractorPackagePath: string = await heftConfiguration.rigToolResolver.resolvePackageAsync(
+      '@microsoft/api-extractor',
+      taskSession.logger.terminal
+    );
+    return await import(apiExtractorPackagePath);
+  }
+
+  private async _updateCleanOptionsAsync(
+    cleanOptions: IHeftTaskCleanHookOptions,
+    apiExtractorConfiguration: TApiExtractor.ExtractorConfig
+  ): Promise<void> {
+    const extractorGeneratedFilePaths: string[] = [];
+    if (apiExtractorConfiguration.apiReportEnabled) {
+      // Keep apiExtractorConfiguration.reportFilePath as-is, since API-Extractor uses the existing
+      // content to write a warning if the output has changed.
+      extractorGeneratedFilePaths.push(apiExtractorConfiguration.reportTempFilePath);
+    }
+    if (apiExtractorConfiguration.docModelEnabled) {
+      extractorGeneratedFilePaths.push(apiExtractorConfiguration.apiJsonFilePath);
+    }
+    if (apiExtractorConfiguration.rollupEnabled) {
+      extractorGeneratedFilePaths.push(
+        apiExtractorConfiguration.alphaTrimmedFilePath,
+        apiExtractorConfiguration.betaTrimmedFilePath,
+        apiExtractorConfiguration.publicTrimmedFilePath,
+        apiExtractorConfiguration.untrimmedFilePath
+      );
+    }
+    if (apiExtractorConfiguration.tsdocMetadataEnabled) {
+      extractorGeneratedFilePaths.push(apiExtractorConfiguration.tsdocMetadataFilePath);
+    }
+
+    for (const generatedFilePath of extractorGeneratedFilePaths) {
+      if (generatedFilePath) {
+        cleanOptions.addDeleteOperations({
+          sourceFolder: path.dirname(generatedFilePath),
+          includeGlobs: [path.basename(generatedFilePath)]
+        });
+      }
+    }
+  }
+
+  private async _getApiExtractorTaskConfigurationAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<IApiExtractorPluginConfiguration | undefined> {
+    if (!this._apiExtractorTaskConfigurationPromise) {
+      this._apiExtractorTaskConfigurationPromise = this._getApiExtractorTaskConfigurationInnerAsync(
+        taskSession,
+        heftConfiguration
+      );
+    }
+
+    return await this._apiExtractorTaskConfigurationPromise;
+  }
+
+  private async _getApiExtractorTaskConfigurationInnerAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<IApiExtractorPluginConfiguration | undefined> {
+    const apiExtractorTaskConfigurationFileLoader: ConfigurationFile<IApiExtractorPluginConfiguration> =
+      new ConfigurationFile<IApiExtractorPluginConfiguration>({
+        projectRelativeFilePath: 'config/api-extractor-task.json',
+        jsonSchemaPath: PLUGIN_SCHEMA_PATH
+      });
+
+    return await apiExtractorTaskConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
+      taskSession.logger.terminal,
+      heftConfiguration.buildFolder,
+      heftConfiguration.rigConfig
+    );
+  }
+
+  private async _runApiExtractorAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    runOptions: IHeftTaskRunHookOptions,
+    apiExtractor: typeof TApiExtractor,
+    apiExtractorConfiguration: TApiExtractor.ExtractorConfig
+  ): Promise<void> {
+    // TODO: Handle watch mode
+    // if (watchMode) {
+    //   taskSession.logger.terminal.writeWarningLine("API Extractor isn't currently supported in --watch mode.");
+    //   return;
+    // }
 
     const apiExtractorTaskConfiguration: IApiExtractorPluginConfiguration | undefined =
-      await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
-        logger.terminal,
-        heftConfiguration.buildFolder,
-        heftConfiguration.rigConfig
+      await this._getApiExtractorTaskConfigurationAsync(taskSession, heftConfiguration);
+
+    let typescriptPackagePath: string | undefined;
+    if (apiExtractorTaskConfiguration?.useProjectTypescriptVersion) {
+      typescriptPackagePath = await heftConfiguration.rigToolResolver.resolvePackageAsync(
+        'typescript',
+        taskSession.logger.terminal
       );
-
-    if (watchMode) {
-      logger.terminal.writeWarningLine("API Extractor isn't currently supported in --watch mode.");
-      return;
     }
 
-    const resolution: IToolPackageResolution | undefined =
-      await this._toolPackageResolver.resolveToolPackagesAsync(options.heftConfiguration, logger.terminal);
+    const apiExtractorRunner: ApiExtractorRunner = new ApiExtractorRunner({
+      apiExtractor,
+      apiExtractorConfiguration,
+      typescriptPackagePath,
+      buildFolder: heftConfiguration.buildFolder,
+      production: runOptions.production,
+      scopedLogger: taskSession.logger
+    });
 
-    if (!resolution) {
-      logger.emitError(new Error('Unable to resolve a compiler package for tsconfig.json'));
-      return;
-    }
-
-    if (!resolution.apiExtractorPackagePath) {
-      logger.emitError(
-        new Error('Unable to resolve the "@microsoft/api-extractor" package for this project')
-      );
-      return;
-    }
-
-    const apiExtractorRunner: ApiExtractorRunner = new ApiExtractorRunner(
-      heftConfiguration.terminalProvider,
-      {
-        apiExtractorJsonFilePath: options.apiExtractorJsonFilePath,
-        apiExtractorPackagePath: resolution.apiExtractorPackagePath,
-        typescriptPackagePath: apiExtractorTaskConfiguration?.useProjectTypescriptVersion
-          ? resolution.typeScriptPackagePath
-          : undefined,
-        buildFolder: buildFolder,
-        production: production
-      },
-      heftSession
-    );
-    if (debugMode) {
-      await apiExtractorRunner.invokeAsync();
-    } else {
-      await apiExtractorRunner.invokeAsSubprocessAsync();
-    }
+    // Run API Extractor
+    await apiExtractorRunner.invokeAsync();
   }
 }
