@@ -11,7 +11,7 @@ export interface IHeftJestDataFileJson {
   /**
    * The "emitFolderNameForTests" from config/typescript.json
    */
-  emitFolderNameForTests: string;
+  folderNameForTests: string;
 
   /**
    * The file extension attached to compiled test files.
@@ -41,36 +41,14 @@ export class HeftJestDataFile {
   /**
    * Called by JestPlugin to write the file.
    */
-  public static async saveForProjectAsync(
-    projectFolder: string,
-    json?: IHeftJestDataFileJson
-  ): Promise<void> {
+  public static async saveForProjectAsync(projectFolder: string, json: IHeftJestDataFileJson): Promise<void> {
+    await HeftJestDataFile._validateHeftJestDataFileAsync(json, projectFolder);
     const jsonFilePath: string = HeftJestDataFile.getConfigFilePath(projectFolder);
     await JsonFile.saveAsync(json, jsonFilePath, {
       ensureFolderExists: true,
       onlyIfChanged: true,
       headerComment: '// THIS DATA FILE IS INTERNAL TO HEFT; DO NOT MODIFY IT OR RELY ON ITS CONTENTS'
     });
-  }
-
-  /**
-   * Called by JestPlugin to load and validate the Heft data file before running Jest.
-   */
-  public static async loadAndValidateForProjectAsync(projectFolder: string): Promise<IHeftJestDataFileJson> {
-    const jsonFilePath: string = HeftJestDataFile.getConfigFilePath(projectFolder);
-    let dataFile: IHeftJestDataFileJson;
-    try {
-      dataFile = await JsonFile.loadAsync(jsonFilePath);
-    } catch (e) {
-      if (FileSystem.isFileDoesNotExistError(e as Error)) {
-        throw new Error(
-          `Could not find the Jest TypeScript data file at "${jsonFilePath}". Was the compiler invoked?`
-        );
-      }
-      throw e;
-    }
-    await HeftJestDataFile._validateHeftJestDataFileAsync(dataFile, projectFolder);
-    return dataFile;
   }
 
   /**
@@ -91,7 +69,7 @@ export class HeftJestDataFile {
    * Get the absolute path to the heft-jest-data.json file
    */
   public static getConfigFilePath(projectFolder: string): string {
-    return path.join(projectFolder, '.heft', 'build-cache', 'heft-jest-data.json');
+    return path.join(projectFolder, 'temp', 'heft-jest-data.json');
   }
 
   private static async _validateHeftJestDataFileAsync(
@@ -100,7 +78,7 @@ export class HeftJestDataFile {
   ): Promise<void> {
     // Only need to validate if using TypeScript
     if (heftJestDataFile.isTypeScriptProject) {
-      const emitFolderPathForJest: string = path.join(projectFolder, heftJestDataFile.emitFolderNameForTests);
+      const emitFolderPathForJest: string = path.join(projectFolder, heftJestDataFile.folderNameForTests);
       if (!(await FileSystem.existsAsync(emitFolderPathForJest))) {
         throw new Error(
           'The transpiler output folder does not exist:\n  ' +
