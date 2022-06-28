@@ -31,8 +31,8 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-legacy": "npm:@rushstack/heft@0.45.1",
-    "@rushstack/heft-node-rig": "1.9.7",
+    "@rushstack/heft-legacy": "npm:@rushstack/heft@0.45.14",
+    "@rushstack/heft-node-rig": "1.9.15",
     "@types/node": "12.20.24",
     "@types/semver": "7.3.5"
   }

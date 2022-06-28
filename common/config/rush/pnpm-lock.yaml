@@ -94,24 +94,15 @@ importers:
       '@rushstack/rig-package': workspace:*
       '@rushstack/ts-command-line': workspace:*
       '@types/argparse': 1.0.38
-      '@types/eslint': 8.2.0
-      '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
-      '@types/semver': 7.3.5
       '@types/tapable': 1.0.6
       argparse: ~1.0.9
       chokidar: ~3.4.0
-      colors: ~1.2.1
       fast-glob: ~3.2.4
-      glob: ~7.0.5
       glob-escape: ~0.0.2
-      prettier: ~2.3.0
-      semver: ~7.3.0
       tapable: 1.1.3
       true-case-path: ~2.2.1
-      tslint: ~5.20.1
-      typescript: ~4.6.3
     dependencies:
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
@@ -121,10 +112,7 @@ importers:
       argparse: 1.0.10
       chokidar: 3.4.3
       fast-glob: 3.2.11
-      glob: 7.0.6
       glob-escape: 0.0.2
-      prettier: 2.3.2
-      semver: 7.3.7
       tapable: 1.1.3
       true-case-path: 2.2.1
     devDependencies:
@@ -133,14 +121,8 @@ importers:
       '@rushstack/heft': 0.45.14
       '@rushstack/heft-node-rig': 1.9.15_e2e2b830e30481d8fe170f2c0cf51fb8
       '@types/argparse': 1.0.38
-      '@types/eslint': 8.2.0
-      '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
-      '@types/semver': 7.3.5
-      colors: 1.2.5
-      tslint: 5.20.1_typescript@4.6.4
-      typescript: 4.6.4
 
   ../../apps/rundown:
     specifiers:
@@ -197,6 +179,8 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: ~8.7.0
@@ -205,6 +189,8 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: 8.7.0
@@ -215,6 +201,8 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: ~8.7.0
@@ -223,6 +211,8 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: 8.7.0
@@ -247,7 +237,9 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
       '@rushstack/heft-serverless-stack-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@serverless-stack/aws-lambda-ric': ^2.0.12
       '@serverless-stack/cli': 0.67.0
       '@serverless-stack/resources': 0.67.0
@@ -262,7 +254,9 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-serverless-stack-plugin': link:../../heft-plugins/heft-serverless-stack-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@serverless-stack/aws-lambda-ric': 2.0.13
       '@serverless-stack/cli': 0.67.0_constructs@10.0.130
       '@serverless-stack/resources': 0.67.0
@@ -279,7 +273,9 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
       '@rushstack/heft-storybook-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
@@ -304,7 +300,9 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-storybook-plugin': link:../../heft-plugins/heft-storybook-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
@@ -430,6 +428,8 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack5-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
@@ -453,6 +453,8 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
@@ -470,12 +472,16 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/node': 12.20.24
       eslint: ~8.7.0
       typescript: ~4.6.3
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/node': 12.20.24
       eslint: 8.7.0
       typescript: 4.6.4
@@ -633,6 +639,8 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/node': 12.20.24
       '@typescript-eslint/parser': ~5.20.0
       eslint: ~7.30.0
@@ -640,6 +648,8 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/node': 12.20.24
       '@typescript-eslint/parser': 5.20.0_eslint@7.30.0+typescript@4.6.4
       eslint: 7.30.0
@@ -649,6 +659,8 @@ importers:
     specifiers:
       '@rushstack/hashed-folder-copy-plugin': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@rushstack/webpack4-module-minifier-plugin': workspace:*
@@ -660,6 +672,8 @@ importers:
     devDependencies:
       '@rushstack/hashed-folder-copy-plugin': link:../../webpack/hashed-folder-copy-plugin
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/module-minifier-plugin-4
@@ -673,6 +687,8 @@ importers:
     specifiers:
       '@rushstack/hashed-folder-copy-plugin': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack5-plugin': workspace:*
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: ~4.5.2
@@ -682,37 +698,14 @@ importers:
     devDependencies:
       '@rushstack/hashed-folder-copy-plugin': link:../../webpack/hashed-folder-copy-plugin
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@5.68.0
       typescript: 4.6.4
       webpack: 5.68.0
       webpack-bundle-analyzer: 4.5.0
-
-  ../../build-tests/heft-action-plugin:
-    specifiers:
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/node-core-library': workspace:*
-      '@types/node': 12.20.24
-      eslint: ~8.7.0
-      typescript: ~4.6.3
-    dependencies:
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-    devDependencies:
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@types/node': 12.20.24
-      eslint: 8.7.0
-      typescript: 4.6.4
-
-  ../../build-tests/heft-action-plugin-test:
-    specifiers:
-      '@rushstack/heft': workspace:*
-      heft-action-plugin: workspace:*
-    devDependencies:
-      '@rushstack/heft': link:../../apps/heft
-      heft-action-plugin: link:../heft-action-plugin
 
   ../../build-tests/heft-copy-files-test:
     specifiers:
@@ -724,6 +717,8 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/node': 12.20.24
       '@types/tapable': 1.0.6
       eslint: ~8.7.0
@@ -734,6 +729,8 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/node': 12.20.24
       '@types/tapable': 1.0.6
       eslint: 8.7.0
@@ -743,6 +740,8 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/node': 12.20.24
       eslint: ~8.7.0
       heft-example-plugin-01: workspace:*
@@ -750,6 +749,8 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/node': 12.20.24
       eslint: 8.7.0
       heft-example-plugin-01: link:../heft-example-plugin-01
@@ -759,6 +760,8 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: ~8.7.0
@@ -769,6 +772,8 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: 8.7.0
@@ -781,6 +786,8 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       eslint: ~8.7.0
       typescript: ~4.6.3
@@ -790,6 +797,8 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/heft-jest': 1.0.1
       eslint: 8.7.0
       typescript: 4.6.4
@@ -797,11 +806,17 @@ importers:
   ../../build-tests/heft-minimal-rig-test:
     specifiers:
       '@microsoft/api-extractor': workspace:*
+      '@rushstack/heft-api-extractor-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       typescript: ~4.6.3
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@rushstack/heft-api-extractor-plugin': link:../../heft-plugins/heft-api-extractor-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       typescript: 4.6.4
 
   ../../build-tests/heft-minimal-rig-usage-test:
@@ -823,7 +838,10 @@ importers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-api-extractor-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: ~8.7.0
@@ -836,7 +854,10 @@ importers:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-api-extractor-plugin': link:../../heft-plugins/heft-api-extractor-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: 8.7.0
@@ -851,7 +872,10 @@ importers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-api-extractor-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: ~8.7.0
@@ -864,7 +888,10 @@ importers:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-api-extractor-plugin': link:../../heft-plugins/heft-api-extractor-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       eslint: 8.7.0
@@ -878,6 +905,8 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/node': 12.20.24
       eslint: ~8.7.0
@@ -887,6 +916,8 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/node': 12.20.24
       eslint: 8.7.0
       typescript: 4.6.4
@@ -895,6 +926,8 @@ importers:
     specifiers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       heft-parameter-plugin: workspace:*
@@ -902,6 +935,8 @@ importers:
     devDependencies:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@types/heft-jest': 1.0.1
       heft-parameter-plugin: link:../heft-parameter-plugin
@@ -912,7 +947,9 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
       '@rushstack/heft-sass-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
@@ -938,7 +975,9 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-sass-plugin': link:../../heft-plugins/heft-sass-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
@@ -963,6 +1002,8 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/jest': 27.4.0
       '@types/webpack-env': 1.13.0
@@ -974,6 +1015,8 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/heft-jest': 1.0.1
       '@types/jest': 27.4.0
       '@types/webpack-env': 1.13.0
@@ -998,6 +1041,8 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-dev-cert-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
@@ -1012,6 +1057,8 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-dev-cert-plugin': link:../../heft-plugins/heft-dev-cert-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
@@ -1028,6 +1075,8 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-dev-cert-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/module-minifier': workspace:*
       '@rushstack/webpack5-module-minifier-plugin': workspace:*
@@ -1044,6 +1093,8 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-dev-cert-plugin': link:../../heft-plugins/heft-dev-cert-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@rushstack/module-minifier': link:../../libraries/module-minifier
       '@rushstack/webpack5-module-minifier-plugin': link:../../webpack/module-minifier-plugin-5
@@ -1154,6 +1205,8 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:*
       '@types/http-proxy': ~1.17.8
@@ -1164,6 +1217,8 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rush-amazon-s3-build-cache-plugin': link:../../rush-plugins/rush-amazon-s3-build-cache-plugin
       '@types/http-proxy': 1.17.9
@@ -1193,6 +1248,8 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@types/webpack-env': 1.13.0
@@ -1203,6 +1260,8 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@types/webpack-env': 1.13.0
@@ -1351,6 +1410,35 @@ importers:
       eslint: 8.7.0
       typescript: 4.6.4
 
+  ../../heft-plugins/heft-api-extractor-plugin:
+    specifiers:
+      '@microsoft/api-extractor': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-config-file': workspace:*
+      '@rushstack/heft-legacy': npm:@rushstack/heft@0.45.14
+      '@rushstack/heft-node-rig': 1.9.15
+      '@rushstack/heft-typescript-plugin': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/semver': 7.3.5
+      semver: ~7.3.0
+    dependencies:
+      '@rushstack/heft-config-file': link:../../libraries/heft-config-file
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      semver: 7.3.7
+    devDependencies:
+      '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-legacy': /@rushstack/heft/0.45.14
+      '@rushstack/heft-node-rig': 1.9.15_@types+node@12.20.24
+      '@rushstack/heft-typescript-plugin': link:../heft-typescript-plugin
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/semver': 7.3.5
+
   ../../heft-plugins/heft-dev-cert-plugin:
     specifiers:
       '@microsoft/api-extractor': workspace:*
@@ -1358,6 +1446,8 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
@@ -1366,6 +1456,8 @@ importers:
       webpack-dev-server: ~4.7.4
     dependencies:
       '@rushstack/debug-certificate-manager': link:../../libraries/debug-certificate-manager
+      '@rushstack/heft-webpack4-plugin': link:../heft-webpack4-plugin
+      '@rushstack/heft-webpack5-plugin': link:../heft-webpack5-plugin
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
@@ -1384,10 +1476,12 @@ importers:
       '@jest/reporters': ~27.4.2
       '@jest/transform': ~27.4.2
       '@jest/types': ~27.4.2
-      '@microsoft/api-extractor': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
+      '@rushstack/heft-legacy': npm:@rushstack/heft@0.45.14
+      '@rushstack/heft-node-rig': 1.9.15
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
@@ -1399,12 +1493,12 @@ importers:
       jest-snapshot: ~27.4.2
       jest-watch-select-projects: 2.0.0
       lodash: ~4.17.15
-      typescript: ~4.6.3
     dependencies:
       '@jest/core': 27.4.7
       '@jest/reporters': 27.4.6
       '@jest/transform': 27.4.6
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
+      '@rushstack/heft-typescript-plugin': link:../heft-typescript-plugin
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       jest-config: 27.4.7_@types+node@12.20.24
       jest-resolve: 27.4.6
@@ -1412,15 +1506,48 @@ importers:
       lodash: 4.17.21
     devDependencies:
       '@jest/types': 27.4.2
-      '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-legacy': /@rushstack/heft/0.45.14
+      '@rushstack/heft-node-rig': 1.9.15_@types+node@12.20.24
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 12.20.24
       eslint: 8.7.0
       jest-environment-node: 27.4.6
       jest-watch-select-projects: 2.0.0
+
+  ../../heft-plugins/heft-lint-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-legacy': npm:@rushstack/heft@0.45.14
+      '@rushstack/heft-node-rig': 1.9.15
+      '@rushstack/heft-typescript-plugin': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/eslint': 8.2.0
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/semver': 7.3.5
+      eslint: ~8.7.0
+      semver: ~7.3.0
+      tslint: ~5.20.1
+      typescript: ~4.6.3
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      semver: 7.3.7
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-legacy': /@rushstack/heft/0.45.14
+      '@rushstack/heft-node-rig': 1.9.15_@types+node@12.20.24
+      '@rushstack/heft-typescript-plugin': link:../heft-typescript-plugin
+      '@types/eslint': 8.2.0
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/semver': 7.3.5
+      eslint: 8.7.0
+      tslint: 5.20.1_typescript@4.6.4
       typescript: 4.6.4
 
   ../../heft-plugins/heft-sass-plugin:
@@ -1461,9 +1588,13 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/node': 12.20.24
     dependencies:
+      '@rushstack/heft-webpack4-plugin': link:../heft-webpack4-plugin
+      '@rushstack/heft-webpack5-plugin': link:../heft-webpack5-plugin
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -1476,15 +1607,48 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/node': 12.20.24
     dependencies:
+      '@rushstack/heft-webpack4-plugin': link:../heft-webpack4-plugin
+      '@rushstack/heft-webpack5-plugin': link:../heft-webpack5-plugin
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
+
+  ../../heft-plugins/heft-typescript-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-config-file': workspace:*
+      '@rushstack/heft-legacy': npm:@rushstack/heft@0.45.14
+      '@rushstack/heft-node-rig': 1.9.15
+      '@rushstack/node-core-library': workspace:*
+      '@types/node': 12.20.24
+      '@types/semver': 7.3.5
+      '@types/tapable': 1.0.6
+      semver: ~7.3.0
+      tapable: 1.1.3
+      typescript: ~4.6.3
+    dependencies:
+      '@rushstack/heft-config-file': link:../../libraries/heft-config-file
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@types/tapable': 1.0.6
+      semver: 7.3.7
+      tapable: 1.1.3
+      typescript: 4.6.4
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-legacy': /@rushstack/heft/0.45.14
+      '@rushstack/heft-node-rig': 1.9.15_@types+node@12.20.24
+      '@types/node': 12.20.24
+      '@types/semver': 7.3.5
 
   ../../heft-plugins/heft-webpack4-plugin:
     specifiers:
@@ -1493,12 +1657,16 @@ importers:
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
       '@types/webpack': 4.41.32
       '@types/webpack-dev-server': 3.11.3
+      tapable: 1.1.3
       webpack: ~4.44.2
       webpack-dev-server: ~3.11.0
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@types/tapable': 1.0.6
+      tapable: 1.1.3
       webpack-dev-server: 3.11.3_webpack@4.44.2
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -1516,10 +1684,14 @@ importers:
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      tapable: 1.1.3
       webpack: ~5.68.0
       webpack-dev-server: ~4.7.4
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@types/tapable': 1.0.6
+      tapable: 1.1.3
       webpack-dev-server: 4.7.4_webpack@5.68.0
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -2076,13 +2248,19 @@ importers:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-api-extractor-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       eslint: ~8.7.0
       jest-environment-node: ~27.4.2
       typescript: ~4.6.3
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@rushstack/heft-api-extractor-plugin': link:../../heft-plugins/heft-api-extractor-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       eslint: 8.7.0
       jest-environment-node: 27.4.6
       typescript: 4.6.4
@@ -2093,8 +2271,11 @@ importers:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-api-extractor-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
       '@rushstack/heft-sass-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack5-plugin': workspace:*
       autoprefixer: ~10.4.2
       css-loader: ~6.6.0
@@ -2117,8 +2298,11 @@ importers:
       webpack-merge: ~5.8.0
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@rushstack/heft-api-extractor-plugin': link:../../heft-plugins/heft-api-extractor-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-sass-plugin': link:../../heft-plugins/heft-sass-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       autoprefixer: 10.4.7_postcss@8.4.14
       css-loader: 6.6.0_webpack@5.68.0
@@ -5202,6 +5386,30 @@ packages:
       jsonpath-plus: 4.0.0
     dev: true
 
+  /@rushstack/heft-jest-plugin/0.3.14_@types+node@12.20.24:
+    resolution: {integrity: sha512-Wm5omEvVN/TVaKxk4O2MhRxA52xhZECzPRGMTTNipcBIzA1pwEQe22zU1PJf7PsqBnNa2Fmc+aWwQRC/DYKfTQ==}
+    peerDependencies:
+      '@rushstack/heft': ^0.45.14
+    dependencies:
+      '@jest/core': 27.4.7
+      '@jest/reporters': 27.4.6
+      '@jest/transform': 27.4.6
+      '@rushstack/heft-config-file': 0.8.9
+      '@rushstack/node-core-library': 3.48.0
+      jest-config: 27.4.7_@types+node@12.20.24
+      jest-resolve: 27.4.6
+      jest-snapshot: 27.4.6
+      lodash: 4.17.21
+    transitivePeerDependencies:
+      - '@types/node'
+      - bufferutil
+      - canvas
+      - node-notifier
+      - supports-color
+      - ts-node
+      - utf-8-validate
+    dev: true
+
   /@rushstack/heft-jest-plugin/0.3.14_e2e2b830e30481d8fe170f2c0cf51fb8:
     resolution: {integrity: sha512-Wm5omEvVN/TVaKxk4O2MhRxA52xhZECzPRGMTTNipcBIzA1pwEQe22zU1PJf7PsqBnNa2Fmc+aWwQRC/DYKfTQ==}
     peerDependencies:
@@ -5217,6 +5425,26 @@ packages:
       jest-resolve: 27.4.6
       jest-snapshot: 27.4.6
       lodash: 4.17.21
+    transitivePeerDependencies:
+      - '@types/node'
+      - bufferutil
+      - canvas
+      - node-notifier
+      - supports-color
+      - ts-node
+      - utf-8-validate
+    dev: true
+
+  /@rushstack/heft-node-rig/1.9.15_@types+node@12.20.24:
+    resolution: {integrity: sha512-6kr89sLiK1b5mDSYVgF/SSq6B7DNrPfsaunX6ryUqUmrneHAbGvCvRGRtOc3tkAT12QQ1vu/lj0qB1rSAPBtGg==}
+    peerDependencies:
+      '@rushstack/heft': ^0.45.14
+    dependencies:
+      '@microsoft/api-extractor': 7.28.0
+      '@rushstack/heft-jest-plugin': 0.3.14_@types+node@12.20.24
+      eslint: 8.7.0
+      jest-environment-node: 27.4.6
+      typescript: 4.6.4
     transitivePeerDependencies:
       - '@types/node'
       - bufferutil
@@ -16625,6 +16853,7 @@ packages:
     resolution: {integrity: sha512-lnJzDfJ66zkMy58OL5/NY5zp70S7Nz6KqcKkXYzn2tMVrNxvbqaBpg7H3qHaLxCJ5lNMsGuM8+ohS7cZrthdLQ==}
     engines: {node: '>=10.13.0'}
     hasBin: true
+    dev: true
 
   /pretty-error/2.1.2:
     resolution: {integrity: sha512-EY5oDzmsX5wvuynAByrmY0P0hcp+QpnAKbJng2A2MPjVKXCxrDSUkzghVJ4ZGPIv+JC4gX8fPUWscC0RtjsWGw==}
