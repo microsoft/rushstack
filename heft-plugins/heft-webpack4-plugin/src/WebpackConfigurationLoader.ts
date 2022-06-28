@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import type * as TWebpack from 'webpack';
 import { FileSystem } from '@rushstack/node-core-library';
-import type * as webpack from 'webpack';
-import type { IBuildStageProperties, ScopedLogger } from '@rushstack/heft';
+import type { IScopedLogger } from '@rushstack/heft';
 
-import { IWebpackConfiguration } from './shared';
+import type { IWebpackConfiguration } from './shared';
 
 /**
  * See https://webpack.js.org/api/cli/#environment-options
@@ -16,50 +16,53 @@ interface IWebpackConfigFunctionEnv {
   production: boolean;
 }
 type IWebpackConfigJsExport =
-  | webpack.Configuration
-  | webpack.Configuration[]
-  | Promise<webpack.Configuration>
-  | Promise<webpack.Configuration[]>
-  | ((env: IWebpackConfigFunctionEnv) => webpack.Configuration | webpack.Configuration[])
-  | ((env: IWebpackConfigFunctionEnv) => Promise<webpack.Configuration | webpack.Configuration[]>);
+  | TWebpack.Configuration
+  | TWebpack.Configuration[]
+  | Promise<TWebpack.Configuration>
+  | Promise<TWebpack.Configuration[]>
+  | ((env: IWebpackConfigFunctionEnv) => TWebpack.Configuration | TWebpack.Configuration[])
+  | ((env: IWebpackConfigFunctionEnv) => Promise<TWebpack.Configuration | TWebpack.Configuration[]>);
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
 const WEBPACK_CONFIG_FILENAME: string = 'webpack.config.js';
 const WEBPACK_DEV_CONFIG_FILENAME: string = 'webpack.dev.config.js';
 
 export class WebpackConfigurationLoader {
-  public static async tryLoadWebpackConfigAsync(
-    logger: ScopedLogger,
-    buildFolder: string,
-    buildProperties: IBuildStageProperties
-  ): Promise<IWebpackConfiguration | undefined> {
+  private _logger: IScopedLogger;
+  private _production: boolean;
+  private _serveMode: boolean;
+
+  public constructor(logger: IScopedLogger, production: boolean, serveMode: boolean) {
+    this._logger = logger;
+    this._production = production;
+    this._serveMode = serveMode;
+  }
+
+  public async tryLoadWebpackConfigAsync(buildFolder: string): Promise<IWebpackConfiguration | undefined> {
     // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
     // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
 
     let webpackConfigJs: IWebpackConfigJs | undefined;
 
     try {
-      if (buildProperties.serveMode) {
-        logger.terminal.writeVerboseLine(
+      if (this._serveMode) {
+        this._logger.terminal.writeVerboseLine(
           `Attempting to load webpack configuration from "${WEBPACK_DEV_CONFIG_FILENAME}".`
         );
-        webpackConfigJs = WebpackConfigurationLoader._tryLoadWebpackConfiguration(
+        webpackConfigJs = await this._tryLoadWebpackConfigurationAsync(
           buildFolder,
           WEBPACK_DEV_CONFIG_FILENAME
         );
       }
 
       if (!webpackConfigJs) {
-        logger.terminal.writeVerboseLine(
+        this._logger.terminal.writeVerboseLine(
           `Attempting to load webpack configuration from "${WEBPACK_CONFIG_FILENAME}".`
         );
-        webpackConfigJs = WebpackConfigurationLoader._tryLoadWebpackConfiguration(
-          buildFolder,
-          WEBPACK_CONFIG_FILENAME
-        );
+        webpackConfigJs = await this._tryLoadWebpackConfigurationAsync(buildFolder, WEBPACK_CONFIG_FILENAME);
       }
     } catch (error) {
-      logger.emitError(error as Error);
+      this._logger.emitError(error as Error);
     }
 
     if (webpackConfigJs) {
@@ -67,7 +70,7 @@ export class WebpackConfigurationLoader {
         (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
 
       if (typeof webpackConfig === 'function') {
-        return webpackConfig({ prod: buildProperties.production, production: buildProperties.production });
+        return webpackConfig({ prod: this._production, production: this._production });
       } else {
         return webpackConfig;
       }
@@ -76,14 +79,15 @@ export class WebpackConfigurationLoader {
     }
   }
 
-  private static _tryLoadWebpackConfiguration(
+  private async _tryLoadWebpackConfigurationAsync(
     buildFolder: string,
     configurationFilename: string
-  ): IWebpackConfigJs | undefined {
+  ): Promise<IWebpackConfigJs | undefined> {
     const fullWebpackConfigPath: string = path.join(buildFolder, configurationFilename);
-    if (FileSystem.exists(fullWebpackConfigPath)) {
+    const configExists: boolean = await FileSystem.existsAsync(fullWebpackConfigPath);
+    if (configExists) {
       try {
-        return require(fullWebpackConfigPath);
+        return await import(fullWebpackConfigPath);
       } catch (e) {
         throw new Error(`Error loading webpack configuration at "${fullWebpackConfigPath}": ${e}`);
       }

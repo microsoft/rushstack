@@ -1,53 +1,123 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as nodePath from 'path';
-import type {
-  Compiler as WebpackCompiler,
-  MultiCompiler as WebpackMultiCompiler,
-  Stats as WebpackStats,
-  MultiStats as WebpackMultiStats,
-  StatsCompilation as WebpackStatsCompilation,
-  StatsError as WebpackStatsError
-} from 'webpack';
+import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
+import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
-import { LegacyAdapters, Path, Import, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import {
+  FileError,
+  Import,
+  IPackageJson,
+  LegacyAdapters,
+  PackageJsonLookup
+} from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
-  HeftSession,
-  IBuildStageContext,
-  IBuildStageProperties,
-  IBundleSubstage,
-  IHeftPlugin,
-  ScopedLogger
+  IHeftTaskSession,
+  IHeftTaskCleanHookOptions,
+  IHeftTaskPlugin,
+  IHeftTaskRunHookOptions,
+  IScopedLogger
 } from '@rushstack/heft';
+
 import type {
   IWebpackConfiguration,
-  IWebpackBundleSubstageProperties,
-  IWebpackBuildStageProperties
+  IWebpackConfigurationWithDevServer,
+  IWebpackPluginAccessor,
+  IWebpackVersions
 } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
-const webpack: typeof import('webpack') = Import.lazy('webpack', require);
-
-const PLUGIN_NAME: string = 'WebpackPlugin';
+/**
+ * @public
+ */
+export const PLUGIN_NAME: string = 'WebpackPlugin';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
 const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
-
-interface IWebpackVersions {
-  webpackVersion: string;
-  webpackDevServerVersion: string;
-}
 
 /**
  * @internal
  */
-export class WebpackPlugin implements IHeftPlugin {
-  public readonly pluginName: string = PLUGIN_NAME;
+export default class WebpackPlugin implements IHeftTaskPlugin {
+  private _webpack: typeof TWebpack | undefined;
+  private _webpackVersions: IWebpackVersions | undefined;
+  private _loadedWebpackConfiguration: IWebpackConfiguration | null | undefined;
 
-  private static _webpackVersions: IWebpackVersions | undefined;
-  private static _getWebpackVersions(): IWebpackVersions {
-    if (!WebpackPlugin._webpackVersions) {
+  public readonly accessor: IWebpackPluginAccessor = {
+    onEmitWebpackVersionsHook: new AsyncParallelHook(['webpackVersions']),
+    onConfigureWebpackHook: new AsyncSeriesWaterfallHook(['webpackConfiguration']),
+    onAfterConfigureWebpackHook: new AsyncParallelHook(['webpackConfiguration']),
+    onEmitStatsHook: new AsyncParallelHook(['webpackStats'])
+  };
+
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    // These get set in the run hook and used in the onConfigureWebpackHook
+    let production: boolean;
+    let serveMode: boolean;
+    let watchMode: boolean;
+
+    this.accessor.onConfigureWebpackHook!.tapPromise(
+      PLUGIN_NAME,
+      async (existingConfiguration: IWebpackConfiguration | null) => {
+        if (existingConfiguration) {
+          taskSession.logger.terminal.writeVerboseLine(
+            'Skipping loading webpack config file because the webpack config has already been set.'
+          );
+          return existingConfiguration;
+        } else {
+          const configurationLoader: WebpackConfigurationLoader = new WebpackConfigurationLoader(
+            taskSession.logger,
+            production,
+            serveMode
+          );
+          return await configurationLoader.tryLoadWebpackConfigAsync(heftConfiguration.buildFolder);
+        }
+      }
+    );
+
+    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
+      // Obtain the finalized webpack configuration
+      const webpackConfiguration: IWebpackConfiguration | null = await this._getWebpackConfigurationAsync();
+      if (webpackConfiguration) {
+        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] = Array.isArray(
+          webpackConfiguration
+        )
+          ? webpackConfiguration
+          : [webpackConfiguration];
+
+        // Add each output path to the clean list
+        for (const config of webpackConfigurationArray) {
+          if (config.output?.path) {
+            cleanOptions.addDeleteOperations({
+              sourceFolder: config.output.path
+            });
+          }
+        }
+      }
+    });
+
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
+      production = runOptions.production;
+      // TODO: Support watch mode
+      watchMode = false;
+      // TODO: Support serve mode
+      serveMode = false;
+
+      // Run webpack with the finalized webpack configuration
+      const webpackConfiguration: IWebpackConfiguration | null = await this._getWebpackConfigurationAsync();
+      await this._runWebpackAsync(taskSession, heftConfiguration, webpackConfiguration, serveMode, watchMode);
+    });
+  }
+
+  private async _getWebpackAsync(): Promise<typeof TWebpack> {
+    if (!this._webpack) {
+      this._webpack = await import('webpack');
+    }
+    return this._webpack;
+  }
+
+  private async _getWebpackVersionsAsync(): Promise<IWebpackVersions> {
+    if (!this._webpackVersions) {
       const webpackDevServerPackageJsonPath: string = Import.resolveModule({
         modulePath: 'webpack-dev-server/package.json',
         baseFolderPath: __dirname
@@ -55,108 +125,68 @@ export class WebpackPlugin implements IHeftPlugin {
       const webpackDevServerPackageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
         webpackDevServerPackageJsonPath
       );
-      WebpackPlugin._webpackVersions = {
+      const webpack: typeof TWebpack = await this._getWebpackAsync();
+      this._webpackVersions = {
         webpackVersion: webpack.version!,
         webpackDevServerVersion: webpackDevServerPackageJson.version
       };
     }
 
-    return WebpackPlugin._webpackVersions;
+    return this._webpackVersions;
   }
 
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.configureWebpack.tap(
-          { name: PLUGIN_NAME, stage: Number.MIN_SAFE_INTEGER },
-          (webpackConfiguration: unknown) => {
-            const webpackVersions: IWebpackVersions = WebpackPlugin._getWebpackVersions();
-            bundle.properties.webpackVersion = webpack.version;
-            bundle.properties.webpackDevServerVersion = webpackVersions.webpackDevServerVersion;
+  private async _getWebpackConfigurationAsync(): Promise<IWebpackConfiguration | null> {
+    if (this._webpackVersions === undefined || this._loadedWebpackConfiguration === undefined) {
+      // First, load and emit the webpack versions so that plugins can use them when loading
+      // their webpack configuration
+      if (this.accessor.onEmitWebpackVersionsHook!.isUsed()) {
+        this._webpackVersions = await this._getWebpackVersionsAsync();
+        await this.accessor.onEmitWebpackVersionsHook!.promise(this._webpackVersions);
+      }
 
-            return webpackConfiguration;
-          }
-        );
+      // Obtain the webpack configuration by calling into the hook. This hook is always used
+      // since the WebpackPlugin itself taps the hook.
+      const webpackConfiguration: IWebpackConfiguration | null =
+        await this.accessor.onConfigureWebpackHook!.promise(undefined);
 
-        bundle.hooks.configureWebpack.tapPromise(PLUGIN_NAME, async (existingConfiguration: unknown) => {
-          const logger: ScopedLogger = heftSession.requestScopedLogger('configure-webpack');
-          if (existingConfiguration) {
-            logger.terminal.writeVerboseLine(
-              'Skipping loading webpack config file because the webpack config has already been set.'
-            );
-            return existingConfiguration;
-          } else {
-            return await WebpackConfigurationLoader.tryLoadWebpackConfigAsync(
-              logger,
-              heftConfiguration.buildFolder,
-              build.properties
-            );
-          }
-        });
+      // Provide the finalized configuration
+      if (this.accessor.onAfterConfigureWebpackHook!.isUsed()) {
+        await this.accessor.onAfterConfigureWebpackHook!.promise(webpackConfiguration);
+      }
 
-        bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runWebpackAsync(
-            heftSession,
-            heftConfiguration,
-            bundle.properties as IWebpackBundleSubstageProperties,
-            build.properties,
-            heftConfiguration.terminalProvider.supportsColor
-          );
-        });
-      });
-    });
+      this._loadedWebpackConfiguration = webpackConfiguration;
+    }
+    return this._loadedWebpackConfiguration;
   }
 
   private async _runWebpackAsync(
-    heftSession: HeftSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    bundleSubstageProperties: IWebpackBundleSubstageProperties,
-    buildProperties: IBuildStageProperties,
-    supportsColor: boolean
+    webpackConfiguration: IWebpackConfiguration | null,
+    serveMode: boolean,
+    watchMode: boolean
   ): Promise<void> {
-    const webpackConfiguration: IWebpackConfiguration | undefined | null =
-      bundleSubstageProperties.webpackConfiguration;
     if (!webpackConfiguration) {
       return;
     }
 
-    const logger: ScopedLogger = heftSession.requestScopedLogger('webpack');
-    const webpackVersions: IWebpackVersions = WebpackPlugin._getWebpackVersions();
-    if (bundleSubstageProperties.webpackVersion !== webpackVersions.webpackVersion) {
-      logger.emitError(
-        new Error(
-          `The Webpack plugin expected to be configured with Webpack version ${webpackVersions.webpackVersion}, ` +
-            `but the configuration specifies version ${bundleSubstageProperties.webpackVersion}. ` +
-            'Are multiple versions of the Webpack plugin present?'
-        )
-      );
-    }
-
-    if (bundleSubstageProperties.webpackDevServerVersion !== webpackVersions.webpackDevServerVersion) {
-      logger.emitError(
-        new Error(
-          `The Webpack plugin expected to be configured with webpack-dev-server version ${webpackVersions.webpackDevServerVersion}, ` +
-            `but the configuration specifies version ${bundleSubstageProperties.webpackDevServerVersion}. ` +
-            'Are multiple versions of the Webpack plugin present?'
-        )
-      );
-    }
-
+    const logger: IScopedLogger = taskSession.logger;
+    const webpack: typeof TWebpack = await this._getWebpackAsync();
     logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
-    let compiler: WebpackCompiler | WebpackMultiCompiler;
+    let compiler: TWebpack.Compiler | TWebpack.MultiCompiler;
     if (Array.isArray(webpackConfiguration)) {
       if (webpackConfiguration.length === 0) {
         logger.terminal.writeLine('The webpack configuration is an empty array - nothing to do.');
         return;
       } else {
-        compiler = webpack(webpackConfiguration); /* (webpack.Compilation[]) => MultiCompiler */
+        compiler = webpack.default(webpackConfiguration); /* (webpack.Compilation[]) => MultiCompiler */
       }
     } else {
-      compiler = webpack(webpackConfiguration); /* (webpack.Compilation) => Compiler */
+      compiler = webpack.default(webpackConfiguration); /* (webpack.Compilation) => Compiler */
     }
 
-    if (buildProperties.serveMode) {
+    if (serveMode) {
       const defaultDevServerOptions: TWebpackDevServer.Configuration = {
         host: 'localhost',
         devMiddleware: {
@@ -164,7 +194,7 @@ export class WebpackPlugin implements IHeftPlugin {
           stats: {
             cached: false,
             cachedAssets: false,
-            colors: supportsColor
+            colors: heftConfiguration.terminalProvider.supportsColor
           }
         },
         client: {
@@ -215,7 +245,7 @@ export class WebpackPlugin implements IHeftPlugin {
       // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
       // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call require()
       // only if Heft is in serve mode.
-      const WebpackDevServer: typeof TWebpackDevServer = require(WEBPACK_DEV_SERVER_PACKAGE_NAME);
+      const WebpackDevServer: typeof TWebpackDevServer = await import(WEBPACK_DEV_SERVER_PACKAGE_NAME);
       // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
       // use of that to make logging cleaner
       const webpackDevServer: TWebpackDevServer = new WebpackDevServer(options, compiler);
@@ -238,11 +268,11 @@ export class WebpackPlugin implements IHeftPlugin {
         );
       }
 
-      let stats: WebpackStats | WebpackMultiStats | undefined;
-      if (buildProperties.watchMode) {
+      let stats: TWebpack.Stats | TWebpack.MultiStats | undefined;
+      if (watchMode) {
         try {
           stats = await LegacyAdapters.convertCallbackToPromise(
-            (compiler as WebpackCompiler).watch.bind(compiler),
+            (compiler as TWebpack.Compiler).watch.bind(compiler),
             {}
           );
         } catch (e) {
@@ -251,7 +281,7 @@ export class WebpackPlugin implements IHeftPlugin {
       } else {
         try {
           stats = await LegacyAdapters.convertCallbackToPromise(
-            (compiler as WebpackCompiler).run.bind(compiler)
+            (compiler as TWebpack.Compiler).run.bind(compiler)
           );
           await LegacyAdapters.convertCallbackToPromise(compiler.close.bind(compiler));
         } catch (e) {
@@ -260,21 +290,21 @@ export class WebpackPlugin implements IHeftPlugin {
       }
 
       if (stats) {
-        // eslint-disable-next-line require-atomic-updates
-        (buildProperties as IWebpackBuildStageProperties).webpackStats = stats;
-
+        if (this.accessor.onEmitStatsHook!.isUsed()) {
+          await this.accessor.onEmitStatsHook!.promise(stats);
+        }
         this._emitErrors(logger, heftConfiguration.buildFolder, stats);
       }
     }
   }
 
   private _emitErrors(
-    logger: ScopedLogger,
+    logger: IScopedLogger,
     buildFolder: string,
-    stats: WebpackStats | WebpackMultiStats
+    stats: TWebpack.Stats | TWebpack.MultiStats
   ): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
-      const serializedStats: WebpackStatsCompilation = stats.toJson('errors-warnings');
+      const serializedStats: TWebpack.StatsCompilation = stats.toJson('errors-warnings');
 
       if (serializedStats.warnings) {
         for (const warning of serializedStats.warnings) {
@@ -290,25 +320,39 @@ export class WebpackPlugin implements IHeftPlugin {
     }
   }
 
-  private _normalizeError(buildFolder: string, error: WebpackStatsError): Error {
+  private _normalizeError(buildFolder: string, error: TWebpack.StatsError): Error {
     if (error instanceof Error) {
       return error;
+    } else if (error.moduleIdentifier) {
+      let lineNumber: number | undefined;
+      let columnNumber: number | undefined;
+      if (error.loc) {
+        // Format of "<line>:<columnStart>-<columnEnd>"
+        // https://webpack.js.org/api/stats/#errors-and-warnings
+        const [lineNumberRaw, columnRangeRaw] = error.loc.split(':');
+        const [startColumnRaw] = columnRangeRaw.split('-');
+        if (lineNumberRaw) {
+          lineNumber = parseInt(lineNumberRaw, 10);
+          if (isNaN(lineNumber)) {
+            lineNumber = undefined;
+          }
+        }
+        if (startColumnRaw) {
+          columnNumber = parseInt(startColumnRaw, 10);
+          if (isNaN(columnNumber)) {
+            columnNumber = undefined;
+          }
+        }
+      }
+
+      return new FileError(error.message, {
+        absolutePath: error.moduleIdentifier,
+        projectFolder: buildFolder,
+        line: lineNumber,
+        column: columnNumber
+      });
     } else {
-      let moduleName: string | undefined = error.moduleName;
-      if (!moduleName && error.moduleIdentifier) {
-        moduleName = Path.convertToSlashes(nodePath.relative(buildFolder, error.moduleIdentifier));
-      }
-
-      let formattedError: string;
-      if (error.loc && moduleName) {
-        formattedError = `${moduleName}:${error.loc} - ${error.message}`;
-      } else if (moduleName) {
-        formattedError = `${moduleName} - ${error.message}`;
-      } else {
-        formattedError = error.message;
-      }
-
-      return new Error(formattedError);
+      return new Error(error.message);
     }
   }
 }
