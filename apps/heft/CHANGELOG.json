@@ -2,6 +2,29 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.46.0",
+      "tag": "@rushstack/heft_v0.46.0",
+      "date": "Tue, 28 Jun 2022 22:47:13 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Update the --locale build parameter to support multiple values and replace the `locale?: string` parameter in `IBuildStageProperties` with a `locales?: readonly string[]` parameter."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.28.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.45.14",
       "tag": "@rushstack/heft_v0.45.14",
       "date": "Tue, 28 Jun 2022 00:23:32 GMT",

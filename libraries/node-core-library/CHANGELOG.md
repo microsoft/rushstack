@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 28 Jun 2022 00:23:32 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jun 2022 22:47:13 GMT and should not be manually modified.
+
+## 3.49.0
+Tue, 28 Jun 2022 22:47:13 GMT
+
+### Minor changes
+
+- Add SubprocessTerminator utility, which can be used to kill a process and all of its child processes on demand or on termination of the host process.
 
 ## 3.48.0
 Tue, 28 Jun 2022 00:23:32 GMT

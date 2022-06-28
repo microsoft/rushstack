@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Tue, 28 Jun 2022 00:23:32 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jun 2022 22:47:13 GMT and should not be manually modified.
+
+## 0.1.6
+Tue, 28 Jun 2022 22:47:13 GMT
+
+### Patches
+
+- Ensure localization file path resolution can handle a UNIX file system on a Windows host, as is used by the unit tests.
 
 ## 0.1.5
 Tue, 28 Jun 2022 00:23:32 GMT
