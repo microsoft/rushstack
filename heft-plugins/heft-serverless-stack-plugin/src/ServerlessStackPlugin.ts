@@ -14,9 +14,7 @@ import type {
   IHeftStringParameter,
   ScopedLogger
 } from '@rushstack/heft';
-// TODO: Expose this API
-import { SubprocessTerminator } from '@rushstack/heft/lib/utilities/subprocess/SubprocessTerminator';
-import { FileSystem, Import } from '@rushstack/node-core-library';
+import { FileSystem, Import, SubprocessTerminator } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: string = 'ServerlessStackPlugin';
 const TASK_NAME: string = 'heft-serverless-stack';
