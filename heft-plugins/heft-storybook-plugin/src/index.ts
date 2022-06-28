@@ -6,13 +6,4 @@
  *
  * @packageDocumentation
  */
-
-import type { IHeftPlugin } from '@rushstack/heft';
-import { IStorybookPluginOptions, StorybookPlugin } from './StorybookPlugin';
-
-export { IStorybookPluginOptions };
-
-/**
- * @internal
- */
-export default new StorybookPlugin() as IHeftPlugin<IStorybookPluginOptions>;
+export {};
