@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.9.158",
+      "tag": "@microsoft/loader-load-themed-styles_v1.9.158",
+      "date": "Tue, 28 Jun 2022 03:30:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include a missing optional peer dependency on @types/webpack."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.9.157",
       "tag": "@microsoft/loader-load-themed-styles_v1.9.157",
       "date": "Tue, 28 Jun 2022 00:23:32 GMT",
