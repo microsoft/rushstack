@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.1.4",
+      "tag": "@rushstack/eslint-patch_v1.1.4",
+      "date": "Tue, 28 Jun 2022 00:23:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the README to mention support for ESLint 8."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.3",
       "tag": "@rushstack/eslint-patch_v1.1.3",
       "date": "Fri, 15 Apr 2022 00:12:36 GMT",

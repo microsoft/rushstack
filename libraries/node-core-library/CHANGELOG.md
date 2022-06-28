@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 27 Jun 2022 18:43:09 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jun 2022 00:23:32 GMT and should not be manually modified.
+
+## 3.48.0
+Tue, 28 Jun 2022 00:23:32 GMT
+
+### Minor changes
+
+- Add FileSystem.isDirectoryError utility function to determine if an error has the code "EISDIR". This error code may be returned (for example) when attempting to delete a folder as if it were a file using the FileSystem.deleteFile API.
 
 ## 3.47.0
 Mon, 27 Jun 2022 18:43:09 GMT

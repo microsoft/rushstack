@@ -1378,6 +1378,13 @@ export class FileSystem {
   }
 
   /**
+   * Returns true if the error object indicates the target is a directory (`EISDIR`).
+   */
+  public static isDirectoryError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && error.code === 'EISDIR';
+  }
+
+  /**
    * Returns true if the error object indicates that the `unlink` system call failed
    * due to a permissions issue (`EPERM`).
    */
@@ -1510,6 +1517,9 @@ export class FileSystem {
       } else if (FileSystem.isUnlinkNotPermittedError(error)) {
         // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File or folder could not be deleted: ${error.path}\n${error.message}`;
+      } else if (FileSystem.isDirectoryError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `Target is a folder, not a file: ${error.path}\n${error.message}`;
       }
     }
   }
