@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Include a missing optional peer dependency on @types/webpack.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles"
+}
