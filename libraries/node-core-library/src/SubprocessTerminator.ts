@@ -13,11 +13,14 @@ import { Executable } from './Executable';
  */
 export interface ISubprocessOptions {
   /**
-   * Whether or not the child process is detached.
+   * Whether or not the child process was started in detached mode.
    *
    * @remarks
-   * On POSIX systems, detached=true is required for killing the subtree. On Windows, detached=true
-   * creates a separate console window which is generally not what we want
+   * On POSIX systems, detached=true is required for killing the subtree. Attempting to kill the
+   * subtree on POSIX systems with detached=false will throw an error. On Windows, detached=true
+   * creates a separate console window and is not required for killing the subtree. In general,
+   * it is recommended to use SubprocessTerminator.RECOMMENDED_OPTIONS when forking or spawning
+   * a child process.
    */
   detached: boolean;
 }
