@@ -813,6 +813,13 @@
 
     // "heft-plugins" folder (alphabetical order)
     {
+      "packageName": "@rushstack/heft-api-extractor-plugin",
+      "projectFolder": "heft-plugins/heft-api-extractor-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+    },
+    {
       "packageName": "@rushstack/heft-dev-cert-plugin",
       "projectFolder": "heft-plugins/heft-dev-cert-plugin",
       "reviewCategory": "libraries",
