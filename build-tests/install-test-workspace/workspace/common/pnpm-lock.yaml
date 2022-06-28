@@ -4,48 +4,28 @@ importers:
 
   typescript-newest-test:
     specifiers:
-<<<<<<< HEAD
-      '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.1.tgz
-      '@rushstack/heft': file:rushstack-heft-0.45.13.tgz
-=======
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.2.tgz
       '@rushstack/heft': file:rushstack-heft-0.45.14.tgz
->>>>>>> fddf08f04c700d878e730f5dbc7f78edfca0d40a
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.6.3
     devDependencies:
-<<<<<<< HEAD
-      '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.1.tgz_eslint@8.7.0+typescript@4.6.4
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.13.tgz
-=======
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.2.tgz_eslint@8.7.0+typescript@4.6.4
       '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.14.tgz
->>>>>>> fddf08f04c700d878e730f5dbc7f78edfca0d40a
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.6.4
       typescript: 4.6.4
 
   typescript-v3-test:
     specifiers:
-<<<<<<< HEAD
-      '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.1.tgz
-      '@rushstack/heft': file:rushstack-heft-0.45.13.tgz
-=======
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.2.tgz
       '@rushstack/heft': file:rushstack-heft-0.45.14.tgz
->>>>>>> fddf08f04c700d878e730f5dbc7f78edfca0d40a
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.6.3
     devDependencies:
-<<<<<<< HEAD
-      '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.1.tgz_eslint@8.7.0+typescript@4.6.4
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.13.tgz
-=======
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.2.tgz_eslint@8.7.0+typescript@4.6.4
       '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.45.14.tgz
->>>>>>> fddf08f04c700d878e730f5dbc7f78edfca0d40a
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.6.4
       typescript: 4.6.4
@@ -342,7 +322,7 @@ packages:
     dev: true
 
   /argparse/1.0.10:
-    resolution: {integrity: sha1-vNZ5HqWuCXJeF+WtmIE0zUCz2RE=}
+    resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
     dependencies:
       sprintf-js: 1.0.3
     dev: true
@@ -1521,7 +1501,7 @@ packages:
     dev: true
 
   /sprintf-js/1.0.3:
-    resolution: {integrity: sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=}
+    resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
     dev: true
 
   /string-argv/0.3.1:
@@ -1824,19 +1804,6 @@ packages:
       - typescript
     dev: true
 
-<<<<<<< HEAD
-  file:../temp/tarballs/rushstack-heft-0.45.13.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.45.13.tgz}
-    name: '@rushstack/heft'
-    version: 0.45.13
-    engines: {node: '>=10.13.0'}
-    hasBin: true
-    dependencies:
-      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.8.8.tgz
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.47.0.tgz
-      '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.12.tgz
-      '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.12.0.tgz
-=======
   file:../temp/tarballs/rushstack-heft-0.45.14.tgz:
     resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.45.14.tgz}
     name: '@rushstack/heft'
@@ -1848,7 +1815,6 @@ packages:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.48.0.tgz
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.13.tgz
       '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.12.1.tgz
->>>>>>> fddf08f04c700d878e730f5dbc7f78edfca0d40a
       '@types/tapable': 1.0.6
       argparse: 1.0.10
       chokidar: 3.4.3
@@ -1861,23 +1827,6 @@ packages:
       true-case-path: 2.2.1
     dev: true
 
-<<<<<<< HEAD
-  file:../temp/tarballs/rushstack-heft-config-file-0.8.8.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.8.8.tgz}
-    name: '@rushstack/heft-config-file'
-    version: 0.8.8
-    engines: {node: '>=10.13.0'}
-    dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.47.0.tgz
-      '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.12.tgz
-      jsonpath-plus: 4.0.0
-    dev: true
-
-  file:../temp/tarballs/rushstack-node-core-library-3.47.0.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.47.0.tgz}
-    name: '@rushstack/node-core-library'
-    version: 3.47.0
-=======
   file:../temp/tarballs/rushstack-heft-config-file-0.8.9.tgz:
     resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.8.9.tgz}
     name: '@rushstack/heft-config-file'
@@ -1893,7 +1842,6 @@ packages:
     resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.48.0.tgz}
     name: '@rushstack/node-core-library'
     version: 3.48.0
->>>>>>> fddf08f04c700d878e730f5dbc7f78edfca0d40a
     dependencies:
       '@types/node': 12.20.24
       colors: 1.2.5
