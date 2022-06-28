@@ -12,6 +12,7 @@ import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParser } from '@rushstack/ts-command-line';
+import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileLocationStyle } from '@rushstack/node-core-library';
 import { IBaseCommandLineDefinition } from '@rushstack/ts-command-line';
@@ -142,7 +143,7 @@ export interface IBuildStageProperties {
     // (undocumented)
     lite: boolean;
     // (undocumented)
-    locale?: string;
+    locales?: ReadonlyArray<string>;
     // (undocumented)
     maxOldSpaceSize?: string;
     // (undocumented)
