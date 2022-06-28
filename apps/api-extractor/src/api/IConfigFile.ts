@@ -409,12 +409,12 @@ export interface IConfigFile {
 
   /**
    * Specifies how API Extractor sorts members of an enum when generating api.json.
-   *
+   * 
    * @remarks
    * By default, the output files will be sorted alphabetically, which is "by-name".
    * To keep the ordering in the source code, specify "preserve".
    *
    * @defaultValue `by-name`
    */
-  enumMemberOrder: EnumMemberOrder;
+   enumMemberOrder: EnumMemberOrder;
 }

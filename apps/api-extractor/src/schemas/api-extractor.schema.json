@@ -32,7 +32,7 @@
     },
 
     "enumMemberOrder": {
-      "description": "Specifies how API Extractor sorts the members of an enum when generating the .api.json doc model. \n 'by-name': sort the items according to the enum member name \n 'preserve': keep the original order that items appear in the source code",
+      "description":  "Specifies how API Extractor sorts the members of an enum when generating the .api.json doc model. \n 'by-name': sort the items according to the enum member name \n 'preserve': keep the original order that items appear in the source code",
       "type": "string",
       "enum": ["by-name", "preserve"],
       "default": "by-name"
