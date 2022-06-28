@@ -69,9 +69,7 @@ export class EmitFilesPatch {
       }
     }
 
-    // Override the underlying file emitter to run itself once for each flavor
-    // This is a rather inelegant way to convince the TypeScript compiler not to duplicate parse/link/check
-    ts.emitFiles = (
+    const patchedEmitFiles = (
       resolver: IEmitResolver,
       host: IEmitHost,
       targetSourceFile: IExtendedSourceFile | undefined,
@@ -153,6 +151,10 @@ export class EmitFilesPatch {
         };
       }
     };
+
+    // Override the underlying file emitter to run itself once for each flavor
+    // This is a rather inelegant way to convince the TypeScript compiler not to duplicate parse/link/check
+    ts.emitFiles = patchedEmitFiles;
   }
 
   public static get isInstalled(): boolean {

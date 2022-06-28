@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as TTslint from 'tslint';
-import { IExtendedSourceFile } from './TypeScriptInternals';
+import { IExtendedSourceFile } from '@rushstack/heft-typescript-plugin';
 
 type TrimmedLinter = Omit<TTslint.Linter, 'getAllFailures' | 'getEnabledRules' | 'failures'>;
 export interface IExtendedLinter extends TrimmedLinter {

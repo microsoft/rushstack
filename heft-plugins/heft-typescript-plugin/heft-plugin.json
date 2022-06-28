@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft-plugin.schema.json",
+
+  "lifecyclePlugins": [],
+
+  "taskPlugins": [
+    {
+      "pluginName": "TypeScriptPlugin",
+      "entryPoint": "./lib/TypeScriptPlugin"
+    }
+  ]
+}
