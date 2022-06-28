@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.48.0",
+      "tag": "@rushstack/node-core-library_v3.48.0",
+      "date": "Tue, 28 Jun 2022 00:23:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add FileSystem.isDirectoryError utility function to determine if an error has the code \"EISDIR\". This error code may be returned (for example) when attempting to delete a folder as if it were a file using the FileSystem.deleteFile API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.47.0",
       "tag": "@rushstack/node-core-library_v3.47.0",
       "date": "Mon, 27 Jun 2022 18:43:09 GMT",
