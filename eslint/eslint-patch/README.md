@@ -22,7 +22,7 @@ for additional technical background.
 
 ## Why it's a patch
 
-ESLint's long awaited module resolver overhaul still has not materialized as of ESLint 7.  As a stopgap,
+ESLint's long awaited module resolver overhaul still has not materialized as of ESLint 8.  As a stopgap,
 we created a small **.eslintrc.js** patch that solves the problem adequately for most real world scenarios.
 This patch was proposed as an ESLint feature with [PR 12460](https://github.com/eslint/eslint/pull/12460), however
 the maintainers were not able to accept it unless it is reworked into a fully correct design.  Such a requirement
@@ -52,7 +52,7 @@ Instead, the hypothetical `@your-company/eslint-config` NPM package would declar
 own dependencies.
 
 This patch works by modifying the ESLint engine so that its module resolver will load relative to the folder of
-the referencing config file, rather than the project folder.  The patch is compatible with ESLint 6 and 7.
+the referencing config file, rather than the project folder.  The patch is compatible with ESLint 6, 7, and 8.
 It also works with any editor extensions that load ESLint as a library.
 
 For an even leaner setup, `@your-company/eslint-config` can provide the patch as its own dependency.  See
@@ -62,8 +62,7 @@ and recommended approach.
 
 ## Links
 
-- [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/main/stack/eslint-patch/CHANGELOG.md) - Find
+- [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/eslint/eslint-patch/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/eslint-patch` is part of the [Rush Stack](https://rushstack.io/) family of projects.

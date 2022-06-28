@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@rushstack/eslint-patch"
+      "packageName": "@microsoft/api-extractor-model"
     }
   ],
-  "packageName": "@rushstack/eslint-patch",
+  "packageName": "@microsoft/api-extractor-model",
   "email": "iclanton@users.noreply.github.com"
 }

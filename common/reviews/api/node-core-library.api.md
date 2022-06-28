@@ -242,6 +242,7 @@ export class FileSystem {
     static getRealPathAsync(linkPath: string): Promise<string>;
     static getStatistics(path: string): FileSystemStats;
     static getStatisticsAsync(path: string): Promise<FileSystemStats>;
+    static isDirectoryError(error: Error): boolean;
     static isErrnoException(error: Error): error is NodeJS.ErrnoException;
     static isExistError(error: Error): boolean;
     static isFileDoesNotExistError(error: Error): boolean;
