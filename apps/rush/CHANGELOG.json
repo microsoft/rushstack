@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.75.0",
+      "tag": "@microsoft/rush_v5.75.0",
+      "date": "Tue, 28 Jun 2022 03:31:01 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable build cache for operations with no corresponding operationSettings entry in rush-project.json, and provide a clear message about why."
+          },
+          {
+            "comment": "When the `projectName:normalize` token is used in a cache ID, remove the `@` character from the scope."
+          },
+          {
+            "comment": "Reduce default maxInstallAttempts to 1"
+          },
+          {
+            "comment": "Improve logging of file locations when using the Heft build tool"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.74.0",
       "tag": "@microsoft/rush_v5.74.0",
       "date": "Fri, 10 Jun 2022 22:17:51 GMT",
