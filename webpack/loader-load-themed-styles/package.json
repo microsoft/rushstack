@@ -20,6 +20,9 @@
       "optional": true
     }
   },
+  "peerDependencies": {
+    "@types/webpack": "^4"
+  },
   "dependencies": {
     "@microsoft/load-themed-styles": "workspace:*",
     "loader-utils": "~1.1.0"
