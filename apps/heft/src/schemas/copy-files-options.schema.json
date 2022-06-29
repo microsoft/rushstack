@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "CopyFiles Heft Task Event Options",
+  "description": "Defines configuration used by the \"copyFiles\" Heft task event.",
+  "type": "object",
+
+  "additionalProperties": false,
+  "required": ["copyOperations"],
+
+  "properties": {
+    "copyOperations": {
+      "type": "array",
+      "description": "An array of copy operations to perform during the specified Heft event.",
+
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sourceFolder", "destinationFolders"],
+
+        "properties": {
+          "sourceFolder": {
+            "title": "Source Folder",
+            "type": "string",
+            "description": "The base folder that files will be copied from, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, all files in the folder will be copied.",
+            "pattern": "[^\\\\]"
+          },
+
+          "destinationFolders": {
+            "title": "Destination Folders",
+            "type": "array",
+            "description": "One or more folders that files will be copied into, relative to the project root.",
+            "items": {
+              "type": "string",
+              "pattern": "[^\\\\]"
+            }
+          },
+
+          "fileExtensions": {
+            "title": "File Extensions",
+            "type": "array",
+            "description": "If specified, this option recursively scans all folders under \"sourceFolder\" and includes any files that match the specified extensions.  (If \"fileExtensions\" and \"includeGlobs\" are both specified, their selections are added together.)",
+            "items": {
+              "type": "string",
+              "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+            }
+          },
+
+          "excludeGlobs": {
+            "title": "Exclude Globs",
+            "type": "array",
+            "description": "A list of glob patterns that exclude files/folders from being copied.  The paths are resolved relative to \"sourceFolder\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
+            "items": {
+              "type": "string",
+              "pattern": "[^\\\\]"
+            }
+          },
+
+          "includeGlobs": {
+            "title": "Include Globs",
+            "type": "array",
+            "description": "A list of glob patterns that select files to be copied.  The paths are resolved relative to \"sourceFolder\".",
+            "items": {
+              "type": "string",
+              "pattern": "[^\\\\]"
+            }
+          },
+
+          "flatten": {
+            "title": "Flatten",
+            "type": "boolean",
+            "description": "Normally, when files are selected under a child folder, a corresponding folder will be created in the destination folder.  Specify flatten=true to discard the source path and copy all matching files to the same folder.  If two files have the same name an error will be reported. The default value is false."
+          },
+
+          "hardlink": {
+            "title": "Hardlink",
+            "type": "boolean",
+            "description": "If true, filesystem hard links will be created instead of copying the file.  Depending on the operating system, this may be faster. (But note that it may cause unexpected behavior if a tool modifies the link.)  The default value is false."
+          }
+        }
+      }
+    }
+  }
+}

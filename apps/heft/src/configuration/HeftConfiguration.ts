@@ -13,6 +13,7 @@ import { trueCasePathSync } from 'true-case-path';
 import { RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
+import { RigToolResolver, type IRigToolResolver } from './RigToolResolver';
 
 /**
  * @internal
@@ -30,53 +31,24 @@ export interface IHeftConfigurationInitializationOptions {
 }
 
 /**
- * The base action configuration that all custom action configuration files
- * should inherit from.
- *
- * @public
- */
-export interface IHeftActionConfiguration {}
-
-/**
- * Options to be used when retrieving the action configuration.
- *
- * @public
- */
-export interface IHeftActionConfigurationOptions {
-  /**
-   * Whether or not arrays should be merged across Heft action configuration files.
-   */
-  mergeArrays?: boolean;
-}
-
-/**
  * @public
  */
 export class HeftConfiguration {
   private _buildFolder!: string;
   private _projectHeftDataFolder: string | undefined;
   private _projectConfigFolder: string | undefined;
-  private _buildCacheFolder: string | undefined;
+  private _cacheFolder: string | undefined;
+  private _tempFolder: string | undefined;
   private _rigConfig: RigConfig | undefined;
   private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
+  private _rigToolResolver!: RigToolResolver;
 
   /**
    * Project build folder. This is the folder containing the project's package.json file.
    */
   public get buildFolder(): string {
     return this._buildFolder;
-  }
-
-  /**
-   * The path to the project's ".heft" folder.
-   */
-  public get projectHeftDataFolder(): string {
-    if (!this._projectHeftDataFolder) {
-      this._projectHeftDataFolder = path.join(this.buildFolder, Constants.projectHeftFolderName);
-    }
-
-    return this._projectHeftDataFolder;
   }
 
   /**
@@ -91,17 +63,34 @@ export class HeftConfiguration {
   }
 
   /**
-   * The project's build cache folder.
+   * The project's cache folder.
    *
-   * This folder exists at \<project root\>/.heft/build-cache. TypeScript's output
-   * goes into this folder and then is either copied or linked to the final output folder
+   * @remarks This folder exists at \<project root\>/.cache. In general, this folder is used to store
+   * cached output from tasks under task-specific subfolders, and is not intended to be directly
+   * written to. Instead, plugins should write to the directory provided by
+   * HeftTaskSession.taskCacheFolder
    */
-  public get buildCacheFolder(): string {
-    if (!this._buildCacheFolder) {
-      this._buildCacheFolder = path.join(this.projectHeftDataFolder, Constants.buildCacheFolderName);
+  public get cacheFolder(): string {
+    if (!this._cacheFolder) {
+      this._cacheFolder = path.join(this.buildFolder, Constants.cacheFolderName);
     }
 
-    return this._buildCacheFolder;
+    return this._cacheFolder;
+  }
+
+  /**
+   * The project's temporary folder.
+   *
+   * @remarks This folder exists at \<project root\>/temp. In general, this folder is used to store temporary
+   * output from tasks under task-specific subfolders, and is not intended to be directly written to.
+   * Instead, plugins should write to the directory provided by HeftTaskSession.taskTempFolder
+   */
+  public get tempFolder(): string {
+    if (!this._tempFolder) {
+      this._tempFolder = path.join(this._buildFolder, Constants.tempFolderName);
+    }
+
+    return this._tempFolder;
   }
 
   /**
@@ -114,6 +103,17 @@ export class HeftConfiguration {
       );
     }
     return this._rigConfig;
+  }
+
+  public get rigToolResolver(): IRigToolResolver {
+    if (!this._rigToolResolver) {
+      this._rigToolResolver = new RigToolResolver({
+        buildFolder: this.buildFolder,
+        projectPackageJson: this.projectPackageJson,
+        rigConfig: this.rigConfig
+      });
+    }
+    return this._rigToolResolver;
   }
 
   /**
@@ -179,7 +179,6 @@ export class HeftConfiguration {
 
     configuration._terminalProvider = options.terminalProvider;
     configuration._globalTerminal = new Terminal(options.terminalProvider);
-
     return configuration;
   }
 }

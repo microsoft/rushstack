@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import { AsyncParallelHook, SyncHook } from 'tapable';
+import { AsyncParallelHook } from 'tapable';
 import { performance } from 'perf_hooks';
 import { InternalError } from '@rushstack/node-core-library';
 
@@ -57,28 +57,18 @@ export interface IMetricsData {
 }
 
 /**
- * Tap these hooks to record build metrics, to a file, for example.
- *
  * @public
  */
-export class MetricsCollectorHooks {
+export interface IHeftRecordMetricsHookOptions {
   /**
-   * This hook is called when a metric is recorded.
+   * @public
    */
-  public recordMetric: SyncHook<string, IMetricsData> = new SyncHook<string, IMetricsData>([
-    'metricName',
-    'metricsData'
-  ]);
+  metricName: string;
 
   /**
-   * This hook is called when collected metrics should be flushed
+   * @public
    */
-  public flush: AsyncParallelHook = new AsyncParallelHook();
-
-  /**
-   * This hook is called when collected metrics should be flushed and no more metrics will be collected.
-   */
-  public flushAndTeardown: AsyncParallelHook = new AsyncParallelHook();
+  metricData: IMetricsData;
 }
 
 /**
@@ -94,8 +84,9 @@ export interface IPerformanceData {
  * A simple performance metrics collector. A plugin is required to pipe data anywhere.
  */
 export class MetricsCollector {
-  public readonly hooks: MetricsCollectorHooks = new MetricsCollectorHooks();
-  private _hasBeenTornDown: boolean = false;
+  public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> =
+    new AsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions']);
+
   private _startTimeMs: number | undefined;
 
   /**
@@ -112,17 +103,13 @@ export class MetricsCollector {
    * @param parameterMap - Optional map of parameters to their values
    * @param performanceData - Optional performance data
    */
-  public record(
+  public async recordAsync(
     command: string,
     performanceData?: Partial<IPerformanceData>,
     parameters?: Record<string, string>
-  ): void {
+  ): Promise<void> {
     if (this._startTimeMs === undefined) {
       throw new InternalError('MetricsCollector has not been initialized with setStartTime() yet');
-    }
-
-    if (this._hasBeenTornDown) {
-      throw new InternalError('MetricsCollector has been torn down.');
     }
 
     if (!command) {
@@ -134,7 +121,7 @@ export class MetricsCollector {
       ...(performanceData || {})
     };
 
-    const metricsData: IMetricsData = {
+    const metricData: IMetricsData = {
       command: command,
       encounteredError: filledPerformanceData.encounteredError,
       taskTotalExecutionMs: filledPerformanceData.taskTotalExecutionMs,
@@ -146,29 +133,9 @@ export class MetricsCollector {
       commandParameters: parameters || {}
     };
 
-    this.hooks.recordMetric.call('inner_loop_heft', metricsData);
-  }
-
-  /**
-   * Flushes all pending logged metrics.
-   */
-  public async flushAsync(): Promise<void> {
-    if (this._hasBeenTornDown) {
-      throw new Error('MetricsCollector has been torn down.');
-    }
-
-    await this.hooks.flush.promise();
-  }
-
-  /**
-   * Flushes all pending logged metrics and closes the MetricsCollector instance.
-   */
-  public async flushAndTeardownAsync(): Promise<void> {
-    if (this._hasBeenTornDown) {
-      throw new Error('MetricsCollector has already been torn down.');
-    }
-
-    await this.hooks.flushAndTeardown.promise();
-    this._hasBeenTornDown = true;
+    await this.recordMetricsHook.promise({
+      metricName: 'inner_loop_heft',
+      metricData
+    });
   }
 }

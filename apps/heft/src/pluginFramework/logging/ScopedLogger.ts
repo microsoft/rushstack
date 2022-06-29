@@ -3,17 +3,8 @@
 
 import { Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 
-import { IHeftPlugin } from '../IHeftPlugin';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { LoggingManager } from './LoggingManager';
-
-export interface IScopedLoggerOptions {
-  requestingPlugin: IHeftPlugin;
-  loggerName: string;
-  terminalProvider: ITerminalProvider;
-  getShouldPrintStacks: () => boolean;
-  errorHasBeenEmittedCallback: () => void;
-}
 
 /**
  * @public
@@ -32,9 +23,13 @@ export interface IScopedLogger {
   emitWarning(warning: Error): void;
 }
 
-/**
- * @public
- */
+export interface IScopedLoggerOptions {
+  loggerName: string;
+  terminalProvider: ITerminalProvider;
+  getShouldPrintStacks: () => boolean;
+  errorHasBeenEmittedCallback: () => void;
+}
+
 export class ScopedLogger implements IScopedLogger {
   private readonly _options: IScopedLoggerOptions;
   private readonly _errors: Error[] = [];
@@ -52,11 +47,6 @@ export class ScopedLogger implements IScopedLogger {
     return [...this._warnings];
   }
 
-  /**
-   * @internal
-   */
-  public readonly _requestingPlugin: IHeftPlugin;
-
   public readonly loggerName: string;
 
   public readonly terminalProvider: ITerminalProvider;
@@ -68,7 +58,6 @@ export class ScopedLogger implements IScopedLogger {
    */
   public constructor(options: IScopedLoggerOptions) {
     this._options = options;
-    this._requestingPlugin = options.requestingPlugin;
     this.loggerName = options.loggerName;
 
     this.terminalProvider = new PrefixProxyTerminalProvider(
