@@ -49,14 +49,14 @@ export enum ApiJsonSchemaVersion {
    * Add an `isReadonly` field to `ApiProperty`, `ApiPropertySignature`, and `ApiVariable` to
    * track whether the item is readonly.
    *
-   * When loading older JSON files, the values defaults to `false`.
+   * When loading older JSON files, the values default to `false`.
    */
   V_1006 = 1006,
 
   /**
    * Add `ApiItemContainerMixin.preserveMemberOrder` to support enums that preserve their original sort order.
    *
-   * When loading older JSON files, the value defaults to `false`.
+   * When loading older JSON files, the value default to `false`.
    */
   V_1007 = 1007,
 
