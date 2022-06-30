@@ -246,7 +246,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       jestConfig = await JsonFile.loadAsync(jestConfigPath);
     } else {
       // Load in and resolve the config file using the "extends" field
-      jestConfig = await this._getJestConfigurationLoader(
+      jestConfig = await JestPlugin._getJestConfigurationLoader(
         buildFolder,
         projectRelativeFilePath
       ).loadConfigurationFileForProjectAsync(
@@ -300,7 +300,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     if (!options?.debugHeftReporter) {
       // Extract the reporters and transform to include the Heft reporter by default
-      jestArgv.reporters = this._extractHeftJestReporters(
+      jestArgv.reporters = JestPlugin._extractHeftJestReporters(
         taskSession,
         heftConfiguration,
         jestConfig,
@@ -353,7 +353,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   /**
    * Returns the loader for the `config/api-extractor-task.json` config file.
    */
-  public _getJestConfigurationLoader(
+  public static _getJestConfigurationLoader(
     buildFolder: string,
     projectRelativeFilePath: string
   ): ConfigurationFile<IHeftJestConfiguration> {
@@ -396,10 +396,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         });
       };
 
-      const tokenResolveMetadata: IJsonPathMetadata = this._getJsonPathMetadata({
+      const tokenResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
         rootDir: buildFolder
       });
-      const jestResolveMetadata: IJsonPathMetadata = this._getJsonPathMetadata({
+      const jestResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
         rootDir: buildFolder,
         resolveAsModule: true
       });
@@ -463,6 +463,91 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     return JestPlugin._jestConfigurationFileLoader;
   }
 
+  private static _extractHeftJestReporters(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    config: IHeftJestConfiguration,
+    projectRelativeFilePath: string
+  ): JestReporterConfig[] {
+    let isUsingHeftReporter: boolean = false;
+
+    const logger: IScopedLogger = taskSession.logger;
+    const terminal: ITerminal = logger.terminal;
+    const reporterOptions: IHeftJestReporterOptions = {
+      heftConfiguration,
+      logger,
+      debugMode: taskSession.debugMode
+    };
+    if (Array.isArray(config.reporters)) {
+      // Harvest all the array indices that need to modified before altering the array
+      const heftReporterIndices: number[] = JestPlugin._findIndexes(config.reporters, 'default');
+
+      // Replace 'default' reporter with the heft reporter
+      // This may clobber default reporters options
+      if (heftReporterIndices.length > 0) {
+        const heftReporter: Config.ReporterConfig = JestPlugin._getHeftJestReporterConfig(reporterOptions);
+        for (const index of heftReporterIndices) {
+          config.reporters[index] = heftReporter;
+        }
+        isUsingHeftReporter = true;
+      }
+    } else if (typeof config.reporters === 'undefined' || config.reporters === null) {
+      // Otherwise if no reporters are specified install only the heft reporter
+      config.reporters = [JestPlugin._getHeftJestReporterConfig(reporterOptions)];
+      isUsingHeftReporter = true;
+    } else {
+      // Making a note if Heft cannot understand the reporter entry in Jest config
+      // Not making this an error or warning because it does not warrant blocking a dev or CI test pass
+      // If the Jest config is truly wrong Jest itself is in a better position to report what is wrong with the config
+      terminal.writeVerboseLine(
+        `The 'reporters' entry in Jest config '${projectRelativeFilePath}' is in an unexpected format. Was ` +
+          'expecting an array of reporters'
+      );
+    }
+
+    if (!isUsingHeftReporter) {
+      terminal.writeVerboseLine(
+        `HeftJestReporter was not specified in Jest config '${projectRelativeFilePath}'. Consider adding a ` +
+          "'default' entry in the reporters array."
+      );
+    }
+
+    // Since we're injecting the HeftConfiguration, we need to pass these args directly and not through serialization
+    const reporters: JestReporterConfig[] = config.reporters;
+    config.reporters = undefined;
+    return reporters;
+  }
+
+  /**
+   * Returns the reporter config using the HeftJestReporter and the provided options.
+   */
+  private static _getHeftJestReporterConfig(reporterOptions: IHeftJestReporterOptions): Config.ReporterConfig {
+    return [
+      `${__dirname}/HeftJestReporter.js`,
+      reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
+    ];
+  }
+
+  /**
+   * Finds the indices of jest reporters with a given name
+   */
+  private static _findIndexes(items: JestReporterConfig[], search: string): number[] {
+    const result: number[] = [];
+
+    for (let index: number = 0; index < items.length; index++) {
+      const item: JestReporterConfig = items[index];
+
+      // Item is either a string or a tuple of [reporterName: string, options: unknown]
+      if (item === search) {
+        result.push(index);
+      } else if (typeof item !== 'undefined' && item !== null && item[0] === search) {
+        result.push(index);
+      }
+    }
+
+    return result;
+  }
+
   /**
    * Resolve all specified properties to an absolute path using Jest resolution. In addition, the following
    * transforms will be applied to the provided propertyValue before resolution:
@@ -470,7 +555,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
    *   - replace \<configDir\> with the directory containing the current configuration file
    *   - replace \<packageDir:...\> with the path to the resolved package (NOT module)
    */
-  private _getJsonPathMetadata(options: IJestResolutionOptions): IJsonPathMetadata {
+  private static _getJsonPathMetadata(options: IJestResolutionOptions): IJsonPathMetadata {
     return {
       customResolver: (configurationFilePath: string, propertyName: string, propertyValue: string) => {
         const configDir: string = path.dirname(configurationFilePath);
@@ -583,88 +668,5 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       },
       pathResolutionMethod: PathResolutionMethod.custom
     };
-  }
-
-  private _extractHeftJestReporters(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    config: IHeftJestConfiguration,
-    projectRelativeFilePath: string
-  ): JestReporterConfig[] {
-    let isUsingHeftReporter: boolean = false;
-
-    const reporterOptions: IHeftJestReporterOptions = {
-      heftConfiguration,
-      logger: taskSession.logger,
-      debugMode: taskSession.debugMode
-    };
-    if (Array.isArray(config.reporters)) {
-      // Harvest all the array indices that need to modified before altering the array
-      const heftReporterIndices: number[] = this._findIndexes(config.reporters, 'default');
-
-      // Replace 'default' reporter with the heft reporter
-      // This may clobber default reporters options
-      if (heftReporterIndices.length > 0) {
-        const heftReporter: Config.ReporterConfig = this._getHeftJestReporterConfig(reporterOptions);
-        for (const index of heftReporterIndices) {
-          config.reporters[index] = heftReporter;
-        }
-        isUsingHeftReporter = true;
-      }
-    } else if (typeof config.reporters === 'undefined' || config.reporters === null) {
-      // Otherwise if no reporters are specified install only the heft reporter
-      config.reporters = [this._getHeftJestReporterConfig(reporterOptions)];
-      isUsingHeftReporter = true;
-    } else {
-      // Making a note if Heft cannot understand the reporter entry in Jest config
-      // Not making this an error or warning because it does not warrant blocking a dev or CI test pass
-      // If the Jest config is truly wrong Jest itself is in a better position to report what is wrong with the config
-      taskSession.logger.terminal.writeVerboseLine(
-        `The 'reporters' entry in Jest config '${projectRelativeFilePath}' is in an unexpected format. Was ` +
-          'expecting an array of reporters'
-      );
-    }
-
-    if (!isUsingHeftReporter) {
-      taskSession.logger.terminal.writeVerboseLine(
-        `HeftJestReporter was not specified in Jest config '${projectRelativeFilePath}'. Consider adding a ` +
-          "'default' entry in the reporters array."
-      );
-    }
-
-    // Since we're injecting the HeftConfiguration, we need to pass these args directly and not through serialization
-    const reporters: JestReporterConfig[] = config.reporters;
-    config.reporters = undefined;
-    return reporters;
-  }
-
-  /**
-   * Returns the reporter config using the HeftJestReporter and the provided options.
-   */
-  private _getHeftJestReporterConfig(reporterOptions: IHeftJestReporterOptions): Config.ReporterConfig {
-    return [
-      `${__dirname}/HeftJestReporter.js`,
-      reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
-    ];
-  }
-
-  /**
-   * Finds the indices of jest reporters with a given name
-   */
-  private _findIndexes(items: JestReporterConfig[], search: string): number[] {
-    const result: number[] = [];
-
-    for (let index: number = 0; index < items.length; index++) {
-      const item: JestReporterConfig = items[index];
-
-      // Item is either a string or a tuple of [reporterName: string, options: unknown]
-      if (item === search) {
-        result.push(index);
-      } else if (typeof item !== 'undefined' && item !== null && item[0] === search) {
-        result.push(index);
-      }
-    }
-
-    return result;
   }
 }
