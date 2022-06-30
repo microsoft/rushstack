@@ -62,7 +62,7 @@
         {
           "longName": "--test-timeout-ms",
           "parameterKind": "string",
-          "argumentName": "INTEGER",
+          "argumentName": "TIMEOUT",
           "description": "Change the default timeout for tests; if a test doesn't complete within this many milliseconds, it will fail.  Individual tests can override the default.  If unspecified, the default is normally 5000 ms.  This corresponds to the \"--testTimeout\" parameter in Jest's documentation."
         },
         {
