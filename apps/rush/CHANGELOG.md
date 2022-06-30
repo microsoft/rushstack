@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 Jun 2022 22:17:51 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jun 2022 03:31:01 GMT and should not be manually modified.
+
+## 5.75.0
+Tue, 28 Jun 2022 03:31:01 GMT
+
+### Updates
+
+- Disable build cache for operations with no corresponding operationSettings entry in rush-project.json, and provide a clear message about why.
+- When the `projectName:normalize` token is used in a cache ID, remove the `@` character from the scope.
+- Reduce default maxInstallAttempts to 1
+- Improve logging of file locations when using the Heft build tool
 
 ## 5.74.0
 Fri, 10 Jun 2022 22:17:51 GMT

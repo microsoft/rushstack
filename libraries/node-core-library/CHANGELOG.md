@@ -1,6 +1,28 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 25 Jun 2022 01:54:29 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jun 2022 22:47:13 GMT and should not be manually modified.
+
+## 3.49.0
+Tue, 28 Jun 2022 22:47:13 GMT
+
+### Minor changes
+
+- Add SubprocessTerminator utility, which can be used to kill a process and all of its child processes on demand or on termination of the host process.
+
+## 3.48.0
+Tue, 28 Jun 2022 00:23:32 GMT
+
+### Minor changes
+
+- Add FileSystem.isDirectoryError utility function to determine if an error has the code "EISDIR". This error code may be returned (for example) when attempting to delete a folder as if it were a file using the FileSystem.deleteFile API.
+
+## 3.47.0
+Mon, 27 Jun 2022 18:43:09 GMT
+
+### Minor changes
+
+- Add a "trimLeadingDotSlash" option to the Path.formatConcisely function to not include the leading "./" in paths under the baseFolder.
+- Change the FileError relative path output to not include the leading "./"
 
 ## 3.46.0
 Sat, 25 Jun 2022 01:54:29 GMT

@@ -55,10 +55,16 @@ export interface IPathFormatConciselyOptions {
    * The path to be converted.
    */
   pathToConvert: string;
+
   /**
    * The base path to use when converting `pathToConvert` to a relative path.
    */
   baseFolder: string;
+
+  /**
+   * If set to true, don't include the leading `./` if the path is under the base folder.
+   */
+  trimLeadingDotSlash?: boolean;
 }
 
 /**
@@ -122,7 +128,8 @@ export class Path {
   /**
    * Formats a path to look nice for reporting purposes.
    * @remarks
-   * If `pathToConvert` is under the `baseFolder`, then it will be converted to a relative with the `./` prefix.
+   * If `pathToConvert` is under the `baseFolder`, then it will be converted to a relative with the `./` prefix
+   * unless the {@link IPathFormatConciselyOptions.trimLeadingDotSlash} option is set to `true`.
    * Otherwise, it will be converted to an absolute path.
    *
    * Backslashes will be converted to slashes, unless the path starts with an OS-specific string like `C:\`.
@@ -134,7 +141,14 @@ export class Path {
 
     if (isUnderOrEqual) {
       // Note that isUnderOrEqual()'s relativePath is the reverse direction
-      return './' + Path.convertToSlashes(path.relative(options.baseFolder, options.pathToConvert));
+      const convertedPath: string = Path.convertToSlashes(
+        path.relative(options.baseFolder, options.pathToConvert)
+      );
+      if (options.trimLeadingDotSlash) {
+        return convertedPath;
+      } else {
+        return `./${convertedPath}`;
+      }
     }
 
     const absolutePath: string = path.resolve(options.pathToConvert);
@@ -157,7 +171,8 @@ export class Path {
     const filePath: string = baseFolder
       ? Path.formatConcisely({
           pathToConvert: pathToFormat,
-          baseFolder
+          baseFolder,
+          trimLeadingDotSlash: true
         })
       : path.resolve(pathToFormat);
 

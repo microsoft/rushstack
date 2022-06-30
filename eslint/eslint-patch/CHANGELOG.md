@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Fri, 15 Apr 2022 00:12:36 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jun 2022 00:23:32 GMT and should not be manually modified.
+
+## 1.1.4
+Tue, 28 Jun 2022 00:23:32 GMT
+
+### Patches
+
+- Update the README to mention support for ESLint 8.
 
 ## 1.1.3
 Fri, 15 Apr 2022 00:12:36 GMT

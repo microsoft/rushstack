@@ -28,7 +28,7 @@ describe(FileError.name, () => {
       absolutePath: `/path/to/project/path/to/file`,
       projectFolder: '/path/to/project'
     });
-    expect(error1.toString()).toEqual('./path/to/file - message');
+    expect(error1.toString()).toMatchInlineSnapshot(`"path/to/file - message"`);
   });
 
   it('correctly performs Unix-style relative file path formatting', () => {
@@ -38,14 +38,18 @@ describe(FileError.name, () => {
       line: 5,
       column: 12
     });
-    expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file:5:12 - message');
+    expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toMatchInlineSnapshot(
+      `"path/to/file:5:12 - message"`
+    );
 
     const error2: FileError = new FileError('message', {
       absolutePath: '/path/to/project/path/to/file',
       projectFolder: '/path/to/project',
       line: 5
     });
-    expect(error2.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file:5 - message');
+    expect(error2.getFormattedErrorMessage({ format: 'Unix' })).toMatchInlineSnapshot(
+      `"path/to/file:5 - message"`
+    );
 
     const error3: FileError = new FileError('message', {
       absolutePath: '/path/to/project/path/to/file',
@@ -53,13 +57,17 @@ describe(FileError.name, () => {
       line: undefined,
       column: 12
     });
-    expect(error3.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file - message');
+    expect(error3.getFormattedErrorMessage({ format: 'Unix' })).toMatchInlineSnapshot(
+      `"path/to/file - message"`
+    );
 
     const error4: FileError = new FileError('message', {
       absolutePath: '/path/to/project/path/to/file',
       projectFolder: '/path/to/project'
     });
-    expect(error4.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file - message');
+    expect(error4.getFormattedErrorMessage({ format: 'Unix' })).toMatchInlineSnapshot(
+      `"path/to/file - message"`
+    );
   });
 
   it('correctly performs Unix-style file absolute path formatting', () => {
@@ -120,8 +128,8 @@ describe(FileError.name, () => {
       line: 5,
       column: 12
     });
-    expect(error1.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual(
-      './path/to/file(5,12) - message'
+    expect(error1.getFormattedErrorMessage({ format: 'VisualStudio' })).toMatchInlineSnapshot(
+      `"path/to/file(5,12) - message"`
     );
 
     const error2: FileError = new FileError('message', {
@@ -129,8 +137,8 @@ describe(FileError.name, () => {
       projectFolder: '/path/to/project',
       line: 5
     });
-    expect(error2.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual(
-      './path/to/file(5) - message'
+    expect(error2.getFormattedErrorMessage({ format: 'VisualStudio' })).toMatchInlineSnapshot(
+      `"path/to/file(5) - message"`
     );
 
     const error3: FileError = new FileError('message', {
@@ -139,13 +147,17 @@ describe(FileError.name, () => {
       line: undefined,
       column: 12
     });
-    expect(error3.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual('./path/to/file - message');
+    expect(error3.getFormattedErrorMessage({ format: 'VisualStudio' })).toMatchInlineSnapshot(
+      `"path/to/file - message"`
+    );
 
     const error4: FileError = new FileError('message', {
       absolutePath: '/path/to/project/path/to/file',
       projectFolder: '/path/to/project'
     });
-    expect(error4.getFormattedErrorMessage({ format: 'VisualStudio' })).toEqual('./path/to/file - message');
+    expect(error4.getFormattedErrorMessage({ format: 'VisualStudio' })).toMatchInlineSnapshot(
+      `"path/to/file - message"`
+    );
   });
 
   it('correctly performs Visual Studio-style absolute file path formatting', () => {
@@ -225,8 +237,8 @@ describe(`${FileError.name} using arbitrary base folder`, () => {
       line: 5,
       column: 12
     });
-    expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toEqual(
-      './to/project/path/to/file:5:12 - message'
+    expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toMatchInlineSnapshot(
+      `"to/project/path/to/file:5:12 - message"`
     );
   });
 });
@@ -256,7 +268,9 @@ describe(`${FileError.name} using PROJECT_FOLDER base folder`, () => {
       line: 5,
       column: 12
     });
-    expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toEqual('./path/to/file:5:12 - message');
+    expect(error1.getFormattedErrorMessage({ format: 'Unix' })).toMatchInlineSnapshot(
+      `"path/to/file:5:12 - message"`
+    );
   });
 });
 

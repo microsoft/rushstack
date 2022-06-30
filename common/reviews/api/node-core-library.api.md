@@ -242,6 +242,7 @@ export class FileSystem {
     static getRealPathAsync(linkPath: string): Promise<string>;
     static getStatistics(path: string): FileSystemStats;
     static getStatisticsAsync(path: string): Promise<FileSystemStats>;
+    static isDirectoryError(error: Error): boolean;
     static isErrnoException(error: Error): error is NodeJS.ErrnoException;
     static isExistError(error: Error): boolean;
     static isFileDoesNotExistError(error: Error): boolean;
@@ -574,6 +575,7 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 export interface IPathFormatConciselyOptions {
     baseFolder: string;
     pathToConvert: string;
+    trimLeadingDotSlash?: boolean;
 }
 
 // @public
@@ -602,6 +604,11 @@ export interface IStringBufferOutputOptions {
 export interface IStringBuilder {
     append(text: string): void;
     toString(): string;
+}
+
+// @beta
+export interface ISubprocessOptions {
+    detached: boolean;
 }
 
 // @beta (undocumented)
@@ -813,6 +820,13 @@ export class StringBuilder implements IStringBuilder {
     constructor();
     append(text: string): void;
     toString(): string;
+}
+
+// @beta
+export class SubprocessTerminator {
+    static killProcessTree(subprocess: child_process.ChildProcess, subprocessOptions: ISubprocessOptions): void;
+    static killProcessTreeOnExit(subprocess: child_process.ChildProcess, subprocessOptions: ISubprocessOptions): void;
+    static readonly RECOMMENDED_OPTIONS: ISubprocessOptions;
 }
 
 // @beta

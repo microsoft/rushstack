@@ -1,6 +1,23 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 25 Jun 2022 21:00:40 GMT and should not be manually modified.
+This log was last generated on Tue, 28 Jun 2022 22:47:13 GMT and should not be manually modified.
+
+## 7.28.1
+Tue, 28 Jun 2022 22:47:13 GMT
+
+_Version update only_
+
+## 7.28.0
+Tue, 28 Jun 2022 00:23:32 GMT
+
+### Minor changes
+
+- Add support for the "ignoreMissingEntryPoint" ExtractorConfig option to allow for loading an ExtractorConfig before the target project is built.
+
+## 7.27.1
+Mon, 27 Jun 2022 18:43:09 GMT
+
+_Version update only_
 
 ## 7.27.0
 Sat, 25 Jun 2022 21:00:40 GMT
