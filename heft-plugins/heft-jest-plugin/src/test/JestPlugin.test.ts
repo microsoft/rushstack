@@ -3,10 +3,55 @@
 
 import * as path from 'path';
 import type { Config } from '@jest/types';
+import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
-import { Import, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { Import, JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 import { default as JestPlugin, IHeftJestConfiguration } from '../JestPlugin';
+
+interface IPartialHeftPluginJson {
+  taskPlugins?: {
+    parameters?: {
+      longName: string;
+    }[];
+  }[];
+}
+
+describe('JestPlugin', () => {
+  it('loads and requests all specified plugin parameters', async () => {
+    const requestedParameters: Set<string> = new Set();
+    const mockTaskSession: IHeftTaskSession = {
+      hooks: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        clean: { tapPromise: jest.fn() } as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        run: { tapPromise: jest.fn() } as any
+      },
+      parametersByLongName: {
+        get: jest.fn((key: string) => {
+          // Add all requested parameters to the set.
+          requestedParameters.add(key);
+          return undefined;
+        })
+      } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+    } as IHeftTaskSession;
+    const mockHeftConfiguration: HeftConfiguration = {} as HeftConfiguration;
+
+    const plugin = new JestPlugin();
+    plugin.apply(mockTaskSession, mockHeftConfiguration, undefined);
+
+    // Load up all the allowed parameters
+    const heftPluginJson: IPartialHeftPluginJson = await JsonFile.loadAsync(
+      `${__dirname}/../../heft-plugin.json`
+    );
+
+    // Verify that all parameters were requested
+    expect(requestedParameters.size).toBe(heftPluginJson.taskPlugins![0].parameters!.length);
+    for (const parameter of heftPluginJson.taskPlugins![0].parameters!) {
+      expect(requestedParameters.has(parameter.longName)).toBe(true);
+    }
+  });
+});
 
 describe('JestConfigLoader', () => {
   let terminalProvider: StringBufferTerminalProvider;
