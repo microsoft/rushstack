@@ -540,31 +540,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   }
 
   /**
-   * Finds the indices of jest reporters with a given name
-   */
-  private static _findIndexes(items: JestReporterConfig[], search: string): number[] {
-    const result: number[] = [];
-
-    for (let index: number = 0; index < items.length; index++) {
-      const item: JestReporterConfig = items[index];
-
-      // Item is either a string or a tuple of [reporterName: string, options: unknown]
-      if (item === search) {
-        result.push(index);
-      } else if (typeof item !== 'undefined' && item !== null && item[0] === search) {
-        result.push(index);
-      }
-    }
-
-    return result;
-  }
-
-  /**
    * Resolve all specified properties to an absolute path using Jest resolution. In addition, the following
    * transforms will be applied to the provided propertyValue before resolution:
-   *   - replace \<rootDir\> with the same rootDir
-   *   - replace \<configDir\> with the directory containing the current configuration file
-   *   - replace \<packageDir:...\> with the path to the resolved package (NOT module)
+   *   - replace `<rootDir>` with the same rootDir
+   *   - replace `<configDir>` with the directory containing the current configuration file
+   *   - replace `<packageDir:...>` with the path to the resolved package (NOT module)
    */
   private static _getJsonPathMetadata(options: IJestResolutionOptions): IJsonPathMetadata {
     return {
@@ -679,5 +659,25 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       },
       pathResolutionMethod: PathResolutionMethod.custom
     };
+  }
+
+  /**
+   * Finds the indices of jest reporters with a given name
+   */
+   private static _findIndexes(items: JestReporterConfig[], search: string): number[] {
+    const result: number[] = [];
+
+    for (let index: number = 0; index < items.length; index++) {
+      const item: JestReporterConfig = items[index];
+
+      // Item is either a string or a tuple of [reporterName: string, options: unknown]
+      if (item === search) {
+        result.push(index);
+      } else if (typeof item !== 'undefined' && item !== null && item[0] === search) {
+        result.push(index);
+      }
+    }
+
+    return result;
   }
 }
