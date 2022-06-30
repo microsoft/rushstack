@@ -34,7 +34,6 @@ import {
   FileSystem,
   Import,
   JsonFile,
-  JsonSchema,
   PackageName,
   type ITerminal
 } from '@rushstack/node-core-library';
@@ -87,7 +86,6 @@ export interface IHeftJestConfiguration extends Config.InitialOptions {}
 const PLUGIN_NAME: string = 'JestPlugin';
 const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
 const PLUGIN_PACKAGE_FOLDER: string = path.resolve(__dirname, '..');
-const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-jest-plugin.schema.json');
 const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
 
 const ROOTDIR_TOKEN: string = '<rootDir>';
@@ -103,8 +101,6 @@ const JEST_CONFIG_PACKAGE_FOLDER: string = path.dirname(require.resolve('jest-co
  */
 export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private static _jestConfigurationFileLoader: ConfigurationFile<IHeftJestConfiguration> | undefined;
-
-  public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
 
   /**
    * Setup the hooks and custom CLI options for the Jest plugin.
