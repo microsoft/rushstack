@@ -24,11 +24,9 @@ import {
   InheritanceType,
   PathResolutionMethod
 } from '@rushstack/heft-config-file';
-import {
-  type ITypeScriptConfigurationJson,
-  type IPartialTsconfig,
-  loadTypeScriptConfigurationFileAsync,
-  loadPartialTsconfigFileAsync
+import type {
+  ITypeScriptConfigurationJson,
+  IPartialTsconfig
 } from '@rushstack/heft-typescript-plugin';
 import {
   FileSystem,
@@ -192,13 +190,27 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     heftConfiguration: HeftConfiguration,
     options?: IJestPluginOptions
   ): Promise<void> {
+    const terminal: ITerminal = taskSession.logger.terminal;
+
+    // Load in some utility functions from the TypeScript plugin, if available.
+    let loadTypeScriptConfigurationFileAsync:
+      typeof import('@rushstack/heft-typescript-plugin').loadTypeScriptConfigurationFileAsync | undefined;
+    let loadPartialTsconfigFileAsync:
+      typeof import('@rushstack/heft-typescript-plugin').loadPartialTsconfigFileAsync | undefined;
+    try {
+      const heftTypeScriptPlugin: typeof import('@rushstack/heft-typescript-plugin') =
+        await import('@rushstack/heft-typescript-plugin');
+      loadTypeScriptConfigurationFileAsync = heftTypeScriptPlugin.loadTypeScriptConfigurationFileAsync;
+      loadPartialTsconfigFileAsync = heftTypeScriptPlugin.loadPartialTsconfigFileAsync;
+    } catch {
+      // Ignore errors here, this is an optional peer dependency and may not be available
+    }
+
+    // Load up the configuration files if we can
     const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, taskSession.logger.terminal);
-    const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync(
-      heftConfiguration,
-      taskSession.logger.terminal,
-      typeScriptConfigurationJson
-    );
+      await loadTypeScriptConfigurationFileAsync?.(heftConfiguration, terminal);
+    const partialTsconfigFile: IPartialTsconfig | undefined =
+      await loadPartialTsconfigFileAsync?.(heftConfiguration, terminal, typeScriptConfigurationJson);
 
     // Validate, and write the Jest data file used by the BuildTransformer
     await HeftJestDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
