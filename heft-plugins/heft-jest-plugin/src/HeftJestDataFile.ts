@@ -4,6 +4,8 @@
 import * as path from 'path';
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
+export const HEFT_JEST_DATA_FILENAME: string = 'heft-jest-data.json';
+
 /**
  * Schema for heft-jest-data.json
  */

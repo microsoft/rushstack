@@ -16,7 +16,8 @@ import type {
   IHeftTaskRunHookOptions,
   IHeftTaskCleanHookOptions,
   CommandLineFlagParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  IScopedLogger
 } from '@rushstack/heft';
 import {
   ConfigurationFile,
@@ -37,7 +38,7 @@ import {
 } from '@rushstack/node-core-library';
 
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
-import { HeftJestDataFile } from './HeftJestDataFile';
+import { HeftJestDataFile, HEFT_JEST_DATA_FILENAME } from './HeftJestDataFile';
 import { jestResolve } from './JestUtils';
 
 type JestReporterConfig = string | Config.ReporterConfig;
@@ -224,7 +225,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       // TODO: Handle for watch mode
       skipTimestampCheck: true
     });
-    taskSession.logger.terminal.writeVerboseLine('Wrote heft-jest-data.json file');
+    terminal.writeVerboseLine(`Wrote ${HEFT_JEST_DATA_FILENAME} file`);
   }
 
   /**
@@ -235,7 +236,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     heftConfiguration: HeftConfiguration,
     options?: IJestPluginOptions
   ): Promise<void> {
-    const terminal: ITerminal = taskSession.logger.terminal;
+    const logger: IScopedLogger = taskSession.logger;
+    const terminal: ITerminal = logger.terminal;
     terminal.writeLine(`Using Jest version ${getVersion()}`);
 
     // Write the jest data file used by the BuildTransformer
@@ -248,7 +250,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       // Module resolution explicitly disabled, use the config as-is
       const jestConfigPath: string = path.join(buildFolder, projectRelativeFilePath);
       if (!(await FileSystem.existsAsync(jestConfigPath))) {
-        taskSession.logger.emitError(new Error(`Expected to find jest config file at "${jestConfigPath}".`));
+        logger.emitError(new Error(`Expected to find jest config file at "${jestConfigPath}".`));
         return;
       }
       jestConfig = await JsonFile.loadAsync(jestConfigPath);
@@ -315,7 +317,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         projectRelativeFilePath
       );
     } else {
-      taskSession.logger.emitWarning(
+      logger.emitWarning(
         new Error('The "--debug-heft-reporter" parameter was specified; disabling HeftJestReporter')
       );
     }
@@ -342,13 +344,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     } = await runCLI(jestArgv, [buildFolder]);
 
     if (jestResults.numFailedTests > 0) {
-      taskSession.logger.emitError(
+      logger.emitError(
         new Error(
           `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
         )
       );
     } else if (jestResults.numFailedTestSuites > 0) {
-      taskSession.logger.emitError(
+      logger.emitError(
         new Error(
           `${jestResults.numFailedTestSuites} Jest test suite${
             jestResults.numFailedTestSuites > 1 ? 's' : ''
