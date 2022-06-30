@@ -17,7 +17,8 @@ import type {
   IHeftTaskCleanHookOptions,
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  IScopedLogger
+  IScopedLogger,
+  CommandLineIntegerParameter
 } from '@rushstack/heft';
 import {
   ConfigurationFile,
@@ -112,39 +113,39 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     pluginOptions?: IJestPluginOptions
   ): void {
     // Flags
-    const detectOpenHandles: CommandLineFlagParameter = taskSession.parametersByLongName.get(
+    const detectOpenHandlesParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
       '--detect-open-handles'
     ) as CommandLineFlagParameter;
-    const debugHeftReporter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
+    const debugHeftReporterParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
       '--debug-heft-reporter'
     ) as CommandLineFlagParameter;
-    const disableCodeCoverage: CommandLineFlagParameter = taskSession.parametersByLongName.get(
+    const disableCodeCoverageParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
       '--disable-code-coverage'
     ) as CommandLineFlagParameter;
-    const silent: CommandLineFlagParameter = taskSession.parametersByLongName.get(
+    const silentParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
       '--silent'
     ) as CommandLineFlagParameter;
-    const updateSnapshots: CommandLineFlagParameter = taskSession.parametersByLongName.get(
+    const updateSnapshotsParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
       '--update-snapshots'
     ) as CommandLineFlagParameter;
 
     // Strings
-    const config: CommandLineStringParameter = taskSession.parametersByLongName.get(
+    const configParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
       '--config'
     ) as CommandLineStringParameter;
-    const maxWorkers: CommandLineStringParameter = taskSession.parametersByLongName.get(
+    const maxWorkersParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
       '--max-workers'
     ) as CommandLineStringParameter;
-    const testTimeout: CommandLineStringParameter = taskSession.parametersByLongName.get(
+    const testTimeoutParameter: CommandLineIntegerParameter = taskSession.parametersByLongName.get(
       '--test-timeout-ms'
-    ) as CommandLineStringParameter;
-    const findRelatedTests: CommandLineStringParameter = taskSession.parametersByLongName.get(
+    ) as CommandLineIntegerParameter;
+    const findRelatedTestsParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
       '--find-related-tests'
     ) as CommandLineStringParameter;
-    const testNamePattern: CommandLineStringParameter = taskSession.parametersByLongName.get(
+    const testNamePatternParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
       '--test-name-pattern'
     ) as CommandLineStringParameter;
-    const testPathPattern: CommandLineStringParameter = taskSession.parametersByLongName.get(
+    const testPathPatternParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
       '--test-path-pattern'
     ) as CommandLineStringParameter;
 
@@ -165,19 +166,19 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       const combinedOptions: IJestPluginOptions = {
         ...pluginOptions,
-        configurationPath: config.value || pluginOptions?.configurationPath,
-        debugHeftReporter: debugHeftReporter.value || pluginOptions?.debugHeftReporter,
-        detectOpenHandles: detectOpenHandles.value || pluginOptions?.detectOpenHandles,
-        disableCodeCoverage: disableCodeCoverage.value || pluginOptions?.disableCodeCoverage,
-        findRelatedTests: findRelatedTests.value || pluginOptions?.findRelatedTests,
-        maxWorkers: maxWorkers.value || pluginOptions?.maxWorkers,
+        configurationPath: configParameter.value || pluginOptions?.configurationPath,
+        debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
+        detectOpenHandles: detectOpenHandlesParameter.value || pluginOptions?.detectOpenHandles,
+        disableCodeCoverage: disableCodeCoverageParameter.value || pluginOptions?.disableCodeCoverage,
+        findRelatedTests: findRelatedTestsParameter.value || pluginOptions?.findRelatedTests,
+        maxWorkers: maxWorkersParameter.value || pluginOptions?.maxWorkers,
         // Default to true and always pass with no tests
         passWithNoTests: true,
-        silent: silent.value || pluginOptions?.silent,
-        testNamePattern: testNamePattern.value || pluginOptions?.testNamePattern,
-        testPathPattern: testPathPattern.value || pluginOptions?.testPathPattern,
-        testTimeout: testTimeout.value ? parseInt(testTimeout.value, 10) : pluginOptions?.testTimeout,
-        updateSnapshots: updateSnapshots.value || pluginOptions?.updateSnapshots
+        silent: silentParameter.value || pluginOptions?.silent,
+        testNamePattern: testNamePatternParameter.value || pluginOptions?.testNamePattern,
+        testPathPattern: testPathPatternParameter.value || pluginOptions?.testPathPattern,
+        testTimeout: testTimeoutParameter.value ?? pluginOptions?.testTimeout,
+        updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots
       };
       await this._runJestAsync(taskSession, heftConfiguration, combinedOptions);
     });
