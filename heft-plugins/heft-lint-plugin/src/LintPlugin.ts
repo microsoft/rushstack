@@ -95,12 +95,9 @@ export default class LintPlugin implements IHeftTaskPlugin {
     );
     this._typeScript = await import(typeScriptToolPath);
 
-    // TODO: Disable during lite/watch mode
-    const lintEnabled: boolean = true;
-
     // Locate the tslint linter if enabled
     this._tslintConfigFilePath = path.resolve(heftConfiguration.buildFolder, 'tslint.json');
-    if (lintEnabled && (await FileSystem.existsAsync(this._tslintConfigFilePath))) {
+    if (await FileSystem.existsAsync(this._tslintConfigFilePath)) {
       this._tslintToolPath = await heftConfiguration.rigToolResolver.resolvePackageAsync(
         'tslint',
         logger.terminal
@@ -109,7 +106,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
 
     // Locate the eslint linter if enabled
     this._eslintConfigFilePath = await this._resolveEslintConfigFilePathAsync(heftConfiguration, lintEnabled);
-    if (lintEnabled && (await FileSystem.existsAsync(this._eslintConfigFilePath))) {
+    if (await FileSystem.existsAsync(this._eslintConfigFilePath)) {
       this._eslintToolPath = await heftConfiguration.rigToolResolver.resolvePackageAsync(
         'eslint',
         logger.terminal
@@ -218,20 +215,11 @@ export default class LintPlugin implements IHeftTaskPlugin {
     return tslint;
   }
 
-  private async _resolveEslintConfigFilePathAsync(
-    heftConfiguration: HeftConfiguration,
-    eslintEnabled: boolean
-  ): Promise<string> {
-    const defaultPath: string = path.resolve(heftConfiguration.buildFolder, '.eslintrc.js');
-    if (!eslintEnabled) {
-      return defaultPath; // No need to check the filesystem
-    }
+  private async _resolveEslintConfigFilePathAsync(heftConfiguration: HeftConfiguration): Promise<string> {
     // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
     // so use it if it exists
+    const defaultPath: string = path.resolve(heftConfiguration.buildFolder, '.eslintrc.js');
     const alternativePathPath: string = path.resolve(heftConfiguration.buildFolder, '.eslintrc.cjs');
-    if (await FileSystem.existsAsync(alternativePathPath)) {
-      return alternativePathPath;
-    }
-    return defaultPath;
+    return await FileSystem.existsAsync(alternativePathPath) ? alternativePathPath : defaultPath;
   }
 }

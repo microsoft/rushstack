@@ -140,7 +140,9 @@ export abstract class LinterBase<TLintResult> {
         if (failures.length === 0) {
           newNoFailureFileVersions.set(relative, version);
         } else {
-          lintFailures.push(...failures);
+          for (const failure of failures) {
+            lintFailures.push(failure);
+          }
         }
       } else {
         newNoFailureFileVersions.set(relative, version);

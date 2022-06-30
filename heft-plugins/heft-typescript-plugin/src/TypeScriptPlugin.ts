@@ -21,7 +21,7 @@ import type {
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
-const PLUGIN_NAME: string = 'typescript';
+const PLUGIN_NAME: 'typescript' = 'typescript';
 
 /**
  * @beta
@@ -245,6 +245,10 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await this._runTypeScriptAsync(taskSession, heftConfiguration);
+      // TODO: We should consider maybe only doing one copy of static assets and pointing
+      // all source files to this set of static assets. This would allow us to avoid
+      // having to copy the static assets multiple times, increasing build times and
+      // package size.
       await this._updateStaticAssetsToCopy(taskSession, heftConfiguration, runOptions);
     });
   }
