@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.28.2",
+      "tag": "@microsoft/api-extractor_v7.28.2",
+      "date": "Thu, 30 Jun 2022 04:48:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve logic that determines whether an API item is readonly"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.21.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.28.1",
       "tag": "@microsoft/api-extractor_v7.28.1",
       "date": "Tue, 28 Jun 2022 22:47:13 GMT",
