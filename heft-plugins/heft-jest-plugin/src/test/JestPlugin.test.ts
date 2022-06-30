@@ -23,16 +23,16 @@ describe('JestPlugin', () => {
     const mockTaskSession: IHeftTaskSession = {
       hooks: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        clean: { tapPromise: jest.fn() } as any,
+        clean: { tapPromise: () => {} } as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        run: { tapPromise: jest.fn() } as any
+        run: { tapPromise: () => {} } as any
       },
       parametersByLongName: {
-        get: jest.fn((key: string) => {
+        get: (key: string) => {
           // Add all requested parameters to the set.
           requestedParameters.add(key);
           return undefined;
-        })
+        }
       } as any // eslint-disable-line @typescript-eslint/no-explicit-any
     } as IHeftTaskSession;
     const mockHeftConfiguration: HeftConfiguration = {} as HeftConfiguration;
