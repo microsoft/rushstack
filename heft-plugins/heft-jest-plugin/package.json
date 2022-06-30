@@ -8,8 +8,6 @@
     "directory": "heft-plugins/heft-jest-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-jest-plugin.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged build --clean",
