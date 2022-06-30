@@ -1,45 +1,111 @@
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import {
-  RUSH_PROJECT_CONFIGURATION_FILE,
-  RushProjectConfiguration,
-  IRushProjectJson
-} from '../RushProjectConfiguration';
+import { IPhase } from '../CommandLineConfiguration';
+import { RushConfigurationProject } from '../RushConfigurationProject';
+import { RushProjectConfiguration } from '../RushProjectConfiguration';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function stripSymbolsFromObject(obj: any | undefined): void {
+  if (obj) {
+    for (const key of Reflect.ownKeys(obj)) {
+      const value: unknown = obj[key];
+      if (typeof key === 'symbol') {
+        delete obj[key];
+      } else if (typeof value === 'object') {
+        stripSymbolsFromObject(value);
+      }
+    }
+  }
+}
+
+async function loadProjectConfigurationAsync(
+  testProjectName: string
+): Promise<RushProjectConfiguration | undefined> {
+  const testFolder: string = `${__dirname}/jsonFiles/${testProjectName}`;
+  const rushProject: RushConfigurationProject = {
+    packageName: testProjectName,
+    projectFolder: testFolder
+  } as RushConfigurationProject;
+  const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+  try {
+    const rushProjectConfiguration: RushProjectConfiguration | undefined =
+      await RushProjectConfiguration.tryLoadForProjectAsync(rushProject, terminal);
+    if (rushProjectConfiguration?.operationSettingsByOperationName) {
+      for (const operationSettings of rushProjectConfiguration.operationSettingsByOperationName.values()) {
+        stripSymbolsFromObject(operationSettings);
+      }
+    }
+
+    return rushProjectConfiguration;
+  } catch (e) {
+    const errorMessage: string = (e as Error).message
+      .replace(/\\/g, '/')
+      .replace(testFolder.replace(/\\/g, '/'), '<testFolder>');
+    throw new Error(errorMessage);
+  }
+}
+
+function validateConfiguration(rushProjectConfiguration: RushProjectConfiguration | undefined): void {
+  const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+  const terminal: Terminal = new Terminal(terminalProvider);
+
+  if (rushProjectConfiguration) {
+    try {
+      rushProjectConfiguration.validatePhaseConfiguration(
+        Array.from(rushProjectConfiguration.operationSettingsByOperationName.keys()).map(
+          (phaseName) => ({ name: phaseName } as IPhase)
+        ),
+        terminal
+      );
+    } finally {
+      expect(terminalProvider.getOutput()).toMatchSnapshot('validation: terminal output');
+      expect(terminalProvider.getErrorOutput()).toMatchSnapshot('validation: terminal error');
+      expect(terminalProvider.getWarningOutput()).toMatchSnapshot('validation: terminal warning');
+      expect(terminalProvider.getVerbose()).toMatchSnapshot('validation: terminal verbose');
+    }
+  }
+}
 
 describe(RushProjectConfiguration.name, () => {
-  it('loads a rush-project.json config that extends another config file', async () => {
-    const testFolder: string = `${__dirname}/jsonFiles/test-project-a`;
-    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-    const rushProjectJson: IRushProjectJson =
-      await RUSH_PROJECT_CONFIGURATION_FILE.loadConfigurationFileForProjectAsync(terminal, testFolder);
-    expect(rushProjectJson.operationSettings?.length).toEqual(2);
-    expect(rushProjectJson.operationSettings?.[0].operationName).toMatchInlineSnapshot(`"_phase:a"`);
-    expect(rushProjectJson.operationSettings?.[0].outputFolderNames).toMatchInlineSnapshot(`
-      Array [
-        "a-a",
-        "a-b",
-      ]
-    `);
-    expect(rushProjectJson.operationSettings?.[1].operationName).toMatchInlineSnapshot(`"_phase:b"`);
-    expect(rushProjectJson.operationSettings?.[1].outputFolderNames).toMatchInlineSnapshot(`
-      Array [
-        "b-a",
-      ]
-    `);
-  });
+  describe('operationSettingsByOperationName', () => {
+    it('loads a rush-project.json config that extends another config file', async () => {
+      const rushProjectConfiguration: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-a');
+      validateConfiguration(rushProjectConfiguration);
 
-  it('throws an error when loading a rush-project.json config that lists an operation twice', async () => {
-    const testFolder: string = `${__dirname}/jsonFiles/test-project-b`;
-    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-    try {
-      await RUSH_PROJECT_CONFIGURATION_FILE.loadConfigurationFileForProjectAsync(terminal, testFolder);
-      fail('Expected to throw');
-    } catch (e) {
-      const errorMessage: string = (e as Error).message
-        .replace(/\\/g, '/')
-        .replace(testFolder.replace(/\\/g, '/'), '<testFolder>');
-      expect(errorMessage).toMatchInlineSnapshot(
-        `"The operation \\"_phase:a\\" occurs multiple times in the \\"operationSettings\\" array in \\"<testFolder>/config/rush-project.json\\"."`
-      );
-    }
+      expect(rushProjectConfiguration?.operationSettingsByOperationName).toMatchSnapshot();
+    });
+
+    it('throws an error when loading a rush-project.json config that lists an operation twice', async () => {
+      let errorMessage: string | undefined;
+      try {
+        await loadProjectConfigurationAsync('test-project-b');
+      } catch (e) {
+        errorMessage = (e as Error).message;
+      }
+
+      expect(errorMessage).toMatchSnapshot();
+    });
+
+    it('allows outputFolderNames to be inside subfolders', async () => {
+      const rushProjectConfiguration: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-c');
+      validateConfiguration(rushProjectConfiguration);
+
+      expect(rushProjectConfiguration?.operationSettingsByOperationName).toMatchSnapshot();
+    });
+
+    it('does not allow one outputFolderName to be under another', async () => {
+      const rushProjectConfiguration: RushProjectConfiguration | undefined =
+        await loadProjectConfigurationAsync('test-project-d');
+
+      let errorWasThrown: boolean = false;
+      try {
+        validateConfiguration(rushProjectConfiguration);
+      } catch (e) {
+        errorWasThrown = true;
+      }
+
+      expect(errorWasThrown).toBe(true);
+    });
   });
 });
