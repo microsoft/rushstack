@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Show protected and readonly modifiers for relevant API items",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}

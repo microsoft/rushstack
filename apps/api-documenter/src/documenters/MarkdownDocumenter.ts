@@ -41,7 +41,9 @@ import {
   ApiTypeAlias,
   ExcerptToken,
   ApiOptionalMixin,
-  ApiInitializerMixin
+  ApiInitializerMixin,
+  ApiProtectedMixin,
+  ApiReadonlyMixin
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -755,12 +757,12 @@ export class MarkdownDocumenter {
 
     const eventsTable: DocTable = new DocTable({
       configuration,
-      headerTitles: ['Property', 'Type', 'Description']
+      headerTitles: ['Property', 'Modifiers', 'Type', 'Description']
     });
 
     const propertiesTable: DocTable = new DocTable({
       configuration,
-      headerTitles: ['Property', 'Type', 'Description']
+      headerTitles: ['Property', 'Modifiers', 'Type', 'Description']
     });
 
     const methodsTable: DocTable = new DocTable({
@@ -787,6 +789,7 @@ export class MarkdownDocumenter {
             eventsTable.addRow(
               new DocTableRow({ configuration }, [
                 this._createTitleCell(apiMember),
+                this._createModifiersCell(apiMember),
                 this._createPropertyTypeCell(apiMember),
                 this._createDescriptionCell(apiMember)
               ])
@@ -795,6 +798,7 @@ export class MarkdownDocumenter {
             propertiesTable.addRow(
               new DocTableRow({ configuration }, [
                 this._createTitleCell(apiMember),
+                this._createModifiersCell(apiMember),
                 this._createPropertyTypeCell(apiMember),
                 this._createDescriptionCell(apiMember)
               ])
@@ -1007,9 +1011,27 @@ export class MarkdownDocumenter {
 
     const section: DocSection = new DocSection({ configuration });
 
+    if (ApiProtectedMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isProtected) {
+        section.appendNode(
+          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'protected' })])
+        );
+      }
+    }
+
+    if (ApiReadonlyMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isReadonly) {
+        section.appendNode(
+          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'readonly' })])
+        );
+      }
+    }
+
     if (ApiStaticMixin.isBaseClassOf(apiItem)) {
       if (apiItem.isStatic) {
-        section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: 'static' }));
+        section.appendNode(
+          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'static' })])
+        );
       }
     }
 

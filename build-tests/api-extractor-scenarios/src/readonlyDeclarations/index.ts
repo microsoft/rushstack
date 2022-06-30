@@ -2,30 +2,34 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-export interface _IInternalThing {
-  title: string;
-}
+export const READONLY_VARIABLE = 'Hello world!';
 
-/** @public */
-export const FOO = 'foo';
+/**
+ * @public
+ * @readonly
+ */
+export let TSDOC_READONLY_VARIABLE: string;
 
 /** @public */
 export class MyClass {
-  public get _writableThing(): _IInternalThing {
-    return { title: 'thing' };
+  get _onlyGetter(): string {
+    return 'Hello world!';
   }
 
-  public set _writableThing(value: _IInternalThing) {}
+  readonly readonlyModifier: string;
 
-  public get _onlyHasGetterThing(): _IInternalThing {
-    return { title: 'thing' };
-  }
+  /** @readonly */
+  tsDocReadonly: string;
+}
 
-  static readonly declaredReadonlyThing: _IInternalThing;
+/** @public */
+export interface MyInterface {
+  get _onlyGetter(): string;
 
-  /**
-   * Technically isn't but for testing purposes
-   * @readonly
-   */
-  public tsDocReadonlyThing: _IInternalThing;
+  readonly readonlyModifier: string;
+
+  /** @readonly */
+  set tsDocReadonly(value: string);
+
+  readonly [x: number]: void;
 }

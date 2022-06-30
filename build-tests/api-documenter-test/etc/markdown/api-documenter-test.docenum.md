@@ -18,6 +18,6 @@ export declare enum DocEnum
 |  Member | Value | Description |
 |  --- | --- | --- |
 |  One | <code>1</code> | These are some docs for One |
-|  Two | <code>2</code> | These are some docs for Two.[DocEnum.One](./api-documenter-test.docenum.md) is a direct link to another enum member. |
+|  Two | <code>2</code> | <p>These are some docs for Two.</p><p>[DocEnum.One](./api-documenter-test.docenum.md) is a direct link to another enum member.</p> |
 |  Zero | <code>0</code> | These are some docs for Zero |
 

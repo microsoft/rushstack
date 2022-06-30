@@ -19,6 +19,32 @@ isPreview: false
 isDeprecated: false
 type: class
 properties:
+  - name: multipleModifiersProperty
+    uid: 'api-documenter-test!DocClass1.multipleModifiersProperty:member'
+    package: api-documenter-test!
+    fullName: multipleModifiersProperty
+    summary: Some property with multiple modifiers.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'protected static readonly multipleModifiersProperty: boolean;'
+      return:
+        type: boolean
+  - name: protectedProperty
+    uid: 'api-documenter-test!DocClass1#protectedProperty:member'
+    package: api-documenter-test!
+    fullName: protectedProperty
+    summary: Some protected property.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'protected protectedProperty: string;'
+      return:
+        type: string
   - name: readonlyProperty
     uid: 'api-documenter-test!DocClass1#readonlyProperty:member'
     package: api-documenter-test!
@@ -45,19 +71,6 @@ properties:
       content: 'regularProperty: SystemEvent;'
       return:
         type: '<xref uid="api-documenter-test!SystemEvent:class" />'
-  - name: staticReadonlyThing
-    uid: 'api-documenter-test!DocClass1.staticReadonlyThing:member'
-    package: api-documenter-test!
-    fullName: staticReadonlyThing
-    summary: ''
-    remarks: ''
-    example: []
-    isPreview: false
-    isDeprecated: false
-    syntax:
-      content: 'static readonly staticReadonlyThing: boolean;'
-      return:
-        type: boolean
   - name: writeableProperty
     uid: 'api-documenter-test!DocClass1#writeableProperty:member'
     package: api-documenter-test!

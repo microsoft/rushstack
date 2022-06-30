@@ -1,0 +1,10 @@
+{
+  "messages": {
+    "extractorMessageReporting": {
+      // Purposefully disabled for the `MyInterface.tsDocReadonly` test case.
+      "ae-missing-getter": {
+        "logLevel": "none"
+      }
+    }
+  }
+}
