@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "Update model to reflex that index signatures can also be readonly.",
+      "comment": "Update model to reflect that index signatures can also be readonly",
       "type": "minor"
     }
   ],

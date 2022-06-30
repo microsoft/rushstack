@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Improvement to logic that determines whether an API item is readonly.",
+      "comment": "Improve logic that determines whether an API item is readonly",
       "type": "patch"
     }
   ],
