@@ -808,7 +808,7 @@ export class RushConfiguration {
         if (!this.getProjectByName(decoupledLocalDependency)) {
           throw new Error(
             `In rush.json, the "${decoupledLocalDependency}" project does not exist,` +
-              ` but was referenced by the decoupledLocalDependencies for ${project.packageName}`
+              ` but was referenced by the decoupledLocalDependencies (previously cyclicDependencyProjects) for ${project.packageName}`
           );
         }
       });
