@@ -23,7 +23,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -36,7 +36,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -56,7 +56,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -69,7 +69,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -93,7 +93,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>(['@types/foo'])
+      decoupledLocalDependencies: new Set<string>(['@types/foo'])
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -106,7 +106,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -126,7 +126,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -139,7 +139,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -160,7 +160,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -173,7 +173,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectC: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'C',
@@ -186,7 +186,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectD: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'D',
@@ -199,7 +199,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([
@@ -231,7 +231,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -244,7 +244,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectC: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'C',
@@ -257,7 +257,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB, projectC]);
@@ -282,7 +282,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -295,7 +295,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -320,7 +320,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -333,7 +333,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -352,7 +352,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -365,7 +365,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
@@ -389,7 +389,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
@@ -402,7 +402,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
 
     const alternatives: Map<string, ReadonlyArray<string>> = new Map<string, ReadonlyArray<string>>();
@@ -427,7 +427,7 @@ describe(VersionMismatchFinder.name, () => {
         } as any,
         'foo.json'
       ),
-      cyclicDependencyProjects: new Set<string>()
+      decoupledLocalDependencies: new Set<string>()
     } as any as RushConfigurationProject);
     const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderCommonVersions(
       CommonVersionsConfiguration.loadFromFile(`${__dirname}/jsonFiles/common-versions.json`)

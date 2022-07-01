@@ -426,7 +426,7 @@
        * locally linked because it would create a cyclic dependency; instead, the last published
        * version will be installed in the Common folder.
        */
-      "cyclicDependencyProjects": [
+      "decoupledLocalDependencies": [
         /*[LINE "HYPOTHETICAL"]*/ "my-toolchain"
       ],
 

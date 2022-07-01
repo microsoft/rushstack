@@ -226,8 +226,8 @@ export class RushInstallManager extends BaseInstallManager {
           this.rushConfiguration.getProjectByName(packageName);
 
         if (localProject) {
-          // Don't locally link if it's listed in the cyclicDependencyProjects
-          if (!rushProject.cyclicDependencyProjects.has(packageName)) {
+          // Don't locally link if it's listed in the decoupledLocalDependencies
+          if (!rushProject.decoupledLocalDependencies.has(packageName)) {
             // Also, don't locally link if the SemVer doesn't match
             const localProjectVersion: string = localProject.packageJsonEditor.version;
             if (semver.satisfies(localProjectVersion, packageVersion)) {

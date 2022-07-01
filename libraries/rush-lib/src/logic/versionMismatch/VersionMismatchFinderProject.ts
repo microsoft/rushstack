@@ -12,7 +12,7 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
   public constructor(project: RushConfigurationProject) {
     super({
       friendlyName: project.packageName,
-      cyclicDependencyProjects: project.cyclicDependencyProjects,
+      decoupledLocalDependencies: project.decoupledLocalDependencies,
       skipRushCheck: project.skipRushCheck
     });
 

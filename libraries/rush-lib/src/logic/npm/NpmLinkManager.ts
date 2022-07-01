@@ -23,7 +23,7 @@ interface IQueueItem {
   // A symlinked virtual package that we will create somewhere under "this-project/node_modules"
   localPackage: NpmPackage;
 
-  // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
+  // If we encounter a dependency listed in decoupledLocalDependencies, this will be set to the root
   // of the localPackage subtree where we will stop creating local links.
   cyclicSubtreeRoot: NpmPackage | undefined;
 }
@@ -141,7 +141,7 @@ export class NpmLinkManager extends BaseLinkManager {
       // where "this-project" corresponds to the "project" parameter for linkProject().
       const localPackage: NpmPackage = queueItem.localPackage;
 
-      // If we encounter a dependency listed in cyclicDependencyProjects, this will be set to the root
+      // If we encounter a dependency listed in decoupledLocalDependencies, this will be set to the root
       // of the localPackage subtree where we will stop creating local links.
       const cyclicSubtreeRoot: NpmPackage | undefined = queueItem.cyclicSubtreeRoot;
 
@@ -163,10 +163,10 @@ export class NpmLinkManager extends BaseLinkManager {
           // to create a local link?
           if (cyclicSubtreeRoot) {
             // DO NOT create a local link, because this is part of an existing
-            // cyclicDependencyProjects subtree
-          } else if (project.cyclicDependencyProjects.has(dependency.name)) {
+            // decoupledLocalDependencies subtree
+          } else if (project.decoupledLocalDependencies.has(dependency.name)) {
             // DO NOT create a local link, because we are starting a new
-            // cyclicDependencyProjects subtree
+            // decoupledLocalDependencies subtree
             startingCyclicSubtree = true;
           } else if (
             dependency.kind !== PackageDependencyKind.LocalLink &&
@@ -232,7 +232,7 @@ export class NpmLinkManager extends BaseLinkManager {
             // Perform normal module resolution.
             resolution = localPackage.resolveOrCreate(dependency.name);
           } else {
-            // We are inside a cyclicDependencyProjects subtree (i.e. cyclicSubtreeRoot != undefined),
+            // We are inside a decoupledLocalDependencies subtree (i.e. cyclicSubtreeRoot != undefined),
             // and the dependency is a local project (i.e. matchedRushPackage != undefined), so
             // we use a special module resolution strategy that places everything under the
             // cyclicSubtreeRoot.

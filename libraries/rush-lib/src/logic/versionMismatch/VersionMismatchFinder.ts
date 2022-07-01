@@ -249,7 +249,7 @@ export class VersionMismatchFinder {
           if (dependency.dependencyType !== DependencyType.Peer) {
             const version: string = dependency.version!;
 
-            const isCyclic: boolean = project.cyclicDependencyProjects.has(dependency.name);
+            const isCyclic: boolean = project.decoupledLocalDependencies.has(dependency.name);
 
             if (this._isVersionAllowedAlternative(dependency.name, version)) {
               return;

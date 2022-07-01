@@ -291,7 +291,7 @@ export class VersionManager {
     let updated: boolean = false;
     this._updatedProjects.forEach((updatedDependentProject, updatedDependentProjectName) => {
       if (dependencies[updatedDependentProjectName]) {
-        if (rushProject.cyclicDependencyProjects.has(updatedDependentProjectName)) {
+        if (rushProject.decoupledLocalDependencies.has(updatedDependentProjectName)) {
           // Skip if cyclic
           console.log(`Found cyclic ${rushProject.packageName} ${updatedDependentProjectName}`);
           return;

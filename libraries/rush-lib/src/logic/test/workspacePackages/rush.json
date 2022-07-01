@@ -93,7 +93,7 @@
       "projectFolder": "cyclic-dep-explicit-2",
       "reviewCategory": "third-party",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["cyclic-dep-explicit-1"]
+      "decoupledLocalDependencies": ["cyclic-dep-explicit-1"]
     }
   ]
 }

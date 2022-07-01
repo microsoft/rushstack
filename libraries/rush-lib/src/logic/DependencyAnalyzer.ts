@@ -98,7 +98,7 @@ export class DependencyAnalyzer {
           this._rushConfiguration.getProjectByName(dependencyName);
         if (localProject) {
           if (
-            !project.cyclicDependencyProjects.has(dependencyName) &&
+            !project.decoupledLocalDependencies.has(dependencyName) &&
             semver.satisfies(localProject.packageJson.version, dependencyVersion)
           ) {
             // For now, ignore local dependencies (that aren't cyclic dependencies).

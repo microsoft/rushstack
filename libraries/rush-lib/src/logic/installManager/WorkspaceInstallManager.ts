@@ -158,7 +158,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           (dependencySpecifier.specifierType === DependencySpecifierType.Version ||
             dependencySpecifier.specifierType === DependencySpecifierType.Range) &&
           referencedLocalProject &&
-          !rushProject.cyclicDependencyProjects.has(name)
+          !rushProject.decoupledLocalDependencies.has(name)
         ) {
           // Make sure that this version is intended to target a local package. If not, then we will fail since it
           // is not explicitly specified as a cyclic dependency.

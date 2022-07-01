@@ -553,7 +553,7 @@ export class PackageJsonUpdater {
           continue;
         }
 
-        if (foundProject.cyclicDependencyProjects.has(rushProject.packageName)) {
+        if (foundProject.decoupledLocalDependencies.has(rushProject.packageName)) {
           continue;
         }
 
@@ -595,7 +595,7 @@ export class PackageJsonUpdater {
 
     const project: RushConfigurationProject = projects[0];
 
-    if (project.cyclicDependencyProjects.has(foundProject.packageName)) {
+    if (project.decoupledLocalDependencies.has(foundProject.packageName)) {
       return undefined;
     }
 

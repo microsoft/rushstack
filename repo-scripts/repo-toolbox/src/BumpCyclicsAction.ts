@@ -26,7 +26,7 @@ export class BumpCyclicsAction extends CommandLineAction {
     const cyclicDependencyNames: Set<string> = new Set<string>();
 
     for (const project of rushConfiguration.projects) {
-      for (const cyclicDependencyProject of project.cyclicDependencyProjects) {
+      for (const cyclicDependencyProject of project.decoupledLocalDependencies) {
         cyclicDependencyNames.add(cyclicDependencyProject);
       }
     }
@@ -46,7 +46,7 @@ export class BumpCyclicsAction extends CommandLineAction {
     terminal.writeLine();
 
     for (const project of rushConfiguration.projects) {
-      for (const cyclicDependencyProject of project.cyclicDependencyProjects) {
+      for (const cyclicDependencyProject of project.decoupledLocalDependencies) {
         const version: string = cyclicDependencyVersions.get(cyclicDependencyProject)!;
         if (project.packageJsonEditor.tryGetDependency(cyclicDependencyProject)) {
           project.packageJsonEditor.addOrUpdateDependency(

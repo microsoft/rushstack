@@ -804,11 +804,11 @@ export class RushConfiguration {
     }
 
     for (const project of this._projects) {
-      project.cyclicDependencyProjects.forEach((cyclicDependencyProject: string) => {
-        if (!this.getProjectByName(cyclicDependencyProject)) {
+      project.decoupledLocalDependencies.forEach((decoupledLocalDependency: string) => {
+        if (!this.getProjectByName(decoupledLocalDependency)) {
           throw new Error(
-            `In rush.json, the "${cyclicDependencyProject}" project does not exist,` +
-              ` but was referenced by the cyclicDependencyProjects for ${project.packageName}`
+            `In rush.json, the "${decoupledLocalDependency}" project does not exist,` +
+              ` but was referenced by the decoupledLocalDependencies for ${project.packageName}`
           );
         }
       });
