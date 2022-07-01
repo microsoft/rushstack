@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "comment": "Rename cyclicDependencyProjects to decoupledLocalDependencies",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets"
+}
