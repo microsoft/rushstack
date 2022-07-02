@@ -11,6 +11,7 @@ import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredIt
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
+import { IApiReadonlyMixinOptions, ApiReadonlyMixin } from '../mixins/ApiReadonlyMixin';
 
 /**
  * Constructor options for {@link ApiIndexSignature}.
@@ -20,6 +21,7 @@ export interface IApiIndexSignatureOptions
   extends IApiParameterListMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiReturnTypeMixinOptions,
+    IApiReadonlyMixinOptions,
     IApiDeclaredItemOptions {}
 
 /**
@@ -45,7 +47,7 @@ export interface IApiIndexSignatureOptions
  * @public
  */
 export class ApiIndexSignature extends ApiParameterListMixin(
-  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))
+  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiReadonlyMixin(ApiDeclaredItem)))
 ) {
   public constructor(options: IApiIndexSignatureOptions) {
     super(options);

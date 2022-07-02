@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 28 Jun 2022 22:47:13 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Jun 2022 04:48:53 GMT and should not be manually modified.
+
+## 7.28.2
+Thu, 30 Jun 2022 04:48:53 GMT
+
+### Patches
+
+- Improve logic that determines whether an API item is readonly
 
 ## 7.28.1
 Tue, 28 Jun 2022 22:47:13 GMT

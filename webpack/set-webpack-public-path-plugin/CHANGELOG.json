@@ -2,6 +2,27 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "3.3.49",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v3.3.49",
+      "date": "Thu, 30 Jun 2022 04:48:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.1.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.31`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.48",
       "tag": "@rushstack/set-webpack-public-path-plugin_v3.3.48",
       "date": "Tue, 28 Jun 2022 22:47:14 GMT",

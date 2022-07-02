@@ -14,11 +14,11 @@ export interface IDocInterface7
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [optionalField?](./api-documenter-test.idocinterface7.optionalfield.md) | boolean | <i>(Optional)</i> Description of optionalField |
-|  [optionalReadonlyField?](./api-documenter-test.idocinterface7.optionalreadonlyfield.md) | boolean | <i>(Optional)</i> Description of optionalReadonlyField |
-|  [optionalUndocumentedField?](./api-documenter-test.idocinterface7.optionalundocumentedfield.md) | boolean | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [optionalField?](./api-documenter-test.idocinterface7.optionalfield.md) |  | boolean | <i>(Optional)</i> Description of optionalField |
+|  [optionalReadonlyField?](./api-documenter-test.idocinterface7.optionalreadonlyfield.md) | <code>readonly</code> | boolean | <i>(Optional)</i> Description of optionalReadonlyField |
+|  [optionalUndocumentedField?](./api-documenter-test.idocinterface7.optionalundocumentedfield.md) |  | boolean | <i>(Optional)</i> |
 
 ## Methods
 

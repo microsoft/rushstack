@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 28 Jun 2022 22:47:13 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Jun 2022 04:48:53 GMT and should not be manually modified.
+
+## 7.18.0
+Thu, 30 Jun 2022 04:48:53 GMT
+
+### Minor changes
+
+- Show protected and readonly modifiers for relevant API items
 
 ## 7.17.26
 Tue, 28 Jun 2022 22:47:13 GMT

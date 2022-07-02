@@ -742,7 +742,7 @@ export interface IApiFunctionOptions extends IApiNameMixinOptions, IApiTypeParam
 }
 
 // @public
-export interface IApiIndexSignatureOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+export interface IApiIndexSignatureOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public

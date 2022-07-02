@@ -5,25 +5,32 @@
 ```ts
 
 // @public (undocumented)
-export const FOO = "foo";
-
-// @public (undocumented)
-export interface _IInternalThing {
-    // (undocumented)
-    title: string;
-}
-
-// @public (undocumented)
 export class MyClass {
     // (undocumented)
-    static readonly declaredReadonlyThing: _IInternalThing;
+    get _onlyGetter(): string;
     // (undocumented)
-    get _onlyHasGetterThing(): _IInternalThing;
-    tsDocReadonlyThing: _IInternalThing;
+    readonly readonlyModifier: string;
     // (undocumented)
-    get _writableThing(): _IInternalThing;
-    set _writableThing(value: _IInternalThing);
+    tsDocReadonly: string;
 }
+
+// @public (undocumented)
+export interface MyInterface {
+    // (undocumented)
+    readonly [x: number]: void;
+    // (undocumented)
+    get _onlyGetter(): string;
+    // (undocumented)
+    readonly readonlyModifier: string;
+    // (undocumented)
+    set tsDocReadonly(value: string);
+}
+
+// @public (undocumented)
+export const READONLY_VARIABLE = "Hello world!";
+
+// @public (undocumented)
+export let TSDOC_READONLY_VARIABLE: string;
 
 // (No @packageDocumentation comment for this package)
 

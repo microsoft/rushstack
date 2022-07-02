@@ -13,7 +13,7 @@ export interface IDocInterface1
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [regularProperty](./api-documenter-test.idocinterface1.regularproperty.md) | [SystemEvent](./api-documenter-test.systemevent.md) | Does something |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [regularProperty](./api-documenter-test.idocinterface1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | Does something |
 
