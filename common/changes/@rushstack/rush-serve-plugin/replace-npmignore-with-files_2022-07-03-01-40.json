@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/rush-serve-plugin"
+    }
+  ],
+  "packageName": "@rushstack/rush-serve-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -32,5 +32,17 @@
     "@types/heft-jest": "1.0.1",
     "@types/semver": "7.3.5",
     "@types/webpack-env": "1.13.0"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt"
+  ]
 }

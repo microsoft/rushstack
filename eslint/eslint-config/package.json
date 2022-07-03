@@ -42,5 +42,21 @@
   "devDependencies": {
     "eslint": "~8.7.0",
     "typescript": "~4.6.3"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt",
+    "*.js",
+    "mixins/*.json",
+    "patch/*.js",
+    "profile/*.js"
+  ]
 }

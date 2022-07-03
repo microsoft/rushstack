@@ -27,5 +27,17 @@
     "@types/heft-jest": "1.0.1",
     "@types/wordwrap": "~1.0.0",
     "colors": "~1.2.1"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt"
+  ]
 }

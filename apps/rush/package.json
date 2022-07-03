@@ -50,5 +50,19 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@types/semver": "7.3.5"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt",
+    "lib/start-dev.*",
+    "lib/start-dev-docs.*"
+  ]
 }

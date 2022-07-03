@@ -42,5 +42,19 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt",
+    "profiles/**",
+    "shared/**"
+  ]
 }

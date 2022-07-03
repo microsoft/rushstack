@@ -28,5 +28,17 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/serialize-javascript": "5.0.2"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt"
+  ]
 }

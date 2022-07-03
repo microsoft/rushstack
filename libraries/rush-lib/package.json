@@ -79,5 +79,19 @@
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt",
+    "assets/**",
+    "!lib/__mocks__/**"
+  ]
 }

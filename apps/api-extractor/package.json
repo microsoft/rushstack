@@ -59,5 +59,18 @@
     "@types/node": "12.20.24",
     "@types/resolve": "1.17.1",
     "@types/semver": "7.3.5"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt",
+    "extends/*.json"
+  ]
 }

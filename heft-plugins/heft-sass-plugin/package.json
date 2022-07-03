@@ -37,5 +37,17 @@
     "@types/node": "12.20.24",
     "@types/node-sass": "4.11.2",
     "eslint": "~8.7.0"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt"
+  ]
 }

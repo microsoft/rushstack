@@ -51,5 +51,17 @@
   },
   "sideEffects": [
     "./lib/OverrideWebpackIdentifierAllocation"
+  ],
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt"
   ]
 }
