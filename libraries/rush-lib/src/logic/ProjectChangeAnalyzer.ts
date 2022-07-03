@@ -93,15 +93,13 @@ export class ProjectChangeAnalyzer {
       return filteredProjectData;
     }
 
-    if (this._data === UNINITIALIZED) {
-      this._data = this._getData(terminal);
-    }
+    const data: IRawRepoState | undefined = this._ensureInitialized(terminal);
 
-    if (!this._data) {
+    if (!data) {
       return undefined;
     }
 
-    const { projectState, rootDir } = this._data;
+    const { projectState, rootDir } = data;
 
     if (projectState === undefined) {
       return undefined;
@@ -121,6 +119,17 @@ export class ProjectChangeAnalyzer {
 
     this._filteredData.set(project, filteredProjectData);
     return filteredProjectData;
+  }
+
+  /**
+   * @internal
+   */
+  public _ensureInitialized(terminal: ITerminal): IRawRepoState | undefined {
+    if (this._data === UNINITIALIZED) {
+      this._data = this._getData(terminal);
+    }
+
+    return this._data;
   }
 
   /**

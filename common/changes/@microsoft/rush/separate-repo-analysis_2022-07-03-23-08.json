@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Put the repo analysis in a separate step to before operations begin to not aftifically extend the amount of time the first project appears to take to run.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
