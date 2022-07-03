@@ -416,5 +416,5 @@ export interface IConfigFile {
    *
    * @defaultValue `by-name`
    */
-   enumMemberOrder: EnumMemberOrder;
+   enumMemberOrder?: EnumMemberOrder;
 }
