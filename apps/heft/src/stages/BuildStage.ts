@@ -233,10 +233,11 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
   public static getOptionsFromStandardParameters(
     standardParameters: IBuildStageStandardParameters
   ): Omit<IBuildStageOptions, 'watchMode' | 'serveMode'> {
+    const localesParameterValues: readonly string[] = standardParameters.localesParameter.values;
     return {
       production: standardParameters.productionFlag.value,
       lite: standardParameters.liteFlag.value,
-      locales: standardParameters.localesParameter.values,
+      locales: localesParameterValues.length > 0 ? localesParameterValues : undefined,
       maxOldSpaceSize: standardParameters.maxOldSpaceSizeParameter.value,
       typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParameter.value
     };
