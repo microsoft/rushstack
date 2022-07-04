@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 30 Jun 2022 04:48:53 GMT and should not be manually modified.
+This log was last generated on Mon, 04 Jul 2022 15:15:13 GMT and should not be manually modified.
+
+## 0.46.2
+Mon, 04 Jul 2022 15:15:13 GMT
+
+### Patches
+
+- Fix an issue with the `locales` build property. The property is now undefined if no `--locale` parameters are specified.
 
 ## 0.46.1
 Thu, 30 Jun 2022 04:48:53 GMT

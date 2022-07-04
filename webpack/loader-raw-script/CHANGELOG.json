@@ -2,6 +2,21 @@
   "name": "@rushstack/loader-raw-script",
   "entries": [
     {
+      "version": "1.3.241",
+      "tag": "@rushstack/loader-raw-script_v1.3.241",
+      "date": "Mon, 04 Jul 2022 15:15:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.240",
       "tag": "@rushstack/loader-raw-script_v1.3.240",
       "date": "Thu, 30 Jun 2022 04:48:54 GMT",

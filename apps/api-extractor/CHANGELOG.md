@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 30 Jun 2022 04:48:53 GMT and should not be manually modified.
+This log was last generated on Mon, 04 Jul 2022 15:15:13 GMT and should not be manually modified.
+
+## 7.28.3
+Mon, 04 Jul 2022 15:15:13 GMT
+
+### Patches
+
+- Make enumMemberOrder configuration field optional
 
 ## 7.28.2
 Thu, 30 Jun 2022 04:48:53 GMT

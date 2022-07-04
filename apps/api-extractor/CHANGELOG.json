@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.28.3",
+      "tag": "@microsoft/api-extractor_v7.28.3",
+      "date": "Mon, 04 Jul 2022 15:15:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make enumMemberOrder configuration field optional"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.28.2",
       "tag": "@microsoft/api-extractor_v7.28.2",
       "date": "Thu, 30 Jun 2022 04:48:53 GMT",
