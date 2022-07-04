@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Reorder some initialization logic so that Rush's change analysis is not counted as part of the build time for the first project",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
