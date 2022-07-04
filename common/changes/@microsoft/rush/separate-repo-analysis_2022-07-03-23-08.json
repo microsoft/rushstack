@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Put the repo analysis in a separate step to before operations begin to not aftifically extend the amount of time the first project appears to take to run.",
+      "comment": "Reorder some initialization logic so that Rush's change analysis is not counted as part of the build time for the first project",
       "type": "none"
     }
   ],
