@@ -263,7 +263,7 @@
             "type": "string"
           },
           "cyclicDependencyProjects": {
-            "description": "[depreciated] A list of local projects that appear as devDependencies for this project, but cannot be locally linked because it would create a cyclic dependency; instead, the last published version will be installed in the Common folder.",
+            "description": "(Deprecated) This field was renamed to \"decoupledLocalDependencies\".",
             "type": "array",
             "items": {
               "type": "string"
