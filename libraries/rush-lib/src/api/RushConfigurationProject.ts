@@ -162,7 +162,7 @@ export class RushConfigurationProject {
     if (projectJson.cyclicDependencyProjects || projectJson.decoupledLocalDependencies) {
       if (projectJson.cyclicDependencyProjects && projectJson.decoupledLocalDependencies) {
         throw new Error(
-          'A project configuration cannot have both decoupledLocalDependencies as well as cyclicDependencyProjects fields. Please only use the decoupledLocalDependencies configuration instead.'
+          'A project configuration cannot specify both "decoupledLocalDependencies" and "cyclicDependencyProjects". Please use "decoupledLocalDependencies" only -- the other name is deprecated.'
         );
       }
       for (const cyclicDependencyProject of projectJson.cyclicDependencyProjects ||
