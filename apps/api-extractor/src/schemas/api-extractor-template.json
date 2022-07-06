@@ -373,4 +373,24 @@
       // . . .
     }
   }
+
+  /**
+   * Set to true when invoking API Extractor's test harness.
+   *
+   * When `testMode` is true, the `toolVersion` field in the .api.json file is assigned an empty string
+   * to prevent spurious diffs in output files tracked for tests.
+   *
+   * DEFAULT VALUE: "false"
+   */
+  // "testMode": false,
+
+  /**
+   * Specifies how API Extractor sorts members of an enum when generating api.json.
+   *
+   * By default, the output files will be sorted alphabetically, which is "by-name".
+   * To keep the ordering in the source code, specify "preserve".
+   *
+   * DEFAULT VALUE: "by-name"
+   */
+  // enumMemberOrder?: EnumMemberOrder
 }
