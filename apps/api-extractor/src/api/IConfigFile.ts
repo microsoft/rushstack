@@ -358,6 +358,35 @@ export interface IConfigFile {
   bundledPackages?: string[];
 
   /**
+   * Specifies what type of newlines API Extractor should use when writing output files.
+   *
+   * @remarks
+   * By default, the output files will be written with Windows-style newlines.
+   * To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   */
+  newlineKind?: 'crlf' | 'lf' | 'os';
+
+  /**
+   * Set to true when invoking API Extractor's test harness.
+   * @remarks
+   * When `testMode` is true, the `toolVersion` field in the .api.json file is assigned an empty string
+   * to prevent spurious diffs in output files tracked for tests.
+   */
+  testMode?: boolean;
+
+  /**
+   * Specifies how API Extractor sorts members of an enum when generating api.json.
+   *
+   * @remarks
+   * By default, the output files will be sorted alphabetically, which is "by-name".
+   * To keep the ordering in the source code, specify "preserve".
+   *
+   * @defaultValue `by-name`
+   */
+  enumMemberOrder?: EnumMemberOrder;
+
+  /**
    * {@inheritDoc IConfigCompiler}
    */
   compiler?: IConfigCompiler;
@@ -385,36 +414,7 @@ export interface IConfigFile {
   tsdocMetadata?: IConfigTsdocMetadata;
 
   /**
-   * Specifies what type of newlines API Extractor should use when writing output files.
-   *
-   * @remarks
-   * By default, the output files will be written with Windows-style newlines.
-   * To use POSIX-style newlines, specify "lf" instead.
-   * To use the OS's default newline kind, specify "os".
-   */
-  newlineKind?: 'crlf' | 'lf' | 'os';
-
-  /**
    * {@inheritDoc IExtractorMessagesConfig}
    */
   messages?: IExtractorMessagesConfig;
-
-  /**
-   * Set to true when invoking API Extractor's test harness.
-   * @remarks
-   * When `testMode` is true, the `toolVersion` field in the .api.json file is assigned an empty string
-   * to prevent spurious diffs in output files tracked for tests.
-   */
-  testMode?: boolean;
-
-  /**
-   * Specifies how API Extractor sorts members of an enum when generating api.json.
-   * 
-   * @remarks
-   * By default, the output files will be sorted alphabetically, which is "by-name".
-   * To keep the ordering in the source code, specify "preserve".
-   *
-   * @defaultValue `by-name`
-   */
-   enumMemberOrder?: EnumMemberOrder;
 }
