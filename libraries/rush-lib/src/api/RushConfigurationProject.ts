@@ -298,17 +298,30 @@ export class RushConfigurationProject {
       ]) {
         if (dependencySet) {
           for (const [dependency, version] of Object.entries(dependencySet)) {
+            const dependencySpecifier: DependencySpecifier | undefined = tryParseDependencySpecifier(
+              dependency,
+              version
+            );
+            if (!dependencySpecifier) {
+              // Don't recognize the format. Ignore.
+              continue;
+            }
+
+            const innerSpecifier: DependencySpecifier =
+              dependencySpecifier.aliasTarget || dependencySpecifier;
+
             // Skip if we can't find the local project or it's a cyclic dependency
             const localProject: RushConfigurationProject | undefined =
-              this._rushConfiguration.getProjectByName(dependency);
-            if (localProject && !this._cyclicDependencyProjects.has(dependency)) {
-              // Set the value if it's a workspace project, or if we have a local project and the semver is satisfied
-              const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
-              switch (dependencySpecifier.specifierType) {
+              this._rushConfiguration.getProjectByName(innerSpecifier.packageName);
+
+            if (localProject) {
+              // Set the value if it's a workspace project, or if we have a local project and the semver is satisfied and not a cyclic dependency
+              switch (innerSpecifier.specifierType) {
                 case DependencySpecifierType.Version:
                 case DependencySpecifierType.Range:
                   if (
-                    semver.satisfies(localProject.packageJson.version, dependencySpecifier.versionSpecifier)
+                    !this._cyclicDependencyProjects.has(dependency) &&
+                    semver.satisfies(localProject.packageJson.version, innerSpecifier.versionSpecifier)
                   ) {
                     dependencyProjects.add(localProject);
                   }
@@ -470,5 +483,13 @@ export class RushConfigurationProject {
    */
   public get tags(): ReadonlySet<string> {
     return this._tags;
+  }
+}
+
+function tryParseDependencySpecifier(dependency: string, version: string): DependencySpecifier | undefined {
+  try {
+    return new DependencySpecifier(dependency, version);
+  } catch (e) {
+    return;
   }
 }

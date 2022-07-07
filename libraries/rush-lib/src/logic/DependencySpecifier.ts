@@ -77,8 +77,8 @@ export class DependencySpecifier {
   public readonly specifierType: DependencySpecifierType;
 
   /**
-   * If `specifierType` is `alias`, then this is the parsed target dependency.
-   * For example, if version specifier i `"npm:other-package@^1.2.3"` then this is the parsed object for
+   * If `specifierType` is `alias` or `workspace`, then this is the parsed target dependency.
+   * For example, if version specifier is `"npm:other-package@^1.2.3"` then this is the parsed object for
    * `other-package@^1.2.3`.
    */
   public readonly aliasTarget: DependencySpecifier | undefined;
@@ -91,8 +91,18 @@ export class DependencySpecifier {
     // to the trimmed version range.
     if (versionSpecifier.startsWith('workspace:')) {
       this.specifierType = DependencySpecifierType.Workspace;
-      this.versionSpecifier = versionSpecifier.slice(this.specifierType.length + 1).trim();
-      this.aliasTarget = undefined;
+      versionSpecifier = versionSpecifier.slice(this.specifierType.length + 1).trim();
+      const index: number = versionSpecifier.indexOf('@', 1);
+      this.aliasTarget =
+        index > 0
+          ? new DependencySpecifier(
+              versionSpecifier.slice(0, index),
+              `workspace:${versionSpecifier.slice(index + 1)}`
+            )
+          : undefined;
+      if (index < 0) {
+        this.versionSpecifier = versionSpecifier;
+      }
       return;
     }
 

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support `workspace:alias@version` dependency specifiers.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
