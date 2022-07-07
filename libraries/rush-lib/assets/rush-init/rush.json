@@ -422,8 +422,8 @@
       "reviewCategory": "production",
 
       /**
-       * A list of Rush project names that are allowed to be installed from NPM
-       * instead of locally linking the folder.
+       * A list of Rush project names that are to be installed from NPM
+       * instead of linking to the local project.
        *
        * If a project's package.json specifies a dependency that is another Rush project
        * in the monorepo workspace, normally Rush will locally link its folder instead of
