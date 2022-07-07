@@ -456,7 +456,7 @@ export class PublishUtilities {
     dependencyName: string
   ): boolean {
     const packageConfig: RushConfigurationProject | undefined = allPackages.get(packageName);
-    return !!packageConfig && packageConfig.cyclicDependencyProjects.has(dependencyName);
+    return !!packageConfig && packageConfig.decoupledLocalDependencies.has(dependencyName);
   }
 
   private static _updateDependencies(

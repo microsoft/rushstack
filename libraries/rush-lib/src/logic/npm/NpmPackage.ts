@@ -184,7 +184,7 @@ export class NpmPackage extends BasePackage {
    * or was found with an incompatible version.
    *
    * "cyclicSubtreeRoot" is a special optional parameter that specifies a different
-   * root for the tree; the cyclicDependencyProjects feature uses this to isolate
+   * root for the tree; the decoupledLocalDependencies feature uses this to isolate
    * certain devDependencies in their own subtree.
    */
   public resolveOrCreate(dependencyName: string, cyclicSubtreeRoot?: NpmPackage): IResolveOrCreateResult {
