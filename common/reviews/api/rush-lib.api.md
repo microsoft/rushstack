@@ -777,6 +777,8 @@ export class RushConfigurationProject {
     // @internal
     constructor(options: IRushConfigurationProjectOptions);
     get consumingProjects(): ReadonlySet<RushConfigurationProject>;
+    // @deprecated
+    get cyclicDependencyProjects(): Set<string>;
     get decoupledLocalDependencies(): Set<string>;
     get dependencyProjects(): ReadonlySet<RushConfigurationProject>;
     // @deprecated

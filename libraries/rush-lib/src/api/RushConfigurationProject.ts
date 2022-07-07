@@ -269,6 +269,19 @@ export class RushConfigurationProject {
   }
 
   /**
+   * A list of local projects that appear as devDependencies for this project, but cannot be
+   * locally linked because it would create a cyclic dependency; instead, the last published
+   * version will be installed in the Common folder.
+   *
+   * These are package names that would be found by RushConfiguration.getProjectByName().
+   *
+   * @deprecated Use `decoupledLocalDependencies` instead, as it better describes the purpose of the data.
+   */
+  public get cyclicDependencyProjects(): Set<string> {
+    return this._decoupledLocalDependencies;
+  }
+
+  /**
    * An array of projects within the Rush configuration which directly depend on this package.
    * @deprecated Use `consumingProjectNames` instead, as it has Set semantics, which better reflect the nature
    * of the data.
