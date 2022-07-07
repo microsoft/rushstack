@@ -12,6 +12,12 @@ import { SelectionParameterSet } from '../SelectionParameterSet';
 export class InstallAction extends BaseInstallAction {
   private _checkOnlyParameter!: CommandLineFlagParameter;
   private _ignoreScriptsParameter!: CommandLineFlagParameter;
+  /**
+   * Whether split workspace projects are included in install
+   *
+   * This paramter only supported when there is split workspace project
+   */
+  private _includeSplitWorkspace?: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -46,6 +52,18 @@ export class InstallAction extends BaseInstallAction {
       enableFiltering: false
     });
 
+    if (this.rushConfiguration.hasSplitWorkspaceProject) {
+      this._includeSplitWorkspace = this.defineFlagParameter({
+        parameterLongName: '--include-split-workspace',
+        description:
+          'Normally "rush install" only install projects in normal rush workspace.' +
+          ' When you want to install for split workspace projects, you can run' +
+          ' "rush install --include-split-workspace", which installs entire split workspace projects.' +
+          ' Or, you can specify selection parameters to do partial install for split workspace projects, ' +
+          ' such as "rush install --to <split_worksapce_package_name>".'
+      });
+    }
+
     this._checkOnlyParameter = this.defineFlagParameter({
       parameterLongName: '--check-only',
       description: `Only check the validity of the shrinkwrap file without performing an install.`
@@ -69,6 +87,26 @@ export class InstallAction extends BaseInstallAction {
     const { pnpmFilterArguments, splitWorkspacePnpmFilterArguments, selectedProjects } =
       await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal);
 
+    // Warn when fully install without selecting any split workspace project
+    if (
+      this._includeSplitWorkspace &&
+      !this._includeSplitWorkspace.value &&
+      !this._selectionParameters?.isSelectionSpecified
+    ) {
+      terminal.writeWarningLine(
+        'Run "rush install" without any selection parameter will not install for split workspace' +
+          ' projects, please run the command again with specifying --include-split-workspace' +
+          ' if you really want to install for split workspace projects.'
+      );
+      terminal.writeLine();
+    }
+
+    let includeSplitWorkspace: boolean = this._includeSplitWorkspace?.value ?? false;
+    // turn on includeSplitWorkspace when selecting any split workspace project
+    if (this._selectionParameters?.isSelectionSpecified) {
+      includeSplitWorkspace = true;
+    }
+
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
@@ -77,6 +115,7 @@ export class InstallAction extends BaseInstallAction {
       noLink: this._noLinkParameter.value!,
       fullUpgrade: false,
       recheckShrinkwrap: false,
+      includeSplitWorkspace,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
       variant: this._variant.value,
@@ -85,8 +124,8 @@ export class InstallAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
       pnpmFilterArguments,
-      selectedProjects,
       splitWorkspacePnpmFilterArguments,
+      selectedProjects,
       checkOnly: this._checkOnlyParameter.value
     };
   }

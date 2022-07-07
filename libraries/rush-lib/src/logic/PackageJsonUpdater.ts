@@ -244,6 +244,7 @@ export class PackageJsonUpdater {
         noLink: false,
         fullUpgrade: false,
         recheckShrinkwrap: false,
+        includeSplitWorkspace: false,
         networkConcurrency: undefined,
         collectLogFile: false,
         variant: variant,

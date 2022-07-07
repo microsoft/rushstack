@@ -41,6 +41,8 @@ export class SelectionParameterSet {
   private readonly _toVersionPolicy: CommandLineStringListParameter;
 
   private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
+  private readonly _selectors: CommandLineStringListParameter[] = [];
+  private _isSelectionSpecified: boolean | undefined;
 
   public constructor(
     rushConfiguration: RushConfiguration,
@@ -181,6 +183,29 @@ export class SelectionParameterSet {
         ' belonging to VERSION_POLICY_NAME.' +
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
+
+    this._selectors = [
+      this._onlyProject,
+      this._fromProject,
+      this._toProject,
+      this._toExceptProject,
+      this._impactedByProject,
+      this._impactedByExceptProject
+    ];
+  }
+
+  /**
+   * Check if any of the selection parameters have a value specified on the command line
+   *
+   * Returns true if specifying any selection parameters, otherwise false.
+   */
+  public get isSelectionSpecified(): boolean {
+    if (undefined === this._isSelectionSpecified) {
+      this._isSelectionSpecified = this._selectors.some(
+        (param: CommandLineStringListParameter) => param.values.length > 0
+      );
+    }
+    return this._isSelectionSpecified;
   }
 
   /**
@@ -197,22 +222,8 @@ export class SelectionParameterSet {
       (this._toProject.values as string[]).push(`version-policy:${value}`);
     }
 
-    const selectors: CommandLineStringListParameter[] = [
-      this._onlyProject,
-      this._fromProject,
-      this._toProject,
-      this._toExceptProject,
-      this._impactedByProject,
-      this._impactedByExceptProject
-    ];
-
-    // Check if any of the selection parameters have a value specified on the command line
-    const isSelectionSpecified: boolean = selectors.some(
-      (param: CommandLineStringListParameter) => param.values.length > 0
-    );
-
     // If no selection parameters are specified, return everything
-    if (!isSelectionSpecified) {
+    if (!this.isSelectionSpecified) {
       return new Set(this._rushConfiguration.projects);
     }
 
@@ -230,7 +241,7 @@ export class SelectionParameterSet {
       // --impacted-by-except
       impactedByExceptProjects
     ] = await Promise.all(
-      selectors.map((param: CommandLineStringListParameter) => {
+      this._selectors.map((param: CommandLineStringListParameter) => {
         return this._evaluateProjectParameterAsync(param, terminal);
       })
     );
@@ -278,11 +289,36 @@ export class SelectionParameterSet {
       // when there are split workspace projects, the selected projects are computed inside Rush.js.
       const selection: Set<RushConfigurationProject> = await this.getSelectedProjectsAsync(terminal);
 
+      const selectedRushProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+      const selectedSplitWorkspaceProjects: Set<RushConfigurationProject> =
+        new Set<RushConfigurationProject>();
+
       for (const project of selection) {
-        if (project.splitWorkspace) {
-          pnpmFilterArguments.push('--filter', `${project.packageName}`);
+        if (!project.splitWorkspace) {
+          selectedRushProjects.add(project);
         } else {
-          splitWorkspacePnpmFilterArguments.push('--filter', `${project.packageName}`);
+          selectedSplitWorkspaceProjects.add(project);
+        }
+      }
+
+      // It is no need to push pnpm filter args if projects are fully selected.
+      if (
+        this._rushConfiguration.getFilteredProjects({
+          splitWorkspace: false
+        }).length !== selectedRushProjects.size
+      ) {
+        for (const selectedProject of selectedRushProjects.values()) {
+          pnpmFilterArguments.push('--filter', `${selectedProject.packageName}`);
+        }
+      }
+
+      if (
+        this._rushConfiguration.getFilteredProjects({
+          splitWorkspace: true
+        }).length !== selectedSplitWorkspaceProjects.size
+      ) {
+        for (const selectedSplitWorkspaceProject of selectedSplitWorkspaceProjects.values()) {
+          splitWorkspacePnpmFilterArguments.push('--filter', `${selectedSplitWorkspaceProject.packageName}`);
         }
       }
     } else {

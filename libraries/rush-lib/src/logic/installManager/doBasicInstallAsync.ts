@@ -36,6 +36,7 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       noLink: false,
       fullUpgrade: false,
       recheckShrinkwrap: false,
+      includeSplitWorkspace: false,
       collectLogFile: false,
       pnpmFilterArguments: [],
       splitWorkspacePnpmFilterArguments: [],

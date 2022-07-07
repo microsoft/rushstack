@@ -106,7 +106,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    if (this.rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       if (!splitWorkspaceShrinkwrapFile) {
         // There are chances that shared-workspace-lockfile=false,
         // so individual shrinkwrap for each split workspace project
@@ -167,15 +167,31 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     let splitWorkspaceFile: PnpmWorkspaceFile | undefined = undefined;
 
-    if (this.rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       splitWorkspaceFile = new PnpmWorkspaceFile(
         path.join(this.rushConfiguration.commonTempSplitFolder, 'pnpm-workspace.yaml')
       );
     }
 
+    // FIXME: In a filtered install for split workspace, validating shrinkwrap file should happen
+    // only in the selected projects, which means "InstallManager" should know the selectedProject.
+    // For now, I choose to get this informantion from this.options.splitWorkspacePnpmFilterArguments
+    const selectedSplitWorkspaceProjectPackageNames: Set<string> = new Set<string>();
+    for (const arg of this.options.splitWorkspacePnpmFilterArguments) {
+      if (arg === '--filter') {
+        continue;
+      }
+      selectedSplitWorkspaceProjectPackageNames.add(arg);
+    }
+
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
+      if (!this.options.includeSplitWorkspace && rushProject.splitWorkspace) {
+        // Skip processing split workspace project when they are not included
+        continue;
+      }
+
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
 
       let targetWorkspaceFile: PnpmWorkspaceFile = workspaceFile;
@@ -278,18 +294,22 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             shrinkwrapIsUpToDate = false;
           }
         } else {
-          const splitWorkspaceProjectShrinkwrapFilepath: string = path.join(
-            rushProject.projectFolder,
-            RushConstants.pnpmV3ShrinkwrapFilename
-          );
-          const splitWorkspaceProjectShrinkwrapFile: PnpmShrinkwrapFile | undefined =
-            PnpmShrinkwrapFile.loadFromFile(splitWorkspaceProjectShrinkwrapFilepath);
-          if (!splitWorkspaceProjectShrinkwrapFile) {
-            shrinkwrapIsUpToDate = false;
-          } else {
-            splitWorkspaceProjectShrinkwrapFile.setIndividualPackage(rushProject.packageName);
-            if (splitWorkspaceProjectShrinkwrapFile.isSplitWorkspaceIndividualProjectModified(rushProject)) {
+          if (selectedSplitWorkspaceProjectPackageNames.has(rushProject.packageName)) {
+            const splitWorkspaceProjectShrinkwrapFilepath: string = path.join(
+              rushProject.projectFolder,
+              RushConstants.pnpmV3ShrinkwrapFilename
+            );
+            const splitWorkspaceProjectShrinkwrapFile: PnpmShrinkwrapFile | undefined =
+              PnpmShrinkwrapFile.loadFromFile(splitWorkspaceProjectShrinkwrapFilepath);
+            if (!splitWorkspaceProjectShrinkwrapFile) {
               shrinkwrapIsUpToDate = false;
+            } else {
+              splitWorkspaceProjectShrinkwrapFile.setIndividualPackage(rushProject.packageName);
+              if (
+                splitWorkspaceProjectShrinkwrapFile.isSplitWorkspaceIndividualProjectModified(rushProject)
+              ) {
+                shrinkwrapIsUpToDate = false;
+              }
             }
           }
         }
@@ -305,7 +325,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // Write the common package.json
     InstallHelpers.generateCommonPackageJson(this.rushConfiguration);
-    if (this.rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       InstallHelpers.generateCommonSplitPackageJson(this.rushConfiguration);
     }
 
@@ -340,13 +360,27 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // files
     // Example: [ "C:\MyRepo\projects\projectA\node_modules", "C:\MyRepo\projects\projectA\package.json" ]
     potentiallyChangedFiles.push(
-      ...this.rushConfiguration.projects.map((project) => {
+      ...this.rushConfiguration.getFilteredProjects({ splitWorkspace: false }).map((project) => {
         return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
       }),
-      ...this.rushConfiguration.projects.map((project) => {
+      ...this.rushConfiguration.getFilteredProjects({ splitWorkspace: false }).map((project) => {
         return path.join(project.projectFolder, FileConstants.PackageJson);
       })
     );
+
+    // FIXME: This filtered potentional changed file list makes me think about whether it could be unified into
+    // using selection projects calcualted by SelectionParameterSet::getSelectedProjectsAsync (?)
+
+    if (this.options.includeSplitWorkspace) {
+      potentiallyChangedFiles.push(
+        ...this.rushConfiguration.getFilteredProjects({ splitWorkspace: true }).map((project) => {
+          return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
+        }),
+        ...this.rushConfiguration.getFilteredProjects({ splitWorkspace: true }).map((project) => {
+          return path.join(project.projectFolder, FileConstants.PackageJson);
+        })
+      );
+    }
 
     // NOTE: If any of the potentiallyChangedFiles does not exist, then isFileTimestampCurrent()
     // returns false.
@@ -433,7 +467,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     );
 
-    if (this.rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       // Install for split workspace
       const splitWorkspaceNodeModulesFolder: string = path.join(
         this.rushConfiguration.commonTempSplitFolder,
@@ -515,7 +549,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       })
     ];
 
-    if (this.rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       projectNodeModulesFolders.push(
         path.join(this.rushConfiguration.commonTempSplitFolder, RushConstants.nodeModulesFolderName)
       );
@@ -578,7 +612,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
-    if (this.rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
         this.rushConfiguration.packageManager,
         this.rushConfiguration.pnpmOptions,

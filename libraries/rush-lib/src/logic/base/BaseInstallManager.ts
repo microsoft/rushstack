@@ -75,6 +75,11 @@ export interface IInstallManagerOptions {
   fullUpgrade: boolean;
 
   /**
+   * Whether to install for projects in split workspace
+   */
+  includeSplitWorkspace: boolean;
+
+  /**
    * Whether to force an update to the shrinkwrap file even if it appears to be unnecessary.
    * Normally Rush uses heuristics to determine when "pnpm install" can be skipped,
    * but sometimes the heuristics can be inaccurate due to external influences
@@ -167,7 +172,7 @@ export abstract class BaseInstallManager {
     this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
 
-    if (rushConfiguration.hasSplitWorkspaceProject) {
+    if (options.includeSplitWorkspace && rushConfiguration.hasSplitWorkspaceProject) {
       this._commonTempSplitInstallFlag = LastInstallFlagFactory.getCommonTempSplitFlag(rushConfiguration);
     }
   }
@@ -230,14 +235,17 @@ export abstract class BaseInstallManager {
 
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
-      console.log();
-      console.log(
-        colors.red(
-          'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
-            'without specifying these arguments.'
-        )
-      );
-      throw new AlreadyReportedError();
+      // Allow partial update when there are split workspace projects.
+      if (!this.rushConfiguration.hasSplitWorkspaceProject) {
+        console.log();
+        console.log(
+          colors.red(
+            'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
+              'without specifying these arguments.'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
     }
 
     const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
@@ -279,7 +287,8 @@ export abstract class BaseInstallManager {
     // need to perform a clean install.  Otherwise, we can do an incremental install.
     const cleanInstall: boolean =
       !this._commonTempInstallFlag.checkValidAndReportStoreIssues() ||
-      (!!this._commonTempSplitInstallFlag &&
+      (this.options.includeSplitWorkspace &&
+        !!this._commonTempSplitInstallFlag &&
         !this._commonTempSplitInstallFlag.checkValidAndReportStoreIssues());
 
     // Allow us to defer the file read until we need it
@@ -328,11 +337,13 @@ export abstract class BaseInstallManager {
           this._rushConfiguration.tempShrinkwrapFilename,
           this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
         );
-        // Copy (or delete) common\temp-split\pnpm-lock.yaml --> common\config\rush\split-workspace-pnpm-lock.yaml
-        Utilities.syncFile(
-          this._rushConfiguration.tempSplitWorkspaceShrinkwrapFilename,
-          this._rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename()
-        );
+        if (this.options.includeSplitWorkspace) {
+          // Copy (or delete) common\temp-split\pnpm-lock.yaml --> common\config\rush\split-workspace-pnpm-lock.yaml
+          Utilities.syncFile(
+            this._rushConfiguration.tempSplitWorkspaceShrinkwrapFilename,
+            this._rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename()
+          );
+        }
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
       }
@@ -461,7 +472,7 @@ export abstract class BaseInstallManager {
 
         shrinkwrapFile = undefined;
       }
-      if (this._rushConfiguration.hasSplitWorkspaceProject) {
+      if (this.options.includeSplitWorkspace && this._rushConfiguration.hasSplitWorkspaceProject) {
         try {
           splitWorkspaceShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
             this._rushConfiguration.packageManager,
@@ -515,7 +526,7 @@ export abstract class BaseInstallManager {
       this._rushConfiguration.commonRushConfigFolder,
       this._rushConfiguration.commonTempFolder
     );
-    if (this._rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this._rushConfiguration.hasSplitWorkspaceProject) {
       const commonRushConfigSplitWorkspaceNpmrcPath: string = path.join(
         this._rushConfiguration.commonRushConfigFolder,
         '.npmrc-split-workspace'
@@ -555,9 +566,11 @@ export abstract class BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(this.rushConfiguration, this.options);
 
-      await SplitWorkspacePnpmfileConfiguration.writeCommonTempSplitGlobalPnpmfileAsync(
-        this.rushConfiguration
-      );
+      if (this.options.includeSplitWorkspace) {
+        await SplitWorkspacePnpmfileConfiguration.writeCommonTempSplitGlobalPnpmfileAsync(
+          this.rushConfiguration
+        );
+      }
     }
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
@@ -914,7 +927,7 @@ export abstract class BaseInstallManager {
       }
     }
 
-    if (this._rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this._rushConfiguration.hasSplitWorkspaceProject) {
       if (splitWorkspaceShrinkwrapFile) {
         Utilities.syncFile(
           this._rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename(),
