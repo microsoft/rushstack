@@ -312,14 +312,10 @@ export class SelectionParameterSet {
         }
       }
 
-      if (
-        this._rushConfiguration.getFilteredProjects({
-          splitWorkspace: true
-        }).length !== selectedSplitWorkspaceProjects.size
-      ) {
-        for (const selectedSplitWorkspaceProject of selectedSplitWorkspaceProjects.values()) {
-          splitWorkspacePnpmFilterArguments.push('--filter', `${selectedSplitWorkspaceProject.packageName}`);
-        }
+      // All selected split workspace are specified. It will be used by InstallManage
+      // to acknowledge all selected split workspace projects.
+      for (const selectedSplitWorkspaceProject of selectedSplitWorkspaceProjects.values()) {
+        splitWorkspacePnpmFilterArguments.push('--filter', `${selectedSplitWorkspaceProject.packageName}`);
       }
     } else {
       // when there are no split workspace projects, replies on pnpm filtering with ellipsis
