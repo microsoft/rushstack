@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.28.4",
+      "tag": "@microsoft/api-extractor_v7.28.4",
+      "date": "Fri, 08 Jul 2022 15:17:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update api-extractor-template.json to \"testMode\" and \"enumMemberOrder\" comment sections."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.28.3",
       "tag": "@microsoft/api-extractor_v7.28.3",
       "date": "Mon, 04 Jul 2022 15:15:13 GMT",

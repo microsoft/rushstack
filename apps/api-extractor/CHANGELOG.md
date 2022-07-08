@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 04 Jul 2022 15:15:13 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Jul 2022 15:17:46 GMT and should not be manually modified.
+
+## 7.28.4
+Fri, 08 Jul 2022 15:17:46 GMT
+
+### Patches
+
+- Update api-extractor-template.json to "testMode" and "enumMemberOrder" comment sections.
 
 ## 7.28.3
 Mon, 04 Jul 2022 15:15:13 GMT
