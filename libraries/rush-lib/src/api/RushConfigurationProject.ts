@@ -174,6 +174,13 @@ export class RushConfigurationProject {
     this._skipRushCheck = !!projectJson.skipRushCheck;
     this._versionPolicyName = projectJson.versionPolicyName;
 
+    if (this._shouldPublish && this._packageJson.private) {
+      throw new Error(
+        `The project "${projectJson.packageName}" specifies "shouldPublish": true, ` +
+          `but the package.json file specifies "private": true.`
+      );
+    }
+
     this._publishFolder = this._projectFolder;
     if (projectJson.publishFolder) {
       this._publishFolder = path.join(this._publishFolder, projectJson.publishFolder);
