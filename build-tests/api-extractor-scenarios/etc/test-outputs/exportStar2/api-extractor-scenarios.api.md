@@ -11,6 +11,7 @@ export class A {
 
 export * from "api-extractor-lib1-test";
 export * from "api-extractor-lib2-test";
+export * from "fs";
 
 // (No @packageDocumentation comment for this package)
 

@@ -155,10 +155,22 @@ export class ExportAnalyzer {
           if (exportStarSymbol) {
             for (const exportStarDeclaration of exportStarSymbol.getDeclarations() || []) {
               if (ts.isExportDeclaration(exportStarDeclaration)) {
-                const starExportedModule: AstModule | undefined = this._fetchSpecifierAstModule(
-                  exportStarDeclaration,
-                  exportStarSymbol
-                );
+                let starExportedModule: AstModule | undefined;
+
+                try {
+                  starExportedModule = this._fetchSpecifierAstModule(exportStarDeclaration, exportStarSymbol);
+                } catch {
+                  // handle export star from ambient modules, they are treated as external modules
+                  // such as export * from 'fs' in @types/fs-extra
+                  const sourceFile: ts.SourceFile = exportStarDeclaration.getSourceFile();
+                  const moduleSymbol: ts.Symbol = this._getModuleSymbolFromSourceFile(sourceFile, undefined);
+
+                  starExportedModule = new AstModule({
+                    sourceFile,
+                    moduleSymbol,
+                    externalModulePath: this._getModuleSpecifier(exportStarDeclaration)
+                  });
+                }
 
                 if (starExportedModule !== undefined) {
                   astModule.starExportedModules.add(starExportedModule);
@@ -351,7 +363,11 @@ export class ExportAnalyzer {
       }
 
       for (const starExportedModule of astModule.starExportedModules) {
-        this._collectAllExportsRecursive(astModuleExportInfo, starExportedModule, visitedAstModules);
+        if (starExportedModule.isExternal) {
+          astModuleExportInfo.starExportedExternalModules.add(starExportedModule);
+        } else {
+          this._collectAllExportsRecursive(astModuleExportInfo, starExportedModule, visitedAstModules);
+        }
       }
     }
   }
