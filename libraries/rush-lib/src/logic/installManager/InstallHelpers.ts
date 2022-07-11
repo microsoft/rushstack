@@ -4,17 +4,25 @@
 import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
-import * as semver from 'semver';
-import { FileConstants, FileSystem, IPackageJson, JsonFile, LockFile } from '@rushstack/node-core-library';
+import {
+  FileConstants,
+  FileSystem,
+  Import,
+  IPackageJson,
+  JsonFile,
+  LockFile
+} from '@rushstack/node-core-library';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 import { PackageManagerName } from '../../api/packageManager/PackageManager';
 import { RushConfiguration, IConfigurationEnvironment } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
+import { RushConstants } from '../RushConstants';
 
 import type { IPnpmProjectManifestConfigurationJson } from '../../logic/pnpm/PnpmProjectManifestConfiguration';
-import { RushConstants } from '../RushConstants';
+
+const semver: typeof import('semver') = Import.lazy('semver', require);
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: IPnpmProjectManifestConfigurationJson;
