@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support for overrides,packageExtensions,neverBuiltDependencies in pnpmOptions",
-      "type": "none"
+      "comment": "Add pnpm-config.json to specify overrides,packageExtensions,neverBuiltDependencies in top level package.json created by Rush.js",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/rush"
