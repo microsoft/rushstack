@@ -15,9 +15,9 @@ export class InstallAction extends BaseInstallAction {
   /**
    * Whether split workspace projects are included in install
    *
-   * This paramter only supported when there is split workspace project
+   * This parameter only supported when there is split workspace project
    */
-  private _includeSplitWorkspace?: CommandLineFlagParameter;
+  private _includeSplitWorkspaceParameter?: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -52,15 +52,15 @@ export class InstallAction extends BaseInstallAction {
       enableFiltering: false
     });
 
-    if (this.rushConfiguration.hasSplitWorkspaceProject) {
-      this._includeSplitWorkspace = this.defineFlagParameter({
+    if (this.rushConfiguration?.hasSplitWorkspaceProject) {
+      this._includeSplitWorkspaceParameter = this.defineFlagParameter({
         parameterLongName: '--include-split-workspace',
         description:
           'Normally "rush install" only install projects in normal rush workspace.' +
           ' When you want to install for split workspace projects, you can run' +
           ' "rush install --include-split-workspace", which installs entire split workspace projects.' +
           ' Or, you can specify selection parameters to do partial install for split workspace projects, ' +
-          ' such as "rush install --to <split_worksapce_package_name>".'
+          ' such as "rush install --to <split_workspace_package_name>".'
       });
     }
 
@@ -89,8 +89,8 @@ export class InstallAction extends BaseInstallAction {
 
     // Warn when fully install without selecting any split workspace project
     if (
-      this._includeSplitWorkspace &&
-      !this._includeSplitWorkspace.value &&
+      this._includeSplitWorkspaceParameter &&
+      !this._includeSplitWorkspaceParameter.value &&
       !this._selectionParameters?.isSelectionSpecified
     ) {
       terminal.writeWarningLine(
@@ -101,7 +101,7 @@ export class InstallAction extends BaseInstallAction {
       terminal.writeLine();
     }
 
-    let includeSplitWorkspace: boolean = this._includeSplitWorkspace?.value ?? false;
+    let includeSplitWorkspace: boolean = this._includeSplitWorkspaceParameter?.value ?? false;
     // turn on includeSplitWorkspace when selecting any split workspace project
     if (this._selectionParameters?.isSelectionSpecified) {
       includeSplitWorkspace = true;

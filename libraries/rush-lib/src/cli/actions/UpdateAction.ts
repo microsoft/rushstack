@@ -15,9 +15,9 @@ export class UpdateAction extends BaseInstallAction {
   /**
    * Whether split workspace projects are included in update
    *
-   * This paramter only supported when there is split workspace project
+   * This parameter only supported when there is split workspace project
    */
-  private _includeSplitWorkspace?: CommandLineFlagParameter;
+  private _includeSplitWorkspaceParameter?: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -53,7 +53,7 @@ export class UpdateAction extends BaseInstallAction {
         enableFiltering: false
       });
 
-      this._includeSplitWorkspace = this.defineFlagParameter({
+      this._includeSplitWorkspaceParameter = this.defineFlagParameter({
         parameterLongName: '--include-split-workspace',
         description:
           'Normally "rush update" only updates projects in normal rush workspace.' +
@@ -140,8 +140,8 @@ export class UpdateAction extends BaseInstallAction {
 
     // Warn when fully update without selecting any split workspace project
     if (
-      this._includeSplitWorkspace &&
-      !this._includeSplitWorkspace.value &&
+      this._includeSplitWorkspaceParameter &&
+      !this._includeSplitWorkspaceParameter.value &&
       !this._selectionParameters?.isSelectionSpecified
     ) {
       terminal.writeWarningLine(
@@ -152,7 +152,7 @@ export class UpdateAction extends BaseInstallAction {
       terminal.writeLine();
     }
 
-    let includeSplitWorkspace: boolean = this._includeSplitWorkspace?.value ?? false;
+    let includeSplitWorkspace: boolean = this._includeSplitWorkspaceParameter?.value ?? false;
     // turn on includeSplitWorkspace when selecting any split workspace project
     if (this._selectionParameters?.isSelectionSpecified) {
       includeSplitWorkspace = true;
