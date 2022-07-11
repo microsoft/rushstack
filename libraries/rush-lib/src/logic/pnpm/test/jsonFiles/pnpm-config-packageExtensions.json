@@ -1,0 +1,9 @@
+{
+  "packageExtensions": {
+    "react-redux": {
+      "peerDependencies": {
+        "react-dom": "*"
+      }
+    }
+  }
+}

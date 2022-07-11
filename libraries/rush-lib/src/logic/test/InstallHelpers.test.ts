@@ -3,7 +3,7 @@ import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { IPackageJson, JsonFile } from '@rushstack/node-core-library';
 
-const RUSH_JSON_FILENAME: string = path.resolve(__dirname, '../../api/test/repo/rush-pnpm-options.json');
+const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'pnpmConfig/rush.json');
 
 describe('InstallHelpers', () => {
   describe('generateCommonPackageJson', () => {

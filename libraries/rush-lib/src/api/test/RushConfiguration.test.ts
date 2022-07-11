@@ -304,39 +304,4 @@ describe(RushConfiguration.name, () => {
       }).toThrow();
     });
   });
-
-  describe('Pnpm options', () => {
-    const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-options.json');
-    it('loads pnpm.overrides', () => {
-      const rushConfiguration: RushConfiguration =
-        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-
-      expect(rushConfiguration.pnpmOptions.overrides).toEqual({
-        foo: '^1.0.0',
-        quux: 'npm:@myorg/quux@^1.0.0',
-        'bar@^2.1.0': '3.0.0',
-        'qar@1>zoo': '2'
-      });
-    });
-    it('loads pnpm.packageExtensions', () => {
-      const rushConfiguration: RushConfiguration =
-        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-
-      expect(rushConfiguration.pnpmOptions.packageExtensions).toEqual({
-        'react-redux': {
-          peerDependencies: {
-            'react-dom': '*'
-          }
-        }
-      });
-    });
-    it('loads pnpm.neverBuiltDependencies', () => {
-      const rushConfiguration: RushConfiguration =
-        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-
-      expect(rushConfiguration.pnpmOptions.neverBuiltDependencies).toEqual(
-        expect.arrayContaining(['fsevents', 'level'])
-      );
-    });
-  });
 });
