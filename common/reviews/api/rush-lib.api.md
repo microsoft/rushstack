@@ -17,6 +17,7 @@ import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import type { ProjectManifest } from '@pnpm/types';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
@@ -428,15 +429,14 @@ export interface IPhasedCommand extends IRushCommand {
 
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
-    neverBuiltDependencies?: string[];
-    overrides?: Record<string, string> | undefined;
-    // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtensions" needs to be exported by the entry point index.d.ts
-    packageExtensions?: IPnpmPackageExtensions;
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
     useWorkspaces?: boolean;
 }
+
+// @beta
+export type IPnpmProjectManifestConfigurationJson = Required<ProjectManifest>['pnpm'];
 
 // @beta
 export interface IRushCommand {
@@ -641,14 +641,22 @@ export class PhasedCommandHooks {
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
     constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
-    readonly neverBuiltDependencies: string[] | undefined;
-    readonly overrides: Record<string, string> | undefined;
-    readonly packageExtensions: IPnpmPackageExtensions | undefined;
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
     readonly strictPeerDependencies: boolean;
     readonly useWorkspaces: boolean;
+}
+
+// @beta
+export class PnpmProjectManifestConfiguration {
+    get filePath(): string;
+    static loadFromFile(jsonFilename: string): PnpmProjectManifestConfiguration;
+    readonly neverBuiltDependencies: IPnpmProjectManifestConfigurationJson['neverBuiltDependencies'];
+    readonly onlyBuiltDependencies: IPnpmProjectManifestConfigurationJson['onlyBuiltDependencies'];
+    readonly overrides: IPnpmProjectManifestConfigurationJson['overrides'];
+    readonly packageExtensions: IPnpmProjectManifestConfigurationJson['packageExtensions'];
+    readonly peerDependencyRules?: IPnpmProjectManifestConfigurationJson['peerDependencyRules'];
 }
 
 // @public
@@ -741,6 +749,10 @@ export class RushConfiguration {
     get packageManagerWrapper(): PackageManager;
     get packageNameParser(): PackageNameParser;
     get pnpmOptions(): PnpmOptionsConfiguration;
+    // @beta (undocumented)
+    get pnpmProjectManifestConfiguration(): PnpmProjectManifestConfiguration;
+    // @beta (undocumented)
+    get pnpmProjectManifestConfigurationFilePath(): string;
     get projectFolderMaxDepth(): number;
     get projectFolderMinDepth(): number;
     // (undocumented)
@@ -846,6 +858,7 @@ export class RushConstants {
     static readonly pinnedVersionsFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
+    static readonly pnpmProjectManifestConfigFilename: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
     static readonly projectRushFolderName: string;
     static readonly projectShrinkwrapFilename: string;

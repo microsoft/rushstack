@@ -5,7 +5,6 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { ProjectManifest } from '@pnpm/types';
 import {
   JsonFile,
   JsonSchema,
@@ -36,6 +35,8 @@ import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { RushPluginsConfiguration } from './RushPluginsConfiguration';
+import { PnpmProjectManifestConfiguration } from '../logic/pnpm/PnpmProjectManifestConfiguration';
+
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 
 const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = Import.lazy(
@@ -65,7 +66,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.pinnedVersionsFilename,
   RushConstants.repoStateFilename,
   RushConstants.versionPoliciesFilename,
-  RushConstants.rushPluginsConfigFilename
+  RushConstants.rushPluginsConfigFilename,
+  RushConstants.pnpmProjectManifestConfigFilename
 ];
 
 /**
@@ -189,16 +191,10 @@ export interface IConfigurationEnvironmentVariable {
 export interface INpmOptionsJson extends IPackageManagerOptionsJsonBase {}
 
 /**
- * Pnpm options in each package.json
- * @internal
- */
-export type IPnpmOptionsInProjectManifest = Required<ProjectManifest>['pnpm'];
-
-/**
  * Part of IRushConfigurationJson.
  * @internal
  */
-export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase, IPnpmOptionsInProjectManifest {
+export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * The store resolution method for PNPM to use
    */
@@ -319,10 +315,7 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
  *
  * @public
  */
-export class PnpmOptionsConfiguration
-  extends PackageManagerOptionsConfigurationBase
-  implements IPnpmOptionsInProjectManifest
-{
+export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
   /**
    * The method used to resolve the store used by PNPM.
    *
@@ -380,56 +373,6 @@ export class PnpmOptionsConfiguration
    */
   public readonly useWorkspaces: boolean;
 
-  /**
-   * See https://pnpm.io/package_json#pnpmneverbuiltdependencies
-   *
-   * @remarks
-   * This field allows to ignore the builds of specific dependencies. The "preinstall", "install", and
-   * "postinstall" scripts of the listed packages will not be executed during installation.
-   */
-  public readonly neverBuiltDependencies: IPnpmOptionsInProjectManifest['neverBuiltDependencies'];
-
-  /**
-   * See https://pnpm.io/package_json#pnpmonlybuiltdependencies
-   *
-   * @remarks
-   * A list of package names that are allowed to be executed during installation. If this field exists,
-   * only the listed packages will be able to run install scripts.
-   */
-  public readonly onlyBuiltDependencies: IPnpmOptionsInProjectManifest['onlyBuiltDependencies'];
-
-  /**
-   * See
-   * https://pnpm.io/package_json#pnpmpeerdependencyrulesignoremissing
-   * https://pnpm.io/package_json#pnpmpeerdependencyrulesallowedversions
-   *
-   * @remarks
-   * - peerDependencyRules.ignoreMissing: pnpm will not print warnings about missing peer dependencies
-   *  from this list.
-   * - peerDependencyRules.allowedVersions: Unmet peer dependency warnings will not be printed for peer
-   *  dependencies of the specified range.
-   */
-  public readonly peerDependencyRules?: IPnpmOptionsInProjectManifest['peerDependencyRules'];
-
-  /**
-   * See https://pnpm.io/package_json#pnpmpackageextensions
-   *
-   * @remarks
-   * The packageExtensions fields offer a way to extend the existing package definitions with additional
-   * information.
-   */
-  public readonly packageExtensions: IPnpmOptionsInProjectManifest['packageExtensions'];
-
-  /**
-   * See https://pnpm.io/package_json#pnpmoverrides
-   *
-   * @remarks
-   * This field allows you to instruct pnpm to override any dependency in the dependency graph. This is
-   * useful to enforce all your packages to use a single version of a dependency, backport a fix, or
-   * replace a dependency with a fork.
-   */
-  public readonly overrides: IPnpmOptionsInProjectManifest['overrides'];
-
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     super(json);
@@ -444,22 +387,6 @@ export class PnpmOptionsConfiguration
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
-
-    if ('neverBuiltDependencies' in json) {
-      this.neverBuiltDependencies = json.neverBuiltDependencies;
-    }
-    if ('onlyBuiltDependencies' in json) {
-      this.onlyBuiltDependencies = json.onlyBuiltDependencies;
-    }
-    if ('peerDependencyRules' in json) {
-      this.peerDependencyRules = json.peerDependencyRules;
-    }
-    if ('packageExtensions' in json) {
-      this.packageExtensions = json.packageExtensions;
-    }
-    if ('overrides' in json) {
-      this.overrides = json.overrides;
-    }
   }
 }
 
@@ -586,6 +513,8 @@ export class RushConfiguration {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
+  private _pnpmProjectManifestConfiguration: PnpmProjectManifestConfiguration;
+  private _pnpmProjectManifestConfigurationFilePath: string;
 
   private __rushPluginsConfiguration: RushPluginsConfiguration;
 
@@ -724,6 +653,14 @@ export class RushConfiguration {
     this._tempShrinkwrapPreinstallFilename = path.join(
       parsedPath.dir,
       parsedPath.name + '-preinstall' + parsedPath.ext
+    );
+
+    this._pnpmProjectManifestConfigurationFilePath = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.pnpmProjectManifestConfigFilename
+    );
+    this._pnpmProjectManifestConfiguration = PnpmProjectManifestConfiguration.loadFromFile(
+      this._pnpmProjectManifestConfigurationFilePath
     );
 
     RushConfiguration._validateCommonRushConfigFolder(
@@ -1814,6 +1751,20 @@ export class RushConfiguration {
    */
   public get experimentsConfiguration(): ExperimentsConfiguration {
     return this._experimentsConfiguration;
+  }
+
+  /**
+   * @beta
+   */
+  public get pnpmProjectManifestConfiguration(): PnpmProjectManifestConfiguration {
+    return this._pnpmProjectManifestConfiguration;
+  }
+
+  /**
+   * @beta
+   */
+  public get pnpmProjectManifestConfigurationFilePath(): string {
+    return this._pnpmProjectManifestConfigurationFilePath;
   }
 
   /**

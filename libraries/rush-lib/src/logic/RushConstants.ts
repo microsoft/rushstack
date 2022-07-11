@@ -145,6 +145,11 @@ export class RushConstants {
   public static readonly experimentsFilename: string = 'experiments.json';
 
   /**
+   * Pnpm configuration file
+   */
+  public static readonly pnpmProjectManifestConfigFilename: string = 'pnpm-config.json';
+
+  /**
    * Rush plugins configuration file name.
    */
   public static readonly rushPluginsConfigFilename: string = 'rush-plugins.json';
