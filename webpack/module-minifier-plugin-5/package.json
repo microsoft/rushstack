@@ -38,5 +38,17 @@
     "memfs": "3.4.3",
     "webpack": "~5.68.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt"
+  ]
 }

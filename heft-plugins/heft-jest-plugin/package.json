@@ -43,5 +43,18 @@
     "jest-environment-node": "~27.4.2",
     "jest-watch-select-projects": "2.0.0",
     "typescript": "~4.6.3"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt",
+    "includes/**"
+  ]
 }

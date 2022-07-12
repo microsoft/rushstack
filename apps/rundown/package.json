@@ -31,5 +31,17 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt"
+  ]
 }

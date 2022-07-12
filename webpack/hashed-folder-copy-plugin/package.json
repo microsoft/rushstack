@@ -39,5 +39,18 @@
     "@types/webpack": "4.41.32",
     "webpack": "~4.44.2",
     "@rushstack/heft-webpack5-plugin": "workspace:*"
-  }
+  },
+  "files": [
+    "bin/**",
+    "lib/**",
+    "!lib/**/*.test.*",
+    "!lib/**/test/**",
+    "lib-*/**",
+    "!lib-*/**/*.test.*",
+    "!lib-*/**/test/**",
+    "dist/**",
+    "dist/*.stats.*",
+    "ThirdPartyNotice.txt",
+    "ambientTypes.d.ts"
+  ]
 }
