@@ -1,8 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import type * as webpack from 'webpack';
+// Compensate for webpack-dev-server referencing constructs from webpack 5
+declare module 'webpack' {
+  export type MultiStats = webpack.compilation.MultiStats;
+  export type StatsOptions = unknown;
+  export type StatsCompilation = webpack.compilation.Compilation;
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  export interface Compiler {
+    watching?: unknown;
+  }
+}
+import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import type { IBuildStageProperties, IBundleSubstageProperties } from '@rushstack/heft';
 
 /**

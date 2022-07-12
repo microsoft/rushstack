@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-serve-plugin",
+      "comment": "Upgrade express",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-serve-plugin"
+}

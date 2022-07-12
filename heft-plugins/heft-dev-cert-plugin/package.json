@@ -32,7 +32,7 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "eslint": "~8.7.0",
-    "webpack-dev-server": "~4.7.4",
+    "webpack-dev-server": "~4.9.3",
     "webpack": "~5.68.0"
   }
 }

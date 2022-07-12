@@ -154,13 +154,16 @@ export class WebpackPlugin implements IHeftPlugin {
     if (buildProperties.serveMode) {
       const defaultDevServerOptions: TWebpackDevServer.Configuration = {
         host: 'localhost',
-        publicPath: '/',
-        filename: '[name]_[hash].js',
-        clientLogLevel: 'info',
-        stats: {
-          cached: false,
-          cachedAssets: false,
-          colors: supportsColor
+        devMiddleware: {
+          publicPath: '/',
+          stats: {
+            cached: false,
+            cachedAssets: false,
+            colors: supportsColor
+          }
+        },
+        client: {
+          logging: 'info'
         },
         port: 8080
       };
@@ -188,8 +191,9 @@ export class WebpackPlugin implements IHeftPlugin {
       // Register a plugin to callback after webpack is done with the first compilation
       // so we can move on to post-build
       let firstCompilationDoneCallback: (() => void) | undefined;
-      const originalBeforeCallback: typeof options.before | undefined = options.before;
-      options.before = (app, devServer, compiler: WebpackCompiler) => {
+      const originalBeforeCallback: typeof options.onBeforeSetupMiddleware | undefined =
+        options.onBeforeSetupMiddleware;
+      options.onBeforeSetupMiddleware = (server: TWebpackDevServer) => {
         compiler.hooks.done.tap('heft-webpack-plugin', () => {
           if (firstCompilationDoneCallback) {
             firstCompilationDoneCallback();
@@ -198,7 +202,7 @@ export class WebpackPlugin implements IHeftPlugin {
         });
 
         if (originalBeforeCallback) {
-          return originalBeforeCallback(app, devServer, compiler);
+          return originalBeforeCallback(server);
         }
       };
 
