@@ -32,6 +32,8 @@ import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
 import { SplitWorkspacePnpmfileConfiguration } from './SplitWorkspacePnpmfileConfiguration';
 
+import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
+
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 export interface IPeerDependenciesMetaYaml {
@@ -116,6 +118,8 @@ export interface IPnpmShrinkwrapYaml {
   registry: string;
   /** The list of specifiers used to resolve direct dependency versions */
   specifiers: { [dependency: string]: string };
+  /** The list of override version number  for dependencies */
+  overrides: { [dependency: string]: string };
 }
 
 /**
@@ -220,6 +224,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly importers: ReadonlyMap<string, IPnpmShrinkwrapImporterYaml>;
   public readonly specifiers: ReadonlyMap<string, string>;
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
+  public readonly overrides: ReadonlyMap<string, string>;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private readonly _integrities: Map<string, Map<string, string>>;
@@ -240,6 +245,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this.importers = new Map(Object.entries(shrinkwrapJson.importers || {}));
     this.specifiers = new Map(Object.entries(shrinkwrapJson.specifiers || {}));
     this.packages = new Map(Object.entries(shrinkwrapJson.packages || {}));
+    this.overrides = new Map(Object.entries(shrinkwrapJson.overrides || {}));
 
     // Importers only exist in workspaces
     this.isWorkspaceCompatible = this.importers.size > 0;
@@ -264,8 +270,15 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return new PnpmShrinkwrapFile(parsedData);
   }
 
-  public setIndividualPackage(packageName: string): void {
+  public setIndividualPackage(
+    packageName: string,
+    splitWorkspaceGlobalPnpmfileConfiguration?: SplitWorkspacePnpmfileConfiguration
+  ): void {
     this._individualPackageName = packageName;
+
+    if (splitWorkspaceGlobalPnpmfileConfiguration) {
+      this._splitWorkspaceGlobalPnpmfileConfiguration = splitWorkspaceGlobalPnpmfileConfiguration;
+    }
   }
 
   public get isIndividual(): boolean {
@@ -682,10 +695,59 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     const packageJson: IPackageJson = project.packageJsonEditor.saveToObject();
 
+    let transformedPackageJson: IPackageJson = packageJson;
+
+    // .pnpmfile.cjs under project folder
+    const individualPnpmfilePath: string = path.join(project.projectFolder, RushConstants.pnpmfileV6Filename);
+    let individualPnpmfile: IPnpmfile | undefined;
+    if (FileSystem.exists(individualPnpmfilePath)) {
+      try {
+        individualPnpmfile = require(individualPnpmfilePath);
+      } catch (err) {
+        if (err instanceof SyntaxError) {
+          console.error(
+            colors.red(
+              `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${individualPnpmfilePath}` +
+                os.EOL
+            )
+          );
+        } else {
+          console.error(
+            colors.red(
+              `Error during pnpmfile execution. pnpmfile: "${individualPnpmfilePath}". Error: "${err.message}".` +
+                os.EOL
+            )
+          );
+        }
+      }
+    }
+
+    transformedPackageJson =
+      this._splitWorkspaceGlobalPnpmfileConfiguration.transform(transformedPackageJson);
+    if (individualPnpmfile) {
+      const individualContext: IPnpmfileContext = {
+        log: (message: string) => {
+          console.log(message);
+        }
+      };
+      try {
+        transformedPackageJson =
+          individualPnpmfile.hooks?.readPackage?.(transformedPackageJson, individualContext) ||
+          transformedPackageJson;
+      } catch (err) {
+        console.error(
+          colors.red(
+            `Error during readPackage hook execution. pnpmfile: "${individualPnpmfilePath}". Error: "${err.message}".` +
+              os.EOL
+          )
+        );
+      }
+    }
+
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
     // found versions much simpler.
     const transformedPackageJsonEditor: PackageJsonEditor = PackageJsonEditor.fromObject(
-      this._splitWorkspaceGlobalPnpmfileConfiguration.transform(packageJson),
+      transformedPackageJson,
       project.packageJsonEditor.filePath
     );
 
@@ -766,8 +828,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       projectShrinkwrap.specifiers
     )) {
       const foundDependency: PackageJsonDependency | undefined = dependencyVersions.get(importerPackageName);
-      if (!foundDependency || foundDependency.version !== importerVersionSpecifier) {
+      if (!foundDependency) {
         return true;
+      }
+
+      if (this.overrides.has(importerPackageName)) {
+        if (this.overrides.get(importerPackageName) !== importerVersionSpecifier) {
+          return true;
+        }
+      } else {
+        if (foundDependency.version !== importerVersionSpecifier) {
+          return true;
+        }
       }
     }
 

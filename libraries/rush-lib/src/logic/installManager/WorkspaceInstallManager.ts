@@ -24,6 +24,7 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { PnpmProjectShrinkwrapFile } from '../pnpm/PnpmProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
+import { SplitWorkspacePnpmfileConfiguration } from '../pnpm/SplitWorkspacePnpmfileConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -175,7 +176,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // FIXME: In a filtered install for split workspace, validating shrinkwrap file should happen
     // only in the selected projects, which means "InstallManager" should know the selectedProject.
-    // For now, I choose to get this informantion from this.options.splitWorkspacePnpmFilterArguments
+    // For now, I choose to get this information from this.options.splitWorkspacePnpmFilterArguments
     const selectedSplitWorkspaceProjectPackageNames: Set<string> = new Set<string>();
     for (const arg of this.options.splitWorkspacePnpmFilterArguments) {
       if (arg === '--filter') {
@@ -302,9 +303,19 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             const splitWorkspaceProjectShrinkwrapFile: PnpmShrinkwrapFile | undefined =
               PnpmShrinkwrapFile.loadFromFile(splitWorkspaceProjectShrinkwrapFilepath);
             if (!splitWorkspaceProjectShrinkwrapFile) {
-              shrinkwrapIsUpToDate = false;
+              const { dependencyList, devDependencyList } = rushProject.packageJsonEditor;
+              // If there is no dependencies or devDependencies in package.json, shrinkwrap file will be not generated.
+              if (dependencyList.length !== 0 || devDependencyList.length !== 0) {
+                shrinkwrapIsUpToDate = false;
+              }
             } else {
-              splitWorkspaceProjectShrinkwrapFile.setIndividualPackage(rushProject.packageName);
+              // All split workspace projects share one splitWorkspacePnpmfileConfiguration
+              const splitWorkspacePnpmfileConfiguration: SplitWorkspacePnpmfileConfiguration =
+                new SplitWorkspacePnpmfileConfiguration(this.rushConfiguration);
+              splitWorkspaceProjectShrinkwrapFile.setIndividualPackage(
+                rushProject.packageName,
+                splitWorkspacePnpmfileConfiguration
+              );
               if (
                 splitWorkspaceProjectShrinkwrapFile.isSplitWorkspaceIndividualProjectModified(rushProject)
               ) {
