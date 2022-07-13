@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-node-rig",
-  "version": "1.9.19",
+  "version": "1.9.20",
   "description": "A rig package for Node.js projects that build using Heft",
   "license": "MIT",
   "scripts": {
@@ -13,7 +13,7 @@
     "directory": "rigs/heft-node-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.46.3"
+    "@rushstack/heft": "^0.46.4"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
