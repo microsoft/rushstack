@@ -98,7 +98,7 @@ interface IConfigurationFileFieldAnnotation<TField> {
  */
 export interface ICustomJsonPathMetadata {
   /**
-   * If `IJsonPathMetadata.pathResolutionMethod` is set to `PathResolutionMethod.custom`,
+   * If `ICustomJsonPathMetadata.pathResolutionMethod` is set to `PathResolutionMethod.custom`,
    * this property be used to resolve the path.
    */
   customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
