@@ -79,14 +79,11 @@ export class SassPlugin implements IHeftPlugin {
       );
 
     if (sassConfigurationJson) {
-      if (sassConfigurationJson.srcFolder && !path.isAbsolute(sassConfigurationJson.srcFolder)) {
+      if (sassConfigurationJson.srcFolder) {
         sassConfigurationJson.srcFolder = path.resolve(buildFolder, sassConfigurationJson.srcFolder);
       }
 
-      if (
-        sassConfigurationJson.generatedTsFolder &&
-        !path.isAbsolute(sassConfigurationJson.generatedTsFolder)
-      ) {
+      if (sassConfigurationJson.generatedTsFolder) {
         sassConfigurationJson.generatedTsFolder = path.resolve(
           buildFolder,
           sassConfigurationJson.generatedTsFolder
@@ -96,10 +93,7 @@ export class SassPlugin implements IHeftPlugin {
       function resolveFolderArray(folders: string[] | undefined): void {
         if (folders) {
           for (let i: number = 0; i < folders.length; i++) {
-            const folder: string = folders[i];
-            if (!path.isAbsolute(folder)) {
-              folders[i] = path.resolve(buildFolder, folder);
-            }
+            folders[i] = path.resolve(buildFolder, folders[i]);
           }
         }
       }
