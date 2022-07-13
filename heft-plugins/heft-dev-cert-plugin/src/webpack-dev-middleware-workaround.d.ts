@@ -4,6 +4,5 @@
 // Node 12 is still LTS so we need to support it.
 // Upstream issue: https://github.com/webpack/webpack-dev-middleware/issues/1194
 declare module 'fs' {
-  // eslint-disable-next-line
-  export type StatSyncFn = any;
+  export type StatSyncFn = typeof statSync;
 }

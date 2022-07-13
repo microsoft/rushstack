@@ -116,6 +116,20 @@ function readPackage(packageJson, context) {
       packageJson.dependencies.anymatch = '^3';
       packageJson.dependencies['@types/express-serve-static-core'] = '*';
       packageJson.dependencies['@types/serve-static'] = '*';
+      // If using webpack 4, need peer dependency on the typings
+      packageJson.peerDependencies['@types/webpack'] = '^4';
+      (packageJson.peerDependenciesMeta || (packageJson.peerDependenciesMeta = {}))['@types/webpack'] = {
+        optional: true
+      };
+      break;
+    }
+
+    case 'webpack-dev-middleware': {
+      // If using webpack 4, need peer dependency on the typings
+      packageJson.peerDependencies['@types/webpack'] = '^4';
+      (packageJson.peerDependenciesMeta || (packageJson.peerDependenciesMeta = {}))['@types/webpack'] = {
+        optional: true
+      };
       break;
     }
   }
