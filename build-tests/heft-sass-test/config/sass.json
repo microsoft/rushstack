@@ -1,3 +1,4 @@
 {
-  "cssOutputFolders": ["lib"]
+  "cssOutputFolders": ["lib"],
+  "secondaryGeneratedTsFolders": ["lib"]
 }

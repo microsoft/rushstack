@@ -72,11 +72,11 @@ interface IClassMap {
 }
 
 /**
- * Generates type files (.d.ts) for Sass/SCSS/CSS files.
+ * Generates type files (.d.ts) for Sass/SCSS/CSS files and optionally produces CSS files.
  *
  * @public
  */
-export class SassTypingsGenerator extends StringValuesTypingsGenerator {
+export class SassProcessor extends StringValuesTypingsGenerator {
   /**
    * @param buildFolder - The project folder to search for Sass files and
    *     generate typings.
