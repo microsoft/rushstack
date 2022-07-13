@@ -51,23 +51,32 @@ export enum PathResolutionMethod {
   /**
    * Resolve a path relative to the configuration file
    */
-  resolvePathRelativeToConfigurationFile,
+  resolvePathRelativeToConfigurationFile = 'resolvePathRelativeToConfigurationFile',
 
   /**
    * Resolve a path relative to the root of the project containing the configuration file
    */
-  resolvePathRelativeToProjectRoot,
+  resolvePathRelativeToProjectRoot = 'resolvePathRelativeToProjectRoot',
+
+  /**
+   * Treat the property as a NodeJS-style require/import reference and resolve using standard
+   * NodeJS filesystem resolution
+   *
+   * @deprecated
+   * Use {@link PathResolutionMethod.nodeResolve} instead
+   */
+  NodeResolve = 'NodeResolve',
 
   /**
    * Treat the property as a NodeJS-style require/import reference and resolve using standard
    * NodeJS filesystem resolution
    */
-  NodeResolve,
+  nodeResolve = 'nodeResolve',
 
   /**
    * Resolve the property using a custom resolver.
    */
-  custom
+  custom = 'custom'
 }
 
 const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.inheritanceType$/;
@@ -87,7 +96,7 @@ interface IConfigurationFileFieldAnnotation<TField> {
  *
  * @beta
  */
-export interface IJsonPathMetadata {
+export interface ICustomJsonPathMetadata {
   /**
    * If `IJsonPathMetadata.pathResolutionMethod` is set to `PathResolutionMethod.custom`,
    * this property be used to resolve the path.
@@ -98,7 +107,24 @@ export interface IJsonPathMetadata {
    * If this property describes a filesystem path, use this property to describe
    * how the path should be resolved.
    */
-  pathResolutionMethod?: PathResolutionMethod;
+  pathResolutionMethod?: PathResolutionMethod.custom;
+}
+
+/**
+ * Used to specify how node(s) in a JSON object should be processed after being loaded.
+ *
+ * @beta
+ */
+export interface INonCustomJsonPathMetadata {
+  /**
+   * If this property describes a filesystem path, use this property to describe
+   * how the path should be resolved.
+   */
+  pathResolutionMethod?:
+    | PathResolutionMethod.NodeResolve // TODO: Remove
+    | PathResolutionMethod.nodeResolve
+    | PathResolutionMethod.resolvePathRelativeToConfigurationFile
+    | PathResolutionMethod.resolvePathRelativeToProjectRoot;
 }
 
 /**
@@ -136,6 +162,11 @@ export type IPropertiesInheritance<TConfigurationFile> = {
     | IPropertyInheritance<InheritanceType.append | InheritanceType.merge | InheritanceType.replace>
     | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
 };
+
+/**
+ * @beta
+ */
+export type IJsonPathMetadata = ICustomJsonPathMetadata | INonCustomJsonPathMetadata;
 
 /**
  * Keys in this object are JSONPaths {@link https://jsonpath.com/}, and values are objects
@@ -533,7 +564,8 @@ export class ConfigurationFile<TConfigurationFile> {
         return nodeJsPath.resolve(packageRoot, propertyValue);
       }
 
-      case PathResolutionMethod.NodeResolve: {
+      case PathResolutionMethod.NodeResolve: // TODO: Remove
+      case PathResolutionMethod.nodeResolve: {
         return Import.resolveModule({
           modulePath: propertyValue,
           baseFolderPath: nodeJsPath.dirname(configurationFilePath)
@@ -547,6 +579,7 @@ export class ConfigurationFile<TConfigurationFile> {
               'resolver was not provided.'
           );
         }
+
         return metadata.customResolver(configurationFilePath, propertyName, propertyValue);
       }
 

@@ -27,16 +27,19 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
 }
 
+// @beta
+export interface ICustomJsonPathMetadata {
+    customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
+    pathResolutionMethod?: PathResolutionMethod.custom;
+}
+
 // @beta (undocumented)
 export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritance<InheritanceType.custom> {
     inheritanceFunction: PropertyInheritanceCustomFunction<TObject>;
 }
 
-// @beta
-export interface IJsonPathMetadata {
-    customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
-    pathResolutionMethod?: PathResolutionMethod;
-}
+// @beta (undocumented)
+export type IJsonPathMetadata = ICustomJsonPathMetadata | INonCustomJsonPathMetadata;
 
 // @beta
 export interface IJsonPathsMetadata {
@@ -50,6 +53,11 @@ export enum InheritanceType {
     custom = "custom",
     merge = "merge",
     replace = "replace"
+}
+
+// @beta
+export interface INonCustomJsonPathMetadata {
+    pathResolutionMethod?: PathResolutionMethod.NodeResolve | PathResolutionMethod.nodeResolve | PathResolutionMethod.resolvePathRelativeToConfigurationFile | PathResolutionMethod.resolvePathRelativeToProjectRoot;
 }
 
 // @beta (undocumented)
@@ -73,10 +81,12 @@ export interface IPropertyInheritance<TInheritanceType extends InheritanceType> 
 
 // @beta (undocumented)
 export enum PathResolutionMethod {
-    custom = 3,
-    NodeResolve = 2,
-    resolvePathRelativeToConfigurationFile = 0,
-    resolvePathRelativeToProjectRoot = 1
+    custom = "custom",
+    // @deprecated
+    NodeResolve = "NodeResolve",
+    nodeResolve = "nodeResolve",
+    resolvePathRelativeToConfigurationFile = "resolvePathRelativeToConfigurationFile",
+    resolvePathRelativeToProjectRoot = "resolvePathRelativeToProjectRoot"
 }
 
 // @beta (undocumented)
