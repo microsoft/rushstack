@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Fix an issue where cssOutputFolders specified in sass.json in a rig did not correctly resolve relative to the root of the project being built.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
