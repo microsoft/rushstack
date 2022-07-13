@@ -153,14 +153,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       // Jest's cache is not reliable.  For example, if a Jest configuration change causes files to be
       // transformed differently, the cache will continue to return the old results unless we manually
       // clean it.  Thus we need to ensure that we always cleans the Jest cache.
-      cleanOptions.addDeleteOperations({ sourceFolder: taskSession.cacheFolder });
+      cleanOptions.addDeleteOperations({ sourcePath: taskSession.cacheFolder });
 
       // We should also clean the data file that we generate for the BuildTransformer
       const dataFilePath: string = HeftJestDataFile.getConfigFilePath(heftConfiguration.buildFolder);
-      cleanOptions.addDeleteOperations({
-        sourceFolder: path.dirname(dataFilePath),
-        includeGlobs: [path.basename(dataFilePath)]
-      });
+      cleanOptions.addDeleteOperations({ sourcePath: dataFilePath });
     });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
