@@ -11,14 +11,14 @@ import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPl
 import { mergeWith, isObject } from 'lodash';
 import type {
   HeftConfiguration,
+  IScopedLogger,
   IHeftTaskPlugin,
   IHeftTaskSession,
   IHeftTaskRunHookOptions,
   IHeftTaskCleanHookOptions,
   CommandLineFlagParameter,
-  CommandLineStringParameter,
-  IScopedLogger,
-  CommandLineIntegerParameter
+  CommandLineIntegerParameter,
+  CommandLineStringParameter
 } from '@rushstack/heft';
 import {
   ConfigurationFile,
@@ -113,41 +113,21 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     pluginOptions?: IJestPluginOptions
   ): void {
     // Flags
-    const detectOpenHandlesParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
-      '--detect-open-handles'
-    ) as CommandLineFlagParameter;
-    const debugHeftReporterParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
-      '--debug-heft-reporter'
-    ) as CommandLineFlagParameter;
-    const disableCodeCoverageParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
-      '--disable-code-coverage'
-    ) as CommandLineFlagParameter;
-    const silentParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
-      '--silent'
-    ) as CommandLineFlagParameter;
-    const updateSnapshotsParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
-      '--update-snapshots'
-    ) as CommandLineFlagParameter;
+    const detectOpenHandlesParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--detect-open-handles');
+    const debugHeftReporterParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--debug-heft-reporter');
+    const disableCodeCoverageParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--disable-code-coverage');
+    const silentParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--silent');
+    const updateSnapshotsParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--update-snapshots');
 
     // Strings
-    const configParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
-      '--config'
-    ) as CommandLineStringParameter;
-    const maxWorkersParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
-      '--max-workers'
-    ) as CommandLineStringParameter;
-    const testTimeoutParameter: CommandLineIntegerParameter = taskSession.parametersByLongName.get(
-      '--test-timeout-ms'
-    ) as CommandLineIntegerParameter;
-    const findRelatedTestsParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
-      '--find-related-tests'
-    ) as CommandLineStringParameter;
-    const testNamePatternParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
-      '--test-name-pattern'
-    ) as CommandLineStringParameter;
-    const testPathPatternParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
-      '--test-path-pattern'
-    ) as CommandLineStringParameter;
+    const configParameter: CommandLineStringParameter = taskSession.getStringParameter('--config');
+    const maxWorkersParameter: CommandLineStringParameter = taskSession.getStringParameter('--max-workers');
+    const findRelatedTestsParameter: CommandLineStringParameter = taskSession.getStringParameter('--find-related-tests');
+    const testNamePatternParameter: CommandLineStringParameter = taskSession.getStringParameter('--test-name-pattern');
+    const testPathPatternParameter: CommandLineStringParameter = taskSession.getStringParameter('--test-path-pattern');
+
+    // Integers
+    const testTimeoutParameter: CommandLineIntegerParameter = taskSession.getIntegerParameter('--test-timeout-ms');
 
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       // Jest's cache is not reliable.  For example, if a Jest configuration change causes files to be
@@ -661,7 +641,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   /**
    * Finds the indices of jest reporters with a given name
    */
-   private static _findIndexes(items: JestReporterConfig[], search: string): number[] {
+  private static _findIndexes(items: JestReporterConfig[], search: string): number[] {
     const result: number[] = [];
 
     for (let index: number = 0; index < items.length; index++) {
