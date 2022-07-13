@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/heft-config-file_v0.9.0",
+      "date": "Wed, 13 Jul 2022 21:31:13 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING API CHANGE) Deprecate `PathResolutionMethod.NodeResolve` in favor of `PathResolutionMethod.nodeResolve`."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Improve types strictness of `IJsonPathsMetadata`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.10",
       "tag": "@rushstack/heft-config-file_v0.8.10",
       "date": "Tue, 28 Jun 2022 22:47:13 GMT",
