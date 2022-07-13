@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Improve types strictness of `IJsonPathsMetadata`",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}

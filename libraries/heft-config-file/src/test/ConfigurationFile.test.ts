@@ -339,7 +339,7 @@ describe(ConfigurationFile.name, () => {
       plugins: { plugin: string }[];
     }
 
-    it('Correctly loads a complex config file', async () => {
+    it('Correctly loads a complex config file (Deprecated PathResolutionMethod.NodeResolve)', async () => {
       const projectRelativeFilePath: string = 'complexConfigFile/pluginsD.json';
       const rootConfigFilePath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'pluginsA.json');
       const secondConfigFilePath: string = nodeJsPath.resolve(
@@ -356,6 +356,87 @@ describe(ConfigurationFile.name, () => {
           jsonPathMetadata: {
             '$.plugins.*.plugin': {
               pathResolutionMethod: PathResolutionMethod.NodeResolve
+            }
+          }
+        });
+      const loadedConfigFile: IComplexConfigFile =
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
+      const expectedConfigFile: IComplexConfigFile = {
+        plugins: [
+          {
+            plugin: await FileSystem.getRealPathAsync(
+              nodeJsPath.resolve(
+                projectRoot,
+                'node_modules',
+                '@rushstack',
+                'node-core-library',
+                'lib',
+                'index.js'
+              )
+            )
+          },
+          {
+            plugin: await FileSystem.getRealPathAsync(
+              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'heft', 'lib', 'index.js')
+            )
+          },
+          {
+            plugin: await FileSystem.getRealPathAsync(
+              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config', 'index.js')
+            )
+          }
+        ]
+      };
+
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+
+      expect(
+        configFileLoader.getPropertyOriginalValue({
+          parentObject: loadedConfigFile.plugins[0],
+          propertyName: 'plugin'
+        })
+      ).toEqual('@rushstack/node-core-library');
+      expect(
+        configFileLoader.getPropertyOriginalValue({
+          parentObject: loadedConfigFile.plugins[1],
+          propertyName: 'plugin'
+        })
+      ).toEqual('@rushstack/heft');
+      expect(
+        configFileLoader.getPropertyOriginalValue({
+          parentObject: loadedConfigFile.plugins[2],
+          propertyName: 'plugin'
+        })
+      ).toEqual('@rushstack/eslint-config');
+
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[0])).toEqual(
+        rootConfigFilePath
+      );
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[1])).toEqual(
+        nodeJsPath.resolve(__dirname, secondConfigFilePath)
+      );
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[2])).toEqual(
+        nodeJsPath.resolve(__dirname, secondConfigFilePath)
+      );
+    });
+
+    it('Correctly loads a complex config file', async () => {
+      const projectRelativeFilePath: string = 'complexConfigFile/pluginsD.json';
+      const rootConfigFilePath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'pluginsA.json');
+      const secondConfigFilePath: string = nodeJsPath.resolve(
+        __dirname,
+        'complexConfigFile',
+        'pluginsB.json'
+      );
+      const schemaPath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
+
+      const configFileLoader: ConfigurationFile<IComplexConfigFile> =
+        new ConfigurationFile<IComplexConfigFile>({
+          projectRelativeFilePath: projectRelativeFilePath,
+          jsonSchemaPath: schemaPath,
+          jsonPathMetadata: {
+            '$.plugins.*.plugin': {
+              pathResolutionMethod: PathResolutionMethod.nodeResolve
             }
           }
         });
