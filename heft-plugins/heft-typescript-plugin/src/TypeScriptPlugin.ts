@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { SyncHook } from 'tapable';
 import { FileSystem, Path, type ITerminal } from '@rushstack/node-core-library';
 import {
   ConfigurationFile,
   InheritanceType,
-  PathResolutionMethod,
-  type IConfigurationFileOptions
+  PathResolutionMethod
 } from '@rushstack/heft-config-file';
 import type {
   HeftConfiguration,
@@ -148,7 +146,7 @@ export async function loadTypeScriptConfigurationFileAsync(
             inheritanceType: InheritanceType.merge
           }
         }
-      } as IConfigurationFileOptions<ITypeScriptConfigurationJson>);
+      });
     }
 
     typescriptConfigurationFilePromise =
@@ -171,7 +169,7 @@ function getTsconfigFilePath(
   typeScriptConfigurationJson?: ITypeScriptConfigurationJson
 ): string {
   return Path.convertToSlashes(
-    path.resolve(heftConfiguration.buildFolder, typeScriptConfigurationJson?.project || './tsconfig.json')
+    `${heftConfiguration.buildFolder}/${typeScriptConfigurationJson?.project || './tsconfig.json'}`
   );
 }
 
@@ -269,13 +267,13 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       configurationFile
     );
     if (tsconfigOutDir) {
-      cleanOptions.addDeleteOperations({ sourceFolder: tsconfigOutDir });
+      cleanOptions.addDeleteOperations({ sourcePath: tsconfigOutDir });
     }
 
     if (configurationFile?.additionalModuleKindsToEmit) {
       for (const additionalModuleKindToEmit of configurationFile.additionalModuleKindsToEmit) {
         cleanOptions.addDeleteOperations({
-          sourceFolder: path.resolve(heftConfiguration.buildFolder, additionalModuleKindToEmit.outFolderName)
+          sourcePath: `${heftConfiguration.buildFolder}/${additionalModuleKindToEmit.outFolderName}`
         });
       }
     }
@@ -307,14 +305,14 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         destinationFolderPaths.add(tsconfigOutDir);
       }
       for (const emitModule of typeScriptConfiguration?.additionalModuleKindsToEmit || []) {
-        destinationFolderPaths.add(path.resolve(heftConfiguration.buildFolder, emitModule.outFolderName));
+        destinationFolderPaths.add(`${heftConfiguration.buildFolder}/${emitModule.outFolderName}`);
       }
 
       runOptions.addCopyOperations({
         ...typeScriptConfiguration?.staticAssetsToCopy,
 
         // For now - these may need to be revised later
-        sourceFolder: 'src',
+        sourcePath: 'src',
         destinationFolders: Array.from(destinationFolderPaths),
         flatten: false,
         hardlink: false

@@ -73,7 +73,7 @@ export abstract class LinterBase<TLintResult> {
 
   public async performLintingAsync(options: IRunLinterOptions): Promise<void> {
     const startTime: number = performance.now();
-    let hitCount: number = 0;
+    let fileCount: number = 0;
 
     await this.initializeAsync(options.tsProgram);
 
@@ -135,7 +135,7 @@ export abstract class LinterBase<TLintResult> {
         cachedVersion !== version ||
         options.changedFiles.has(sourceFile)
       ) {
-        hitCount++;
+        fileCount++;
         const failures: TLintResult[] = await this.lintFileAsync(sourceFile);
         if (failures.length === 0) {
           newNoFailureFileVersions.set(relative, version);
@@ -160,7 +160,7 @@ export abstract class LinterBase<TLintResult> {
 
     const duration: number = performance.now() - startTime;
 
-    this._terminal.writeVerboseLine(`Lint: ${duration}ms (${hitCount} files)`);
+    this._terminal.writeVerboseLine(`Lint: ${duration}ms (${fileCount} files)`);
   }
 
   public abstract reportFailures(): void;

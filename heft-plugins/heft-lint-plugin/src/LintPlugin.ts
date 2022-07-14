@@ -1,7 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import * as path from 'path';
-
 import { FileSystem } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
@@ -23,6 +21,8 @@ import { Tslint } from './Tslint';
 import type { LinterBase } from './LinterBase';
 
 const PLUGIN_NAME: string = 'LintPlugin';
+const ESLINTRC_JS_FILENAME: string = '.eslintrc.js';
+const ESLINTRC_CJS_FILENAME: string = '.eslintrc.cjs';
 
 export default class LintPlugin implements IHeftTaskPlugin {
   private readonly _lintingPromises: Promise<LinterBase<unknown>[]>[] = [];
@@ -96,8 +96,8 @@ export default class LintPlugin implements IHeftTaskPlugin {
     this._typeScript = await import(typeScriptToolPath);
 
     // Locate the tslint linter if enabled
-    this._tslintConfigFilePath = path.resolve(heftConfiguration.buildFolder, 'tslint.json');
-    if (await FileSystem.existsAsync(this._tslintConfigFilePath)) {
+    this._tslintConfigFilePath = await this._resolveTslintConfigFilePathAsync(heftConfiguration);
+    if (this._tslintConfigFilePath) {
       this._tslintToolPath = await heftConfiguration.rigToolResolver.resolvePackageAsync(
         'tslint',
         logger.terminal
@@ -105,8 +105,8 @@ export default class LintPlugin implements IHeftTaskPlugin {
     }
 
     // Locate the eslint linter if enabled
-    this._eslintConfigFilePath = await this._resolveEslintConfigFilePathAsync(heftConfiguration, lintEnabled);
-    if (await FileSystem.existsAsync(this._eslintConfigFilePath)) {
+    this._eslintConfigFilePath = await this._resolveEslintConfigFilePathAsync(heftConfiguration);
+    if (this._eslintConfigFilePath) {
       this._eslintToolPath = await heftConfiguration.rigToolResolver.resolvePackageAsync(
         'eslint',
         logger.terminal
@@ -127,27 +127,27 @@ export default class LintPlugin implements IHeftTaskPlugin {
       return [];
     }
 
-    // Now that we know we have initialized properly, run the linting
+    // Now that we know we have initialized properly, run the linter(s)
     const lintingPromises: Promise<LinterBase<unknown>>[] = [];
-    if (this._eslintToolPath && this._eslintConfigFilePath) {
+    if (this._eslintToolPath) {
       lintingPromises.push(
         this._runEslintAsync(
           taskSession,
           heftConfiguration,
           this._eslintToolPath,
-          this._eslintConfigFilePath,
+          this._eslintConfigFilePath!,
           tsProgram,
           changedFiles
         )
       );
     }
-    if (this._tslintToolPath && this._tslintConfigFilePath) {
+    if (this._tslintToolPath) {
       lintingPromises.push(
         this._runTslintAsync(
           taskSession,
           heftConfiguration,
           this._tslintToolPath,
-          this._tslintConfigFilePath,
+          this._tslintConfigFilePath!,
           tsProgram,
           changedFiles
         )
@@ -165,7 +165,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
     tsProgram: IExtendedProgram,
     changedFiles?: Set<IExtendedSourceFile> | undefined
   ): Promise<Eslint> {
-    const eslint: Eslint = await Eslint.loadAsync({
+    const eslint: Eslint = new Eslint({
       ts: this._typeScript,
       scopedLogger: taskSession.logger,
       eslintPackagePath: eslintToolPath,
@@ -194,7 +194,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
     tsProgram: IExtendedProgram,
     changedFiles?: Set<IExtendedSourceFile> | undefined
   ): Promise<Tslint> {
-    const tslint: Tslint = await Tslint.loadAsync({
+    const tslint: Tslint = new Tslint({
       ts: this._typeScript,
       scopedLogger: taskSession.logger,
       tslintPackagePath: tslintToolPath,
@@ -215,11 +215,37 @@ export default class LintPlugin implements IHeftTaskPlugin {
     return tslint;
   }
 
-  private async _resolveEslintConfigFilePathAsync(heftConfiguration: HeftConfiguration): Promise<string> {
+  private async _resolveTslintConfigFilePathAsync(
+    heftConfiguration: HeftConfiguration
+  ): Promise<string | undefined> {
+    const tslintConfigFilePath: string = `${heftConfiguration.buildFolder}/tslint.json`
+    const tslintConfigFileExists: boolean = await FileSystem.existsAsync(tslintConfigFilePath);
+    return tslintConfigFileExists ? tslintConfigFilePath : undefined;
+  }
+
+  private async _resolveEslintConfigFilePathAsync(
+    heftConfiguration: HeftConfiguration
+  ): Promise<string | undefined> {
     // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
     // so use it if it exists
-    const defaultPath: string = path.resolve(heftConfiguration.buildFolder, '.eslintrc.js');
-    const alternativePathPath: string = path.resolve(heftConfiguration.buildFolder, '.eslintrc.cjs');
-    return await FileSystem.existsAsync(alternativePathPath) ? alternativePathPath : defaultPath;
+    const defaultPath: string = `${heftConfiguration.buildFolder}/${ESLINTRC_JS_FILENAME}`;
+    const alternativePath: string = `${heftConfiguration.buildFolder}/${ESLINTRC_CJS_FILENAME}`;
+    const [alternativePathExists, defaultPathExists] = await Promise.all([
+      FileSystem.existsAsync(alternativePath),
+      FileSystem.existsAsync(defaultPath)
+    ]);
+
+    if (alternativePathExists && defaultPathExists) {
+      throw new Error(
+        `Project contains both "${ESLINTRC_JS_FILENAME}" and "${ESLINTRC_CJS_FILENAME}". Ensure that only ` +
+        'one of these files is present in the project.'
+      );
+    } else if (alternativePathExists) {
+      return alternativePath;
+    } else if (defaultPathExists) {
+      return defaultPath;
+    } else {
+      return undefined;
+    }
   }
 }

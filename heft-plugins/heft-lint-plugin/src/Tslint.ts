@@ -15,22 +15,16 @@ interface ITslintOptions extends ILinterBaseOptions {
 }
 
 export class Tslint extends LinterBase<TTslint.RuleFailure> {
-  private _tslint!: typeof TTslint;
+  private _tslint: typeof TTslint;
   private _tslintConfiguration!: TTslint.Configuration.IConfigurationFile;
   private _linter!: IExtendedLinter;
   private _enabledRules!: TTslint.IRule[];
   private _ruleSeverityMap!: Map<string, TTslint.RuleSeverity>;
   protected _lintResult!: TTslint.LintResult;
 
-  private constructor(options: ITslintOptions) {
+  public constructor(options: ITslintOptions) {
     super('tslint', options);
-  }
-
-  public static async loadAsync(options: ITslintOptions): Promise<Tslint> {
-    const tslint: Tslint = new Tslint(options);
-
-    tslint._tslint = require(options.tslintPackagePath);
-    return tslint;
+    this._tslint = require(options.tslintPackagePath);
   }
 
   /**

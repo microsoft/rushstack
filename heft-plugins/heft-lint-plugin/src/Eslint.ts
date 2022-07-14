@@ -29,23 +29,17 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private readonly _eslintPackagePath: string;
   private readonly _eslintTimings: Map<string, number> = new Map();
 
-  private _eslintPackage!: typeof TEslint;
+  private _eslintPackage: typeof TEslint;
   private _eslint!: TEslint.ESLint;
   private _lintResult!: TEslint.ESLint.LintResult[];
 
-  private constructor(options: IEslintOptions) {
+  public constructor(options: IEslintOptions) {
     super('eslint', options);
     this._eslintPackagePath = options.eslintPackagePath;
-  }
-
-  public static async loadAsync(options: IEslintOptions): Promise<Eslint> {
-    const eslint: Eslint = new Eslint(options);
 
     // This must happen before the rest of the linter package is loaded
-    await eslint._patchTimerAsync(options.eslintPackagePath);
-    eslint._eslintPackage = require(options.eslintPackagePath);
-
-    return eslint;
+    this._patchTimer(options.eslintPackagePath);
+    this._eslintPackage = require(options.eslintPackagePath);
   }
 
   public printVersionHeader(): void {
@@ -179,7 +173,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     return await this._eslint.isPathIgnored(filePath);
   }
 
-  private async _patchTimerAsync(eslintPackagePath: string): Promise<void> {
+  private _patchTimer(eslintPackagePath: string): void {
     const timing: IEslintTiming = require(path.join(eslintPackagePath, 'lib', 'linter', 'timing'));
     timing.enabled = true;
     const patchedTime: (key: string, fn: (...args: unknown[]) => void) => (...args: unknown[]) => void = (
