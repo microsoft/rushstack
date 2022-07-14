@@ -502,7 +502,9 @@ export class _LastInstallFlag {
     create(): void;
     protected get flagName(): string;
     isValid(): boolean;
+    mergeFromObject(data: JsonObject): void;
     get path(): string;
+    saveIfModified(): void;
 }
 
 // @public

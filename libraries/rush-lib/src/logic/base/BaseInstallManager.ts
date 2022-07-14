@@ -40,6 +40,8 @@ import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+
 export interface IInstallManagerOptions {
   /**
    * Whether the global "--debug" flag was specified.
@@ -90,6 +92,12 @@ export interface IInstallManagerOptions {
   networkConcurrency: number | undefined;
 
   /**
+   * Whether to specify "--ignore-scripts" command-line parameter, which ignores
+   * install lifecycle scripts in package.json and its dependencies
+   */
+  ignoreScripts: boolean;
+
+  /**
    * Whether or not to collect verbose logs from the package manager.
    * If specified when using PNPM, the logs will be in /common/temp/pnpm.log
    */
@@ -110,6 +118,11 @@ export interface IInstallManagerOptions {
    * These restrict the scope of a workspace installation.
    */
   pnpmFilterArguments: string[];
+
+  /**
+   * Selected projects during partial install.
+   */
+  selectedProjects?: Set<RushConfigurationProject>;
 }
 
 /**
@@ -123,6 +136,16 @@ export abstract class BaseInstallManager {
   private _installRecycler: AsyncRecycler;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
+
+  /**
+   * Two stage install:
+   * - Only works when using pnpm and turn on "useWorkspaces" in rush.json
+   * - Dividing install into two stages:
+   * Stage 1: rush implicitly adds "--ignore-scripts" for "pnpm install"
+   * Stage 2: run "pnpm rebuild --pending"
+   * If stage 2 throws error, rerun install can skip stage 1
+   */
+  private _twoStageInstall: boolean = false;
 
   private _options: IInstallManagerOptions;
 
@@ -163,10 +186,25 @@ export abstract class BaseInstallManager {
     return this._options;
   }
 
+  protected get commonTempInstallFlag(): LastInstallFlag {
+    return this._commonTempInstallFlag;
+  }
+
+  protected get twoStageInstall(): boolean {
+    return this._twoStageInstall;
+  }
+
   public async doInstallAsync(): Promise<void> {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+
+    this._twoStageInstall = useWorkspaces && this.rushConfiguration.packageManager === 'pnpm';
+
+    if (isFilteredInstall && !this.options.selectedProjects) {
+      // This should never even happen
+      throw new Error(`Missing selectedProjects when filtered install`);
+    }
 
     // Prevent filtered installs when workspaces is disabled
     if (isFilteredInstall && !useWorkspaces) {
@@ -202,12 +240,22 @@ export abstract class BaseInstallManager {
       os.EOL + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`)
     );
 
+    if (this.options.selectedProjects) {
+      this._commonTempInstallFlag.mergeFromObject({
+        selectedProjectNames: Array.from(this.options.selectedProjects).map((project) => project.packageName)
+      });
+    }
+    if (this._twoStageInstall || this.options.ignoreScripts) {
+      this.commonTempInstallFlag.mergeFromObject({
+        ignoreScripts: true
+      });
+    }
+
     // This marker file indicates that the last "rush install" completed successfully.
-    // Always perform a clean install if filter flags were provided. Additionally, if
+    // perform a clean install if selected projects are not matched. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
-    const cleanInstall: boolean =
-      isFilteredInstall || !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
+    const cleanInstall: boolean = !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -265,10 +313,8 @@ export abstract class BaseInstallManager {
         }
       }
 
-      // Create the marker file to indicate a successful install if it's not a filtered install
-      if (!isFilteredInstall) {
-        this._commonTempInstallFlag.create();
-      }
+      // Create the marker file to indicate a successful install
+      this._commonTempInstallFlag.create();
     } else {
       console.log('Installation is already up-to-date.');
     }
@@ -613,6 +659,10 @@ export abstract class BaseInstallManager {
         semver.gte(this._rushConfiguration.packageManagerToolVersion, '6.34.0')
       ) {
         args.push('--ignore-compatibility-db');
+      }
+
+      if (this._twoStageInstall || this.options.ignoreScripts) {
+        args.push('--ignore-scripts');
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');
