@@ -822,7 +822,8 @@
       "packageName": "@rushstack/heft-jest-plugin",
       "projectFolder": "heft-plugins/heft-jest-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
     },
     {
       "packageName": "@rushstack/heft-lint-plugin",
