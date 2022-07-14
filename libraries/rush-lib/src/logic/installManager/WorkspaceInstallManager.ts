@@ -27,6 +27,13 @@ import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
  * This class implements common logic between "rush install" and "rush update".
  */
 export class WorkspaceInstallManager extends BaseInstallManager {
+  // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
+  private _packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
+  private _packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
+    this.rushConfiguration,
+    this.options
+  );
+
   /**
    * @override
    */
@@ -278,12 +285,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    */
   protected async installAsync(cleanInstall: boolean): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-    const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
+    const packageManagerFilename: string = this._packageManagerFilename;
 
-    const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
-      this.rushConfiguration,
-      this.options
-    );
+    const packageManagerEnv: NodeJS.ProcessEnv = this._packageManagerEnv;
 
     const commonNodeModulesFolder: string = path.join(
       this.rushConfiguration.commonTempFolder,
@@ -372,6 +376,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   protected async postInstallAsync(): Promise<void> {
+    if (this.twoStageInstall) {
+      this.commonTempInstallFlag.saveIfModified();
+    }
+
     // Grab the temp shrinkwrap, as this was the most recently completed install. It may also be
     // more up-to-date than the checked-in shrinkwrap since filtered installs are not written back.
     // Note that if there are no projects, or if we're in PNPM workspace mode and there are no
@@ -414,6 +422,54 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
+
+    // Stage 2 rebuild pending
+    if (this.twoStageInstall && !this.options.ignoreScripts) {
+      const rebuildArgs: string[] = ['rebuild', '--pending', '--recursive'];
+
+      if (
+        this.rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
+        EnvironmentConfiguration.pnpmStorePathOverride
+      ) {
+        // --store is not supported to pnpm rebuild... So, config.store is used here
+        rebuildArgs.push(`--config.storeDir=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
+      }
+
+      if (this.options.collectLogFile) {
+        rebuildArgs.push('--reporter', 'ndjson');
+      }
+
+      for (const arg of this.options.pnpmFilterArguments) {
+        rebuildArgs.push(arg);
+      }
+
+      // If any diagnostic options were specified, then show the full command-line
+      if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+        console.log(
+          os.EOL +
+            colors.green('Invoking package manager: ') +
+            FileSystem.getRealPath(this._packageManagerFilename) +
+            ' ' +
+            rebuildArgs.join(' ') +
+            os.EOL
+        );
+      }
+
+      try {
+        Utilities.executeCommand({
+          command: this._packageManagerFilename,
+          args: rebuildArgs,
+          workingDirectory: this.rushConfiguration.commonTempFolder,
+          environment: this._packageManagerEnv,
+          suppressOutput: false
+        });
+      } catch (err) {
+        throw new Error(`Encounter an error when running install lifecycle scripts. error: ${err.message}`);
+      } finally {
+        // Always save after pnpm rebuild to update timestamp of last install flag file.
+        this.commonTempInstallFlag.create();
+      }
+    }
   }
 
   /**

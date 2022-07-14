@@ -22,6 +22,7 @@ export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 export class LastInstallFlag {
   private _path: string;
   private _state: JsonObject;
+  private _isModified: boolean;
 
   /**
    * Creates a new LastInstall flag
@@ -31,6 +32,7 @@ export class LastInstallFlag {
   public constructor(folderPath: string, state: JsonObject = {}) {
     this._path = path.join(folderPath, this.flagName);
     this._state = state;
+    this._isModified = true;
   }
 
   /**
@@ -80,6 +82,29 @@ export class LastInstallFlag {
                 `New Path: ${newStorePath}`
             );
           }
+
+          // check ignoreScripts
+          if (newState.ignoreScripts !== oldState.ignoreScripts) {
+            return false;
+          } else {
+            // full install
+            if (newState.selectedProjectNames === oldState.selectedProjectNames) {
+              return true;
+            }
+          }
+
+          // check whether new selected projects are installed
+          if (newState.selectedProjectNames) {
+            if (!oldState.selectedProjectNames) {
+              // used to be a full install
+              return true;
+            } else if (
+              lodash.difference(newState.selectedProjectNames, oldState.selectedProjectNames).length === 0
+            ) {
+              // current selected projects are included in old selected projects
+              return true;
+            }
+          }
         }
       }
       return false;
@@ -95,6 +120,29 @@ export class LastInstallFlag {
     JsonFile.save(this._state, this._path, {
       ensureFolderExists: true
     });
+  }
+
+  /**
+   * Merge new data into current state by lodash "merge"
+   */
+  public mergeFromObject(data: JsonObject): void {
+    if (lodash.isMatch(this._state, data)) {
+      return;
+    }
+    lodash.merge(this._state, data);
+    this._isModified = true;
+  }
+
+  /**
+   * Writes the flag file to disk with the current state if modified
+   */
+  public saveIfModified(): void {
+    if (this._isModified) {
+      JsonFile.save(this._state, this._path, {
+        ensureFolderExists: true
+      });
+      this._isModified = false;
+    }
   }
 
   /**

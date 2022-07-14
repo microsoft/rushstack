@@ -9,8 +9,11 @@ import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+
 export class InstallAction extends BaseInstallAction {
   private _checkOnlyParameter!: CommandLineFlagParameter;
+  private _ignoreScriptsParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -49,13 +52,33 @@ export class InstallAction extends BaseInstallAction {
       parameterLongName: '--check-only',
       description: `Only check the validity of the shrinkwrap file without performing an install.`
     });
+
+    this._ignoreScriptsParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-scripts',
+      description:
+        'Does not execute any install lifecycle scripts specified in package.json files and its' +
+        ' dependencies when "rush install". Running with this flag makes your installing faster. Later,' +
+        ' you can run "rush install" to run all ignored scripts. Moreover, you can partial install such as' +
+        ' "rush install --to <package>" to run ignored scripts of the dependencies of the selected projects.'
+    });
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+
+    const pnpmFilterArguments: string[] = await this._selectionParameters!.getPnpmFilterArgumentsAsync(
+      terminal
+    );
+
+    let selectedProjects: Set<RushConfigurationProject> | undefined;
+    if (pnpmFilterArguments.length > 0) {
+      selectedProjects = await this._selectionParameters!.getSelectedProjectsAsync(terminal);
+    }
+
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
+      ignoreScripts: this._ignoreScriptsParameter.value!,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: false,
@@ -67,7 +90,8 @@ export class InstallAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal),
+      pnpmFilterArguments,
+      selectedProjects,
       checkOnly: this._checkOnlyParameter.value
     };
   }

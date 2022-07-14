@@ -10,6 +10,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter!: CommandLineFlagParameter;
   private _recheckParameter!: CommandLineFlagParameter;
+  private _ignoreScriptsParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -54,6 +55,14 @@ export class UpdateAction extends BaseInstallAction {
         " to process the shrinkwrap file.  This will also update your shrinkwrap file with Rush's fixups." +
         ' (To minimize shrinkwrap churn, these fixups are normally performed only in the temporary folder.)'
     });
+    this._ignoreScriptsParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-scripts',
+      description:
+        'Does not execute any install lifecycle scripts specified in package.json files and its dependencies' +
+        ' when "rush update". Running with this flag makes your installing faster. Later, you can run' +
+        ' "rush update" or "rush install" to run all ignored scripts. Moreover, you can run partial install' +
+        ' such as "rush install --to <package>" to run ignored scripts for the selected projects.'
+    });
   }
 
   protected async runAsync(): Promise<void> {
@@ -70,6 +79,7 @@ export class UpdateAction extends BaseInstallAction {
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,
+      ignoreScripts: this._ignoreScriptsParameter.value,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,
