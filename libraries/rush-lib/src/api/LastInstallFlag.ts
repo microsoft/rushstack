@@ -1,16 +1,52 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import { JsonFile, Import } from '@rushstack/node-core-library';
+import { BaseFlag } from './base/BaseFlag';
 
-import { FileSystem, JsonFile, JsonObject, Import } from '@rushstack/node-core-library';
-
-import { PackageManagerName } from './packageManager/PackageManager';
-import { RushConfiguration } from './RushConfiguration';
+import type { PackageManagerName } from './packageManager/PackageManager';
+import type { RushConfiguration } from './RushConfiguration';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
+
+export interface ILastInstallFlagJson {
+  /**
+   * Current node version
+   */
+  node: string;
+  /**
+   * Current package manager name
+   */
+  packageManager: PackageManagerName;
+  /**
+   * Current package manager version
+   */
+  packageManagerVersion: string;
+  /**
+   * Current rush json folder
+   */
+  rushJsonFolder: string;
+  /**
+   * Same with pnpmOptions.pnpmStorePath in rush.json
+   */
+  storePath?: string;
+  /**
+   * True when "useWorkspaces" is true in rush.json
+   */
+  workspaces?: true;
+  /**
+   * True when user explicitly specify "--ignore-scripts" CLI parameter,
+   * or Rush implicitly use two stage install.
+   */
+  ignoreScripts?: true;
+  /**
+   * When specified, it is a list of selected projects during partial install
+   * It is undefined when full install
+   */
+  selectedProjectNames?: string[];
+}
 
 /**
  * A helper class for managing last-install flags, which are persistent and
@@ -19,23 +55,9 @@ export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
  * it can invalidate the last install.
  * @internal
  */
-export class LastInstallFlag {
-  private _path: string;
-  private _state: JsonObject;
-  private _isModified: boolean;
-
+export class LastInstallFlag extends BaseFlag {
   /**
-   * Creates a new LastInstall flag
-   * @param folderPath - the folder that this flag is managing
-   * @param state - optional, the state that should be managed or compared
-   */
-  public constructor(folderPath: string, state: JsonObject = {}) {
-    this._path = path.join(folderPath, this.flagName);
-    this._state = state;
-    this._isModified = true;
-  }
-
-  /**
+   * @override
    * Returns true if the file exists and the contents match the current state.
    */
   public isValid(): boolean {
@@ -53,14 +75,14 @@ export class LastInstallFlag {
   }
 
   private _isValid(checkValidAndReportStoreIssues: boolean): boolean {
-    let oldState: JsonObject;
+    let oldState: ILastInstallFlagJson;
     try {
-      oldState = JsonFile.load(this._path);
+      oldState = JsonFile.load(this.path);
     } catch (err) {
       return false;
     }
 
-    const newState: JsonObject = this._state;
+    const newState: ILastInstallFlagJson = this._state;
 
     if (!lodash.isEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
@@ -114,52 +136,6 @@ export class LastInstallFlag {
   }
 
   /**
-   * Writes the flag file to disk with the current state
-   */
-  public create(): void {
-    JsonFile.save(this._state, this._path, {
-      ensureFolderExists: true
-    });
-  }
-
-  /**
-   * Merge new data into current state by lodash "merge"
-   */
-  public mergeFromObject(data: JsonObject): void {
-    if (lodash.isMatch(this._state, data)) {
-      return;
-    }
-    lodash.merge(this._state, data);
-    this._isModified = true;
-  }
-
-  /**
-   * Writes the flag file to disk with the current state if modified
-   */
-  public saveIfModified(): void {
-    if (this._isModified) {
-      JsonFile.save(this._state, this._path, {
-        ensureFolderExists: true
-      });
-      this._isModified = false;
-    }
-  }
-
-  /**
-   * Removes the flag file
-   */
-  public clear(): void {
-    FileSystem.deleteFile(this._path);
-  }
-
-  /**
-   * Returns the full path to the flag file
-   */
-  public get path(): string {
-    return this._path;
-  }
-
-  /**
    * Returns the name of the flag file
    */
   protected get flagName(): string {
@@ -182,7 +158,7 @@ export class LastInstallFlagFactory {
    * @internal
    */
   public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastInstallFlag {
-    const currentState: JsonObject = {
+    const currentState: ILastInstallFlagJson = {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
