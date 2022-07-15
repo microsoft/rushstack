@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as crypto from 'crypto';
 import type * as TTslint from 'tslint';
-import type { IExtendedSourceFile, IExtendedProgram } from '@rushstack/heft-typescript-plugin';
+import type * as TTypescript from 'typescript';
 import { Import, JsonFile, FileError, FileSystem, type ITerminal } from '@rushstack/node-core-library';
 
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
@@ -125,7 +125,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     return tslintConfigVersion;
   }
 
-  protected async initializeAsync(tsProgram: IExtendedProgram): Promise<void> {
+  protected async initializeAsync(tsProgram: TTypescript.Program): Promise<void> {
     this._tslintConfiguration = this._tslint.Configuration.loadConfigurationFromPath(
       this._linterConfigFilePath
     );
@@ -147,7 +147,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     );
   }
 
-  protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TTslint.RuleFailure[]> {
+  protected async lintFileAsync(sourceFile: TTypescript.SourceFile): Promise<TTslint.RuleFailure[]> {
     // Some of this code comes from here:
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about

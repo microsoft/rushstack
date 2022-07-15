@@ -7,8 +7,7 @@ import {
   ExtendedTypeScript,
   IEmitResolver,
   IEmitHost,
-  IEmitTransformers,
-  IExtendedSourceFile
+  IEmitTransformers
 } from './internalTypings/TypeScriptInternals';
 
 export interface ICachedEmitModuleKind {
@@ -38,7 +37,7 @@ export class EmitFilesPatch {
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
     moduleKindsToEmit: ICachedEmitModuleKind[],
-    changedFiles?: Set<IExtendedSourceFile>
+    changedFiles?: Set<TTypescript.SourceFile>
   ): void {
     if (EmitFilesPatch._patchedTs === ts) {
       // We already patched this instance of TS
@@ -72,7 +71,7 @@ export class EmitFilesPatch {
     const patchedEmitFiles = (
       resolver: IEmitResolver,
       host: IEmitHost,
-      targetSourceFile: IExtendedSourceFile | undefined,
+      targetSourceFile: TTypescript.SourceFile | undefined,
       emitTransformers: IEmitTransformers,
       emitOnlyDtsFiles?: boolean,
       onlyBuildInfo?: boolean,

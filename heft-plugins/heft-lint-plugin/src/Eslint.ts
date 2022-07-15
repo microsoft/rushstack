@@ -4,10 +4,10 @@
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as semver from 'semver';
+import type * as TTypescript from 'typescript';
 import type * as TEslint from 'eslint';
 import { performance } from 'perf_hooks';
 import { FileError } from '@rushstack/node-core-library';
-import type { IExtendedProgram, IExtendedSourceFile } from '@rushstack/heft-typescript-plugin';
 
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
 
@@ -123,7 +123,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     return eslintConfigVersion;
   }
 
-  protected async initializeAsync(tsProgram: IExtendedProgram): Promise<void> {
+  protected async initializeAsync(tsProgram: TTypescript.Program): Promise<void> {
     // Override config takes precedence over overrideConfigFile, which allows us to provide
     // the source TypeScript program.
     this._eslint = new this._eslintPackage.ESLint({
@@ -137,7 +137,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     });
   }
 
-  protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TEslint.ESLint.LintResult[]> {
+  protected async lintFileAsync(sourceFile: TTypescript.SourceFile): Promise<TEslint.ESLint.LintResult[]> {
     const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
       filePath: sourceFile.fileName
     });

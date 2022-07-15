@@ -1,13 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type * as TTypescript from 'typescript';
 import { SyncHook } from 'tapable';
 import { FileSystem, Path, type ITerminal } from '@rushstack/node-core-library';
-import {
-  ConfigurationFile,
-  InheritanceType,
-  PathResolutionMethod
-} from '@rushstack/heft-config-file';
+import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -17,7 +14,6 @@ import type {
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
-import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
 const PLUGIN_NAME: 'typescript' = 'typescript';
 
@@ -103,8 +99,8 @@ export interface IPartialTsconfig {
  * @beta
  */
 export interface IChangedFilesHookOptions {
-  program: IExtendedProgram;
-  changedFiles?: Set<IExtendedSourceFile>;
+  program: TTypescript.Program;
+  changedFiles?: Set<TTypescript.SourceFile>;
 }
 
 /**
@@ -360,7 +356,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       // watchMode: watchMode,
       maxWriteParallelism: typeScriptConfigurationJson?.maxWriteParallelism || 50,
       scopedLogger: taskSession.logger,
-      emitChangedFilesCallback: (program: IExtendedProgram, changedFiles?: Set<IExtendedSourceFile>) => {
+      emitChangedFilesCallback: (program: TTypescript.Program, changedFiles?: Set<TTypescript.SourceFile>) => {
         // Provide the typescript program dependent plugins
         if (this.accessor.onChangedFilesHook!.isUsed()) {
           this.accessor.onChangedFilesHook!.call({ program, changedFiles });

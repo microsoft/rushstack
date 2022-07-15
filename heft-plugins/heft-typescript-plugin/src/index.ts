@@ -8,11 +8,6 @@
  */
 
  export type {
-  IExtendedProgram,
-  IExtendedSourceFile
-} from './internalTypings/TypeScriptInternals';
-
-export type {
   IEmitModuleKind,
   IStaticAssetsCopyConfiguration,
   ITypeScriptConfigurationJson,

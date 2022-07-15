@@ -8,16 +8,12 @@ import type {
   IHeftTaskRunHookOptions,
   IScopedLogger
 } from '@rushstack/heft';
-import type {
-  IChangedFilesHookOptions,
-  IExtendedProgram,
-  IExtendedSourceFile,
-  ITypeScriptPluginAccessor
-} from '@rushstack/heft-typescript-plugin';
+import type { IChangedFilesHookOptions, ITypeScriptPluginAccessor } from '@rushstack/heft-typescript-plugin';
 
 import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
 import type { LinterBase } from './LinterBase';
+import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
 const PLUGIN_NAME: string = 'LintPlugin';
 const ESLINTRC_JS_FILENAME: string = '.eslintrc.js';
@@ -45,8 +41,8 @@ export default class LintPlugin implements IHeftTaskPlugin {
             this._lintAsync(
               taskSession,
               heftConfiguration,
-              changedFilesHookOptions.program,
-              changedFilesHookOptions.changedFiles
+              changedFilesHookOptions.program as IExtendedProgram,
+              changedFilesHookOptions.changedFiles as Set<IExtendedSourceFile>
             )
           );
         });

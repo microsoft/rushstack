@@ -4,6 +4,7 @@
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as semver from 'semver';
+import type * as TTypescript from 'typescript';
 import {
   type FileSystemStats,
   type ITerminal,
@@ -15,13 +16,8 @@ import {
   FileError
 } from '@rushstack/node-core-library';
 import type { IScopedLogger } from '@rushstack/heft';
-import type * as TTypescript from 'typescript';
-import type {
-  ExtendedTypeScript,
-  IExtendedProgram,
-  IExtendedSourceFile
-} from './internalTypings/TypeScriptInternals';
 
+import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';
 import { EmitFilesPatch, type ICachedEmitModuleKind } from './EmitFilesPatch';
 import { TypeScriptCachedFileSystem } from './fileSystem/TypeScriptCachedFileSystem';
 import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
@@ -64,7 +60,7 @@ export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfiguratio
   /**
    * The callback used to emit the typescript program (or programs) from the builder.
    */
-  emitChangedFilesCallback: (program: IExtendedProgram, changedFiles?: Set<IExtendedSourceFile>) => void;
+  emitChangedFilesCallback: (program: TTypescript.Program, changedFiles?: Set<TTypescript.SourceFile>) => void;
 }
 
 type TSolutionHost = TTypescript.SolutionBuilderHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
@@ -102,7 +98,7 @@ interface IModuleKindReason {
 }
 
 interface IExtendedEmitResult extends TTypescript.EmitResult {
-  changedSourceFiles: Set<IExtendedSourceFile>;
+  changedSourceFiles: Set<TTypescript.SourceFile>;
   filesToWrite: IFileToWrite[];
 }
 
@@ -404,8 +400,7 @@ export class TypeScriptBuilder {
     );
 
     this._logDiagnostics(ts, rawDiagnostics);
-    const extendedProgram: IExtendedProgram = tsProgram as IExtendedProgram;
-    this._configuration.emitChangedFilesCallback(extendedProgram, emitResult.changedSourceFiles);
+    this._configuration.emitChangedFilesCallback(tsProgram, emitResult.changedSourceFiles);
   }
 
   public _runSolutionBuild(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): void {
@@ -436,8 +431,7 @@ export class TypeScriptBuilder {
       ) => {
         const tsProgram: TTypescript.Program | undefined = program.getProgram();
         if (tsProgram) {
-          const extendedProgram: IExtendedProgram = tsProgram as IExtendedProgram;
-          this._configuration.emitChangedFilesCallback(extendedProgram);
+          this._configuration.emitChangedFilesCallback(tsProgram);
         }
       };
 
@@ -604,7 +598,7 @@ export class TypeScriptBuilder {
   ): IExtendedEmitResult {
     const filesToWrite: IFileToWrite[] = [];
 
-    const changedFiles: Set<IExtendedSourceFile> = new Set<IExtendedSourceFile>();
+    const changedFiles: Set<TTypescript.SourceFile> = new Set();
     EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, changedFiles);
 
     const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
