@@ -57,6 +57,21 @@ export class ApprovedPackagesPolicy {
     get reviewCategories(): Set<string>;
 }
 
+// @internal
+export class _BaseFlag {
+    constructor(folderPath: string, state?: JsonObject);
+    clear(): void;
+    create(): void;
+    protected get flagName(): string;
+    protected _isModified: boolean;
+    isValid(): boolean;
+    mergeFromObject(data: JsonObject): void;
+    get path(): string;
+    protected _path: string;
+    saveIfModified(): void;
+    protected _state: JsonObject;
+}
+
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
@@ -495,16 +510,11 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export class _LastInstallFlag {
-    constructor(folderPath: string, state?: JsonObject);
+export class _LastInstallFlag extends _BaseFlag {
     checkValidAndReportStoreIssues(): boolean;
-    clear(): void;
-    create(): void;
     protected get flagName(): string;
+    // @override
     isValid(): boolean;
-    mergeFromObject(data: JsonObject): void;
-    get path(): string;
-    saveIfModified(): void;
 }
 
 // @public

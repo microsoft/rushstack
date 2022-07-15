@@ -63,6 +63,7 @@ export { EventHooks, Event } from './api/EventHooks';
 export { ChangeManager } from './api/ChangeManager';
 
 export { LastInstallFlag as _LastInstallFlag } from './api/LastInstallFlag';
+export { BaseFlag as _BaseFlag } from './api/base/BaseFlag';
 
 export {
   VersionPolicyDefinitionName,
