@@ -56,7 +56,7 @@ export class InstallAction extends BaseInstallAction {
     this._ignoreScriptsParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-scripts',
       description:
-        'Does not execute any install lifecycle scripts specified in package.json files and its' +
+        'Do not execute any install lifecycle scripts specified in package.json files and its' +
         ' dependencies when "rush install". Running with this flag makes your installing faster. Later,' +
         ' you can run "rush install" to run all ignored scripts. Moreover, you can partial install such as' +
         ' "rush install --to <package>" to run ignored scripts of the dependencies of the selected projects.'
