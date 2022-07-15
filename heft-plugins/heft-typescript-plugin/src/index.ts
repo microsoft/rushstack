@@ -7,8 +7,7 @@
  * @packageDocumentation
  */
 
-export type {
-  IExtendedTypeScript,
+ export type {
   IExtendedProgram,
   IExtendedSourceFile
 } from './internalTypings/TypeScriptInternals';

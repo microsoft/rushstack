@@ -8,12 +8,10 @@ import { type ITerminal, FileSystem, JsonFile, Path } from '@rushstack/node-core
 import type { IScopedLogger } from '@rushstack/heft';
 import type {
   IExtendedSourceFile,
-  IExtendedProgram,
-  IExtendedTypeScript
+  IExtendedProgram
 } from '@rushstack/heft-typescript-plugin';
 
 export interface ILinterBaseOptions {
-  ts: IExtendedTypeScript;
   scopedLogger: IScopedLogger;
   buildFolderPath: string;
   /**
