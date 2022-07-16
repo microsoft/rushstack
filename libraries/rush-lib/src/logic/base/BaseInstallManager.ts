@@ -12,7 +12,8 @@ import {
   PosixModeBits,
   NewlineKind,
   AlreadyReportedError,
-  FileSystemStats
+  FileSystemStats,
+  InternalError
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -196,7 +197,7 @@ export abstract class BaseInstallManager {
 
     if (isFilteredInstall && !this.options.selectedProjects) {
       // This should never even happen
-      throw new Error(`Missing selectedProjects when filtered install`);
+      throw new InternalError(`Missing selectedProjects when filtered install`);
     }
 
     // Prevent filtered installs when workspaces is disabled
