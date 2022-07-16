@@ -46,6 +46,12 @@ export interface IExperimentsJson {
    * in common/config/rush/command-line.json.
    */
   phasedCommands?: boolean;
+
+  /**
+   * If true, rush install or rush update implicitly specify --ignore-scripts during pnpm install,
+   * and run install lifecycle scripts by pnpm rebuild --pending after pnpm install successfully.
+   */
+  deferredInstallationScripts?: boolean;
 }
 
 /**
