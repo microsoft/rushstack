@@ -117,7 +117,7 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
             return false;
           } else {
             // full install
-            if (newState.selectedProjectNames === oldState.selectedProjectNames) {
+            if (!newState.selectedProjectNames && !oldState.selectedProjectNames) {
               return true;
             }
           }
