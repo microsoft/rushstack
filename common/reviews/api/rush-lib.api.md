@@ -58,8 +58,8 @@ export class ApprovedPackagesPolicy {
 }
 
 // @internal
-export class _BaseFlag {
-    constructor(folderPath: string, state?: JsonObject);
+export class _BaseFlag<T extends object = JsonObject> {
+    constructor(folderPath: string, state?: Partial<T>);
     clear(): void;
     create(): void;
     protected get flagName(): string;
@@ -69,7 +69,7 @@ export class _BaseFlag {
     get path(): string;
     protected _path: string;
     saveIfModified(): void;
-    protected _state: JsonObject;
+    protected _state: T;
 }
 
 // @beta
@@ -311,6 +311,7 @@ export interface IExecutionResult {
 // @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
+    deferredInstallationScripts?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
@@ -345,6 +346,19 @@ export interface IGetChangedProjectsOptions {
 
 // @beta
 export interface IGlobalCommand extends IRushCommand {
+}
+
+// @internal
+export interface _ILastInstallFlagJson {
+    ignoreScripts?: true;
+    node: string;
+    packageJson?: IPackageJson;
+    packageManager: PackageManagerName;
+    packageManagerVersion: string;
+    rushJsonFolder: string;
+    selectedProjectNames?: string[];
+    storePath?: string;
+    workspaces?: true;
 }
 
 // @public
@@ -510,7 +524,7 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export class _LastInstallFlag extends _BaseFlag {
+export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
     checkValidAndReportStoreIssues(): boolean;
     protected get flagName(): string;
     // @override

@@ -10,7 +10,7 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
  * A base class for flag file.
  * @internal
  */
-export class BaseFlag {
+export class BaseFlag<T extends object = JsonObject> {
   /**
    * Flag file path
    */
@@ -18,7 +18,7 @@ export class BaseFlag {
   /**
    * Content of the flag
    */
-  protected _state: JsonObject;
+  protected _state: T;
   /**
    * Whether the current state is modified
    */
@@ -29,9 +29,9 @@ export class BaseFlag {
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
    */
-  public constructor(folderPath: string, state: JsonObject = {}) {
+  public constructor(folderPath: string, state?: Partial<T>) {
     this._path = path.join(folderPath, this.flagName);
-    this._state = state;
+    this._state = (state || {}) as T;
     this._isModified = true;
   }
 
