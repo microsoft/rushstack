@@ -425,23 +425,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // Stage 2 rebuild pending
     if (this.deferredInstallationScripts && !this.options.ignoreScripts) {
-      const rebuildArgs: string[] = ['rebuild', '--pending', '--recursive'];
-
-      if (
-        this.rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
-        EnvironmentConfiguration.pnpmStorePathOverride
-      ) {
-        // --store is not supported to pnpm rebuild... So, config.store is used here
-        rebuildArgs.push(`--config.storeDir=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
-      }
-
-      if (this.options.collectLogFile) {
-        rebuildArgs.push('--reporter', 'ndjson');
-      }
-
-      for (const arg of this.options.pnpmFilterArguments) {
-        rebuildArgs.push(arg);
-      }
+      const rebuildArgs: string[] = ['rebuild', '--pending'];
+      this.pushRebuildArgs(rebuildArgs);
 
       console.log(
         os.EOL +
@@ -496,6 +481,29 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       for (const arg of this.options.pnpmFilterArguments) {
         args.push(arg);
       }
+    }
+  }
+
+  /**
+   * Used when invoking pnpm rebuild for running deferred installation scripts.
+   */
+  protected pushRebuildArgs(args: string[]): void {
+    args.push('--recursive');
+
+    if (
+      this.rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
+      EnvironmentConfiguration.pnpmStorePathOverride
+    ) {
+      // pnpm rebuild does not accept --store-dir now... So, config.storeDir is used here
+      args.push(`--config.storeDir=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
+    }
+
+    if (this.options.collectLogFile) {
+      args.push('--reporter', 'ndjson');
+    }
+
+    for (const arg of this.options.pnpmFilterArguments) {
+      args.push(arg);
     }
   }
 }
