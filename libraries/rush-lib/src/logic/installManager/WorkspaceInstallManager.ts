@@ -27,13 +27,6 @@ import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
  * This class implements common logic between "rush install" and "rush update".
  */
 export class WorkspaceInstallManager extends BaseInstallManager {
-  // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-  private _packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
-  private _packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
-    this.rushConfiguration,
-    this.options
-  );
-
   /**
    * @override
    */
@@ -285,9 +278,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    */
   protected async installAsync(cleanInstall: boolean): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-    const packageManagerFilename: string = this._packageManagerFilename;
+    const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
 
-    const packageManagerEnv: NodeJS.ProcessEnv = this._packageManagerEnv;
+    const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
+      this.rushConfiguration,
+      this.options
+    );
 
     const commonNodeModulesFolder: string = path.join(
       this.rushConfiguration.commonTempFolder,
@@ -425,6 +421,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // Stage 2 rebuild pending
     if (this.deferredInstallationScripts && !this.options.ignoreScripts) {
+      // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
+      const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
+
+      const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
+        this.rushConfiguration,
+        this.options
+      );
+
       const rebuildArgs: string[] = ['rebuild', '--pending'];
       this.pushRebuildArgs(rebuildArgs);
 
@@ -442,7 +446,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         console.log(
           os.EOL +
             colors.green('Invoking package manager: ') +
-            FileSystem.getRealPath(this._packageManagerFilename) +
+            FileSystem.getRealPath(packageManagerFilename) +
             ' ' +
             rebuildArgs.join(' ') +
             os.EOL
@@ -451,10 +455,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       try {
         Utilities.executeCommand({
-          command: this._packageManagerFilename,
+          command: packageManagerFilename,
           args: rebuildArgs,
           workingDirectory: this.rushConfiguration.commonTempFolder,
-          environment: this._packageManagerEnv,
+          environment: packageManagerEnv,
           suppressOutput: false
         });
       } catch (err) {
