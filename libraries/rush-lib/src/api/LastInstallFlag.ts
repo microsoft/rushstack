@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, Import } from '@rushstack/node-core-library';
+import { JsonFile, Import, IPackageJson } from '@rushstack/node-core-library';
 import { BaseFlag } from './base/BaseFlag';
 
 import type { PackageManagerName } from './packageManager/PackageManager';
@@ -11,6 +11,10 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
+/**
+ * This represents the JSON data structure for the "last-install.flag" file.
+ * @internal
+ */
 export interface ILastInstallFlagJson {
   /**
    * Current node version
@@ -28,6 +32,10 @@ export interface ILastInstallFlagJson {
    * Current rush json folder
    */
   rushJsonFolder: string;
+  /**
+   * The content of package.json, used in the flag file of autoinstaller
+   */
+  packageJson?: IPackageJson;
   /**
    * Same with pnpmOptions.pnpmStorePath in rush.json
    */
@@ -54,7 +62,7 @@ export interface ILastInstallFlagJson {
  * it can invalidate the last install.
  * @internal
  */
-export class LastInstallFlag extends BaseFlag {
+export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
   /**
    * @override
    * Returns true if the file exists and the contents match the current state.
