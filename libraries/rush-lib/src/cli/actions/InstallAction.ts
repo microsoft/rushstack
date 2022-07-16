@@ -9,8 +9,6 @@ import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-
 export class InstallAction extends BaseInstallAction {
   private _checkOnlyParameter!: CommandLineFlagParameter;
   private _ignoreScriptsParameter!: CommandLineFlagParameter;
@@ -66,14 +64,8 @@ export class InstallAction extends BaseInstallAction {
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
-    const pnpmFilterArguments: string[] = await this._selectionParameters!.getPnpmFilterArgumentsAsync(
-      terminal
-    );
-
-    let selectedProjects: Set<RushConfigurationProject> | undefined;
-    if (pnpmFilterArguments.length > 0) {
-      selectedProjects = await this._selectionParameters!.getSelectedProjectsAsync(terminal);
-    }
+    const { pnpmFilterArguments, selectedProjects } =
+      await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal);
 
     return {
       debug: this.parser.isDebug,
