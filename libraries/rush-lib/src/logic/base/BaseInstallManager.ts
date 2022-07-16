@@ -135,14 +135,13 @@ export abstract class BaseInstallManager {
   private _syncNpmrcAlreadyCalled: boolean = false;
 
   /**
-   * Two stage install:
-   * - Only works when using pnpm and turn on "useWorkspaces" in rush.json
-   * - Dividing install into two stages:
+   * If deferredInstallationScripts, installation will be divided into two stages:
    * Stage 1: rush implicitly adds "--ignore-scripts" for "pnpm install"
    * Stage 2: run "pnpm rebuild --pending"
-   * If stage 2 throws error, rerun install can skip stage 1
+   *
+   * Note: This feature only works when using pnpm and turn on "useWorkspaces" in rush.json
    */
-  private _twoStageInstall: boolean = false;
+  private _deferredInstallationScripts: boolean = false;
 
   private _options: IInstallManagerOptions;
 
@@ -181,8 +180,8 @@ export abstract class BaseInstallManager {
     return this._commonTempInstallFlag;
   }
 
-  protected get twoStageInstall(): boolean {
-    return this._twoStageInstall;
+  protected get deferredInstallationScripts(): boolean {
+    return this._deferredInstallationScripts;
   }
 
   public async doInstallAsync(): Promise<void> {
@@ -190,7 +189,10 @@ export abstract class BaseInstallManager {
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
-    this._twoStageInstall = useWorkspaces && this.rushConfiguration.packageManager === 'pnpm';
+    if (this.rushConfiguration.experimentsConfiguration.configuration.deferredInstallationScripts) {
+      // Only works for pnpm and useWorkspaces=true
+      this._deferredInstallationScripts = useWorkspaces && this.rushConfiguration.packageManager === 'pnpm';
+    }
 
     if (isFilteredInstall && !this.options.selectedProjects) {
       // This should never even happen
@@ -236,7 +238,7 @@ export abstract class BaseInstallManager {
         selectedProjectNames: Array.from(this.options.selectedProjects).map((project) => project.packageName)
       });
     }
-    if (this._twoStageInstall || this.options.ignoreScripts) {
+    if (this._deferredInstallationScripts || this.options.ignoreScripts) {
       this.commonTempInstallFlag.mergeFromObject({
         ignoreScripts: true
       });
@@ -632,7 +634,7 @@ export abstract class BaseInstallManager {
         }
       }
 
-      if (this._twoStageInstall || this.options.ignoreScripts) {
+      if (this._deferredInstallationScripts || this.options.ignoreScripts) {
         args.push('--ignore-scripts');
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {

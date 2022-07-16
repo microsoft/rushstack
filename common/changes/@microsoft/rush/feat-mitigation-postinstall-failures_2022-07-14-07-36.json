@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Supports two stage install, which makes faster retires for install lifecycle scripts",
+      "comment": "Supports deferredInstallationScripts behind a experimental flag, which makes faster retires for install lifecycle scripts",
       "type": "none"
     }
   ],

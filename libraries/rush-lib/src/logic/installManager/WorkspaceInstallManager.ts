@@ -376,7 +376,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   protected async postInstallAsync(): Promise<void> {
-    if (this.twoStageInstall) {
+    if (this.deferredInstallationScripts) {
       this.commonTempInstallFlag.saveIfModified();
     }
 
@@ -424,7 +424,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
 
     // Stage 2 rebuild pending
-    if (this.twoStageInstall && !this.options.ignoreScripts) {
+    if (this.deferredInstallationScripts && !this.options.ignoreScripts) {
       const rebuildArgs: string[] = ['rebuild', '--pending', '--recursive'];
 
       if (

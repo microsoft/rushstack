@@ -37,8 +37,7 @@ export interface ILastInstallFlagJson {
    */
   workspaces?: true;
   /**
-   * True when user explicitly specify "--ignore-scripts" CLI parameter,
-   * or Rush implicitly use two stage install.
+   * True when user explicitly specify "--ignore-scripts" CLI parameter or deferredInstallationScripts
    */
   ignoreScripts?: true;
   /**
