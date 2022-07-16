@@ -443,6 +443,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         rebuildArgs.push(arg);
       }
 
+      console.log(
+        os.EOL +
+          colors.bold(
+            `Running "${this.rushConfiguration.packageManager} rebuild --pending" in` +
+              ` ${this.rushConfiguration.commonTempFolder}`
+          ) +
+          os.EOL
+      );
+
       // If any diagnostic options were specified, then show the full command-line
       if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
         console.log(
