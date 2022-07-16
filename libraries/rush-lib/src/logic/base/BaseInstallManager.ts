@@ -15,7 +15,8 @@ import {
   FileSystemStats,
   ConsoleTerminalProvider,
   Terminal,
-  ITerminalProvider
+  ITerminalProvider,
+  InternalError
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -205,7 +206,7 @@ export abstract class BaseInstallManager {
 
     if (isFilteredInstall && !this.options.selectedProjects) {
       // This should never even happen
-      throw new Error(`Missing selectedProjects when filtered install`);
+      throw new InternalError(`Missing selectedProjects when filtered install`);
     }
 
     // Prevent filtered installs when workspaces is disabled
@@ -214,7 +215,7 @@ export abstract class BaseInstallManager {
       console.log(
         colors.red(
           'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
-            'command again without specifying these arguments.'
+          'command again without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
@@ -226,7 +227,7 @@ export abstract class BaseInstallManager {
       console.log(
         colors.red(
           'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
-            'without specifying these arguments.'
+          'without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
@@ -651,9 +652,9 @@ export abstract class BaseInstallManager {
       ) {
         this._terminal.writeWarningLine(
           'Warning: Your rush.json specifies a pnpmVersion with a known issue ' +
-            'that may cause unintended version selections.' +
-            " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
-            'For details see: https://rushjs.io/link/pnpm-issue-5132'
+          'that may cause unintended version selections.' +
+          " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
+          'For details see: https://rushjs.io/link/pnpm-issue-5132'
         );
       }
       if (
