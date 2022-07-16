@@ -55,9 +55,11 @@ export class InstallAction extends BaseInstallAction {
       parameterLongName: '--ignore-scripts',
       description:
         'Do not execute any install lifecycle scripts specified in package.json files and its' +
-        ' dependencies when "rush install". Running with this flag makes your installing faster. Later,' +
-        ' you can run "rush install" to run all ignored scripts. Moreover, you can partial install such as' +
-        ' "rush install --to <package>" to run ignored scripts of the dependencies of the selected projects.'
+        ' dependencies when "rush install". Running with this flag leaves your installation in a uncompleted' +
+        ' state, you need to run without this flag again to complete a full installation. Meanwhile, it makes' +
+        ' your installing faster. Later, you can run "rush install" to run all ignored scripts. Moreover, you' +
+        ' can partial install such as "rush install --to <package>" to run ignored scripts of the dependencies' +
+        ' of the selected projects.'
     });
   }
 
