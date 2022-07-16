@@ -58,10 +58,12 @@ export class UpdateAction extends BaseInstallAction {
     this._ignoreScriptsParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-scripts',
       description:
-        'Do not execute any install lifecycle scripts specified in package.json files and its dependencies' +
-        ' when "rush update". Running with this flag makes your installing faster. Later, you can run' +
-        ' "rush update" or "rush install" to run all ignored scripts. Moreover, you can run partial install' +
-        ' such as "rush install --to <package>" to run ignored scripts for the selected projects.'
+        'Do not execute any install lifecycle scripts specified in package.json files and its' +
+        ' dependencies when "rush update". Running with this flag leaves your installation in a uncompleted' +
+        ' state, you need to run this command without this flag again or run "rush install" to complete a ' +
+        ' full installation. Meanwhile, it makes faster retries on running install lifecycle scripts. You' +
+        ' can partial install such as "rush install --to <package>" to run the ignored scripts of the' +
+        ' dependencies of the selected projects.'
     });
   }
 
