@@ -30,10 +30,10 @@ export interface IRunLinterOptions {
   /**
    * The set of files that TypeScript has compiled since the last compilation.
    */
-  changedFiles: Set<IExtendedSourceFile>;
+  changedFiles: ReadonlySet<IExtendedSourceFile>;
 }
 
-interface ITsLintCacheData {
+interface ILinterCacheData {
   /**
    * The TSLint version and a hash of the TSLint config files. If either changes,
    * the cache is invalidated.
@@ -86,25 +86,25 @@ export abstract class LinterBase<TLintResult> {
     }
     const hashSuffix: string = fileHash.digest('base64').replace(/\+/g, '-').replace(/\//g, '_').slice(0, 8);
 
-    const tslintConfigVersion: string = await this.getCacheVersionAsync();
-    const cacheFilePath: string = path.resolve(
+    const linterCacheVersion: string = await this.getCacheVersionAsync();
+    const linterCacheFilePath: string = path.resolve(
       this._buildMetadataFolderPath,
       `_${this._linterName}-${hashSuffix}.json`
     );
 
-    let tslintCacheData: ITsLintCacheData | undefined;
+    let linterCacheData: ILinterCacheData | undefined;
     try {
-      tslintCacheData = await JsonFile.loadAsync(cacheFilePath);
+      linterCacheData = await JsonFile.loadAsync(linterCacheFilePath);
     } catch (e) {
       if (FileSystem.isNotExistError(e as Error)) {
-        tslintCacheData = undefined;
+        linterCacheData = undefined;
       } else {
         throw e;
       }
     }
 
     const cachedNoFailureFileVersions: Map<string, string> = new Map<string, string>(
-      tslintCacheData?.cacheVersion === tslintConfigVersion ? tslintCacheData.fileVersions : []
+      linterCacheData?.cacheVersion === linterCacheVersion ? linterCacheData.fileVersions : []
     );
 
     const newNoFailureFileVersions: Map<string, string> = new Map<string, string>();
@@ -148,18 +148,16 @@ export abstract class LinterBase<TLintResult> {
 
     this.lintingFinished(lintFailures);
 
-    const updatedTslintCacheData: ITsLintCacheData = {
-      cacheVersion: tslintConfigVersion,
+    const updatedTslintCacheData: ILinterCacheData = {
+      cacheVersion: linterCacheVersion,
       fileVersions: Array.from(newNoFailureFileVersions)
     };
-    await JsonFile.saveAsync(updatedTslintCacheData, cacheFilePath, { ensureFolderExists: true });
+    await JsonFile.saveAsync(updatedTslintCacheData, linterCacheFilePath, { ensureFolderExists: true });
 
     const duration: number = performance.now() - startTime;
 
     this._terminal.writeVerboseLine(`Lint: ${duration}ms (${fileCount} files)`);
   }
-
-  public abstract reportFailures(): void;
 
   protected abstract getCacheVersionAsync(): Promise<string>;
 

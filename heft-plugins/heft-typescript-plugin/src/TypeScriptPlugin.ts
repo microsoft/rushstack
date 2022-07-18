@@ -16,7 +16,7 @@ import type {
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 
 /**
- * The name of the plugin, as specified in heft-plugin.json.
+ * The name of the plugin, as specified in heft-plugin.json
  *
  * @public
  */
@@ -105,14 +105,14 @@ export interface IPartialTsconfig {
  */
 export interface IChangedFilesHookOptions {
   program: TTypescript.Program;
-  changedFiles?: Set<TTypescript.SourceFile>;
+  changedFiles?: ReadonlySet<TTypescript.SourceFile>;
 }
 
 /**
  * @beta
  */
 export interface ITypeScriptPluginAccessor {
-  readonly onChangedFilesHook?: SyncHook<IChangedFilesHookOptions>;
+  readonly onChangedFilesHook: SyncHook<IChangedFilesHookOptions>;
 }
 
 let _typeScriptConfigurationFileLoader: ConfigurationFile<ITypeScriptConfigurationJson> | undefined;
@@ -359,10 +359,13 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       // watchMode: watchMode,
       maxWriteParallelism: typeScriptConfigurationJson?.maxWriteParallelism || 50,
       scopedLogger: taskSession.logger,
-      emitChangedFilesCallback: (program: TTypescript.Program, changedFiles?: Set<TTypescript.SourceFile>) => {
+      emitChangedFilesCallback: (
+        program: TTypescript.Program,
+        changedFiles?: Set<TTypescript.SourceFile>
+      ) => {
         // Provide the typescript program dependent plugins
-        if (this.accessor.onChangedFilesHook!.isUsed()) {
-          this.accessor.onChangedFilesHook!.call({ program, changedFiles });
+        if (this.accessor.onChangedFilesHook.isUsed()) {
+          this.accessor.onChangedFilesHook.call({ program, changedFiles });
         }
       }
     };

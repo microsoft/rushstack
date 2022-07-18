@@ -16,7 +16,6 @@ import type {
 
 import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
-import type { LinterBase } from './LinterBase';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
 const PLUGIN_NAME: string = 'LintPlugin';
@@ -25,7 +24,7 @@ const ESLINTRC_JS_FILENAME: string = '.eslintrc.js';
 const ESLINTRC_CJS_FILENAME: string = '.eslintrc.cjs';
 
 export default class LintPlugin implements IHeftTaskPlugin {
-  private readonly _lintingPromises: Promise<LinterBase<unknown>[]>[] = [];
+  private readonly _lintingPromises: Promise<void>[] = [];
 
   // These are initliazed by _initAsync
   private _initPromise!: Promise<void>;
@@ -41,41 +40,47 @@ export default class LintPlugin implements IHeftTaskPlugin {
       TYPESCRIPT_PLUGIN_NAME,
       (accessor: ITypeScriptPluginAccessor) => {
         // Hook into the changed files hook to kick off linting, which will be awaited in the run hook
-        accessor.onChangedFilesHook?.tap(PLUGIN_NAME, (changedFilesHookOptions: IChangedFilesHookOptions) => {
-          this._lintingPromises.push(
-            this._lintAsync(
-              taskSession,
-              heftConfiguration,
-              changedFilesHookOptions.program as IExtendedProgram,
-              changedFilesHookOptions.changedFiles as Set<IExtendedSourceFile>
-            )
-          );
+        accessor.onChangedFilesHook.tap(PLUGIN_NAME, (changedFilesHookOptions: IChangedFilesHookOptions) => {
+          this._lintingPromises.push((async () => {
+            // Ensure that we have initialized. This promise is cached, so calling init
+            // multiple times will only init once.
+            let linterInitialized: boolean = false;
+            try {
+              await this._ensureInitializedAsync(taskSession, heftConfiguration);
+              linterInitialized = true;
+            } catch (e) {
+              // Swwallow the error, but avoid running the linter. The call to ensure the
+              // linter is initialized returns a memoized promise. We also ensure that the
+              // linters are initialized in the run hook. In this way, we can ensure that
+              // the init error is thrown a single time in the run hook, instead of multiple
+              // times in the changed files hook.
+            }
+            if (linterInitialized) {
+              await this._lintAsync(
+                taskSession,
+                heftConfiguration,
+                changedFilesHookOptions.program as IExtendedProgram,
+                changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
+              );
+            }
+          })());
         });
       }
     );
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
-      // Run init again. Since we are intentionally swallowing init errors in the linting promises,
-      // we will await the init here in order to ensure that init errors bubble up.
-      await this._initAsync(taskSession, heftConfiguration);
+      // Ensure we are initialized. Since we are intentionally swallowing the init errors in
+      // the onChangedFilesHook tap, we will call _ensureInitializedAsync again in the run hook.
+      // This allows the errors to be surfaced during lint plugin execution instead of during
+      // TypeScript plugin execution.
+      await this._ensureInitializedAsync(taskSession, heftConfiguration);
 
-      // Linter wasn't requested to run, exit early
-      if (!this._lintingPromises.length) {
-        return;
-      }
-
-      const lintingResults: LinterBase<unknown>[][] = await Promise.all(this._lintingPromises);
-
-      // Log out errors from the gathered linters
-      for (const lintingResult of lintingResults) {
-        for (const linter of lintingResult) {
-          linter.reportFailures();
-        }
-      }
+      // Run the linters to completion. Linters emit errors and warnings to the logger.
+      await Promise.all(this._lintingPromises);
     });
   }
 
-  private async _initAsync(
+  private async _ensureInitializedAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
@@ -110,17 +115,10 @@ export default class LintPlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     tsProgram: IExtendedProgram,
-    changedFiles?: Set<IExtendedSourceFile>
-  ): Promise<LinterBase<unknown>[]> {
-    try {
-      await this._initAsync(taskSession, heftConfiguration);
-    } catch {
-      // Initialization failures are handled in the run hook. For now, just return
-      return [];
-    }
-
+    changedFiles?: ReadonlySet<IExtendedSourceFile>
+  ): Promise<void> {
     // Now that we know we have initialized properly, run the linter(s)
-    const lintingPromises: Promise<LinterBase<unknown>>[] = [];
+    const lintingPromises: Promise<void>[] = [];
     if (this._eslintToolPath) {
       lintingPromises.push(
         this._runEslintAsync(
@@ -146,7 +144,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
       );
     }
 
-    return await Promise.all(lintingPromises);
+    await Promise.all(lintingPromises);
   }
 
   private async _runEslintAsync(
@@ -155,8 +153,8 @@ export default class LintPlugin implements IHeftTaskPlugin {
     eslintToolPath: string,
     eslintConfigFilePath: string,
     tsProgram: IExtendedProgram,
-    changedFiles?: Set<IExtendedSourceFile> | undefined
-  ): Promise<Eslint> {
+    changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
+  ): Promise<void> {
     const eslint: Eslint = new Eslint({
       scopedLogger: taskSession.logger,
       eslintPackagePath: eslintToolPath,
@@ -173,8 +171,6 @@ export default class LintPlugin implements IHeftTaskPlugin {
       typeScriptFilenames,
       changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
     });
-
-    return eslint;
   }
 
   private async _runTslintAsync(
@@ -183,8 +179,8 @@ export default class LintPlugin implements IHeftTaskPlugin {
     tslintToolPath: string,
     tslintConfigFilePath: string,
     tsProgram: IExtendedProgram,
-    changedFiles?: Set<IExtendedSourceFile> | undefined
-  ): Promise<Tslint> {
+    changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
+  ): Promise<void> {
     const tslint: Tslint = new Tslint({
       scopedLogger: taskSession.logger,
       tslintPackagePath: tslintToolPath,
@@ -201,8 +197,6 @@ export default class LintPlugin implements IHeftTaskPlugin {
       typeScriptFilenames,
       changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
     });
-
-    return tslint;
   }
 
   private async _resolveTslintConfigFilePathAsync(

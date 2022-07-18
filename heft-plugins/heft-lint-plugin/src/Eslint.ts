@@ -31,7 +31,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
   private _eslintPackage: typeof TEslint;
   private _eslint!: TEslint.ESLint;
-  private _lintResult!: TEslint.ESLint.LintResult[];
 
   public constructor(options: IEslintOptions) {
     super('eslint', options);
@@ -58,53 +57,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
         'The ESLint version is newer than the latest version that was tested with Heft; it may not work correctly:'
       );
       this._terminal.writeLine(this._eslintPackagePath);
-    }
-  }
-
-  public reportFailures(): void {
-    let eslintFailureCount: number = 0;
-    const errors: Error[] = [];
-    const warnings: Error[] = [];
-
-    for (const eslintFileResult of this._lintResult) {
-      for (const message of eslintFileResult.messages) {
-        eslintFailureCount++;
-        // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
-        const formattedMessage: string = message.ruleId
-          ? `(${message.ruleId}) ${message.message}`
-          : message.message;
-        const errorObject: FileError = new FileError(formattedMessage, {
-          absolutePath: eslintFileResult.filePath,
-          projectFolder: this._buildFolderPath,
-          line: message.line,
-          column: message.column
-        });
-        switch (message.severity) {
-          case EslintMessageSeverity.error: {
-            errors.push(errorObject);
-            break;
-          }
-
-          case EslintMessageSeverity.warning: {
-            warnings.push(errorObject);
-            break;
-          }
-        }
-      }
-    }
-
-    if (eslintFailureCount > 0) {
-      this._terminal.writeLine(
-        `Encountered ${eslintFailureCount} ESLint issue${eslintFailureCount > 1 ? 's' : ''}:`
-      );
-    }
-
-    for (const error of errors) {
-      this._scopedLogger.emitError(error);
-    }
-
-    for (const warning of warnings) {
-      this._scopedLogger.emitWarning(warning);
     }
   }
 
@@ -153,8 +105,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected lintingFinished(lintFailures: TEslint.ESLint.LintResult[]): void {
-    this._lintResult = lintFailures;
-
     let omittedRuleCount: number = 0;
     for (const [ruleName, duration] of this._eslintTimings.entries()) {
       if (duration > 0) {
@@ -166,6 +116,43 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
     if (omittedRuleCount > 0) {
       this._terminal.writeVerboseLine(`${omittedRuleCount} rules took 0ms`);
+    }
+
+    const errors: Error[] = [];
+    const warnings: Error[] = [];
+
+    for (const eslintFailure of lintFailures) {
+      for (const message of eslintFailure.messages) {
+        // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
+        const formattedMessage: string = message.ruleId
+          ? `(${message.ruleId}) ${message.message}`
+          : message.message;
+        const errorObject: FileError = new FileError(formattedMessage, {
+          absolutePath: eslintFailure.filePath,
+          projectFolder: this._buildFolderPath,
+          line: message.line,
+          column: message.column
+        });
+        switch (message.severity) {
+          case EslintMessageSeverity.error: {
+            errors.push(errorObject);
+            break;
+          }
+
+          case EslintMessageSeverity.warning: {
+            warnings.push(errorObject);
+            break;
+          }
+        }
+      }
+    }
+
+    for (const error of errors) {
+      this._scopedLogger.emitError(error);
+    }
+
+    for (const warning of warnings) {
+      this._scopedLogger.emitWarning(warning);
     }
   }
 

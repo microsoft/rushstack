@@ -20,7 +20,6 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   private _linter!: IExtendedLinter;
   private _enabledRules!: TTslint.IRule[];
   private _ruleSeverityMap!: Map<string, TTslint.RuleSeverity>;
-  protected _lintResult!: TTslint.LintResult;
 
   public constructor(options: ITslintOptions) {
     super('tslint', options);
@@ -83,38 +82,6 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     this._terminal.writeLine(`Using TSLint version ${this._tslint.Linter.VERSION}`);
   }
 
-  public reportFailures(): void {
-    if (this._lintResult.failures?.length) {
-      this._terminal.writeWarningLine(
-        `Encountered ${this._lintResult.failures.length} TSLint issues${
-          this._lintResult.failures.length > 1 ? 's' : ''
-        }:`
-      );
-
-      for (const tslintFailure of this._lintResult.failures) {
-        const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
-        const formattedFailure: string = `(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`;
-        const errorObject: FileError = new FileError(formattedFailure, {
-          absolutePath: tslintFailure.getFileName(),
-          projectFolder: this._buildFolderPath,
-          line: line + 1,
-          column: character + 1
-        });
-        switch (tslintFailure.getRuleSeverity()) {
-          case 'error': {
-            this._scopedLogger.emitError(errorObject);
-            break;
-          }
-
-          case 'warning': {
-            this._scopedLogger.emitWarning(errorObject);
-            break;
-          }
-        }
-      }
-    }
-  }
-
   protected async getCacheVersionAsync(): Promise<string> {
     const tslintConfigHash: crypto.Hash = await Tslint.getConfigHashAsync(
       this._linterConfigFilePath,
@@ -167,7 +134,32 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
 
   protected lintingFinished(failures: TTslint.RuleFailure[]): void {
     this._linter.failures = failures;
-    this._lintResult = this._linter.getResult();
+    const lintResult: TTslint.LintResult = this._linter.getResult();
+
+    // Report linter errors and warnings to the logger
+    if (lintResult.failures.length) {
+      for (const tslintFailure of lintResult.failures) {
+        const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
+        const formattedFailure: string = `(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`;
+        const errorObject: FileError = new FileError(formattedFailure, {
+          absolutePath: tslintFailure.getFileName(),
+          projectFolder: this._buildFolderPath,
+          line: line + 1,
+          column: character + 1
+        });
+        switch (tslintFailure.getRuleSeverity()) {
+          case 'error': {
+            this._scopedLogger.emitError(errorObject);
+            break;
+          }
+
+          case 'warning': {
+            this._scopedLogger.emitWarning(errorObject);
+            break;
+          }
+        }
+      }
+    }
   }
 
   protected async isFileExcludedAsync(filePath: string): Promise<boolean> {
