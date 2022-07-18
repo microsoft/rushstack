@@ -41,40 +41,20 @@ export default class LintPlugin implements IHeftTaskPlugin {
       (accessor: ITypeScriptPluginAccessor) => {
         // Hook into the changed files hook to kick off linting, which will be awaited in the run hook
         accessor.onChangedFilesHook.tap(PLUGIN_NAME, (changedFilesHookOptions: IChangedFilesHookOptions) => {
-          this._lintingPromises.push((async () => {
-            // Ensure that we have initialized. This promise is cached, so calling init
-            // multiple times will only init once.
-            let linterInitialized: boolean = false;
-            try {
-              await this._ensureInitializedAsync(taskSession, heftConfiguration);
-              linterInitialized = true;
-            } catch (e) {
-              // Swwallow the error, but avoid running the linter. The call to ensure the
-              // linter is initialized returns a memoized promise. We also ensure that the
-              // linters are initialized in the run hook. In this way, we can ensure that
-              // the init error is thrown a single time in the run hook, instead of multiple
-              // times in the changed files hook.
-            }
-            if (linterInitialized) {
-              await this._lintAsync(
-                taskSession,
-                heftConfiguration,
-                changedFilesHookOptions.program as IExtendedProgram,
-                changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
-              );
-            }
-          })());
+          const lintingPromise: Promise<void> = this._lintAsync(
+            taskSession,
+            heftConfiguration,
+            changedFilesHookOptions.program as IExtendedProgram,
+            changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
+          );
+          lintingPromise.catch(() => { /* Suppress unhandled promise rejection */ });
+          // Hold on to the original promise, which will throw in the run hook if it unexpectedly fails
+          this._lintingPromises.push(lintingPromise);
         });
       }
     );
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
-      // Ensure we are initialized. Since we are intentionally swallowing the init errors in
-      // the onChangedFilesHook tap, we will call _ensureInitializedAsync again in the run hook.
-      // This allows the errors to be surfaced during lint plugin execution instead of during
-      // TypeScript plugin execution.
-      await this._ensureInitializedAsync(taskSession, heftConfiguration);
-
       // Run the linters to completion. Linters emit errors and warnings to the logger.
       await Promise.all(this._lintingPromises);
     });
@@ -117,6 +97,10 @@ export default class LintPlugin implements IHeftTaskPlugin {
     tsProgram: IExtendedProgram,
     changedFiles?: ReadonlySet<IExtendedSourceFile>
   ): Promise<void> {
+    // Ensure that we have initialized. This promise is cached, so calling init
+    // multiple times will only init once.
+    await this._ensureInitializedAsync(taskSession, heftConfiguration);
+
     // Now that we know we have initialized properly, run the linter(s)
     const lintingPromises: Promise<void>[] = [];
     if (this._eslintToolPath) {
