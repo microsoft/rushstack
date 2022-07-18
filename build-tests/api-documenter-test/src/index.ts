@@ -53,6 +53,28 @@ export function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1 
 }
 
 /**
+ * @public
+ */
+export type MyType = {
+  /**
+   * A name example
+   */
+  name: string;
+};
+
+/**
+ * @public
+ */
+export type MyUnionType =
+  | {
+      /**
+       * A name example
+       */
+      name: string;
+    }
+  | { bar: number };
+
+/**
  * A top-level namespace
  * @public
  */

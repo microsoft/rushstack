@@ -159,6 +159,11 @@ export interface ISimpleInterface {
 export { MAX_UNSIGNED_VALUE }
 
 // @public (undocumented)
+export type MyType = {
+    name: string;
+};
+
+// @public (undocumented)
 export namespace NamespaceContainingVariable {
     let // @internal (undocumented)
     variable: object[];
@@ -202,6 +207,5 @@ export const VARIABLE: string;
 
 // @public
 export function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
-
 
 ```

@@ -873,7 +873,7 @@ export interface IApiStaticMixinOptions extends IApiItemOptions {
 }
 
 // @public
-export interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions {
+export interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiItemContainerMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions {
     // (undocumented)
     typeTokenRange: IExcerptTokenRange;
 }

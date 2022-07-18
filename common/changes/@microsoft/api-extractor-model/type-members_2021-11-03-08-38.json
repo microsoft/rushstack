@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Support documenting members of type aliases",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}
