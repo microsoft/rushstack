@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update the `common/config/rush/.npmrc` file in the `rush init` template to disble hoisting of any packages during `rush install`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
