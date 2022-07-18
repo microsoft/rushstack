@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
- export type {
+export type {
   IEmitModuleKind,
   IStaticAssetsCopyConfiguration,
   ITypeScriptConfigurationJson,
@@ -17,4 +17,8 @@
   ITypeScriptPluginAccessor
 } from './TypeScriptPlugin';
 
-export { loadTypeScriptConfigurationFileAsync, loadPartialTsconfigFileAsync } from './TypeScriptPlugin';
+export {
+  PLUGIN_NAME as TypeScriptPluginName,
+  loadTypeScriptConfigurationFileAsync,
+  loadPartialTsconfigFileAsync
+} from './TypeScriptPlugin';

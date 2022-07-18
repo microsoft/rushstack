@@ -8,7 +8,11 @@ import type {
   IHeftTaskRunHookOptions,
   IScopedLogger
 } from '@rushstack/heft';
-import type { IChangedFilesHookOptions, ITypeScriptPluginAccessor } from '@rushstack/heft-typescript-plugin';
+import type {
+  TypeScriptPluginName,
+  IChangedFilesHookOptions,
+  ITypeScriptPluginAccessor
+} from '@rushstack/heft-typescript-plugin';
 
 import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
@@ -16,6 +20,7 @@ import type { LinterBase } from './LinterBase';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
 const PLUGIN_NAME: string = 'LintPlugin';
+const TYPESCRIPT_PLUGIN_NAME: typeof TypeScriptPluginName = 'TypeScriptPlugin';
 const ESLINTRC_JS_FILENAME: string = '.eslintrc.js';
 const ESLINTRC_CJS_FILENAME: string = '.eslintrc.cjs';
 
@@ -33,7 +38,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
     // Use the changed files hook to kick off linting asynchronously
     taskSession.requestAccessToPluginByName(
       '@rushstack/heft-typescript-plugin',
-      'TypeScriptPlugin',
+      TYPESCRIPT_PLUGIN_NAME,
       (accessor: ITypeScriptPluginAccessor) => {
         // Hook into the changed files hook to kick off linting, which will be awaited in the run hook
         accessor.onChangedFilesHook?.tap(PLUGIN_NAME, (changedFilesHookOptions: IChangedFilesHookOptions) => {

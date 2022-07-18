@@ -15,7 +15,12 @@ import type {
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 
-const PLUGIN_NAME: 'typescript' = 'typescript';
+/**
+ * The name of the plugin, as specified in heft-plugin.json.
+ *
+ * @public
+ */
+export const PLUGIN_NAME: 'TypeScriptPlugin' = 'TypeScriptPlugin';
 
 /**
  * @beta
@@ -226,8 +231,6 @@ export async function loadPartialTsconfigFileAsync(
 }
 
 export default class TypeScriptPlugin implements IHeftTaskPlugin {
-  public readonly pluginName: string = PLUGIN_NAME;
-
   public accessor: ITypeScriptPluginAccessor = {
     onChangedFilesHook: new SyncHook<IChangedFilesHookOptions>(['changedFilesHookOptions'])
   };
