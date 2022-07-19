@@ -43,7 +43,7 @@ export class UpdateAction extends BaseInstallAction {
   protected onDefineParameters(): void {
     super.onDefineParameters();
 
-    if (this.rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.rushConfiguration?.hasSplitWorkspaceProject) {
       // Partial update is supported only when there is split workspace project
       this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
         // Include lockfile processing since this expands the selection, and we need to select
