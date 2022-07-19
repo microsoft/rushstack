@@ -16,15 +16,15 @@ import type {
 import { FileSystem, Import, SubprocessTerminator } from '@rushstack/node-core-library';
 import type {
   PluginName as Webpack4PluginName,
-  IWebpackPluginAccessor as IWebpack4PluginAccessor,
+  IWebpackPluginAccessor as IWebpack4PluginAccessor
 } from '@rushstack/heft-webpack4-plugin';
 import type {
   PluginName as Webpack5PluginName,
-  IWebpackPluginAccessor as IWebpack5PluginAccessor,
+  IWebpackPluginAccessor as IWebpack5PluginAccessor
 } from '@rushstack/heft-webpack5-plugin';
 
 const PLUGIN_NAME: 'ServerlessStackPlugin' = 'ServerlessStackPlugin';
-const WEBPACK_PLUGIN_NAME: typeof Webpack4PluginName | typeof Webpack5PluginName = 'WebpackPlugin';
+const WEBPACK_PLUGIN_NAME: typeof Webpack4PluginName & typeof Webpack5PluginName = 'WebpackPlugin';
 const SST_CLI_PACKAGE_NAME: string = '@serverless-stack/cli';
 
 export default class ServerlessStackPlugin implements IHeftTaskPlugin {
@@ -40,7 +40,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
 
     // Only tap if the --sst flag is set.
     if (sstParameter.value) {
-      const configureWebpackTapOptions: { name: string, stage: number } = {
+      const configureWebpackTapOptions: { name: string; stage: number } = {
         name: PLUGIN_NAME,
         stage: Number.MAX_SAFE_INTEGER
       };
