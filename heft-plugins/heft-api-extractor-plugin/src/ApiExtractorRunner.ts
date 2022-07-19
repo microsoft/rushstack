@@ -40,6 +40,9 @@ export interface IApiExtractorRunnerConfiguration {
   scopedLogger: IScopedLogger;
 }
 
+const MIN_SUPPORTED_MAJOR_VERSION: number = 7;
+const MIN_SUPPORTED_MINOR_VERSION: number = 10;
+
 export class ApiExtractorRunner {
   private readonly _configuration: IApiExtractorRunnerConfiguration;
   private readonly _scopedLogger: IScopedLogger;
@@ -61,8 +64,11 @@ export class ApiExtractorRunner {
     const apiExtractorVersion: semver.SemVer | null = semver.parse(this._apiExtractor.Extractor.version);
     if (
       !apiExtractorVersion ||
-      apiExtractorVersion.major < 7 ||
-      (apiExtractorVersion.major === 7 && apiExtractorVersion.minor < 10)
+      apiExtractorVersion.major < MIN_SUPPORTED_MAJOR_VERSION ||
+      (
+        apiExtractorVersion.major === MIN_SUPPORTED_MAJOR_VERSION &&
+        apiExtractorVersion.minor < MIN_SUPPORTED_MINOR_VERSION
+      )
     ) {
       this._scopedLogger.emitWarning(new Error(`Heft requires API Extractor version 7.10.0 or newer`));
     }

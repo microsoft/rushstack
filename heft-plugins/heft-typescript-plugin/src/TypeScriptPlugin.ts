@@ -325,7 +325,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   ): Promise<void> {
     const terminal: ITerminal = taskSession.logger.terminal;
 
-    const typeScriptToolPath: string = await heftConfiguration.rigToolResolver.resolvePackageAsync(
+    const typeScriptToolPath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
       'typescript',
       terminal
     );

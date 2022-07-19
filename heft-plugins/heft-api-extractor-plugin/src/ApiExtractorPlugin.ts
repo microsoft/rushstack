@@ -13,10 +13,14 @@ import { ConfigurationFile } from '@rushstack/heft-config-file';
 
 import { ApiExtractorRunner } from './ApiExtractorRunner';
 
+// eslint-disable-next-line @rushstack/no-new-null
+const UNINITIALIZED: null = null;
+
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const TASK_CONFIG_SCHEMA_PATH: string = `${__dirname}/schemas/api-extractor-task.schema.json`;
 const TASK_CONFIG_RELATIVE_PATH: string = './config/api-extractor-task.json';
 const EXTRACTOR_CONFIG_FILENAME: typeof TApiExtractor.ExtractorConfig.FILENAME = 'api-extractor.json';
+const LEGACY_EXTRACTOR_CONFIG_RELATIVE_PATH: string = `./${EXTRACTOR_CONFIG_FILENAME}`;
 const EXTRACTOR_CONFIG_RELATIVE_PATH: string = `./config/${EXTRACTOR_CONFIG_FILENAME}`;
 
 export interface IApiExtractorConfigurationResult {
@@ -40,7 +44,7 @@ export interface IApiExtractorTaskConfiguration {
 
 export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   private _apiExtractor: typeof TApiExtractor | undefined;
-  private _apiExtractorConfigurationFilePath: string | undefined | null = null;
+  private _apiExtractorConfigurationFilePath: string | undefined | typeof UNINITIALIZED = UNINITIALIZED;
   private _apiExtractorTaskConfigurationFileLoader:
     | ConfigurationFile<IApiExtractorTaskConfiguration>
     | undefined;
@@ -76,12 +80,26 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   }
 
   private async _getApiExtractorConfigurationFilePathAsync(
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<string | undefined> {
-    // When null, we have yet to set the value. When undefined, the file could not be resolved.
-    if (this._apiExtractorConfigurationFilePath === null) {
+    if (this._apiExtractorConfigurationFilePath === UNINITIALIZED) {
       this._apiExtractorConfigurationFilePath =
         await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(EXTRACTOR_CONFIG_RELATIVE_PATH);
+      if (this._apiExtractorConfigurationFilePath === undefined) {
+        this._apiExtractorConfigurationFilePath =
+          await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(
+            LEGACY_EXTRACTOR_CONFIG_RELATIVE_PATH
+          );
+        if (this._apiExtractorConfigurationFilePath !== undefined) {
+          taskSession.logger.emitWarning(
+            new Error(
+              `The "${LEGACY_EXTRACTOR_CONFIG_RELATIVE_PATH}" configuration file path is not supported ` +
+                `in Heft. Please move it to "${EXTRACTOR_CONFIG_RELATIVE_PATH}".`
+            )
+          );
+        }
+      }
     }
     return this._apiExtractorConfigurationFilePath;
   }
@@ -95,7 +113,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     // including support for rig.json.  However, Heft does not load the @microsoft/api-extractor package at all
     // unless it sees a config/api-extractor.json file.  Thus we need to do our own lookup here.
     const apiExtractorConfigurationFilePath: string | undefined =
-      await this._getApiExtractorConfigurationFilePathAsync(heftConfiguration);
+      await this._getApiExtractorConfigurationFilePathAsync(taskSession, heftConfiguration);
     if (!apiExtractorConfigurationFilePath) {
       return undefined;
     }
@@ -127,7 +145,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     heftConfiguration: HeftConfiguration
   ): Promise<typeof TApiExtractor> {
     if (!this._apiExtractor) {
-      const apiExtractorPackagePath: string = await heftConfiguration.rigToolResolver.resolvePackageAsync(
+      const apiExtractorPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         '@microsoft/api-extractor',
         taskSession.logger.terminal
       );
@@ -204,7 +222,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
 
     let typescriptPackagePath: string | undefined;
     if (apiExtractorTaskConfiguration?.useProjectTypescriptVersion) {
-      typescriptPackagePath = await heftConfiguration.rigToolResolver.resolvePackageAsync(
+      typescriptPackagePath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'typescript',
         taskSession.logger.terminal
       );
