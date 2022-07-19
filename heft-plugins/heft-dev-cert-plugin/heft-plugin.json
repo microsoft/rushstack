@@ -5,10 +5,6 @@
 
   "taskPlugins": [
     {
-      "pluginName": "ConfigureWebpackDevServerPlugin",
-      "entryPoint": "./lib/ConfigureWebpackDevServerPlugin"
-    },
-    {
       "pluginName": "TrustDevCertificatePlugin",
       "entryPoint": "./lib/TrustDevCertificatePlugin"
     },
