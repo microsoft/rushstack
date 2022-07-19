@@ -47,11 +47,6 @@
       "type": "boolean"
     },
 
-    "emitFolderNameForTests": {
-      "description": "Specifies the intermediary folder that tests will use.  Because Jest uses the Node.js runtime to execute tests, the module format must be CommonJS. The default value is \"lib\".",
-      "type": "string"
-    },
-
     "buildProjectReferences": {
       "description": "If true, enable behavior analogous to the \"tsc --build\" command. Will build projects referenced by the main project. Note that this will effectively enable \"noEmitOnError\".",
       "type": "boolean"

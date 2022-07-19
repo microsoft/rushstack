@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as TTslint from 'tslint';
-import { IExtendedSourceFile } from './TypeScriptInternals';
+import type * as TTypescript from 'typescript';
 
 type TrimmedLinter = Omit<TTslint.Linter, 'getAllFailures' | 'getEnabledRules' | 'failures'>;
 export interface IExtendedLinter extends TrimmedLinter {
@@ -14,7 +14,7 @@ export interface IExtendedLinter extends TrimmedLinter {
   /**
    * https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L207-L210
    */
-  getAllFailures(sourceFile: IExtendedSourceFile, enabledRules: TTslint.IRule[]): TTslint.RuleFailure[];
+  getAllFailures(sourceFile: TTypescript.SourceFile, enabledRules: TTslint.IRule[]): TTslint.RuleFailure[];
 
   /**
    * https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L303-L306
