@@ -1,15 +1,13 @@
 {
   "name": "@rushstack/heft-api-extractor-plugin",
   "version": "0.1.0",
-  "description": "A Heft plugin for using API Extractor. Intended for use with @rushstack/heft-typescript-plugin",
+  "description": "A Heft plugin for API Extractor",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "heft-plugins/heft-api-extractor-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-api-extractor-plugin.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged build --clean",
@@ -29,7 +27,6 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-legacy": "npm:@rushstack/heft@0.45.14",
     "@rushstack/heft-node-rig": "1.9.15",
     "@types/heft-jest": "1.0.1",

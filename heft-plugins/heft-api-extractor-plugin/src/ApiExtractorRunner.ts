@@ -41,10 +41,10 @@ export interface IApiExtractorRunnerConfiguration {
 }
 
 export class ApiExtractorRunner {
-  private _configuration: IApiExtractorRunnerConfiguration;
-  private _scopedLogger: IScopedLogger;
-  private _terminal: ITerminal;
-  private _apiExtractor: typeof TApiExtractor;
+  private readonly _configuration: IApiExtractorRunnerConfiguration;
+  private readonly _scopedLogger: IScopedLogger;
+  private readonly _terminal: ITerminal;
+  private readonly _apiExtractor: typeof TApiExtractor;
 
   public constructor(configuration: IApiExtractorRunnerConfiguration) {
     this._configuration = configuration;
@@ -128,25 +128,10 @@ export class ApiExtractorRunner {
       extractorOptions
     );
 
-    const { errorCount, warningCount } = apiExtractorResult;
-    if (errorCount > 0) {
-      let message: string = `API Extractor completed with ${errorCount} error${errorCount > 1 ? 's' : ''}`;
-      if (warningCount > 0) {
-        message += ` and ${warningCount} warning${warningCount > 1 ? 's' : ''}`;
-      }
-      this._terminal.writeErrorLine(message);
-    } else if (warningCount > 0) {
-      this._terminal.writeWarningLine(
-        `API Extractor completed with ${warningCount} warning${warningCount > 1 ? 's' : ''}`
-      );
-    }
-
     if (!apiExtractorResult.succeeded) {
-      throw new Error('API Extractor failed.');
-    }
-
-    if (apiExtractorResult.apiReportChanged && this._configuration.production) {
-      throw new Error('API Report changed.');
+      this._scopedLogger.emitError(new Error('API Extractor failed.'));
+    } else if (apiExtractorResult.apiReportChanged && this._configuration.production) {
+      this._scopedLogger.emitError(new Error('API Report changed while in production mode.'));
     }
   }
 }
