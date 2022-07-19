@@ -45,7 +45,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
         stage: Number.MAX_SAFE_INTEGER
       };
       const configureWebpackTap: () => Promise<null> = async () => {
-        this._logger.terminal.writeVerboseLine(
+        this._logger.terminal.writeLine(
           'The command line includes "--sst", redirecting Webpack to Serverless Stack'
         );
         return null;
