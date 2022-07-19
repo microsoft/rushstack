@@ -14,76 +14,55 @@ import type {
   IScopedLogger
 } from '@rushstack/heft';
 import { FileSystem, Import, SubprocessTerminator } from '@rushstack/node-core-library';
-import { PluginName as Webpack4PluginName } from '@rushstack/heft-webpack4-plugin';
 import type {
+  PluginName as Webpack4PluginName,
   IWebpackPluginAccessor as IWebpack4PluginAccessor,
-  IWebpackConfiguration as IWebpack4Configuration
 } from '@rushstack/heft-webpack4-plugin';
-import { PluginName as Webpack5PluginName } from '@rushstack/heft-webpack5-plugin';
 import type {
+  PluginName as Webpack5PluginName,
   IWebpackPluginAccessor as IWebpack5PluginAccessor,
-  IWebpackConfiguration as IWebpack5Configuration
 } from '@rushstack/heft-webpack5-plugin';
 
-const PLUGIN_NAME: string = 'ServerlessStackPlugin';
+const PLUGIN_NAME: 'ServerlessStackPlugin' = 'ServerlessStackPlugin';
+const WEBPACK_PLUGIN_NAME: typeof Webpack4PluginName | typeof Webpack5PluginName = 'WebpackPlugin';
 const SST_CLI_PACKAGE_NAME: string = '@serverless-stack/cli';
 
-export interface IServerlessStackPluginOptions {}
-
-export default class ServerlessStackPlugin implements IHeftTaskPlugin<IServerlessStackPluginOptions> {
+export default class ServerlessStackPlugin implements IHeftTaskPlugin {
   private _logger!: IScopedLogger;
 
-  public apply(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    options: IServerlessStackPluginOptions
-  ): void {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     this._logger = taskSession.logger;
 
     // Once https://github.com/serverless-stack/serverless-stack/issues/1537 is fixed, we may be
     // eliminate the need for this parameter.
-    const sstParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
-      '--sst'
-    ) as CommandLineFlagParameter;
-
-    const sstStageParameter: CommandLineStringParameter = taskSession.parametersByLongName.get(
-      '--sst-stage'
-    ) as CommandLineStringParameter;
+    const sstParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--sst');
+    const sstStageParameter: CommandLineStringParameter = taskSession.getStringParameter('--sst-stage');
 
     // Only tap if the --sst flag is set.
     if (sstParameter.value) {
+      const configureWebpackTapOptions: { name: string, stage: number } = {
+        name: PLUGIN_NAME,
+        stage: Number.MAX_SAFE_INTEGER
+      };
+      const configureWebpackTap: () => Promise<null> = async () => {
+        this._logger.terminal.writeVerboseLine(
+          'The command line includes "--sst", redirecting Webpack to Serverless Stack'
+        );
+        return null;
+      };
+
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack4-plugin',
-        Webpack4PluginName,
-        async (accessor: IWebpack4PluginAccessor) => {
-          accessor.onConfigureWebpackHook?.tapPromise(
-            { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-            async (config: IWebpack4Configuration | null) => {
-              // Discard Webpack's configuration to prevent Webpack from running
-              this._logger.terminal.writeVerboseLine(
-                'The command line includes "--sst", redirecting Webpack to Serverless Stack'
-              );
-              return null;
-            }
-          );
-        }
+        WEBPACK_PLUGIN_NAME,
+        async (accessor: IWebpack4PluginAccessor) =>
+          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
       );
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack5-plugin',
-        Webpack5PluginName,
-        async (accessor: IWebpack5PluginAccessor) => {
-          accessor.onConfigureWebpackHook?.tapPromise(
-            { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-            async (config: IWebpack5Configuration | null) => {
-              // Discard Webpack's configuration to prevent Webpack from running
-              this._logger.terminal.writeVerboseLine(
-                'The command line includes "--sst", redirecting Webpack to Serverless Stack'
-              );
-              return null;
-            }
-          );
-        }
+        WEBPACK_PLUGIN_NAME,
+        async (accessor: IWebpack5PluginAccessor) =>
+          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
       );
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
@@ -93,7 +72,6 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin<IServerles
           heftConfiguration,
           sstStage: sstStageParameter.value,
           debugMode: taskSession.debugMode,
-          // serveMode:
           verbose: runOptions.verbose
         });
       });
@@ -115,19 +93,26 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin<IServerles
         baseFolderPath: options.heftConfiguration.buildFolder
       });
     } catch (e) {
-      throw new Error(
-        `The ${options.taskSession.taskName} task cannot start because your project does not seem to have ` +
-          `a dependency on the "${SST_CLI_PACKAGE_NAME}" package: ` +
-          e.message
+      this._logger.emitError(
+        new Error(
+          `The ${options.taskSession.taskName} task cannot start because your project does not seem to have ` +
+            `a dependency on the "${SST_CLI_PACKAGE_NAME}" package: ` +
+            e.message
+        )
       );
+      return;
     }
 
     const sstCliEntryPoint: string = path.join(sstCliPackagePath, 'bin/scripts.js');
-    if (!(await FileSystem.existsAsync(sstCliEntryPoint))) {
-      throw new Error(
-        `The ${options.taskSession.taskName} task cannot start because the entry point was not found:\n` +
-          sstCliEntryPoint
+    const sstCliEntryPointExists: boolean = await FileSystem.existsAsync(sstCliEntryPoint);
+    if (!sstCliEntryPointExists) {
+      this._logger.emitError(
+        new Error(
+          `The ${options.taskSession.taskName} task cannot start because the entry point was not found` +
+            `at "${sstCliEntryPoint}".`
+        )
       );
+      return;
     }
 
     this._logger.terminal.writeVerboseLine('Found SST package in' + sstCliPackagePath);

@@ -5,7 +5,6 @@
     {
       "pluginName": "ServerlessStackPlugin",
       "entryPoint": "./lib/ServerlessStackPlugin",
-      "optionsSchema": "./lib/schemas/serverless-stack.schema.json",
 
       "parameterScope": "serverless-stack",
       "parameters": [
