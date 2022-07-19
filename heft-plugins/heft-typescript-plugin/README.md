@@ -1,11 +1,11 @@
-# @rushstack/heft-jest-plugin
+# @rushstack/heft-typescript-plugin
 
-This is a Heft plugin for running Jest.
+This is a Heft plugin for compiling TypeScript.
 
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/main/heft-plugins/heft-jest-plugin/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/heft-plugins/heft-typescript-plugin/CHANGELOG.md) - Find
   out what's new in the latest version
 - [@rushstack/heft](https://www.npmjs.com/package/@rushstack/heft) - Heft is a config-driven toolchain that invokes popular tools such as TypeScript, ESLint, Jest, Webpack, and API Extractor.
 
