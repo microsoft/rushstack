@@ -4,11 +4,12 @@
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as semver from 'semver';
-import * as TEslint from 'eslint';
+import type * as TTypescript from 'typescript';
+import type * as TEslint from 'eslint';
+import { performance } from 'perf_hooks';
 import { FileError } from '@rushstack/node-core-library';
 
-import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
-import { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import { LinterBase, type ILinterBaseOptions } from './LinterBase';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
@@ -26,20 +27,17 @@ const enum EslintMessageSeverity {
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private readonly _eslintPackagePath: string;
-  private readonly _eslintPackage: typeof TEslint;
-  private readonly _eslintTimings: Map<string, string> = new Map<string, string>();
+  private readonly _eslintTimings: Map<string, number> = new Map();
 
+  private _eslintPackage: typeof TEslint;
   private _eslint!: TEslint.ESLint;
-  private _eslintBaseConfiguration: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  private _lintResult!: TEslint.ESLint.LintResult[];
 
   public constructor(options: IEslintOptions) {
     super('eslint', options);
+    this._eslintPackagePath = options.eslintPackagePath;
 
     // This must happen before the rest of the linter package is loaded
     this._patchTimer(options.eslintPackagePath);
-
-    this._eslintPackagePath = options.eslintPackagePath;
     this._eslintPackage = require(options.eslintPackagePath);
   }
 
@@ -62,20 +60,75 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     }
   }
 
-  public reportFailures(): void {
-    let eslintFailureCount: number = 0;
+  protected async getCacheVersionAsync(): Promise<string> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const eslintBaseConfiguration: any = await this._eslint.calculateConfigForFile(
+      this._linterConfigFilePath
+    );
+    const eslintConfigHash: crypto.Hash = crypto
+      .createHash('sha1')
+      .update(JSON.stringify(eslintBaseConfiguration));
+    const eslintConfigVersion: string = `${this._eslintPackage.Linter.version}_${eslintConfigHash.digest(
+      'hex'
+    )}`;
+
+    return eslintConfigVersion;
+  }
+
+  protected async initializeAsync(tsProgram: TTypescript.Program): Promise<void> {
+    // Override config takes precedence over overrideConfigFile, which allows us to provide
+    // the source TypeScript program.
+    this._eslint = new this._eslintPackage.ESLint({
+      cwd: this._buildFolderPath,
+      overrideConfigFile: this._linterConfigFilePath,
+      overrideConfig: {
+        parserOptions: {
+          programs: [tsProgram]
+        }
+      }
+    });
+  }
+
+  protected async lintFileAsync(sourceFile: TTypescript.SourceFile): Promise<TEslint.ESLint.LintResult[]> {
+    const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
+      filePath: sourceFile.fileName
+    });
+
+    const failures: TEslint.ESLint.LintResult[] = [];
+    for (const lintResult of lintResults) {
+      if (lintResult.messages.length > 0) {
+        failures.push(lintResult);
+      }
+    }
+
+    return failures;
+  }
+
+  protected lintingFinished(lintFailures: TEslint.ESLint.LintResult[]): void {
+    let omittedRuleCount: number = 0;
+    for (const [ruleName, duration] of this._eslintTimings.entries()) {
+      if (duration > 0) {
+        this._terminal.writeVerboseLine(`Rule "${ruleName}" duration: ${duration}ms`);
+      } else {
+        omittedRuleCount++;
+      }
+    }
+
+    if (omittedRuleCount > 0) {
+      this._terminal.writeVerboseLine(`${omittedRuleCount} rules took 0ms`);
+    }
+
     const errors: Error[] = [];
     const warnings: Error[] = [];
 
-    for (const eslintFileResult of this._lintResult) {
-      for (const message of eslintFileResult.messages) {
-        eslintFailureCount++;
+    for (const eslintFailure of lintFailures) {
+      for (const message of eslintFailure.messages) {
         // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
         const formattedMessage: string = message.ruleId
           ? `(${message.ruleId}) ${message.message}`
           : message.message;
         const errorObject: FileError = new FileError(formattedMessage, {
-          absolutePath: eslintFileResult.filePath,
+          absolutePath: eslintFailure.filePath,
           projectFolder: this._buildFolderPath,
           line: message.line,
           column: message.column
@@ -94,78 +147,12 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       }
     }
 
-    if (eslintFailureCount > 0) {
-      this._terminal.writeLine(
-        `Encountered ${eslintFailureCount} ESLint issue${eslintFailureCount > 1 ? 's' : ''}:`
-      );
-    }
-
     for (const error of errors) {
       this._scopedLogger.emitError(error);
     }
 
     for (const warning of warnings) {
       this._scopedLogger.emitWarning(warning);
-    }
-  }
-
-  protected get cacheVersion(): string {
-    const eslintConfigHash: crypto.Hash = crypto
-      .createHash('sha1')
-      .update(JSON.stringify(this._eslintBaseConfiguration));
-    const eslintConfigVersion: string = `${this._eslintPackage.Linter.version}_${eslintConfigHash.digest(
-      'hex'
-    )}`;
-
-    return eslintConfigVersion;
-  }
-
-  protected async initializeAsync(tsProgram: IExtendedProgram): Promise<void> {
-    // Override config takes precedence over overrideConfigFile, which allows us to provide
-    // the source TypeScript program.
-    this._eslint = new this._eslintPackage.ESLint({
-      cwd: this._buildFolderPath,
-      overrideConfigFile: this._linterConfigFilePath,
-      overrideConfig: {
-        parserOptions: {
-          programs: [tsProgram]
-        }
-      }
-    });
-
-    this._eslintBaseConfiguration = await this._eslint.calculateConfigForFile(this._linterConfigFilePath);
-  }
-
-  protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TEslint.ESLint.LintResult[]> {
-    const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
-      filePath: sourceFile.fileName
-    });
-
-    const failures: TEslint.ESLint.LintResult[] = [];
-    for (const lintResult of lintResults) {
-      if (lintResult.messages.length > 0) {
-        failures.push(lintResult);
-      }
-    }
-
-    return failures;
-  }
-
-  protected lintingFinished(lintFailures: TEslint.ESLint.LintResult[]): void {
-    this._lintResult = lintFailures;
-
-    let omittedRuleCount: number = 0;
-    for (const [ruleName, measurementName] of this._eslintTimings.entries()) {
-      const timing: ITiming = this.getTiming(measurementName);
-      if (timing.duration > 0) {
-        this._terminal.writeVerboseLine(`Rule "${ruleName}" duration: ${timing.duration}ms`);
-      } else {
-        omittedRuleCount++;
-      }
-    }
-
-    if (omittedRuleCount > 0) {
-      this._terminal.writeVerboseLine(`${omittedRuleCount} rules took 0ms`);
     }
   }
 
@@ -176,10 +163,18 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private _patchTimer(eslintPackagePath: string): void {
     const timing: IEslintTiming = require(path.join(eslintPackagePath, 'lib', 'linter', 'timing'));
     timing.enabled = true;
-    timing.time = (key: string, fn: (...args: unknown[]) => void) => {
-      const timingName: string = `Eslint${key}`;
-      this._eslintTimings.set(key, timingName);
-      return (...args: unknown[]) => this._measurePerformance(timingName, () => fn(...args));
+    const patchedTime: (key: string, fn: (...args: unknown[]) => void) => (...args: unknown[]) => void = (
+      key: string,
+      fn: (...args: unknown[]) => void
+    ) => {
+      return (...args: unknown[]) => {
+        const startTime: number = performance.now();
+        fn(...args);
+        const endTime: number = performance.now();
+        const existingTiming: number = this._eslintTimings.get(key) || 0;
+        this._eslintTimings.set(key, existingTiming + endTime - startTime);
+      };
     };
+    timing.time = patchedTime;
   }
 }

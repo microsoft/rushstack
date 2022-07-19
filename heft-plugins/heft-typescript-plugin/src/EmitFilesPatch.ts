@@ -7,8 +7,7 @@ import {
   ExtendedTypeScript,
   IEmitResolver,
   IEmitHost,
-  IEmitTransformers,
-  IExtendedSourceFile
+  IEmitTransformers
 } from './internalTypings/TypeScriptInternals';
 
 export interface ICachedEmitModuleKind {
@@ -38,7 +37,7 @@ export class EmitFilesPatch {
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
     moduleKindsToEmit: ICachedEmitModuleKind[],
-    changedFiles?: Set<IExtendedSourceFile>
+    changedFiles?: Set<TTypescript.SourceFile>
   ): void {
     if (EmitFilesPatch._patchedTs === ts) {
       // We already patched this instance of TS
@@ -69,12 +68,10 @@ export class EmitFilesPatch {
       }
     }
 
-    // Override the underlying file emitter to run itself once for each flavor
-    // This is a rather inelegant way to convince the TypeScript compiler not to duplicate parse/link/check
-    ts.emitFiles = (
+    const patchedEmitFiles = (
       resolver: IEmitResolver,
       host: IEmitHost,
-      targetSourceFile: IExtendedSourceFile | undefined,
+      targetSourceFile: TTypescript.SourceFile | undefined,
       emitTransformers: IEmitTransformers,
       emitOnlyDtsFiles?: boolean,
       onlyBuildInfo?: boolean,
@@ -153,6 +150,10 @@ export class EmitFilesPatch {
         };
       }
     };
+
+    // Override the underlying file emitter to run itself once for each flavor
+    // This is a rather inelegant way to convince the TypeScript compiler not to duplicate parse/link/check
+    ts.emitFiles = patchedEmitFiles;
   }
 
   public static get isInstalled(): boolean {

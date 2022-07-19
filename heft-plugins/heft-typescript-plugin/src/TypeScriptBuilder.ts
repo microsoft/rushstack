@@ -4,61 +4,42 @@
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as semver from 'semver';
+import type * as TTypescript from 'typescript';
 import {
-  FileSystemStats,
-  ITerminal,
+  type FileSystemStats,
+  type ITerminal,
   JsonFile,
   IPackageJson,
-  ITerminalProvider,
   FileSystem,
   Path,
   Async,
   FileError
 } from '@rushstack/node-core-library';
-import type * as TTypescript from 'typescript';
-import {
-  ExtendedTypeScript,
-  IExtendedProgram,
-  IExtendedSourceFile
-} from './internalTypings/TypeScriptInternals';
+import type { IScopedLogger } from '@rushstack/heft';
 
-import {
-  ISubprocessRunnerBaseConfiguration,
-  SubprocessRunnerBase
-} from '../../utilities/subprocess/SubprocessRunnerBase';
-import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
-import { Tslint } from './Tslint';
-import { Eslint } from './Eslint';
-import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';
+import { EmitFilesPatch, type ICachedEmitModuleKind } from './EmitFilesPatch';
+import { TypeScriptCachedFileSystem } from './fileSystem/TypeScriptCachedFileSystem';
+import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
+import type { PerformanceMeasurer, PerformanceMeasurerAsync } from './Performance';
 
-import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
-import { HeftSession } from '../../pluginFramework/HeftSession';
-import { EmitCompletedCallbackManager } from './EmitCompletedCallbackManager';
-import { ISharedTypeScriptConfiguration } from './TypeScriptPlugin';
-import { TypeScriptCachedFileSystem } from '../../utilities/fileSystem/TypeScriptCachedFileSystem';
-import { LinterBase } from './LinterBase';
+export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfigurationJson {
+  /**
+   * The root folder of the build.
+   */
+  buildFolder: string;
 
-interface ILinterWrapper {
-  ts: ExtendedTypeScript;
-  logger: IScopedLogger;
-  measureTsPerformance: PerformanceMeasurer;
-  measureTsPerformanceAsync: PerformanceMeasurerAsync;
-}
-
-export interface ITypeScriptBuilderConfiguration
-  extends ISharedTypeScriptConfiguration,
-    ISubprocessRunnerBaseConfiguration {
   /**
    * The folder to write build metadata.
    */
   buildMetadataFolder: string;
+
+  /**
+   * The path to the TypeScript tool.
+   */
   typeScriptToolPath: string;
-  tslintToolPath: string | undefined;
-  eslintToolPath: string | undefined;
 
-  lintingEnabled: boolean;
-
-  watchMode: boolean;
+  // watchMode: boolean;
 
   /**
    * The path to the tsconfig file being built.
@@ -70,13 +51,23 @@ export interface ITypeScriptBuilderConfiguration
    * The default is 50.
    */
   maxWriteParallelism: number;
+
+  /**
+   * The scoped logger that the builder will log to.
+   */
+  scopedLogger: IScopedLogger;
+
+  /**
+   * The callback used to emit the typescript program (or programs) from the builder.
+   */
+  emitChangedFilesCallback: (program: TTypescript.Program, changedFiles?: Set<TTypescript.SourceFile>) => void;
 }
 
-type TWatchCompilerHost =
-  TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
 type TSolutionHost = TTypescript.SolutionBuilderHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
-type TWatchSolutionHost =
-  TTypescript.SolutionBuilderWithWatchHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
+// type TWatchCompilerHost =
+//   TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
+// type TWatchSolutionHost =
+//   TTypescript.SolutionBuilderWithWatchHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
 
 const EMPTY_JSON: object = {};
 
@@ -107,7 +98,7 @@ interface IModuleKindReason {
 }
 
 interface IExtendedEmitResult extends TTypescript.EmitResult {
-  changedSourceFiles: Set<IExtendedSourceFile>;
+  changedSourceFiles: Set<TTypescript.SourceFile>;
   filesToWrite: IFileToWrite[];
 }
 
@@ -117,29 +108,22 @@ const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 4;
 const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 6;
 
-export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
+export class TypeScriptBuilder {
+  private readonly _configuration: ITypeScriptBuilderConfiguration;
+  private readonly _typescriptLogger: IScopedLogger;
+  private readonly _typescriptTerminal: ITerminal;
+
   private _typescriptVersion!: string;
   private _typescriptParsedVersion!: semver.SemVer;
 
   private _capabilities!: ICompilerCapabilities;
   private _useSolutionBuilder!: boolean;
 
-  private _eslintEnabled!: boolean;
-  private _tslintEnabled!: boolean;
   private _moduleKindsToEmit!: ICachedEmitModuleKind[];
-  private _eslintConfigFilePath!: string;
-  private _tslintConfigFilePath!: string;
-  private _typescriptLogger!: IScopedLogger;
-  private _typescriptTerminal!: ITerminal;
-  private _emitCompletedCallbackManager: EmitCompletedCallbackManager;
 
   private __tsCacheFilePath: string | undefined;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
   private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
-
-  public get filename(): string {
-    return __filename;
-  }
 
   private get _tsCacheFilePath(): string {
     if (!this.__tsCacheFilePath) {
@@ -164,28 +148,19 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     return this.__tsCacheFilePath;
   }
 
-  public constructor(
-    parentGlobalTerminalProvider: ITerminalProvider,
-    configuration: ITypeScriptBuilderConfiguration,
-    heftSession: HeftSession,
-    emitCallback: () => void
-  ) {
-    super(parentGlobalTerminalProvider, configuration, heftSession);
-
-    this._emitCompletedCallbackManager = new EmitCompletedCallbackManager(emitCallback);
-    this.registerSubprocessCommunicationManager(this._emitCompletedCallbackManager);
+  public constructor(configuration: ITypeScriptBuilderConfiguration) {
+    this._configuration = configuration;
+    this._typescriptLogger = configuration.scopedLogger;
+    this._typescriptTerminal = configuration.scopedLogger.terminal;
   }
 
   public async invokeAsync(): Promise<void> {
-    this._typescriptLogger = await this.requestScopedLoggerAsync('typescript');
-    this._typescriptTerminal = this._typescriptLogger.terminal;
-
     // Determine the compiler version
     const compilerPackageJsonFilename: string = path.join(
       this._configuration.typeScriptToolPath,
       'package.json'
     );
-    const packageJson: IPackageJson = JsonFile.load(compilerPackageJsonFilename);
+    const packageJson: IPackageJson = await JsonFile.loadAsync(compilerPackageJsonFilename);
     this._typescriptVersion = packageJson.version;
     const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
     if (!parsedVersion) {
@@ -215,19 +190,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       throw new Error(
         `Building project references requires TypeScript@>=3.0, but the current version is ${this._typescriptVersion}`
       );
-    }
-
-    this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
-    this._eslintEnabled = this._tslintEnabled =
-      this._configuration.lintingEnabled && !this._configuration.watchMode; // Don't run lint in watch mode
-
-    if (this._tslintEnabled) {
-      this._tslintEnabled = this._cachedFileSystem.exists(this._tslintConfigFilePath);
-    }
-
-    this._eslintConfigFilePath = this._resolveEslintConfigFilePath(this._eslintEnabled);
-    if (this._eslintEnabled) {
-      this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
     }
 
     // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
@@ -296,58 +258,45 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
 
-    if (this._configuration.watchMode) {
-      await this._runWatch(ts, measureTsPerformance);
-    } else if (this._useSolutionBuilder) {
-      await this._runSolutionBuildAsync(ts, measureTsPerformance, measureTsPerformanceAsync);
+    // if (this._configuration.watchMode) {
+    //   await this._runWatch(ts, measureTsPerformance);
+    // } else if (this._useSolutionBuilder) {
+    if (this._useSolutionBuilder) {
+      this._runSolutionBuild(ts, measureTsPerformance);
     } else {
       await this._runBuildAsync(ts, measureTsPerformance, measureTsPerformanceAsync);
     }
   }
 
-  private _resolveEslintConfigFilePath(eslintEnabled: boolean): string {
-    const defaultPath: string = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
-    if (!eslintEnabled) {
-      return defaultPath; // No need to check the filesystem
-    }
-    // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
-    // so use it if it exists
-    const alternativePathPath: string = path.resolve(this._configuration.buildFolder, '.eslintrc.cjs');
-    if (this._cachedFileSystem.exists(alternativePathPath)) {
-      return alternativePathPath;
-    }
-    return defaultPath;
-  }
+  // public async _runWatch(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): Promise<void> {
+  //   //#region CONFIGURE
+  //   const { duration: configureDurationMs, tsconfig } = measureTsPerformance('Configure', () => {
+  //     const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+  //     this._validateTsconfig(ts, _tsconfig);
+  //     EmitFilesPatch.install(ts, _tsconfig, this._moduleKindsToEmit);
 
-  public async _runWatch(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): Promise<void> {
-    //#region CONFIGURE
-    const { duration: configureDurationMs, tsconfig } = measureTsPerformance('Configure', () => {
-      const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
-      this._validateTsconfig(ts, _tsconfig);
-      EmitFilesPatch.install(ts, _tsconfig, this._moduleKindsToEmit);
+  //     return {
+  //       tsconfig: _tsconfig
+  //     };
+  //   });
+  //   this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
+  //   //#endregion
 
-      return {
-        tsconfig: _tsconfig
-      };
-    });
-    this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
-    //#endregion
+  //   if (this._useSolutionBuilder) {
+  //     const solutionHost: TWatchSolutionHost = this._buildWatchSolutionBuilderHost(ts);
+  //     const watchBuilder: TTypescript.SolutionBuilder<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
+  //       ts.createSolutionBuilderWithWatch(solutionHost, [this._configuration.tsconfigPath], {});
 
-    if (this._useSolutionBuilder) {
-      const solutionHost: TWatchSolutionHost = this._buildWatchSolutionBuilderHost(ts);
-      const watchBuilder: TTypescript.SolutionBuilder<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
-        ts.createSolutionBuilderWithWatch(solutionHost, [this._configuration.tsconfigPath], {});
+  //     watchBuilder.build();
+  //   } else {
+  //     const compilerHost: TWatchCompilerHost = this._buildWatchCompilerHost(ts, tsconfig);
+  //     ts.createWatchProgram(compilerHost);
+  //   }
 
-      watchBuilder.build();
-    } else {
-      const compilerHost: TWatchCompilerHost = this._buildWatchCompilerHost(ts, tsconfig);
-      ts.createWatchProgram(compilerHost);
-    }
-
-    return new Promise(() => {
-      /* never terminate */
-    });
-  }
+  //   return new Promise(() => {
+  //     /* never terminate */
+  //   });
+  // }
 
   public async _runBuildAsync(
     ts: ExtendedTypeScript,
@@ -445,53 +394,24 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     );
     //#endregion
 
-    const [eslint, tslint] = await Promise.all([
-      this._initESlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync),
-      this._initTSlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync)
-    ]);
-    const lintPromises: Promise<LinterBase<unknown>>[] = [];
-
-    const extendedProgram: IExtendedProgram = tsProgram as IExtendedProgram;
-    //#region ESLINT
-    if (eslint) {
-      lintPromises.push(this._runESlintAsync(eslint, extendedProgram, emitResult.changedSourceFiles));
-    }
-    //#endregion
-
-    //#region TSLINT
-    if (tslint) {
-      lintPromises.push(this._runTSlintAsync(tslint, extendedProgram, emitResult.changedSourceFiles));
-    }
-    //#endregion
-
     const { duration: writeDuration } = await writePromise;
     this._typescriptTerminal.writeVerboseLine(
       `I/O Write: ${writeDuration}ms (${emitResult.filesToWrite.length} files)`
     );
 
-    // In non-watch mode, notify EmitCompletedCallbackManager once after we complete the compile step
-    this._emitCompletedCallbackManager.callback();
-
-    const linters: LinterBase<unknown>[] = await Promise.all(lintPromises);
-
-    this._logDiagnostics(ts, rawDiagnostics, linters);
+    this._logDiagnostics(ts, rawDiagnostics);
+    this._configuration.emitChangedFilesCallback(tsProgram, emitResult.changedSourceFiles);
   }
 
-  public async _runSolutionBuildAsync(
-    ts: ExtendedTypeScript,
-    measureTsPerformance: PerformanceMeasurer,
-    measureTsPerformanceAsync: PerformanceMeasurerAsync
-  ): Promise<void> {
+  public _runSolutionBuild(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): void {
     this._typescriptTerminal.writeVerboseLine(`Using solution mode`);
-
-    const lintPromises: Promise<LinterBase<unknown>>[] = [];
 
     //#region CONFIGURE
     const {
       duration: configureDurationMs,
       rawDiagnostics,
       solutionBuilderHost
-    } = await measureTsPerformanceAsync('Configure', async () => {
+    } = measureTsPerformance('Configure', () => {
       this._overrideTypeScriptReadJson(ts);
       const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
       this._validateTsconfig(ts, _tsconfig);
@@ -500,11 +420,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       const reportDiagnostic: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic) => {
         _rawDiagnostics.push(diagnostic);
       };
-
-      const [eslint, tslint] = await Promise.all([
-        this._initESlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync),
-        this._initTSlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync)
-      ]);
 
       // TypeScript doesn't have a
       EmitFilesPatch.install(ts, _tsconfig, this._moduleKindsToEmit);
@@ -515,16 +430,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         program: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
       ) => {
         const tsProgram: TTypescript.Program | undefined = program.getProgram();
-
         if (tsProgram) {
-          const extendedProgram: IExtendedProgram = tsProgram as IExtendedProgram;
-          if (eslint) {
-            lintPromises.push(this._runESlintAsync(eslint, extendedProgram));
-          }
-
-          if (tslint) {
-            lintPromises.push(this._runTSlintAsync(tslint, extendedProgram));
-          }
+          this._configuration.emitChangedFilesCallback(tsProgram);
         }
       };
 
@@ -553,21 +460,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       )} files)`
     );
 
-    // In non-watch mode, notify EmitCompletedCallbackManager once after we complete the compile step
-    this._emitCompletedCallbackManager.callback();
-
-    const linters: LinterBase<unknown>[] = await Promise.all(lintPromises);
-
-    this._logDiagnostics(ts, rawDiagnostics, linters);
+    this._logDiagnostics(ts, rawDiagnostics);
 
     EmitFilesPatch.uninstall(ts);
   }
 
-  private _logDiagnostics(
-    ts: ExtendedTypeScript,
-    rawDiagnostics: readonly TTypescript.Diagnostic[],
-    linters: LinterBase<unknown>[]
-  ): void {
+  private _logDiagnostics(ts: ExtendedTypeScript, rawDiagnostics: readonly TTypescript.Diagnostic[]): void {
     const diagnostics: readonly TTypescript.Diagnostic[] = ts.sortAndDeduplicateDiagnostics(rawDiagnostics);
 
     let typeScriptErrorCount: number = 0;
@@ -587,10 +485,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
         this._printDiagnosticMessage(ts, diagnostic, diagnosticCategory);
       }
-    }
-
-    for (const linter of linters) {
-      linter.reportFailures();
     }
 
     if (typeScriptErrorCount > 0) {
@@ -626,103 +520,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._typescriptTerminal.writeVerboseLine(
       `Program (includes Read + Parse): ${ts.performance.getDuration('Program')}ms`
     );
-  }
-
-  private async _initTSlintAsync(
-    ts: ExtendedTypeScript,
-    measureTsPerformance: PerformanceMeasurer,
-    measureTsPerformanceAsync: PerformanceMeasurerAsync
-  ): Promise<ILinterWrapper | undefined> {
-    if (this._tslintEnabled) {
-      if (!this._configuration.tslintToolPath) {
-        throw new Error('Unable to resolve "tslint" package');
-      }
-
-      const logger: IScopedLogger = await this.requestScopedLoggerAsync('tslint');
-      return {
-        logger,
-        ts,
-        measureTsPerformance,
-        measureTsPerformanceAsync
-      };
-    }
-  }
-
-  private async _initESlintAsync(
-    ts: ExtendedTypeScript,
-    measureTsPerformance: PerformanceMeasurer,
-    measureTsPerformanceAsync: PerformanceMeasurerAsync
-  ): Promise<ILinterWrapper | undefined> {
-    if (this._eslintEnabled) {
-      if (!this._configuration.eslintToolPath) {
-        throw new Error('Unable to resolve "eslint" package');
-      }
-
-      const logger: IScopedLogger = await this.requestScopedLoggerAsync('eslint');
-      return {
-        logger,
-        ts,
-        measureTsPerformance,
-        measureTsPerformanceAsync
-      };
-    }
-  }
-
-  private async _runESlintAsync(
-    linter: ILinterWrapper,
-    tsProgram: IExtendedProgram,
-    changedFiles?: Set<IExtendedSourceFile> | undefined
-  ): Promise<Eslint> {
-    const eslint: Eslint = new Eslint({
-      ts: linter.ts,
-      scopedLogger: linter.logger,
-      buildFolderPath: this._configuration.buildFolder,
-      buildMetadataFolderPath: this._configuration.buildMetadataFolder,
-      linterConfigFilePath: this._eslintConfigFilePath,
-      measurePerformance: linter.measureTsPerformance,
-      measurePerformanceAsync: linter.measureTsPerformanceAsync,
-      eslintPackagePath: this._configuration.eslintToolPath!
-    });
-
-    eslint.printVersionHeader();
-
-    const typeScriptFilenames: Set<string> = new Set(tsProgram.getRootFileNames());
-    await eslint.performLintingAsync({
-      tsProgram,
-      typeScriptFilenames,
-      changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
-    });
-
-    return eslint;
-  }
-
-  private async _runTSlintAsync(
-    linter: ILinterWrapper,
-    tsProgram: IExtendedProgram,
-    changedFiles?: Set<IExtendedSourceFile> | undefined
-  ): Promise<Tslint> {
-    const tslint: Tslint = new Tslint({
-      ts: linter.ts,
-      scopedLogger: linter.logger,
-      buildFolderPath: this._configuration.buildFolder,
-      buildMetadataFolderPath: this._configuration.buildMetadataFolder,
-      linterConfigFilePath: this._tslintConfigFilePath,
-      measurePerformance: linter.measureTsPerformance,
-      measurePerformanceAsync: linter.measureTsPerformanceAsync,
-      cachedFileSystem: this._cachedFileSystem,
-      tslintPackagePath: this._configuration.tslintToolPath!
-    });
-
-    tslint.printVersionHeader();
-
-    const typeScriptFilenames: Set<string> = new Set(tsProgram.getRootFileNames());
-    await tslint.performLintingAsync({
-      tsProgram,
-      typeScriptFilenames,
-      changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
-    });
-
-    return tslint;
   }
 
   private _printDiagnosticMessage(
@@ -801,7 +598,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   ): IExtendedEmitResult {
     const filesToWrite: IFileToWrite[] = [];
 
-    const changedFiles: Set<IExtendedSourceFile> = new Set<IExtendedSourceFile>();
+    const changedFiles: Set<TTypescript.SourceFile> = new Set();
     EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, changedFiles);
 
     const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
@@ -1123,64 +920,64 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     return sys;
   }
 
-  private _buildWatchCompilerHost(
-    ts: ExtendedTypeScript,
-    tsconfig: TTypescript.ParsedCommandLine
-  ): TWatchCompilerHost {
-    const reportDiagnostic: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic): void => {
-      this._printDiagnosticMessage(ts, diagnostic);
-    };
-    const reportWatchStatus: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic) => {
-      this._printDiagnosticMessage(ts, diagnostic);
+  // private _buildWatchCompilerHost(
+  //   ts: ExtendedTypeScript,
+  //   tsconfig: TTypescript.ParsedCommandLine
+  // ): TWatchCompilerHost {
+  //   const reportDiagnostic: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic): void => {
+  //     this._printDiagnosticMessage(ts, diagnostic);
+  //   };
+  //   const reportWatchStatus: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic) => {
+  //     this._printDiagnosticMessage(ts, diagnostic);
 
-      // In watch mode, notify EmitCompletedCallbackManager every time we finish recompiling.
-      if (
-        diagnostic.code === ts.Diagnostics.Found_0_errors_Watching_for_file_changes.code ||
-        diagnostic.code === ts.Diagnostics.Found_1_error_Watching_for_file_changes.code
-      ) {
-        this._emitCompletedCallbackManager.callback();
-      }
-    };
+  //     // In watch mode, notify EmitCompletedCallbackManager every time we finish recompiling.
+  //     if (
+  //       diagnostic.code === ts.Diagnostics.Found_0_errors_Watching_for_file_changes.code ||
+  //       diagnostic.code === ts.Diagnostics.Found_1_error_Watching_for_file_changes.code
+  //     ) {
+  //       this._emitCompletedCallbackManager.callback();
+  //     }
+  //   };
 
-    return ts.createWatchCompilerHost(
-      tsconfig.fileNames,
-      tsconfig.options,
-      this._getCachingTypeScriptSystem(ts),
-      ts.createEmitAndSemanticDiagnosticsBuilderProgram,
-      reportDiagnostic,
-      reportWatchStatus,
-      tsconfig.projectReferences
-    );
-  }
+  //   return ts.createWatchCompilerHost(
+  //     tsconfig.fileNames,
+  //     tsconfig.options,
+  //     this._getCachingTypeScriptSystem(ts),
+  //     ts.createEmitAndSemanticDiagnosticsBuilderProgram,
+  //     reportDiagnostic,
+  //     reportWatchStatus,
+  //     tsconfig.projectReferences
+  //   );
+  // }
 
-  private _buildWatchSolutionBuilderHost(ts: ExtendedTypeScript): TWatchSolutionHost {
-    const reportDiagnostic: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic): void => {
-      this._printDiagnosticMessage(ts, diagnostic);
-    };
-    const reportSolutionBuilderStatus: TTypescript.DiagnosticReporter = reportDiagnostic;
-    const reportWatchStatus: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic) => {
-      this._printDiagnosticMessage(ts, diagnostic);
+  // private _buildWatchSolutionBuilderHost(ts: ExtendedTypeScript): TWatchSolutionHost {
+  //   const reportDiagnostic: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic): void => {
+  //     this._printDiagnosticMessage(ts, diagnostic);
+  //   };
+  //   const reportSolutionBuilderStatus: TTypescript.DiagnosticReporter = reportDiagnostic;
+  //   const reportWatchStatus: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic) => {
+  //     this._printDiagnosticMessage(ts, diagnostic);
 
-      // In watch mode, notify EmitCompletedCallbackManager every time we finish recompiling.
-      if (
-        diagnostic.code === ts.Diagnostics.Found_0_errors_Watching_for_file_changes.code ||
-        diagnostic.code === ts.Diagnostics.Found_1_error_Watching_for_file_changes.code
-      ) {
-        this._emitCompletedCallbackManager.callback();
-      }
-    };
+  //     // In watch mode, notify EmitCompletedCallbackManager every time we finish recompiling.
+  //     if (
+  //       diagnostic.code === ts.Diagnostics.Found_0_errors_Watching_for_file_changes.code ||
+  //       diagnostic.code === ts.Diagnostics.Found_1_error_Watching_for_file_changes.code
+  //     ) {
+  //       this._emitCompletedCallbackManager.callback();
+  //     }
+  //   };
 
-    return ts.createSolutionBuilderWithWatchHost(
-      this._getCachingTypeScriptSystem(ts),
-      ts.createEmitAndSemanticDiagnosticsBuilderProgram,
-      reportDiagnostic,
-      reportSolutionBuilderStatus,
-      reportWatchStatus
-    );
-  }
+  //   return ts.createSolutionBuilderWithWatchHost(
+  //     this._getCachingTypeScriptSystem(ts),
+  //     ts.createEmitAndSemanticDiagnosticsBuilderProgram,
+  //     reportDiagnostic,
+  //     reportSolutionBuilderStatus,
+  //     reportWatchStatus
+  //   );
+  // }
 
   private _overrideTypeScriptReadJson(ts: ExtendedTypeScript): void {
-    ts.readJson = (filePath: string) => {
+    const cachedReadJson: (filePath: string) => object = (filePath: string) => {
       let jsonData: object | undefined = this._tsReadJsonCache.get(filePath);
       if (jsonData) {
         return jsonData;
@@ -1208,6 +1005,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         return jsonData;
       }
     };
+    ts.readJson = cachedReadJson;
   }
 
   private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): TTypescript.ModuleKind {
