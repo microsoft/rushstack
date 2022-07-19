@@ -75,7 +75,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
     // Locate the tslint linter if enabled
     this._tslintConfigFilePath = await this._resolveTslintConfigFilePathAsync(heftConfiguration);
     if (this._tslintConfigFilePath) {
-      this._tslintToolPath = await heftConfiguration.rigToolResolver.resolvePackageAsync(
+      this._tslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'tslint',
         logger.terminal
       );
@@ -84,7 +84,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
     // Locate the eslint linter if enabled
     this._eslintConfigFilePath = await this._resolveEslintConfigFilePathAsync(heftConfiguration);
     if (this._eslintConfigFilePath) {
-      this._eslintToolPath = await heftConfiguration.rigToolResolver.resolvePackageAsync(
+      this._eslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'eslint',
         logger.terminal
       );
