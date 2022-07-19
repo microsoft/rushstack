@@ -79,4 +79,5 @@ dist
 .vscode
 
 # Heft
+.cache
 .heft

@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
 import type { AsyncTransformer, SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
 import type { Config } from '@jest/types';
+import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
 
 import { HeftJestDataFile, IHeftJestDataFileJson } from '../HeftJestDataFile';
 import { GetCacheKeyFunction, createCacheKeyFunction, createCacheKeyFunctionAsync } from '../JestUtils';
@@ -317,7 +317,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
     );
     const cacheKeyFunction: GetCacheKeyFunction = createCacheKeyFunction(
       /* files: */ [__filename],
-      /* values: */ [heftJestDataFile.emitFolderNameForTests, heftJestDataFile.extensionForTests]
+      /* values: */ [heftJestDataFile.folderNameForTests, heftJestDataFile.extensionForTests]
     );
     return cacheKeyFunction(sourceText, sourcePath, options);
   }
@@ -335,7 +335,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
     );
     const cacheKeyFunction: GetCacheKeyFunction = await createCacheKeyFunctionAsync(
       /* files: */ [__filename],
-      /* values: */ [heftJestDataFile.emitFolderNameForTests, heftJestDataFile.extensionForTests]
+      /* values: */ [heftJestDataFile.folderNameForTests, heftJestDataFile.extensionForTests]
     );
     return cacheKeyFunction(sourceText, sourcePath, options);
   }
@@ -362,7 +362,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
       // Example: /path/to/project/lib/folder1/folder2/Example.js
       const transpiledPath: string = path.join(
         jestOptions.rootDir,
-        heftJestDataFile.emitFolderNameForTests,
+        heftJestDataFile.folderNameForTests,
         srcRelativeFolderPath,
         `${parsedFilename.name}${heftJestDataFile.extensionForTests}`
       );
@@ -415,7 +415,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
       // Example: /path/to/project/lib/folder1/folder2/Example.js
       const transpiledPath: string = path.join(
         jestOptions.rootDir,
-        heftJestDataFile.emitFolderNameForTests,
+        heftJestDataFile.folderNameForTests,
         srcRelativeFolderPath,
         `${parsedFilename.name}${heftJestDataFile.extensionForTests}`
       );
