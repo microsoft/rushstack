@@ -689,7 +689,7 @@ export enum ExcerptTokenKind {
     Reference = "Reference"
 }
 
-// @public
+// @beta
 export enum FindApiItemsMessageId {
     DeclarationResolutionFailed = "declaration-resolution-failed",
     MissingApiModel = "missing-api-model",
@@ -928,6 +928,7 @@ export interface IExcerptTokenRange {
 
 // @public
 export interface IFindApiItemsMessage {
+    // @beta
     messageId: FindApiItemsMessageId;
     text: string;
 }

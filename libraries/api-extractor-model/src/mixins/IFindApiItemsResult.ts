@@ -29,6 +29,7 @@ export interface IFindApiItemsResult {
 export interface IFindApiItemsMessage {
   /**
    * Unique identifier for the message.
+   * @beta
    */
   messageId: FindApiItemsMessageId;
 
@@ -40,7 +41,7 @@ export interface IFindApiItemsMessage {
 
 /**
  * Unique identifiers for messages returned as part of `IFindApiItemsResult`.
- * @public
+ * @beta
  */
 export enum FindApiItemsMessageId {
   /**
