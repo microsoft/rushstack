@@ -4,13 +4,14 @@
 import * as path from 'path';
 import type * as TWebpack from 'webpack';
 import { FileSystem } from '@rushstack/node-core-library';
-import type { IScopedLogger } from '@rushstack/heft';
+import type { IScopedLogger, IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 import type { IWebpack5PluginOptions } from './Webpack5Plugin';
 import type { IWebpackConfiguration } from './shared';
 
 interface ILoadWebpackConfigurationOptions extends IWebpack5PluginOptions {
-  buildFolder: string;
+  taskSession: IHeftTaskSession;
+  heftConfiguration: HeftConfiguration;
   webpack: typeof TWebpack;
 }
 
@@ -22,6 +23,8 @@ interface IWebpackConfigFunctionEnv {
   production: boolean;
 
   // Non-standard environment options
+  taskSession: IHeftTaskSession;
+  heftConfiguration: HeftConfiguration;
   webpack: typeof TWebpack;
 }
 
@@ -54,10 +57,17 @@ export class WebpackConfigurationLoader {
     // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
     // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
 
-    const { buildFolder, configurationPath, devConfigurationPath, webpack } = options;
+    const {
+      taskSession,
+      heftConfiguration,
+      webpack,
+      configurationPath,
+      devConfigurationPath,
+    } = options;
     let webpackConfigJs: IWebpackConfigJs | undefined;
 
     try {
+      const buildFolder: string = heftConfiguration.buildFolder;
       if (this._serveMode) {
         const devConfigPath: string =
           path.resolve(buildFolder, devConfigurationPath || DEFAULT_WEBPACK_DEV_CONFIG_PATH);
@@ -84,7 +94,13 @@ export class WebpackConfigurationLoader {
         (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
 
       if (typeof webpackConfig === 'function') {
-        return webpackConfig({ prod: this._production, production: this._production, webpack });
+        return webpackConfig({
+          prod: this._production,
+          production: this._production,
+          taskSession,
+          heftConfiguration,
+          webpack
+        });
       } else {
         return webpackConfig;
       }

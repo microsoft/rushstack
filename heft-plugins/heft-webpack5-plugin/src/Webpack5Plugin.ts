@@ -74,8 +74,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
           const webpack: typeof TWebpack = await this._getWebpackAsync();
           return await configurationLoader.tryLoadWebpackConfigurationAsync({
             ...options,
-            webpack,
-            buildFolder: heftConfiguration.buildFolder
+            taskSession,
+            heftConfiguration,
+            webpack
           });
         }
       }
@@ -106,7 +107,13 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
 
       // Run webpack with the finalized webpack configuration
       const webpackConfiguration: IWebpackConfiguration | null = await this._getWebpackConfigurationAsync();
-      await this._runWebpackAsync(taskSession, heftConfiguration, webpackConfiguration, serveMode, watchMode);
+      await this._runWebpackAsync(
+        taskSession,
+        heftConfiguration,
+        webpackConfiguration,
+        serveMode,
+        watchMode
+      );
     });
   }
 
@@ -202,28 +209,18 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
       // Register a plugin to callback after webpack is done with the first compilation
       // so we can move on to post-build
       let firstCompilationDoneCallback: (() => void) | undefined;
-      const originalBeforeCallback: typeof options.setupMiddlewares | undefined = options.setupMiddlewares;
-      options.setupMiddlewares = (middlewares, devServer) => {
-        compiler.hooks.done.tap(PLUGIN_NAME, () => {
-          if (firstCompilationDoneCallback) {
-            firstCompilationDoneCallback();
-            firstCompilationDoneCallback = undefined;
-          }
-        });
-
-        if (originalBeforeCallback) {
-          return originalBeforeCallback(middlewares, devServer);
+      compiler.hooks.done.tap(PLUGIN_NAME, () => {
+        if (firstCompilationDoneCallback) {
+          firstCompilationDoneCallback();
+          firstCompilationDoneCallback = undefined;
         }
-        return middlewares;
-      };
+      });
 
       // The webpack-dev-server package has a design flaw, where merely loading its package will set the
       // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
-      // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call require()
-      // only if Heft is in serve mode.
+      // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call
+      // require() only if Heft is in serve mode.
       const WebpackDevServer: typeof TWebpackDevServer = await import(WEBPACK_DEV_SERVER_PACKAGE_NAME);
-      // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
-      // use of that to make logging cleaner
       const webpackDevServer: TWebpackDevServer = new WebpackDevServer(options, compiler);
 
       await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
