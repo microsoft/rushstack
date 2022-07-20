@@ -689,7 +689,7 @@ export enum ExcerptTokenKind {
     Reference = "Reference"
 }
 
-// @beta
+// @public
 export enum FindApiItemsMessageId {
     DeclarationResolutionFailed = "declaration-resolution-failed",
     ExtendsClauseMissingReference = "extends-clause-missing-reference",
