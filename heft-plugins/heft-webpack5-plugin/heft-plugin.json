@@ -1,12 +1,11 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft-plugin.schema.json",
 
-  "lifecyclePlugins": [],
-
   "taskPlugins": [
     {
-      "pluginName": "WebpackPlugin",
-      "entryPoint": "./lib/WebpackPlugin"
+      "pluginName": "Webpack5Plugin",
+      "entryPoint": "./lib/Webpack5Plugin",
+      "optionsSchema": "./lib/schemas/heft-webpack5-plugin.schema.json"
     }
   ]
 }

@@ -4,13 +4,7 @@
 import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
-import {
-  FileError,
-  Import,
-  IPackageJson,
-  LegacyAdapters,
-  PackageJsonLookup
-} from '@rushstack/node-core-library';
+import { LegacyAdapters } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -23,42 +17,49 @@ import type {
 import type {
   IWebpackConfiguration,
   IWebpackConfigurationWithDevServer,
-  IWebpackPluginAccessor,
-  IWebpackVersions
+  IWebpack4PluginAccessor,
 } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
+
+export interface IWebpack4PluginOptions {
+  devConfigurationPath: string | undefined;
+  configurationPath: string | undefined;
+}
 
 /**
  * @public
  */
-export const PLUGIN_NAME: string = 'WebpackPlugin';
-const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
-const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
+export const PLUGIN_NAME: 'Webpack4Plugin' = 'Webpack4Plugin';
+const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
+const WEBPACK_DEV_SERVER_ENV_VAR_NAME: 'WEBPACK_DEV_SERVER' = 'WEBPACK_DEV_SERVER';
 
 /**
  * @internal
  */
-export default class WebpackPlugin implements IHeftTaskPlugin {
+export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOptions> {
   private _webpack: typeof TWebpack | undefined;
-  private _webpackVersions: IWebpackVersions | undefined;
-  private _loadedWebpackConfiguration: IWebpackConfiguration | null | undefined;
+  private _webpackConfiguration: IWebpackConfiguration | undefined;
 
-  public readonly accessor: IWebpackPluginAccessor = {
-    onEmitWebpackVersionsHook: new AsyncParallelHook(['webpackVersions']),
+  public readonly accessor: IWebpack4PluginAccessor = {
     onConfigureWebpackHook: new AsyncSeriesWaterfallHook(['webpackConfiguration']),
     onAfterConfigureWebpackHook: new AsyncParallelHook(['webpackConfiguration']),
     onEmitStatsHook: new AsyncParallelHook(['webpackStats'])
   };
 
-  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
+  public apply(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    options: IWebpack4PluginOptions
+  ): void {
     // These get set in the run hook and used in the onConfigureWebpackHook
     let production: boolean;
     let serveMode: boolean;
     let watchMode: boolean;
 
-    this.accessor.onConfigureWebpackHook!.tapPromise(
+    // Provide the initial webpack configuration by tapping the hook
+    this.accessor.onConfigureWebpackHook.tapPromise(
       PLUGIN_NAME,
-      async (existingConfiguration: IWebpackConfiguration | null) => {
+      async (existingConfiguration: IWebpackConfiguration | false) => {
         if (existingConfiguration) {
           taskSession.logger.terminal.writeVerboseLine(
             'Skipping loading webpack config file because the webpack config has already been set.'
@@ -70,7 +71,12 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
             production,
             serveMode
           );
-          return await configurationLoader.tryLoadWebpackConfigAsync(heftConfiguration.buildFolder);
+          const webpack: typeof TWebpack = await this._getWebpackAsync();
+          return await configurationLoader.tryLoadWebpackConfigurationAsync({
+            ...options,
+            webpack,
+            buildFolder: heftConfiguration.buildFolder
+          });
         }
       }
     );
@@ -79,18 +85,13 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
       // Obtain the finalized webpack configuration
       const webpackConfiguration: IWebpackConfiguration | null = await this._getWebpackConfigurationAsync();
       if (webpackConfiguration) {
-        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] = Array.isArray(
-          webpackConfiguration
-        )
-          ? webpackConfiguration
-          : [webpackConfiguration];
+        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] =
+          Array.isArray(webpackConfiguration) ? webpackConfiguration : [webpackConfiguration];
 
         // Add each output path to the clean list
         for (const config of webpackConfigurationArray) {
           if (config.output?.path) {
-            cleanOptions.addDeleteOperations({
-              sourceFolder: config.output.path
-            });
+            cleanOptions.addDeleteOperations({ sourcePath: config.output.path });
           }
         }
       }
@@ -116,47 +117,22 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
     return this._webpack;
   }
 
-  private async _getWebpackVersionsAsync(): Promise<IWebpackVersions> {
-    if (!this._webpackVersions) {
-      const webpackDevServerPackageJsonPath: string = Import.resolveModule({
-        modulePath: 'webpack-dev-server/package.json',
-        baseFolderPath: __dirname
-      });
-      const webpackDevServerPackageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
-        webpackDevServerPackageJsonPath
-      );
-      const webpack: typeof TWebpack = await this._getWebpackAsync();
-      this._webpackVersions = {
-        webpackVersion: webpack.version!,
-        webpackDevServerVersion: webpackDevServerPackageJson.version
-      };
-    }
-
-    return this._webpackVersions;
-  }
-
-  private async _getWebpackConfigurationAsync(): Promise<IWebpackConfiguration | null> {
-    if (this._webpackVersions === undefined || this._loadedWebpackConfiguration === undefined) {
-      // First, load and emit the webpack versions so that plugins can use them when loading
-      // their webpack configuration
-      if (this.accessor.onEmitWebpackVersionsHook!.isUsed()) {
-        this._webpackVersions = await this._getWebpackVersionsAsync();
-        await this.accessor.onEmitWebpackVersionsHook!.promise(this._webpackVersions);
-      }
-
+  private async _getWebpackConfigurationAsync(): Promise<IWebpackConfiguration | undefined> {
+    if (this._webpackConfiguration === undefined) {
       // Obtain the webpack configuration by calling into the hook. This hook is always used
-      // since the WebpackPlugin itself taps the hook.
-      const webpackConfiguration: IWebpackConfiguration | null =
-        await this.accessor.onConfigureWebpackHook!.promise(undefined);
+      // since the this plugin taps the hook.
+      const webpackConfiguration: IWebpackConfiguration | false =
+        await this.accessor.onConfigureWebpackHook.promise();
 
-      // Provide the finalized configuration
-      if (this.accessor.onAfterConfigureWebpackHook!.isUsed()) {
-        await this.accessor.onAfterConfigureWebpackHook!.promise(webpackConfiguration);
+      if (webpackConfiguration !== false) {
+        this._webpackConfiguration = webpackConfiguration;
+        if (this.accessor.onAfterConfigureWebpackHook.isUsed()) {
+          // Provide the finalized configuration
+          await this.accessor.onAfterConfigureWebpackHook.promise(webpackConfiguration);
+        }
       }
-
-      this._loadedWebpackConfiguration = webpackConfiguration;
     }
-    return this._loadedWebpackConfiguration;
+    return this._webpackConfiguration;
   }
 
   private async _runWebpackAsync(
@@ -177,7 +153,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
     let compiler: TWebpack.Compiler | TWebpack.MultiCompiler;
     if (Array.isArray(webpackConfiguration)) {
       if (webpackConfiguration.length === 0) {
-        logger.terminal.writeLine('The webpack configuration is an empty array - nothing to do.');
+        logger.terminal.writeLine('The webpack configuration received is an empty array - nothing to do.');
         return;
       } else {
         compiler = webpack.default(webpackConfiguration); /* (webpack.Compilation[]) => MultiCompiler */
@@ -228,7 +204,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
       let firstCompilationDoneCallback: (() => void) | undefined;
       const originalBeforeCallback: typeof options.setupMiddlewares | undefined = options.setupMiddlewares;
       options.setupMiddlewares = (middlewares, devServer) => {
-        compiler.hooks.done.tap('heft-webpack-plugin', () => {
+        compiler.hooks.done.tap(PLUGIN_NAME, () => {
           if (firstCompilationDoneCallback) {
             firstCompilationDoneCallback();
             firstCompilationDoneCallback = undefined;
@@ -252,10 +228,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
 
       await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
         firstCompilationDoneCallback = resolve;
-
-        // Wrap in promise.resolve due to small issue in the type declaration, return type should be
-        // webpackDevServer.start(): Promise<void>;
-        Promise.resolve(webpackDevServer.start()).catch(reject);
+        webpackDevServer.start().catch(reject);
       });
     } else {
       if (process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
@@ -268,7 +241,7 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
         );
       }
 
-      let stats: TWebpack.Stats | TWebpack.MultiStats | undefined;
+      let stats: TWebpack.Stats | TWebpack.compilation.MultiStats | undefined;
       if (watchMode) {
         try {
           stats = await LegacyAdapters.convertCallbackToPromise(
@@ -283,76 +256,31 @@ export default class WebpackPlugin implements IHeftTaskPlugin {
           stats = await LegacyAdapters.convertCallbackToPromise(
             (compiler as TWebpack.Compiler).run.bind(compiler)
           );
-          await LegacyAdapters.convertCallbackToPromise(compiler.close.bind(compiler));
         } catch (e) {
           logger.emitError(e as Error);
         }
       }
 
       if (stats) {
-        if (this.accessor.onEmitStatsHook!.isUsed()) {
-          await this.accessor.onEmitStatsHook!.promise(stats);
+        this._emitErrors(logger, stats);
+        if (this.accessor.onEmitStatsHook.isUsed()) {
+          await this.accessor.onEmitStatsHook.promise(stats);
         }
-        this._emitErrors(logger, heftConfiguration.buildFolder, stats);
       }
     }
   }
 
-  private _emitErrors(
-    logger: IScopedLogger,
-    buildFolder: string,
-    stats: TWebpack.Stats | TWebpack.MultiStats
-  ): void {
+  private _emitErrors(logger: IScopedLogger, stats: TWebpack.Stats | TWebpack.compilation.MultiStats): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
-      const serializedStats: TWebpack.StatsCompilation = stats.toJson('errors-warnings');
+      const serializedStats: TWebpack.Stats.ToJsonOutput = stats.toJson('errors-warnings');
 
-      if (serializedStats.warnings) {
-        for (const warning of serializedStats.warnings) {
-          logger.emitWarning(this._normalizeError(buildFolder, warning));
-        }
+      for (const warning of serializedStats.warnings as (string | Error)[]) {
+        logger.emitWarning(warning instanceof Error ? warning : new Error(warning));
       }
 
-      if (serializedStats.errors) {
-        for (const error of serializedStats.errors) {
-          logger.emitError(this._normalizeError(buildFolder, error));
-        }
+      for (const error of serializedStats.errors as (string | Error)[]) {
+        logger.emitError(error instanceof Error ? error : new Error(error));
       }
-    }
-  }
-
-  private _normalizeError(buildFolder: string, error: TWebpack.StatsError): Error {
-    if (error instanceof Error) {
-      return error;
-    } else if (error.moduleIdentifier) {
-      let lineNumber: number | undefined;
-      let columnNumber: number | undefined;
-      if (error.loc) {
-        // Format of "<line>:<columnStart>-<columnEnd>"
-        // https://webpack.js.org/api/stats/#errors-and-warnings
-        const [lineNumberRaw, columnRangeRaw] = error.loc.split(':');
-        const [startColumnRaw] = columnRangeRaw.split('-');
-        if (lineNumberRaw) {
-          lineNumber = parseInt(lineNumberRaw, 10);
-          if (isNaN(lineNumber)) {
-            lineNumber = undefined;
-          }
-        }
-        if (startColumnRaw) {
-          columnNumber = parseInt(startColumnRaw, 10);
-          if (isNaN(columnNumber)) {
-            columnNumber = undefined;
-          }
-        }
-      }
-
-      return new FileError(error.message, {
-        absolutePath: error.moduleIdentifier,
-        projectFolder: buildFolder,
-        line: lineNumber,
-        column: columnNumber
-      });
-    } else {
-      return new Error(error.message);
     }
   }
 }

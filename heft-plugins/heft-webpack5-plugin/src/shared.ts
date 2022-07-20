@@ -23,34 +23,26 @@ export type IWebpackConfiguration =
 /**
  * @public
  */
-export interface IWebpackVersions {
-  webpackVersion: string;
-  webpackDevServerVersion: string;
-}
-
-/**
- * @public
- */
-export interface IWebpackPluginAccessor {
+ export interface IWebpack5PluginAccessor {
   /**
-   * A hook that provides the versions of Webpack and Webpack Dev Server.
-   */
-  readonly onEmitWebpackVersionsHook?: AsyncParallelHook<IWebpackVersions>;
-  /**
-   * The configuration used by the Webpack plugin. This must be populated
-   * for Webpack to run. If webpackConfigFilePath is specified,
-   * this will be populated automatically with the exports of the
-   * config file referenced in that property.
+   * A hook that allows for modification of the  configuration used by the Webpack
+   * plugin. This must be populated for Webpack to run. If a webpack configuration is
+   * provided, this will be populated automatically with the exports of the config
+   * file.
    *
    * @remarks
-   * Tapable event handlers can return `null` instead of `undefined` to suppress
+   * Tapable event handlers can return `false` instead of `undefined` to suppress
    * other handlers from creating a configuration object.
    */
-  // We are inheriting this problem from Tapable's API
-  // eslint-disable-next-line @rushstack/no-new-null
-  readonly onConfigureWebpackHook?: AsyncSeriesWaterfallHook<IWebpackConfiguration | null>;
-  // We are inheriting this problem from Tapable's API
-  // eslint-disable-next-line @rushstack/no-new-null
-  readonly onAfterConfigureWebpackHook?: AsyncParallelHook<IWebpackConfiguration | null>;
-  readonly onEmitStatsHook?: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
+  readonly onConfigureWebpackHook: AsyncSeriesWaterfallHook<IWebpackConfiguration | false>;
+  /**
+   * A hook that provides the finalized configuration that will be used by Webpack.
+   * If the configuration object is supressed, this hook will not be called.
+   */
+  readonly onAfterConfigureWebpackHook: AsyncParallelHook<IWebpackConfiguration>;
+  /**
+   * A hook that provides the stats output from Webpack. If the configuration object
+   * is suppressed, this hook will not be called.
+   */
+  readonly onEmitStatsHook: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
 }
