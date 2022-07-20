@@ -56,7 +56,7 @@ export enum FindApiItemsMessageId {
   /**
    * "Encountered unexpected excerpt tokens in ___. Excerpt: ___."
    */
-  UnexpectedExcerptTokens = 'unexpected-excerpt-token',
+  UnexpectedExcerptTokens = 'unexpected-excerpt-tokens',
 
   /**
    * Item ___ is of unsupported kind ___."
