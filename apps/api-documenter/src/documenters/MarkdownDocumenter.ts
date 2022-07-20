@@ -647,7 +647,7 @@ export class MarkdownDocumenter {
       headerTitles: ['Method', 'Modifiers', 'Description']
     });
 
-    const apiMembers: readonly ApiItem[] = this._AndWriteIncompleteWarning(apiClass, output);
+    const apiMembers: readonly ApiItem[] = this._getMembersAndWriteIncompleteWarning(apiClass, output);
     for (const apiMember of apiMembers) {
       const isInherited: boolean = apiMember.parent !== apiClass;
       switch (apiMember.kind) {
