@@ -348,7 +348,10 @@ export class ProjectChangeAnalyzer {
 
     // Currently, only pnpm handles project shrinkwraps
     if (this._rushConfiguration.packageManager === 'pnpm') {
-      const projectDependencyManifestPaths: string[] = [];
+      const projectRelativeDependencyManifestPaths: Map<RushConfigurationProject, string> = new Map<
+        RushConfigurationProject,
+        string
+      >();
 
       for (const project of projectHashDeps.keys()) {
         const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
@@ -357,32 +360,42 @@ export class ProjectChangeAnalyzer {
         );
 
         if (!FileSystem.exists(projectShrinkwrapFilePath)) {
-          throw new Error(
-            `A project dependency file (${relativeProjectShrinkwrapFilePath}) is missing. You may need to run ` +
-              '"rush install" or "rush update".'
-          );
+          // Missing project shrinkwrap allowed because split workspace project may not installed
+          if (!project.splitWorkspace) {
+            throw new Error(
+              `A project dependency file (${relativeProjectShrinkwrapFilePath}) is missing. You may need to run ` +
+                '"rush install" or "rush update".'
+            );
+          }
+        } else {
+          projectRelativeDependencyManifestPaths.set(project, relativeProjectShrinkwrapFilePath);
         }
-
-        projectDependencyManifestPaths.push(relativeProjectShrinkwrapFilePath);
       }
 
       const gitPath: string = this._git.getGitPathOrThrow();
       const hashes: Map<string, string> = getGitHashForFiles(
-        projectDependencyManifestPaths,
+        Array.from(projectRelativeDependencyManifestPaths.values()),
         rootDir,
         gitPath
       );
 
-      let i: number = 0;
-      for (const projectDeps of projectHashDeps.values()) {
-        const projectDependencyManifestPath: string = projectDependencyManifestPaths[i];
-        if (!hashes.has(projectDependencyManifestPath)) {
-          throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
+      for (const [project, projectDeps] of projectHashDeps.entries()) {
+        const projectDependencyManifestPath: string | undefined =
+          projectRelativeDependencyManifestPaths.get(project);
+        if (!projectDependencyManifestPath) {
+          // Missing project dependency manifest is allowed because split workspace may not installed
+          if (project.splitWorkspace) {
+            continue;
+          }
+          throw new InternalError(`Missing projectDependencyManifestPath for ${project.packageName}`);
         }
 
-        const hash: string = hashes.get(projectDependencyManifestPath)!;
-        projectDeps.set(projectDependencyManifestPath, hash);
-        i++;
+        const hash: string | undefined = hashes.get(projectDependencyManifestPath);
+        if (!hash) {
+          throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
+        } else {
+          projectDeps.set(projectDependencyManifestPath, hash);
+        }
       }
     } else {
       // Determine the current variant from the link JSON.
