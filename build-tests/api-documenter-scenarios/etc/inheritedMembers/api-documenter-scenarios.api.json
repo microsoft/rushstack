@@ -191,12 +191,6 @@
               "text": "<number> "
             }
           ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            }
-          ],
           "releaseTag": "Public",
           "name": "Class1",
           "preserveMemberOrder": false,
@@ -307,6 +301,10 @@
               "name": "someOverload"
             }
           ],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         },
         {
@@ -326,12 +324,6 @@
             {
               "kind": "Content",
               "text": " "
-            }
-          ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
             }
           ],
           "releaseTag": "Public",
@@ -457,6 +449,10 @@
               "isProtected": false
             }
           ],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         },
         {
@@ -500,16 +496,14 @@
               "text": " "
             }
           ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            }
-          ],
           "releaseTag": "Public",
           "name": "ExtendsAnonymousClass",
           "preserveMemberOrder": false,
           "members": [],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         },
         {
@@ -531,16 +525,14 @@
               "text": " "
             }
           ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            }
-          ],
           "releaseTag": "Public",
           "name": "ExtendsClassFromAnotherPackage",
           "preserveMemberOrder": false,
           "members": [],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         },
         {
@@ -562,16 +554,14 @@
               "text": " "
             }
           ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            }
-          ],
           "releaseTag": "Public",
           "name": "ExtendsClassLikeVariable",
           "preserveMemberOrder": false,
           "members": [],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         },
         {
@@ -593,16 +583,14 @@
               "text": " "
             }
           ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            }
-          ],
           "releaseTag": "Public",
           "name": "ExtendsUnexportedClass",
           "preserveMemberOrder": false,
           "members": [],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         },
         {
@@ -624,16 +612,16 @@
               "text": " "
             }
           ],
+          "releaseTag": "Public",
+          "name": "IExtendsInterfaceLikeTypeAlias",
+          "preserveMemberOrder": false,
+          "members": [],
           "extendsTokenRanges": [
             {
               "startIndex": 1,
               "endIndex": 2
             }
-          ],
-          "releaseTag": "Public",
-          "name": "IExtendsInterfaceLikeTypeAlias",
-          "preserveMemberOrder": false,
-          "members": []
+          ]
         },
         {
           "kind": "Interface",
@@ -661,16 +649,6 @@
             {
               "kind": "Content",
               "text": " "
-            }
-          ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            },
-            {
-              "startIndex": 3,
-              "endIndex": 4
             }
           ],
           "releaseTag": "Public",
@@ -731,6 +709,16 @@
                 "endIndex": 2
               }
             }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 1,
+              "endIndex": 2
+            },
+            {
+              "startIndex": 3,
+              "endIndex": 4
+            }
           ]
         },
         {
@@ -743,7 +731,6 @@
               "text": "export interface IInterface1 "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IInterface1",
           "preserveMemberOrder": false,
@@ -802,7 +789,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "Interface",
@@ -814,7 +802,6 @@
               "text": "export interface IInterface2 "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IInterface2",
           "preserveMemberOrder": false,
@@ -846,7 +833,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "TypeAlias",
@@ -897,7 +885,6 @@
                   "text": "class Class3 "
                 }
               ],
-              "extendsTokenRanges": [],
               "releaseTag": "Public",
               "name": "Class3",
               "preserveMemberOrder": false,
