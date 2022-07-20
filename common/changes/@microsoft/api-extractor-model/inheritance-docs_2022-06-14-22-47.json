@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-extractor-model",
       "comment": "Add a new ApiItemContainerMixin.findMembersWithInheritance() method for finding an item's inherited members",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor-model"
