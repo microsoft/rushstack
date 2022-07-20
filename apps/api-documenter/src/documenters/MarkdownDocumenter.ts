@@ -647,19 +647,7 @@ export class MarkdownDocumenter {
       headerTitles: ['Method', 'Modifiers', 'Description']
     });
 
-    const showInheritedMembers: boolean = !!this._documenterConfig?.configFile.showInheritedMembers;
-
-    let apiMembers: readonly ApiItem[];
-    let maybeIncompleteResult: boolean;
-    if (showInheritedMembers) {
-      const result: IFindApiItemsResult = apiClass.findMembersWithInheritance();
-      apiMembers = result.items;
-      maybeIncompleteResult = result.maybeIncompleteResult;
-    } else {
-      apiMembers = apiClass.members;
-      maybeIncompleteResult = false;
-    }
-
+    const apiMembers: readonly ApiItem[] = this._AndWriteIncompleteWarning(apiClass, output);
     for (const apiMember of apiMembers) {
       const isInherited: boolean = apiMember.parent !== apiClass;
       switch (apiMember.kind) {
@@ -712,19 +700,6 @@ export class MarkdownDocumenter {
           break;
         }
       }
-    }
-
-    if (showInheritedMembers && maybeIncompleteResult) {
-      output.appendNode(
-        new DocParagraph({ configuration }, [
-          new DocEmphasisSpan({ configuration, italic: true }, [
-            new DocPlainText({
-              configuration,
-              text: '(Some inherited members may not be shown because they are not represented in the documentation.)'
-            })
-          ])
-        ])
-      );
     }
 
     if (eventsTable.rows.length > 0) {
@@ -800,19 +775,7 @@ export class MarkdownDocumenter {
       headerTitles: ['Method', 'Description']
     });
 
-    const showInheritedMembers: boolean = !!this._documenterConfig?.configFile.showInheritedMembers;
-
-    let apiMembers: readonly ApiItem[];
-    let maybeIncompleteResult: boolean;
-    if (showInheritedMembers) {
-      const result: IFindApiItemsResult = apiInterface.findMembersWithInheritance();
-      apiMembers = result.items;
-      maybeIncompleteResult = result.maybeIncompleteResult;
-    } else {
-      apiMembers = apiInterface.members;
-      maybeIncompleteResult = false;
-    }
-
+    const apiMembers: readonly ApiItem[] = this._getMembersAndWriteIncompleteWarning(apiInterface, output);
     for (const apiMember of apiMembers) {
       const isInherited: boolean = apiMember.parent !== apiInterface;
       switch (apiMember.kind) {
@@ -853,19 +816,6 @@ export class MarkdownDocumenter {
           break;
         }
       }
-    }
-
-    if (showInheritedMembers && maybeIncompleteResult) {
-      output.appendNode(
-        new DocParagraph({ configuration }, [
-          new DocEmphasisSpan({ configuration, italic: true }, [
-            new DocPlainText({
-              configuration,
-              text: '(Some inherited members may not be shown because they are not represented in the documentation.)'
-            })
-          ])
-        ])
-      );
     }
 
     if (eventsTable.rows.length > 0) {
@@ -1207,6 +1157,40 @@ export class MarkdownDocumenter {
 
       output.appendNode(node);
     }
+  }
+
+  private _getMembersAndWriteIncompleteWarning(
+    apiClassOrInterface: ApiClass | ApiInterface,
+    output: DocSection
+  ): readonly ApiItem[] {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+    const showInheritedMembers: boolean = !!this._documenterConfig?.configFile.showInheritedMembers;
+    if (!showInheritedMembers) {
+      return apiClassOrInterface.members;
+    }
+
+    const result: IFindApiItemsResult = apiClassOrInterface.findMembersWithInheritance();
+
+    // If the result is potentially incomplete, write a short warning communicating this.
+    if (result.maybeIncompleteResult) {
+      output.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, italic: true }, [
+            new DocPlainText({
+              configuration,
+              text: '(Some inherited members may not be shown because they are not represented in the documentation.)'
+            })
+          ])
+        ])
+      );
+    }
+
+    // Log the messages for diagnostic purposes.
+    for (const message of result.messages) {
+      console.log(`findMembersWithInheritance() diagnostic: ${message.text}`);
+    }
+
+    return result.items;
   }
 
   private _getFilenameForApiItem(apiItem: ApiItem): string {

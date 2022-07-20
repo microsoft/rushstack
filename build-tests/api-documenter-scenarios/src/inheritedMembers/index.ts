@@ -112,10 +112,11 @@ export type IInterfaceLikeTypeAlias = {
 };
 
 /**
- * Some interface that extends an interface-like type alias.
+ * Some interface that extends an interface-like type alias as well as
+ * another interface.
  * @public
  */
-export interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias {}
+export interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias, IInterface1 {}
 
 /**
  * Some class that extends a class from another package. This base class

@@ -596,7 +596,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "api-documenter-scenarios!IExtendsInterfaceLikeTypeAlias:interface",
-          "docComment": "/**\n * Some interface that extends an interface-like type alias.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Some interface that extends an interface-like type alias as well as another interface.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -606,6 +606,15 @@
               "kind": "Reference",
               "text": "IInterfaceLikeTypeAlias",
               "canonicalReference": "api-documenter-scenarios!IInterfaceLikeTypeAlias:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", "
+            },
+            {
+              "kind": "Reference",
+              "text": "IInterface1",
+              "canonicalReference": "api-documenter-scenarios!IInterface1:interface"
             },
             {
               "kind": "Content",
@@ -620,6 +629,10 @@
             {
               "startIndex": 1,
               "endIndex": 2
+            },
+            {
+              "startIndex": 3,
+              "endIndex": 4
             }
           ]
         },

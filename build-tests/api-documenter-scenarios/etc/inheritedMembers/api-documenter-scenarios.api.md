@@ -48,7 +48,7 @@ export class ExtendsUnexportedClass extends UnexportedClass {
 }
 
 // @public
-export interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias {
+export interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias, IInterface1 {
 }
 
 // @public

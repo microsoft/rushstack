@@ -4,14 +4,21 @@
 
 ## IExtendsInterfaceLikeTypeAlias interface
 
-Some interface that extends an interface-like type alias.
+Some interface that extends an interface-like type alias as well as another interface.
 
 <b>Signature:</b>
 
 ```typescript
-export interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias 
+export interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias, IInterface1 
 ```
-<b>Extends:</b> [IInterfaceLikeTypeAlias](./api-documenter-scenarios.iinterfaceliketypealias.md)
+<b>Extends:</b> [IInterfaceLikeTypeAlias](./api-documenter-scenarios.iinterfaceliketypealias.md)<!-- -->, [IInterface1](./api-documenter-scenarios.iinterface1.md)
 
 <i>(Some inherited members may not be shown because they are not represented in the documentation.)</i>
+
+## Properties
+
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [secondProp](./api-documenter-scenarios.iinterface1.secondprop.md) |  | boolean \| string | <p>A second prop.</p><p>(Inherited from [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->)</p> |
+|  [someProp](./api-documenter-scenarios.iinterface1.someprop.md) |  | number | <p>Some prop.</p><p>(Inherited from [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->)</p> |
 

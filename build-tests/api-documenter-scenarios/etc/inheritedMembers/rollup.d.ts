@@ -66,10 +66,11 @@ export declare class ExtendsUnexportedClass extends UnexportedClass {
 }
 
 /**
- * Some interface that extends an interface-like type alias.
+ * Some interface that extends an interface-like type alias as well as
+ * another interface.
  * @public
  */
-export declare interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias {
+export declare interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias, IInterface1 {
 }
 
 /**

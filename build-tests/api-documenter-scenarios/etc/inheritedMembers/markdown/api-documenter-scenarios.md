@@ -19,7 +19,7 @@
 
 |  Interface | Description |
 |  --- | --- |
-|  [IExtendsInterfaceLikeTypeAlias](./api-documenter-scenarios.iextendsinterfaceliketypealias.md) | Some interface that extends an interface-like type alias. |
+|  [IExtendsInterfaceLikeTypeAlias](./api-documenter-scenarios.iextendsinterfaceliketypealias.md) | Some interface that extends an interface-like type alias as well as another interface. |
 |  [IExtendsMultipleInterfaces](./api-documenter-scenarios.iextendsmultipleinterfaces.md) | Some interface that extends multiple interfaces. |
 |  [IInterface1](./api-documenter-scenarios.iinterface1.md) |  |
 |  [IInterface2](./api-documenter-scenarios.iinterface2.md) |  |
