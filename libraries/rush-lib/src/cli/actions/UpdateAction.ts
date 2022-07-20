@@ -61,7 +61,7 @@ export class UpdateAction extends BaseInstallAction {
           ' When you want to update for split workspace projects, you can run' +
           ' "rush update --include-split-workspace", which updates entire split workspace projects.' +
           ' Or, you can specify selection parameters to do partial update for split workspace projects, ' +
-          ' such as "rush update --to <split_worksapce_package_name>".'
+          ' such as "rush update --to <split_workspace_package_name>".'
       });
     }
 
