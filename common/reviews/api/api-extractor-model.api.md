@@ -692,8 +692,8 @@ export enum ExcerptTokenKind {
 // @beta
 export enum FindApiItemsMessageId {
     DeclarationResolutionFailed = "declaration-resolution-failed",
-    MissingApiModel = "missing-api-model",
-    UnexpectedExcerptTokens = "unexpected-excerpt-tokens",
+    ExtendsClauseMissingReference = "extends-clause-missing-reference",
+    NoAssociatedApiModel = "no-associated-api-model",
     UnsupportedKind = "unsupported-kind"
 }
 

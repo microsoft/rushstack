@@ -45,7 +45,7 @@ export interface IFindApiItemsMessage {
  */
 export enum FindApiItemsMessageId {
   /**
-   * "Unable to resolve canonical reference within API item ___: ___"
+   * "Unable to resolve declaration reference within API item ___: ___"
    */
   DeclarationResolutionFailed = 'declaration-resolution-failed',
 

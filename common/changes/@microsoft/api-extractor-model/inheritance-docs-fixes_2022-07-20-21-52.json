@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Improve IFindApiItemMessage and fix two small bugs with ApiItemContainerMixin.findMembersWithInheritance()",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}

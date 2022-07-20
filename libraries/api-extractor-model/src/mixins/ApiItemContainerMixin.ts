@@ -17,6 +17,7 @@ import { ApiInterface } from '../model/ApiInterface';
 import { ExcerptToken, ExcerptTokenKind } from './Excerpt';
 import { IFindApiItemsResult, IFindApiItemsMessage, FindApiItemsMessageId } from './IFindApiItemsResult';
 import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { HeritageType } from '../model/HeritageType';
 import { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver';
 
@@ -354,6 +355,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
             text: `Unable to analyze references of API item ${next.displayName} because it is of unsupported kind ${next.kind}`
           });
           maybeIncompleteResult = true;
+          next = toVisit.shift();
           continue;
         }
 
@@ -394,7 +396,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
             continue;
           }
 
-          const canonicalReference = firstReferenceToken.canonicalReference!;
+          const canonicalReference: DeclarationReference = firstReferenceToken.canonicalReference!;
           const apiItemResult: IResolveDeclarationReferenceResult = apiModel.resolveDeclarationReference(
             canonicalReference,
             undefined
@@ -404,7 +406,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
           if (!apiItem) {
             messages.push({
               messageId: FindApiItemsMessageId.DeclarationResolutionFailed,
-              text: `Unable to resolve canonical reference within API item ${next.displayName}: ${apiItemResult.errorMessage}`
+              text: `Unable to resolve declaration reference within API item ${next.displayName}: ${apiItemResult.errorMessage}`
             });
             maybeIncompleteResult = true;
             continue;
