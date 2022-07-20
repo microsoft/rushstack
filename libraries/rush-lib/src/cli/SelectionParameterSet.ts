@@ -281,9 +281,11 @@ export class SelectionParameterSet {
     pnpmFilterArguments: string[];
     splitWorkspacePnpmFilterArguments: string[];
     selectedProjects: Set<RushConfigurationProject> | undefined;
+    hasSelectSplitWorkspaceProject: boolean;
   }> {
     const pnpmFilterArguments: string[] = [];
     const splitWorkspacePnpmFilterArguments: string[] = [];
+    let hasSelectSplitWorkspaceProject: boolean = false;
 
     if (this._rushConfiguration.hasSplitWorkspaceProject) {
       // when there are split workspace projects, the selected projects are computed inside Rush.js.
@@ -297,6 +299,7 @@ export class SelectionParameterSet {
         if (!project.splitWorkspace) {
           selectedRushProjects.add(project);
         } else {
+          hasSelectSplitWorkspaceProject = true;
           selectedSplitWorkspaceProjects.add(project);
         }
       }
@@ -312,10 +315,14 @@ export class SelectionParameterSet {
         }
       }
 
-      // All selected split workspace are specified. It will be used by InstallManage
-      // to acknowledge all selected split workspace projects.
-      for (const selectedSplitWorkspaceProject of selectedSplitWorkspaceProjects.values()) {
-        splitWorkspacePnpmFilterArguments.push('--filter', `${selectedSplitWorkspaceProject.packageName}`);
+      if (
+        this._rushConfiguration.getFilteredProjects({
+          splitWorkspace: true
+        }).length !== selectedSplitWorkspaceProjects.size
+      ) {
+        for (const selectedProject of selectedSplitWorkspaceProjects.values()) {
+          splitWorkspacePnpmFilterArguments.push('--filter', `${selectedProject.packageName}`);
+        }
       }
     } else {
       // when there are no split workspace projects, replies on pnpm filtering with ellipsis
@@ -365,14 +372,15 @@ export class SelectionParameterSet {
 
     // Undefined when full install
     let selectedProjects: Set<RushConfigurationProject> | undefined;
-    if (pnpmFilterArguments.length > 0 || splitWorkspacePnpmFilterArguments.length > 0) {
+    if (this.isSelectionSpecified) {
       selectedProjects = await this.getSelectedProjectsAsync(terminal);
     }
 
     return {
       pnpmFilterArguments,
       splitWorkspacePnpmFilterArguments,
-      selectedProjects
+      selectedProjects,
+      hasSelectSplitWorkspaceProject
     };
   }
 

@@ -114,25 +114,20 @@ export class UpdateAction extends BaseInstallAction {
      * not affects on normal rush workspace projects.
      */
     const pnpmFilterArguments: string[] = [];
-    const { splitWorkspacePnpmFilterArguments = [], selectedProjects } =
-      (await this._selectionParameters?.getPnpmFilterArgumentsAsync(terminal)) || {};
+    const {
+      splitWorkspacePnpmFilterArguments = [],
+      selectedProjects,
+      hasSelectSplitWorkspaceProject = false
+    } = (await this._selectionParameters?.getPnpmFilterArgumentsAsync(terminal)) || {};
 
-    if (this._selectionParameters?.isSelectionSpecified) {
-      if (
-        Array.from(await this._selectionParameters.getSelectedProjectsAsync(terminal)).some(
-          (project) => project.splitWorkspace
-        )
-      ) {
-        // at least one split workspace has been selected
-      } else {
-        // Warn when there is no split workspace project selected
-        if (splitWorkspacePnpmFilterArguments.length === 0) {
-          terminal.writeWarningLine(
-            'Project filtering arguments are using without selecting any split workspace' +
-              ' projects. Better run "rush update" without specifying selection parameters.'
-          );
-          terminal.writeLine();
-        }
+    if (this._selectionParameters?.isSelectionSpecified && !hasSelectSplitWorkspaceProject) {
+      // Warn when there is no split workspace project selected
+      if (splitWorkspacePnpmFilterArguments.length === 0) {
+        terminal.writeWarningLine(
+          'Project filtering arguments are using without selecting any split workspace' +
+            ' projects. Better run "rush update" without specifying selection parameters.'
+        );
+        terminal.writeLine();
       }
     }
 
@@ -152,7 +147,7 @@ export class UpdateAction extends BaseInstallAction {
 
     let includeSplitWorkspace: boolean = this._includeSplitWorkspaceParameter?.value ?? false;
     // turn on includeSplitWorkspace when selecting any split workspace project
-    if (this._selectionParameters?.isSelectionSpecified) {
+    if (selectedProjects && hasSelectSplitWorkspaceProject) {
       includeSplitWorkspace = true;
     }
 

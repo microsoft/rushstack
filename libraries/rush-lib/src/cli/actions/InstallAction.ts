@@ -84,8 +84,12 @@ export class InstallAction extends BaseInstallAction {
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
-    const { pnpmFilterArguments, splitWorkspacePnpmFilterArguments, selectedProjects } =
-      await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal);
+    const {
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      selectedProjects,
+      hasSelectSplitWorkspaceProject
+    } = await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal);
 
     // Warn when fully install without selecting any split workspace project
     if (
@@ -103,7 +107,7 @@ export class InstallAction extends BaseInstallAction {
 
     let includeSplitWorkspace: boolean = this._includeSplitWorkspaceParameter?.value ?? false;
     // turn on includeSplitWorkspace when selecting any split workspace project
-    if (this._selectionParameters?.isSelectionSpecified) {
+    if (selectedProjects && hasSelectSplitWorkspaceProject) {
       includeSplitWorkspace = true;
     }
 
