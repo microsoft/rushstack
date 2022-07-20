@@ -44,6 +44,10 @@ export interface IJsonEntry {
    * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.tags | RushConfigurationProject.tags}
    */
   tags: string[];
+  /**
+   * @see {@link ../../api/RushConfigurationProject#RushConfigurationProject.splitWorkspace | RushConfigurationProject.splitWorkspace}
+   */
+  splitWorkspace: boolean;
 }
 
 export interface IJsonOutput {
@@ -164,7 +168,8 @@ export class ListAction extends BaseRushAction {
         versionPolicyName,
         shouldPublish,
         reviewCategory,
-        tags: Array.from(config.tags)
+        tags: Array.from(config.tags),
+        splitWorkspace: config.splitWorkspace
       };
     });
 
@@ -200,6 +205,10 @@ export class ListAction extends BaseRushAction {
       tableHeader.push('Should publish');
       tableHeader.push('Review category');
       tableHeader.push('Tags');
+
+      if (this.rushConfiguration.hasSplitWorkspaceProject) {
+        tableHeader.push('Split workspace');
+      }
     }
 
     const { default: CliTable } = await import('cli-table');
@@ -251,6 +260,10 @@ export class ListAction extends BaseRushAction {
         appendToPackageRow(shouldPublish);
         appendToPackageRow(reviewCategory);
         appendToPackageRow(Array.from(project.tags).join(', '));
+
+        if (this.rushConfiguration.hasSplitWorkspaceProject) {
+          appendToPackageRow(String(Boolean(project.splitWorkspace)));
+        }
       }
 
       table.push(packageRow);
