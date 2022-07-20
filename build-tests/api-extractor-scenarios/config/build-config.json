@@ -35,6 +35,8 @@
     "importType",
     "inconsistentReleaseTags",
     "internationalCharacters",
+    "mergedDeclarations",
+    "mixinPattern",
     "namedDefaultImport",
     "preapproved",
     "readonlyDeclarations",
