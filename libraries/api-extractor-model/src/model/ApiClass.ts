@@ -14,7 +14,6 @@ import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiRel
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiExtendsMixin, IApiExtendsMixinOptions, IApiExtendsMixinJson } from '../mixins/ApiExtendsMixin';
 import {
   ApiTypeParameterListMixin,
   IApiTypeParameterListMixinOptions,
@@ -31,15 +30,13 @@ export interface IApiClassOptions
     IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiDeclaredItemOptions,
-    IApiTypeParameterListMixinOptions,
-    IApiExtendsMixinOptions {
+    IApiTypeParameterListMixinOptions {
+  extendsTokenRange: IExcerptTokenRange | undefined;
   implementsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiClassJson
-  extends IApiDeclaredItemJson,
-    IApiTypeParameterListMixinJson,
-    IApiExtendsMixinJson {
+export interface IApiClassJson extends IApiDeclaredItemJson, IApiTypeParameterListMixinJson {
+  extendsTokenRange?: IExcerptTokenRange;
   implementsTokenRanges: IExcerptTokenRange[];
 }
 
@@ -60,12 +57,23 @@ export interface IApiClassJson
  * @public
  */
 export class ApiClass extends ApiItemContainerMixin(
-  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExtendsMixin(ApiDeclaredItem))))
+  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)))
 ) {
+  /**
+   * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.
+   */
+  public readonly extendsType: HeritageType | undefined;
+
   private readonly _implementsTypes: HeritageType[] = [];
 
   public constructor(options: IApiClassOptions) {
     super(options);
+
+    if (options.extendsTokenRange) {
+      this.extendsType = new HeritageType(this.buildExcerpt(options.extendsTokenRange));
+    } else {
+      this.extendsType = undefined;
+    }
 
     for (const implementsTokenRange of options.implementsTokenRanges) {
       this._implementsTypes.push(new HeritageType(this.buildExcerpt(implementsTokenRange)));
@@ -84,6 +92,7 @@ export class ApiClass extends ApiItemContainerMixin(
   ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
+    options.extendsTokenRange = jsonObject.extendsTokenRange;
     options.implementsTokenRanges = jsonObject.implementsTokenRanges;
   }
 
@@ -107,6 +116,11 @@ export class ApiClass extends ApiItemContainerMixin(
   /** @override */
   public serializeInto(jsonObject: Partial<IApiClassJson>): void {
     super.serializeInto(jsonObject);
+
+    // Note that JSON does not support the "undefined" value, so we simply omit the field entirely if it is undefined
+    if (this.extendsType) {
+      jsonObject.extendsTokenRange = this.extendsType.excerpt.tokenRange;
+    }
 
     jsonObject.implementsTokenRanges = this.implementsTypes.map((x) => x.excerpt.tokenRange);
   }

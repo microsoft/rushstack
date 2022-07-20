@@ -362,7 +362,6 @@
               "text": "export declare class Combiner "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "Combiner",
           "preserveMemberOrder": false,

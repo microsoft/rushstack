@@ -182,7 +182,6 @@
               "text": "export declare class ClassΞ "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "ClassΞ",
           "preserveMemberOrder": false,

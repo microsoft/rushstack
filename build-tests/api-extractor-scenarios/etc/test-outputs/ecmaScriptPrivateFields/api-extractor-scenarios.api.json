@@ -182,7 +182,6 @@
               "text": "export declare class Example "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "Example",
           "preserveMemberOrder": false,

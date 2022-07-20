@@ -49,6 +49,7 @@ export class ApiClass extends ApiClass_base {
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     get containerKey(): string;
+    readonly extendsType: HeritageType | undefined;
     // (undocumented)
     static getContainerKey(name: string): string;
     get implementsTypes(): ReadonlyArray<HeritageType>;
@@ -171,24 +172,6 @@ export class ApiEnumMember extends ApiEnumMember_base {
     get kind(): ApiItemKind;
 }
 
-// @public
-export function ApiExtendsMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiExtendsMixin);
-
-// @public
-export interface ApiExtendsMixin extends ApiItem {
-    readonly extendsTypes: HeritageType[];
-    findMembersWithInheritance(): IFindMembersWithInheritanceResult;
-    // Warning: (ae-forgotten-export) The symbol "IApiExtendsMixinJson" needs to be exported by the entry point index.d.ts
-    //
-    // @override (undocumented)
-    serializeInto(jsonObject: Partial<IApiExtendsMixinJson>): void;
-}
-
-// @public
-export namespace ApiExtendsMixin {
-    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiExtendsMixin;
-}
-
 // Warning: (ae-forgotten-export) The symbol "ApiFunction_base" needs to be exported by the entry point index.d.ts
 //
 // @public
@@ -245,6 +228,7 @@ export class ApiInterface extends ApiInterface_base {
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     get containerKey(): string;
+    get extendsTypes(): ReadonlyArray<HeritageType>;
     // (undocumented)
     static getContainerKey(name: string): string;
     // @override (undocumented)
@@ -298,6 +282,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 export interface ApiItemContainerMixin extends ApiItem {
     addMember(member: ApiItem): void;
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
+    findMembersWithInheritance(): IFindApiItemsResult;
     // @internal
     _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
     readonly preserveMemberOrder: boolean;
@@ -705,10 +690,10 @@ export enum ExcerptTokenKind {
 }
 
 // @public
-export enum FindMembersWithInheritanceMessageId {
+export enum FindApiItemsMessageId {
     DeclarationResolutionFailed = "declaration-resolution-failed",
     MissingApiModel = "missing-api-model",
-    MissingReferenceToken = "missing-reference-token",
+    UnexpectedExcerptTokens = "unexpected-excerpt-token",
     UnsupportedKind = "unsupported-kind"
 }
 
@@ -723,7 +708,9 @@ export interface IApiCallSignatureOptions extends IApiTypeParameterListMixinOpti
 }
 
 // @public
-export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions, IApiExtendsMixinOptions {
+export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions {
+    // (undocumented)
+    extendsTokenRange: IExcerptTokenRange | undefined;
     // (undocumented)
     implementsTokenRanges: IExcerptTokenRange[];
 }
@@ -761,12 +748,6 @@ export interface IApiEnumOptions extends IApiItemContainerMixinOptions, IApiName
 }
 
 // @public
-export interface IApiExtendsMixinOptions extends IApiItemOptions {
-    // (undocumented)
-    extendsTokenRanges: IExcerptTokenRange[];
-}
-
-// @public
 export interface IApiFunctionOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
 }
 
@@ -781,7 +762,9 @@ export interface IApiInitializerMixinOptions extends IApiItemOptions {
 }
 
 // @public
-export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiExtendsMixinOptions {
+export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+    // (undocumented)
+    extendsTokenRanges: IExcerptTokenRange[];
 }
 
 // @public
@@ -944,16 +927,16 @@ export interface IExcerptTokenRange {
 }
 
 // @public
-export interface IFindMembersWithInheritanceMessage {
-    messageId: FindMembersWithInheritanceMessageId;
+export interface IFindApiItemsMessage {
+    messageId: FindApiItemsMessageId;
     text: string;
 }
 
 // @public
-export interface IFindMembersWithInheritanceResult {
+export interface IFindApiItemsResult {
+    items: ApiItem[];
     maybeIncompleteResult: boolean;
-    members: ApiItem[];
-    messages: IFindMembersWithInheritanceMessage[];
+    messages: IFindApiItemsMessage[];
 }
 
 // @public

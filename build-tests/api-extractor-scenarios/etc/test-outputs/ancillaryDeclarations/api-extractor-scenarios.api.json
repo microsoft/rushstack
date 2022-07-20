@@ -182,7 +182,6 @@
               "text": "export declare class MyClass "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "MyClass",
           "preserveMemberOrder": false,

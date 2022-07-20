@@ -182,7 +182,6 @@
               "text": "export declare class MergedClassAndInterface "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "MergedClassAndInterface",
           "preserveMemberOrder": false,
@@ -229,7 +228,6 @@
               "text": "export interface MergedClassAndInterface "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "MergedClassAndInterface",
           "preserveMemberOrder": false,
@@ -306,7 +304,8 @@
               ],
               "name": "someMethod"
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "Class",
@@ -318,7 +317,6 @@
               "text": "export declare class MergedClassAndNamespace "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "MergedClassAndNamespace",
           "preserveMemberOrder": false,
@@ -403,7 +401,6 @@
               "text": "export interface MergedInterfaces "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "MergedInterfaces",
           "preserveMemberOrder": false,
@@ -435,7 +432,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         }
       ]
     }

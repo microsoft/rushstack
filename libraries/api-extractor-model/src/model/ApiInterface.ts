@@ -19,6 +19,8 @@ import {
   ApiReleaseTagMixin,
   IApiReleaseTagMixinJson
 } from '../mixins/ApiReleaseTagMixin';
+import { IExcerptTokenRange } from '../mixins/Excerpt';
+import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin, IApiNameMixinJson } from '../mixins/ApiNameMixin';
 import {
   IApiTypeParameterListMixinOptions,
@@ -26,7 +28,6 @@ import {
   ApiTypeParameterListMixin
 } from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
-import { IApiExtendsMixinJson, IApiExtendsMixinOptions, ApiExtendsMixin } from '../mixins/ApiExtendsMixin';
 
 /**
  * Constructor options for {@link ApiInterface}.
@@ -37,16 +38,18 @@ export interface IApiInterfaceOptions
     IApiNameMixinOptions,
     IApiTypeParameterListMixinOptions,
     IApiReleaseTagMixinOptions,
-    IApiDeclaredItemOptions,
-    IApiExtendsMixinOptions {}
+    IApiDeclaredItemOptions {
+  extendsTokenRanges: IExcerptTokenRange[];
+}
 
 export interface IApiInterfaceJson
   extends IApiItemContainerJson,
     IApiNameMixinJson,
     IApiTypeParameterListMixinJson,
     IApiReleaseTagMixinJson,
-    IApiDeclaredItemJson,
-    IApiExtendsMixinJson {}
+    IApiDeclaredItemJson {
+  extendsTokenRanges: IExcerptTokenRange[];
+}
 
 /**
  * Represents a TypeScript class declaration.
@@ -66,10 +69,16 @@ export interface IApiInterfaceJson
  * @public
  */
 export class ApiInterface extends ApiItemContainerMixin(
-  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExtendsMixin(ApiDeclaredItem))))
+  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)))
 ) {
+  private readonly _extendsTypes: HeritageType[] = [];
+
   public constructor(options: IApiInterfaceOptions) {
     super(options);
+
+    for (const extendsTokenRange of options.extendsTokenRanges) {
+      this._extendsTypes.push(new HeritageType(this.buildExcerpt(extendsTokenRange)));
+    }
   }
 
   public static getContainerKey(name: string): string {
@@ -83,6 +92,8 @@ export class ApiInterface extends ApiItemContainerMixin(
     jsonObject: IApiInterfaceJson
   ): void {
     super.onDeserializeInto(options, context, jsonObject);
+
+    options.extendsTokenRanges = jsonObject.extendsTokenRanges;
   }
 
   /** @override */
@@ -95,9 +106,18 @@ export class ApiInterface extends ApiItemContainerMixin(
     return ApiInterface.getContainerKey(this.name);
   }
 
+  /**
+   * The list of base interfaces that this interface inherits from using the `extends` keyword.
+   */
+  public get extendsTypes(): ReadonlyArray<HeritageType> {
+    return this._extendsTypes;
+  }
+
   /** @override */
   public serializeInto(jsonObject: Partial<IApiInterfaceJson>): void {
     super.serializeInto(jsonObject);
+
+    jsonObject.extendsTokenRanges = this.extendsTypes.map((x) => x.excerpt.tokenRange);
   }
 
   /** @beta @override */

@@ -191,16 +191,14 @@
               "text": " "
             }
           ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            }
-          ],
           "releaseTag": "Public",
           "name": "Child",
           "preserveMemberOrder": false,
           "members": [],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         }
       ]

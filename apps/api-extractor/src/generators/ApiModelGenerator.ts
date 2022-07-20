@@ -371,18 +371,21 @@ export class ApiModelGenerator {
         classDeclaration.typeParameters
       );
 
-      const extendsTokenRanges: IExcerptTokenRange[] = [];
+      let extendsTokenRange: IExcerptTokenRange | undefined = undefined;
       const implementsTokenRanges: IExcerptTokenRange[] = [];
 
       for (const heritageClause of classDeclaration.heritageClauses || []) {
-        for (const heritageType of heritageClause.types) {
-          const tokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-          if (heritageClause.token === ts.SyntaxKind.ExtendsKeyword) {
-            extendsTokenRanges.push(tokenRange);
-          } else {
-            implementsTokenRanges.push(tokenRange);
+        if (heritageClause.token === ts.SyntaxKind.ExtendsKeyword) {
+          extendsTokenRange = ExcerptBuilder.createEmptyTokenRange();
+          if (heritageClause.types.length > 0) {
+            nodesToCapture.push({ node: heritageClause.types[0], tokenRange: extendsTokenRange });
           }
-          nodesToCapture.push({ node: heritageType, tokenRange: tokenRange });
+        } else if (heritageClause.token === ts.SyntaxKind.ImplementsKeyword) {
+          for (const heritageType of heritageClause.types) {
+            const implementsTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+            implementsTokenRanges.push(implementsTokenRange);
+            nodesToCapture.push({ node: heritageType, tokenRange: implementsTokenRange });
+          }
         }
       }
 
@@ -397,7 +400,7 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         typeParameters,
-        extendsTokenRanges,
+        extendsTokenRange,
         implementsTokenRanges
       });
 

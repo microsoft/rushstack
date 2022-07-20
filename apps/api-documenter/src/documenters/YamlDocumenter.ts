@@ -37,8 +37,7 @@ import {
   ExcerptTokenKind,
   HeritageType,
   ApiVariable,
-  ApiTypeAlias,
-  ApiExtendsMixin
+  ApiTypeAlias
 } from '@microsoft/api-extractor-model';
 import {
   DeclarationReference,
@@ -560,15 +559,17 @@ export class YamlDocumenter {
     apiItem: ApiClass | ApiInterface
   ): void {
     if (apiItem instanceof ApiClass) {
+      if (apiItem.extendsType) {
+        yamlItem.extends = [this._renderType(uid, apiItem.extendsType.excerpt)];
+        yamlItem.inheritance = this._renderInheritance(uid, [apiItem.extendsType]);
+      }
       if (apiItem.implementsTypes.length > 0) {
         yamlItem.implements = [];
         for (const implementsType of apiItem.implementsTypes) {
           yamlItem.implements.push(this._renderType(uid, implementsType.excerpt));
         }
       }
-    }
-
-    if (ApiExtendsMixin.isBaseClassOf(apiItem)) {
+    } else if (apiItem instanceof ApiInterface) {
       if (apiItem.extendsTypes.length > 0) {
         yamlItem.extends = [];
         for (const extendsType of apiItem.extendsTypes) {
@@ -818,7 +819,13 @@ export class YamlDocumenter {
       const yamlInheritance: IYamlInheritanceTree = { type };
       const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(type);
       if (apiItem) {
-        if (ApiExtendsMixin.isBaseClassOf(apiItem)) {
+        if (apiItem instanceof ApiClass) {
+          if (apiItem.extendsType) {
+            yamlInheritance.inheritance = this._renderInheritance(this._getUidObject(apiItem), [
+              apiItem.extendsType
+            ]);
+          }
+        } else if (apiItem instanceof ApiInterface) {
           if (apiItem.extendsTypes.length > 0) {
             yamlInheritance.inheritance = this._renderInheritance(
               this._getUidObject(apiItem),

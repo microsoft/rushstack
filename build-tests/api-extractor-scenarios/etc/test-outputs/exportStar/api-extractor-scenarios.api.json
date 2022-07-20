@@ -182,7 +182,6 @@
               "text": "export declare class A "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -199,7 +198,6 @@
               "text": "export declare class B "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "B",
           "preserveMemberOrder": false,
@@ -216,7 +214,6 @@
               "text": "export declare class C "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "C",
           "preserveMemberOrder": false,

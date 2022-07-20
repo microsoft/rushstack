@@ -182,7 +182,6 @@
               "text": "export declare class IFile "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IFile",
           "preserveMemberOrder": false,
@@ -230,7 +229,6 @@
               "text": "export declare class IFolder "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IFolder",
           "preserveMemberOrder": false,

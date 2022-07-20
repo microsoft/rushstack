@@ -182,7 +182,6 @@
               "text": "export declare class Item "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "Item",
           "preserveMemberOrder": false,

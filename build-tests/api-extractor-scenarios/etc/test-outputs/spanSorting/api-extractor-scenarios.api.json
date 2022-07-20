@@ -182,7 +182,6 @@
               "text": "export declare class ExampleA "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "ExampleA",
           "preserveMemberOrder": false,
@@ -264,7 +263,6 @@
               "text": "export declare class ExampleB "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "ExampleB",
           "preserveMemberOrder": false,
@@ -329,7 +327,6 @@
               "text": "export declare class ExampleC "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "ExampleC",
           "preserveMemberOrder": false,

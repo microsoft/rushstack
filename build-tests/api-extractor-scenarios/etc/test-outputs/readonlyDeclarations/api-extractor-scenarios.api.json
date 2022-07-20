@@ -182,7 +182,6 @@
               "text": "export declare class MyClass "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "MyClass",
           "preserveMemberOrder": false,
@@ -287,7 +286,6 @@
               "text": "export interface MyInterface "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "MyInterface",
           "preserveMemberOrder": false,
@@ -421,7 +419,8 @@
               "isStatic": false,
               "isProtected": false
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "Variable",

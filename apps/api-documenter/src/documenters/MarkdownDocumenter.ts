@@ -43,8 +43,7 @@ import {
   ApiOptionalMixin,
   ApiInitializerMixin,
   ApiProtectedMixin,
-  ApiReadonlyMixin,
-  ApiExtendsMixin
+  ApiReadonlyMixin
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -329,26 +328,16 @@ export class MarkdownDocumenter {
   private _writeHeritageTypes(output: DocSection, apiItem: ApiDeclaredItem): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    if (ApiExtendsMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.extendsTypes.length > 0) {
+    if (apiItem instanceof ApiClass) {
+      if (apiItem.extendsType) {
         const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
           new DocEmphasisSpan({ configuration, bold: true }, [
             new DocPlainText({ configuration, text: 'Extends: ' })
           ])
         ]);
-        let needsComma: boolean = false;
-        for (const extendsType of apiItem.extendsTypes) {
-          if (needsComma) {
-            extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
-          }
-          this._appendExcerptWithHyperlinks(extendsParagraph, extendsType.excerpt);
-          needsComma = true;
-        }
+        this._appendExcerptWithHyperlinks(extendsParagraph, apiItem.extendsType.excerpt);
         output.appendNode(extendsParagraph);
       }
-    }
-
-    if (apiItem instanceof ApiClass) {
       if (apiItem.implementsTypes.length > 0) {
         const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
           new DocEmphasisSpan({ configuration, bold: true }, [
@@ -361,6 +350,25 @@ export class MarkdownDocumenter {
             extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
           }
           this._appendExcerptWithHyperlinks(extendsParagraph, implementsType.excerpt);
+          needsComma = true;
+        }
+        output.appendNode(extendsParagraph);
+      }
+    }
+
+    if (apiItem instanceof ApiInterface) {
+      if (apiItem.extendsTypes.length > 0) {
+        const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'Extends: ' })
+          ])
+        ]);
+        let needsComma: boolean = false;
+        for (const extendsType of apiItem.extendsTypes) {
+          if (needsComma) {
+            extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
+          }
+          this._appendExcerptWithHyperlinks(extendsParagraph, extendsType.excerpt);
           needsComma = true;
         }
         output.appendNode(extendsParagraph);

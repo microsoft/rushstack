@@ -253,12 +253,6 @@
               "text": " "
             }
           ],
-          "extendsTokenRanges": [
-            {
-              "startIndex": 1,
-              "endIndex": 2
-            }
-          ],
           "releaseTag": "Public",
           "name": "Lib1Class",
           "preserveMemberOrder": false,
@@ -322,6 +316,10 @@
               "isProtected": false
             }
           ],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         }
       ]

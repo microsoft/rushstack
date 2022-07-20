@@ -182,7 +182,6 @@
               "text": "export default class DefaultClass "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "DefaultClass",
           "preserveMemberOrder": false,

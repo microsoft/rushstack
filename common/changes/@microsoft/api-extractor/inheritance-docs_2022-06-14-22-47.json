@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Small API doc model change to support changes to api-extractor-model for finding an item's inherited members.",
-      "type": "major"
+      "comment": "Update API Extractor to support the latest \"api-extrator-model\"",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-extractor"

@@ -40,12 +40,10 @@ export { IApiOptionalMixinOptions, ApiOptionalMixin } from './mixins/ApiOptional
 export { IApiReadonlyMixinOptions, ApiReadonlyMixin } from './mixins/ApiReadonlyMixin';
 export { IApiInitializerMixinOptions, ApiInitializerMixin } from './mixins/ApiInitializerMixin';
 export {
-  IFindMembersWithInheritanceResult,
-  IFindMembersWithInheritanceMessage,
-  FindMembersWithInheritanceMessageId,
-  IApiExtendsMixinOptions,
-  ApiExtendsMixin
-} from './mixins/ApiExtendsMixin';
+  IFindApiItemsResult,
+  IFindApiItemsMessage,
+  FindApiItemsMessageId
+} from './mixins/IFindApiItemsResult';
 
 export { ExcerptTokenKind, IExcerptTokenRange, IExcerptToken, ExcerptToken, Excerpt } from './mixins/Excerpt';
 export { Constructor, PropertiesOf } from './mixins/Mixin';

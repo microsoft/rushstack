@@ -182,7 +182,6 @@
               "text": "export declare abstract class AbstractClass "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "AbstractClass",
           "preserveMemberOrder": false,
@@ -230,7 +229,6 @@
               "text": "export declare class ClassWithTypeLiterals "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "ClassWithTypeLiterals",
           "preserveMemberOrder": false,
@@ -435,7 +433,6 @@
               "text": "export interface IInterface "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IInterface",
           "preserveMemberOrder": false,
@@ -467,7 +464,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "Namespace",
@@ -640,7 +638,6 @@
               "text": "export declare class SimpleClass "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "SimpleClass",
           "preserveMemberOrder": false,

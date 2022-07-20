@@ -182,7 +182,6 @@
               "text": "export declare class A "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -199,7 +198,6 @@
               "text": "export declare class B "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "B",
           "preserveMemberOrder": false,
@@ -216,7 +214,6 @@
               "text": "export declare class IFile "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IFile",
           "preserveMemberOrder": false,
@@ -264,7 +261,6 @@
               "text": "export declare class IFolder "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "IFolder",
           "preserveMemberOrder": false,

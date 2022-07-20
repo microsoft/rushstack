@@ -250,7 +250,6 @@
                   "text": "class MyClass "
                 }
               ],
-              "extendsTokenRanges": [],
               "releaseTag": "Public",
               "name": "MyClass",
               "preserveMemberOrder": false,

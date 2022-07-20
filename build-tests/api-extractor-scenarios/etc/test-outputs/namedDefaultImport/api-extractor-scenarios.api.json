@@ -182,7 +182,6 @@
               "text": "export interface DefaultImportTypes "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "DefaultImportTypes",
           "preserveMemberOrder": false,
@@ -275,7 +274,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         }
       ]
     }

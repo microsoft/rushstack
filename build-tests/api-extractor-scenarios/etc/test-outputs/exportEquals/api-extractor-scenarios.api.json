@@ -182,7 +182,6 @@
               "text": "export interface ITeamsContext "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "ITeamsContext",
           "preserveMemberOrder": false,
@@ -215,7 +214,8 @@
                 "endIndex": 2
               }
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         }
       ]
     }

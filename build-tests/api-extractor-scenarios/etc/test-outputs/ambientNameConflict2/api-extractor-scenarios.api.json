@@ -182,7 +182,6 @@
               "text": "export declare class Date "
             }
           ],
-          "extendsTokenRanges": [],
           "releaseTag": "Public",
           "name": "Date_2",
           "preserveMemberOrder": false,
