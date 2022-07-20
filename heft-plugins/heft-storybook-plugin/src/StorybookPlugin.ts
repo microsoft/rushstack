@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import {
   AlreadyExistsBehavior,
   FileSystem,
@@ -17,18 +16,17 @@ import type {
   CommandLineFlagParameter,
   IHeftTaskRunHookOptions
 } from '@rushstack/heft';
-import { PluginName as Webpack4PluginName } from '@rushstack/heft-webpack4-plugin';
 import type {
-  IWebpackPluginAccessor as IWebpack4PluginAccessor,
-  IWebpackConfiguration as IWebpack4Configuration
+  PluginName as Webpack4PluginName,
+  IWebpackPluginAccessor as IWebpack4PluginAccessor
 } from '@rushstack/heft-webpack4-plugin';
-import { PluginName as Webpack5PluginName } from '@rushstack/heft-webpack5-plugin';
 import type {
-  IWebpackPluginAccessor as IWebpack5PluginAccessor,
-  IWebpackConfiguration as IWebpack5Configuration
+  PluginName as Webpack5PluginName,
+  IWebpackPluginAccessor as IWebpack5PluginAccessor
 } from '@rushstack/heft-webpack5-plugin';
 
 const PLUGIN_NAME: string = 'StorybookPlugin';
+const WEBPACK_PLUGIN_NAME: typeof Webpack4PluginName & typeof Webpack5PluginName = 'WebpackPlugin';
 
 /**
  * Options for `StorybookPlugin`.
@@ -75,9 +73,6 @@ export interface IStorybookPluginOptions {
 /** @public */
 export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPluginOptions> {
   private _logger!: IScopedLogger;
-  private _storykitPackageName!: string;
-  private _startupModulePath!: string;
-  private _resolvedStartupModulePath!: string;
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -87,13 +82,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     heftConfiguration: HeftConfiguration,
     options: IStorybookPluginOptions
   ): void {
-    const storybookParameter: CommandLineFlagParameter = taskSession.parametersByLongName.get(
-      '--storybook'
-    ) as CommandLineFlagParameter;
-
     this._logger = taskSession.logger;
-    this._storykitPackageName = options.storykitPackageName;
-    this._startupModulePath = options.startupModulePath;
+    const storybookParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--storybook');
 
     const parseResult: IParsedPackageNameOrError = PackageName.tryParse(options.storykitPackageName);
     if (parseResult.error) {
@@ -106,69 +96,65 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     // Only tap if the --storybook flag is present.
     if (storybookParameter.value) {
+      const configureWebpackTapOptions: { name: string, stage: number } = {
+        name: PLUGIN_NAME,
+        stage: Number.MAX_SAFE_INTEGER
+      };
+      const configureWebpackTap: () => Promise<null> = async () => {
+        // Discard Webpack's configuration to prevent Webpack from running
+        this._logger.terminal.writeLine(
+          'The command line includes "--storybook", redirecting Webpack to Storybook'
+        );
+        return null;
+      };
+
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack4-plugin',
-        Webpack4PluginName,
-        (accessor: IWebpack4PluginAccessor) => {
-          accessor.onConfigureWebpackHook?.tapPromise(
-            { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-            async (config: IWebpack4Configuration | null) => {
-              // Discard Webpack's configuration to prevent Webpack from running
-              this._logger.terminal.writeVerboseLine(
-                'The command line includes "--storybook", redirecting Webpack to Storybook'
-              );
-              return null;
-            }
-          );
-        }
+        WEBPACK_PLUGIN_NAME,
+        (accessor: IWebpack4PluginAccessor) =>
+          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
       );
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack5-plugin',
-        Webpack5PluginName,
-        (accessor: IWebpack5PluginAccessor) => {
-          accessor.onConfigureWebpackHook?.tapPromise(
-            { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-            async (config: IWebpack5Configuration | null) => {
-              // Discard Webpack's configuration to prevent Webpack from running
-              this._logger.terminal.writeVerboseLine(
-                'The command line includes "--storybook", redirecting Webpack to Storybook'
-              );
-              return null;
-            }
-          );
-        }
+        WEBPACK_PLUGIN_NAME,
+        (accessor: IWebpack5PluginAccessor) =>
+          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
       );
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-        await this._prepareStorybookAsync(taskSession, heftConfiguration);
-        await this._runStorybookAsync();
+        const resolvedStartupModulePath: string =
+          await this._prepareStorybookAsync(taskSession, heftConfiguration, options);
+        await this._runStorybookAsync(resolvedStartupModulePath);
       });
     }
   }
 
   private async _prepareStorybookAsync(
     taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration
-  ): Promise<void> {
-    this._logger.terminal.writeVerboseLine(`Probing for "${this._storykitPackageName}"`);
+    heftConfiguration: HeftConfiguration,
+    options: IStorybookPluginOptions
+  ): Promise<string> {
+    const { storykitPackageName, startupModulePath } = options;
+    this._logger.terminal.writeVerboseLine(`Probing for "${storykitPackageName}"`);
 
     // Example: "/path/to/my-project/node_modules/my-storykit"
     let storykitFolder: string;
     try {
       storykitFolder = Import.resolvePackage({
-        packageName: this._storykitPackageName,
+        packageName: storykitPackageName,
         baseFolderPath: heftConfiguration.buildFolder
       });
     } catch (ex) {
       throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
     }
 
-    this._logger.terminal.writeVerboseLine(`Found "${this._storykitPackageName}" in ` + storykitFolder);
+    this._logger.terminal.writeVerboseLine(`Found "${storykitPackageName}" in ` + storykitFolder);
 
     // Example: "/path/to/my-project/node_modules/my-storykit/node_modules"
-    const storykitModuleFolder: string = path.join(storykitFolder, 'node_modules');
-    if (!(await FileSystem.existsAsync(storykitModuleFolder))) {
+    const storykitModuleFolder: string = `${storykitFolder}/node_modules`;
+    const storykitModuleFolderExists: boolean = await FileSystem.existsAsync(storykitModuleFolder);
+    if (!storykitModuleFolderExists) {
       throw new Error(
         `The ${taskSession.taskName} task cannot start because the storykit module folder does not exist:\n` +
           storykitModuleFolder +
@@ -176,25 +162,27 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       );
     }
 
-    this._logger.terminal.writeVerboseLine(`Resolving startupModulePath "${this._startupModulePath}"`);
+    this._logger.terminal.writeVerboseLine(`Resolving startupModulePath "${startupModulePath}"`);
+    let resolvedStartupModulePath: string | undefined;
     try {
-      this._resolvedStartupModulePath = Import.resolveModule({
-        modulePath: this._startupModulePath,
+      resolvedStartupModulePath = Import.resolveModule({
+        modulePath: startupModulePath,
         baseFolderPath: storykitModuleFolder
       });
     } catch (ex) {
       throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
     }
+
     this._logger.terminal.writeVerboseLine(
-      `Resolved startupModulePath is "${this._resolvedStartupModulePath}"`
+      `Resolved startupModulePath is "${resolvedStartupModulePath}"`
     );
 
     // Example: "/path/to/my-project/.storybook"
-    const dotStorybookFolder: string = path.join(heftConfiguration.buildFolder, '.storybook');
+    const dotStorybookFolder: string = `${heftConfiguration.buildFolder}/.storybook`;
     await FileSystem.ensureFolderAsync(dotStorybookFolder);
 
     // Example: "/path/to/my-project/.storybook/node_modules"
-    const dotStorybookModuleFolder: string = path.join(dotStorybookFolder, 'node_modules');
+    const dotStorybookModuleFolder: string = `${dotStorybookFolder}/node_modules`;
 
     // Example:
     //   LINK FROM: "/path/to/my-project/.storybook/node_modules"
@@ -207,13 +195,15 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       linkTargetPath: storykitModuleFolder,
       alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
     });
+
+    return resolvedStartupModulePath;
   }
 
-  private async _runStorybookAsync(): Promise<void> {
+  private async _runStorybookAsync(resolvedStartupModulePath: string): Promise<void> {
     this._logger.terminal.writeLine('Starting Storybook...');
-    this._logger.terminal.writeLine('Launching ' + this._resolvedStartupModulePath);
+    this._logger.terminal.writeLine(`Launching "${resolvedStartupModulePath}"`);
 
-    require(this._resolvedStartupModulePath);
+    require(resolvedStartupModulePath);
 
     this._logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
   }
