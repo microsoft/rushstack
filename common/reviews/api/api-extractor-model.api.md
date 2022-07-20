@@ -693,7 +693,7 @@ export enum ExcerptTokenKind {
 export enum FindApiItemsMessageId {
     DeclarationResolutionFailed = "declaration-resolution-failed",
     MissingApiModel = "missing-api-model",
-    UnexpectedExcerptTokens = "unexpected-excerpt-token",
+    UnexpectedExcerptTokens = "unexpected-excerpt-tokens",
     UnsupportedKind = "unsupported-kind"
 }
 
