@@ -12,6 +12,7 @@ import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library'
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter!: CommandLineFlagParameter;
   private _recheckParameter!: CommandLineFlagParameter;
+  private _ignoreScriptsParameter!: CommandLineFlagParameter;
   /**
    * Whether split workspace projects are included in update
    *
@@ -113,13 +114,10 @@ export class UpdateAction extends BaseInstallAction {
      * not affects on normal rush workspace projects.
      */
     const pnpmFilterArguments: string[] = [];
-    let splitWorkspacePnpmFilterArguments: string[] = [];
+    const { splitWorkspacePnpmFilterArguments = [], selectedProjects } =
+      (await this._selectionParameters?.getPnpmFilterArgumentsAsync(terminal)) || {};
 
     if (this._selectionParameters?.isSelectionSpecified) {
-      splitWorkspacePnpmFilterArguments = (
-        await this._selectionParameters.getPnpmFilterArgumentsAsync(terminal)
-      ).splitWorkspacePnpmFilterArguments;
-
       if (
         Array.from(await this._selectionParameters.getSelectedProjectsAsync(terminal)).some(
           (project) => project.splitWorkspace
@@ -175,6 +173,7 @@ export class UpdateAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       pnpmFilterArguments,
       splitWorkspacePnpmFilterArguments,
+      selectedProjects,
       checkOnly: false
     };
   }

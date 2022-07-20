@@ -174,17 +174,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
-    // FIXME: In a filtered install for split workspace, validating shrinkwrap file should happen
-    // only in the selected projects, which means "InstallManager" should know the selectedProject.
-    // For now, I choose to get this information from this.options.splitWorkspacePnpmFilterArguments
-    const selectedSplitWorkspaceProjectPackageNames: Set<string> = new Set<string>();
-    for (const arg of this.options.splitWorkspacePnpmFilterArguments) {
-      if (arg === '--filter') {
-        continue;
-      }
-      selectedSplitWorkspaceProjectPackageNames.add(arg);
-    }
-
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
@@ -295,7 +284,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             shrinkwrapIsUpToDate = false;
           }
         } else {
-          if (selectedSplitWorkspaceProjectPackageNames.has(rushProject.packageName)) {
+          // full install or project selected
+          if (!this.options.selectedProjects || this.options.selectedProjects.has(rushProject)) {
             const splitWorkspaceProjectShrinkwrapFilepath: string = path.join(
               rushProject.projectFolder,
               RushConstants.pnpmV3ShrinkwrapFilename
@@ -348,7 +338,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
 
-  protected canSkipInstall(lastModifiedDate: Date): boolean {
+  protected canSkipInstall(lastModifiedDate: Date, splitWorkspaceLastModifiedDate?: Date): boolean {
     if (!super.canSkipInstall(lastModifiedDate)) {
       return false;
     }
@@ -379,23 +369,64 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       })
     );
 
-    // FIXME: This filtered potentional changed file list makes me think about whether it could be unified into
-    // using selection projects calcualted by SelectionParameterSet::getSelectedProjectsAsync (?)
+    // NOTE: If any of the potentiallyChangedFiles does not exist, then isFileTimestampCurrent()
+    // returns false.
+    const isFileTimestampCurrent: boolean = Utilities.isFileTimestampCurrent(
+      lastModifiedDate,
+      potentiallyChangedFiles
+    );
 
-    if (this.options.includeSplitWorkspace) {
-      potentiallyChangedFiles.push(
-        ...this.rushConfiguration.getFilteredProjects({ splitWorkspace: true }).map((project) => {
-          return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
-        }),
-        ...this.rushConfiguration.getFilteredProjects({ splitWorkspace: true }).map((project) => {
-          return path.join(project.projectFolder, FileConstants.PackageJson);
-        })
+    // Check timestamp for split workspace
+    let isSplitWorkspaceFileTimestampCurrent: boolean = true;
+    if (splitWorkspaceLastModifiedDate && this.options.includeSplitWorkspace) {
+      let selectedSplitWorkspaceProjects: RushConfigurationProject[] = [];
+      if (!this.options.selectedProjects) {
+        // full
+        selectedSplitWorkspaceProjects = this.rushConfiguration.getFilteredProjects({ splitWorkspace: true });
+      } else {
+        this.options.selectedProjects.forEach((project) => {
+          if (project.splitWorkspace) {
+            selectedSplitWorkspaceProjects.push(project);
+          }
+        });
+      }
+
+      const splitWorkspacePotentiallyChangedFiles: string[] = [];
+      if (this.rushConfiguration.packageManager === 'pnpm') {
+        // Add workspace file. This file is only modified when workspace packages change.
+        const pnpmWorkspaceFilename: string = path.join(
+          this.rushConfiguration.commonTempSplitFolder,
+          'pnpm-workspace.yaml'
+        );
+
+        if (FileSystem.exists(pnpmWorkspaceFilename)) {
+          splitWorkspacePotentiallyChangedFiles.push(pnpmWorkspaceFilename);
+        }
+      }
+
+      for (const project of selectedSplitWorkspaceProjects) {
+        splitWorkspacePotentiallyChangedFiles.push(
+          path.join(project.projectFolder, RushConstants.nodeModulesFolderName),
+          path.join(project.projectFolder, FileConstants.PackageJson)
+        );
+
+        // Check individual shrinkwrap file changed
+        const individualShrinkwrapFilePath: string = path.join(
+          project.projectFolder,
+          RushConstants.pnpmV3ShrinkwrapFilename
+        );
+        if (FileSystem.exists(individualShrinkwrapFilePath)) {
+          splitWorkspacePotentiallyChangedFiles.push(individualShrinkwrapFilePath);
+        }
+      }
+
+      isSplitWorkspaceFileTimestampCurrent = Utilities.isFileTimestampCurrent(
+        splitWorkspaceLastModifiedDate,
+        splitWorkspacePotentiallyChangedFiles
       );
     }
 
-    // NOTE: If any of the potentiallyChangedFiles does not exist, then isFileTimestampCurrent()
-    // returns false.
-    return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
+    return isFileTimestampCurrent && isSplitWorkspaceFileTimestampCurrent;
   }
 
   /**
@@ -679,7 +710,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
 
       const rebuildArgs: string[] = ['rebuild', '--pending'];
-      this.pushRebuildArgs(rebuildArgs);
+      this.pushRebuildArgs(rebuildArgs, this.options.pnpmFilterArguments);
 
       console.log(
         os.EOL +
@@ -715,7 +746,47 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       } finally {
         // Always save after pnpm rebuild to update timestamp of last install flag file.
         this.commonTempInstallFlag.create();
-        this.commonTempSplitInstallFlag?.create();
+      }
+
+      if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
+        const rebuildArgs: string[] = ['rebuild', '--pending'];
+        this.pushRebuildArgs(rebuildArgs, this.options.splitWorkspacePnpmFilterArguments);
+
+        console.log(
+          os.EOL +
+            colors.bold(
+              `Running "${this.rushConfiguration.packageManager} rebuild --pending" in` +
+                ` ${this.rushConfiguration.commonTempSplitFolder}`
+            ) +
+            os.EOL
+        );
+
+        // If any diagnostic options were specified, then show the full command-line
+        if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+          console.log(
+            os.EOL +
+              colors.green('Invoking package manager: ') +
+              FileSystem.getRealPath(packageManagerFilename) +
+              ' ' +
+              rebuildArgs.join(' ') +
+              os.EOL
+          );
+        }
+
+        try {
+          Utilities.executeCommand({
+            command: packageManagerFilename,
+            args: rebuildArgs,
+            workingDirectory: this.rushConfiguration.commonTempSplitFolder,
+            environment: packageManagerEnv,
+            suppressOutput: false
+          });
+        } catch (err) {
+          throw new Error(`Encounter an error when running install lifecycle scripts. error: ${err.message}`);
+        } finally {
+          // Always save after pnpm rebuild to update timestamp of last install flag file.
+          this.commonTempSplitInstallFlag?.create();
+        }
       }
     }
   }
@@ -741,7 +812,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   /**
    * Used when invoking pnpm rebuild for running deferred installation scripts.
    */
-  protected pushRebuildArgs(args: string[]): void {
+  protected pushRebuildArgs(args: string[], filterArguments: string[]): void {
     args.push('--recursive');
 
     if (
@@ -756,7 +827,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--reporter', 'ndjson');
     }
 
-    for (const arg of this.options.pnpmFilterArguments) {
+    for (const arg of filterArguments) {
       args.push(arg);
     }
   }

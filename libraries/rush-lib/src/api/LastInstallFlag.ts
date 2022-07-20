@@ -191,7 +191,7 @@ export class LastInstallFlagFactory {
    */
 
   public static getCommonTempSplitFlag(rushConfiguration: RushConfiguration): LastInstallFlag {
-    const currentState: JsonObject = {
+    const currentState: ILastInstallFlagJson = {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
