@@ -1548,8 +1548,8 @@ export class RushConfiguration {
 
     let filteredProjects: RushConfigurationProject[] | undefined = this._filteredProjectsCache.get(cacheKey);
     if (!filteredProjects) {
-      filteredProjects = this.projects.filter((project: RushConfigurationProject) =>
-        Boolean(project.splitWorkspace)
+      filteredProjects = this.projects.filter(
+        (project: RushConfigurationProject) => project.splitWorkspace === splitWorkspace
       );
       this._filteredProjectsCache.set(cacheKey, filteredProjects);
     }
