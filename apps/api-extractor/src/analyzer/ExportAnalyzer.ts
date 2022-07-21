@@ -363,11 +363,7 @@ export class ExportAnalyzer {
       }
 
       for (const starExportedModule of astModule.starExportedModules) {
-        if (starExportedModule.isExternal) {
-          astModuleExportInfo.starExportedExternalModules.add(starExportedModule);
-        } else {
-          this._collectAllExportsRecursive(astModuleExportInfo, starExportedModule, visitedAstModules);
-        }
+        this._collectAllExportsRecursive(astModuleExportInfo, starExportedModule, visitedAstModules);
       }
     }
   }
