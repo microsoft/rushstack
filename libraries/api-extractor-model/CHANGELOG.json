@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.22.0",
+      "tag": "@microsoft/api-extractor-model_v7.22.0",
+      "date": "Thu, 21 Jul 2022 00:16:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new ApiItemContainerMixin.findMembersWithInheritance() method for finding an item's inherited members"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.21.0",
       "tag": "@microsoft/api-extractor-model_v7.21.0",
       "date": "Thu, 30 Jun 2022 04:48:53 GMT",
