@@ -1,6 +1,11 @@
 # Change Log - @rushstack/webpack-preserve-dynamic-require-plugin
 
-This log was last generated on Thu, 21 Jul 2022 00:16:14 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jul 2022 23:30:28 GMT and should not be manually modified.
+
+## 0.9.21
+Thu, 21 Jul 2022 23:30:28 GMT
+
+_Version update only_
 
 ## 0.9.20
 Thu, 21 Jul 2022 00:16:14 GMT

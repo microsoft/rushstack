@@ -1,6 +1,11 @@
 # Change Log - @rushstack/webpack4-module-minifier-plugin
 
-This log was last generated on Thu, 21 Jul 2022 00:16:14 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jul 2022 23:30:27 GMT and should not be manually modified.
+
+## 0.9.16
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
 
 ## 0.9.15
 Thu, 21 Jul 2022 00:16:14 GMT

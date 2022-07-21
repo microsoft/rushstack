@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Thu, 21 Jul 2022 00:16:14 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jul 2022 23:30:27 GMT and should not be manually modified.
+
+## 7.22.1
+Thu, 21 Jul 2022 23:30:27 GMT
+
+### Patches
+
+- Improve IFindApiItemMessage and fix two small bugs with ApiItemContainerMixin.findMembersWithInheritance()
 
 ## 7.22.0
 Thu, 21 Jul 2022 00:16:14 GMT

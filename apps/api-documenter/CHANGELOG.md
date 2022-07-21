@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 21 Jul 2022 00:16:14 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jul 2022 23:30:27 GMT and should not be manually modified.
+
+## 7.19.0
+Thu, 21 Jul 2022 23:30:27 GMT
+
+### Minor changes
+
+- Add showInheritedMembers config to api-documenter that allows it to show an API item's inherited members.
 
 ## 7.18.4
 Thu, 21 Jul 2022 00:16:14 GMT
