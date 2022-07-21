@@ -41,26 +41,26 @@ export interface IFindApiItemsMessage {
 
 /**
  * Unique identifiers for messages returned as part of `IFindApiItemsResult`.
- * @beta
+ * @public
  */
 export enum FindApiItemsMessageId {
   /**
-   * "Declaration resolution failed for ___. Error message: ___."
+   * "Unable to resolve declaration reference within API item ___: ___"
    */
   DeclarationResolutionFailed = 'declaration-resolution-failed',
 
   /**
-   * "Unable to get the associated model of ___."
+   * "Unable to analyze extends clause ___ of API item ___ because no canonical reference was found."
    */
-  MissingApiModel = 'missing-api-model',
+  ExtendsClauseMissingReference = 'extends-clause-missing-reference',
 
   /**
-   * "Encountered unexpected excerpt tokens in ___. Excerpt: ___."
+   * "Unable to analyze references of API item ___ because it is not associated with an ApiModel"
    */
-  UnexpectedExcerptTokens = 'unexpected-excerpt-tokens',
+  NoAssociatedApiModel = 'no-associated-api-model',
 
   /**
-   * Item ___ is of unsupported kind ___."
+   * "Unable to analyze references of API item ___ because it is of unsupported kind ___"
    */
   UnsupportedKind = 'unsupported-kind'
 }

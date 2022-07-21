@@ -17,6 +17,7 @@ import { ApiInterface } from '../model/ApiInterface';
 import { ExcerptToken, ExcerptTokenKind } from './Excerpt';
 import { IFindApiItemsResult, IFindApiItemsMessage, FindApiItemsMessageId } from './IFindApiItemsResult';
 import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { HeritageType } from '../model/HeritageType';
 import { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver';
 
@@ -278,6 +279,21 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       const messages: IFindApiItemsMessage[] = [];
       let maybeIncompleteResult: boolean = false;
 
+      // For API items that don't support inheritance, this method just returns the item's
+      // immediate members.
+      switch (this.kind) {
+        case ApiItemKind.Class:
+        case ApiItemKind.Interface:
+          break;
+        default: {
+          return {
+            items: this.members.concat(),
+            messages,
+            maybeIncompleteResult
+          };
+        }
+      }
+
       const membersByName: Map<string, ApiItem[]> = new Map();
       const membersByKind: Map<ApiItemKind, ApiItem[]> = new Map();
 
@@ -336,10 +352,11 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
         if (extendsTypes === undefined) {
           messages.push({
             messageId: FindApiItemsMessageId.UnsupportedKind,
-            text: `Item ${next.displayName} is of unsupported kind ${next.kind}.`
+            text: `Unable to analyze references of API item ${next.displayName} because it is of unsupported kind ${next.kind}`
           });
           maybeIncompleteResult = true;
-          break;
+          next = toVisit.shift();
+          continue;
         }
 
         for (const extendsType of extendsTypes) {
@@ -362,8 +379,8 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
 
           if (!firstReferenceToken) {
             messages.push({
-              messageId: FindApiItemsMessageId.UnexpectedExcerptTokens,
-              text: `Encountered unexpected excerpt tokens in ${next.displayName}. Excerpt: ${extendsType.excerpt.text}.`
+              messageId: FindApiItemsMessageId.ExtendsClauseMissingReference,
+              text: `Unable to analyze extends clause ${extendsType.excerpt.text} of API item ${next.displayName} because no canonical reference was found`
             });
             maybeIncompleteResult = true;
             continue;
@@ -372,15 +389,16 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
           const apiModel: ApiModel | undefined = this.getAssociatedModel();
           if (!apiModel) {
             messages.push({
-              messageId: FindApiItemsMessageId.MissingApiModel,
-              text: `Unable to get the associated model of ${next.displayName}.`
+              messageId: FindApiItemsMessageId.NoAssociatedApiModel,
+              text: `Unable to analyze references of API item ${next.displayName} because it is not associated with an ApiModel`
             });
             maybeIncompleteResult = true;
             continue;
           }
 
+          const canonicalReference: DeclarationReference = firstReferenceToken.canonicalReference!;
           const apiItemResult: IResolveDeclarationReferenceResult = apiModel.resolveDeclarationReference(
-            firstReferenceToken.canonicalReference!,
+            canonicalReference,
             undefined
           );
 
@@ -388,7 +406,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
           if (!apiItem) {
             messages.push({
               messageId: FindApiItemsMessageId.DeclarationResolutionFailed,
-              text: `Declaration resolution failed for ${next.displayName}. Error message: ${apiItemResult.errorMessage}.`
+              text: `Unable to resolve declaration reference within API item ${next.displayName}: ${apiItemResult.errorMessage}`
             });
             maybeIncompleteResult = true;
             continue;
