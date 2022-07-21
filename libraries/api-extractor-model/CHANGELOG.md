@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Thu, 30 Jun 2022 04:48:53 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jul 2022 00:16:14 GMT and should not be manually modified.
+
+## 7.22.0
+Thu, 21 Jul 2022 00:16:14 GMT
+
+### Minor changes
+
+- Add a new ApiItemContainerMixin.findMembersWithInheritance() method for finding an item's inherited members
 
 ## 7.21.0
 Thu, 30 Jun 2022 04:48:53 GMT
