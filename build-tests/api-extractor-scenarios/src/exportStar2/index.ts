@@ -4,3 +4,4 @@
 export * from './reexportStar';
 
 export * from 'api-extractor-lib2-test';
+export * from 'fs';
