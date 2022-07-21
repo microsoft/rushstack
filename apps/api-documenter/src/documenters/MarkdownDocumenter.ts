@@ -1186,11 +1186,8 @@ export class MarkdownDocumenter {
     }
 
     // Log the messages for diagnostic purposes.
-    if (result.messages.length > 0) {
-      console.log('Diagnostic messages for findMembersWithInheritance()');
-    }
     for (const message of result.messages) {
-      console.log(`-  ${message.text}`);
+      console.log(`Diagnostic message for findMembersWithInheritance: ${message.text}`);
     }
 
     return result.items;
