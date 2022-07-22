@@ -3,8 +3,8 @@
 
   "taskPlugins": [
     {
-      "pluginName": "SassTypingsPlugin",
-      "entryPoint": "./lib/SassTypingsPlugin"
+      "pluginName": "SassPlugin",
+      "entryPoint": "./lib/SassPlugin"
     }
   ]
 }
