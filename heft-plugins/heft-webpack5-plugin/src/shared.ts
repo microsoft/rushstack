@@ -4,6 +4,41 @@
 import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import type * as TWebpack from 'webpack';
 import type { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
+import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
+
+/**
+ * The environment passed into the Webpack configuration function. Loosely based
+ * on the default Webpack environment options, specified here:
+ * https://webpack.js.org/api/cli/#environment-options
+ *
+ * @public
+ */
+export interface IWebpackConfigurationFnEnvironment {
+  /**
+   * Whether or not the run is in production mode. Synonym of
+   * IWebpackConfigurationFnEnvironment.production.
+   */
+  prod: boolean;
+  /**
+   * Whether or not the run is in production mode. Synonym of
+   * IWebpackConfigurationFnEnvironment.prod.
+   */
+  production: boolean;
+
+  // Non-standard environment options
+  /**
+   * The task session provided to the plugin.
+   */
+  taskSession: IHeftTaskSession;
+  /**
+   * The Heft configuration provided to the plugin.
+   */
+  heftConfiguration: HeftConfiguration;
+  /**
+   * The resolved Webpack package.
+   */
+  webpack: typeof TWebpack;
+}
 
 /**
  * @public
@@ -17,13 +52,12 @@ export interface IWebpackConfigurationWithDevServer extends TWebpack.Configurati
  */
 export type IWebpackConfiguration =
   | IWebpackConfigurationWithDevServer
-  | IWebpackConfigurationWithDevServer[]
-  | undefined;
+  | IWebpackConfigurationWithDevServer[];
 
 /**
  * @public
  */
- export interface IWebpack5PluginAccessor {
+export interface IWebpack5PluginAccessorHooks {
   /**
    * A hook that allows for modification of the  configuration used by the Webpack
    * plugin. This must be populated for Webpack to run. If a webpack configuration is
@@ -34,15 +68,25 @@ export type IWebpackConfiguration =
    * Tapable event handlers can return `false` instead of `undefined` to suppress
    * other handlers from creating a configuration object.
    */
-  readonly onConfigureWebpackHook: AsyncSeriesWaterfallHook<IWebpackConfiguration | false>;
+  readonly onConfigureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration | undefined | false>;
   /**
    * A hook that provides the finalized configuration that will be used by Webpack.
    * If the configuration object is supressed, this hook will not be called.
    */
-  readonly onAfterConfigureWebpackHook: AsyncParallelHook<IWebpackConfiguration>;
+  readonly onAfterConfigureWebpack: AsyncParallelHook<IWebpackConfiguration>;
   /**
    * A hook that provides the stats output from Webpack. If the configuration object
    * is suppressed, this hook will not be called.
    */
-  readonly onEmitStatsHook: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
+  readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats>;
+}
+
+/**
+ * @public
+ */
+export interface IWebpack5PluginAccessor {
+  /**
+   * Hooks that are called at various points in the Webpack plugin lifecycle.
+   */
+  hooks: IWebpack5PluginAccessorHooks;
 }

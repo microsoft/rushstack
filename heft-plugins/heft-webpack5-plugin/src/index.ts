@@ -6,5 +6,7 @@ export { PLUGIN_NAME as PluginName } from './Webpack5Plugin';
 export type {
   IWebpackConfigurationWithDevServer,
   IWebpackConfiguration,
-  IWebpack5PluginAccessor
+  IWebpackConfigurationFnEnvironment,
+  IWebpack5PluginAccessor,
+  IWebpack5PluginAccessorHooks
 } from './shared';

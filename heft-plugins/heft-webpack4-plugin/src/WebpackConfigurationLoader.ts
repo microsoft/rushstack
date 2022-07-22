@@ -7,35 +7,22 @@ import { FileSystem } from '@rushstack/node-core-library';
 import type { IScopedLogger, IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 import type { IWebpack4PluginOptions } from './Webpack4Plugin';
-import type { IWebpackConfiguration } from './shared';
-
-interface ILoadWebpackConfigurationOptions extends IWebpack4PluginOptions {
-  taskSession: IHeftTaskSession;
-  heftConfiguration: HeftConfiguration;
-  webpack: typeof TWebpack;
-}
-
-/**
- * See https://webpack.js.org/api/cli/#environment-options
- */
-interface IWebpackConfigFunctionEnv {
-  prod: boolean;
-  production: boolean;
-
-  // Non-standard environment options
-  taskSession: IHeftTaskSession;
-  heftConfiguration: HeftConfiguration;
-  webpack: typeof TWebpack;
-}
+import type { IWebpackConfiguration, IWebpackConfigurationFnEnvironment } from './shared';
 
 type IWebpackConfigJsExport =
   | TWebpack.Configuration
   | TWebpack.Configuration[]
   | Promise<TWebpack.Configuration>
   | Promise<TWebpack.Configuration[]>
-  | ((env: IWebpackConfigFunctionEnv) => TWebpack.Configuration | TWebpack.Configuration[])
-  | ((env: IWebpackConfigFunctionEnv) => Promise<TWebpack.Configuration | TWebpack.Configuration[]>);
+  | ((env: IWebpackConfigurationFnEnvironment) => TWebpack.Configuration | TWebpack.Configuration[])
+  | ((env: IWebpackConfigurationFnEnvironment) => Promise<TWebpack.Configuration | TWebpack.Configuration[]>);
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
+
+interface ILoadWebpackConfigurationOptions extends IWebpack4PluginOptions {
+  taskSession: IHeftTaskSession;
+  heftConfiguration: HeftConfiguration;
+  webpack: typeof TWebpack;
+}
 
 const DEFAULT_WEBPACK_CONFIG_PATH: './webpack.config.js' = './webpack.config.js';
 const DEFAULT_WEBPACK_DEV_CONFIG_PATH: './webpack.dev.config.js' = './webpack.dev.config.js';
@@ -117,6 +104,11 @@ export class WebpackConfigurationLoader {
       try {
         return await import(configurationPath);
       } catch (e) {
+        const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
+        if (error.code === 'ERR_MODULE_NOT_FOUND') {
+          // No configuration found, return undefined.
+          return undefined;
+        }
         throw new Error(`Error loading webpack configuration at "${configurationPath}": ${e}`);
       }
     } else {

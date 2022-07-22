@@ -32,18 +32,22 @@ export interface IWebpack4PluginOptions {
 export const PLUGIN_NAME: 'Webpack4Plugin' = 'Webpack4Plugin';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
 const WEBPACK_DEV_SERVER_ENV_VAR_NAME: 'WEBPACK_DEV_SERVER' = 'WEBPACK_DEV_SERVER';
+const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
 
 /**
  * @internal
  */
 export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOptions> {
   private _webpack: typeof TWebpack | undefined;
-  private _webpackConfiguration: IWebpackConfiguration | undefined;
+  private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED
+    = UNINITIALIZED;
 
   public readonly accessor: IWebpack4PluginAccessor = {
-    onConfigureWebpackHook: new AsyncSeriesWaterfallHook(['webpackConfiguration']),
-    onAfterConfigureWebpackHook: new AsyncParallelHook(['webpackConfiguration']),
-    onEmitStatsHook: new AsyncParallelHook(['webpackStats'])
+    hooks: {
+      onConfigureWebpack: new AsyncSeriesWaterfallHook(['webpackConfiguration']),
+      onAfterConfigureWebpack: new AsyncParallelHook(['webpackConfiguration']),
+      onEmitStats: new AsyncParallelHook(['webpackStats'])
+    }
   };
 
   public apply(
@@ -57,21 +61,21 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
     let watchMode: boolean;
 
     // Provide the initial webpack configuration by tapping the hook
-    this.accessor.onConfigureWebpackHook.tapPromise(
+    this.accessor.hooks.onConfigureWebpack.tapPromise(
       PLUGIN_NAME,
-      async (existingConfiguration: IWebpackConfiguration | false) => {
+      async (existingConfiguration: IWebpackConfiguration | undefined | false) => {
         if (existingConfiguration) {
           taskSession.logger.terminal.writeVerboseLine(
             'Skipping loading webpack config file because the webpack config has already been set.'
           );
           return existingConfiguration;
-        } else {
+        } else if (existingConfiguration === undefined) {
           const configurationLoader: WebpackConfigurationLoader = new WebpackConfigurationLoader(
             taskSession.logger,
             production,
             serveMode
           );
-          const webpack: typeof TWebpack = await this._getWebpackAsync();
+          const webpack: typeof TWebpack = await this._loadWebpackAsync();
           return await configurationLoader.tryLoadWebpackConfigurationAsync({
             ...options,
             taskSession,
@@ -84,7 +88,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
 
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       // Obtain the finalized webpack configuration
-      const webpackConfiguration: IWebpackConfiguration | null = await this._getWebpackConfigurationAsync();
+      const webpackConfiguration: IWebpackConfiguration | undefined = await this._getWebpackConfigurationAsync();
       if (webpackConfiguration) {
         const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] =
           Array.isArray(webpackConfiguration) ? webpackConfiguration : [webpackConfiguration];
@@ -106,7 +110,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
       serveMode = false;
 
       // Run webpack with the finalized webpack configuration
-      const webpackConfiguration: IWebpackConfiguration | null = await this._getWebpackConfigurationAsync();
+      const webpackConfiguration: IWebpackConfiguration | undefined = await this._getWebpackConfigurationAsync();
       await this._runWebpackAsync(
         taskSession,
         heftConfiguration,
@@ -117,7 +121,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
     });
   }
 
-  private async _getWebpackAsync(): Promise<typeof TWebpack> {
+  private async _loadWebpackAsync(): Promise<typeof TWebpack> {
     if (!this._webpack) {
       this._webpack = await import('webpack');
     }
@@ -125,18 +129,21 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
   }
 
   private async _getWebpackConfigurationAsync(): Promise<IWebpackConfiguration | undefined> {
-    if (this._webpackConfiguration === undefined) {
+    if (this._webpackConfiguration === UNINITIALIZED) {
       // Obtain the webpack configuration by calling into the hook. This hook is always used
       // since the this plugin taps the hook.
-      const webpackConfiguration: IWebpackConfiguration | false =
-        await this.accessor.onConfigureWebpackHook.promise();
+      const webpackConfiguration: IWebpackConfiguration | undefined | false =
+        await this.accessor.hooks.onConfigureWebpack.promise();
 
       if (webpackConfiguration !== false) {
         this._webpackConfiguration = webpackConfiguration;
-        if (this.accessor.onAfterConfigureWebpackHook.isUsed()) {
+        if (webpackConfiguration && this.accessor.hooks.onAfterConfigureWebpack.isUsed()) {
           // Provide the finalized configuration
-          await this.accessor.onAfterConfigureWebpackHook.promise(webpackConfiguration);
+          await this.accessor.hooks.onAfterConfigureWebpack.promise(webpackConfiguration);
         }
+      } else {
+        // It is initialized, but suppressed. Set the configuration to undefined.
+        this._webpackConfiguration = undefined;
       }
     }
     return this._webpackConfiguration;
@@ -145,7 +152,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
   private async _runWebpackAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    webpackConfiguration: IWebpackConfiguration | null,
+    webpackConfiguration: IWebpackConfiguration | undefined,
     serveMode: boolean,
     watchMode: boolean
   ): Promise<void> {
@@ -154,7 +161,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
     }
 
     const logger: IScopedLogger = taskSession.logger;
-    const webpack: typeof TWebpack = await this._getWebpackAsync();
+    const webpack: typeof TWebpack = await this._loadWebpackAsync();
     logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
     let compiler: TWebpack.Compiler | TWebpack.MultiCompiler;
@@ -260,8 +267,8 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
 
       if (stats) {
         this._emitErrors(logger, stats);
-        if (this.accessor.onEmitStatsHook.isUsed()) {
-          await this.accessor.onEmitStatsHook.promise(stats);
+        if (this.accessor.hooks.onEmitStats.isUsed()) {
+          await this.accessor.hooks.onEmitStats.promise(stats);
         }
       }
     }
