@@ -191,7 +191,7 @@ export class ExtractorConfig {
   /**
    * The config file name "api-extractor.json".
    */
-  public static readonly FILENAME: string = 'api-extractor.json';
+  public static readonly FILENAME: 'api-extractor.json' = 'api-extractor.json';
 
   /**
    * The full path to `extends/tsdoc-base.json` which contains the standard TSDoc configuration
