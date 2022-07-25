@@ -21,7 +21,7 @@ type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExpo
 interface ILoadWebpackConfigurationOptions extends IWebpack5PluginOptions {
   taskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
-  webpack: typeof TWebpack;
+  loadWebpackAsyncFn: () => Promise<typeof TWebpack>;
 }
 
 const DEFAULT_WEBPACK_CONFIG_PATH: './webpack.config.js' = './webpack.config.js';
@@ -44,20 +44,17 @@ export class WebpackConfigurationLoader {
     // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
     // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
 
-    const {
-      taskSession,
-      heftConfiguration,
-      webpack,
-      configurationPath,
-      devConfigurationPath,
-    } = options;
+    const { taskSession, heftConfiguration, configurationPath, devConfigurationPath, loadWebpackAsyncFn } =
+      options;
     let webpackConfigJs: IWebpackConfigJs | undefined;
 
     try {
       const buildFolder: string = heftConfiguration.buildFolder;
       if (this._serveMode) {
-        const devConfigPath: string =
-          path.resolve(buildFolder, devConfigurationPath || DEFAULT_WEBPACK_DEV_CONFIG_PATH);
+        const devConfigPath: string = path.resolve(
+          buildFolder,
+          devConfigurationPath || DEFAULT_WEBPACK_DEV_CONFIG_PATH
+        );
         this._logger.terminal.writeVerboseLine(
           `Attempting to load webpack configuration from "${devConfigPath}".`
         );
@@ -65,8 +62,10 @@ export class WebpackConfigurationLoader {
       }
 
       if (!webpackConfigJs) {
-        const configPath: string =
-          path.resolve(buildFolder, configurationPath || DEFAULT_WEBPACK_CONFIG_PATH);
+        const configPath: string = path.resolve(
+          buildFolder,
+          configurationPath || DEFAULT_WEBPACK_CONFIG_PATH
+        );
         this._logger.terminal.writeVerboseLine(
           `Attempting to load webpack configuration from "${configPath}".`
         );
@@ -81,12 +80,13 @@ export class WebpackConfigurationLoader {
         (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
 
       if (typeof webpackConfig === 'function') {
+        // Defer loading of webpack until we know for sure that we will need it
         return webpackConfig({
           prod: this._production,
           production: this._production,
           taskSession,
           heftConfiguration,
-          webpack
+          webpack: await loadWebpackAsyncFn()
         });
       } else {
         return webpackConfig;
