@@ -16,13 +16,13 @@ export interface ISassConfiguration {
    * Source code root directory.
    * Defaults to "src/".
    */
-  srcFolder?: string;
+  srcFolder: string;
 
   /**
    * Output directory for generated Sass typings.
    * Defaults to "temp/sass-ts/".
    */
-  generatedTsFolder?: string;
+  generatedTsFolder: string;
 
   /**
    * Optional additional folders to which Sass typings should be output.
@@ -32,26 +32,26 @@ export interface ISassConfiguration {
   /**
    * Output directories for compiled CSS
    */
-  cssOutputFolders?: string[] | undefined;
+  cssOutputFolders?: string[];
 
   /**
    * Determines whether export values are wrapped in a default property, or not.
    * Defaults to true.
    */
-  exportAsDefault?: boolean;
+  exportAsDefault: boolean;
 
   /**
    * Files with these extensions will pass through the Sass transpiler for typings generation.
    * Defaults to [".sass", ".scss", ".css"]
    */
-  fileExtensions?: string[];
+  fileExtensions: string[];
 
   /**
    * A list of paths used when resolving Sass imports.
    * The paths should be relative to the project root.
    * Defaults to ["node_modules", "src"]
    */
-  importIncludePaths?: string[];
+  importIncludePaths: string[];
 
   /**
    * A list of file paths relative to the "src" folder that should be excluded from typings generation.
@@ -63,13 +63,14 @@ export interface ISassConfiguration {
  * @public
  */
 export interface ISassTypingsGeneratorOptions {
-  buildFolder: string;
   sassConfiguration: ISassConfiguration;
 }
 
 interface IClassMap {
   [className: string]: string;
 }
+
+const EXPORT_DEFAULT_INTERFACE_NAME: 'IExportStyles' = 'IExportStyles';
 
 /**
  * Generates type files (.d.ts) for Sass/SCSS/CSS files.
@@ -82,15 +83,9 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
    *     generate typings.
    */
   public constructor(options: ISassTypingsGeneratorOptions) {
-    const { buildFolder, sassConfiguration } = options;
-    const srcFolder: string = sassConfiguration.srcFolder || path.join(buildFolder, 'src');
-    const generatedTsFolder: string =
-      sassConfiguration.generatedTsFolder || path.join(buildFolder, 'temp', 'sass-ts');
-    const exportAsDefault: boolean =
-      sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
-    const exportAsDefaultInterfaceName: string = 'IExportStyles';
-    const fileExtensions: string[] = sassConfiguration.fileExtensions || ['.sass', '.scss', '.css'];
-    const { cssOutputFolders } = sassConfiguration;
+    const { sassConfiguration } = options;
+    const { srcFolder, generatedTsFolder, exportAsDefault, fileExtensions, cssOutputFolders } =
+      sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
       ? (relativePath: string): string[] => {
@@ -105,8 +100,8 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       srcFolder,
       generatedTsFolder,
       exportAsDefault,
-      exportAsDefaultInterfaceName,
       fileExtensions,
+      exportAsDefaultInterfaceName: EXPORT_DEFAULT_INTERFACE_NAME,
       filesToIgnore: sassConfiguration.excludeFiles,
       secondaryGeneratedTsFolders: sassConfiguration.secondaryGeneratedTsFolders,
 
@@ -122,7 +117,6 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
         const css: string = await this._transpileSassAsync(
           fileContents,
           filePath,
-          buildFolder,
           sassConfiguration.importIncludePaths
         );
 
@@ -176,8 +170,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
   private async _transpileSassAsync(
     fileContents: string,
     filePath: string,
-    buildFolder: string,
-    importIncludePaths: string[] | undefined
+    importIncludePaths: string[]
   ): Promise<string> {
     const result: Result = await new Promise(
       (resolve: (result: Result) => void, reject: (err: Error) => void) => {
@@ -186,9 +179,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
             data: fileContents,
             file: filePath,
             importer: (url: string) => ({ file: this._patchSassUrl(url) }),
-            includePaths: importIncludePaths
-              ? importIncludePaths
-              : [path.join(buildFolder, 'node_modules'), path.join(buildFolder, 'src')],
+            includePaths: importIncludePaths,
             indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
           },
           (err: SassError, result: Result) => {
