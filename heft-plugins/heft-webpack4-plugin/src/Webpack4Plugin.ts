@@ -159,7 +159,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
     const logger: IScopedLogger = taskSession.logger;
 
     if (!webpackConfiguration) {
-      logger.terminal.writeLine('Webpack configuration suppressed, running Webpack skipped');
+      logger.terminal.writeLine('Webpack configuration not provided, running Webpack skipped');
       return;
     }
 
