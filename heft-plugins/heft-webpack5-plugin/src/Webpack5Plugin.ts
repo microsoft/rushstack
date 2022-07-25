@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 import type * as TWebpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
+import { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook } from 'tapable';
 import { FileError, LegacyAdapters } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
@@ -39,13 +39,13 @@ const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
  */
 export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOptions> {
   private _webpack: typeof TWebpack | undefined;
-  private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED
-    = UNINITIALIZED;
+  private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED = UNINITIALIZED;
 
   public readonly accessor: IWebpack5PluginAccessor = {
     hooks: {
-      onConfigureWebpack: new AsyncSeriesWaterfallHook(['webpackConfiguration']),
-      onAfterConfigureWebpack: new AsyncParallelHook(['webpackConfiguration']),
+      onLoadConfiguration: new AsyncSeriesBailHook(),
+      onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
+      onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
       onEmitStats: new AsyncParallelHook(['webpackStats'])
     }
   };
@@ -60,38 +60,37 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
     let serveMode: boolean;
     let watchMode: boolean;
 
-    // Provide the initial webpack configuration by tapping the hook
-    this.accessor.hooks.onConfigureWebpack.tapPromise(
-      PLUGIN_NAME,
-      async (existingConfiguration: IWebpackConfiguration | undefined | false) => {
-        if (existingConfiguration) {
-          taskSession.logger.terminal.writeVerboseLine(
-            'Skipping loading webpack config file because the webpack config has already been set.'
-          );
-          return existingConfiguration;
-        } else if (existingConfiguration === undefined) {
-          const configurationLoader: WebpackConfigurationLoader = new WebpackConfigurationLoader(
-            taskSession.logger,
-            production,
-            serveMode
-          );
-          const webpack: typeof TWebpack = await this._loadWebpackAsync();
-          return await configurationLoader.tryLoadWebpackConfigurationAsync({
-            ...options,
-            taskSession,
-            heftConfiguration,
-            webpack
-          });
-        }
+    // Provide the initial webpack configuration by tapping the hook. Tap with stage as
+    // MAX_SAFE_INTEGER to ensure that we run last.
+    this.accessor.hooks.onLoadConfiguration.tapPromise(
+      { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
+      async () => {
+        taskSession.logger.terminal.writeVerboseLine('Loading default Webpack configuration');
+        const configurationLoader: WebpackConfigurationLoader = new WebpackConfigurationLoader(
+          taskSession.logger,
+          production,
+          serveMode
+        );
+        const webpack: typeof TWebpack = await this._loadWebpackAsync();
+        return await configurationLoader.tryLoadWebpackConfigurationAsync({
+          ...options,
+          taskSession,
+          heftConfiguration,
+          webpack
+        });
       }
     );
 
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       // Obtain the finalized webpack configuration
-      const webpackConfiguration: IWebpackConfiguration | undefined = await this._getWebpackConfigurationAsync();
+      const webpackConfiguration: IWebpackConfiguration | undefined =
+        await this._getWebpackConfigurationAsync();
       if (webpackConfiguration) {
-        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] =
-          Array.isArray(webpackConfiguration) ? webpackConfiguration : [webpackConfiguration];
+        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] = Array.isArray(
+          webpackConfiguration
+        )
+          ? webpackConfiguration
+          : [webpackConfiguration];
 
         // Add each output path to the clean list
         for (const config of webpackConfigurationArray) {
@@ -110,14 +109,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
       serveMode = false;
 
       // Run webpack with the finalized webpack configuration
-      const webpackConfiguration: IWebpackConfiguration | undefined = await this._getWebpackConfigurationAsync();
-      await this._runWebpackAsync(
-        taskSession,
-        heftConfiguration,
-        webpackConfiguration,
-        serveMode,
-        watchMode
-      );
+      const webpackConfiguration: IWebpackConfiguration | undefined =
+        await this._getWebpackConfigurationAsync();
+      await this._runWebpackAsync(taskSession, heftConfiguration, webpackConfiguration, serveMode, watchMode);
     });
   }
 
@@ -131,19 +125,25 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
   private async _getWebpackConfigurationAsync(): Promise<IWebpackConfiguration | undefined> {
     if (this._webpackConfiguration === UNINITIALIZED) {
       // Obtain the webpack configuration by calling into the hook. This hook is always used
-      // since the this plugin taps the hook.
-      const webpackConfiguration: IWebpackConfiguration | undefined | false =
-        await this.accessor.hooks.onConfigureWebpack.promise();
+      // since the this plugin taps the hook to provide the default configuration.
+      const webpackConfiguration: IWebpackConfiguration | false =
+        (await this.accessor.hooks.onLoadConfiguration.promise())!;
 
-      if (webpackConfiguration !== false) {
-        this._webpackConfiguration = webpackConfiguration;
-        if (webpackConfiguration && this.accessor.hooks.onAfterConfigureWebpack.isUsed()) {
-          // Provide the finalized configuration
-          await this.accessor.hooks.onAfterConfigureWebpack.promise(webpackConfiguration);
-        }
-      } else {
+      if (webpackConfiguration === false) {
         // It is initialized, but suppressed. Set the configuration to undefined.
         this._webpackConfiguration = undefined;
+      } else {
+        this._webpackConfiguration = webpackConfiguration;
+        if (webpackConfiguration) {
+          if (this.accessor.hooks.onConfigure.isUsed()) {
+            // Allow for plugins to customise the configuration
+            await this.accessor.hooks.onConfigure.promise(webpackConfiguration);
+          }
+          if (this.accessor.hooks.onAfterConfigure.isUsed()) {
+            // Provide the finalized configuration
+            await this.accessor.hooks.onAfterConfigure.promise(webpackConfiguration);
+          }
+        }
       }
     }
     return this._webpackConfiguration;
@@ -156,11 +156,13 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
     serveMode: boolean,
     watchMode: boolean
   ): Promise<void> {
+    const logger: IScopedLogger = taskSession.logger;
+
     if (!webpackConfiguration) {
+      logger.terminal.writeLine('Webpack configuration suppressed, running Webpack skipped');
       return;
     }
 
-    const logger: IScopedLogger = taskSession.logger;
     const webpack: typeof TWebpack = await this._loadWebpackAsync();
     logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 

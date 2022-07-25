@@ -14,7 +14,7 @@ declare module 'webpack' {
   }
 }
 import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
-import type { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
+import type { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook } from 'tapable';
 import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
 /**
@@ -61,35 +61,38 @@ export interface IWebpackConfigurationWithDevServer extends TWebpack.Configurati
 /**
  * @public
  */
-export type IWebpackConfiguration =
-  | IWebpackConfigurationWithDevServer
-  | IWebpackConfigurationWithDevServer[];
+export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[];
 
 /**
  * @public
  */
 export interface IWebpack4PluginAccessorHooks {
   /**
-   * A hook that allows for modification of the  configuration used by the Webpack
-   * plugin. This must be populated for Webpack to run. If a webpack configuration is
-   * provided, this will be populated automatically with the exports of the config
-   * file.
+   * A hook that allows for loading custom configurations used by the Webpack
+   * plugin. If a webpack configuration is provided, this will be populated automatically
+   * with the exports of the config file. If a webpack configuration is not provided,
+   * one will be loaded by the Webpack plugin.
    *
    * @remarks
    * Tapable event handlers can return `false` instead of `undefined` to suppress
-   * other handlers from creating a configuration object.
+   * other handlers from creating a configuration object, and prevent webpack from running.
    */
-  readonly onConfigureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration | undefined | false>;
+  readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IWebpackConfiguration | false>;
+  /**
+   * A hook that allows for modification of the loaded configuration used by the Webpack
+   * plugin. If no configuration was loaded, this hook will not be called.
+   */
+  readonly onConfigure: AsyncSeriesHook<IWebpackConfiguration, never, never>;
   /**
    * A hook that provides the finalized configuration that will be used by Webpack.
-   * If the configuration object is supressed, this hook will not be called.
+   * If no configuration was loaded, this hook will not be called.
    */
-  readonly onAfterConfigureWebpack: AsyncParallelHook<IWebpackConfiguration>;
+  readonly onAfterConfigure: AsyncParallelHook<IWebpackConfiguration, never, never>;
   /**
-   * A hook that provides the stats output from Webpack. If the configuration object
-   * is suppressed, this hook will not be called.
+   * A hook that provides the stats output from Webpack. If no configuration is loaded,
+   * this hook will not be called.
    */
-  readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.compilation.MultiStats>;
+  readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.compilation.MultiStats, never, never>;
 }
 
 /**
