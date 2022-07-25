@@ -70,6 +70,8 @@ interface IClassMap {
   [className: string]: string;
 }
 
+const EXPORT_DEFAULT_INTERFACE_NAME: 'IExportStyles' = 'IExportStyles';
+
 /**
  * Generates type files (.d.ts) for Sass/SCSS/CSS files.
  *
@@ -82,14 +84,8 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
    */
   public constructor(options: ISassTypingsGeneratorOptions) {
     const { sassConfiguration } = options;
-    const {
-      srcFolder,
-      generatedTsFolder,
-      exportAsDefault,
-      fileExtensions,
-      cssOutputFolders
-    } = sassConfiguration;
-    const exportAsDefaultInterfaceName: string = 'IExportStyles'
+    const { srcFolder, generatedTsFolder, exportAsDefault, fileExtensions, cssOutputFolders } =
+      sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
       ? (relativePath: string): string[] => {
@@ -104,8 +100,8 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       srcFolder,
       generatedTsFolder,
       exportAsDefault,
-      exportAsDefaultInterfaceName,
       fileExtensions,
+      exportAsDefaultInterfaceName: EXPORT_DEFAULT_INTERFACE_NAME,
       filesToIgnore: sassConfiguration.excludeFiles,
       secondaryGeneratedTsFolders: sassConfiguration.secondaryGeneratedTsFolders,
 

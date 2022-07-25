@@ -83,15 +83,12 @@ export default class SassPlugin implements IHeftPlugin {
 
     // Set defaults if no configuration file or option was found
     return {
-      ...sassConfigurationJson,
-      srcFolder: sassConfigurationJson?.srcFolder || `${buildFolder}/src`,
-      generatedTsFolder:
-        sassConfigurationJson?.generatedTsFolder || `${buildFolder}/temp/sass-ts`,
-      exportAsDefault: sassConfigurationJson?.exportAsDefault ?? true,
-      fileExtensions: sassConfigurationJson?.fileExtensions || ['.sass', '.scss', '.css'],
-      importIncludePaths:
-        sassConfigurationJson?.importIncludePaths ||
-        [`${buildFolder}/node_modules`, `${buildFolder}/src`]
+      srcFolder: `${buildFolder}/src`,
+      generatedTsFolder: `${buildFolder}/temp/sass-ts`,
+      exportAsDefault: true,
+      fileExtensions: ['.sass', '.scss', '.css'],
+      importIncludePaths: [`${buildFolder}/node_modules`, `${buildFolder}/src`],
+      ...sassConfigurationJson
     };
   }
 
