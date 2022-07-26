@@ -96,6 +96,17 @@ export interface IConfigApiReport {
    * prepend a folder token such as `<projectFolder>`.
    */
   reportTempFolder?: string;
+
+  /**
+   * Whether "forgotten exports" should be included in the API report file.
+   *
+   * @remarks
+   * Forgotten exports are declarations flagged with `ae-forgotten-export` warnings. See
+   * https://api-extractor.com/pages/messages/ae-forgotten-export/ to learn more.
+   *
+   * @defaultValue `false`
+   */
+  includeForgottenExports?: boolean;
 }
 
 /**
@@ -120,6 +131,17 @@ export interface IConfigDocModel {
    * prepend a folder token such as `<projectFolder>`.
    */
   apiJsonFilePath?: string;
+
+  /**
+   * Whether "forgotten exports" should be included in the doc model file.
+   *
+   * @remarks
+   * Forgotten exports are declarations flagged with `ae-forgotten-export` warnings. See
+   * https://api-extractor.com/pages/messages/ae-forgotten-export/ to learn more.
+   *
+   * @defaultValue `false`
+   */
+  includeForgottenExports?: boolean;
 }
 
 /**
@@ -376,7 +398,7 @@ export interface IConfigFile {
   testMode?: boolean;
 
   /**
-   * Specifies how API Extractor sorts members of an enum when generating api.json.
+   * Specifies how API Extractor sorts members of an enum when generating the .api.json file.
    *
    * @remarks
    * By default, the output files will be sorted alphabetically, which is "by-name".

@@ -14,7 +14,7 @@ declare namespace calculator {
     export {
         add,
         subtract,
-        calucatorVersion
+        calculatorVersion
     }
 }
 export { calculator }
@@ -23,13 +23,13 @@ declare namespace calculator2 {
     export {
         add_2 as add,
         subtract_2 as subtract,
-        calucatorVersion
+        calculatorVersion
     }
 }
 export { calculator2 }
 
 // @public
-const calucatorVersion: string;
+const calculatorVersion: string;
 
 // @beta
 function subtract(a: number, b: number): number;

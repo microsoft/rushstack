@@ -78,7 +78,7 @@ export class ApiReportGenerator {
     // Emit the regular declarations
     for (const entity of collector.entities) {
       const astEntity: AstEntity = entity.astEntity;
-      if (entity.consumable) {
+      if (entity.exported || collector.extractorConfig.apiReportIncludeForgottenExports) {
         // First, collect the list of export names for this symbol.  When reporting messages with
         // ExtractorMessage.properties.exportName, this will enable us to emit the warning comments alongside
         // the associated export statement.
@@ -146,7 +146,7 @@ export class ApiReportGenerator {
           if (astModuleExportInfo.starExportedExternalModules.size > 0) {
             // We could support this, but we would need to find a way to safely represent it.
             throw new Error(
-              `The ${entity.nameForEmit} namespace import includes a start export, which is not supported:\n` +
+              `The ${entity.nameForEmit} namespace import includes a star export, which is not supported:\n` +
                 SourceFileLocationFormatter.formatDeclaration(astEntity.declaration)
             );
           }
@@ -172,21 +172,20 @@ export class ApiReportGenerator {
           writer.increaseIndent();
 
           const exportClauses: string[] = [];
-          for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
-            const collectorEntity: CollectorEntity | undefined =
-              collector.tryGetCollectorEntity(exportedEntity);
+          for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
+            const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(astEntity);
             if (collectorEntity === undefined) {
               // This should never happen
               // top-level exports of local imported module should be added as collector entities before
               throw new InternalError(
-                `Cannot find collector entity for ${entity.nameForEmit}.${exportedEntity.localName}`
+                `Cannot find collector entity for ${entity.nameForEmit}.${astEntity.localName}`
               );
             }
 
-            if (collectorEntity.nameForEmit === exportedName) {
+            if (collectorEntity.nameForEmit === exportName) {
               exportClauses.push(collectorEntity.nameForEmit);
             } else {
-              exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
+              exportClauses.push(`${collectorEntity.nameForEmit} as ${exportName}`);
             }
           }
           writer.writeLine(exportClauses.join(',\n'));

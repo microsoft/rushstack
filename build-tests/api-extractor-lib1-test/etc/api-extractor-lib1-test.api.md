@@ -37,5 +37,4 @@ export namespace Lib1Namespace {
     }
 }
 
-
 ```

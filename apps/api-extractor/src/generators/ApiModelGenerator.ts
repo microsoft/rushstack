@@ -35,6 +35,7 @@ import {
 } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
+import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
@@ -45,6 +46,7 @@ import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule } from '../analyzer/AstModule';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import { InternalError } from '@rushstack/node-core-library';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -80,9 +82,13 @@ export class ApiModelGenerator {
     const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: '' });
     apiPackage.addMember(apiEntryPoint);
 
-    // Create a CollectorEntity for each top-level export
     for (const entity of this._collector.entities) {
-      if (entity.exported) {
+      // Note that we don't process entities that have parents, because those entities will be recursively
+      // processed by the parent.
+      if (
+        !entity.hasParents &&
+        (entity.exported || this._collector.extractorConfig.docModelIncludeForgottenExports)
+      ) {
         this._processAstEntity(entity.astEntity, entity.nameForEmit, apiEntryPoint);
       }
     }
@@ -114,7 +120,7 @@ export class ApiModelGenerator {
       //   export { example1, example2 }
       //
       // The current logic does not try to associate "thing()" with a specific parent.  Instead
-      // the API documentation will show duplicated entries for example1.thing() and example2.thing()./
+      // the API documentation will show duplicated entries for example1.thing() and example2.thing().
       //
       // This could be improved in the future, but it requires a stable mechanism for choosing an associated parent.
       // For thoughts about this:  https://github.com/microsoft/rushstack/issues/1308
@@ -144,7 +150,8 @@ export class ApiModelGenerator {
         name,
         docComment: undefined,
         releaseTag: ReleaseTag.None,
-        excerptTokens: []
+        excerptTokens: [],
+        isExported: true
       });
       parentApiItem.addMember(apiNamespace);
     }
@@ -393,6 +400,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isExported: boolean = this._isExported(astDeclaration);
 
       apiClass = new ApiClass({
         name,
@@ -401,7 +409,8 @@ export class ApiModelGenerator {
         excerptTokens,
         typeParameters,
         extendsTokenRange,
-        implementsTokenRanges
+        implementsTokenRanges,
+        isExported
       });
 
       parentApiItem.addMember(apiClass);
@@ -477,8 +486,9 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const preserveMemberOrder: boolean =
         this._collector.extractorConfig.enumMemberOrder === EnumMemberOrder.Preserve;
+      const isExported: boolean = this._isExported(astDeclaration);
 
-      apiEnum = new ApiEnum({ name, docComment, releaseTag, excerptTokens, preserveMemberOrder });
+      apiEnum = new ApiEnum({ name, docComment, releaseTag, excerptTokens, preserveMemberOrder, isExported });
       parentApiItem.addMember(apiEnum);
     }
 
@@ -560,9 +570,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
-        return; // trim out items marked as "@internal" or "@alpha"
-      }
+      const isExported: boolean = this._isExported(astDeclaration);
 
       apiFunction = new ApiFunction({
         name,
@@ -572,7 +580,8 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        isExported
       });
 
       parentApiItem.addMember(apiFunction);
@@ -664,6 +673,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isExported: boolean = this._isExported(astDeclaration);
 
       apiInterface = new ApiInterface({
         name,
@@ -671,7 +681,8 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         typeParameters,
-        extendsTokenRanges
+        extendsTokenRanges,
+        isExported
       });
 
       parentApiItem.addMember(apiInterface);
@@ -812,8 +823,9 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isExported: boolean = this._isExported(astDeclaration);
 
-      apiNamespace = new ApiNamespace({ name, docComment, releaseTag, excerptTokens });
+      apiNamespace = new ApiNamespace({ name, docComment, releaseTag, excerptTokens, isExported });
       parentApiItem.addMember(apiNamespace);
     }
 
@@ -961,6 +973,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isExported: boolean = this._isExported(astDeclaration);
 
       apiTypeAlias = new ApiTypeAlias({
         name,
@@ -968,7 +981,8 @@ export class ApiModelGenerator {
         typeParameters,
         releaseTag,
         excerptTokens,
-        typeTokenRange
+        typeTokenRange,
+        isExported
       });
 
       parentApiItem.addMember(apiTypeAlias);
@@ -1006,6 +1020,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
+      const isExported: boolean = this._isExported(astDeclaration);
 
       apiVariable = new ApiVariable({
         name,
@@ -1014,7 +1029,8 @@ export class ApiModelGenerator {
         excerptTokens,
         variableTypeTokenRange,
         initializerTokenRange,
-        isReadonly
+        isReadonly,
+        isExported
       });
 
       parentApiItem.addMember(apiVariable);
@@ -1118,5 +1134,19 @@ export class ApiModelGenerator {
         return false;
       }
     }
+  }
+
+  private _isExported(astDeclaration: AstDeclaration): boolean {
+    // Collector entities are only created for root symbols.
+    const entity: CollectorEntity | undefined = this._collector.tryGetCollectorEntity(
+      astDeclaration.astSymbol.rootAstSymbol
+    );
+
+    if (!entity) {
+      // This should never happen.
+      throw new InternalError('Failed to get collector entity for root symbol of declaration');
+    }
+
+    return entity.exported;
   }
 }

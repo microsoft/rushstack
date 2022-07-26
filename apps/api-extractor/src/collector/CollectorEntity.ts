@@ -7,7 +7,6 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
 import { Sort } from '@rushstack/node-core-library';
 import { AstEntity } from '../analyzer/AstEntity';
-import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 
 /**
  * This is a data structure used by the Collector to track an AstEntity that may be emitted in the *.d.ts file.
@@ -27,12 +26,11 @@ export class CollectorEntity {
   private _exportNames: Set<string> = new Set();
   private _exportNamesSorted: boolean = false;
   private _singleExportName: string | undefined = undefined;
+  private _localExportNamesByParent: Map<CollectorEntity, Set<string>> = new Map();
 
   private _nameForEmit: string | undefined = undefined;
 
   private _sortKey: string | undefined = undefined;
-
-  private _astNamespaceImports: Set<AstNamespaceImport> = new Set();
 
   public constructor(astEntity: AstEntity) {
     this.astEntity = astEntity;
@@ -53,7 +51,7 @@ export class CollectorEntity {
   }
 
   /**
-   * If this symbol is exported from the entry point, the list of export names.
+   * The list of export names if this symbol is exported from the entry point.
    *
    * @remarks
    * Note that a given symbol may be exported more than once:
@@ -98,56 +96,54 @@ export class CollectorEntity {
   }
 
   /**
-   * Returns true if this symbol is an export for the entry point being analyzed.
-   */
-  public get exported(): boolean {
-    return this.exportNames.size > 0;
-  }
-
-  /**
-   * Indicates that it is possible for a consumer of the API to access this declaration, either by importing
-   * it directly, or via some other alias such as a member of a namespace.  If a collector entity is not consumable,
-   * then API Extractor will report a ExtractorMessageId.ForgottenExport warning.
+   * Returns true if the entity is exported from the entry point. If the entity is not exported,
+   * then API Extractor will report an `ae-forgotten-export` warning.
    *
    * @remarks
-   * Generally speaking, an API item is consumable if:
+   * An API item is exported if:
    *
-   * - The collector encounters it while crawling the entry point, and it is a root symbol
-   *   (i.e. there is a corresponding a CollectorEntity)
+   * 1. It is exported from the top-level entry point OR
+   * 2. It is exported from a parent entity that is also exported.
    *
-   * - AND it is exported by the entry point
-   *
-   * However a special case occurs with `AstNamespaceImport` which produces a rollup like this:
+   * #2 occurs when processing `AstNamespaceImport` entities. A generated rollup.d.ts
+   * might look like this:
    *
    * ```ts
-   * declare interface IForgottenExport { }
+   * declare function add(): void;
    *
-   * declare function member(): IForgottenExport;
-   *
-   * declare namespace ns {
+   * declare namespace calculator {
    *   export {
-   *     member
+   *     add
    *   }
    * }
-   * export { ns }
+   * export { calculator }
    * ```
    *
-   * In this example, `IForgottenExport` is not consumable.  Whereas `member()` is consumable as `ns.member()`
-   * even though `member()` itself is not exported.
+   * In this example, `add` is exported via the exported `calculator` namespace.
    */
-  public get consumable(): boolean {
-    return this.exported || this._astNamespaceImports.size > 0;
+  public get exported(): boolean {
+    const exportedFromTopLevel: boolean = this.exportNames.size > 0;
+
+    let exportedFromExportedParent: boolean = false;
+    for (const [parent, localExportNames] of this._localExportNamesByParent) {
+      if (localExportNames.size > 0 && parent.exported) {
+        exportedFromExportedParent = true;
+        break;
+      }
+    }
+
+    return exportedFromTopLevel || exportedFromExportedParent;
   }
 
   /**
-   * Associates this entity with a `AstNamespaceImport`.
+   * Whether the entity has any parent entities.
    */
-  public addAstNamespaceImports(astNamespaceImport: AstNamespaceImport): void {
-    this._astNamespaceImports.add(astNamespaceImport);
+  public get hasParents(): boolean {
+    return this._localExportNamesByParent.size > 0;
   }
 
   /**
-   * Adds a new exportName to the exportNames set.
+   * Adds a new export name to the entity.
    */
   public addExportName(exportName: string): void {
     if (!this._exportNames.has(exportName)) {
@@ -160,6 +156,16 @@ export class CollectorEntity {
         this._singleExportName = undefined;
       }
     }
+  }
+
+  /**
+   * Adds a new local export name to the entity.
+   */
+  public addLocalExportName(localExportName: string, parent: CollectorEntity): void {
+    const localExportNames: Set<string> = this._localExportNamesByParent.get(parent) || new Set();
+    localExportNames.add(localExportName);
+
+    this._localExportNamesByParent.set(parent, localExportNames);
   }
 
   /**

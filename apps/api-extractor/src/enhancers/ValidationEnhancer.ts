@@ -21,7 +21,7 @@ export class ValidationEnhancer {
     const alreadyWarnedEntities: Set<AstEntity> = new Set<AstEntity>();
 
     for (const entity of collector.entities) {
-      if (!entity.consumable) {
+      if (!(entity.exported || collector.extractorConfig.apiReportIncludeForgottenExports)) {
         continue;
       }
 
@@ -73,7 +73,7 @@ export class ValidationEnhancer {
 
     if (symbolMetadata.maxEffectiveReleaseTag === ReleaseTag.Internal) {
       if (!astSymbol.parentAstSymbol) {
-        // If it's marked as @internal and has no parent, then it needs and underscore.
+        // If it's marked as @internal and has no parent, then it needs an underscore.
         // We use maxEffectiveReleaseTag because a merged declaration would NOT need an underscore in a case like this:
         //
         //   /** @public */
@@ -227,7 +227,7 @@ export class ValidationEnhancer {
         continue;
       }
 
-      if (collectorEntity && collectorEntity.consumable) {
+      if (collectorEntity && collectorEntity.exported) {
         if (ReleaseTag.compare(declarationReleaseTag, referencedReleaseTag) > 0) {
           collector.messageRouter.addAnalyzerIssue(
             ExtractorMessageId.IncompatibleReleaseTags,
