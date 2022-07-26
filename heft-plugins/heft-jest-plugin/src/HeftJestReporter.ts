@@ -13,10 +13,11 @@ import {
   Config
 } from '@jest/reporters';
 
-import type { HeftConfiguration } from '@rushstack/heft';
+import type { HeftConfiguration, IScopedLogger } from '@rushstack/heft';
 
 export interface IHeftJestReporterOptions {
   heftConfiguration: HeftConfiguration;
+  logger: IScopedLogger;
   debugMode: boolean;
 }
 
@@ -37,7 +38,7 @@ export default class HeftJestReporter implements Reporter {
   private _debugMode: boolean;
 
   public constructor(jestConfig: Config.GlobalConfig, options: IHeftJestReporterOptions) {
-    this._terminal = options.heftConfiguration.globalTerminal;
+    this._terminal = options.logger.terminal;
     this._buildFolder = options.heftConfiguration.buildFolder;
     this._debugMode = options.debugMode;
   }

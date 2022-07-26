@@ -2,16 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  ConfigurationFile,
-  IConfigurationFileOptions,
-  InheritanceType,
-  PathResolutionMethod
-} from '@rushstack/heft-config-file';
+import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 import { ITerminal } from '@rushstack/node-core-library';
 
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
-import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
 
@@ -117,9 +111,6 @@ export class CoreConfigFiles {
 
   private static _apiExtractorTaskConfigurationLoader:
     | ConfigurationFile<IApiExtractorPluginConfiguration>
-    | undefined;
-  private static _typeScriptConfigurationFileLoader:
-    | ConfigurationFile<ITypeScriptConfigurationJson>
     | undefined;
   private static _nodeServiceConfigurationLoader:
     | ConfigurationFile<INodeServicePluginConfiguration>
@@ -233,39 +224,6 @@ export class CoreConfigFiles {
   }
 
   /**
-   * Returns the loader for the `config/typescript.json` config file.
-   */
-  public static get typeScriptConfigurationFileLoader(): ConfigurationFile<ITypeScriptConfigurationJson> {
-    if (!CoreConfigFiles._typeScriptConfigurationFileLoader) {
-      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'typescript.schema.json');
-      CoreConfigFiles._typeScriptConfigurationFileLoader =
-        new ConfigurationFile<ITypeScriptConfigurationJson>({
-          projectRelativeFilePath: 'config/typescript.json',
-          jsonSchemaPath: schemaPath,
-          propertyInheritance: {
-            staticAssetsToCopy: {
-              inheritanceType: InheritanceType.custom,
-              inheritanceFunction: (
-                currentObject: ISharedCopyConfiguration,
-                parentObject: ISharedCopyConfiguration
-              ): ISharedCopyConfiguration => {
-                const result: ISharedCopyConfiguration = {};
-
-                CoreConfigFiles._inheritArray(result, 'fileExtensions', currentObject, parentObject);
-                CoreConfigFiles._inheritArray(result, 'includeGlobs', currentObject, parentObject);
-                CoreConfigFiles._inheritArray(result, 'excludeGlobs', currentObject, parentObject);
-
-                return result;
-              }
-            }
-          }
-        } as IConfigurationFileOptions<ITypeScriptConfigurationJson>);
-    }
-
-    return CoreConfigFiles._typeScriptConfigurationFileLoader;
-  }
-
-  /**
    * Returns the loader for the `config/api-extractor-task.json` config file.
    */
   public static get nodeServiceConfigurationLoader(): ConfigurationFile<INodeServicePluginConfiguration> {
@@ -320,30 +278,6 @@ export class CoreConfigFiles {
           `Unknown heft event "${eventAction.heftEvent}" in ` +
             ` "${CoreConfigFiles.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}".`
         );
-    }
-  }
-
-  private static _inheritArray<
-    TResultObject extends { [P in TArrayKeys]?: unknown[] },
-    TArrayKeys extends keyof TResultObject
-  >(
-    resultObject: TResultObject,
-    propertyName: TArrayKeys,
-    currentObject: TResultObject,
-    parentObject: TResultObject
-  ): void {
-    let newValue: unknown[] | undefined;
-    if (currentObject[propertyName] && parentObject[propertyName]) {
-      newValue = [
-        ...(currentObject[propertyName] as unknown[]),
-        ...(parentObject[propertyName] as unknown[])
-      ];
-    } else {
-      newValue = currentObject[propertyName] || parentObject[propertyName];
-    }
-
-    if (newValue !== undefined) {
-      resultObject[propertyName] = newValue as TResultObject[TArrayKeys];
     }
   }
 }

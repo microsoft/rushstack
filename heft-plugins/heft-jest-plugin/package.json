@@ -8,17 +8,21 @@
     "directory": "heft-plugins/heft-jest-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-jest-plugin.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft build --clean",
-    "start": "heft test --clean --watch",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "build": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged build --clean",
+    "start": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged test --clean --watch",
+    "_phase:build": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged build --clean",
+    "_phase:test": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged test --no-build"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.46.6"
+    "@rushstack/heft": "^0.46.6",
+    "@rushstack/heft-typescript-plugin": "^0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@rushstack/heft-typescript-plugin": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@jest/core": "~27.4.2",
@@ -33,15 +37,16 @@
   },
   "devDependencies": {
     "@jest/types": "~27.4.2",
-    "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-legacy": "npm:@rushstack/heft@0.45.14",
+    "@rushstack/heft-node-rig": "1.9.15",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "12.20.24",
     "eslint": "~8.7.0",
     "jest-environment-node": "~27.4.2",
-    "jest-watch-select-projects": "2.0.0",
-    "typescript": "~4.6.3"
+    "jest-watch-select-projects": "2.0.0"
   }
 }

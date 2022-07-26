@@ -4,71 +4,72 @@
 import path from 'path';
 import type {
   HeftConfiguration,
-  HeftSession,
-  IBuildStageContext,
+  IHeftTaskSession,
   IHeftPlugin,
-  IPreCompileSubstage,
-  ScopedLogger
+  IHeftTaskCleanHookOptions,
+  IHeftTaskRunHookOptions,
+  IScopedLogger
 } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
-import { JsonSchema } from '@rushstack/node-core-library';
 
 import { ISassConfiguration, SassProcessor } from './SassProcessor';
 import { Async } from './utilities/Async';
 
-export interface ISassConfigurationJson extends ISassConfiguration {}
+export interface ISassConfigurationJson extends Partial<ISassConfiguration> {}
 
-const PLUGIN_NAME: string = 'SassTypingsPlugin';
+const PLUGIN_NAME: string = 'SassPlugin';
 const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-sass-plugin.schema.json`;
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
-export class SassPlugin implements IHeftPlugin {
+export default class SassPlugin implements IHeftPlugin {
   private static _sassConfigurationLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
-
-  public readonly pluginName: string = PLUGIN_NAME;
-  public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
    */
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runSassTypingsGeneratorAsync(
-            heftSession,
-            heftConfiguration,
-            build.properties.watchMode
-          );
-        });
-      });
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
+      const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
+        heftConfiguration,
+        taskSession.logger
+      );
+      cleanOptions.addDeleteOperations({ sourcePath: sassConfiguration.generatedTsFolder });
+      for (const secondaryGeneratedTsFolder of sassConfiguration.secondaryGeneratedTsFolders || []) {
+        cleanOptions.addDeleteOperations({ sourcePath: secondaryGeneratedTsFolder });
+      }
+      for (const cssOutputFolder of sassConfiguration.cssOutputFolders || []) {
+        cleanOptions.addDeleteOperations({ sourcePath: cssOutputFolder });
+      }
+    });
+
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
+      // TODO: Handle watch mode
+      await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration, false);
     });
   }
 
   private async _runSassTypingsGeneratorAsync(
-    heftSession: HeftSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     isWatchMode: boolean
   ): Promise<void> {
-    const logger: ScopedLogger = heftSession.requestScopedLogger('sass-typings-generator');
     const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
       heftConfiguration,
-      logger
+      taskSession.logger
     );
-    const sassTypingsGenerator: SassProcessor = new SassProcessor({
-      buildFolder: heftConfiguration.buildFolder,
-      sassConfiguration
-    });
-
+    const sassTypingsGenerator: SassProcessor = new SassProcessor({ sassConfiguration });
     await sassTypingsGenerator.generateTypingsAsync();
     if (isWatchMode) {
-      Async.runWatcherWithErrorHandling(async () => await sassTypingsGenerator.runWatcherAsync(), logger);
+      Async.runWatcherWithErrorHandling(
+        async () => await sassTypingsGenerator.runWatcherAsync(),
+        taskSession.logger
+      );
     }
   }
 
   private async _loadSassConfigurationAsync(
     heftConfiguration: HeftConfiguration,
-    logger: ScopedLogger
+    logger: IScopedLogger
   ): Promise<ISassConfiguration> {
     const { buildFolder } = heftConfiguration;
     const sassConfigurationJson: ISassConfigurationJson | undefined =
@@ -102,7 +103,13 @@ export class SassPlugin implements IHeftPlugin {
       resolveFolderArray(sassConfigurationJson.secondaryGeneratedTsFolders);
     }
 
+    // Set defaults if no configuration file or option was found
     return {
+      srcFolder: `${buildFolder}/src`,
+      generatedTsFolder: `${buildFolder}/temp/sass-ts`,
+      exportAsDefault: true,
+      fileExtensions: ['.sass', '.scss', '.css'],
+      importIncludePaths: [`${buildFolder}/node_modules`, `${buildFolder}/src`],
       ...sassConfigurationJson
     };
   }

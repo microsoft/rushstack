@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "Webpack4Plugin",
+      "entryPoint": "./lib/Webpack4Plugin",
+      "optionsSchema": "./lib/schemas/heft-webpack4-plugin.schema.json"
+    }
+  ]
+}
