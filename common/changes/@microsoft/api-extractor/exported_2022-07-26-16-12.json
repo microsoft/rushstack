@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Add new \"apiReport.includeForgottenExports\" and \"docModel.includeForgottenExports\" properties to control whether forgotten exports are included in the API report and doc model files.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
