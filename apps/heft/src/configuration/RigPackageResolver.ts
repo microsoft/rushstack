@@ -14,17 +14,17 @@ import type { RigConfig } from '@rushstack/rig-package';
 /**
  * @public
  */
-export interface IRigToolResolver {
+export interface IRigPackageResolver {
   resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
 }
 
-export interface IRigToolResolverOptions {
+export interface IRigPackageResolverOptions {
   buildFolder: string;
   projectPackageJson: IPackageJson;
   rigConfig: RigConfig;
 }
 
-export class RigToolResolver implements IRigToolResolver {
+export class RigPackageResolver implements IRigPackageResolver {
   private _buildFolder: string;
   private _projectPackageJson: IPackageJson;
   private _rigConfig: RigConfig;
@@ -34,7 +34,7 @@ export class RigToolResolver implements IRigToolResolver {
   /**
    * @internal
    */
-  public constructor(options: IRigToolResolverOptions) {
+  public constructor(options: IRigPackageResolverOptions) {
     this._buildFolder = options.buildFolder;
     this._projectPackageJson = options.projectPackageJson;
     this._rigConfig = options.rigConfig;
@@ -50,14 +50,14 @@ export class RigToolResolver implements IRigToolResolver {
     const cacheKey: string = `${projectFolder};${packageName}`;
     let resolutionPromise: Promise<string> | undefined = this._resolverCache.get(cacheKey);
     if (!resolutionPromise) {
-      resolutionPromise = this._resolveToolPackageInnerAsync(packageName, terminal);
+      resolutionPromise = this._resolvePackageInnerAsync(packageName, terminal);
       this._resolverCache.set(cacheKey, resolutionPromise);
     }
 
     return await resolutionPromise;
   }
 
-  private async _resolveToolPackageInnerAsync(toolPackageName: string, terminal: ITerminal): Promise<string> {
+  private async _resolvePackageInnerAsync(toolPackageName: string, terminal: ITerminal): Promise<string> {
     // The following rules will apply:
     // - If the local project has a devDependency (not regular or peer dependency) on the tool,
     // that has highest precedence.

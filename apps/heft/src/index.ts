@@ -6,7 +6,7 @@ export {
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 
-export { IRigToolResolver } from './configuration/RigToolResolver';
+export { IRigPackageResolver } from './configuration/RigPackageResolver';
 
 export { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
 
@@ -27,15 +27,13 @@ export {
   IHeftTaskCleanHookOptions
 } from './pluginFramework/HeftTaskSession';
 
-export { RequestAccessToPluginByNameCallback } from './pluginFramework/HeftPluginHost';
-
 export { ICopyOperation } from './plugins/CopyFilesPlugin';
 
 export { IDeleteOperation } from './plugins/DeleteFilesPlugin';
 
 export { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
 
-export { IFileGlobSpecifier } from './plugins/FileGlobSpecifier';
+export { IFileSelectionSpecifier } from './plugins/FileGlobSpecifier';
 
 export {
   IHeftRecordMetricsHookOptions,

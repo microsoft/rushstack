@@ -59,7 +59,8 @@ export class HeftParameterManager {
       this._parametersByDefinition.get(pluginDefinition);
     if (!parameters) {
       throw new InternalError(
-        `Parameters from plugin "${pluginDefinition.pluginName}" were not added before finalization.`
+        `Parameters from plugin "${pluginDefinition.pluginName}" in package ` +
+          `"${pluginDefinition.pluginPackageName}" were not added before finalization.`
       );
     }
     return parameters;

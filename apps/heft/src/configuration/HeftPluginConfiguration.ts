@@ -43,7 +43,7 @@ export class HeftPluginConfiguration {
     this._heftPluginConfigurationJson = heftPluginConfigurationJson;
     this._packageRoot = packageRoot;
     this._packageName = packageName;
-    this._validate(heftPluginConfigurationJson, packageRoot, packageName);
+    this._validate(heftPluginConfigurationJson, packageName);
   }
 
   public static async loadFromPackageAsync(
@@ -163,7 +163,6 @@ export class HeftPluginConfiguration {
 
   private _validate(
     heftPluginConfigurationJson: IHeftPluginConfigurationJson,
-    packageRoot: string,
     packageName: string
   ): void {
     if (

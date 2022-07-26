@@ -79,7 +79,7 @@ export class HeftPhaseSession extends HeftPluginHost {
           run: new AsyncParallelHook(['runHookOptions'])
         },
         parametersByLongName: this._options.parameterManager.getParametersForPlugin(task.pluginDefinition),
-        requestAccessToPluginByName: this.getRequestAccessToPluginByNameFn(task.taskName),
+        pluginHost: this,
         task
       });
       this._taskSessionsByName.set(task.taskName, taskSession);
@@ -105,13 +105,13 @@ export class HeftPhaseSession extends HeftPluginHost {
       { concurrency: Constants.maxParallelism }
     );
 
-    // Do a second pass to apply the plugin hooks that were requested by plugins
+    // Do a second pass to apply the plugin access requests for each plugin
     await Async.forEachAsync(
       this._options.phase.tasks,
       async (task: HeftTask) => {
         const taskSession: HeftTaskSession = this.getSessionForTask(task);
         const taskPlugin: IHeftTaskPlugin<object | void> = await task.getPluginAsync(taskSession.logger);
-        await this.applyPluginHooksAsync(taskPlugin, task.pluginDefinition);
+        await this.resolveAccessRequestsAsync(taskPlugin, task.pluginDefinition);
       },
       { concurrency: Constants.maxParallelism }
     );

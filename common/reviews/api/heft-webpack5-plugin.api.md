@@ -4,35 +4,47 @@
 
 ```ts
 
+import type { AsyncParallelHook } from 'tapable';
+import type { AsyncSeriesBailHook } from 'tapable';
+import type { AsyncSeriesHook } from 'tapable';
 import type { Configuration } from 'webpack-dev-server';
-import type { IBuildStageProperties } from '@rushstack/heft';
-import type { IBundleSubstageProperties } from '@rushstack/heft';
-import type { IHeftPlugin } from '@rushstack/heft';
-import type * as webpack from 'webpack';
+import type { HeftConfiguration } from '@rushstack/heft';
+import type { IHeftTaskSession } from '@rushstack/heft';
+import type * as TWebpack from 'webpack';
 
 // @public (undocumented)
-const _default: IHeftPlugin<void>;
-export default _default;
-
-// @public (undocumented)
-export interface IWebpackBuildStageProperties extends IBuildStageProperties {
-    // (undocumented)
-    webpackStats?: webpack.Stats | webpack.MultiStats;
+export interface IWebpack5PluginAccessor {
+    hooks: IWebpack5PluginAccessorHooks;
 }
 
 // @public (undocumented)
-export interface IWebpackBundleSubstageProperties extends IBundleSubstageProperties {
-    webpackConfiguration?: webpack.Configuration | webpack.Configuration[] | null;
+export interface IWebpack5PluginAccessorHooks {
+    readonly onAfterConfigure: AsyncParallelHook<IWebpackConfiguration, never, never>;
+    readonly onConfigure: AsyncSeriesHook<IWebpackConfiguration, never, never>;
+    readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats, never, never>;
+    readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IWebpackConfiguration | false>;
 }
 
 // @public (undocumented)
-export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[] | undefined;
+export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[];
+
+// @public
+export interface IWebpackConfigurationFnEnvironment {
+    heftConfiguration: HeftConfiguration;
+    prod: boolean;
+    production: boolean;
+    taskSession: IHeftTaskSession;
+    webpack: typeof TWebpack;
+}
 
 // @public (undocumented)
-export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
+export interface IWebpackConfigurationWithDevServer extends TWebpack.Configuration {
     // (undocumented)
     devServer?: Configuration;
 }
+
+// @public (undocumented)
+export const PluginName: 'Webpack5Plugin';
 
 // (No @packageDocumentation comment for this package)
 

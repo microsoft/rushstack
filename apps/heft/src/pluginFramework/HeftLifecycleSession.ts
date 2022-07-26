@@ -8,9 +8,9 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
 import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
-import type { RequestAccessToPluginByNameCallback } from './HeftPluginHost';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
+import type { HeftPluginHost } from './HeftPluginHost';
 
 /**
  * @public
@@ -49,12 +49,16 @@ export interface IHeftLifecycleSession {
   readonly logger: IScopedLogger;
 
   /**
-   * Call this function to receive a callback with the plugin if and after the specified plugin
-   * has been applied. This is used to tap hooks on another plugin.
+   * Set a a callback which will be called if and after the specified plugin has been applied.
+   * This can be used to tap hooks on another lifecycle plugin that exists within the same phase.
    *
    * @public
    */
-  readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+  requestAccessToPluginByName<T extends object>(
+    pluginToAccessPackage: string,
+    pluginToAccessName: string,
+    pluginApply: (pluginAccessor: T) => void
+  ): void;
 }
 
 /**
@@ -97,7 +101,7 @@ export interface IHeftLifecycleSessionOptions extends IInternalHeftSessionOption
   lifecycleHooks: IHeftLifecycleHooks;
   pluginDefinition: HeftPluginDefinitionBase;
   parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
-  requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+  pluginHost: HeftPluginHost;
 }
 
 export class HeftLifecycleSession implements IHeftLifecycleSession {
@@ -108,7 +112,7 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
   public readonly cacheFolder: string;
   public readonly tempFolder: string;
   public readonly logger: IScopedLogger;
-  public readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+  public readonly pluginHost: HeftPluginHost;
 
   public get debugMode(): boolean {
     return this._options.getIsDebugMode();
@@ -125,6 +129,7 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
     this.metricsCollector = options.metricsCollector;
     this.hooks = options.lifecycleHooks;
     this.parametersByLongName = options.parametersByLongName;
+    this.pluginHost = options.pluginHost;
 
     // Guranteed to be unique since phases are forbidden from using the name 'lifecycle'
     // and lifecycle plugin names are enforced to be unique.
@@ -135,7 +140,20 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
 
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolder = path.join(options.heftConfiguration.tempFolder, uniquePluginFolderName);
+  }
 
-    this.requestAccessToPluginByName = options.requestAccessToPluginByName;
+  public requestAccessToPluginByName<T extends object>(
+    pluginToAccessPackage: string,
+    pluginToAccessName: string,
+    pluginApply: (pluginAccessor: T) => void
+  ): void {
+    const { pluginPackageName, pluginName } = this._options.pluginDefinition;
+    const pluginHookName: string = this.pluginHost.getPluginHookName(pluginPackageName, pluginName);
+    this.pluginHost.requestAccessToPluginByName(
+      pluginHookName,
+      pluginToAccessPackage,
+      pluginToAccessName,
+      pluginApply
+    );
   }
 }

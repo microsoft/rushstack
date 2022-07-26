@@ -4,37 +4,41 @@
 import glob from 'fast-glob';
 
 /**
- * Used to specify a selection of files from a source folder.
+ * Used to specify a selection of one or more files.
  *
  * @public
  */
-export interface IFileGlobSpecifier {
+export interface IFileSelectionSpecifier {
   /**
-   * Absolute path to the folder from which source files should be located.
+   * Absolute path to the target. The provided sourcePath can be to a file or a folder. If
+   * fileExtensions, excludeGlobs, or includeGlobs are specified, the sourcePath is assumed
+   * to be a folder. If it is not a folder, an error will be thrown.
    */
-  sourceFolder: string;
+  sourcePath: string;
 
   /**
-   * File extensions that should be included from the source folder.
+   * File extensions that should be included from the source folder. Only supported when the sourcePath
+   * is a folder.
    */
   fileExtensions?: string[];
 
   /**
    * Globs that should be explicitly excluded. This takes precedence over globs listed in "includeGlobs" and
-   * files that match the file extensions provided in "fileExtensions".
+   * files that match the file extensions provided in "fileExtensions". Only supported when the sourcePath
+   * is a folder.
    */
   excludeGlobs?: string[];
 
   /**
-   * Globs that should be explicitly included.
+   * Globs that should be explicitly included. Only supported when the sourcePath is a folder.
    */
   includeGlobs?: string[];
 }
 
-export async function getRelativeFilePathsAsync(fileGlobSpecifier: IFileGlobSpecifier): Promise<Set<string>> {
+export async function getRelativeFilePathsAsync(fileGlobSpecifier: IFileSelectionSpecifier): Promise<Set<string>> {
   return new Set<string>(
     await glob(getIncludedGlobPatterns(fileGlobSpecifier), {
-      cwd: fileGlobSpecifier.sourceFolder,
+      cwd: fileGlobSpecifier.sourcePath,
       ignore: fileGlobSpecifier.excludeGlobs,
       dot: true,
       onlyFiles: true
@@ -42,7 +46,7 @@ export async function getRelativeFilePathsAsync(fileGlobSpecifier: IFileGlobSpec
   );
 }
 
-function getIncludedGlobPatterns(fileGlobSpecifier: IFileGlobSpecifier): string[] {
+function getIncludedGlobPatterns(fileGlobSpecifier: IFileSelectionSpecifier): string[] {
   const patternsToGlob: Set<string> = new Set<string>();
 
   // Glob file extensions with a specific glob to increase perf

@@ -90,11 +90,11 @@ export class PhaseOperationRunner implements IOperationRunner {
       // Delete all temp folders for tasks by default
       for (const task of phase.tasks) {
         const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
-        deleteOperations.push({ sourceFolder: taskSession.tempFolder });
+        deleteOperations.push({ sourcePath: taskSession.tempFolder });
 
         // Also delete the cache folder if requested
         if (cleanCache) {
-          deleteOperations.push({ sourceFolder: taskSession.cacheFolder });
+          deleteOperations.push({ sourcePath: taskSession.cacheFolder });
         }
       }
 

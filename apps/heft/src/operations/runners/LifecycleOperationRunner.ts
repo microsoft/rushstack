@@ -103,11 +103,11 @@ export class LifecycleOperationRunner implements IOperationRunner {
           for (const pluginDefinition of lifecycle.pluginDefinitions) {
             const lifecycleSession: HeftLifecycleSession =
               lifecycle.getSessionForPluginDefinition(pluginDefinition);
-            deleteOperations.push({ sourceFolder: lifecycleSession.tempFolder });
+            deleteOperations.push({ sourcePath: lifecycleSession.tempFolder });
 
             // Also delete the cache folder if requested
             if (cleanCache) {
-              deleteOperations.push({ sourceFolder: lifecycleSession.cacheFolder });
+              deleteOperations.push({ sourcePath: lifecycleSession.cacheFolder });
             }
           }
 

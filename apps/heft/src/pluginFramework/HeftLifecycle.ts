@@ -139,7 +139,7 @@ export class HeftLifecycle extends HeftPluginHost {
       async (pluginDefinition: HeftLifecyclePluginDefinition) => {
         const lifecyclePlugin: IHeftLifecyclePlugin<object | void> =
           await this._getLifecyclePluginForPluginDefinitionAsync(pluginDefinition);
-        await this.applyPluginHooksAsync(lifecyclePlugin, pluginDefinition);
+        await this.resolveAccessRequestsAsync(lifecyclePlugin, pluginDefinition);
       },
       { concurrency: Constants.maxParallelism }
     );
@@ -163,9 +163,7 @@ export class HeftLifecycle extends HeftPluginHost {
           this._internalHeftSession.parameterManager.getParametersForPlugin(pluginDefinition),
         pluginDefinition: pluginDefinition,
         getIsDebugMode: () => this._internalHeftSession.debugMode,
-        requestAccessToPluginByName: this.getRequestAccessToPluginByNameFn(
-          this.getPluginHookName(pluginDefinition.pluginPackageName, pluginDefinition.pluginName)
-        )
+        pluginHost: this
       });
       this._lifecycleSessionsByDefinition.set(pluginDefinition, lifecycleSession);
     }

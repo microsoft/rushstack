@@ -70,8 +70,7 @@ describe('JestConfigLoader', () => {
     // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
     // means that we don't run on the built test assets directly
     const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
-    const plugin: JestPlugin = new JestPlugin();
-    const loader: ConfigurationFile<IHeftJestConfiguration> = plugin._getJestConfigurationLoader(
+    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );
@@ -158,8 +157,7 @@ describe('JestConfigLoader', () => {
     // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
     // means that we don't run on the built test assets directly
     const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project2');
-    const plugin: JestPlugin = new JestPlugin();
-    const loader: ConfigurationFile<IHeftJestConfiguration> = plugin._getJestConfigurationLoader(
+    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );

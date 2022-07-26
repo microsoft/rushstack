@@ -13,7 +13,7 @@ import { trueCasePathSync } from 'true-case-path';
 import { RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
-import { RigToolResolver, type IRigToolResolver } from './RigToolResolver';
+import { RigPackageResolver, type IRigPackageResolver } from './RigPackageResolver';
 
 /**
  * @internal
@@ -35,14 +35,13 @@ export interface IHeftConfigurationInitializationOptions {
  */
 export class HeftConfiguration {
   private _buildFolder!: string;
-  private _projectHeftDataFolder: string | undefined;
   private _projectConfigFolder: string | undefined;
   private _cacheFolder: string | undefined;
   private _tempFolder: string | undefined;
   private _rigConfig: RigConfig | undefined;
   private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
-  private _rigToolResolver!: RigToolResolver;
+  private _rigPackageResolver!: RigPackageResolver;
 
   /**
    * Project build folder. This is the folder containing the project's package.json file.
@@ -105,15 +104,15 @@ export class HeftConfiguration {
     return this._rigConfig;
   }
 
-  public get rigToolResolver(): IRigToolResolver {
-    if (!this._rigToolResolver) {
-      this._rigToolResolver = new RigToolResolver({
+  public get rigPackageResolver(): IRigPackageResolver {
+    if (!this._rigPackageResolver) {
+      this._rigPackageResolver = new RigPackageResolver({
         buildFolder: this.buildFolder,
         projectPackageJson: this.projectPackageJson,
         rigConfig: this.rigConfig
       });
     }
-    return this._rigToolResolver;
+    return this._rigPackageResolver;
   }
 
   /**

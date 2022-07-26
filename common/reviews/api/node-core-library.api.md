@@ -247,6 +247,7 @@ export class FileSystem {
     static isExistError(error: Error): boolean;
     static isFileDoesNotExistError(error: Error): boolean;
     static isFolderDoesNotExistError(error: Error): boolean;
+    static isNotDirectoryError(error: Error): boolean;
     static isNotExistError(error: Error): boolean;
     static isUnlinkNotPermittedError(error: Error): boolean;
     static move(options: IFileSystemMoveOptions): void;

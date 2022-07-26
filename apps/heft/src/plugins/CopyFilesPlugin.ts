@@ -5,7 +5,7 @@ import * as path from 'path';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getRelativeFilePathsAsync, type IFileGlobSpecifier } from './FileGlobSpecifier';
+import { getRelativeFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
@@ -17,9 +17,9 @@ import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
  *
  * @public
  */
-export interface ICopyOperation extends IFileGlobSpecifier {
+export interface ICopyOperation extends IFileSelectionSpecifier {
   /**
-   * Absolute paths to folder(s) which files should be copied to.
+   * Absolute paths to folder(s) which files or folders should be copied to.
    */
   destinationFolders: string[];
 
@@ -30,6 +30,14 @@ export interface ICopyOperation extends IFileGlobSpecifier {
 
   /**
    * Hardlink files instead of copying.
+   *
+   * @remarks
+   * If the sourcePath is a folder, the contained directory structure will be re-created
+   * and all files will be individually hardlinked. This means that folders will be new
+   * filesystem entities and will have separate folder metadata, while the contained files
+   * will maintain normal hardlink behavior. This is done since folders do not have a
+   * cross-platform equivalent of a hardlink, and since file symlinks provide fundamentally
+   * different functionality in comparison to hardlinks.
    */
   hardlink?: boolean;
 }
@@ -39,26 +47,27 @@ interface ICopyFilesPluginOptions {
 }
 
 interface ICopyFilesResult {
-  copiedFileCount: number;
+  copiedFolderOrFileCount: number;
   linkedFileCount: number;
 }
 
-interface ICopyFileDescriptor {
-  sourceFilePath: string;
-  destinationFilePath: string;
+interface ICopyDescriptor {
+  sourcePath: string;
+  destinationPath: string;
   hardlink: boolean;
 }
 
 export async function copyFilesAsync(copyOperations: ICopyOperation[], logger: IScopedLogger): Promise<void> {
-  const copyDescriptors: ICopyFileDescriptor[] = await _getCopyFileDescriptorsAsync(copyOperations);
+  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(copyOperations);
   if (copyDescriptors.length === 0) {
     // No need to run copy and print to console
     return;
   }
 
-  const { copiedFileCount, linkedFileCount } = await _copyFilesInnerAsync(copyDescriptors, logger);
+  const { copiedFolderOrFileCount, linkedFileCount } = await _copyFilesInnerAsync(copyDescriptors, logger);
+  const folderOrFilesPlural: string = copiedFolderOrFileCount === 1 ? '' : 's';
   logger.terminal.writeLine(
-    `Copied ${copiedFileCount} file${copiedFileCount === 1 ? '' : 's'} and ` +
+    `Copied ${copiedFolderOrFileCount} folder${folderOrFilesPlural} or file${folderOrFilesPlural} and ` +
       `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
   );
 
@@ -69,58 +78,87 @@ export async function copyFilesAsync(copyOperations: ICopyOperation[], logger: I
   // }
 }
 
-async function _getCopyFileDescriptorsAsync(
-  copyConfigurations: ICopyOperation[]
-): Promise<ICopyFileDescriptor[]> {
-  const processedCopyDescriptors: ICopyFileDescriptor[] = [];
+async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): Promise<ICopyDescriptor[]> {
+  const processedCopyDescriptors: ICopyDescriptor[] = [];
 
   // Create a map to deduplicate and prevent double-writes
   // resolvedDestinationFilePath -> descriptor
-  const destinationCopyDescriptors: Map<string, ICopyFileDescriptor> = new Map();
+  const destinationCopyDescriptors: Map<string, ICopyDescriptor> = new Map();
 
   await Async.forEachAsync(
     copyConfigurations,
     async (copyConfiguration: ICopyOperation) => {
-      const sourceFileRelativePaths: Set<string> = await getRelativeFilePathsAsync(copyConfiguration);
+      let sourceFolder: string | undefined;
+      let sourceFolderRelativePaths: Set<string> | undefined;
+      if (
+        !copyConfiguration.fileExtensions?.length &&
+        !copyConfiguration.includeGlobs?.length &&
+        !copyConfiguration.excludeGlobs?.length
+      ) {
+        sourceFolder = path.dirname(copyConfiguration.sourcePath);
+        if (copyConfiguration.hardlink) {
+          // Specify a glob to match all files in the folder, since folders cannot be hardlinked.
+          // Perform globbing from one folder up, so that we create the folder in the destination.
+          try {
+            sourceFolderRelativePaths = await getRelativeFilePathsAsync({
+              ...copyConfiguration,
+              sourcePath: sourceFolder,
+              includeGlobs: [`${path.basename(copyConfiguration.sourcePath)}/**/*`]
+            });
+          } catch (error) {
+            if (FileSystem.isNotDirectoryError(error)) {
+              // The source path is a file, not a folder. Handled below.
+            } else {
+              throw error;
+            }
+          }
+        }
+
+        // Still not set, either it's not a hardlink or it's a file.
+        if (!sourceFolderRelativePaths) {
+          sourceFolderRelativePaths = new Set([path.basename(copyConfiguration.sourcePath)]);
+        }
+      } else {
+        // Assume the source path is a folder
+        sourceFolder = copyConfiguration.sourcePath;
+        sourceFolderRelativePaths = await getRelativeFilePathsAsync(copyConfiguration);
+      }
 
       // Dedupe and throw if a double-write is detected
       for (const destinationFolderPath of copyConfiguration.destinationFolders) {
-        for (const sourceFileRelativePath of sourceFileRelativePaths) {
+        for (const sourceFolderRelativePath of sourceFolderRelativePaths!) {
           // Only include the relative path from the sourceFolder if flatten is false
-          const resolvedSourceFilePath: string = path.join(
-            copyConfiguration.sourceFolder,
-            sourceFileRelativePath
-          );
-          const resolvedDestinationFilePath: string = path.resolve(
+          const resolvedSourcePath: string = path.join(sourceFolder!, sourceFolderRelativePath);
+          const resolvedDestinationPath: string = path.resolve(
             destinationFolderPath,
-            copyConfiguration.flatten ? '.' : path.dirname(sourceFileRelativePath),
-            path.basename(sourceFileRelativePath)
+            copyConfiguration.flatten ? '.' : path.dirname(sourceFolderRelativePath),
+            path.basename(sourceFolderRelativePath)
           );
 
           // Throw if a duplicate copy target with a different source or options is specified
-          const existingDestinationCopyDescriptor: ICopyFileDescriptor | undefined =
-            destinationCopyDescriptors.get(resolvedDestinationFilePath);
+          const existingDestinationCopyDescriptor: ICopyDescriptor | undefined =
+            destinationCopyDescriptors.get(resolvedDestinationPath);
           if (existingDestinationCopyDescriptor) {
             if (
-              existingDestinationCopyDescriptor.sourceFilePath === resolvedSourceFilePath &&
+              existingDestinationCopyDescriptor.sourcePath === resolvedSourcePath &&
               existingDestinationCopyDescriptor.hardlink === !!copyConfiguration.hardlink
             ) {
               // Found a duplicate, avoid adding again
               continue;
             }
             throw new Error(
-              `Cannot copy multiple files to the same destination "${resolvedDestinationFilePath}"`
+              `Cannot copy multiple files to the same destination "${resolvedDestinationPath}"`
             );
           }
 
           // Finally, default hardlink to false, add to the result, and add to the map for deduping
-          const processedCopyDescriptor: ICopyFileDescriptor = {
-            sourceFilePath: resolvedSourceFilePath,
-            destinationFilePath: resolvedDestinationFilePath,
+          const processedCopyDescriptor: ICopyDescriptor = {
+            sourcePath: resolvedSourcePath,
+            destinationPath: resolvedDestinationPath,
             hardlink: !!copyConfiguration.hardlink
           };
           processedCopyDescriptors.push(processedCopyDescriptor);
-          destinationCopyDescriptors.set(resolvedDestinationFilePath, processedCopyDescriptor);
+          destinationCopyDescriptors.set(resolvedDestinationPath, processedCopyDescriptor);
         }
       }
     },
@@ -132,44 +170,44 @@ async function _getCopyFileDescriptorsAsync(
 }
 
 async function _copyFilesInnerAsync(
-  copyDescriptors: ICopyFileDescriptor[],
+  copyDescriptors: ICopyDescriptor[],
   logger: IScopedLogger
 ): Promise<ICopyFilesResult> {
   if (copyDescriptors.length === 0) {
-    return { copiedFileCount: 0, linkedFileCount: 0 };
+    return { copiedFolderOrFileCount: 0, linkedFileCount: 0 };
   }
 
-  let copiedFileCount: number = 0;
+  let copiedFolderOrFileCount: number = 0;
   let linkedFileCount: number = 0;
   await Async.forEachAsync(
     copyDescriptors,
-    async (copyDescriptor: ICopyFileDescriptor) => {
+    async (copyDescriptor: ICopyDescriptor) => {
       if (copyDescriptor.hardlink) {
         linkedFileCount++;
         await FileSystem.createHardLinkAsync({
-          linkTargetPath: copyDescriptor.sourceFilePath,
-          newLinkPath: copyDescriptor.destinationFilePath,
+          linkTargetPath: copyDescriptor.sourcePath,
+          newLinkPath: copyDescriptor.destinationPath,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
         logger.terminal.writeVerboseLine(
-          `Linked "${copyDescriptor.sourceFilePath}" to "${copyDescriptor.destinationFilePath}"`
+          `Linked "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}"`
         );
       } else {
-        copiedFileCount++;
-        await FileSystem.copyFileAsync({
-          sourcePath: copyDescriptor.sourceFilePath,
-          destinationPath: copyDescriptor.destinationFilePath,
+        copiedFolderOrFileCount++;
+        await FileSystem.copyFilesAsync({
+          sourcePath: copyDescriptor.sourcePath,
+          destinationPath: copyDescriptor.destinationPath,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
         logger.terminal.writeVerboseLine(
-          `Copied "${copyDescriptor.sourceFilePath}" to "${copyDescriptor.destinationFilePath}"`
+          `Copied "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}"`
         );
       }
     },
     { concurrency: Constants.maxParallelism }
   );
 
-  return { copiedFileCount, linkedFileCount };
+  return { copiedFolderOrFileCount, linkedFileCount };
 }
 
 export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions> {

@@ -1,61 +1,44 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError } from '@rushstack/node-core-library';
 import { SyncHook } from 'tapable';
 
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { IHeftPlugin } from './IHeftPlugin';
 
-/**
- * @public
- */
-export type RequestAccessToPluginByNameCallback = (
-  pluginToAccessPackage: string,
-  pluginToAccessName: string,
-  pluginApply: (pluginAccessor: object) => void
-) => void;
-
-/**
- * @internal
- */
 export abstract class HeftPluginHost {
-  private readonly _pluginHooks: Map<string, SyncHook<object>> = new Map();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private readonly _pluginAccessRequestHooks: Map<string, SyncHook<any>> = new Map();
 
-  /**
-   * @internal
-   */
   public abstract applyPluginsAsync(): Promise<void>;
 
-  /**
-   * @internal
-   */
-  protected getRequestAccessToPluginByNameFn(applyTapName: string): RequestAccessToPluginByNameCallback {
-    return (
-      pluginToAccessPackage: string,
-      pluginToAccessName: string,
-      pluginApply: (pluginAccessor: object) => void
-    ) => {
-      const pluginHookName: string = this.getPluginHookName(pluginToAccessPackage, pluginToAccessName);
-      let pluginHook: SyncHook<object> | undefined = this._pluginHooks.get(pluginHookName);
-      if (!pluginHook) {
-        pluginHook = new SyncHook(['pluginAccessor']);
-        this._pluginHooks.set(pluginHookName, pluginHook);
-      }
-      if (pluginHook.taps.some((t) => t.name === applyTapName)) {
-        throw new InternalError(
-          `Plugin "${pluginToAccessName}" from "${pluginToAccessPackage}" has already been accessed ` +
-            `by "${applyTapName}".`
-        );
-      }
-      pluginHook.tap(applyTapName, pluginApply);
-    };
+  public requestAccessToPluginByName<T extends object>(
+    requestorName: string,
+    pluginToAccessPackage: string,
+    pluginToAccessName: string,
+    accessorCallback: (pluginAccessor: T) => void
+  ): void {
+    const pluginHookName: string = this.getPluginHookName(pluginToAccessPackage, pluginToAccessName);
+    let pluginAccessRequestHook: SyncHook<T> | undefined =
+      this._pluginAccessRequestHooks.get(pluginHookName);
+    if (!pluginAccessRequestHook) {
+      pluginAccessRequestHook = new SyncHook(['pluginAccessor']);
+      this._pluginAccessRequestHooks.set(pluginHookName, pluginAccessRequestHook);
+    }
+    if (pluginAccessRequestHook.taps.some((t) => t.name === requestorName)) {
+      throw new Error(
+        `Plugin "${pluginToAccessName}" from "${pluginToAccessPackage}" has already been accessed ` +
+          `by "${requestorName}".`
+      );
+    }
+    pluginAccessRequestHook.tap(requestorName, accessorCallback);
   }
 
-  /**
-   * @internal
-   */
-  protected async applyPluginHooksAsync(
+  public getPluginHookName(pluginPackageName: string, pluginName: string): string {
+    return `${pluginPackageName};${pluginName}`;
+  }
+
+  protected async resolveAccessRequestsAsync(
     plugin: IHeftPlugin,
     pluginDefinition: HeftPluginDefinitionBase
   ): Promise<void> {
@@ -63,24 +46,18 @@ export abstract class HeftPluginHost {
       pluginDefinition.pluginPackageName,
       pluginDefinition.pluginName
     );
-    const pluginHook: SyncHook<object> | undefined = this._pluginHooks.get(pluginHookName);
-    const accessor: object | undefined = plugin.accessor;
-    if (pluginHook && pluginHook.taps.length > 0) {
-      if (!accessor) {
+    const pluginAccessRequestHook: SyncHook<object> | undefined =
+      this._pluginAccessRequestHooks.get(pluginHookName);
+    if (pluginAccessRequestHook?.isUsed()) {
+      const accessor: object | undefined = plugin.accessor;
+      if (accessor) {
+        pluginAccessRequestHook.call(accessor);
+      } else {
         throw new Error(
           `Plugin "${pluginDefinition.pluginName}" from package "${pluginDefinition.pluginPackageName}" ` +
             'does not provide an accessor property, so it does not provide access to other plugins.'
         );
-      } else {
-        pluginHook.call(accessor);
       }
     }
-  }
-
-  /**
-   * @internal
-   */
-  protected getPluginHookName(pluginPackageName: string, pluginName: string): string {
-    return `${pluginPackageName};${pluginName}`;
   }
 }

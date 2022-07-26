@@ -5,7 +5,7 @@ import * as path from 'path';
 import { FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getRelativeFilePathsAsync, type IFileGlobSpecifier } from './FileGlobSpecifier';
+import { getRelativeFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
@@ -16,7 +16,7 @@ import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
  *
  * @public
  */
-export interface IDeleteOperation extends IFileGlobSpecifier {}
+export interface IDeleteOperation extends IFileSelectionSpecifier {}
 
 interface IDeleteFilesPluginOptions {
   deleteOperations: IDeleteOperation[];
@@ -39,14 +39,14 @@ export async function deleteFilesAsync(
         !deleteOperation.includeGlobs?.length &&
         !deleteOperation.excludeGlobs?.length
       ) {
-        // We can optimize for folder deletions by not globbing if there are no file extensions or globs
-        pathsToDelete.add(deleteOperation.sourceFolder);
-        return;
-      }
-
-      const sourceFileRelativePaths: Set<string> = await getRelativeFilePathsAsync(deleteOperation);
-      for (const sourceFileRelativePath of sourceFileRelativePaths) {
-        pathsToDelete.add(path.resolve(deleteOperation.sourceFolder, sourceFileRelativePath));
+        // If no globs or file extensions are provided add the path to the set of paths to delete
+        pathsToDelete.add(deleteOperation.sourcePath);
+      } else {
+        // Glob the files under the source path and add them to the set of files to delete
+        const sourceFileRelativePaths: Set<string> = await getRelativeFilePathsAsync(deleteOperation);
+        for (const sourceFileRelativePath of sourceFileRelativePaths) {
+          pathsToDelete.add(path.resolve(deleteOperation.sourcePath, sourceFileRelativePath));
+        }
       }
     },
     { concurrency: Constants.maxParallelism }
