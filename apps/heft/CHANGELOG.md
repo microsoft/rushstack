@@ -1,6 +1,45 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 28 Jun 2022 00:23:32 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jul 2022 23:30:27 GMT and should not be manually modified.
+
+## 0.46.6
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
+
+## 0.46.5
+Thu, 21 Jul 2022 00:16:14 GMT
+
+_Version update only_
+
+## 0.46.4
+Wed, 13 Jul 2022 21:31:13 GMT
+
+_Version update only_
+
+## 0.46.3
+Fri, 08 Jul 2022 15:17:46 GMT
+
+_Version update only_
+
+## 0.46.2
+Mon, 04 Jul 2022 15:15:13 GMT
+
+### Patches
+
+- Fix an issue with the `locales` build property. The property is now undefined if no `--locale` parameters are specified.
+
+## 0.46.1
+Thu, 30 Jun 2022 04:48:53 GMT
+
+_Version update only_
+
+## 0.46.0
+Tue, 28 Jun 2022 22:47:13 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Update the --locale build parameter to support multiple values and replace the `locale?: string` parameter in `IBuildStageProperties` with a `locales?: readonly string[]` parameter.
 
 ## 0.45.14
 Tue, 28 Jun 2022 00:23:32 GMT

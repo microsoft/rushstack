@@ -2,6 +2,111 @@
   "name": "@rushstack/loader-raw-script",
   "entries": [
     {
+      "version": "1.3.245",
+      "tag": "@rushstack/loader-raw-script_v1.3.245",
+      "date": "Thu, 21 Jul 2022 23:30:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.244",
+      "tag": "@rushstack/loader-raw-script_v1.3.244",
+      "date": "Thu, 21 Jul 2022 00:16:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.243",
+      "tag": "@rushstack/loader-raw-script_v1.3.243",
+      "date": "Wed, 13 Jul 2022 21:31:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.242",
+      "tag": "@rushstack/loader-raw-script_v1.3.242",
+      "date": "Fri, 08 Jul 2022 15:17:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.241",
+      "tag": "@rushstack/loader-raw-script_v1.3.241",
+      "date": "Mon, 04 Jul 2022 15:15:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.240",
+      "tag": "@rushstack/loader-raw-script_v1.3.240",
+      "date": "Thu, 30 Jun 2022 04:48:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.239",
+      "tag": "@rushstack/loader-raw-script_v1.3.239",
+      "date": "Tue, 28 Jun 2022 22:47:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.238",
       "tag": "@rushstack/loader-raw-script_v1.3.238",
       "date": "Tue, 28 Jun 2022 00:23:32 GMT",

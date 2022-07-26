@@ -2,6 +2,136 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.19.0",
+      "tag": "@microsoft/api-documenter_v7.19.0",
+      "date": "Thu, 21 Jul 2022 23:30:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add showInheritedMembers config to api-documenter that allows it to show an API item's inherited members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.22.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.4",
+      "tag": "@microsoft/api-documenter_v7.18.4",
+      "date": "Thu, 21 Jul 2022 00:16:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.22.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.3",
+      "tag": "@microsoft/api-documenter_v7.18.3",
+      "date": "Wed, 13 Jul 2022 21:31:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.2",
+      "tag": "@microsoft/api-documenter_v7.18.2",
+      "date": "Fri, 08 Jul 2022 15:17:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.1",
+      "tag": "@microsoft/api-documenter_v7.18.1",
+      "date": "Mon, 04 Jul 2022 15:15:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.0",
+      "tag": "@microsoft/api-documenter_v7.18.0",
+      "date": "Thu, 30 Jun 2022 04:48:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Show protected and readonly modifiers for relevant API items"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.21.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.17.26",
+      "tag": "@microsoft/api-documenter_v7.17.26",
+      "date": "Tue, 28 Jun 2022 22:47:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.20.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.17.25",
       "tag": "@microsoft/api-documenter_v7.17.25",
       "date": "Tue, 28 Jun 2022 00:23:32 GMT",

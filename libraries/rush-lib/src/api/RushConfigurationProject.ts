@@ -19,7 +19,8 @@ export interface IRushConfigurationProjectJson {
   packageName: string;
   projectFolder: string;
   reviewCategory?: string;
-  cyclicDependencyProjects: string[];
+  decoupledLocalDependencies: string[];
+  cyclicDependencyProjects?: string[];
   versionPolicyName?: string;
   shouldPublish?: boolean;
   skipRushCheck?: boolean;
@@ -65,7 +66,7 @@ export class RushConfigurationProject {
   private readonly _packageJsonEditor: PackageJsonEditor;
   private readonly _tempProjectName: string;
   private readonly _unscopedTempProjectName: string;
-  private readonly _cyclicDependencyProjects: Set<string>;
+  private readonly _decoupledLocalDependencies: Set<string>;
   private readonly _versionPolicyName: string | undefined;
   private readonly _shouldPublish: boolean;
   private readonly _skipRushCheck: boolean;
@@ -157,15 +158,28 @@ export class RushConfigurationProject {
     // Example: "my-project-2"
     this._unscopedTempProjectName = PackageNameParsers.permissive.getUnscopedName(tempProjectName);
 
-    this._cyclicDependencyProjects = new Set<string>();
-    if (projectJson.cyclicDependencyProjects) {
-      for (const cyclicDependencyProject of projectJson.cyclicDependencyProjects) {
-        this._cyclicDependencyProjects.add(cyclicDependencyProject);
+    this._decoupledLocalDependencies = new Set<string>();
+    if (projectJson.cyclicDependencyProjects || projectJson.decoupledLocalDependencies) {
+      if (projectJson.cyclicDependencyProjects && projectJson.decoupledLocalDependencies) {
+        throw new Error(
+          'A project configuration cannot specify both "decoupledLocalDependencies" and "cyclicDependencyProjects". Please use "decoupledLocalDependencies" only -- the other name is deprecated.'
+        );
+      }
+      for (const cyclicDependencyProject of projectJson.cyclicDependencyProjects ||
+        projectJson.decoupledLocalDependencies) {
+        this._decoupledLocalDependencies.add(cyclicDependencyProject);
       }
     }
     this._shouldPublish = !!projectJson.shouldPublish;
     this._skipRushCheck = !!projectJson.skipRushCheck;
     this._versionPolicyName = projectJson.versionPolicyName;
+
+    if (this._shouldPublish && this._packageJson.private) {
+      throw new Error(
+        `The project "${projectJson.packageName}" specifies "shouldPublish": true, ` +
+          `but the package.json file specifies "private": true.`
+      );
+    }
 
     this._publishFolder = this._projectFolder;
     if (projectJson.publishFolder) {
@@ -257,8 +271,21 @@ export class RushConfigurationProject {
    *
    * These are package names that would be found by RushConfiguration.getProjectByName().
    */
+  public get decoupledLocalDependencies(): Set<string> {
+    return this._decoupledLocalDependencies;
+  }
+
+  /**
+   * A list of local projects that appear as devDependencies for this project, but cannot be
+   * locally linked because it would create a cyclic dependency; instead, the last published
+   * version will be installed in the Common folder.
+   *
+   * These are package names that would be found by RushConfiguration.getProjectByName().
+   *
+   * @deprecated Use `decoupledLocalDependencies` instead, as it better describes the purpose of the data.
+   */
   public get cyclicDependencyProjects(): Set<string> {
-    return this._cyclicDependencyProjects;
+    return this._decoupledLocalDependencies;
   }
 
   /**
@@ -301,7 +328,7 @@ export class RushConfigurationProject {
             // Skip if we can't find the local project or it's a cyclic dependency
             const localProject: RushConfigurationProject | undefined =
               this._rushConfiguration.getProjectByName(dependency);
-            if (localProject && !this._cyclicDependencyProjects.has(dependency)) {
+            if (localProject && !this._decoupledLocalDependencies.has(dependency)) {
               // Set the value if it's a workspace project, or if we have a local project and the semver is satisfied
               const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
               switch (dependencySpecifier.specifierType) {

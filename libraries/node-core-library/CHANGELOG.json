@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.49.0",
+      "tag": "@rushstack/node-core-library_v3.49.0",
+      "date": "Tue, 28 Jun 2022 22:47:13 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add SubprocessTerminator utility, which can be used to kill a process and all of its child processes on demand or on termination of the host process."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.48.0",
       "tag": "@rushstack/node-core-library_v3.48.0",
       "date": "Tue, 28 Jun 2022 00:23:32 GMT",

@@ -63,6 +63,31 @@
   "bundledPackages": [],
 
   /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.  To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   *
+   * DEFAULT VALUE: "crlf"
+   */
+  // "newlineKind": "crlf",
+
+  /**
+   * Set to true when invoking API Extractor's test harness. When `testMode` is true, the `toolVersion` field in the
+   * .api.json file is assigned an empty string to prevent spurious diffs in output files tracked for tests.
+   *
+   * DEFAULT VALUE: "false"
+   */
+  // "testMode": false,
+
+  /**
+   * Specifies how API Extractor sorts members of an enum when generating api.json. By default, the output files
+   * will be sorted alphabetically, which is "by-name". To keep the ordering in the source code, specify "preserve".
+   *
+   * DEFAULT VALUE: "by-name"
+   */
+  // enumMemberOrder?: EnumMemberOrder,
+
+  /**
    * Determines how the TypeScript compiler engine will be invoked by API Extractor.
    */
   "compiler": {
@@ -270,15 +295,6 @@
      */
     // "tsdocMetadataFilePath": "<projectFolder>/dist/tsdoc-metadata.json"
   },
-
-  /**
-   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
-   * will be written with Windows-style newlines.  To use POSIX-style newlines, specify "lf" instead.
-   * To use the OS's default newline kind, specify "os".
-   *
-   * DEFAULT VALUE: "crlf"
-   */
-  // "newlineKind": "crlf",
 
   /**
    * Configures how API Extractor reports error and warning messages produced during analysis.

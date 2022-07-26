@@ -1,6 +1,42 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 28 Jun 2022 00:23:32 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jul 2022 23:30:27 GMT and should not be manually modified.
+
+## 7.28.6
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
+
+## 7.28.5
+Thu, 21 Jul 2022 00:16:14 GMT
+
+_Version update only_
+
+## 7.28.4
+Fri, 08 Jul 2022 15:17:46 GMT
+
+### Patches
+
+- Update api-extractor-template.json to "testMode" and "enumMemberOrder" comment sections.
+
+## 7.28.3
+Mon, 04 Jul 2022 15:15:13 GMT
+
+### Patches
+
+- Make enumMemberOrder configuration field optional
+
+## 7.28.2
+Thu, 30 Jun 2022 04:48:53 GMT
+
+### Patches
+
+- Improve logic that determines whether an API item is readonly
+
+## 7.28.1
+Tue, 28 Jun 2022 22:47:13 GMT
+
+_Version update only_
 
 ## 7.28.0
 Tue, 28 Jun 2022 00:23:32 GMT

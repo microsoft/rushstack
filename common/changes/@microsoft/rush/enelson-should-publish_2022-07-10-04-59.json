@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Validate that if shouldPublish is set, private is not set",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

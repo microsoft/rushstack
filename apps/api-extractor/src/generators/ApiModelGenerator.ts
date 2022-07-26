@@ -609,6 +609,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isReadonly: boolean = this._isReadonly(astDeclaration);
 
       apiIndexSignature = new ApiIndexSignature({
         docComment,
@@ -616,7 +617,8 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        isReadonly
       });
 
       parentApiItem.addMember(apiIndexSignature);
@@ -862,7 +864,7 @@ export class ApiModelGenerator {
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
-      const isReadonly: boolean = this._determineReadonly(astDeclaration);
+      const isReadonly: boolean = this._isReadonly(astDeclaration);
 
       apiProperty = new ApiProperty({
         name,
@@ -909,7 +911,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
-      const isReadonly: boolean = this._determineReadonly(astDeclaration);
+      const isReadonly: boolean = this._isReadonly(astDeclaration);
 
       apiPropertySignature = new ApiPropertySignature({
         name,
@@ -1003,7 +1005,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isReadonly: boolean = this._determineReadonly(astDeclaration);
+      const isReadonly: boolean = this._isReadonly(astDeclaration);
 
       apiVariable = new ApiVariable({
         name,
@@ -1087,21 +1089,34 @@ export class ApiModelGenerator {
     return parameters;
   }
 
-  private _determineReadonly(astDeclaration: AstDeclaration): boolean {
-    const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
-    const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
-    const declarationMetadata: DeclarationMetadata = this._collector.fetchDeclarationMetadata(astDeclaration);
-    //Line 1: sees whether the readonly or const modifiers are present
-    //Line 2: sees if the TSDoc comment for @readonly is present
-    //Line 3: sees whether a getter is present for a property with no setter
-    //Line 4: sees if the var declaration has Const keyword
-    return (
-      (astDeclaration.modifierFlags & (ts.ModifierFlags.Readonly + ts.ModifierFlags.Const)) !== 0 ||
-      (docComment !== undefined && docComment.modifierTagSet.hasTagName('@readonly')) ||
-      (declarationMetadata.ancillaryDeclarations.length === 0 &&
-        astDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) ||
-      (ts.isVariableDeclaration(astDeclaration.declaration) &&
-        TypeScriptInternals.isVarConst(astDeclaration.declaration))
-    );
+  private _isReadonly(astDeclaration: AstDeclaration): boolean {
+    switch (astDeclaration.declaration.kind) {
+      case ts.SyntaxKind.GetAccessor:
+      case ts.SyntaxKind.IndexSignature:
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.PropertySignature:
+      case ts.SyntaxKind.SetAccessor:
+      case ts.SyntaxKind.VariableDeclaration: {
+        const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
+        const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
+        const declarationMetadata: DeclarationMetadata =
+          this._collector.fetchDeclarationMetadata(astDeclaration);
+
+        const hasReadonlyModifier: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Readonly) !== 0;
+        const hasReadonlyDocTag: boolean = !!docComment?.modifierTagSet?.hasTagName('@readonly');
+        const isGetterWithNoSetter: boolean =
+          ts.isGetAccessorDeclaration(astDeclaration.declaration) &&
+          declarationMetadata.ancillaryDeclarations.length === 0;
+        const isVarConst: boolean =
+          ts.isVariableDeclaration(astDeclaration.declaration) &&
+          TypeScriptInternals.isVarConst(astDeclaration.declaration);
+
+        return hasReadonlyModifier || hasReadonlyDocTag || isGetterWithNoSetter || isVarConst;
+      }
+      default: {
+        // Readonly-ness does not make sense for any other declaration kind.
+        return false;
+      }
+    }
   }
 }

@@ -4,10 +4,12 @@
 export {
   ConfigurationFile,
   IConfigurationFileOptions,
+  ICustomJsonPathMetadata,
   ICustomPropertyInheritance,
   IJsonPathMetadata,
   IJsonPathsMetadata,
   InheritanceType,
+  INonCustomJsonPathMetadata,
   IOriginalValueOptions,
   IPropertiesInheritance,
   IPropertyInheritance,

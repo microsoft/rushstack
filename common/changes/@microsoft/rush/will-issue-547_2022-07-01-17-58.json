@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING API CHANGE) Rename cyclicDependencyProjects to decoupledLocalDependencies",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

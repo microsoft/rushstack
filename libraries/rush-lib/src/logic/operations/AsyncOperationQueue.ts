@@ -142,7 +142,7 @@ function calculateCriticalPathLength(
           .map((visitedTask) => visitedTask.name)
           .reverse()
           .join('\n  -> ') +
-        '\nConsider using the cyclicDependencyProjects option for rush.json.'
+        '\nConsider using the decoupledLocalDependencies option for rush.json.'
     );
   }
 

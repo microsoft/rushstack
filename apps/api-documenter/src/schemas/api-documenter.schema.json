@@ -35,6 +35,11 @@
       "description": "Configures how the table of contents is generated.",
       "type": "object",
       "additionalProperties": true
+    },
+
+    "showInheritedMembers": {
+      "description": "Specifies whether inherited members should also be shown on an API item's page.",
+      "type": "boolean"
     }
   },
 

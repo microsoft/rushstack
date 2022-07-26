@@ -217,6 +217,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       customParametersByName.set(configParameter.longName, parserParameter);
     }
 
+    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const initialCreateOperationsContext: ICreateOperationsContext = {
       buildCacheConfiguration,
       customParameters: customParametersByName,
@@ -225,7 +226,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       isWatch,
       rushConfiguration: this.rushConfiguration,
       phaseSelection: new Set(this._initialPhases),
-      projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration),
+      projectChangeAnalyzer,
       projectSelection,
       projectsInUnknownState: projectSelection
     };
@@ -243,6 +244,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       stopwatch,
       terminal
     };
+
+    terminal.write('Analyzing repo state... ');
+    const repoStateStopwatch: Stopwatch = new Stopwatch();
+    repoStateStopwatch.start();
+    projectChangeAnalyzer._ensureInitialized(terminal);
+    repoStateStopwatch.stop();
+    terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
+    terminal.writeLine();
 
     await this._runInitialPhases(internalOptions);
 

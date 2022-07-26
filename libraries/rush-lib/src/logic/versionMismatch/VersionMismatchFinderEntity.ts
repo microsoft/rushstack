@@ -5,18 +5,18 @@ import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEdit
 
 export interface IVersionMismatchFinderEntityOptions {
   friendlyName: string;
-  cyclicDependencyProjects: Set<string>;
+  decoupledLocalDependencies: Set<string>;
   skipRushCheck?: boolean;
 }
 
 export abstract class VersionMismatchFinderEntity {
   public readonly friendlyName: string;
-  public readonly cyclicDependencyProjects: Set<string>;
+  public readonly decoupledLocalDependencies: Set<string>;
   public readonly skipRushCheck: boolean | undefined;
 
   public constructor(options: IVersionMismatchFinderEntityOptions) {
     this.friendlyName = options.friendlyName;
-    this.cyclicDependencyProjects = options.cyclicDependencyProjects;
+    this.decoupledLocalDependencies = options.decoupledLocalDependencies;
     this.skipRushCheck = options.skipRushCheck;
   }
 

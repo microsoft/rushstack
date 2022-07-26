@@ -407,7 +407,7 @@
     //    * locally linked because it would create a cyclic dependency; instead, the last published
     //    * version will be installed in the Common folder.
     //    */
-    //   "cyclicDependencyProjects": [
+    //   "decoupledLocalDependencies": [
     //     // "my-toolchain"
     //   ],
     //
@@ -485,6 +485,12 @@
     {
       "packageName": "api-documenter-test",
       "projectFolder": "build-tests/api-documenter-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-documenter-scenarios",
+      "projectFolder": "build-tests/api-documenter-scenarios",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

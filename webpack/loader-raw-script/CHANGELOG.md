@@ -1,6 +1,41 @@
 # Change Log - @rushstack/loader-raw-script
 
-This log was last generated on Tue, 28 Jun 2022 00:23:32 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jul 2022 23:30:27 GMT and should not be manually modified.
+
+## 1.3.245
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
+
+## 1.3.244
+Thu, 21 Jul 2022 00:16:14 GMT
+
+_Version update only_
+
+## 1.3.243
+Wed, 13 Jul 2022 21:31:13 GMT
+
+_Version update only_
+
+## 1.3.242
+Fri, 08 Jul 2022 15:17:47 GMT
+
+_Version update only_
+
+## 1.3.241
+Mon, 04 Jul 2022 15:15:13 GMT
+
+_Version update only_
+
+## 1.3.240
+Thu, 30 Jun 2022 04:48:54 GMT
+
+_Version update only_
+
+## 1.3.239
+Tue, 28 Jun 2022 22:47:14 GMT
+
+_Version update only_
 
 ## 1.3.238
 Tue, 28 Jun 2022 00:23:32 GMT

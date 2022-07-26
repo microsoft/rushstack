@@ -204,7 +204,7 @@ export interface IConfigFile {
     docModel?: IConfigDocModel;
     // @beta
     dtsRollup?: IConfigDtsRollup;
-    enumMemberOrder: EnumMemberOrder;
+    enumMemberOrder?: EnumMemberOrder;
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;

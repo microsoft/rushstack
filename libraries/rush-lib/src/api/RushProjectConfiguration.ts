@@ -73,7 +73,7 @@ interface IOldRushProjectJson {
   buildCacheOptions?: unknown;
 }
 
-export const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
+const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
   new ConfigurationFile<IRushProjectJson>({
     projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
     jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),

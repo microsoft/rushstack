@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'path';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -9,9 +10,9 @@ import type {
   IHeftTaskRunHookOptions,
   IScopedLogger
 } from '@rushstack/heft';
-import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
+import { ConfigurationFile } from '@rushstack/heft-config-file';
 
-import { ISassConfiguration, SassTypingsGenerator } from './SassTypingsGenerator';
+import { ISassConfiguration, SassProcessor } from './SassProcessor';
 import { Async } from './utilities/Async';
 
 export interface ISassConfigurationJson extends Partial<ISassConfiguration> {}
@@ -56,10 +57,7 @@ export default class SassPlugin implements IHeftPlugin {
       heftConfiguration,
       taskSession.logger
     );
-    const sassTypingsGenerator: SassTypingsGenerator = new SassTypingsGenerator({
-      sassConfiguration
-    });
-
+    const sassTypingsGenerator: SassProcessor = new SassProcessor({ sassConfiguration });
     await sassTypingsGenerator.generateTypingsAsync();
     if (isWatchMode) {
       Async.runWatcherWithErrorHandling(
@@ -81,6 +79,30 @@ export default class SassPlugin implements IHeftPlugin {
         heftConfiguration.rigConfig
       );
 
+    if (sassConfigurationJson) {
+      if (sassConfigurationJson.srcFolder) {
+        sassConfigurationJson.srcFolder = path.resolve(buildFolder, sassConfigurationJson.srcFolder);
+      }
+
+      if (sassConfigurationJson.generatedTsFolder) {
+        sassConfigurationJson.generatedTsFolder = path.resolve(
+          buildFolder,
+          sassConfigurationJson.generatedTsFolder
+        );
+      }
+
+      function resolveFolderArray(folders: string[] | undefined): void {
+        if (folders) {
+          for (let i: number = 0; i < folders.length; i++) {
+            folders[i] = path.resolve(buildFolder, folders[i]);
+          }
+        }
+      }
+
+      resolveFolderArray(sassConfigurationJson.cssOutputFolders);
+      resolveFolderArray(sassConfigurationJson.secondaryGeneratedTsFolders);
+    }
+
     // Set defaults if no configuration file or option was found
     return {
       srcFolder: `${buildFolder}/src`,
@@ -96,21 +118,7 @@ export default class SassPlugin implements IHeftPlugin {
     if (!SassPlugin._sassConfigurationLoader) {
       SassPlugin._sassConfigurationLoader = new ConfigurationFile<ISassConfigurationJson>({
         projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
-        jsonSchemaPath: PLUGIN_SCHEMA_PATH,
-        jsonPathMetadata: {
-          '$.importIncludePaths.*': {
-            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-          },
-          '$.generatedTsFolder.*': {
-            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-          },
-          '$.srcFolder.*': {
-            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-          },
-          '$.cssOutputFolders.*': {
-            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-          }
-        }
+        jsonSchemaPath: PLUGIN_SCHEMA_PATH
       });
     }
     return SassPlugin._sassConfigurationLoader;

@@ -11,7 +11,15 @@ import {
 } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
+import { ApiModel } from '../model/ApiModel';
+import { ApiClass } from '../model/ApiClass';
+import { ApiInterface } from '../model/ApiInterface';
+import { ExcerptToken, ExcerptTokenKind } from './Excerpt';
+import { IFindApiItemsResult, IFindApiItemsMessage, FindApiItemsMessageId } from './IFindApiItemsResult';
 import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+import { HeritageType } from '../model/HeritageType';
+import { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -94,6 +102,64 @@ export interface ApiItemContainerMixin extends ApiItem {
    * Returns a list of members with the specified name.
    */
   findMembersByName(name: string): ReadonlyArray<ApiItem>;
+
+  /**
+   * Finds all of the ApiItem's immediate and inherited members by walking up the inheritance tree.
+   *
+   * @remarks
+   *
+   * Given the following class heritage:
+   *
+   * ```
+   * export class A {
+   *   public a: number|boolean;
+   * }
+   *
+   * export class B extends A {
+   *   public a: number;
+   *   public b: string;
+   * }
+   *
+   * export class C extends B {
+   *   public c: boolean;
+   * }
+   * ```
+   *
+   * Calling `findMembersWithInheritance` on `C` will return `B.a`, `B.b`, and `C.c`. Calling the
+   * method on `B` will return `B.a` and `B.b`. And calling the method on `A` will return just
+   * `A.a`.
+   *
+   * The inherited members returned by this method may be incomplete. If so, there will be a flag
+   * on the result object indicating this as well as messages explaining the errors in more detail.
+   * Some scenarios include:
+   *
+   * - Interface extending from a type alias.
+   *
+   * - Class extending from a variable.
+   *
+   * - Extending from a declaration not present in the model (e.g. external package).
+   *
+   * - Extending from an unexported declaration (e.g. ae-forgotten-export). Common in mixin
+   *   patterns.
+   *
+   * - Unexpected runtime errors...
+   *
+   * Lastly, be aware that the types of inherited members are returned with respect to their
+   * defining class as opposed to with respect to the inheriting class. For example, consider
+   * the following:
+   *
+   * ```
+   * export class A<T> {
+   *   public a: T;
+   * }
+   *
+   * export class B extends A<number> {}
+   * ```
+   *
+   * When called on `B`, this method will return `B.a` with type `T` as opposed to type
+   * `number`, although the latter is more accurate.
+   */
+  findMembersWithInheritance(): IFindApiItemsResult;
 
   /**
    * For a given member of this container, return its `ApiItem.getMergedSiblings()` list.
@@ -207,6 +273,190 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
     public findMembersByName(name: string): ReadonlyArray<ApiItem> {
       this._ensureMemberMaps();
       return this[_membersByName]!.get(name) || [];
+    }
+
+    public findMembersWithInheritance(): IFindApiItemsResult {
+      const messages: IFindApiItemsMessage[] = [];
+      let maybeIncompleteResult: boolean = false;
+
+      // For API items that don't support inheritance, this method just returns the item's
+      // immediate members.
+      switch (this.kind) {
+        case ApiItemKind.Class:
+        case ApiItemKind.Interface:
+          break;
+        default: {
+          return {
+            items: this.members.concat(),
+            messages,
+            maybeIncompleteResult
+          };
+        }
+      }
+
+      const membersByName: Map<string, ApiItem[]> = new Map();
+      const membersByKind: Map<ApiItemKind, ApiItem[]> = new Map();
+
+      const toVisit: ApiItem[] = [];
+      let next: ApiItem | undefined = this;
+
+      while (next) {
+        const membersToAdd: ApiItem[] = [];
+
+        // For each member, check to see if we've already seen a member with the same name
+        // previously in the inheritance tree. If so, we know we won't inherit it, and thus
+        // do not add it to our `membersToAdd` array.
+        for (const member of next.members) {
+          // We add the to-be-added members to an intermediate array instead of immediately
+          // to the maps themselves to support method overloads with the same name.
+          if (ApiNameMixin.isBaseClassOf(member)) {
+            if (!membersByName.has(member.name)) {
+              membersToAdd.push(member);
+            }
+          } else {
+            if (!membersByKind.has(member.kind)) {
+              membersToAdd.push(member);
+            }
+          }
+        }
+
+        for (const member of membersToAdd) {
+          if (ApiNameMixin.isBaseClassOf(member)) {
+            const members: ApiItem[] = membersByName.get(member.name) || [];
+            members.push(member);
+            membersByName.set(member.name, members);
+          } else {
+            const members: ApiItem[] = membersByKind.get(member.kind) || [];
+            members.push(member);
+            membersByKind.set(member.kind, members);
+          }
+        }
+
+        // Interfaces can extend multiple interfaces, so iterate through all of them.
+        const extendedItems: ApiItem[] = [];
+        let extendsTypes: readonly HeritageType[] | undefined;
+
+        switch (next.kind) {
+          case ApiItemKind.Class: {
+            const apiClass: ApiClass = next as ApiClass;
+            extendsTypes = apiClass.extendsType ? [apiClass.extendsType] : [];
+            break;
+          }
+          case ApiItemKind.Interface: {
+            const apiInterface: ApiInterface = next as ApiInterface;
+            extendsTypes = apiInterface.extendsTypes;
+            break;
+          }
+        }
+
+        if (extendsTypes === undefined) {
+          messages.push({
+            messageId: FindApiItemsMessageId.UnsupportedKind,
+            text: `Unable to analyze references of API item ${next.displayName} because it is of unsupported kind ${next.kind}`
+          });
+          maybeIncompleteResult = true;
+          next = toVisit.shift();
+          continue;
+        }
+
+        for (const extendsType of extendsTypes) {
+          // We want to find the reference token associated with the actual inherited declaration.
+          // In every case we support, this is the first reference token. For example:
+          //
+          // ```
+          // export class A extends B {}
+          //                        ^
+          // export class A extends B<C> {}
+          //                        ^
+          // export class A extends B.C {}
+          //                        ^^^
+          // ```
+          const firstReferenceToken: ExcerptToken | undefined = extendsType.excerpt.spannedTokens.find(
+            (token: ExcerptToken) => {
+              return token.kind === ExcerptTokenKind.Reference && token.canonicalReference;
+            }
+          );
+
+          if (!firstReferenceToken) {
+            messages.push({
+              messageId: FindApiItemsMessageId.ExtendsClauseMissingReference,
+              text: `Unable to analyze extends clause ${extendsType.excerpt.text} of API item ${next.displayName} because no canonical reference was found`
+            });
+            maybeIncompleteResult = true;
+            continue;
+          }
+
+          const apiModel: ApiModel | undefined = this.getAssociatedModel();
+          if (!apiModel) {
+            messages.push({
+              messageId: FindApiItemsMessageId.NoAssociatedApiModel,
+              text: `Unable to analyze references of API item ${next.displayName} because it is not associated with an ApiModel`
+            });
+            maybeIncompleteResult = true;
+            continue;
+          }
+
+          const canonicalReference: DeclarationReference = firstReferenceToken.canonicalReference!;
+          const apiItemResult: IResolveDeclarationReferenceResult = apiModel.resolveDeclarationReference(
+            canonicalReference,
+            undefined
+          );
+
+          const apiItem: ApiItem | undefined = apiItemResult.resolvedApiItem;
+          if (!apiItem) {
+            messages.push({
+              messageId: FindApiItemsMessageId.DeclarationResolutionFailed,
+              text: `Unable to resolve declaration reference within API item ${next.displayName}: ${apiItemResult.errorMessage}`
+            });
+            maybeIncompleteResult = true;
+            continue;
+          }
+
+          extendedItems.push(apiItem);
+        }
+
+        // For classes, this array will only have one item. For interfaces, there may be multiple items. Sort the array
+        // into alphabetical order before adding to our list of API items to visit. This ensures that in the case
+        // of multiple interface inheritance, a member inherited from multiple interfaces is attributed to the interface
+        // earlier in alphabetical order (as opposed to source order).
+        //
+        // For example, in the code block below, `Bar.x` is reported as the inherited item, not `Foo.x`.
+        //
+        // ```
+        // interface Foo {
+        //   public x: string;
+        // }
+        //
+        // interface Bar {
+        //   public x: string;
+        // }
+        //
+        // interface FooBar extends Foo, Bar {}
+        // ```
+        LegacyAdapters.sortStable(extendedItems, (x: ApiItem, y: ApiItem) =>
+          x.getSortKey().localeCompare(y.getSortKey())
+        );
+
+        toVisit.push(...extendedItems);
+        next = toVisit.shift();
+      }
+
+      const items: ApiItem[] = [];
+      for (const members of membersByName.values()) {
+        items.push(...members);
+      }
+      for (const members of membersByKind.values()) {
+        items.push(...members);
+      }
+      LegacyAdapters.sortStable(items, (x: ApiItem, y: ApiItem) =>
+        x.getSortKey().localeCompare(y.getSortKey())
+      );
+
+      return {
+        items,
+        messages,
+        maybeIncompleteResult
+      };
     }
 
     /** @internal */

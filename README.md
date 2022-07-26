@@ -108,6 +108,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests-samples/heft-web-rig-library-tutorial](./build-tests-samples/heft-web-rig-library-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-webpack-basic-tutorial](./build-tests-samples/heft-webpack-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/packlets-tutorial](./build-tests-samples/packlets-tutorial/) | (Copy of sample project) Building this project is a regression test for @rushstack/eslint-plugin-packlets |
+| [/build-tests/api-documenter-scenarios](./build-tests/api-documenter-scenarios/) | Building this project is a regression test for api-documenter |
 | [/build-tests/api-documenter-test](./build-tests/api-documenter-test/) | Building this project is a regression test for api-documenter |
 | [/build-tests/api-extractor-lib1-test](./build-tests/api-extractor-lib1-test/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-lib2-test](./build-tests/api-extractor-lib2-test/) | Building this project is a regression test for api-extractor |
