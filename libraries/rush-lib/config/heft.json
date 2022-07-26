@@ -5,66 +5,33 @@
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
-  "eventActions": [
-    {
-      /**
-       * (Required) The kind of built-in operation that should be performed.
-       * The "copyFiles" action copies files that match the specified patterns.
-       */
-      "actionKind": "copyFiles",
 
-      /**
-       * (Required) The Heft stage when this action should be performed.  Note that heft.json event actions
-       * are scheduled after any plugin tasks have processed the event.  For example, a "compile" event action
-       * will be performed after the TypeScript compiler has been invoked.
-       *
-       * Options: "pre-compile", "compile", "bundle", "post-build"
-       */
-      "heftEvent": "post-build",
-
-      /**
-       * (Required) A user-defined tag whose purpose is to allow configs to replace/delete handlers that
-       * were added by other configs.
-       */
-      "actionId": "copy-files-for-tests",
-
-      /**
-       * (Required) An array of copy operations to run perform during the specified Heft event.
-       */
-      "copyOperations": [
-        {
-          /**
-           * (Required) The base folder that files will be copied from, relative to the project root.
-           * Settings such as "includeGlobs" and "excludeGlobs" will be resolved relative
-           * to this folder.
-           * NOTE: Assigning "sourceFolder" does not by itself select any files to be copied.
-           */
-          "sourceFolder": "lib/cli/test/rush-mock-flush-telemetry-plugin",
-
-          /**
-           * (Required) One or more folders that files will be copied into, relative to the project root.
-           * If you specify more than one destination folder, Heft will read the input files only once, using
-           * streams to efficiently write multiple outputs.
-           */
-          "destinationFolders": [
-            "lib/cli/test/tapFlushTelemetryAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-flush-telemetry-plugin"
-          ],
-
-          /**
-           * If specified, this option recursively scans all folders under "sourceFolder" and includes any files
-           * that match the specified extensions.  (If "fileExtensions" and "includeGlobs" are both
-           * specified, their selections are added together.)
-           */
-          "fileExtensions": [".json", ".js", ".map"],
-
-          /**
-           * If true, filesystem hard links will be created instead of copying the file.  Depending on the
-           * operating system, this may be faster. (But note that it may cause unexpected behavior if a tool
-           * modifies the link.)  The default value is false.
-           */
-          "hardlink": true
+  // TODO: Add comments
+  "$phasesByName.inheritanceType": "merge",
+  "phasesByName": {
+    "$build.inheritanceType": "merge",
+    "build": {
+      "$tasksByName.inheritanceType": "merge",
+      "tasksByName": {
+        "copy-mock-flush-telemetry-plugin": {
+          "taskDependencies": ["typescript"],
+          "taskEvent": {
+            "eventKind": "copyFiles",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "lib/cli/test/rush-mock-flush-telemetry-plugin",
+                  "destinationFolders": [
+                    "lib/cli/test/tapFlushTelemetryAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-flush-telemetry-plugin"
+                  ],
+                  "fileExtensions": [".json", ".js", ".map"],
+                  "hardlink": true
+                }
+              ]
+            }
+          }
         }
-      ]
+      }
     }
-  ]
+  }
 }

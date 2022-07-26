@@ -16,6 +16,8 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
     "eslint": "~8.7.0",

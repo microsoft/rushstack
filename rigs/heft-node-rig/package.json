@@ -17,7 +17,10 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/heft-api-extractor-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "eslint": "~8.7.0",
     "jest-environment-node": "~27.4.2",
     "typescript": "~4.6.3"

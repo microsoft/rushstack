@@ -10,8 +10,10 @@
   },
   "devDependencies": {
     "@rushstack/hashed-folder-copy-plugin": "workspace:*",
-    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@types/webpack-env": "1.13.0",
     "html-webpack-plugin": "~4.5.2",
     "typescript": "~4.6.3",
