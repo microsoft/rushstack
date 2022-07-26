@@ -9,7 +9,7 @@
 // (undocumented)
 type AnotherForgottenExport = number;
 
-// Warning: (ae-forgotten-export) The symbol "DuplicateName" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "DuplicateName_2" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
 export function anotherFunction(): DuplicateName_2;

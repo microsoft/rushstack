@@ -210,9 +210,8 @@ export class ValidationEnhancer {
           continue;
         }
 
-        localName = rootSymbol.localName;
-
         collectorEntity = collector.tryGetCollectorEntity(rootSymbol);
+        localName = collectorEntity?.nameForEmit || rootSymbol.localName;
 
         const referencedMetadata: SymbolMetadata = collector.fetchSymbolMetadata(referencedEntity);
         referencedReleaseTag = referencedMetadata.maxEffectiveReleaseTag;
@@ -222,7 +221,7 @@ export class ValidationEnhancer {
         // TODO: Currently the "import * as ___ from ___" syntax does not yet support doc comments
         referencedReleaseTag = ReleaseTag.Public;
 
-        localName = referencedEntity.localName;
+        localName = collectorEntity?.nameForEmit || referencedEntity.localName;
       } else {
         continue;
       }
@@ -233,7 +232,7 @@ export class ValidationEnhancer {
             ExtractorMessageId.IncompatibleReleaseTags,
             `The symbol "${astDeclaration.astSymbol.localName}"` +
               ` is marked as ${ReleaseTag.getTagName(declarationReleaseTag)},` +
-              ` but its signature references "${referencedEntity.localName}"` +
+              ` but its signature references "${localName}"` +
               ` which is marked as ${ReleaseTag.getTagName(referencedReleaseTag)}`,
             astDeclaration
           );
