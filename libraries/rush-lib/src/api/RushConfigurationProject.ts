@@ -149,6 +149,13 @@ export class RushConfigurationProject {
       );
     }
 
+    if (!semver.valid(this._packageJson.version)) {
+      throw new Error(
+        `The package version "${this._packageJson.version}" specified in file` +
+          ` "${packageJsonFilename}" does not meet semver specification`
+      );
+    }
+
     this._packageJsonEditor = PackageJsonEditor.fromObject(this._packageJson, packageJsonFilename);
 
     this._tempProjectName = tempProjectName;
