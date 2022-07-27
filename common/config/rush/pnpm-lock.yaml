@@ -946,6 +946,8 @@ importers:
     specifiers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       heft-parameter-plugin: workspace:*
@@ -953,6 +955,8 @@ importers:
     devDependencies:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@types/heft-jest': 1.0.1
       heft-parameter-plugin: link:../heft-parameter-plugin

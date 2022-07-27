@@ -5,7 +5,7 @@
     {
       "pluginName": "HeftParameterPlugin",
       "entryPoint": "./lib/index",
-      "parameterScope": "HeftParameterPlugin",
+      "parameterScope": "heft-parameter-plugin",
       "parameters": [
         {
           "longName": "--custom-parameter",
