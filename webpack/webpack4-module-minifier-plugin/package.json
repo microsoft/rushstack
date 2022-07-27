@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "webpack/module-minifier-plugin-4"
+    "directory": "webpack/webpack4-module-minifier-plugin"
   },
   "engines": {
     "node": ">=10.17.1"
