@@ -106,7 +106,7 @@ export class RushConfigurationProject {
     const packageJsonFilename: string = path.join(this._projectFolder, FileConstants.PackageJson);
 
     try {
-      this._packageJson = JsonFile.load(packageJsonFilename);
+      this._packageJson = JsonFile.load(packageJsonFilename, true);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(

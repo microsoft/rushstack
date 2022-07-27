@@ -113,10 +113,14 @@ export class JsonFile {
   /**
    * Loads a JSON file.
    */
-  public static load(jsonFilename: string): JsonObject {
+  public static load(jsonFilename: string, validateStrictJsonFormat?: boolean): JsonObject {
     try {
       const contents: string = FileSystem.readFile(jsonFilename);
-      return jju.parse(contents);
+      const parserOptions: jju.ParseOptions = {};
+      if (validateStrictJsonFormat) {
+        parserOptions.mode = 'json';
+      }
+      return jju.parse(contents, parserOptions);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         throw error;
