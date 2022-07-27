@@ -47,7 +47,9 @@ export default class LintPlugin implements IHeftTaskPlugin {
             changedFilesHookOptions.program as IExtendedProgram,
             changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
           );
-          lintingPromise.catch(() => { /* Suppress unhandled promise rejection */ });
+          lintingPromise.catch(() => {
+            // Suppress unhandled promise rejection error
+          });
           // Hold on to the original promise, which will throw in the run hook if it unexpectedly fails
           this._lintingPromises.push(lintingPromise);
         });

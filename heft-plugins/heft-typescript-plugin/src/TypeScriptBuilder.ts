@@ -60,7 +60,10 @@ export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfiguratio
   /**
    * The callback used to emit the typescript program (or programs) from the builder.
    */
-  emitChangedFilesCallback: (program: TTypescript.Program, changedFiles?: Set<TTypescript.SourceFile>) => void;
+  emitChangedFilesCallback: (
+    program: TTypescript.Program,
+    changedFiles?: Set<TTypescript.SourceFile>
+  ) => void;
 }
 
 type TSolutionHost = TTypescript.SolutionBuilderHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;

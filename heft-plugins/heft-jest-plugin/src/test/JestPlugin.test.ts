@@ -24,7 +24,7 @@ describe('JestPlugin', () => {
       requestedParameters.add(parameterLongName);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return undefined as any as T;
-    };
+    }
     const mockTaskSession: IHeftTaskSession = {
       hooks: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,7 +38,7 @@ describe('JestPlugin', () => {
       getIntegerParameter: mockGetParameter,
       getIntegerListParameter: mockGetParameter,
       getStringParameter: mockGetParameter,
-      getStringListParameter: mockGetParameter,
+      getStringListParameter: mockGetParameter
     } as IHeftTaskSession;
     const mockHeftConfiguration: HeftConfiguration = {} as HeftConfiguration;
 
@@ -46,8 +46,9 @@ describe('JestPlugin', () => {
     plugin.apply(mockTaskSession, mockHeftConfiguration, undefined);
 
     // Load up all the allowed parameters
-    const heftPluginJson: IPartialHeftPluginJson =
-      await JsonFile.loadAsync(`${__dirname}/../../heft-plugin.json`);
+    const heftPluginJson: IPartialHeftPluginJson = await JsonFile.loadAsync(
+      `${__dirname}/../../heft-plugin.json`
+    );
 
     // Verify that all parameters were requested
     expect(requestedParameters.size).toBe(heftPluginJson.taskPlugins![0].parameters!.length);

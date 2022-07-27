@@ -26,17 +26,8 @@ import {
   InheritanceType,
   PathResolutionMethod
 } from '@rushstack/heft-config-file';
-import type {
-  ITypeScriptConfigurationJson,
-  IPartialTsconfig
-} from '@rushstack/heft-typescript-plugin';
-import {
-  FileSystem,
-  Import,
-  JsonFile,
-  PackageName,
-  type ITerminal
-} from '@rushstack/node-core-library';
+import type { ITypeScriptConfigurationJson, IPartialTsconfig } from '@rushstack/heft-typescript-plugin';
+import { FileSystem, Import, JsonFile, PackageName, type ITerminal } from '@rushstack/node-core-library';
 
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { HeftJestDataFile, HEFT_JEST_DATA_FILENAME } from './HeftJestDataFile';
@@ -113,21 +104,29 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     pluginOptions?: IJestPluginOptions
   ): void {
     // Flags
-    const detectOpenHandlesParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--detect-open-handles');
-    const debugHeftReporterParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--debug-heft-reporter');
-    const disableCodeCoverageParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--disable-code-coverage');
+    const detectOpenHandlesParameter: CommandLineFlagParameter =
+      taskSession.getFlagParameter('--detect-open-handles');
+    const debugHeftReporterParameter: CommandLineFlagParameter =
+      taskSession.getFlagParameter('--debug-heft-reporter');
+    const disableCodeCoverageParameter: CommandLineFlagParameter =
+      taskSession.getFlagParameter('--disable-code-coverage');
     const silentParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--silent');
-    const updateSnapshotsParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--update-snapshots');
+    const updateSnapshotsParameter: CommandLineFlagParameter =
+      taskSession.getFlagParameter('--update-snapshots');
 
     // Strings
     const configParameter: CommandLineStringParameter = taskSession.getStringParameter('--config');
     const maxWorkersParameter: CommandLineStringParameter = taskSession.getStringParameter('--max-workers');
-    const findRelatedTestsParameter: CommandLineStringParameter = taskSession.getStringParameter('--find-related-tests');
-    const testNamePatternParameter: CommandLineStringParameter = taskSession.getStringParameter('--test-name-pattern');
-    const testPathPatternParameter: CommandLineStringParameter = taskSession.getStringParameter('--test-path-pattern');
+    const findRelatedTestsParameter: CommandLineStringParameter =
+      taskSession.getStringParameter('--find-related-tests');
+    const testNamePatternParameter: CommandLineStringParameter =
+      taskSession.getStringParameter('--test-name-pattern');
+    const testPathPatternParameter: CommandLineStringParameter =
+      taskSession.getStringParameter('--test-path-pattern');
 
     // Integers
-    const testTimeoutParameter: CommandLineIntegerParameter = taskSession.getIntegerParameter('--test-timeout-ms');
+    const testTimeoutParameter: CommandLineIntegerParameter =
+      taskSession.getIntegerParameter('--test-timeout-ms');
 
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       // Jest's cache is not reliable.  For example, if a Jest configuration change causes files to be
@@ -173,12 +172,15 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     // Load in some utility functions from the TypeScript plugin, if available.
     let loadTypeScriptConfigurationFileAsync:
-      typeof import('@rushstack/heft-typescript-plugin').loadTypeScriptConfigurationFileAsync | undefined;
+      | typeof import('@rushstack/heft-typescript-plugin').loadTypeScriptConfigurationFileAsync
+      | undefined;
     let loadPartialTsconfigFileAsync:
-      typeof import('@rushstack/heft-typescript-plugin').loadPartialTsconfigFileAsync | undefined;
+      | typeof import('@rushstack/heft-typescript-plugin').loadPartialTsconfigFileAsync
+      | undefined;
     try {
-      const heftTypeScriptPlugin: typeof import('@rushstack/heft-typescript-plugin') =
-        await import('@rushstack/heft-typescript-plugin');
+      const heftTypeScriptPlugin: typeof import('@rushstack/heft-typescript-plugin') = await import(
+        '@rushstack/heft-typescript-plugin'
+      );
       loadTypeScriptConfigurationFileAsync = heftTypeScriptPlugin.loadTypeScriptConfigurationFileAsync;
       loadPartialTsconfigFileAsync = heftTypeScriptPlugin.loadPartialTsconfigFileAsync;
     } catch {
@@ -188,8 +190,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     // Load up the configuration files if we can
     const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
       await loadTypeScriptConfigurationFileAsync?.(heftConfiguration, terminal);
-    const partialTsconfigFile: IPartialTsconfig | undefined =
-      await loadPartialTsconfigFileAsync?.(heftConfiguration, terminal, typeScriptConfigurationJson);
+    const partialTsconfigFile: IPartialTsconfig | undefined = await loadPartialTsconfigFileAsync?.(
+      heftConfiguration,
+      terminal,
+      typeScriptConfigurationJson
+    );
 
     // Validate, and write the Jest data file used by the BuildTransformer
     await HeftJestDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
@@ -509,7 +514,9 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   /**
    * Returns the reporter config using the HeftJestReporter and the provided options.
    */
-  private static _getHeftJestReporterConfig(reporterOptions: IHeftJestReporterOptions): Config.ReporterConfig {
+  private static _getHeftJestReporterConfig(
+    reporterOptions: IHeftJestReporterOptions
+  ): Config.ReporterConfig {
     return [
       `${__dirname}/HeftJestReporter.js`,
       reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>

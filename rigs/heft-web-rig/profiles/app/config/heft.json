@@ -10,54 +10,54 @@
    */
   // "extends": "base-project/config/heft.json",
 
- // TODO: Add comments
- "phasesByName": {
-  "build": {
-    "tasksByName": {
-      "sass": {
-        "taskPlugin": {
-          "pluginPackage": "@rushstack/heft-sass-plugin"
-        }
-      },
-      "typescript": {
-        "taskDependencies": ["sass"],
-        "taskPlugin": {
-          "pluginPackage": "@rushstack/heft-typescript-plugin"
-        }
-      },
-      "lint": {
-        "taskDependencies": ["typescript"],
-        "taskPlugin": {
-          "pluginPackage": "@rushstack/heft-lint-plugin"
-        }
-      },
-      "api-extractor": {
-        "taskDependencies": ["typescript"],
-        "taskPlugin": {
-          "pluginPackage": "@rushstack/heft-api-extractor-plugin"
-        }
-      },
-      "webpack": {
-        "taskDependencies": ["typescript"],
-        "taskPlugin": {
-          "pluginPackage": "@rushstack/heft-webpack5-plugin"
+  // TODO: Add comments
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        "sass": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-sass-plugin"
+          }
+        },
+        "typescript": {
+          "taskDependencies": ["sass"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        },
+        "lint": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-lint-plugin"
+          }
+        },
+        "api-extractor": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-api-extractor-plugin"
+          }
+        },
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
         }
       }
-    }
-  },
+    },
 
-  "test": {
-    "phaseDependencies": ["build"],
-    "tasksByName": {
-      "jest": {
-        "taskPlugin": {
-          "pluginPackage": "@rushstack/heft-jest-plugin",
-          "options": {
-            "folderNameForTests": "lib-commonjs"
+    "test": {
+      "phaseDependencies": ["build"],
+      "tasksByName": {
+        "jest": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-jest-plugin",
+            "options": {
+              "folderNameForTests": "lib-commonjs"
+            }
           }
         }
       }
     }
   }
-}
 }

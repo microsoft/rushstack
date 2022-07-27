@@ -19,8 +19,7 @@ export abstract class HeftPluginHost {
     accessorCallback: (pluginAccessor: T) => void
   ): void {
     const pluginHookName: string = this.getPluginHookName(pluginToAccessPackage, pluginToAccessName);
-    let pluginAccessRequestHook: SyncHook<T> | undefined =
-      this._pluginAccessRequestHooks.get(pluginHookName);
+    let pluginAccessRequestHook: SyncHook<T> | undefined = this._pluginAccessRequestHooks.get(pluginHookName);
     if (!pluginAccessRequestHook) {
       pluginAccessRequestHook = new SyncHook(['pluginAccessor']);
       this._pluginAccessRequestHooks.set(pluginHookName, pluginAccessRequestHook);

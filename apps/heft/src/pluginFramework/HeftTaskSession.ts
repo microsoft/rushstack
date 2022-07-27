@@ -245,13 +245,17 @@ export class HeftTaskSession implements IHeftTaskSession {
     parameterLongName: string,
     expectedParameterKind: CommandLineParameterKind
   ): T {
-    const parameter: CommandLineParameter | undefined = this._options.parametersByLongName.get(parameterLongName);
+    const parameter: CommandLineParameter | undefined =
+      this._options.parametersByLongName.get(parameterLongName);
     if (!parameter) {
-      throw new Error(`Parameter "${parameterLongName}" not found. Are you sure it was defined in heft-plugin.json?`);
+      throw new Error(
+        `Parameter "${parameterLongName}" not found. Are you sure it was defined in heft-plugin.json?`
+      );
     } else if (parameter.kind !== expectedParameterKind) {
       throw new Error(
-        `Parameter "${parameterLongName}" is of kind "${CommandLineParameterKind[parameter.kind]}", not of kind ` +
-        `"${CommandLineParameterKind[expectedParameterKind]}".`
+        `Parameter "${parameterLongName}" is of kind "${
+          CommandLineParameterKind[parameter.kind]
+        }", not of kind ` + `"${CommandLineParameterKind[expectedParameterKind]}".`
       );
     }
     return parameter as T;

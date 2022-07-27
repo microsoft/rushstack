@@ -21,18 +21,22 @@ const PLUGIN_NAME: string = 'HeftParameterPlugin';
 export default class HeftParameterPlugin implements IHeftTaskPlugin {
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     const customParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--custom-parameter');
-    const customIntegerParameter: CommandLineIntegerParameter =
-      taskSession.getIntegerParameter('--custom-integer-parameter');
-    const customIntegerListParameter: CommandLineIntegerListParameter =
-      taskSession.getIntegerListParameter('--custom-integer-list-parameter');
+    const customIntegerParameter: CommandLineIntegerParameter = taskSession.getIntegerParameter(
+      '--custom-integer-parameter'
+    );
+    const customIntegerListParameter: CommandLineIntegerListParameter = taskSession.getIntegerListParameter(
+      '--custom-integer-list-parameter'
+    );
     const customStringParameter: CommandLineStringParameter =
       taskSession.getStringParameter('--custom-string-parameter');
-    const customStringListParameter: CommandLineStringListParameter =
-      taskSession.getStringListParameter('--custom-string-list-parameter');
+    const customStringListParameter: CommandLineStringListParameter = taskSession.getStringListParameter(
+      '--custom-string-list-parameter'
+    );
     const customChoiceParameter: CommandLineChoiceParameter =
       taskSession.getChoiceParameter('--custom-choice-parameter');
-    const customChoiceListParameter: CommandLineChoiceListParameter =
-      taskSession.getChoiceListParameter('--custom-choice-list-parameter');
+    const customChoiceListParameter: CommandLineChoiceListParameter = taskSession.getChoiceListParameter(
+      '--custom-choice-list-parameter'
+    );
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       if (customParameter.value) {

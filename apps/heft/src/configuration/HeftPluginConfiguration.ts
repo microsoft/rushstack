@@ -161,10 +161,7 @@ export class HeftPluginConfiguration {
     return this._taskPluginDefinitionsMap.get(taskPluginName);
   }
 
-  private _validate(
-    heftPluginConfigurationJson: IHeftPluginConfigurationJson,
-    packageName: string
-  ): void {
+  private _validate(heftPluginConfigurationJson: IHeftPluginConfigurationJson, packageName: string): void {
     if (
       !heftPluginConfigurationJson.lifecyclePlugins?.length &&
       !heftPluginConfigurationJson.taskPlugins?.length
