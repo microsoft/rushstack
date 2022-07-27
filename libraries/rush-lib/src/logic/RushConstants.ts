@@ -92,6 +92,13 @@ export class RushConstants {
   public static readonly pnpmfileV6Filename: string = '.pnpmfile.cjs';
 
   /**
+   * The folder name used to store patch files for pnpm
+   * Example: `C:\MyRepo\common\config\pnpm\patches`
+   * Example: `C:\MyRepo\common\temp\patches`
+   */
+  public static readonly pnpmPatchesFolderName: string = 'patches';
+
+  /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm
    */
   public static readonly yarnShrinkwrapFilename: string = 'yarn.lock';

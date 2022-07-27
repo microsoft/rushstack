@@ -923,6 +923,7 @@ export class RushConstants {
     static readonly pnpmConfigFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
+    static readonly pnpmPatchesFolderName: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
     static readonly projectRushFolderName: string;
     static readonly projectShrinkwrapFilename: string;

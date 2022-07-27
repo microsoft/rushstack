@@ -183,7 +183,7 @@ export abstract class BaseInstallManager {
       console.log(
         colors.red(
           'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
-            'command again without specifying these arguments.'
+          'command again without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
@@ -195,7 +195,7 @@ export abstract class BaseInstallManager {
       console.log(
         colors.red(
           'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
-            'without specifying these arguments.'
+          'without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
@@ -435,6 +435,25 @@ export abstract class BaseInstallManager {
       ? crypto.createHash('sha1').update(npmrcText).digest('hex')
       : undefined;
 
+    // Copy the committed patches folder if using pnpm
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      const commonTempPnpmPatchesFolder: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.pnpmPatchesFolderName
+      );
+      const rushPnpmPatchesFolder: string = path.join(
+        this._rushConfiguration.commonFolder,
+        'pnpm',
+        RushConstants.pnpmPatchesFolderName
+      );
+      if (FileSystem.exists(rushPnpmPatchesFolder)) {
+        FileSystem.copyFiles({
+          sourcePath: rushPnpmPatchesFolder,
+          destinationPath: commonTempPnpmPatchesFolder
+        });
+      }
+    }
+
     // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
     // Additionally when in workspaces, the shim implements support for common versions.
     if (this.rushConfiguration.packageManager === 'pnpm') {
@@ -642,9 +661,9 @@ export abstract class BaseInstallManager {
       ) {
         this._terminal.writeWarningLine(
           'Warning: Your rush.json specifies a pnpmVersion with a known issue ' +
-            'that may cause unintended version selections.' +
-            " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
-            'For details see: https://rushjs.io/link/pnpm-issue-5132'
+          'that may cause unintended version selections.' +
+          " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
+          'For details see: https://rushjs.io/link/pnpm-issue-5132'
         );
       }
       if (
