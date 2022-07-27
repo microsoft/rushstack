@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "rush-pnpm accepts patch and patch-commit",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
