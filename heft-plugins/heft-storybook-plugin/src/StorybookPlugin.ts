@@ -18,15 +18,16 @@ import type {
 } from '@rushstack/heft';
 import type {
   PluginName as Webpack4PluginName,
-  IWebpackPluginAccessor as IWebpack4PluginAccessor
+  IWebpack4PluginAccessor
 } from '@rushstack/heft-webpack4-plugin';
 import type {
   PluginName as Webpack5PluginName,
-  IWebpackPluginAccessor as IWebpack5PluginAccessor
+  IWebpack5PluginAccessor
 } from '@rushstack/heft-webpack5-plugin';
 
 const PLUGIN_NAME: string = 'StorybookPlugin';
-const WEBPACK_PLUGIN_NAME: typeof Webpack4PluginName & typeof Webpack5PluginName = 'WebpackPlugin';
+const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'Webpack4Plugin';
+const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'Webpack5Plugin';
 
 /**
  * Options for `StorybookPlugin`.
@@ -96,35 +97,34 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     // Only tap if the --storybook flag is present.
     if (storybookParameter.value) {
-      const configureWebpackTapOptions: { name: string, stage: number } = {
-        name: PLUGIN_NAME,
-        stage: Number.MAX_SAFE_INTEGER
-      };
-      const configureWebpackTap: () => Promise<null> = async () => {
+      const configureWebpackTap: () => Promise<false> = async () => {
         // Discard Webpack's configuration to prevent Webpack from running
         this._logger.terminal.writeLine(
           'The command line includes "--storybook", redirecting Webpack to Storybook'
         );
-        return null;
+        return false;
       };
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack4-plugin',
-        WEBPACK_PLUGIN_NAME,
+        WEBPACK4_PLUGIN_NAME,
         (accessor: IWebpack4PluginAccessor) =>
-          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap)
       );
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack5-plugin',
-        WEBPACK_PLUGIN_NAME,
+        WEBPACK5_PLUGIN_NAME,
         (accessor: IWebpack5PluginAccessor) =>
-          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap)
       );
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-        const resolvedStartupModulePath: string =
-          await this._prepareStorybookAsync(taskSession, heftConfiguration, options);
+        const resolvedStartupModulePath: string = await this._prepareStorybookAsync(
+          taskSession,
+          heftConfiguration,
+          options
+        );
         await this._runStorybookAsync(resolvedStartupModulePath);
       });
     }
@@ -173,9 +173,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
     }
 
-    this._logger.terminal.writeVerboseLine(
-      `Resolved startupModulePath is "${resolvedStartupModulePath}"`
-    );
+    this._logger.terminal.writeVerboseLine(`Resolved startupModulePath is "${resolvedStartupModulePath}"`);
 
     // Example: "/path/to/my-project/.storybook"
     const dotStorybookFolder: string = `${heftConfiguration.buildFolder}/.storybook`;

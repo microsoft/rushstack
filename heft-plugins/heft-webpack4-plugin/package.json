@@ -9,7 +9,7 @@
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "lib/index.js",
-  "types": "dist/heft-webpack4-plugin.d.ts",
+  "types": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",

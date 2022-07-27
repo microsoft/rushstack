@@ -10,7 +10,7 @@ import { CommandLineChoiceParameter } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerListParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
-import { CommandLineParser } from '@rushstack/ts-command-line';
+import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
@@ -73,28 +73,10 @@ export interface IFileSelectionSpecifier {
     sourcePath: string;
 }
 
-// @public (undocumented)
-export interface IBuildStageProperties {
-    // @beta (undocumented)
-    emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
-    // @beta (undocumented)
-    emitFolderNameForTests?: string;
-    // @beta (undocumented)
-    isTypeScriptProject?: boolean;
-    // (undocumented)
-    lite: boolean;
-    // (undocumented)
-    locales?: ReadonlyArray<string>;
-    // (undocumented)
-    maxOldSpaceSize?: string;
-    // (undocumented)
-    production: boolean;
-    // (undocumented)
-    serveMode: boolean;
-    // (undocumented)
-    watchMode: boolean;
-    // (undocumented)
-    webpackStats?: unknown;
+// @internal (undocumented)
+export interface _IHeftConfigurationInitializationOptions {
+    cwd: string;
+    terminalProvider: ITerminalProvider;
 }
 
 // @public (undocumented)

@@ -16,15 +16,16 @@ import type {
 import { FileSystem, Import, SubprocessTerminator } from '@rushstack/node-core-library';
 import type {
   PluginName as Webpack4PluginName,
-  IWebpackPluginAccessor as IWebpack4PluginAccessor
+  IWebpack4PluginAccessor
 } from '@rushstack/heft-webpack4-plugin';
 import type {
   PluginName as Webpack5PluginName,
-  IWebpackPluginAccessor as IWebpack5PluginAccessor
+  IWebpack5PluginAccessor
 } from '@rushstack/heft-webpack5-plugin';
 
 const PLUGIN_NAME: 'ServerlessStackPlugin' = 'ServerlessStackPlugin';
-const WEBPACK_PLUGIN_NAME: typeof Webpack4PluginName & typeof Webpack5PluginName = 'WebpackPlugin';
+const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'Webpack4Plugin';
+const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'Webpack5Plugin';
 const SST_CLI_PACKAGE_NAME: string = '@serverless-stack/cli';
 
 export default class ServerlessStackPlugin implements IHeftTaskPlugin {
@@ -40,29 +41,25 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
 
     // Only tap if the --sst flag is set.
     if (sstParameter.value) {
-      const configureWebpackTapOptions: { name: string; stage: number } = {
-        name: PLUGIN_NAME,
-        stage: Number.MAX_SAFE_INTEGER
-      };
-      const configureWebpackTap: () => Promise<null> = async () => {
+      const configureWebpackTap: () => Promise<false> = async () => {
         this._logger.terminal.writeLine(
           'The command line includes "--sst", redirecting Webpack to Serverless Stack'
         );
-        return null;
+        return false;
       };
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack4-plugin',
-        WEBPACK_PLUGIN_NAME,
+        WEBPACK4_PLUGIN_NAME,
         async (accessor: IWebpack4PluginAccessor) =>
-          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap)
       );
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack5-plugin',
-        WEBPACK_PLUGIN_NAME,
+        WEBPACK5_PLUGIN_NAME,
         async (accessor: IWebpack5PluginAccessor) =>
-          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap)
       );
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
