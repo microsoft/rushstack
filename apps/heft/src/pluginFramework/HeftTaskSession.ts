@@ -255,7 +255,7 @@ export class HeftTaskSession implements IHeftTaskSession {
       throw new Error(
         `Parameter "${parameterLongName}" is of kind "${
           CommandLineParameterKind[parameter.kind]
-        }", not of kind ` + `"${CommandLineParameterKind[expectedParameterKind]}".`
+        }", not of kind "${CommandLineParameterKind[expectedParameterKind]}".`
       );
     }
     return parameter as T;
