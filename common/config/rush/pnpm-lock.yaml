@@ -682,7 +682,7 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
-      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/module-minifier-plugin-4
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       typescript: 4.6.4
@@ -1066,7 +1066,7 @@ importers:
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@rushstack/module-minifier': link:../../libraries/module-minifier
-      '@rushstack/webpack5-module-minifier-plugin': link:../../webpack/module-minifier-plugin-5
+      '@rushstack/webpack5-module-minifier-plugin': link:../../webpack/webpack5-module-minifier-plugin
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
       eslint: 8.7.0
@@ -1101,8 +1101,8 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
-      '@rushstack/webpack4-localization-plugin': link:../../webpack/localization-plugin-4
-      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/module-minifier-plugin-4
+      '@rushstack/webpack4-localization-plugin': link:../../webpack/webpack4-localization-plugin
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       ts-loader: 6.0.0_typescript@4.6.4
@@ -1131,8 +1131,8 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
-      '@rushstack/webpack4-localization-plugin': link:../../webpack/localization-plugin-4
-      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/module-minifier-plugin-4
+      '@rushstack/webpack4-localization-plugin': link:../../webpack/webpack4-localization-plugin
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
       '@types/lodash': 4.14.116
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
@@ -1160,7 +1160,7 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
-      '@rushstack/webpack4-localization-plugin': link:../../webpack/localization-plugin-4
+      '@rushstack/webpack4-localization-plugin': link:../../webpack/webpack4-localization-plugin
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       ts-loader: 6.0.0_typescript@4.6.4
@@ -2335,126 +2335,6 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
 
-  ../../webpack/localization-plugin-4:
-    specifiers:
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
-      '@rushstack/localization-utilities': workspace:*
-      '@rushstack/node-core-library': workspace:*
-      '@rushstack/set-webpack-public-path-plugin': workspace:*
-      '@types/loader-utils': 1.1.3
-      '@types/lodash': 4.14.116
-      '@types/minimatch': 3.0.5
-      '@types/node': 12.20.24
-      '@types/tapable': 1.0.6
-      '@types/webpack': 4.41.32
-      loader-utils: ~1.1.0
-      lodash: ~4.17.15
-      minimatch: ~3.0.3
-      webpack: ~4.44.2
-    dependencies:
-      '@rushstack/localization-utilities': link:../../libraries/localization-utilities
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-      '@types/node': 12.20.24
-      '@types/tapable': 1.0.6
-      loader-utils: 1.1.0
-      lodash: 4.17.21
-      minimatch: 3.0.8
-    devDependencies:
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@rushstack/set-webpack-public-path-plugin': link:../set-webpack-public-path-plugin
-      '@types/loader-utils': 1.1.3
-      '@types/lodash': 4.14.116
-      '@types/minimatch': 3.0.5
-      '@types/webpack': 4.41.32
-      webpack: 4.44.2
-
-  ../../webpack/localization-plugin-5:
-    specifiers:
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
-      '@rushstack/localization-utilities': workspace:*
-      '@rushstack/node-core-library': workspace:*
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      memfs: 3.4.3
-      webpack: ~5.68.0
-    dependencies:
-      '@rushstack/localization-utilities': link:../../libraries/localization-utilities
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-      '@types/node': 12.20.24
-    devDependencies:
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@types/heft-jest': 1.0.1
-      memfs: 3.4.3
-      webpack: 5.68.0
-
-  ../../webpack/module-minifier-plugin-4:
-    specifiers:
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
-      '@rushstack/module-minifier': workspace:*
-      '@rushstack/worker-pool': workspace:*
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      '@types/tapable': 1.0.6
-      '@types/webpack': 4.41.32
-      '@types/webpack-sources': 1.4.2
-      tapable: 1.1.3
-      webpack: ~4.44.2
-      webpack-sources: ~1.4.3
-    dependencies:
-      '@rushstack/module-minifier': link:../../libraries/module-minifier
-      '@rushstack/worker-pool': link:../../libraries/worker-pool
-      '@types/node': 12.20.24
-      '@types/tapable': 1.0.6
-      tapable: 1.1.3
-    devDependencies:
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@types/heft-jest': 1.0.1
-      '@types/webpack': 4.41.32
-      '@types/webpack-sources': 1.4.2
-      webpack: 4.44.2
-      webpack-sources: 1.4.3
-
-  ../../webpack/module-minifier-plugin-5:
-    specifiers:
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
-      '@rushstack/module-minifier': workspace:*
-      '@rushstack/worker-pool': workspace:*
-      '@types/estree': 0.0.50
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      '@types/tapable': 1.0.6
-      memfs: 3.4.3
-      tapable: 2.2.1
-      webpack: ~5.68.0
-    dependencies:
-      '@rushstack/worker-pool': link:../../libraries/worker-pool
-      '@types/node': 12.20.24
-      '@types/tapable': 1.0.6
-      tapable: 2.2.1
-    devDependencies:
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@rushstack/module-minifier': link:../../libraries/module-minifier
-      '@types/estree': 0.0.50
-      '@types/heft-jest': 1.0.1
-      memfs: 3.4.3
-      webpack: 5.68.0
-
   ../../webpack/preserve-dynamic-require-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -2510,6 +2390,126 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/tapable': 1.0.6
+      webpack: 5.68.0
+
+  ../../webpack/webpack4-localization-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/localization-utilities': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/set-webpack-public-path-plugin': workspace:*
+      '@types/loader-utils': 1.1.3
+      '@types/lodash': 4.14.116
+      '@types/minimatch': 3.0.5
+      '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      '@types/webpack': 4.41.32
+      loader-utils: ~1.1.0
+      lodash: ~4.17.15
+      minimatch: ~3.0.3
+      webpack: ~4.44.2
+    dependencies:
+      '@rushstack/localization-utilities': link:../../libraries/localization-utilities
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      loader-utils: 1.1.0
+      lodash: 4.17.21
+      minimatch: 3.0.8
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/set-webpack-public-path-plugin': link:../set-webpack-public-path-plugin
+      '@types/loader-utils': 1.1.3
+      '@types/lodash': 4.14.116
+      '@types/minimatch': 3.0.5
+      '@types/webpack': 4.41.32
+      webpack: 4.44.2
+
+  ../../webpack/webpack4-module-minifier-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/module-minifier': workspace:*
+      '@rushstack/worker-pool': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      '@types/webpack': 4.41.32
+      '@types/webpack-sources': 1.4.2
+      tapable: 1.1.3
+      webpack: ~4.44.2
+      webpack-sources: ~1.4.3
+    dependencies:
+      '@rushstack/module-minifier': link:../../libraries/module-minifier
+      '@rushstack/worker-pool': link:../../libraries/worker-pool
+      '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      tapable: 1.1.3
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/webpack': 4.41.32
+      '@types/webpack-sources': 1.4.2
+      webpack: 4.44.2
+      webpack-sources: 1.4.3
+
+  ../../webpack/webpack5-localization-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/localization-utilities': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      memfs: 3.4.3
+      webpack: ~5.68.0
+    dependencies:
+      '@rushstack/localization-utilities': link:../../libraries/localization-utilities
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@types/node': 12.20.24
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      memfs: 3.4.3
+      webpack: 5.68.0
+
+  ../../webpack/webpack5-module-minifier-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/module-minifier': workspace:*
+      '@rushstack/worker-pool': workspace:*
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      memfs: 3.4.3
+      tapable: 2.2.1
+      webpack: ~5.68.0
+    dependencies:
+      '@rushstack/worker-pool': link:../../libraries/worker-pool
+      '@types/node': 12.20.24
+      '@types/tapable': 1.0.6
+      tapable: 2.2.1
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/module-minifier': link:../../libraries/module-minifier
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      memfs: 3.4.3
       webpack: 5.68.0
 
 packages:
