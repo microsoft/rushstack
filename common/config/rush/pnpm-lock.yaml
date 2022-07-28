@@ -165,7 +165,7 @@ importers:
 
   ../../apps/rush:
     specifiers:
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -1058,7 +1058,7 @@ importers:
 
   ../../build-tests/install-test-workspace:
     specifiers:
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.0
       '@rushstack/node-core-library': workspace:*
     devDependencies:
       '@microsoft/rush-lib': link:../../libraries/rush-lib
@@ -1174,7 +1174,7 @@ importers:
 
   ../../build-tests/rush-project-change-analyzer-test:
     specifiers:
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -1847,7 +1847,7 @@ importers:
 
   ../../libraries/rush-sdk:
     specifiers:
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -2049,7 +2049,7 @@ importers:
 
   ../../repo-scripts/repo-toolbox:
     specifiers:
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -2142,7 +2142,7 @@ importers:
 
   ../../rush-plugins/rush-amazon-s3-build-cache-plugin:
     specifiers:
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -2171,7 +2171,7 @@ importers:
     specifiers:
       '@azure/identity': ~1.0.0
       '@azure/storage-blob': ~12.3.0
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
