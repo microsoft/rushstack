@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.75.0",
+  "version": "5.75.0-pr3481.0",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -36,7 +36,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/rush-lib": "workspace:*",
+    "@microsoft/rush-lib": "workspace:5.75.0-pr3481.0",
     "@rushstack/node-core-library": "workspace:*",
     "colors": "~1.2.1",
     "semver": "~7.3.0"
