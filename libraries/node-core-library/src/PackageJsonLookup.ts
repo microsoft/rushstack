@@ -292,10 +292,18 @@ export class PackageJsonLookup {
       return this._packageFolderCache.get(resolvedFileOrFolderPath);
     }
 
-    // Is resolvedFileOrFolderPath itself a folder with a package.json file?  If so, return it.
-    if (FileSystem.exists(path.join(resolvedFileOrFolderPath, FileConstants.PackageJson))) {
-      this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
-      return resolvedFileOrFolderPath;
+    // Is resolvedFileOrFolderPath itself a folder with a valid package.json file?  If so, return it.
+    const packageJsonFilePath: string = path.join(resolvedFileOrFolderPath, FileConstants.PackageJson);
+    if (FileSystem.exists(packageJsonFilePath)) {
+      try {
+        this.loadNodePackageJson(packageJsonFilePath);
+        this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
+        return resolvedFileOrFolderPath;
+      } catch (error) {
+        if (!/The required field "name" was not found/.test(error.message)) {
+          throw error;
+        }
+      }
     }
 
     // Otherwise go up one level
