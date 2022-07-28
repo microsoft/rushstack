@@ -21,7 +21,7 @@
     "@azure/identity": "~1.0.0",
     "@azure/storage-blob": "~12.3.0",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:5.75.0-pr3481.0",
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {

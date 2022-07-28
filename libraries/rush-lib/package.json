@@ -77,7 +77,7 @@
     "@types/tar": "6.1.1"
   },
   "publishOnlyDependencies": {
-    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
-    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*"
+    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:5.75.0-pr3481.0",
+    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:5.75.0-pr3481.0"
   }
 }
