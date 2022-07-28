@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Added package.json strict JSON validation & version adherence to semver check",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
