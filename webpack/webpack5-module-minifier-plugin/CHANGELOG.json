@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.1.16",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.16",
+      "date": "Thu, 28 Jul 2022 00:18:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix typings reference."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.1.15",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.15",
       "date": "Thu, 21 Jul 2022 23:30:27 GMT",
