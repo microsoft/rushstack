@@ -460,6 +460,15 @@ export interface IImportResolvePackageOptions extends IImportResolveOptions {
 }
 
 // @public
+export interface IJsonFileLoadAndValidateOptions extends IJsonFileParseOptions, IJsonSchemaValidateOptions {
+}
+
+// @public
+export interface IJsonFileParseOptions {
+    jsonSyntax?: JsonSyntax;
+}
+
+// @public
 export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
     ensureFolderExists?: boolean;
     onlyIfChanged?: boolean;
@@ -638,13 +647,13 @@ export interface ITerminalProvider {
 export class JsonFile {
     // @internal (undocumented)
     static _formatPathForError: (path: string) => string;
-    static load(jsonFilename: string): JsonObject;
-    static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): JsonObject;
-    static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): Promise<JsonObject>;
-    static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): JsonObject;
-    static loadAndValidateWithCallbackAsync(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): Promise<JsonObject>;
-    static loadAsync(jsonFilename: string): Promise<JsonObject>;
-    static parseString(jsonContents: string): JsonObject;
+    static load(jsonFilename: string, options?: IJsonFileParseOptions): JsonObject;
+    static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonFileLoadAndValidateOptions): JsonObject;
+    static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonFileLoadAndValidateOptions): Promise<JsonObject>;
+    static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void, options?: IJsonFileLoadAndValidateOptions): JsonObject;
+    static loadAndValidateWithCallbackAsync(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void, options?: IJsonFileLoadAndValidateOptions): Promise<JsonObject>;
+    static loadAsync(jsonFilename: string, options?: IJsonFileParseOptions): Promise<JsonObject>;
+    static parseString(jsonContents: string, options?: IJsonFileParseOptions): JsonObject;
     static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
     static saveAsync(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): Promise<boolean>;
     static stringify(jsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
@@ -666,6 +675,13 @@ export class JsonSchema {
     get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
     validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
+}
+
+// @public
+export enum JsonSyntax {
+    Json5 = "json5",
+    JsonWithComments = "jsonWithComments",
+    Strict = "strict"
 }
 
 // @public

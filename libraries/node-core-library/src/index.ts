@@ -37,7 +37,16 @@ export {
   IImportResolvePackageOptions
 } from './Import';
 export { InternalError } from './InternalError';
-export { JsonObject, JsonFile, JsonNull, IJsonFileSaveOptions, IJsonFileStringifyOptions } from './JsonFile';
+export {
+  JsonObject,
+  JsonNull,
+  JsonSyntax,
+  IJsonFileParseOptions,
+  IJsonFileLoadAndValidateOptions,
+  IJsonFileStringifyOptions,
+  IJsonFileSaveOptions,
+  JsonFile
+} from './JsonFile';
 export {
   JsonSchema,
   IJsonSchemaErrorInfo,
