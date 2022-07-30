@@ -5,7 +5,7 @@ import * as path from 'path';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getRelativeFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
+import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
@@ -89,7 +89,7 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
     copyConfigurations,
     async (copyConfiguration: ICopyOperation) => {
       let sourceFolder: string | undefined;
-      let sourceFolderRelativePaths: Set<string> | undefined;
+      let sourceFilePaths: Set<string> | undefined;
       if (
         !copyConfiguration.fileExtensions?.length &&
         !copyConfiguration.includeGlobs?.length &&
@@ -100,7 +100,7 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
           // Specify a glob to match all files in the folder, since folders cannot be hardlinked.
           // Perform globbing from one folder up, so that we create the folder in the destination.
           try {
-            sourceFolderRelativePaths = await getRelativeFilePathsAsync({
+            sourceFilePaths = await getFilePathsAsync({
               ...copyConfiguration,
               sourcePath: sourceFolder,
               includeGlobs: [`${path.basename(copyConfiguration.sourcePath)}/**/*`]
@@ -115,24 +115,24 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
         }
 
         // Still not set, either it's not a hardlink or it's a file.
-        if (!sourceFolderRelativePaths) {
-          sourceFolderRelativePaths = new Set([path.basename(copyConfiguration.sourcePath)]);
+        if (!sourceFilePaths) {
+          sourceFilePaths = new Set(copyConfiguration.sourcePath);
         }
       } else {
         // Assume the source path is a folder
         sourceFolder = copyConfiguration.sourcePath;
-        sourceFolderRelativePaths = await getRelativeFilePathsAsync(copyConfiguration);
+        sourceFilePaths = await getFilePathsAsync(copyConfiguration);
       }
 
       // Dedupe and throw if a double-write is detected
       for (const destinationFolderPath of copyConfiguration.destinationFolders) {
-        for (const sourceFolderRelativePath of sourceFolderRelativePaths!) {
+        for (const sourceFilePath of sourceFilePaths!) {
+          const sourceFileRelativePath: string = path.relative(sourceFolder!, sourceFilePath);
+
           // Only include the relative path from the sourceFolder if flatten is false
-          const resolvedSourcePath: string = path.join(sourceFolder!, sourceFolderRelativePath);
           const resolvedDestinationPath: string = path.resolve(
             destinationFolderPath,
-            copyConfiguration.flatten ? '.' : path.dirname(sourceFolderRelativePath),
-            path.basename(sourceFolderRelativePath)
+            copyConfiguration.flatten ? path.basename(sourceFileRelativePath) : sourceFileRelativePath
           );
 
           // Throw if a duplicate copy target with a different source or options is specified
@@ -140,7 +140,7 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
             destinationCopyDescriptors.get(resolvedDestinationPath);
           if (existingDestinationCopyDescriptor) {
             if (
-              existingDestinationCopyDescriptor.sourcePath === resolvedSourcePath &&
+              existingDestinationCopyDescriptor.sourcePath === sourceFilePath &&
               existingDestinationCopyDescriptor.hardlink === !!copyConfiguration.hardlink
             ) {
               // Found a duplicate, avoid adding again
@@ -153,7 +153,7 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
 
           // Finally, default hardlink to false, add to the result, and add to the map for deduping
           const processedCopyDescriptor: ICopyDescriptor = {
-            sourcePath: resolvedSourcePath,
+            sourcePath: sourceFilePath,
             destinationPath: resolvedDestinationPath,
             hardlink: !!copyConfiguration.hardlink
           };

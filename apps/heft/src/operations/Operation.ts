@@ -9,6 +9,11 @@ import type { IOperationRunner } from './IOperationRunner';
  */
 export interface IOperationOptions {
   /**
+   * The group that this operation belongs to. Will be used for logging and duration tracking.
+   */
+  groupName?: string | undefined;
+
+  /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
    * running the operation.
    */
@@ -35,6 +40,8 @@ export class Operation {
    */
   public readonly dependencies: Set<Operation> = new Set<Operation>();
 
+  public readonly groupName: string | undefined;
+
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
    * running the operation.
@@ -55,6 +62,7 @@ export class Operation {
   public weight: number;
 
   public constructor(options?: IOperationOptions) {
+    this.groupName = options?.groupName;
     this.runner = options?.runner;
     this.weight = options?.weight || 1;
   }

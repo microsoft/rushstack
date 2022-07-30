@@ -42,7 +42,6 @@ export interface ICreateOperationsOptions {
 
 export function createOperations(options: ICreateOperationsOptions): Set<Operation> {
   const operations: Map<string, Operation> = new Map();
-  const leafNodeTaskOperationsByPhaseName: Map<string, Set<Operation>> = new Map();
 
   if (options.cleanCache && !options.clean) {
     throw new Error('The "--clean-cache" option can only be used in conjunction with "--clean".');
@@ -54,18 +53,20 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
   let hasWarnedAboutSkippedPhases: boolean = false;
   for (const phase of options.selectedPhases) {
     // Warn if any dependencies are excluded from the list of selected phases
-    if (
-      !hasWarnedAboutSkippedPhases &&
-      [...phase.dependencyPhases].some((dependency: HeftPhase) => !options.selectedPhases.has(dependency))
-    ) {
-      // Only write once, and write with yellow to make it stand out without writing a warning to stderr
-      hasWarnedAboutSkippedPhases = true;
-      options.terminal.writeLine(
-        Colors.yellow(
-          'The provided list of phases does not contain all phase dependencies. You may need to run the ' +
-            'excluded phases manually.'
-        )
-      );
+    if (!hasWarnedAboutSkippedPhases) {
+      for (const dependencyPhase of phase.dependencyPhases) {
+        if (!options.selectedPhases.has(dependencyPhase)) {
+          // Only write once, and write with yellow to make it stand out without writing a warning to stderr
+          hasWarnedAboutSkippedPhases = true;
+          options.terminal.writeLine(
+            Colors.bold(
+              'The provided list of phases does not contain all phase dependencies. You may need to run the ' +
+                'excluded phases manually.'
+            )
+          );
+          break;
+        }
+      }
     }
 
     // Create operation for the phase start node
@@ -78,7 +79,6 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
     stopLifecycleOperation.dependencies.add(phaseOperation);
 
     // Create operations for each task
-    const phaseLeafNodes: Set<Operation> = new Set();
     for (const task of phase.tasks) {
       const taskOperation: Operation = getOrCreateTaskOperation(task, options);
       // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
@@ -105,7 +105,6 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
         }
       }
     }
-    leafNodeTaskOperationsByPhaseName.set(phase.phaseName, phaseLeafNodes);
   }
 
   return new Set(operations.values());
@@ -118,6 +117,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
       operation = new Operation({
+        groupName: 'lifecycle',
         runner: new LifecycleOperationRunner({
           internalHeftSession: options.internalHeftSession,
           production: options.production,
@@ -138,6 +138,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
     if (!operation) {
       // Only create the operation. Dependencies are hooked up separately
       operation = new Operation({
+        groupName: phase.phaseName,
         runner: new PhaseOperationRunner({
           internalHeftSession: options.internalHeftSession,
           production: options.production,
@@ -157,6 +158,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
       operation = new Operation({
+        groupName: task.parentPhase.phaseName,
         runner: new TaskOperationRunner({
           internalHeftSession: options.internalHeftSession,
           production: options.production,
@@ -177,13 +179,23 @@ export function initializeAction(action: IHeftAction): void {
 
 export async function executeInstrumentedAsync(options: IExecuteInstrumentedOptions): Promise<void> {
   const { action, executeAsync } = options;
-  const { actionName, heftConfiguration, terminal, loggingManager } = action;
+  const { heftConfiguration, terminal, loggingManager } = action;
 
-  terminal.writeLine(`Starting ${actionName}`);
-
-  if (action.verbose && action.heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
-    action.heftConfiguration.terminalProvider.verboseEnabled = true;
+  if (action.heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
+    action.heftConfiguration.terminalProvider.verboseEnabled =
+      action.heftConfiguration.terminalProvider.verboseEnabled || action.verbose;
   }
+
+  const projectPackageJson: IPackageJson = heftConfiguration.projectPackageJson;
+  terminal.writeVerboseLine(`Project: ${projectPackageJson.name}@${projectPackageJson.version}`);
+  terminal.writeVerboseLine(`Project build folder: ${heftConfiguration.buildFolder}`);
+  if (heftConfiguration.rigConfig.rigFound) {
+    terminal.writeVerboseLine(`Rig package: ${heftConfiguration.rigConfig.rigPackageName}`);
+    terminal.writeVerboseLine(`Rig profile: ${heftConfiguration.rigConfig.rigProfile}`);
+  }
+  terminal.writeVerboseLine(`Heft version: ${heftConfiguration.heftPackageJson.version}`);
+  terminal.writeVerboseLine(`Node version: ${process.version}`);
+  terminal.writeVerboseLine('');
 
   let encounteredError: boolean = false;
   try {
@@ -231,14 +243,6 @@ export async function executeInstrumentedAsync(options: IExecuteInstrumentedOpti
         terminal.writeErrorLine(`  ${errorString}`);
       }
     }
-
-    const projectPackageJson: IPackageJson = heftConfiguration.projectPackageJson;
-    terminal.writeLine(
-      `Project: ${projectPackageJson.name}`,
-      Colors.dim(Colors.gray(`@${projectPackageJson.version}`))
-    );
-    terminal.writeLine(`Heft version: ${heftConfiguration.heftPackageJson.version}`);
-    terminal.writeLine(`Node version: ${process.version}`);
   }
 
   if (encounteredError) {

@@ -78,7 +78,7 @@ export class HeftPluginConfiguration {
     return this._packageName;
   }
 
-  public get lifecyclePluginDefinitions(): Set<HeftLifecyclePluginDefinition> {
+  public get lifecyclePluginDefinitions(): ReadonlySet<HeftLifecyclePluginDefinition> {
     if (!this._lifecyclePluginDefinitions) {
       this._lifecyclePluginDefinitions = new Set();
       for (const lifecyclePluginDefinitionJson of this._heftPluginConfigurationJson.lifecyclePlugins || []) {
@@ -94,7 +94,7 @@ export class HeftPluginConfiguration {
     return this._lifecyclePluginDefinitions;
   }
 
-  public get taskPluginDefinitions(): Set<HeftTaskPluginDefinition> {
+  public get taskPluginDefinitions(): ReadonlySet<HeftTaskPluginDefinition> {
     if (!this._taskPluginDefinitions) {
       this._taskPluginDefinitions = new Set();
       for (const taskPluginDefinitionJson of this._heftPluginConfigurationJson.taskPlugins || []) {

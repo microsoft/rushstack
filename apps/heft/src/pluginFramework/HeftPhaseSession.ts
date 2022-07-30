@@ -2,9 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AsyncParallelHook } from 'tapable';
-import { Async } from '@rushstack/node-core-library';
 
-import { Constants } from '../utilities/Constants';
 import { HeftTaskSession, IHeftTaskCleanHookOptions } from './HeftTaskSession';
 import { HeftPluginHost } from './HeftPluginHost';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
@@ -35,7 +33,7 @@ export interface IHeftPhaseSessionOptions extends IInternalHeftSessionOptions {
  */
 export class HeftPhaseSession extends HeftPluginHost {
   private readonly _options: IHeftPhaseSessionOptions;
-  private readonly _taskSessionsByName: Map<string, HeftTaskSession> = new Map();
+  private readonly _taskSessionsByTask: Map<HeftTask, HeftTaskSession> = new Map();
 
   /**
    * @beta
@@ -66,7 +64,7 @@ export class HeftPhaseSession extends HeftPluginHost {
   }
 
   public getSessionForTask(task: HeftTask): HeftTaskSession {
-    let taskSession: HeftTaskSession | undefined = this._taskSessionsByName.get(task.taskName);
+    let taskSession: HeftTaskSession | undefined = this._taskSessionsByTask.get(task);
     if (!taskSession) {
       taskSession = new HeftTaskSession({
         ...this._options,
@@ -82,38 +80,47 @@ export class HeftPhaseSession extends HeftPluginHost {
         pluginHost: this,
         task
       });
-      this._taskSessionsByName.set(task.taskName, taskSession);
+      this._taskSessionsByTask.set(task, taskSession);
     }
     return taskSession;
   }
 
   public async applyPluginsAsync(): Promise<void> {
-    await Async.forEachAsync(
-      this._options.phase.tasks,
-      async (task: HeftTask) => {
-        try {
-          const taskSession: HeftTaskSession = this.getSessionForTask(task);
-          const taskPlugin: IHeftTaskPlugin<object | void> = await task.getPluginAsync(taskSession.logger);
-          taskPlugin.apply(taskSession, this._options.heftConfiguration, task.pluginOptions);
-        } catch (error) {
-          throw new Error(
-            `Error applying plugin "${task.pluginDefinition.pluginName}" from package ` +
-              `"${task.pluginDefinition.pluginPackageName}": ${error}`
-          );
-        }
-      },
-      { concurrency: Constants.maxParallelism }
-    );
+    const {
+      heftConfiguration,
+      phase: { tasks }
+    } = this._options;
+
+    // Load up all plugins concurrently
+    const loadPluginPromises: Promise<IHeftTaskPlugin<object | void>>[] = [];
+    for (const task of tasks) {
+      const taskSession: HeftTaskSession = this.getSessionForTask(task);
+      loadPluginPromises.push(task.getPluginAsync(taskSession.logger));
+    }
+
+    // Promise.all maintains the order of the input array
+    const plugins: IHeftTaskPlugin<object | void>[] = await Promise.all(loadPluginPromises);
+
+    // Iterate through and apply the plugins
+    let pluginIndex: number = 0;
+    for (const task of tasks) {
+      const taskSession: HeftTaskSession = this.getSessionForTask(task);
+      const taskPlugin: IHeftTaskPlugin<object | void> = plugins[pluginIndex++];
+      try {
+        taskPlugin.apply(taskSession, heftConfiguration, task.pluginOptions);
+      } catch (error) {
+        throw new Error(
+          `Error applying plugin "${task.pluginDefinition.pluginName}" from package ` +
+            `"${task.pluginDefinition.pluginPackageName}": ${error}`
+        );
+      }
+    }
 
     // Do a second pass to apply the plugin access requests for each plugin
-    await Async.forEachAsync(
-      this._options.phase.tasks,
-      async (task: HeftTask) => {
-        const taskSession: HeftTaskSession = this.getSessionForTask(task);
-        const taskPlugin: IHeftTaskPlugin<object | void> = await task.getPluginAsync(taskSession.logger);
-        await this.resolveAccessRequestsAsync(taskPlugin, task.pluginDefinition);
-      },
-      { concurrency: Constants.maxParallelism }
-    );
+    pluginIndex = 0;
+    for (const task of tasks) {
+      const taskPlugin: IHeftTaskPlugin<object | void> = plugins[pluginIndex++];
+      this.resolvePluginAccessRequests(taskPlugin, task.pluginDefinition);
+    }
   }
 }

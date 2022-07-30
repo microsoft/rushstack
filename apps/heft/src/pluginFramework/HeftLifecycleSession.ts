@@ -115,7 +115,7 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
   public readonly pluginHost: HeftPluginHost;
 
   public get debugMode(): boolean {
-    return this._options.getIsDebugMode();
+    return this._options.debugMode;
   }
 
   /**

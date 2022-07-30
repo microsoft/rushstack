@@ -9,6 +9,13 @@ import type { OperationError } from './OperationError';
 import type { Operation } from './Operation';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import type { OperationGroupRecord } from './OperationGroupRecord';
+
+export interface IOperationExecutionRecordOptions {
+  operation: Operation;
+  group: OperationGroupRecord | undefined;
+  context: IOperationExecutionRecordContext;
+}
 
 export interface IOperationExecutionRecordContext {
   terminal: ITerminal;
@@ -78,11 +85,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public readonly runner: IOperationRunner;
   public readonly weight: number;
+  public readonly group: OperationGroupRecord | undefined;
 
   private readonly _context: IOperationExecutionRecordContext;
 
-  public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
+  public constructor(options: IOperationExecutionRecordOptions) {
+    const { operation, group, context } = options;
     const { runner } = operation;
+
     if (!runner) {
       throw new InternalError(`Operation has no runner.`);
     }
@@ -90,6 +100,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     this.runner = runner;
     this.weight = operation.weight;
     this._context = context;
+    this.group = group;
+    this.group?.addOperation(this);
   }
 
   public get name(): string {
@@ -111,6 +123,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {
     this.status = OperationStatus.Executing;
     this.stopwatch.start();
+    this.group?.startTimer();
 
     try {
       this.status = await this.runner.executeAsync(this);
@@ -122,6 +135,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       // Delegate global state reporting
       onResult(this);
     } finally {
+      this.group?.setOperationAsComplete(this);
       this.stopwatch.stop();
     }
   }

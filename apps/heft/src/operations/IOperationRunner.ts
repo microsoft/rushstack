@@ -30,11 +30,6 @@ export interface IOperationRunner {
   readonly name: string;
 
   /**
-   * Name of the group the runner belongs to, for logging.
-   */
-  readonly groupName: string | undefined;
-
-  /**
    * Indicates that this runner is architectural and should not be reported on.
    */
   silent: boolean;

@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { AsyncParallelHook } from 'tapable';
-import { Async, InternalError } from '@rushstack/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
-import { Constants } from '../utilities/Constants';
 import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration';
 import { HeftPluginHost } from './HeftPluginHost';
 import type { InternalHeftSession } from './InternalHeftSession';
@@ -19,46 +18,37 @@ import {
   type IHeftLifecycleToolStopHookOptions
 } from './HeftLifecycleSession';
 
-/**
- * @internal
- */
-export class HeftLifecycle extends HeftPluginHost {
-  private _internalHeftSession: InternalHeftSession;
-  private _lifecyclePluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[];
-  private _lifecycleHooks: IHeftLifecycleHooks;
+export interface IHeftLifecycleContext {
+  lifecycleSession: HeftLifecycleSession;
+  pluginOptions?: object;
+}
 
-  private _lifecyclePluginDefinitions: Set<HeftLifecyclePluginDefinition> | undefined;
-  private _lifecyclePluginOptionsByDefinition: Map<HeftLifecyclePluginDefinition, object | undefined> =
+export class HeftLifecycle extends HeftPluginHost {
+  private readonly _internalHeftSession: InternalHeftSession;
+  private readonly _lifecyclePluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[];
+  private readonly _lifecycleHooks: IHeftLifecycleHooks;
+  private readonly _lifecycleContextByDefinition: Map<HeftLifecyclePluginDefinition, IHeftLifecycleContext> =
     new Map();
-  private _lifecyclePluginsByDefinition: Map<
+  private readonly _lifecyclePluginsByDefinition: Map<
     HeftLifecyclePluginDefinition,
     IHeftLifecyclePlugin<object | void>
   > = new Map();
-  private _lifecycleSessionsByDefinition: Map<HeftLifecyclePluginDefinition, HeftLifecycleSession> =
-    new Map();
 
-  /**
-   * @beta
-   */
+  private _isInitialized: boolean = false;
+
   public get hooks(): IHeftLifecycleHooks {
     return this._lifecycleHooks;
   }
 
-  /**
-   * @beta
-   */
-  public get pluginDefinitions(): Set<HeftLifecyclePluginDefinition> {
-    if (!this._lifecyclePluginDefinitions) {
+  public get pluginDefinitions(): Iterable<HeftLifecyclePluginDefinition> {
+    if (!this._isInitialized) {
       throw new InternalError(
         'HeftLifecycle.ensureInitializedAsync() must be called before accessing HeftLifecycle.pluginDefinitions.'
       );
     }
-    return this._lifecyclePluginDefinitions;
+    return this._lifecycleContextByDefinition.keys();
   }
 
-  /**
-   * @internal
-   */
   public constructor(
     internalHeftSession: InternalHeftSession,
     lifecyclePluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[]
@@ -75,99 +65,119 @@ export class HeftLifecycle extends HeftPluginHost {
     };
   }
 
-  /**
-   * @beta
-   */
-  public async ensureInitializedAsync(): Promise<void> {
-    if (!this._lifecyclePluginDefinitions) {
-      this._lifecyclePluginDefinitions = new Set();
-      await Async.forEachAsync(
-        this._lifecyclePluginSpecifiers,
-        async (pluginSpecifier: IHeftConfigurationJsonPluginSpecifier) => {
-          const pluginConfiguration: HeftPluginConfiguration =
-            await HeftPluginConfiguration.loadFromPackageAsync(
-              pluginSpecifier.pluginPackageRoot,
-              pluginSpecifier.pluginPackage
-            );
-          const pluginDefinition: HeftLifecyclePluginDefinition =
-            pluginConfiguration.getPluginDefinitionBySpecifier(pluginSpecifier);
-          if (!pluginConfiguration.lifecyclePluginDefinitions.has(pluginDefinition)) {
-            throw new Error(
-              `Plugin "${pluginDefinition.pluginName}" from package "${pluginSpecifier.pluginPackage}" ` +
-                'is not a lifecycle plugin.'
-            );
-          }
-          if (this._lifecyclePluginDefinitions!.has(pluginDefinition)) {
-            throw new Error(
-              `Lifecycle plugin "${pluginDefinition.pluginName}" from package ` +
-                `"${pluginSpecifier.pluginPackage}" cannot be specified more than once.`
-            );
-          }
-          this._lifecyclePluginDefinitions!.add(pluginDefinition);
-          this._lifecyclePluginOptionsByDefinition.set(pluginDefinition, pluginSpecifier.options);
-        },
-        { concurrency: Constants.maxParallelism }
-      );
-    }
-  }
-
   public async applyPluginsAsync(): Promise<void> {
     await this.ensureInitializedAsync();
-    await Async.forEachAsync(
-      this.pluginDefinitions,
-      async (pluginDefinition: HeftLifecyclePluginDefinition) => {
-        try {
-          const lifecycleSession: HeftLifecycleSession = this.getSessionForPluginDefinition(pluginDefinition);
-          const lifecyclePlugin: IHeftLifecyclePlugin<object | void> =
-            await this._getLifecyclePluginForPluginDefinitionAsync(pluginDefinition);
-          const pluginOptions: object | undefined =
-            this._lifecyclePluginOptionsByDefinition.get(pluginDefinition);
-          lifecyclePlugin.apply(lifecycleSession, this._internalHeftSession.heftConfiguration, pluginOptions);
-        } catch (error) {
-          throw new Error(
-            `Error applying plugin "${pluginDefinition.pluginName}" from package ` +
-              `"${pluginDefinition.pluginPackageName}": ${error}`
-          );
-        }
-      },
-      { concurrency: Constants.maxParallelism }
-    );
 
-    // Do a second pass to apply the plugin hooks that were requested by plugins
-    await Async.forEachAsync(
-      this.pluginDefinitions,
-      async (pluginDefinition: HeftLifecyclePluginDefinition) => {
-        const lifecyclePlugin: IHeftLifecyclePlugin<object | void> =
-          await this._getLifecyclePluginForPluginDefinitionAsync(pluginDefinition);
-        await this.resolveAccessRequestsAsync(lifecyclePlugin, pluginDefinition);
-      },
-      { concurrency: Constants.maxParallelism }
-    );
+    // Load up all plugins concurrently
+    const loadPluginPromises: Promise<IHeftLifecyclePlugin<object | void>>[] = [];
+    for (const [pluginDefinition] of this._lifecycleContextByDefinition) {
+      loadPluginPromises.push(this._getLifecyclePluginForPluginDefinitionAsync(pluginDefinition));
+    }
+
+    // Promise.all maintains the order of the input array
+    const plugins: IHeftLifecyclePlugin<object | void>[] = await Promise.all(loadPluginPromises);
+
+    // Iterate through and apply the plugins
+    let pluginIndex: number = 0;
+    for (const [pluginDefinition, lifecycleContext] of this._lifecycleContextByDefinition) {
+      const lifecyclePlugin: IHeftLifecyclePlugin<object | void> = plugins[pluginIndex++];
+      try {
+        lifecyclePlugin.apply(
+          lifecycleContext.lifecycleSession,
+          this._internalHeftSession.heftConfiguration,
+          lifecycleContext.pluginOptions
+        );
+      } catch (error) {
+        throw new Error(
+          `Error applying plugin "${pluginDefinition.pluginName}" from package ` +
+            `"${pluginDefinition.pluginPackageName}": ${error}`
+        );
+      }
+    }
+
+    // Do a second pass to apply the plugin access requests for each plugin
+    pluginIndex = 0;
+    for (const [pluginDefinition] of this._lifecycleContextByDefinition) {
+      const lifecyclePlugin: IHeftLifecyclePlugin<object | void> = plugins[pluginIndex++];
+      this.resolvePluginAccessRequests(lifecyclePlugin, pluginDefinition);
+    }
   }
 
-  public getSessionForPluginDefinition(
-    pluginDefinition: HeftLifecyclePluginDefinition
-  ): HeftLifecycleSession {
-    let lifecycleSession: HeftLifecycleSession | undefined =
-      this._lifecycleSessionsByDefinition.get(pluginDefinition);
-    if (!lifecycleSession) {
-      lifecycleSession = new HeftLifecycleSession({
-        heftConfiguration: this._internalHeftSession.heftConfiguration,
-        loggingManager: this._internalHeftSession.loggingManager,
-        metricsCollector: this._internalHeftSession.metricsCollector,
-        logger: this._internalHeftSession.loggingManager.requestScopedLogger(
-          `lifecycle:${pluginDefinition.pluginName}`
-        ),
-        lifecycleHooks: this.hooks,
-        parametersByLongName:
-          this._internalHeftSession.parameterManager.getParametersForPlugin(pluginDefinition),
-        pluginDefinition: pluginDefinition,
-        getIsDebugMode: () => this._internalHeftSession.debugMode,
-        pluginHost: this
-      });
-      this._lifecycleSessionsByDefinition.set(pluginDefinition, lifecycleSession);
+  public async ensureInitializedAsync(): Promise<void> {
+    if (!this._isInitialized) {
+      this._isInitialized = true;
+
+      // Load up all plugin configurations concurrently
+      const pluginConfigurationPromises: Promise<HeftPluginConfiguration>[] = [];
+      for (const pluginSpecifier of this._lifecyclePluginSpecifiers) {
+        const { pluginPackageRoot, pluginPackage } = pluginSpecifier;
+        pluginConfigurationPromises.push(
+          HeftPluginConfiguration.loadFromPackageAsync(pluginPackageRoot, pluginPackage)
+        );
+      }
+
+      // Promise.all maintains the order of the input array
+      const pluginConfigurations: HeftPluginConfiguration[] = await Promise.all(pluginConfigurationPromises);
+
+      // Iterate through and generate the lifecycle context for each plugin
+      let pluginConfigurationIndex: number = 0;
+      for (const pluginSpecifier of this._lifecyclePluginSpecifiers) {
+        const pluginConfiguration: HeftPluginConfiguration = pluginConfigurations[pluginConfigurationIndex++];
+        const pluginDefinition: HeftLifecyclePluginDefinition =
+          pluginConfiguration.getPluginDefinitionBySpecifier(pluginSpecifier);
+
+        // Ensure the plugin is a lifecycle plugin
+        if (!pluginConfiguration.lifecyclePluginDefinitions.has(pluginDefinition)) {
+          throw new Error(
+            `Plugin "${pluginDefinition.pluginName}" from package "${pluginSpecifier.pluginPackage}" ` +
+              'is not a lifecycle plugin.'
+          );
+        }
+
+        // Ensure there are no duplicate plugin names within the same package
+        if (this._lifecycleContextByDefinition.has(pluginDefinition)) {
+          throw new Error(
+            `Lifecycle plugin "${pluginDefinition.pluginName}" from package ` +
+              `"${pluginSpecifier.pluginPackage}" cannot be specified more than once.`
+          );
+        }
+
+        // Generate the plugin-specific session
+        const lifecycleSession: HeftLifecycleSession = new HeftLifecycleSession({
+          heftConfiguration: this._internalHeftSession.heftConfiguration,
+          loggingManager: this._internalHeftSession.loggingManager,
+          metricsCollector: this._internalHeftSession.metricsCollector,
+          logger: this._internalHeftSession.loggingManager.requestScopedLogger(
+            `lifecycle:${pluginDefinition.pluginName}`
+          ),
+          lifecycleHooks: this.hooks,
+          parametersByLongName:
+            this._internalHeftSession.parameterManager.getParametersForPlugin(pluginDefinition),
+          pluginDefinition: pluginDefinition,
+          debugMode: this._internalHeftSession.debugMode,
+          pluginHost: this
+        });
+        const pluginOptions: object | undefined = pluginSpecifier.options;
+
+        // Set the context
+        const lifecycleContext: IHeftLifecycleContext = { lifecycleSession, pluginOptions };
+        this._lifecycleContextByDefinition.set(pluginDefinition, lifecycleContext);
+      }
     }
-    return lifecycleSession;
+  }
+
+  public async getContextForPluginDefinitionAsync(
+    pluginDefinition: HeftLifecyclePluginDefinition
+  ): Promise<IHeftLifecycleContext> {
+    await this.ensureInitializedAsync();
+    const lifecycleContext: IHeftLifecycleContext | undefined =
+      this._lifecycleContextByDefinition.get(pluginDefinition);
+    if (!lifecycleContext) {
+      throw new InternalError(
+        `Could not find lifecycle context for plugin "${pluginDefinition.pluginName}".`
+      );
+    }
+    return lifecycleContext;
   }
 
   private async _getLifecyclePluginForPluginDefinitionAsync(
@@ -176,8 +186,11 @@ export class HeftLifecycle extends HeftPluginHost {
     let lifecyclePlugin: IHeftPlugin<HeftLifecycleSession, object | void> | undefined =
       this._lifecyclePluginsByDefinition.get(pluginDefinition);
     if (!lifecyclePlugin) {
-      const lifecycleSession: HeftLifecycleSession = this.getSessionForPluginDefinition(pluginDefinition);
-      lifecyclePlugin = await pluginDefinition.loadPluginAsync(lifecycleSession.logger);
+      // Need to obtain the plugin logger from the session
+      const lifecycleContext: IHeftLifecycleContext = await this.getContextForPluginDefinitionAsync(
+        pluginDefinition
+      );
+      lifecyclePlugin = await pluginDefinition.loadPluginAsync(lifecycleContext.lifecycleSession.logger);
       this._lifecyclePluginsByDefinition.set(pluginDefinition, lifecyclePlugin);
     }
     return lifecyclePlugin;

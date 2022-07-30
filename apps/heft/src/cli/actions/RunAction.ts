@@ -115,7 +115,7 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     });
 
     this._selectedPhases = Selection.union(
-      Selection.expandAllDependencies(toPhases, (phase: HeftPhase) => phase.dependencyPhases),
+      Selection.recursiveExpand(toPhases, (phase: HeftPhase) => phase.dependencyPhases),
       onlyPhases
     );
 
@@ -152,7 +152,7 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
           selectedPhases: this._selectedPhases!,
           terminal: this.terminal,
           production: this._productionFlag.value,
-          verbose: this._verboseFlag.value,
+          verbose: this.verbose,
           clean: this._cleanFlag.value,
           cleanCache: this._cleanCacheFlag.value
         });

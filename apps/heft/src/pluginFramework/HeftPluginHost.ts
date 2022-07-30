@@ -37,10 +37,10 @@ export abstract class HeftPluginHost {
     return `${pluginPackageName};${pluginName}`;
   }
 
-  protected async resolveAccessRequestsAsync(
+  protected resolvePluginAccessRequests(
     plugin: IHeftPlugin,
     pluginDefinition: HeftPluginDefinitionBase
-  ): Promise<void> {
+  ): void {
     const pluginHookName: string = this.getPluginHookName(
       pluginDefinition.pluginPackageName,
       pluginDefinition.pluginName

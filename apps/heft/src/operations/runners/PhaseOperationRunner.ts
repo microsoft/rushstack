@@ -60,10 +60,6 @@ export class PhaseOperationRunner implements IOperationRunner {
     return `Phase "${this._options.phase.phaseName}"`;
   }
 
-  public get groupName(): string {
-    return this._options.phase.phaseName;
-  }
-
   public constructor(options: IPhaseOperationRunnerOptions) {
     this._options = options;
   }

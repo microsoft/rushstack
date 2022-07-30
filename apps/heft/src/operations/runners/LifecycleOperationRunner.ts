@@ -12,7 +12,6 @@ import type { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import type { HeftLifecycle } from '../../pluginFramework/HeftLifecycle';
 import type { IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type {
-  HeftLifecycleSession,
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
   IHeftLifecycleToolStopHookOptions
@@ -67,10 +66,6 @@ export class LifecycleOperationRunner implements IOperationRunner {
     return `Lifecycle "${this._options.type}"`;
   }
 
-  public get groupName(): string {
-    return 'lifecycle';
-  }
-
   public constructor(options: ILifecycleOperationRunnerOptions) {
     this._options = options;
   }
@@ -101,8 +96,7 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
           // Delete all temp folders for tasks by default
           for (const pluginDefinition of lifecycle.pluginDefinitions) {
-            const lifecycleSession: HeftLifecycleSession =
-              lifecycle.getSessionForPluginDefinition(pluginDefinition);
+            const { lifecycleSession } = await lifecycle.getContextForPluginDefinitionAsync(pluginDefinition);
             deleteOperations.push({ sourcePath: lifecycleSession.tempFolder });
 
             // Also delete the cache folder if requested

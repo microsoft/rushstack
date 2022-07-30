@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getRelativeFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
+import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
@@ -43,9 +42,9 @@ export async function deleteFilesAsync(
         pathsToDelete.add(deleteOperation.sourcePath);
       } else {
         // Glob the files under the source path and add them to the set of files to delete
-        const sourceFileRelativePaths: Set<string> = await getRelativeFilePathsAsync(deleteOperation);
-        for (const sourceFileRelativePath of sourceFileRelativePaths) {
-          pathsToDelete.add(path.resolve(deleteOperation.sourcePath, sourceFileRelativePath));
+        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation);
+        for (const sourceFilePath of sourceFilePaths) {
+          pathsToDelete.add(sourceFilePath);
         }
       }
     },

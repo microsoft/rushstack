@@ -134,12 +134,10 @@ export class CoreConfigFiles {
     const pluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] = [
       ...(configurationFile.heftPlugins || [])
     ];
-    for (const phaseName of Object.keys(configurationFile.phasesByName || {})) {
-      const phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier = configurationFile.phasesByName![phaseName];
-      for (const taskName of Object.keys(phaseSpecifier.tasksByName || {})) {
-        const taskSpecifier: IHeftConfigurationJsonTaskSpecifier = phaseSpecifier.tasksByName![taskName];
-        if (taskSpecifier.taskPlugin) {
-          pluginSpecifiers.push(taskSpecifier.taskPlugin);
+    for (const { tasksByName } of Object.values(configurationFile.phasesByName || {})) {
+      for (const { taskPlugin } of Object.values(tasksByName || {})) {
+        if (taskPlugin) {
+          pluginSpecifiers.push(taskPlugin);
         }
       }
     }

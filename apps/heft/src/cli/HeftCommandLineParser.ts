@@ -9,7 +9,6 @@ import {
   InternalError,
   ConsoleTerminalProvider,
   AlreadyReportedError,
-  Path,
   FileSystem
 } from '@rushstack/node-core-library';
 
@@ -57,7 +56,8 @@ export class HeftCommandLineParser extends CommandLineParser {
     this._preInitializationArgumentValues = this._getPreInitializationArgumentValues();
 
     this._terminalProvider = new ConsoleTerminalProvider({
-      debugEnabled: this.isDebug
+      debugEnabled: this.isDebug,
+      verboseEnabled: this.isDebug
     });
     this.globalTerminal = new Terminal(this._terminalProvider);
     this._metricsCollector = new MetricsCollector();
@@ -84,33 +84,20 @@ export class HeftCommandLineParser extends CommandLineParser {
   }
 
   public async execute(args?: string[]): Promise<boolean> {
-    // Defensively set the exit code to 1 so if the tool crashes for whatever reason, we'll have a nonzero exit code.
+    // Defensively set the exit code to 1 so if the tool crashes for whatever reason,
+    // we'll have a nonzero exit code.
     process.exitCode = 1;
-
-    this._terminalProvider.verboseEnabled = this.isDebug;
 
     try {
       this._normalizeCwd();
 
       await this._checkForUpgradeAsync();
 
-      await this._heftConfiguration._checkForRigAsync();
-
-      if (this._heftConfiguration.rigConfig.rigFound) {
-        const rigProfileFolder: string =
-          await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
-        const relativeRigFolderPath: string = Path.formatConcisely({
-          pathToConvert: rigProfileFolder,
-          baseFolder: this._heftConfiguration.buildFolder
-        });
-        this.globalTerminal.writeLine(`Using rig configuration from ${relativeRigFolderPath}`);
-      }
-
       const internalHeftSession: InternalHeftSession = await InternalHeftSession.initializeAsync({
         heftConfiguration: this._heftConfiguration,
         loggingManager: this._loggingManager,
         metricsCollector: this._metricsCollector,
-        getIsDebugMode: () => this.isDebug
+        debugMode: this.isDebug
       });
 
       const actionOptions: IHeftActionOptions = {
@@ -123,7 +110,7 @@ export class HeftCommandLineParser extends CommandLineParser {
 
       this.addAction(new RunAction(actionOptions));
       for (const phase of internalHeftSession.phases) {
-        this.addAction(new PhaseAction({ phase, ...actionOptions }));
+        this.addAction(new PhaseAction({ ...actionOptions, phase }));
       }
 
       return await super.execute(args);
@@ -160,11 +147,10 @@ export class HeftCommandLineParser extends CommandLineParser {
 
   private _normalizeCwd(): void {
     const buildFolder: string = this._heftConfiguration.buildFolder;
-    this.globalTerminal.writeLine(`Project build folder is "${buildFolder}"`);
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
-      this.globalTerminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
+      this.globalTerminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to "${buildFolder}".`);
       // If `process.cwd()` and `buildFolder` differ only by casing on Windows, the chdir operation will not fix the casing, which is the entire purpose of the exercise.
       // As such, chdir to a different directory first. That directory needs to exist, so use the parent of the current directory.
       // This will not work if the current folder is the drive root, but that is a rather exotic case.

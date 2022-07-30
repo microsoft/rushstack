@@ -35,15 +35,14 @@ export interface IFileSelectionSpecifier {
   includeGlobs?: string[];
 }
 
-export async function getRelativeFilePathsAsync(
-  fileGlobSpecifier: IFileSelectionSpecifier
-): Promise<Set<string>> {
+export async function getFilePathsAsync(fileGlobSpecifier: IFileSelectionSpecifier): Promise<Set<string>> {
   return new Set<string>(
     await glob(getIncludedGlobPatterns(fileGlobSpecifier), {
       cwd: fileGlobSpecifier.sourcePath,
       ignore: fileGlobSpecifier.excludeGlobs,
       dot: true,
-      onlyFiles: true
+      onlyFiles: true,
+      absolute: true
     })
   );
 }

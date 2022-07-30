@@ -21,7 +21,13 @@ export interface IInternalHeftSessionOptions {
   heftConfiguration: HeftConfiguration;
   loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
-  getIsDebugMode(): boolean;
+  debugMode: boolean;
+}
+
+function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
+  for (const phase of phases) {
+    yield* phase.tasks;
+  }
 }
 
 /**
@@ -30,7 +36,7 @@ export interface IInternalHeftSessionOptions {
 export class InternalHeftSession {
   private readonly _options: IInternalHeftSessionOptions;
   private readonly _heftConfigurationJson: IHeftConfigurationJson;
-  private readonly _phaseSessionsByName: Map<string, HeftPhaseSession> = new Map();
+  private readonly _phaseSessionsByPhase: Map<HeftPhase, HeftPhaseSession> = new Map();
   private _lifecycle: HeftLifecycle | undefined;
   private _phases: Set<HeftPhase> | undefined;
   private _phasesByName: Map<string, HeftPhase> | undefined;
@@ -42,6 +48,9 @@ export class InternalHeftSession {
   }
 
   public static async initializeAsync(options: IInternalHeftSessionOptions): Promise<InternalHeftSession> {
+    // Initialize the rig. Must be done before the HeftConfiguration.rigConfig is used.
+    await options.heftConfiguration._checkForRigAsync();
+
     const heftConfigurationJson: IHeftConfigurationJson =
       await CoreConfigFiles.loadHeftConfigurationFileForProjectAsync(
         options.heftConfiguration.globalTerminal,
@@ -52,9 +61,7 @@ export class InternalHeftSession {
     const internalHeftSession: InternalHeftSession = new InternalHeftSession(options, heftConfigurationJson);
     await internalHeftSession.lifecycle.ensureInitializedAsync();
 
-    const tasks: HeftTask[] = [...internalHeftSession.phases]
-      .map((p) => [...p.tasks])
-      .reduce((accumulator: HeftTask[], current: HeftTask[]) => accumulator.concat(current), []);
+    const tasks: Iterable<HeftTask> = getAllTasks(internalHeftSession.phases);
     await Async.forEachAsync(
       tasks,
       async (task: HeftTask) => {
@@ -78,7 +85,7 @@ export class InternalHeftSession {
   }
 
   public get debugMode(): boolean {
-    return this._options.getIsDebugMode();
+    return this._options.debugMode;
   }
 
   public get heftConfiguration(): HeftConfiguration {
@@ -111,29 +118,28 @@ export class InternalHeftSession {
   }
 
   public getSessionForPhase(phase: HeftPhase): HeftPhaseSession {
-    let phaseSession: HeftPhaseSession | undefined = this._phaseSessionsByName.get(phase.phaseName);
+    let phaseSession: HeftPhaseSession | undefined = this._phaseSessionsByPhase.get(phase);
     if (!phaseSession) {
       phaseSession = new HeftPhaseSession({
         ...this._options,
         phase,
         parameterManager: this.parameterManager
       });
-      this._phaseSessionsByName.set(phase.phaseName, phaseSession);
+      this._phaseSessionsByPhase.set(phase, phaseSession);
     }
     return phaseSession;
   }
 
   private _ensurePhases(): void {
     if (!this._phases || !this._phasesByName) {
-      this._phases = new Set();
       this._phasesByName = new Map();
       for (const [phaseName, phaseSpecifier] of Object.entries(
         this._heftConfigurationJson.phasesByName || {}
       )) {
         const phase: HeftPhase = new HeftPhase(this, phaseName, phaseSpecifier);
-        this._phases.add(phase);
         this._phasesByName.set(phaseName, phase);
       }
+      this._phases = new Set(this._phasesByName.values());
     }
   }
 }

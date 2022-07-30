@@ -63,7 +63,7 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
     this._parameterManager = new HeftParameterManager();
     this._internalSession = options.internalHeftSession;
 
-    this._selectedPhases = Selection.expandAllDependencies(
+    this._selectedPhases = Selection.recursiveExpand(
       [options.phase],
       (phase: HeftPhase) => phase.dependencyPhases
     );
@@ -122,7 +122,7 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
           selectedPhases: this._selectedPhases,
           terminal: this.terminal,
           production: this._productionFlag.value,
-          verbose: this._verboseFlag.value,
+          verbose: this.verbose,
           clean: this._cleanFlag.value,
           cleanCache: this._cleanCacheFlag.value
         });

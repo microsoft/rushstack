@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import { performance } from 'perf_hooks';
 import { AlreadyReportedError, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import type { Operation } from './Operation';
+import { OperationGroupRecord } from './OperationGroupRecord';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 export interface IOperationExecutionManagerOptions {
@@ -26,9 +26,9 @@ export interface IOperationExecutionManagerOptions {
  */
 export class OperationExecutionManager {
   private readonly _executionRecords: Set<OperationExecutionRecord>;
-  private readonly _runnerGroupRecords: ReadonlyMap<string, Set<OperationExecutionRecord>>;
-  private readonly _runnerGroupRemainingRecords: Map<string, Set<OperationExecutionRecord>>;
-  private readonly _runnerGroupStartTimes: Map<string, number> = new Map();
+  private readonly _groupRecords: Map<string, OperationGroupRecord> = new Map();
+  private readonly _startedGroups: Set<OperationGroupRecord> = new Set();
+  private readonly _finishedGroups: Set<OperationGroupRecord> = new Set();
   private readonly _parallelism: number;
   private readonly _totalOperations: number;
   private readonly _terminal: ITerminal;
@@ -50,32 +50,26 @@ export class OperationExecutionManager {
 
     let totalOperations: number = 0;
     const executionRecords: Map<Operation, OperationExecutionRecord> = new Map();
-    const runnerGroupExecutionRecords: Map<string, Set<OperationExecutionRecord>> = new Map();
     for (const operation of operations) {
-      const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
-        operation,
-        executionRecordContext
-      );
-
-      executionRecords.set(operation, executionRecord);
-      const runnerGroupName: string | undefined = executionRecord.runner.groupName;
-      if (runnerGroupName) {
-        const groupExecutionRecords: Set<OperationExecutionRecord> | undefined =
-          runnerGroupExecutionRecords.get(runnerGroupName);
-        if (!groupExecutionRecords) {
-          runnerGroupExecutionRecords.set(runnerGroupName, new Set([executionRecord]));
-        } else {
-          groupExecutionRecords.add(executionRecord);
-        }
+      let group: OperationGroupRecord | undefined = undefined;
+      if (operation.groupName && !(group = this._groupRecords.get(operation.groupName))) {
+        group = new OperationGroupRecord(operation.groupName);
+        this._groupRecords.set(operation.groupName, group);
       }
 
+      const executionRecord: OperationExecutionRecord = new OperationExecutionRecord({
+        operation,
+        group,
+        context: executionRecordContext
+      });
+
+      executionRecords.set(operation, executionRecord);
       if (!executionRecord.runner.silent) {
         // Only count non-silent operations
         totalOperations++;
       }
     }
-    this._runnerGroupRecords = runnerGroupExecutionRecords;
-    this._runnerGroupRemainingRecords = new Map(runnerGroupExecutionRecords);
+
     this._totalOperations = totalOperations;
 
     for (const [operation, consumer] of executionRecords) {
@@ -142,7 +136,7 @@ export class OperationExecutionManager {
   public async executeAsync(): Promise<void> {
     const totalOperations: number = this._totalOperations;
 
-    this._terminal.writeLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
+    this._terminal.writeVerboseLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     const maxParallelism: number = Math.min(totalOperations, this._parallelism);
     const prioritySort: IOperationSortFunction = (
@@ -158,8 +152,6 @@ export class OperationExecutionManager {
     const onOperationComplete: (record: OperationExecutionRecord) => void = (
       record: OperationExecutionRecord
     ) => {
-      const endTime: number = performance.now();
-
       // This operation failed. Mark it as such and all reachable dependents as blocked.
       if (record.status === OperationStatus.Failure) {
         // Failed operations get reported, even if silent.
@@ -175,33 +167,9 @@ export class OperationExecutionManager {
             for (const dependent of blockedRecord.consumers) {
               blockedQueue.add(dependent);
             }
-            if (blockedRecord.runner.groupName) {
-              this._runnerGroupRemainingRecords.get(blockedRecord.runner.groupName)!.delete(blockedRecord);
-            }
           }
         }
         this._hasReportedFailures = true;
-      }
-
-      // At this point, we should only have Success/SuccessWithWarning/Failure cases. Remove
-      // the record and log out the overall time taken for this runner group to complete.
-      const runnerGroupName: string | undefined = record.runner.groupName;
-      if (runnerGroupName) {
-        const groupRemainingRecords: Set<OperationExecutionRecord> =
-          this._runnerGroupRemainingRecords.get(runnerGroupName)!;
-        groupRemainingRecords.delete(record);
-        if (groupRemainingRecords.size === 0) {
-          const startTime: number = this._runnerGroupStartTimes.get(runnerGroupName)!;
-          const executionTime: number = Math.round(endTime - startTime);
-          const hasFailures: boolean = [...this._runnerGroupRecords.get(runnerGroupName)!].some(
-            (record: OperationExecutionRecord) => record.status === OperationStatus.Failure
-          );
-
-          const finishedLoggingWord: string = hasFailures ? 'encountered an error' : 'finished';
-          this._terminal.writeLine(
-            ` ---- ${runnerGroupName} ${finishedLoggingWord} (${executionTime}ms) ---- `
-          );
-        }
       }
 
       // Apply status changes to direct dependents
@@ -215,13 +183,23 @@ export class OperationExecutionManager {
       executionQueue,
       async (operation: OperationExecutionRecord) => {
         // Initialize group if uninitialized and log the group name
-        const runnerGroupName: string | undefined = operation.runner.groupName;
-        if (runnerGroupName && !this._runnerGroupStartTimes.has(runnerGroupName)) {
-          this._runnerGroupStartTimes.set(runnerGroupName, performance.now());
-          this._terminal.writeLine(` ---- ${runnerGroupName} started ---- `);
+        const groupRecord: OperationGroupRecord | undefined = operation.group;
+        if (groupRecord && !this._startedGroups.has(groupRecord)) {
+          this._startedGroups.add(groupRecord);
+          this._terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
         }
+
         // Execute the operation
         await operation.executeAsync(onOperationComplete);
+
+        // Log out the group name and duration if it is the last operation in the group
+        if (groupRecord?.finished && !this._finishedGroups.has(groupRecord)) {
+          this._finishedGroups.add(groupRecord);
+          const finishedLoggingWord: string = groupRecord.hasFailures ? 'encountered an error' : 'finished';
+          this._terminal.writeLine(
+            ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
+          );
+        }
       },
       {
         concurrency: maxParallelism

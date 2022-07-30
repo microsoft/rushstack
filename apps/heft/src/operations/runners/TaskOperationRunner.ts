@@ -55,10 +55,6 @@ export class TaskOperationRunner implements IOperationRunner {
     return `Task "${this._options.task.taskName}" of phase "${this._options.phase.phaseName}"`;
   }
 
-  public get groupName(): string {
-    return this._options.phase.phaseName;
-  }
-
   public constructor(options: ITaskOperationRunnerOptions) {
     this._options = options;
   }
