@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.75.0-pr3481.1",
+  "version": "5.75.0-pr3481.2",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "tapable": "2.2.1"
   },
   "devDependencies": {
-    "@microsoft/rush-lib": "workspace:5.75.0-pr3481.1",
+    "@microsoft/rush-lib": "workspace:5.75.0-pr3481.2",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
