@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Added package.json strict JSON validation & version adherence to semver check",
+      "comment": "Add validation to ensure package.json files are strict JSON and the \"version\" field is strict SemVer",
       "type": "none"
     }
   ],
