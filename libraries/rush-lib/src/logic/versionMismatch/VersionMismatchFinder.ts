@@ -100,7 +100,7 @@ export class VersionMismatchFinder {
     // Make sure this one is first so it doesn't get truncated when a long list is printed
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
-    for (const project of rushConfiguration.projects) {
+    for (const project of rushConfiguration.getFilteredProjects({ splitWorkspace: false })) {
       projects.push(new VersionMismatchFinderProject(project));
     }
 
