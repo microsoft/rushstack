@@ -44,8 +44,7 @@
       "type": "array",
       "description": "If specified, folders where compiled CSS files will be emitted to. They will be named by appending \".css\" to the source file name for ease of reference translation.",
       "items": {
-        "type": "string",
-        "pattern": "[^\\\\]"
+        "type": "string"
       }
     },
 
@@ -62,8 +61,7 @@
       "type": "array",
       "description": "A list of paths used when resolving Sass imports.",
       "items": {
-        "type": "string",
-        "pattern": "[^\\\\]"
+        "type": "string"
       }
     },
 
@@ -71,8 +69,7 @@
       "type": "array",
       "description": "A list of file paths relative to the \"src\" folder that should be excluded from typings generation.",
       "items": {
-        "type": "string",
-        "pattern": "[^\\\\]"
+        "type": "string"
       }
     }
   }

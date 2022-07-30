@@ -17,7 +17,6 @@
     "startupModulePath": {
       "title": "Startup Module Path",
       "description": "The module entry point that Heft should use to launch the Storybook toolchain.  Typically it is the path loaded the `start-storybook` shell script (ex. if you are using `@storybook/react`, then the startup path would be \"@storybook/react/bin/index.js\".",
-      "pattern": "[^\\\\]",
       "type": "string"
     }
   }

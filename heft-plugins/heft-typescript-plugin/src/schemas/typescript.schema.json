@@ -82,8 +82,7 @@
           "type": "array",
           "description": "Globs that should be explicitly excluded. This takes precedence over globs listed in \"includeGlobs\" and files that match the file extensions provided in \"fileExtensions\".",
           "items": {
-            "type": "string",
-            "pattern": "[^\\\\]"
+            "type": "string"
           }
         },
 
@@ -91,8 +90,7 @@
           "type": "array",
           "description": "Globs that should be explicitly included.",
           "items": {
-            "type": "string",
-            "pattern": "[^\\\\]"
+            "type": "string"
           }
         }
       }

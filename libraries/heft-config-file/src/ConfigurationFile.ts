@@ -417,6 +417,16 @@ export class ConfigurationFile<TConfigurationFile> {
         path: jsonPath,
         json: configurationJson,
         callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
+          // Manually validate that paths do not contain '\' characters. This is to prevent developers
+          // from creating non-cross-platform paths.
+          if (fullPayload.value.includes('\\')) {
+            throw new Error(
+              `Configuration file "${ConfigurationFile._formatPathForLogging(
+                resolvedConfigurationFilePath
+              )}" specifies path "${fullPayload.path}". For compatability reasons, paths cannot ` +
+                `contain '\\' characters.`
+            );
+          }
           const resolvedPath: string = this._resolvePathProperty(
             resolvedConfigurationFilePath,
             fullPayload.path,
