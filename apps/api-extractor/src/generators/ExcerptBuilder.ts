@@ -262,7 +262,6 @@ export class ExcerptBuilder {
           // be merged into "MyNamespace". The condensed token would be ["MyNamespace.MyClass" (R)].
           prevPrevToken.text += prevToken.text + currentToken.text;
           prevPrevToken.canonicalReference = currentToken.canonicalReference;
-          excerptTokens.splice(currentIndex - 1, 2);
           mergeCount = 2;
           currentIndex--;
         } else if (
@@ -274,12 +273,14 @@ export class ExcerptBuilder {
           !startOrEndIndices.has(currentIndex)
         ) {
           prevToken.text += currentToken.text;
-          excerptTokens.splice(currentIndex, 1);
           mergeCount = 1;
         } else {
           // Otherwise, no merging can occur here. Continue to the next index.
           break;
         }
+
+        // Remove the now redundant excerpt token(s), as they were merged into a previous token.
+        excerptTokens.splice(currentIndex, mergeCount);
 
         // Update the start and end indices for all token ranges based upon how many excerpt
         // tokens were merged and in what positions.
