@@ -24,3 +24,9 @@ export class SimpleClass {
   readonly someReadonlyProp = 5;
   readonly someReadonlyPropWithType: number = 5;
 }
+
+/** @public */
+export class ClassWithTypeParameter<T> {}
+
+/** @public */
+export class ExtendsClassWithTypeParameter extends ClassWithTypeParameter<SimpleClass> {}

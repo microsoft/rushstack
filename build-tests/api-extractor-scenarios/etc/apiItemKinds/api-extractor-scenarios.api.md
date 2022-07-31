@@ -23,6 +23,10 @@ export class ClassWithTypeLiterals {
 }
 
 // @public (undocumented)
+export class ClassWithTypeParameter<T> {
+}
+
+// @public (undocumented)
 export const CONST_VARIABLE: string;
 
 // @public (undocumented)
@@ -33,6 +37,10 @@ export const enum ConstEnum {
     Two = 2,
     // (undocumented)
     Zero = 0
+}
+
+// @public (undocumented)
+export class ExtendsClassWithTypeParameter extends ClassWithTypeParameter<SimpleClass> {
 }
 
 // @public (undocumented)

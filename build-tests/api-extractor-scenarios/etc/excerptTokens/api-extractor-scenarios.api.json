@@ -219,27 +219,27 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "number "
+                  "text": "number"
                 },
                 {
                   "kind": "Content",
-                  "text": ", y : "
+                  "text": " , y : "
                 },
                 {
                   "kind": "Content",
-                  "text": "string "
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
-                  "text": ") : "
+                  "text": " ) : "
                 },
                 {
                   "kind": "Content",
-                  "text": "boolean "
+                  "text": "boolean"
                 },
                 {
                   "kind": "Content",
-                  "text": ";"
+                  "text": " ;"
                 }
               ],
               "isStatic": false,

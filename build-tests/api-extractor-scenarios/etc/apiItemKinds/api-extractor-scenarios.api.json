@@ -323,6 +323,35 @@
           "implementsTokenRanges": []
         },
         {
+          "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!ClassWithTypeParameter:class",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class ClassWithTypeParameter<T> "
+            }
+          ],
+          "releaseTag": "Public",
+          "typeParameters": [
+            {
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "ClassWithTypeParameter",
+          "preserveMemberOrder": false,
+          "members": [],
+          "implementsTokenRanges": []
+        },
+        {
           "kind": "Variable",
           "canonicalReference": "api-extractor-scenarios!CONST_VARIABLE:var",
           "docComment": "/**\n * @public\n */\n",
@@ -422,6 +451,48 @@
               "name": "Zero"
             }
           ]
+        },
+        {
+          "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!ExtendsClassWithTypeParameter:class",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class ExtendsClassWithTypeParameter extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "ClassWithTypeParameter",
+              "canonicalReference": "api-extractor-scenarios!ClassWithTypeParameter:class"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SimpleClass",
+              "canonicalReference": "api-extractor-scenarios!SimpleClass:class"
+            },
+            {
+              "kind": "Content",
+              "text": ">"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "ExtendsClassWithTypeParameter",
+          "preserveMemberOrder": false,
+          "members": [],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 5
+          },
+          "implementsTokenRanges": []
         },
         {
           "kind": "Interface",
@@ -825,11 +896,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ";"
-                },
-                {
-                  "kind": "Content",
-                  "text": "\n\nset writeableProperty(value: string);"
+                  "text": ";\n\nset writeableProperty(value: string);"
                 }
               ],
               "isReadonly": false,
