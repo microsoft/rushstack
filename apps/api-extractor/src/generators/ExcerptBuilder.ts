@@ -227,7 +227,7 @@ export class ExcerptBuilder {
    * originally [0, 1], we would not be able to merge tokens "A" and "B".
    */
   private static _condenseTokens(excerptTokens: IExcerptToken[], tokenRanges: IExcerptTokenRange[]): void {
-    // THis set is used to quickly lookup a start or end index.
+    // This set is used to quickly lookup a start or end index.
     const startOrEndIndices: Set<number> = new Set();
     for (const tokenRange of tokenRanges) {
       startOrEndIndices.add(tokenRange.startIndex);
@@ -245,7 +245,7 @@ export class ExcerptBuilder {
         let mergeCount: number;
 
         // There are two types of merges that can occur. We only perform these merges if they are
-        // compatible with all of the start and end indices in our token ranges.
+        // compatible with all of our token ranges.
         if (
           prevPrevToken &&
           prevPrevToken.kind === ExcerptTokenKind.Reference &&
