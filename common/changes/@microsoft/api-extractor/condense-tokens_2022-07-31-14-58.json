@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Condense ExcerptTokens in post-processing step after original construction instead of attempting to do this mid-construction\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

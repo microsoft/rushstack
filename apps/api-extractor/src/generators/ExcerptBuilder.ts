@@ -225,10 +225,6 @@ export class ExcerptBuilder {
    * are condensed to ["AB", "C"], then the token range would be updated to [0, 1]. Note that merges are only
    * performed if they are compatible with the provided token ranges. In the example above, if our token range was
    * originally [0, 1], we would not be able to merge tokens "A" and "B".
-   *
-   *
-   * This method runs in O(nm) time, where "n" is the number of excerpt tokens, and "m" is the number of token
-   * ranges. For each token, it evaluates whether merging can occur, and updates all token ranges accordingly.
    */
   private static _condenseTokens(excerptTokens: IExcerptToken[], tokenRanges: IExcerptTokenRange[]): void {
     // THis set is used to quickly lookup a start or end index.
@@ -250,14 +246,6 @@ export class ExcerptBuilder {
 
         // There are two types of merges that can occur. We only perform these merges if they are
         // compatible with all of the start and end indices in our token ranges.
-
-        // 1.
-        //
-        // If the current token is a reference token, the previous token is a ".", and the previous-
-        // previous token is a reference token, then merge all three tokens into a reference token.
-        //
-        // For example: Given ["MyNamespace" (R), ".", "MyClass" (R)], tokens "." and "MyClass" might
-        // be merged into "MyNamespace". The condensed token would be ["MyNamespace.MyClass" (R)].
         if (
           prevPrevToken &&
           prevPrevToken.kind === ExcerptTokenKind.Reference &&
@@ -267,18 +255,20 @@ export class ExcerptBuilder {
           !startOrEndIndices.has(currentIndex) &&
           !startOrEndIndices.has(currentIndex - 1)
         ) {
+          // If the current token is a reference token, the previous token is a ".", and the previous-
+          // previous token is a reference token, then merge all three tokens into a reference token.
+          //
+          // For example: Given ["MyNamespace" (R), ".", "MyClass" (R)], tokens "." and "MyClass" might
+          // be merged into "MyNamespace". The condensed token would be ["MyNamespace.MyClass" (R)].
           prevPrevToken.text += prevToken.text + currentToken.text;
           prevPrevToken.canonicalReference = currentToken.canonicalReference;
           excerptTokens.splice(currentIndex - 1, 2);
           mergeCount = 2;
           currentIndex--;
-
-          // 2.
-          //
+        } else if (
           // If the current and previous tokens are both content tokens, then merge the tokens into a
           // single content token. For example: Given ["export ", "declare class"], these tokens
           // might be merged into "export declare class".
-        } else if (
           prevToken.kind === ExcerptTokenKind.Content &&
           prevToken.kind === currentToken.kind &&
           !startOrEndIndices.has(currentIndex)
@@ -287,6 +277,7 @@ export class ExcerptBuilder {
           excerptTokens.splice(currentIndex, 1);
           mergeCount = 1;
         } else {
+          // Otherwise, no merging can occur here. Continue to the next index.
           break;
         }
 
