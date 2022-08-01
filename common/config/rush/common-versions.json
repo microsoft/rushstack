@@ -4,7 +4,6 @@
  */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json",
-
   /**
    * A table that specifies a "preferred version" for a given NPM package.  This feature is typically used
    * to hold back an indirect dependency to a specific older version, or to reduce duplication of indirect dependencies.
@@ -25,15 +24,15 @@
      */
     // "some-library": "1.2.3"
 
-    // From the allowedAlternativeVersions list below, this should be the TypeScript version that's used to
-    // build most of the projects in the repo.  Preferring it avoids errors for indirect dependencies
-    // that request it as a peer dependency.
-    "typescript": "~4.5.2",
+    // This should be the TypeScript version that's used to build most of the projects in the repo.
+    // Preferring it avoids errors for indirect dependencies that request it as a peer dependency.
+    // It's also the newest supported compiler, used by most build tests and used as the bundled compiler
+    // engine for API Extractor.
+    "typescript": "~4.7.4",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "~8.7.0"
   },
-
   /**
    * When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions,
    * except in cases where different projects specify different version ranges for a given dependency.  For older
@@ -47,7 +46,6 @@
    * will recalculate all version selections.
    */
   // "implicitlyPreferredVersions": false,
-
   /**
    * The "rush check" command can be used to enforce that every project in the repo must specify
    * the same SemVer range for a given dependency.  However, sometimes exceptions are needed.
@@ -63,31 +61,21 @@
      * Used by build-tests/eslint-7-test
      */
     "eslint": ["~7.30.0"],
-
     /**
      * For example, allow some projects to use an older TypeScript compiler
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
     "typescript": [
-      // "~4.5.2" is the (inferred, not alternative) range used by most projects in this repo
-
       // The oldest supported compiler, used by build-tests/api-extractor-lib1-test
-      "~2.9.2",
-
-      // The newest supported compiler, used by most build tests and used as the bundled compiler
-      // engine for API Extractor.
-      "~4.5.2"
+      "~2.9.2"
     ],
-
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
     ],
-
     "tapable": [
       "2.2.1",
       "1.1.3" // heft plugin is using an older version of tapable
     ],
-
     // --- For Webpack 4 projects ----
     "css-loader": ["~5.2.7"],
     "html-webpack-plugin": ["~4.5.2"],
