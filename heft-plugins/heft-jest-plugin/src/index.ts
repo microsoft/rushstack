@@ -11,6 +11,6 @@ import type { IHeftPlugin } from '@rushstack/heft';
 import { JestPlugin } from './JestPlugin';
 
 /**
- * @internal
+ * @public
  */
 export default new JestPlugin() as IHeftPlugin;
