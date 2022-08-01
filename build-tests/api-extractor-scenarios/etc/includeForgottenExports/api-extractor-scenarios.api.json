@@ -174,61 +174,8 @@
       "members": [
         {
           "kind": "TypeAlias",
-          "canonicalReference": "api-extractor-scenarios!~AnotherForgottenExport:type",
-          "docComment": "/**\n * {@inheritDoc ForgottenExport}\n */\n",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "declare type AnotherForgottenExport = "
-            },
-            {
-              "kind": "Content",
-              "text": "number"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "None",
-          "name": "AnotherForgottenExport",
-          "typeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          }
-        },
-        {
-          "kind": "Function",
-          "canonicalReference": "api-extractor-scenarios!anotherFunction:function(1)",
-          "docComment": "/**\n * @public\n */\n",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare function anotherFunction(): "
-            },
-            {
-              "kind": "Reference",
-              "text": "DuplicateName",
-              "canonicalReference": "api-extractor-scenarios!~DuplicateName:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "returnTypeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          },
-          "releaseTag": "Public",
-          "overloadIndex": 1,
-          "parameters": [],
-          "name": "anotherFunction"
-        },
-        {
-          "kind": "TypeAlias",
           "canonicalReference": "api-extractor-scenarios!~DuplicateName_2:type",
-          "docComment": "",
+          "docComment": "/**\n * Will be renamed to avoid a name conflict with the exported `DuplicateName` from index.ts.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -277,22 +224,22 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "api-extractor-scenarios!~ForgottenExport:class",
-          "docComment": "/**\n * This doc comment should be inherited by `AnotherForgottenExport`\n */\n",
+          "canonicalReference": "api-extractor-scenarios!~ForgottenExport1:class",
+          "docComment": "/**\n * This doc comment should be inherited by `ForgottenExport2`\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "declare class ForgottenExport "
+              "text": "declare class ForgottenExport1 "
             }
           ],
           "releaseTag": "None",
-          "name": "ForgottenExport",
+          "name": "ForgottenExport1",
           "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Constructor",
-              "canonicalReference": "api-extractor-scenarios!~ForgottenExport:constructor(1)",
-              "docComment": "/**\n * Constructs a new instance of the `ForgottenExport` class\n */\n",
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport1:constructor(1)",
+              "docComment": "/**\n * Constructs a new instance of the `ForgottenExport1` class\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -306,7 +253,7 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!~ForgottenExport#prop:member",
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport1#prop:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -315,8 +262,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "AnotherForgottenExport",
-                  "canonicalReference": "api-extractor-scenarios!~AnotherForgottenExport:type"
+                  "text": "ForgottenExport2",
+                  "canonicalReference": "api-extractor-scenarios!~ForgottenExport2:type"
                 },
                 {
                   "kind": "Content",
@@ -338,18 +285,102 @@
           "implementsTokenRanges": []
         },
         {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-extractor-scenarios!~ForgottenExport2:type",
+          "docComment": "/**\n * {@inheritDoc ForgottenExport1}\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "declare type ForgottenExport2 = "
+            },
+            {
+              "kind": "Content",
+              "text": "number"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "None",
+          "name": "ForgottenExport2",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!~ForgottenExport4:namespace",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "declare namespace ForgottenExport4 "
+            }
+          ],
+          "releaseTag": "None",
+          "name": "ForgottenExport4",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport4~ForgottenExport5:class",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "class ForgottenExport5 "
+                }
+              ],
+              "releaseTag": "None",
+              "name": "ForgottenExport5",
+              "preserveMemberOrder": false,
+              "members": [],
+              "implementsTokenRanges": []
+            }
+          ]
+        },
+        {
+          "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!internal2:namespace",
+          "docComment": "",
+          "excerptTokens": [],
+          "releaseTag": "None",
+          "name": "internal2",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!internal2.ForgottenExport6:class",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "export declare class ForgottenExport6 "
+                }
+              ],
+              "releaseTag": "None",
+              "name": "ForgottenExport6",
+              "preserveMemberOrder": false,
+              "members": [],
+              "implementsTokenRanges": []
+            }
+          ]
+        },
+        {
           "kind": "Function",
-          "canonicalReference": "api-extractor-scenarios!someFunction:function(1)",
+          "canonicalReference": "api-extractor-scenarios!someFunction1:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function someFunction(): "
+              "text": "export declare function someFunction1(): "
             },
             {
               "kind": "Reference",
-              "text": "ForgottenExport",
-              "canonicalReference": "api-extractor-scenarios!~ForgottenExport:class"
+              "text": "ForgottenExport1",
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport1:class"
             },
             {
               "kind": "Content",
@@ -363,7 +394,155 @@
           "releaseTag": "Public",
           "overloadIndex": 1,
           "parameters": [],
-          "name": "someFunction"
+          "name": "someFunction1"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!someFunction2:function(1)",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function someFunction2(): "
+            },
+            {
+              "kind": "Reference",
+              "text": "DuplicateName",
+              "canonicalReference": "api-extractor-scenarios!~DuplicateName:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "someFunction2"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!someFunction4:function(1)",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function someFunction4(): "
+            },
+            {
+              "kind": "Reference",
+              "text": "ForgottenExport4.ForgottenExport5",
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport4.ForgottenExport5:class"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "someFunction4"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!someFunction5:function(1)",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function someFunction5(): "
+            },
+            {
+              "kind": "Content",
+              "text": "internal2."
+            },
+            {
+              "kind": "Reference",
+              "text": "ForgottenExport6",
+              "canonicalReference": "api-extractor-scenarios!ForgottenExport6:class"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "someFunction5"
+        },
+        {
+          "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!SomeNamespace1:namespace",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace SomeNamespace1 "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "SomeNamespace1",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!SomeNamespace1.ForgottenExport3:class",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "class ForgottenExport3 "
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "ForgottenExport3",
+              "preserveMemberOrder": false,
+              "members": [],
+              "implementsTokenRanges": []
+            },
+            {
+              "kind": "Function",
+              "canonicalReference": "api-extractor-scenarios!SomeNamespace1.someFunction3:function(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "export function someFunction3(): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ForgottenExport3",
+                  "canonicalReference": "api-extractor-scenarios!~ForgottenExport3:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "someFunction3"
+            }
+          ]
         }
       ]
     }

@@ -87,7 +87,7 @@ export class ApiModelGenerator {
       // processed by the parent.
       if (
         !entity.hasParents &&
-        (entity.exported || this._collector.extractorConfig.docModelIncludeForgottenExports)
+        (entity.consumable || this._collector.extractorConfig.docModelIncludeForgottenExports)
       ) {
         this._processAstEntity(entity.astEntity, entity.nameForEmit, apiEntryPoint);
       }

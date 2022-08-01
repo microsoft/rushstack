@@ -4,34 +4,70 @@
 
 ```ts
 
-// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "api-extractor-scenarios" does not have an export "ForgottenExport"
+// @public
+export type DuplicateName = boolean;
+
+type DuplicateName_2 = number;
+
+class ForgottenExport1 {
+    constructor();
+    // Warning: (ae-forgotten-export) The symbol "ForgottenExport2" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    prop?: ForgottenExport2;
+}
+
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "api-extractor-scenarios" does not have an export "ForgottenExport1"
 //
 // (undocumented)
-type AnotherForgottenExport = number;
+type ForgottenExport2 = number;
+
+// (undocumented)
+namespace ForgottenExport4 {
+    // (undocumented)
+    class ForgottenExport5 {
+    }
+}
+
+// (undocumented)
+class ForgottenExport6 {
+}
+
+declare namespace internal2 {
+    export {
+        ForgottenExport6
+    }
+}
+
+// Warning: (ae-forgotten-export) The symbol "ForgottenExport1" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export function someFunction1(): ForgottenExport1;
 
 // Warning: (ae-forgotten-export) The symbol "DuplicateName_2" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export function anotherFunction(): DuplicateName_2;
+export function someFunction2(): DuplicateName_2;
 
-// @public
-export type DuplicateName = boolean;
-
-// (undocumented)
-type DuplicateName_2 = number;
-
-class ForgottenExport {
-    constructor();
-    // Warning: (ae-forgotten-export) The symbol "AnotherForgottenExport" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    prop?: AnotherForgottenExport;
-}
-
-// Warning: (ae-forgotten-export) The symbol "ForgottenExport" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ForgottenExport4" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export function someFunction(): ForgottenExport;
+export function someFunction4(): ForgottenExport4.ForgottenExport5;
+
+// Warning: (ae-forgotten-export) The symbol "internal2" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export function someFunction5(): internal2.ForgottenExport6;
+
+// @public (undocumented)
+export namespace SomeNamespace1 {
+    // (undocumented)
+    export class ForgottenExport3 {
+    }
+    // (undocumented)
+    export function someFunction3(): ForgottenExport3;
+        {};
+}
 
 // (No @packageDocumentation comment for this package)
 

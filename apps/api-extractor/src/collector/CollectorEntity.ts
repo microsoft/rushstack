@@ -96,21 +96,54 @@ export class CollectorEntity {
   }
 
   /**
-   * Returns true if the entity is exported from the entry point. If the entity is not exported,
+   * Indicates that this entity is exported from its parent module (i.e. either the package entry point or
+   * a local namespace).
+   *
+   * @remarks
+   * In the example below:
+   *
+   * ```ts
+   * declare function add(): void;
+   * declare namespace calculator {
+   *  export {
+   *    add
+   *  }
+   * }
+   * ```
+   *
+   * Namespace `calculator` is neither exported nor consumable, function `add` is exported (from `calculator`)
+   * but not consumable.
+   */
+  public get exported(): boolean {
+    const exportedFromTopLevel: boolean = this.exportNames.size > 0;
+
+    let exportedFromParent: boolean = false;
+    for (const localExportNames of this._localExportNamesByParent.values()) {
+      if (localExportNames.size > 0) {
+        exportedFromParent = true;
+        break;
+      }
+    }
+
+    return exportedFromTopLevel || exportedFromParent;
+  }
+
+  /**
+   * Indicates that it is possible for a consumer of the API to access this entity, either by importing
+   * it directly, or via some other alias such as a member of a namespace. If an entity is not consumable,
    * then API Extractor will report an `ae-forgotten-export` warning.
    *
    * @remarks
-   * An API item is exported if:
+   * An API item is consumable if:
    *
    * 1. It is exported from the top-level entry point OR
-   * 2. It is exported from a parent entity that is also exported.
+   * 2. It is exported from a consumable parent entity.
    *
-   * #2 occurs when processing `AstNamespaceImport` entities. A generated rollup.d.ts
+   * For an example of #2, consider how `AstNamespaceImport` entities are processed. A generated rollup.d.ts
    * might look like this:
    *
    * ```ts
    * declare function add(): void;
-   *
    * declare namespace calculator {
    *   export {
    *     add
@@ -119,14 +152,14 @@ export class CollectorEntity {
    * export { calculator }
    * ```
    *
-   * In this example, `add` is exported via the exported `calculator` namespace.
+   * In this example, `add` is exported via the consumable `calculator` namespace.
    */
-  public get exported(): boolean {
+  public get consumable(): boolean {
     const exportedFromTopLevel: boolean = this.exportNames.size > 0;
 
     let exportedFromExportedParent: boolean = false;
     for (const [parent, localExportNames] of this._localExportNamesByParent) {
-      if (localExportNames.size > 0 && parent.exported) {
+      if (localExportNames.size > 0 && parent.consumable) {
         exportedFromExportedParent = true;
         break;
       }

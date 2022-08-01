@@ -818,7 +818,7 @@ export class Collector {
         // Don't report missing release tags for forgotten exports
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
         const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-        if (entity && entity.exported) {
+        if (entity && entity.consumable) {
           // We also don't report errors for the default export of an entry point, since its doc comment
           // isn't easy to obtain from the .d.ts file
           if (astSymbol.rootAstSymbol.localName !== '_default') {

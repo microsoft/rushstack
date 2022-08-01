@@ -21,7 +21,7 @@ export class ValidationEnhancer {
     const alreadyWarnedEntities: Set<AstEntity> = new Set<AstEntity>();
 
     for (const entity of collector.entities) {
-      if (!(entity.exported || collector.extractorConfig.apiReportIncludeForgottenExports)) {
+      if (!(entity.consumable || collector.extractorConfig.apiReportIncludeForgottenExports)) {
         continue;
       }
 
@@ -226,7 +226,7 @@ export class ValidationEnhancer {
         continue;
       }
 
-      if (collectorEntity && collectorEntity.exported) {
+      if (collectorEntity && collectorEntity.consumable) {
         if (ReleaseTag.compare(declarationReleaseTag, referencedReleaseTag) > 0) {
           collector.messageRouter.addAnalyzerIssue(
             ExtractorMessageId.IncompatibleReleaseTags,

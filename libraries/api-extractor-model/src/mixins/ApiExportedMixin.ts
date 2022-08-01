@@ -37,7 +37,30 @@ const _isExported: unique symbol = Symbol('ApiExportedMixin._isExported');
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiExportedMixin extends ApiItem {
   /**
-   * Whether the declaration is exported.
+   * Whether the declaration is exported from its parent item container (i.e. either an `ApiEntryPoint` or an
+   * `ApiNamespace`).
+   *
+   * @remarks
+   * Suppose `index.ts` is your entry point:
+   *
+   * ```ts
+   * // index.ts
+   *
+   * export class A {}
+   * class B {}
+   *
+   * namespace n {
+   *   export class C {}
+   *   class D {}
+   * }
+   *
+   * // file.ts
+   * export class E {}
+   * ```
+   *
+   * Classes `A` and `C` are both exported, while classes `B`, `D`, and `E` are not. `E` is exported from its
+   * local file, but not from its parent item container (i.e. the entry point).
+   *
    */
   readonly isExported: boolean;
 
