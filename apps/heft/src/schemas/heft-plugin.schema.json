@@ -353,13 +353,15 @@
         "entryPoint": {
           "title": "Entry Point",
           "description": "The entry point path. This path is resolved relative to the package folder.",
-          "type": "string"
+          "type": "string",
+          "pattern": "[^\\\\]"
         },
 
         "optionsSchema": {
           "title": "Options Schema",
           "type": "string",
-          "description": "Path to the schema that defines the options for the plugin. This schema should be a valid JSON schema. This path is resolved relative to the package folder."
+          "description": "Path to the schema that defines the options for the plugin. This schema should be a valid JSON schema. This path is resolved relative to the package folder.",
+          "pattern": "[^\\\\]"
         },
 
         "parameterScope": {

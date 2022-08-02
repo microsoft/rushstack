@@ -21,7 +21,8 @@
           "sourcePath": {
             "title": "Source Path",
             "type": "string",
-            "description": "The target file or folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the file or folder will be copied."
+            "description": "The target file or folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the file or folder will be copied.",
+            "pattern": "[^\\\\]"
           },
 
           "destinationFolders": {
@@ -29,7 +30,8 @@
             "type": "array",
             "description": "One or more folders that files and folders will be copied into, relative to the project root.",
             "items": {
-              "type": "string"
+              "type": "string",
+              "pattern": "[^\\\\]"
             }
           },
 
@@ -48,7 +50,8 @@
             "type": "array",
             "description": "A list of glob patterns that exclude files or folders from being copied.  The paths are resolved relative to \"sourcePath\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
             "items": {
-              "type": "string"
+              "type": "string",
+              "pattern": "[^\\\\]"
             }
           },
 
@@ -57,7 +60,8 @@
             "type": "array",
             "description": "A list of glob patterns that select files to be copied.  The paths are resolved relative to \"sourcePath\".",
             "items": {
-              "type": "string"
+              "type": "string",
+              "pattern": "[^\\\\]"
             }
           },
 

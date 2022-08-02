@@ -24,7 +24,8 @@
       "properties": {
         "pluginPackage": {
           "description": "The plugin package name.",
-          "type": "string"
+          "type": "string",
+          "pattern": "[^\\\\]"
         },
         "pluginName": {
           "description": "Name of the plugin to load from the specified package. If not specified and the plugin package provides a single plugin, that plugin will be loaded.",
@@ -63,7 +64,8 @@
         "sourcePath": {
           "title": "Source Path",
           "type": "string",
-          "description": "The target file or folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the file or folder will be deleted."
+          "description": "The target file or folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the file or folder will be deleted.",
+          "pattern": "[^\\\\]"
         },
         "fileExtensions": {
           "type": "array",
@@ -77,14 +79,16 @@
           "type": "array",
           "description": "A list of glob patterns that exclude files or folders from being copied.  The paths are resolved relative to \"sourcePath\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "[^\\\\]"
           }
         },
         "includeGlobs": {
           "type": "array",
           "description": "A list of glob patterns that select files to be copied.  The paths are resolved relative to \"sourcePath\".",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "[^\\\\]"
           }
         }
       }
