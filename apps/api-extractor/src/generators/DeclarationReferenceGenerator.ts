@@ -324,13 +324,11 @@ export class DeclarationReferenceGenerator {
       }
     }
 
-    // At this point, we either have...
+    // At this point, we have a local symbol in a module.
     const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
     if (sourceFile && ts.isExternalModule(sourceFile)) {
-      // ...a local symbol in some source file module.
       return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
     } else {
-      // ...a global symbol.
       return new DeclarationReference(GlobalSource.instance);
     }
   }
