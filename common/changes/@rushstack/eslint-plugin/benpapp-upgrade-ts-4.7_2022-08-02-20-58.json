@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrading TypeScript dependency to 4.7",
+      "type": "minor",
+      "packageName": "@rushstack/eslint-plugin"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

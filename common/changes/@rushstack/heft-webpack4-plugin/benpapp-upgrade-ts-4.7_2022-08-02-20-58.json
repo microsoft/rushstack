@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrading TypeScript dependency to 4.7",
+      "type": "minor",
+      "packageName": "@rushstack/heft-webpack4-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

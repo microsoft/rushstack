@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrading TypeScript dependency to 4.7",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

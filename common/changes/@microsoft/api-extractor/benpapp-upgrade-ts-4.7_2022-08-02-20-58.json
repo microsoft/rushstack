@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrading TypeScript dependency to 4.7",
+      "type": "minor",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "BPapp-MS@users.noreply.github.com"
+}
