@@ -32,3 +32,8 @@ export class MergedClassAndNamespace {
 export namespace MergedClassAndNamespace {
   export let anotherProp: number;
 }
+
+/** @public */
+export function someFunction(): MergedClassAndInterface {
+  return new MergedClassAndInterface();
+}

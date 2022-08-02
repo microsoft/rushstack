@@ -230,10 +230,8 @@ export class DeclarationReferenceGenerator {
       if (!includeModuleSymbols) {
         return undefined;
       }
-      const sourceFile: ts.SourceFile | undefined =
-        followedSymbol.declarations &&
-        followedSymbol.declarations[0] &&
-        followedSymbol.declarations[0].getSourceFile();
+      const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
+      const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
       return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
     }
 
@@ -242,28 +240,8 @@ export class DeclarationReferenceGenerator {
       return undefined;
     }
 
-    const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(followedSymbol);
-    let parentRef: DeclarationReference | undefined;
-    if (parent) {
-      parentRef = this._symbolToDeclarationReference(
-        parent,
-        ts.SymbolFlags.Namespace,
-        /*includeModuleSymbols*/ true
-      );
-    } else {
-      // this may be a local symbol in a module...
-      const sourceFile: ts.SourceFile | undefined =
-        followedSymbol.declarations &&
-        followedSymbol.declarations[0] &&
-        followedSymbol.declarations[0].getSourceFile();
-      if (sourceFile && ts.isExternalModule(sourceFile)) {
-        parentRef = new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
-      } else {
-        parentRef = new DeclarationReference(GlobalSource.instance);
-      }
-    }
-
-    if (parentRef === undefined) {
+    const parentRef: DeclarationReference | undefined = this._getParentReference(followedSymbol);
+    if (!parentRef) {
       return undefined;
     }
 
@@ -295,15 +273,51 @@ export class DeclarationReferenceGenerator {
     let navigation: Navigation | 'global' =
       DeclarationReferenceGenerator._getNavigationToSymbol(followedSymbol);
     if (navigation === 'global') {
-      if (parentRef.source !== GlobalSource.instance) {
-        parentRef = new DeclarationReference(GlobalSource.instance);
-      }
       navigation = Navigation.Exports;
     }
 
     return parentRef
       .addNavigationStep(navigation, localName)
       .withMeaning(DeclarationReferenceGenerator._getMeaningOfSymbol(followedSymbol, meaning));
+  }
+
+  private _getParentReference(symbol: ts.Symbol): DeclarationReference | undefined {
+    let parentRef: DeclarationReference | undefined;
+    const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
+
+    // First, try to find a parent symbol via the symbol tree. A parent symbol will exist if the
+    // symbol is part of a qualified name. For example, for `MyNamespace.MyClass`, `MyNamespace`
+    // is the parent symbol of `MyClass`.
+    let parentSymbol: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
+
+    // If we failed to get a parent symbol, then try to find a parent symbol by its node. Is the node
+    // declared within a namespace?
+    if (!parentSymbol) {
+      const parentDeclaration: ts.Node | undefined = declaration?.parent?.parent;
+      if (parentDeclaration && ts.isModuleDeclaration(parentDeclaration)) {
+        parentSymbol = TypeScriptHelpers.getSymbolForDeclaration(parentDeclaration, this._typeChecker);
+      }
+    }
+
+    // If there's still no parent symbol, then this symbol is either a top-level export from a package
+    // entry point or a global. Build the declaration reference accordingly.
+    if (!parentSymbol) {
+      const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
+      if (sourceFile && ts.isExternalModule(sourceFile)) {
+        parentRef = new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
+      } else {
+        parentRef = new DeclarationReference(GlobalSource.instance);
+      }
+    } else {
+      // If there is a parent symbol, then build the declaration reference for that symbol.
+      parentRef = this._symbolToDeclarationReference(
+        parentSymbol,
+        parentSymbol.flags,
+        /*includeModuleSymbols*/ true
+      );
+    }
+
+    return parentRef;
   }
 
   private _getPackageName(sourceFile: ts.SourceFile): string {
