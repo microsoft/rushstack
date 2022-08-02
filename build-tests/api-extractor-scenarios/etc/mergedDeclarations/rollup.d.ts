@@ -29,7 +29,4 @@ export declare interface MergedInterfaces {
     someProp: number;
 }
 
-/** @public */
-export declare function someFunction(): MergedClassAndInterface;
-
 export { }

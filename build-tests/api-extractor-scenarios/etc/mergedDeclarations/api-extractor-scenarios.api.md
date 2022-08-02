@@ -42,9 +42,6 @@ export interface MergedInterfaces {
     someProp: number;
 }
 
-// @public (undocumented)
-export function someFunction(): MergedClassAndInterface;
-
 // (No @packageDocumentation comment for this package)
 
 ```
