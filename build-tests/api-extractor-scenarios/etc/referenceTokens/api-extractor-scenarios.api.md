@@ -4,23 +4,24 @@
 
 ```ts
 
-// @public (undocumented)
+import { Lib2Class } from 'api-extractor-lib2-test';
+
+// @public
 export namespace n1 {
     // (undocumented)
     export namespace n2 {
         // (undocumented)
         export namespace n3 {
             // (undocumented)
-            export function someFunction4(): n2.n3.SomeType3;
+            export function someFunction3(): n2.n3.SomeType3;
             // (undocumented)
             export type SomeType3 = number;
         }
         // (undocumented)
         export function someFunction2(): SomeType2;
         // (undocumented)
-        export function someFunction3(): n2.SomeType2;
-        // (undocumented)
         export type SomeType2 = number;
+            {};
     }
     // (undocumented)
     export function someFunction1(): SomeType1;
@@ -30,9 +31,15 @@ export namespace n1 {
 }
 
 // @public (undocumented)
-export class SomeClass {
+export class SomeClass1 {
     // (undocumented)
     static staticProp: number;
+}
+
+// Warning: (ae-forgotten-export) The symbol "SomeClass2" needs to be exported by the entry point index.d.ts
+//
+// @public
+export class SomeClass3 extends SomeClass2 {
 }
 
 // @public (undocumented)
@@ -45,11 +52,17 @@ export enum SomeEnum {
     C = "C"
 }
 
-// @public (undocumented)
+// @public
 export function someFunction5(): SomeEnum.A;
 
-// @public (undocumented)
-export function someFunction6(): typeof SomeClass.staticProp;
+// @public
+export function someFunction6(): typeof SomeClass1.staticProp;
+
+// @public
+export function someFunction7(): Promise<void>;
+
+// @public
+export function someFunction8(): Lib2Class;
 
 // (No @packageDocumentation comment for this package)
 

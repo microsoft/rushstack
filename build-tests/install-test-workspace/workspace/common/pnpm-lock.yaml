@@ -5,13 +5,13 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.2.tgz
-      '@rushstack/heft': file:rushstack-heft-0.46.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.46.6.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.6.3
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.2.tgz_eslint@8.7.0+typescript@4.6.4
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.46.5.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.46.6.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.6.4
       typescript: 4.6.4
@@ -19,13 +19,13 @@ importers:
   typescript-v3-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.6.2.tgz
-      '@rushstack/heft': file:rushstack-heft-0.46.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.46.6.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.6.3
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.6.2.tgz_eslint@8.7.0+typescript@4.6.4
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.46.5.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.46.6.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.6.4
       typescript: 4.6.4
@@ -1804,10 +1804,10 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.46.5.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.46.5.tgz}
+  file:../temp/tarballs/rushstack-heft-0.46.6.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.46.6.tgz}
     name: '@rushstack/heft'
-    version: 0.46.5
+    version: 0.46.6
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:

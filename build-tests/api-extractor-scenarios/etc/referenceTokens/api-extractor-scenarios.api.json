@@ -175,7 +175,7 @@
         {
           "kind": "Namespace",
           "canonicalReference": "api-extractor-scenarios!n1:namespace",
-          "docComment": "/**\n * @public\n */\n",
+          "docComment": "/**\n * Various namespace scenarios.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -207,7 +207,7 @@
                   "excerptTokens": [
                     {
                       "kind": "Content",
-                      "text": "namespace n3 "
+                      "text": "export namespace n3 "
                     }
                   ],
                   "releaseTag": "Public",
@@ -216,12 +216,12 @@
                   "members": [
                     {
                       "kind": "Function",
-                      "canonicalReference": "api-extractor-scenarios!n1.n2.n3.someFunction4:function(1)",
+                      "canonicalReference": "api-extractor-scenarios!n1.n2.n3.someFunction3:function(1)",
                       "docComment": "",
                       "excerptTokens": [
                         {
                           "kind": "Content",
-                          "text": "function someFunction4(): "
+                          "text": "function someFunction3(): "
                         },
                         {
                           "kind": "Reference",
@@ -240,7 +240,7 @@
                       "releaseTag": "Public",
                       "overloadIndex": 1,
                       "parameters": [],
-                      "name": "someFunction4"
+                      "name": "someFunction3"
                     },
                     {
                       "kind": "TypeAlias",
@@ -276,12 +276,12 @@
                   "excerptTokens": [
                     {
                       "kind": "Content",
-                      "text": "function someFunction2(): "
+                      "text": "export function someFunction2(): "
                     },
                     {
                       "kind": "Reference",
                       "text": "SomeType2",
-                      "canonicalReference": "api-extractor-scenarios!n1.n2.SomeType2:type"
+                      "canonicalReference": "api-extractor-scenarios!n1.n2~SomeType2:type"
                     },
                     {
                       "kind": "Content",
@@ -296,34 +296,6 @@
                   "overloadIndex": 1,
                   "parameters": [],
                   "name": "someFunction2"
-                },
-                {
-                  "kind": "Function",
-                  "canonicalReference": "api-extractor-scenarios!n1.n2.someFunction3:function(1)",
-                  "docComment": "",
-                  "excerptTokens": [
-                    {
-                      "kind": "Content",
-                      "text": "function someFunction3(): "
-                    },
-                    {
-                      "kind": "Reference",
-                      "text": "n2.SomeType2",
-                      "canonicalReference": "api-extractor-scenarios!n1.n2.SomeType2:type"
-                    },
-                    {
-                      "kind": "Content",
-                      "text": ";"
-                    }
-                  ],
-                  "returnTypeTokenRange": {
-                    "startIndex": 1,
-                    "endIndex": 2
-                  },
-                  "releaseTag": "Public",
-                  "overloadIndex": 1,
-                  "parameters": [],
-                  "name": "someFunction3"
                 },
                 {
                   "kind": "TypeAlias",
@@ -409,21 +381,21 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "api-extractor-scenarios!SomeClass:class",
+          "canonicalReference": "api-extractor-scenarios!SomeClass1:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class SomeClass "
+              "text": "export declare class SomeClass1 "
             }
           ],
           "releaseTag": "Public",
-          "name": "SomeClass",
+          "name": "SomeClass1",
           "preserveMemberOrder": false,
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "api-extractor-scenarios!SomeClass.staticProp:member",
+              "canonicalReference": "api-extractor-scenarios!SomeClass1.staticProp:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -451,6 +423,35 @@
               "isProtected": false
             }
           ],
+          "implementsTokenRanges": []
+        },
+        {
+          "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!SomeClass3:class",
+          "docComment": "/**\n * Unexported symbol reference.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class SomeClass3 extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SomeClass2",
+              "canonicalReference": "api-extractor-scenarios!~SomeClass2:class"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "SomeClass3",
+          "preserveMemberOrder": false,
+          "members": [],
+          "extendsTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
           "implementsTokenRanges": []
         },
         {
@@ -535,7 +536,7 @@
         {
           "kind": "Function",
           "canonicalReference": "api-extractor-scenarios!someFunction5:function(1)",
-          "docComment": "/**\n * @public\n */\n",
+          "docComment": "/**\n * Enum member reference.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -563,7 +564,7 @@
         {
           "kind": "Function",
           "canonicalReference": "api-extractor-scenarios!someFunction6:function(1)",
-          "docComment": "/**\n * @public\n */\n",
+          "docComment": "/**\n * Static class member reference.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -575,8 +576,8 @@
             },
             {
               "kind": "Reference",
-              "text": "SomeClass.staticProp",
-              "canonicalReference": "api-extractor-scenarios!SomeClass.staticProp:member"
+              "text": "SomeClass1.staticProp",
+              "canonicalReference": "api-extractor-scenarios!SomeClass1.staticProp:member"
             },
             {
               "kind": "Content",
@@ -591,6 +592,66 @@
           "overloadIndex": 1,
           "parameters": [],
           "name": "someFunction6"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!someFunction7:function(1)",
+          "docComment": "/**\n * Global symbol reference.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function someFunction7(): "
+            },
+            {
+              "kind": "Reference",
+              "text": "Promise",
+              "canonicalReference": "!Promise:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<void>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "someFunction7"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!someFunction8:function(1)",
+          "docComment": "/**\n * External symbol reference.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function someFunction8(): "
+            },
+            {
+              "kind": "Reference",
+              "text": "Lib2Class",
+              "canonicalReference": "api-extractor-lib2-test!Lib2Class:class"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "someFunction8"
         }
       ]
     }
