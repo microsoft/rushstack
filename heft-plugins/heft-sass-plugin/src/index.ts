@@ -11,6 +11,6 @@ import type { IHeftPlugin } from '@rushstack/heft';
 import { SassPlugin } from './SassPlugin';
 
 /**
- * @internal
+ * @public
  */
 export default new SassPlugin() as IHeftPlugin;

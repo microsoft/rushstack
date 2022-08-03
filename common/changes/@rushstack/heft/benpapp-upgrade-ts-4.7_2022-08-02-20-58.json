@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update the highest supported version of TypeScript to 4.7",
+      "type": "minor",
+      "packageName": "@rushstack/heft"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

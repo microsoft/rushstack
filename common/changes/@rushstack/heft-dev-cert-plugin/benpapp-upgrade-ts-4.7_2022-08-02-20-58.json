@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-dev-cert-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-dev-cert-plugin",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-jest-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

@@ -44,7 +44,8 @@ export class KeyboardLoop {
   }
 
   private _checkForTTY(): void {
-    if (this.stdin.isTTY && this.stdin.setRawMode) {
+    // Typescript thinks setRawMode always extists, but we're testing that assumption here.
+    if (this.stdin.isTTY && (this.stdin as Partial<NodeJS.ReadStream>).setRawMode) {
       return;
     }
 
