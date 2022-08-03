@@ -66,6 +66,8 @@
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
     "typescript": [
+      // "~4.7.4" is the (inferred, not alternative) range used by most projects in this repo
+
       // The oldest supported compiler, used by build-tests/api-extractor-lib1-test
       "~2.9.2"
     ],
