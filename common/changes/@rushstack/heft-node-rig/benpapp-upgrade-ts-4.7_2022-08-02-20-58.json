@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Upgrading TypeScript dependency to 4.7",
+      "comment": "Upgrade TypeScript to 4.7",
       "type": "minor",
       "packageName": "@rushstack/heft-node-rig"
     }
