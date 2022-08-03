@@ -1,8 +1,8 @@
 {
   "changes": [
     {
-      "comment": "Upgrading TypeScript dependency to 4.7",
-      "type": "minor",
+      "comment": "",
+      "type": "none",
       "packageName": "@rushstack/heft-config-file"
     }
   ],
