@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Upgrading TypeScript dependency to 4.7, requires new peer dependency of >=4.7",
+      "comment": "Upgrade TypeScript dependency to 4.7. This package now requires a peerDependency on TypeScript >=4.7",
       "type": "major",
       "packageName": "@rushstack/eslint-config"
     }
