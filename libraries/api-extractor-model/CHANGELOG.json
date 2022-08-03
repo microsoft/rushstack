@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.23.0",
+      "tag": "@microsoft/api-extractor-model_v7.23.0",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade TypeScript dependency to 4.7"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.22.2",
       "tag": "@microsoft/api-extractor-model_v7.22.2",
       "date": "Mon, 01 Aug 2022 02:45:32 GMT",

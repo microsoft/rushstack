@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Tue, 28 Jun 2022 00:23:32 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+
+## 3.0.0
+Wed, 03 Aug 2022 18:40:35 GMT
+
+### Breaking changes
+
+- Upgrade TypeScript dependency to 4.7. This package now requires a peerDependency on TypeScript >=4.7
 
 ## 2.6.2
 Tue, 28 Jun 2022 00:23:32 GMT
