@@ -235,6 +235,18 @@ export class PackageJsonLookup {
    * if the `version` field is missing from the package.json file.
    */
   public loadNodePackageJson(jsonFilename: string): INodePackageJson {
+    const packageJson: INodePackageJson | undefined = this._tryLoadNodePackageJson(jsonFilename);
+
+    if (!packageJson) {
+      throw new Error(`Error reading "${jsonFilename}":\n  The required field "name" was not found`);
+    }
+
+    return packageJson;
+  }
+
+  // Try to load a package.json file as an INodePackageJson,
+  // returning undefined if the found file does not contain a `name` field.
+  private _tryLoadNodePackageJson(jsonFilename: string): INodePackageJson | undefined {
     if (!FileSystem.exists(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
@@ -251,7 +263,7 @@ export class PackageJsonLookup {
       // Make sure this is really a package.json file.  CommonJS has fairly strict requirements,
       // but NPM only requires "name" and "version"
       if (!loadedPackageJson.name) {
-        throw new Error(`Error reading "${jsonFilename}":\n  The required field "name" was not found`);
+        return undefined;
       }
 
       if (this._loadExtraFields) {
@@ -295,14 +307,10 @@ export class PackageJsonLookup {
     // Is resolvedFileOrFolderPath itself a folder with a valid package.json file?  If so, return it.
     const packageJsonFilePath: string = path.join(resolvedFileOrFolderPath, FileConstants.PackageJson);
     if (FileSystem.exists(packageJsonFilePath)) {
-      try {
-        this.loadNodePackageJson(packageJsonFilePath);
+      const packageJson: INodePackageJson | undefined = this._tryLoadNodePackageJson(packageJsonFilePath);
+      if (packageJson) {
         this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
         return resolvedFileOrFolderPath;
-      } catch (error) {
-        if (!/The required field "name" was not found/.test(error.message)) {
-          throw error;
-        }
       }
     }
 
