@@ -19,44 +19,13 @@ import type {
 
 export type LifecycleOperationRunnerType = 'start' | 'stop';
 
-/**
- *
- */
 export interface ILifecycleOperationRunnerOptions {
-  /**
-   *
-   */
   internalHeftSession: InternalHeftSession;
-
-  /**
-   *
-   */
   type: LifecycleOperationRunnerType;
-
-  /**
-   *
-   */
   clean: boolean;
-
-  /**
-   *
-   */
   cleanCache: boolean;
-
-  /**
-   *
-   */
-  production: boolean;
-
-  /**
-   *
-   */
-  verbose: boolean;
 }
 
-/**
- *
- */
 export class LifecycleOperationRunner implements IOperationRunner {
   private readonly _options: ILifecycleOperationRunnerOptions;
 
@@ -72,7 +41,7 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     // Load and apply the plugins for this phase only
-    const { internalHeftSession, type, production, clean, cleanCache, verbose } = this._options;
+    const { internalHeftSession, type, clean, cleanCache } = this._options;
     const lifecycle: HeftLifecycle = internalHeftSession.lifecycle;
     const lifecycleLogger: ScopedLogger = internalHeftSession.loggingManager.requestScopedLogger(
       `lifecycle:${this._options.type}`
@@ -107,8 +76,6 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
           // Create the options and provide a utility method to obtain paths to delete
           const cleanHookOptions: IHeftLifecycleCleanHookOptions = {
-            production,
-            verbose,
             addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
               deleteOperations.push(...deleteOperationsToAdd)
           };
@@ -136,20 +103,14 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
         // Run the start hook
         if (lifecycle.hooks.toolStart.isUsed()) {
-          const lifecycleToolStartHookOptions: IHeftLifecycleToolStartHookOptions = {
-            production,
-            verbose
-          };
+          const lifecycleToolStartHookOptions: IHeftLifecycleToolStartHookOptions = {};
           await lifecycle.hooks.toolStart.promise(lifecycleToolStartHookOptions);
         }
         break;
       }
       case 'stop': {
         if (lifecycle.hooks.toolStop.isUsed()) {
-          const lifeycleToolStopHookOptions: IHeftLifecycleToolStopHookOptions = {
-            production,
-            verbose
-          };
+          const lifeycleToolStopHookOptions: IHeftLifecycleToolStopHookOptions = {};
           await lifecycle.hooks.toolStop.promise(lifeycleToolStopHookOptions);
         }
         break;

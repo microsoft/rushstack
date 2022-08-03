@@ -12,7 +12,6 @@ import { OperationGroupRecord } from './OperationGroupRecord';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
 export interface IOperationExecutionManagerOptions {
-  debugMode: boolean;
   parallelism: string | undefined;
   terminal: ITerminal;
   loggingManager: LoggingManager;
@@ -37,13 +36,12 @@ export class OperationExecutionManager {
   private _hasReportedFailures: boolean;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
-    const { debugMode, parallelism, terminal, loggingManager } = options;
+    const { parallelism, terminal, loggingManager } = options;
     this._hasReportedFailures = false;
     this._terminal = terminal;
 
     // Convert the developer graph to the mutable execution graph;
     const executionRecordContext: IOperationExecutionRecordContext = {
-      debugMode,
       terminal,
       loggingManager
     };

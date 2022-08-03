@@ -12,16 +12,13 @@ import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { LoggingManager } from './logging/LoggingManager';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { HeftTask } from './HeftTask';
-import type { HeftParameterManager } from '../configuration/HeftParameterManager';
+import type { HeftParameterManager } from './HeftParameterManager';
 
-/**
- * @internal
- */
 export interface IInternalHeftSessionOptions {
   heftConfiguration: HeftConfiguration;
   loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
-  debugMode: boolean;
+  debug: boolean;
 }
 
 function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
@@ -30,9 +27,6 @@ function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
   }
 }
 
-/**
- * @internal
- */
 export class InternalHeftSession {
   private readonly _options: IInternalHeftSessionOptions;
   private readonly _heftConfigurationJson: IHeftConfigurationJson;
@@ -84,8 +78,8 @@ export class InternalHeftSession {
     this._parameterManager = value;
   }
 
-  public get debugMode(): boolean {
-    return this._options.debugMode;
+  public get debug(): boolean {
+    return this._options.debug;
   }
 
   public get heftConfiguration(): HeftConfiguration {

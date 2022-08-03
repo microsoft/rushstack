@@ -3,58 +3,64 @@
 
 import * as path from 'path';
 import type { AsyncParallelHook } from 'tapable';
-import {
-  CommandLineParameterKind,
-  type CommandLineChoiceListParameter,
-  type CommandLineChoiceParameter,
-  type CommandLineFlagParameter,
-  type CommandLineIntegerListParameter,
-  type CommandLineIntegerParameter,
-  type CommandLineParameter,
-  type CommandLineStringListParameter,
-  type CommandLineStringParameter
-} from '@rushstack/ts-command-line';
 
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
 import type { HeftTask } from './HeftTask';
 import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
+import type { IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 
 /**
+ * The task session provided to the task.
+ *
  * @public
  */
 export interface IHeftTaskSession {
   /**
+   * The name of the task. This is defined in "heft.json".
+   *
    * @public
    */
   readonly taskName: string;
 
   /**
+   * The hooks available to the task.
+   *
    * @public
    */
   readonly hooks: IHeftTaskHooks;
 
   /**
-   * If set to true, the build is running with the --debug flag
+   * The parameters that were passed to the task.
    *
    * @public
    */
-  readonly debugMode: boolean;
+  readonly parameters: IHeftParameters;
 
   /**
+   * The cache folder for the task. This folder is unique for each task, and will not be
+   * cleaned when Heft is run with `--clean`. However, it will be cleaned when Heft is run
+   * with `--clean` and `--clean-cache`.
+   *
    * @public
    */
   readonly cacheFolder: string;
 
   /**
+   * The temp folder for the task. This folder is unique for each task, and will be cleaned
+   * when Heft is run with `--clean`.
+   *
    * @public
    */
   readonly tempFolder: string;
 
   /**
+   * The scoped logger for the task. Messages logged with this logger will be prefixed with
+   * the phase and task name.
+   *
    * @public
    */
   readonly logger: IScopedLogger;
@@ -70,84 +76,59 @@ export interface IHeftTaskSession {
     pluginToAccessName: string,
     pluginApply: (pluginAccessor: T) => void
   ): void;
-
-  /**
-   * Get a choice parameter that has been defined in heft-plugin.json.
-   *
-   * @public
-   */
-  getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter;
-
-  /**
-   * Get a choice list parameter that has been defined in heft-plugin.json.
-   *
-   * @public
-   */
-  getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter;
-
-  /**
-   * Get a flag parameter that has been defined in heft-plugin.json.
-   *
-   * @public
-   */
-  getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
-
-  /**
-   * Get an integer parameter that has been defined in heft-plugin.json.
-   *
-   * @public
-   */
-  getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
-
-  /**
-   * Get an integer list parameter that has been defined in heft-plugin.json.
-   *
-   * @public
-   */
-  getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter;
-
-  /**
-   * Get a string parameter that has been defined in heft-plugin.json.
-   *
-   * @public
-   */
-  getStringParameter(parameterLongName: string): CommandLineStringParameter;
-
-  /**
-   * Get a string list parameter that has been defined in heft-plugin.json.
-   *
-   * @public
-   */
-  getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
 }
 
 /**
+ * Hooks that are available to the task plugin.
+ *
  * @public
  */
 export interface IHeftTaskHooks {
+  /**
+   * The `clean` hook is called at the beginning of the phase. It can be used to clean up
+   * any files or folders that may be produced by the plugin. To use it, call
+   * `clean.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
+
+  /**
+   * The `run` hook is called after all dependency task executions have completed. It is
+   * where the plugin can perform its work. To use it, call `run.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   run: AsyncParallelHook<IHeftTaskRunHookOptions>;
 }
 
 /**
+ * Options provided to the `clean` hook.
+ *
  * @public
  */
-export interface IHeftTaskHookOptions {
-  production: boolean;
-  verbose: boolean;
-}
-
-/**
- * @public
- */
-export interface IHeftTaskCleanHookOptions extends IHeftTaskHookOptions {
+export interface IHeftTaskCleanHookOptions {
+  /**
+   * Add delete operations to be performed during the `clean` hook. These operations will be
+   * performed before any tasks are run within a phase.
+   *
+   * @public
+   */
   addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 /**
+ * Options provided to the `run` hook.
+ *
  * @public
  */
-export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {
+export interface IHeftTaskRunHookOptions {
+  /**
+   * Add copy operations to be performed during the `run` hook. These operations will be
+   * performed after the task `run` hook has completed.
+   *
+   * @public
+   */
   addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
@@ -155,23 +136,19 @@ export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
   logger: ScopedLogger;
   task: HeftTask;
   taskHooks: IHeftTaskHooks;
-  parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+  taskParameters: IHeftParameters;
   pluginHost: HeftPluginHost;
 }
 
 export class HeftTaskSession implements IHeftTaskSession {
-  private _options: IHeftTaskSessionOptions;
+  private _pluginHost: HeftPluginHost;
 
   public readonly taskName: string;
   public readonly hooks: IHeftTaskHooks;
+  public readonly parameters: IHeftParameters;
   public readonly cacheFolder: string;
   public readonly tempFolder: string;
   public readonly logger: IScopedLogger;
-  public readonly pluginHost: HeftPluginHost;
-
-  public get debugMode(): boolean {
-    return this._options.debugMode;
-  }
 
   /**
    * @internal
@@ -179,12 +156,11 @@ export class HeftTaskSession implements IHeftTaskSession {
   public readonly metricsCollector: MetricsCollector;
 
   public constructor(options: IHeftTaskSessionOptions) {
-    this._options = options;
     this.logger = options.logger;
     this.metricsCollector = options.metricsCollector;
     this.taskName = options.task.taskName;
     this.hooks = options.taskHooks;
-    this.pluginHost = options.pluginHost;
+    this.parameters = options.taskParameters;
 
     // Guranteed to be unique since phases are uniquely named, tasks are uniquely named within
     // phases, and neither can have '.' in their names. We will also use the phase name and
@@ -198,6 +174,8 @@ export class HeftTaskSession implements IHeftTaskSession {
 
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolder = path.join(options.heftConfiguration.tempFolder, uniqueTaskFolderName);
+
+    this._pluginHost = options.pluginHost;
   }
 
   public requestAccessToPluginByName<T extends object>(
@@ -205,59 +183,11 @@ export class HeftTaskSession implements IHeftTaskSession {
     pluginToAccessName: string,
     pluginApply: (pluginAccessor: T) => void
   ): void {
-    this.pluginHost.requestAccessToPluginByName(
+    this._pluginHost.requestAccessToPluginByName(
       this.taskName,
       pluginToAccessPackage,
       pluginToAccessName,
       pluginApply
     );
-  }
-
-  public getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Choice);
-  }
-
-  public getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.ChoiceList);
-  }
-
-  public getFlagParameter(parameterLongName: string): CommandLineFlagParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Flag);
-  }
-
-  public getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.Integer);
-  }
-
-  public getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.IntegerList);
-  }
-
-  public getStringParameter(parameterLongName: string): CommandLineStringParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.String);
-  }
-
-  public getStringListParameter(parameterLongName: string): CommandLineStringListParameter {
-    return this._getParameter(parameterLongName, CommandLineParameterKind.StringList);
-  }
-
-  private _getParameter<T extends CommandLineParameter>(
-    parameterLongName: string,
-    expectedParameterKind: CommandLineParameterKind
-  ): T {
-    const parameter: CommandLineParameter | undefined =
-      this._options.parametersByLongName.get(parameterLongName);
-    if (!parameter) {
-      throw new Error(
-        `Parameter "${parameterLongName}" not found. Are you sure it was defined in heft-plugin.json?`
-      );
-    } else if (parameter.kind !== expectedParameterKind) {
-      throw new Error(
-        `Parameter "${parameterLongName}" is of kind "${
-          CommandLineParameterKind[parameter.kind]
-        }", not of kind "${CommandLineParameterKind[expectedParameterKind]}".`
-      );
-    }
-    return parameter as T;
   }
 }

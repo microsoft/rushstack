@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
@@ -92,6 +93,12 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     pluginOptions: IDeleteFilesPluginOptions
   ): void {
     taskSession.hooks.run.tapPromise(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
+      // TODO: Remove once improved heft-config-file is used
+      for (const copyOperation of pluginOptions.deleteOperations) {
+        if (!path.isAbsolute(copyOperation.sourcePath)) {
+          copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolder, copyOperation.sourcePath);
+        }
+      }
       await deleteFilesAsync(pluginOptions.deleteOperations, taskSession.logger);
     });
   }

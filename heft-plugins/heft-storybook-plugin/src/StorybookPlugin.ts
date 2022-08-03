@@ -84,7 +84,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     options: IStorybookPluginOptions
   ): void {
     this._logger = taskSession.logger;
-    const storybookParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--storybook');
+    const storybookParameter: CommandLineFlagParameter =
+      taskSession.parameters.getFlagParameter('--storybook');
 
     const parseResult: IParsedPackageNameOrError = PackageName.tryParse(options.storykitPackageName);
     if (parseResult.error) {

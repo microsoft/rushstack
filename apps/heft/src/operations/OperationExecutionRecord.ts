@@ -20,7 +20,6 @@ export interface IOperationExecutionRecordOptions {
 export interface IOperationExecutionRecordContext {
   terminal: ITerminal;
   loggingManager: LoggingManager;
-  debugMode: boolean;
 }
 
 /**
@@ -106,10 +105,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public get name(): string {
     return this.runner.name;
-  }
-
-  public get debugMode(): boolean {
-    return this._context.debugMode;
   }
 
   public get terminal(): ITerminal {

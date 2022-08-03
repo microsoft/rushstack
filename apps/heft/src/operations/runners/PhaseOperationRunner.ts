@@ -13,44 +13,13 @@ import type { HeftTaskSession, IHeftTaskCleanHookOptions } from '../../pluginFra
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import type { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
-/**
- *
- */
 export interface IPhaseOperationRunnerOptions {
-  /**
-   *
-   */
   internalHeftSession: InternalHeftSession;
-
-  /**
-   * The task to execute.
-   */
   phase: HeftPhase;
-
-  /**
-   *
-   */
   clean: boolean;
-
-  /**
-   *
-   */
   cleanCache: boolean;
-
-  /**
-   *
-   */
-  production: boolean;
-
-  /**
-   *
-   */
-  verbose: boolean;
 }
 
-/**
- *
- */
 export class PhaseOperationRunner implements IOperationRunner {
   private readonly _options: IPhaseOperationRunnerOptions;
 
@@ -66,7 +35,8 @@ export class PhaseOperationRunner implements IOperationRunner {
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     // Load and apply the plugins for this phase only
-    const { internalHeftSession, phase, production, verbose, clean, cleanCache } = this._options;
+    const { internalHeftSession, phase, clean, cleanCache } = this._options;
+
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(phase);
     const phaseLogger: ScopedLogger = phaseSession.loggingManager.requestScopedLogger(phase.phaseName);
     phaseLogger.terminal.writeVerboseLine('Applying task plugins');
@@ -96,8 +66,6 @@ export class PhaseOperationRunner implements IOperationRunner {
 
       // Create the options and provide a utility method to obtain paths to delete
       const cleanHookOptions: IHeftTaskCleanHookOptions = {
-        production,
-        verbose,
         addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
           deleteOperations.push(...deleteOperationsToAdd)
       };

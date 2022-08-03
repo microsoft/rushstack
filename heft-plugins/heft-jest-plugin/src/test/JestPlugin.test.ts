@@ -32,13 +32,15 @@ describe('JestPlugin', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         run: { tapPromise: () => {} } as any
       },
-      getChoiceParameter: mockGetParameter,
-      getChoiceListParameter: mockGetParameter,
-      getFlagParameter: mockGetParameter,
-      getIntegerParameter: mockGetParameter,
-      getIntegerListParameter: mockGetParameter,
-      getStringParameter: mockGetParameter,
-      getStringListParameter: mockGetParameter
+      parameters: {
+        getChoiceParameter: mockGetParameter,
+        getChoiceListParameter: mockGetParameter,
+        getFlagParameter: mockGetParameter,
+        getIntegerParameter: mockGetParameter,
+        getIntegerListParameter: mockGetParameter,
+        getStringParameter: mockGetParameter,
+        getStringListParameter: mockGetParameter
+      }
     } as IHeftTaskSession;
     const mockHeftConfiguration: HeftConfiguration = {} as HeftConfiguration;
 

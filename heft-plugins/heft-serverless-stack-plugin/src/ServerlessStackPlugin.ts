@@ -36,8 +36,9 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
 
     // Once https://github.com/serverless-stack/serverless-stack/issues/1537 is fixed, we may be
     // eliminate the need for this parameter.
-    const sstParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--sst');
-    const sstStageParameter: CommandLineStringParameter = taskSession.getStringParameter('--sst-stage');
+    const sstParameter: CommandLineFlagParameter = taskSession.parameters.getFlagParameter('--sst');
+    const sstStageParameter: CommandLineStringParameter =
+      taskSession.parameters.getStringParameter('--sst-stage');
 
     // Only tap if the --sst flag is set.
     if (sstParameter.value) {
@@ -67,9 +68,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
         await this._runServerlessStackAsync({
           taskSession,
           heftConfiguration,
-          sstStage: sstStageParameter.value,
-          debugMode: taskSession.debugMode,
-          verbose: runOptions.verbose
+          sstStage: sstStageParameter.value
         });
       });
     }
@@ -79,9 +78,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession;
     heftConfiguration: HeftConfiguration;
     sstStage?: string;
-    debugMode?: boolean;
     serveMode?: boolean;
-    verbose?: boolean;
   }): Promise<void> {
     let sstCliPackagePath: string;
     try {
@@ -122,7 +119,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     } else {
       sstCommandArgs.push('build');
     }
-    if (options.debugMode) {
+    if (options.taskSession.parameters.debug || options.taskSession.parameters.verbose) {
       sstCommandArgs.push('--verbose');
     }
     if (options.sstStage) {

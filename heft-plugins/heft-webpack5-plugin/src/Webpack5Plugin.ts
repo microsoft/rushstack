@@ -77,8 +77,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
     };
 
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      // TODO: Improve how default parameters are surfaced, since this is a bit of a hack.
-      production = cleanOptions.production;
+      production = taskSession.parameters.production;
 
       // Obtain the finalized webpack configuration
       const webpackConfiguration: IWebpackConfiguration | undefined =
@@ -102,7 +101,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
     });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      production = runOptions.production;
+      production = taskSession.parameters.production;
       // TODO: Support watch mode
       watchMode = false;
       // TODO: Support serve mode

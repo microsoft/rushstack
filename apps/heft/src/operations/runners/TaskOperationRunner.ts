@@ -11,48 +11,20 @@ import type { HeftTask } from '../../pluginFramework/HeftTask';
 import type { HeftTaskSession, IHeftTaskRunHookOptions } from '../../pluginFramework/HeftTaskSession';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 
-/**
- *
- */
 export interface ITaskOperationRunnerOptions {
-  /**
-   *
-   */
   internalHeftSession: InternalHeftSession;
-
-  /**
-   * The task to execute.
-   */
-  phase: HeftPhase;
-
-  /**
-   * The task to execute.
-   */
   task: HeftTask;
-
-  /**
-   *
-   */
-  production: boolean;
-
-  /**
-   *
-   */
-  verbose: boolean;
 }
 
-/**
- *
- */
 export class TaskOperationRunner implements IOperationRunner {
   private readonly _options: ITaskOperationRunnerOptions;
 
   public readonly silent: boolean = false;
 
   public get name(): string {
-    return `Task "${this._options.task.taskName}" of phase "${this._options.phase.phaseName}"`;
+    const { taskName, parentPhase } = this._options.task;
+    return `Task "${taskName}" of phase "${parentPhase.phaseName}"`;
   }
 
   public constructor(options: ITaskOperationRunnerOptions) {
@@ -60,8 +32,9 @@ export class TaskOperationRunner implements IOperationRunner {
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    const { internalHeftSession, task, phase, production, verbose } = this._options;
-    const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(phase);
+    const { internalHeftSession, task } = this._options;
+    const { parentPhase } = task;
+    const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(parentPhase);
     const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
 
     if (taskSession.hooks.run.isUsed()) {
@@ -72,8 +45,6 @@ export class TaskOperationRunner implements IOperationRunner {
 
       // Create the options and provide a utility method to obtain paths to copy
       const runHookOptions: IHeftTaskRunHookOptions = {
-        production,
-        verbose,
         addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
           copyOperations.push(...copyOperationsToAdd)
       };

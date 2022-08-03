@@ -151,10 +151,10 @@ export class HeftLifecycle extends HeftPluginHost {
             `lifecycle:${pluginDefinition.pluginName}`
           ),
           lifecycleHooks: this.hooks,
-          parametersByLongName:
+          lifecycleParameters:
             this._internalHeftSession.parameterManager.getParametersForPlugin(pluginDefinition),
           pluginDefinition: pluginDefinition,
-          debugMode: this._internalHeftSession.debugMode,
+          debug: this._internalHeftSession.debug,
           pluginHost: this
         });
         const pluginOptions: object | undefined = pluginSpecifier.options;

@@ -6,59 +6,59 @@ import {
   AlreadyReportedError,
   Colors,
   ConsoleTerminalProvider,
-  type IPackageJson,
-  type ITerminal
+  type IPackageJson
 } from '@rushstack/node-core-library';
+import type {
+  CommandLineFlagParameter,
+  CommandLineParameterProvider,
+  CommandLineStringListParameter
+} from '@rushstack/ts-command-line';
 
 import { Operation } from '../operations/Operation';
+import {
+  IOperationExecutionManagerOptions,
+  OperationExecutionManager
+} from '../operations/OperationExecutionManager';
 import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
 import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
 import { LifecycleOperationRunner } from '../operations/runners/LifecycleOperationRunner';
-import type { IHeftAction } from '../cli/actions/IHeftAction';
 import { HeftPhase } from '../pluginFramework/HeftPhase';
+import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
+import type { IHeftAction } from '../cli/actions/IHeftAction';
 import type { HeftTask } from '../pluginFramework/HeftTask';
-import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import type { LifecycleOperationRunnerType } from '../operations/runners/LifecycleOperationRunner';
-
-export interface IExpandPhaseSelectionOptions {
-  to?: Set<HeftPhase>;
-  only?: Set<HeftPhase>;
-}
 
 export interface IExecuteInstrumentedOptions {
   action: IHeftAction;
   executeAsync: () => Promise<void>;
 }
 
-export interface ICreateOperationsOptions {
-  internalHeftSession: InternalHeftSession;
-  selectedPhases: Set<HeftPhase>;
-  terminal: ITerminal;
-  production: boolean;
-  verbose: boolean;
-  clean: boolean;
-  cleanCache: boolean;
-}
+export function createOperations(action: IHeftAction): Set<Operation> {
+  const {
+    terminal,
+    selectedPhases,
+    parameterManager: {
+      defaultParameters: { clean, cleanCache }
+    }
+  } = action;
 
-export function createOperations(options: ICreateOperationsOptions): Set<Operation> {
-  const operations: Map<string, Operation> = new Map();
-
-  if (options.cleanCache && !options.clean) {
+  if (cleanCache && !clean) {
     throw new Error('The "--clean-cache" option can only be used in conjunction with "--clean".');
   }
 
-  const startLifecycleOperation: Operation = getOrCreateLifecycleOperation('start', options);
-  const stopLifecycleOperation: Operation = getOrCreateLifecycleOperation('stop', options);
+  const operations: Map<string, Operation> = new Map();
+  const startLifecycleOperation: Operation = getOrCreateLifecycleOperation('start', action);
+  const stopLifecycleOperation: Operation = getOrCreateLifecycleOperation('stop', action);
 
   let hasWarnedAboutSkippedPhases: boolean = false;
-  for (const phase of options.selectedPhases) {
+  for (const phase of selectedPhases) {
     // Warn if any dependencies are excluded from the list of selected phases
     if (!hasWarnedAboutSkippedPhases) {
       for (const dependencyPhase of phase.dependencyPhases) {
-        if (!options.selectedPhases.has(dependencyPhase)) {
+        if (!selectedPhases.has(dependencyPhase)) {
           // Only write once, and write with yellow to make it stand out without writing a warning to stderr
           hasWarnedAboutSkippedPhases = true;
-          options.terminal.writeLine(
+          terminal.writeLine(
             Colors.bold(
               'The provided list of phases does not contain all phase dependencies. You may need to run the ' +
                 'excluded phases manually.'
@@ -70,7 +70,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
     }
 
     // Create operation for the phase start node
-    const phaseOperation: Operation = getOrCreatePhaseOperation(phase, options);
+    const phaseOperation: Operation = getOrCreatePhaseOperation(phase, action);
     // Set the 'start' lifecycle operation as a dependency of all phases to ensure the 'start' lifecycle
     // operation runs first
     phaseOperation.dependencies.add(startLifecycleOperation);
@@ -80,7 +80,7 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
 
     // Create operations for each task
     for (const task of phase.tasks) {
-      const taskOperation: Operation = getOrCreateTaskOperation(task, options);
+      const taskOperation: Operation = getOrCreateTaskOperation(task, action);
       // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
       taskOperation.dependencies.add(phaseOperation);
       // Set the 'start' lifecycle operation as a dependency of all tasks to ensure the 'start' lifecycle
@@ -92,15 +92,15 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
 
       // Set all dependency tasks as dependencies of the task operation
       for (const dependencyTask of task.dependencyTasks) {
-        taskOperation.dependencies.add(getOrCreateTaskOperation(dependencyTask, options));
+        taskOperation.dependencies.add(getOrCreateTaskOperation(dependencyTask, action));
       }
 
       // Set all tasks in a in a phase as dependencies of the consuming phase
       for (const consumingPhase of phase.consumingPhases) {
-        if (options.selectedPhases.has(consumingPhase)) {
+        if (action.selectedPhases.has(consumingPhase)) {
           // Set all tasks in a dependency phase as dependencies of the consuming phase to ensure the dependency
           // tasks run first
-          const consumingPhaseOperation: Operation = getOrCreatePhaseOperation(consumingPhase, options);
+          const consumingPhaseOperation: Operation = getOrCreatePhaseOperation(consumingPhase, action);
           consumingPhaseOperation.dependencies.add(taskOperation);
         }
       }
@@ -109,63 +109,55 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
 
   return new Set(operations.values());
 
-  function getOrCreateLifecycleOperation(
-    type: LifecycleOperationRunnerType,
-    options: ICreateOperationsOptions
-  ): Operation {
+  function getOrCreateLifecycleOperation(type: LifecycleOperationRunnerType, action: IHeftAction): Operation {
+    const {
+      internalHeftSession,
+      parameterManager: {
+        defaultParameters: { clean, cleanCache }
+      }
+    } = action;
     const key: string = `lifecycle.${type}`;
+
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
       operation = new Operation({
         groupName: 'lifecycle',
-        runner: new LifecycleOperationRunner({
-          internalHeftSession: options.internalHeftSession,
-          production: options.production,
-          verbose: options.verbose,
-          clean: options.clean,
-          cleanCache: options.cleanCache,
-          type
-        })
+        runner: new LifecycleOperationRunner({ internalHeftSession, clean, cleanCache, type })
       });
       operations.set(key, operation);
     }
     return operation;
   }
 
-  function getOrCreatePhaseOperation(phase: HeftPhase, options: ICreateOperationsOptions): Operation {
+  function getOrCreatePhaseOperation(phase: HeftPhase, action: IHeftAction): Operation {
+    const {
+      internalHeftSession,
+      parameterManager: {
+        defaultParameters: { clean, cleanCache }
+      }
+    } = action;
     const key: string = phase.phaseName;
+
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
       // Only create the operation. Dependencies are hooked up separately
       operation = new Operation({
         groupName: phase.phaseName,
-        runner: new PhaseOperationRunner({
-          internalHeftSession: options.internalHeftSession,
-          production: options.production,
-          verbose: options.verbose,
-          clean: options.clean,
-          cleanCache: options.cleanCache,
-          phase
-        })
+        runner: new PhaseOperationRunner({ internalHeftSession, clean, cleanCache, phase })
       });
       operations.set(key, operation);
     }
     return operation;
   }
 
-  function getOrCreateTaskOperation(task: HeftTask, options: ICreateOperationsOptions): Operation {
+  function getOrCreateTaskOperation(task: HeftTask, action: IHeftAction): Operation {
+    const { internalHeftSession } = action;
     const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
       operation = new Operation({
         groupName: task.parentPhase.phaseName,
-        runner: new TaskOperationRunner({
-          internalHeftSession: options.internalHeftSession,
-          production: options.production,
-          verbose: options.verbose,
-          phase: task.parentPhase,
-          task
-        })
+        runner: new TaskOperationRunner({ internalHeftSession, task })
       });
       operations.set(key, operation);
     }
@@ -173,17 +165,97 @@ export function createOperations(options: ICreateOperationsOptions): Set<Operati
   }
 }
 
-export function initializeAction(action: IHeftAction): void {
-  action.metricsCollector.setStartTime();
+export function defineHeftActionParameters(
+  action: IHeftAction,
+  parameterProvider?: CommandLineParameterProvider | undefined
+): void {
+  const { internalHeftSession, selectedPhases } = action;
+  parameterProvider = parameterProvider || action;
+
+  const cleanFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
+    parameterLongName: '--clean',
+    description: 'If specified, clean the outputs before running each phase.'
+  });
+  const cleanCacheFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
+    parameterLongName: '--clean-cache',
+    description:
+      'If specified, clean the cache before running each phase. To use this flag, the ' +
+      '--clean flag must also be provided.'
+  });
+  const verboseFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
+    parameterLongName: '--verbose',
+    parameterShortName: '-v',
+    description: 'If specified, log information useful for debugging.'
+  });
+  const productionFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
+    parameterLongName: '--production',
+    description: 'If specified, run Heft in production mode.'
+  });
+  const localesParameter: CommandLineStringListParameter = parameterProvider.defineStringListParameter({
+    parameterLongName: '--locales',
+    argumentName: 'LOCALE',
+    description: 'Use the specified locale for this run, if applicable.'
+  });
+
+  const parameterManager: HeftParameterManager = new HeftParameterManager({
+    isClean: () => cleanFlag.value,
+    isCleanCache: () => cleanCacheFlag.value,
+    isDebug: () => internalHeftSession.debug,
+    isVerbose: () => verboseFlag.value,
+    isProduction: () => productionFlag.value,
+    getLocales: () => localesParameter.values
+  });
+
+  // Add all the lifecycle parameters for the action
+  for (const lifecyclePluginDefinition of internalHeftSession.lifecycle.pluginDefinitions) {
+    parameterManager.addPluginParameters(lifecyclePluginDefinition);
+  }
+
+  // Add all the task parameters for the action
+  for (const phase of selectedPhases) {
+    for (const task of phase.tasks) {
+      parameterManager.addPluginParameters(task.pluginDefinition);
+    }
+  }
+
+  // Finalize and apply to the CommandLineParameterProvider
+  parameterManager.finalizeParameters(parameterProvider);
+  action.parameterManager = parameterManager;
+}
+
+export async function executeHeftAction(action: IHeftAction): Promise<void> {
+  // Set the parameter manager on the internal session, which is used to provide the selected
+  // parameters to plugins. Set this in onExecute() since we now know that this action is being
+  // executed, and the session should be populated with the executing parameters.
+  action.internalHeftSession.parameterManager = action.parameterManager;
+
+  // Execute the selected phases
+  await executeInstrumentedAsync({
+    action,
+    executeAsync: async () => {
+      const operations: Set<Operation> = createOperations(action);
+      const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
+        loggingManager: action.loggingManager,
+        terminal: action.terminal,
+        // TODO: Allow for running non-parallelized operations.
+        parallelism: undefined
+      };
+      const executionManager: OperationExecutionManager = new OperationExecutionManager(
+        operations,
+        operationExecutionManagerOptions
+      );
+      await executionManager.executeAsync();
+    }
+  });
 }
 
 export async function executeInstrumentedAsync(options: IExecuteInstrumentedOptions): Promise<void> {
   const { action, executeAsync } = options;
-  const { heftConfiguration, terminal, loggingManager } = action;
+  const { heftConfiguration, terminal, loggingManager, parameterManager } = action;
 
-  if (action.heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
-    action.heftConfiguration.terminalProvider.verboseEnabled =
-      action.heftConfiguration.terminalProvider.verboseEnabled || action.verbose;
+  if (heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
+    heftConfiguration.terminalProvider.verboseEnabled =
+      heftConfiguration.terminalProvider.verboseEnabled || parameterManager.defaultParameters.verbose;
   }
 
   const projectPackageJson: IPackageJson = heftConfiguration.projectPackageJson;
@@ -248,4 +320,8 @@ export async function executeInstrumentedAsync(options: IExecuteInstrumentedOpti
   if (encounteredError) {
     throw new AlreadyReportedError();
   }
+}
+
+export function initializeAction(action: IHeftAction): void {
+  action.metricsCollector.setStartTime();
 }

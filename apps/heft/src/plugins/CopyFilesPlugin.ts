@@ -116,7 +116,7 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
 
         // Still not set, either it's not a hardlink or it's a file.
         if (!sourceFilePaths) {
-          sourceFilePaths = new Set(copyConfiguration.sourcePath);
+          sourceFilePaths = new Set([copyConfiguration.sourcePath]);
         }
       } else {
         // Assume the source path is a folder
@@ -217,6 +217,19 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
     pluginOptions: ICopyFilesPluginOptions
   ): void {
     taskSession.hooks.run.tapPromise(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
+      // TODO: Remove once improved heft-config-file is used
+      for (const copyOperation of pluginOptions.copyOperations) {
+        if (!path.isAbsolute(copyOperation.sourcePath)) {
+          copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolder, copyOperation.sourcePath);
+        }
+        const destinationFolders: string[] = [];
+        for (const destinationFolder of copyOperation.destinationFolders) {
+          if (!path.isAbsolute(destinationFolder)) {
+            destinationFolders.push(path.resolve(heftConfiguration.buildFolder, destinationFolder));
+          }
+        }
+        copyOperation.destinationFolders = destinationFolders;
+      }
       await copyFilesAsync(pluginOptions.copyOperations, taskSession.logger);
     });
   }

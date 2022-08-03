@@ -79,21 +79,13 @@ export interface _IHeftConfigurationInitializationOptions {
     terminalProvider: ITerminalProvider;
 }
 
-// @public (undocumented)
-export interface IHeftLifecycleCleanHookOptions extends IHeftLifecycleHookOptions {
+// @public
+export interface IHeftLifecycleCleanHookOptions {
     // (undocumented)
     addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
-// @public (undocumented)
-export interface IHeftLifecycleHookOptions {
-    // (undocumented)
-    production: boolean;
-    // (undocumented)
-    verbose: boolean;
-}
-
-// @public (undocumented)
+// @public
 export interface IHeftLifecycleHooks {
     // (undocumented)
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
@@ -118,19 +110,21 @@ export interface IHeftLifecycleSession {
     readonly hooks: IHeftLifecycleHooks;
     // (undocumented)
     readonly logger: IScopedLogger;
+    // Warning: (ae-forgotten-export) The symbol "IHeftParameters" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+    readonly parameters: IHeftParameters;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     // (undocumented)
     readonly tempFolder: string;
 }
 
-// @public (undocumented)
-export interface IHeftLifecycleToolStartHookOptions extends IHeftLifecycleHookOptions {
+// @public
+export interface IHeftLifecycleToolStartHookOptions {
 }
 
-// @public (undocumented)
-export interface IHeftLifecycleToolStopHookOptions extends IHeftLifecycleHookOptions {
+// @public
+export interface IHeftLifecycleToolStopHookOptions {
 }
 
 // @public (undocumented)
@@ -149,25 +143,14 @@ export interface IHeftRecordMetricsHookOptions {
     metricName: string;
 }
 
-// @public (undocumented)
-export interface IHeftTaskCleanHookOptions extends IHeftTaskHookOptions {
-    // (undocumented)
+// @public
+export interface IHeftTaskCleanHookOptions {
     addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
-// @public (undocumented)
-export interface IHeftTaskHookOptions {
-    // (undocumented)
-    production: boolean;
-    // (undocumented)
-    verbose: boolean;
-}
-
-// @public (undocumented)
+// @public
 export interface IHeftTaskHooks {
-    // (undocumented)
     clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
-    // (undocumented)
     run: AsyncParallelHook<IHeftTaskRunHookOptions>;
 }
 
@@ -175,32 +158,19 @@ export interface IHeftTaskHooks {
 export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskSession, TOptions> {
 }
 
-// @public (undocumented)
-export interface IHeftTaskRunHookOptions extends IHeftTaskHookOptions {
-    // (undocumented)
+// @public
+export interface IHeftTaskRunHookOptions {
     addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
-// @public (undocumented)
+// @public
 export interface IHeftTaskSession {
-    // (undocumented)
     readonly cacheFolder: string;
-    readonly debugMode: boolean;
-    getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter;
-    getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter;
-    getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
-    getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter;
-    getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
-    getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
-    getStringParameter(parameterLongName: string): CommandLineStringParameter;
-    // (undocumented)
     readonly hooks: IHeftTaskHooks;
-    // (undocumented)
     readonly logger: IScopedLogger;
+    readonly parameters: IHeftParameters;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
-    // (undocumented)
     readonly taskName: string;
-    // (undocumented)
     readonly tempFolder: string;
 }
 

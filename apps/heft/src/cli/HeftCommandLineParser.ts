@@ -40,7 +40,7 @@ export class HeftCommandLineParser extends CommandLineParser {
 
   private _preInitializationArgumentValues: IPreInitializationArgumentValues;
 
-  private _debugFlag!: CommandLineFlagParameter;
+  private _debugFlag: CommandLineFlagParameter | undefined;
 
   public get isDebug(): boolean {
     return !!this._preInitializationArgumentValues.debug;
@@ -55,21 +55,21 @@ export class HeftCommandLineParser extends CommandLineParser {
     // Pre-initialize with known argument values to determine state of "--debug"
     this._preInitializationArgumentValues = this._getPreInitializationArgumentValues();
 
+    // Enable debug and verbose logging if the "--debug" flag is set
     this._terminalProvider = new ConsoleTerminalProvider({
       debugEnabled: this.isDebug,
       verboseEnabled: this.isDebug
     });
-    this.globalTerminal = new Terminal(this._terminalProvider);
-    this._metricsCollector = new MetricsCollector();
-    this._loggingManager = new LoggingManager({
-      terminalProvider: this._terminalProvider
-    });
 
+    this.globalTerminal = new Terminal(this._terminalProvider);
+    this._loggingManager = new LoggingManager({ terminalProvider: this._terminalProvider });
     if (this.isDebug) {
+      // Enable printing stacktraces if the "--debug" flag is set
       this._loggingManager.enablePrintStacks();
       InternalError.breakInDebugger = true;
     }
 
+    this._metricsCollector = new MetricsCollector();
     this._heftConfiguration = HeftConfiguration.initialize({
       cwd: process.cwd(),
       terminalProvider: this._terminalProvider
@@ -97,7 +97,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         heftConfiguration: this._heftConfiguration,
         loggingManager: this._loggingManager,
         metricsCollector: this._metricsCollector,
-        debugMode: this.isDebug
+        debug: this.isDebug
       });
 
       const actionOptions: IHeftActionOptions = {
@@ -162,6 +162,10 @@ export class HeftCommandLineParser extends CommandLineParser {
   private _getPreInitializationArgumentValues(
     args: string[] = process.argv
   ): IPreInitializationArgumentValues {
+    if (!this._debugFlag) {
+      throw new InternalError('onDefineParameters() has not yet been called.');
+    }
+
     // This is a rough parsing of the --debug parameter
     const parser: ArgumentParser = new ArgumentParser({ addHelp: false });
     parser.addArgument(this._debugFlag.longName, { dest: 'debug', action: 'storeTrue' });

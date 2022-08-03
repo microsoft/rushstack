@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import {
-  CommandLineFlagParameter,
   CommandLineParameterProvider,
   CommandLineStringListParameter,
   ScopedCommandLineAction
@@ -10,74 +9,85 @@ import {
 import { AlreadyReportedError, InternalError, ITerminal } from '@rushstack/node-core-library';
 
 import {
-  createOperations,
-  executeInstrumentedAsync,
-  initializeAction
+  initializeAction,
+  defineHeftActionParameters,
+  executeHeftAction
 } from '../../utilities/HeftActionUtilities';
 import { Selection } from '../../utilities/Selection';
-import {
-  OperationExecutionManager,
-  type IOperationExecutionManagerOptions
-} from '../../operations/OperationExecutionManager';
-import { HeftParameterManager } from '../../configuration/HeftParameterManager';
+import { HeftParameterManager } from '../../pluginFramework/HeftParameterManager';
 import type { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import type { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
 import type { MetricsCollector } from '../../metrics/MetricsCollector';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
-import type { Operation } from '../../operations/Operation';
-
-export interface IRunActionOptions extends IHeftActionOptions {}
 
 export class RunAction extends ScopedCommandLineAction implements IHeftAction {
+  public readonly internalHeftSession: InternalHeftSession;
   public readonly terminal: ITerminal;
   public readonly loggingManager: LoggingManager;
   public readonly metricsCollector: MetricsCollector;
   public readonly heftConfiguration: HeftConfiguration;
 
-  private _parameterManager: HeftParameterManager;
-  private _verboseFlag!: CommandLineFlagParameter;
-  private _productionFlag!: CommandLineFlagParameter;
-  private _cleanFlag!: CommandLineFlagParameter;
-  private _cleanCacheFlag!: CommandLineFlagParameter;
-  private _to!: CommandLineStringListParameter;
-  private _only!: CommandLineStringListParameter;
+  private _toParameter: CommandLineStringListParameter | undefined;
+  private _onlyParameter: CommandLineStringListParameter | undefined;
 
-  private _internalSession: InternalHeftSession;
-  private _selectedPhases: Set<HeftPhase> | undefined;
-
-  public get verbose(): boolean {
-    return this._verboseFlag.value;
+  private _parameterManager: HeftParameterManager | undefined;
+  public get parameterManager(): HeftParameterManager {
+    if (!this._parameterManager) {
+      throw new InternalError(`onDefineParameters() has not been called.`);
+    }
+    return this._parameterManager;
   }
 
-  public constructor(options: IRunActionOptions) {
+  public set parameterManager(parameterManager: HeftParameterManager) {
+    this._parameterManager = parameterManager;
+  }
+
+  private _selectedPhases: Set<HeftPhase> | undefined;
+  public get selectedPhases(): Set<HeftPhase> {
+    if (!this._selectedPhases) {
+      const toPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._toParameter!, this.terminal);
+      const onlyPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._onlyParameter!, this.terminal);
+      this._selectedPhases = Selection.union(
+        Selection.recursiveExpand(toPhases, (phase: HeftPhase) => phase.dependencyPhases),
+        onlyPhases
+      );
+
+      if (this._selectedPhases.size === 0) {
+        throw new Error(
+          'No phases were selected. Provide at least one phase to the "--to" or "--only" parameters.'
+        );
+      }
+    }
+    return this._selectedPhases;
+  }
+
+  public constructor(options: IHeftActionOptions) {
     super({
       actionName: 'run',
       documentation: 'Run a provided selection of Heft phases.',
       summary: 'Run a provided selection of Heft phases.'
     });
 
+    this.internalHeftSession = options.internalHeftSession;
     this.terminal = options.terminal;
     this.loggingManager = options.loggingManager;
     this.metricsCollector = options.metricsCollector;
     this.heftConfiguration = options.heftConfiguration;
 
-    this._parameterManager = new HeftParameterManager();
-    this._internalSession = options.internalHeftSession;
-
     initializeAction(this);
   }
 
   protected onDefineUnscopedParameters(): void {
-    this._to = this.defineStringListParameter({
+    this._toParameter = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
       description: 'The phase to run to, including all transitive dependencies.',
       argumentName: 'PHASE',
       parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
     });
-    this._only = this.defineStringListParameter({
+    this._onlyParameter = this.defineStringListParameter({
       parameterLongName: '--only',
       parameterShortName: '-o',
       description: 'The phase to run.',
@@ -87,100 +97,26 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    // Define these flags here, since we want them to be available to all scoped actions.
-    // It also makes it easier to append these flags when using NPM scripts, for example:
-    // "npm run <script> -- --production"
-    this._verboseFlag = scopedParameterProvider.defineFlagParameter({
-      parameterLongName: '--verbose',
-      parameterShortName: '-v',
-      description: 'If specified, log information useful for debugging.'
-    });
-    this._productionFlag = scopedParameterProvider.defineFlagParameter({
-      parameterLongName: '--production',
-      description: 'If specified, run Heft in production mode.'
-    });
-    this._cleanFlag = scopedParameterProvider.defineFlagParameter({
-      parameterLongName: '--clean',
-      description: 'If specified, clean the outputs before running each phase.'
-    });
-    this._cleanCacheFlag = scopedParameterProvider.defineFlagParameter({
-      parameterLongName: '--clean-cache',
-      description:
-        'If specified, clean the cache before running each phase. To use this flag, the ' +
-        '--clean flag must also be provided.'
-    });
-
-    const [toPhases, onlyPhases] = [this._to, this._only].map((listParameter) => {
-      return this._evaluatePhaseParameter(listParameter, this.terminal);
-    });
-
-    this._selectedPhases = Selection.union(
-      Selection.recursiveExpand(toPhases, (phase: HeftPhase) => phase.dependencyPhases),
-      onlyPhases
-    );
-
-    // Add all the parameters for the action
-    for (const lifecyclePluginDefinition of this._internalSession.lifecycle.pluginDefinitions) {
-      this._parameterManager.addPluginParameters(lifecyclePluginDefinition);
-    }
-    for (const phase of this._selectedPhases) {
-      for (const task of phase.tasks) {
-        this._parameterManager.addPluginParameters(task.pluginDefinition);
-      }
-    }
-
-    // Finalize and apply to the CommandLineParameterProvider
-    this._parameterManager.finalizeParameters(scopedParameterProvider);
-
-    // Set the parameter provider on the internal session, which is used to provide the selected
-    // parameters to plugins. Set this now since the second phase of parsing for a ScopedCommandLineAction
-    // is executed during action execution, so we know this action is being executed, and the session
-    // should be populated with the executing parameters.
-    this._internalSession.parameterManager = this._parameterManager;
+    defineHeftActionParameters(this, scopedParameterProvider);
   }
 
   protected async onExecute(): Promise<void> {
-    if (!this._selectedPhases) {
-      throw new InternalError('onDefineScopedParameters() must be called before onExecute()');
-    }
-
-    await executeInstrumentedAsync({
-      action: this,
-      executeAsync: async () => {
-        const operations: Set<Operation> = createOperations({
-          internalHeftSession: this._internalSession,
-          selectedPhases: this._selectedPhases!,
-          terminal: this.terminal,
-          production: this._productionFlag.value,
-          verbose: this.verbose,
-          clean: this._cleanFlag.value,
-          cleanCache: this._cleanCacheFlag.value
-        });
-        const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
-          loggingManager: this.loggingManager,
-          terminal: this.terminal,
-          debugMode: this._internalSession.debugMode,
-          // TODO: Allow for running non-parallelized operations.
-          parallelism: undefined
-        };
-        const executionManager: OperationExecutionManager = new OperationExecutionManager(
-          operations,
-          operationExecutionManagerOptions
-        );
-        await executionManager.executeAsync();
-      }
-    });
+    await executeHeftAction(this);
   }
 
   private _evaluatePhaseParameter(
-    listParameter: CommandLineStringListParameter,
+    phaseParameter: CommandLineStringListParameter | undefined,
     terminal: ITerminal
   ): Set<HeftPhase> {
-    const parameterName: string = listParameter.longName;
+    if (!phaseParameter) {
+      throw new InternalError(`onDefineParameters() has not been called.`);
+    }
+
+    const parameterName: string = phaseParameter.longName;
     const selection: Set<HeftPhase> = new Set();
 
-    for (const rawSelector of listParameter.values) {
-      const phase: HeftPhase | undefined = this._internalSession.phasesByName.get(rawSelector);
+    for (const rawSelector of phaseParameter.values) {
+      const phase: HeftPhase | undefined = this.internalHeftSession.phasesByName.get(rawSelector);
       if (!phase) {
         terminal.writeErrorLine(
           `The phase name "${rawSelector}" passed to "${parameterName}" does not exist in heft.json.`

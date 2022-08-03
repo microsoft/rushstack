@@ -3,7 +3,7 @@
 
 import { AsyncParallelHook } from 'tapable';
 
-import { HeftTaskSession, IHeftTaskCleanHookOptions } from './HeftTaskSession';
+import { HeftTaskSession, type IHeftTaskCleanHookOptions } from './HeftTaskSession';
 import { HeftPluginHost } from './HeftPluginHost';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
@@ -11,11 +11,8 @@ import type { HeftPhase } from './HeftPhase';
 import type { HeftTask } from './HeftTask';
 import type { IHeftTaskPlugin } from './IHeftPlugin';
 import type { LoggingManager } from './logging/LoggingManager';
-import type { HeftParameterManager } from '../configuration/HeftParameterManager';
+import type { HeftParameterManager } from './HeftParameterManager';
 
-/**
- * @internal
- */
 export interface IHeftPhaseSessionOptions extends IInternalHeftSessionOptions {
   /**
    * @beta
@@ -28,26 +25,12 @@ export interface IHeftPhaseSessionOptions extends IInternalHeftSessionOptions {
   parameterManager: HeftParameterManager;
 }
 
-/**
- * @internal
- */
 export class HeftPhaseSession extends HeftPluginHost {
   private readonly _options: IHeftPhaseSessionOptions;
   private readonly _taskSessionsByTask: Map<HeftTask, HeftTaskSession> = new Map();
 
-  /**
-   * @beta
-   */
   public readonly cleanHook: AsyncParallelHook<IHeftTaskCleanHookOptions>;
-
-  /**
-   * @beta
-   */
   public readonly loggingManager: LoggingManager;
-
-  /**
-   * @beta
-   */
   public readonly metricsCollector: MetricsCollector;
 
   /**
@@ -76,7 +59,7 @@ export class HeftPhaseSession extends HeftPluginHost {
           clean: this.cleanHook,
           run: new AsyncParallelHook(['runHookOptions'])
         },
-        parametersByLongName: this._options.parameterManager.getParametersForPlugin(task.pluginDefinition),
+        taskParameters: this._options.parameterManager.getParametersForPlugin(task.pluginDefinition),
         pluginHost: this,
         task
       });

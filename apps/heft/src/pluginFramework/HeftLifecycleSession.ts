@@ -3,11 +3,11 @@
 
 import * as path from 'path';
 import type { AsyncParallelHook } from 'tapable';
-import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
 import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
+import type { IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { HeftPluginHost } from './HeftPluginHost';
@@ -24,7 +24,7 @@ export interface IHeftLifecycleSession {
   /**
    * @public
    */
-  readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+  readonly parameters: IHeftParameters;
 
   /**
    * @public
@@ -62,6 +62,8 @@ export interface IHeftLifecycleSession {
 }
 
 /**
+ * Hooks that are available to the lifecycle plugin.
+ *
  * @public
  */
 export interface IHeftLifecycleHooks {
@@ -72,50 +74,48 @@ export interface IHeftLifecycleHooks {
 }
 
 /**
+ * Options provided to the clean hook.
+ *
  * @public
  */
-export interface IHeftLifecycleHookOptions {
-  production: boolean;
-  verbose: boolean;
-}
-
-/**
- * @public
- */
-export interface IHeftLifecycleCleanHookOptions extends IHeftLifecycleHookOptions {
+export interface IHeftLifecycleCleanHookOptions {
   addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 /**
+ * Options provided to the toolStart hook.
+ *
  * @public
  */
-export interface IHeftLifecycleToolStartHookOptions extends IHeftLifecycleHookOptions {}
+export interface IHeftLifecycleToolStartHookOptions {}
 
 /**
+ * Options provided to the toolStop hook.
+ *
  * @public
  */
-export interface IHeftLifecycleToolStopHookOptions extends IHeftLifecycleHookOptions {}
+export interface IHeftLifecycleToolStopHookOptions {}
 
 export interface IHeftLifecycleSessionOptions extends IInternalHeftSessionOptions {
   logger: ScopedLogger;
   lifecycleHooks: IHeftLifecycleHooks;
+  lifecycleParameters: IHeftParameters;
   pluginDefinition: HeftPluginDefinitionBase;
-  parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
   pluginHost: HeftPluginHost;
 }
 
 export class HeftLifecycleSession implements IHeftLifecycleSession {
   private _options: IHeftLifecycleSessionOptions;
+  private _pluginHost: HeftPluginHost;
 
   public readonly hooks: IHeftLifecycleHooks;
-  public readonly parametersByLongName: ReadonlyMap<string, CommandLineParameter>;
+  public readonly parameters: IHeftParameters;
   public readonly cacheFolder: string;
   public readonly tempFolder: string;
   public readonly logger: IScopedLogger;
-  public readonly pluginHost: HeftPluginHost;
 
   public get debugMode(): boolean {
-    return this._options.debugMode;
+    return this._options.debug;
   }
 
   /**
@@ -128,8 +128,7 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
     this.logger = options.logger;
     this.metricsCollector = options.metricsCollector;
     this.hooks = options.lifecycleHooks;
-    this.parametersByLongName = options.parametersByLongName;
-    this.pluginHost = options.pluginHost;
+    this.parameters = options.lifecycleParameters;
 
     // Guranteed to be unique since phases are forbidden from using the name 'lifecycle'
     // and lifecycle plugin names are enforced to be unique.
@@ -140,6 +139,8 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
 
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolder = path.join(options.heftConfiguration.tempFolder, uniquePluginFolderName);
+
+    this._pluginHost = options.pluginHost;
   }
 
   public requestAccessToPluginByName<T extends object>(
@@ -148,8 +149,8 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
     pluginApply: (pluginAccessor: T) => void
   ): void {
     const { pluginPackageName, pluginName } = this._options.pluginDefinition;
-    const pluginHookName: string = this.pluginHost.getPluginHookName(pluginPackageName, pluginName);
-    this.pluginHost.requestAccessToPluginByName(
+    const pluginHookName: string = this._pluginHost.getPluginHookName(pluginPackageName, pluginName);
+    this._pluginHost.requestAccessToPluginByName(
       pluginHookName,
       pluginToAccessPackage,
       pluginToAccessName,

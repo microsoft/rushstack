@@ -13,7 +13,6 @@ export { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFram
 export {
   IHeftLifecycleSession,
   IHeftLifecycleHooks,
-  IHeftLifecycleHookOptions,
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
   IHeftLifecycleToolStopHookOptions
@@ -22,7 +21,6 @@ export {
 export {
   IHeftTaskSession,
   IHeftTaskHooks,
-  IHeftTaskHookOptions,
   IHeftTaskRunHookOptions,
   IHeftTaskCleanHookOptions
 } from './pluginFramework/HeftTaskSession';

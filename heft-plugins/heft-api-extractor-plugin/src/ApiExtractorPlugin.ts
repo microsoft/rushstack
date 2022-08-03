@@ -233,7 +233,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       apiExtractorConfiguration,
       typescriptPackagePath,
       buildFolder: heftConfiguration.buildFolder,
-      production: runOptions.production,
+      production: taskSession.parameters.production,
       scopedLogger: taskSession.logger
     });
 

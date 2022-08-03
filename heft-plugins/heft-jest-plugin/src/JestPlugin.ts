@@ -103,30 +103,32 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     heftConfiguration: HeftConfiguration,
     pluginOptions?: IJestPluginOptions
   ): void {
+    const { parameters } = taskSession;
+
     // Flags
     const detectOpenHandlesParameter: CommandLineFlagParameter =
-      taskSession.getFlagParameter('--detect-open-handles');
+      parameters.getFlagParameter('--detect-open-handles');
     const debugHeftReporterParameter: CommandLineFlagParameter =
-      taskSession.getFlagParameter('--debug-heft-reporter');
+      parameters.getFlagParameter('--debug-heft-reporter');
     const disableCodeCoverageParameter: CommandLineFlagParameter =
-      taskSession.getFlagParameter('--disable-code-coverage');
-    const silentParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--silent');
+      parameters.getFlagParameter('--disable-code-coverage');
+    const silentParameter: CommandLineFlagParameter = parameters.getFlagParameter('--silent');
     const updateSnapshotsParameter: CommandLineFlagParameter =
-      taskSession.getFlagParameter('--update-snapshots');
+      parameters.getFlagParameter('--update-snapshots');
 
     // Strings
-    const configParameter: CommandLineStringParameter = taskSession.getStringParameter('--config');
-    const maxWorkersParameter: CommandLineStringParameter = taskSession.getStringParameter('--max-workers');
+    const configParameter: CommandLineStringParameter = parameters.getStringParameter('--config');
+    const maxWorkersParameter: CommandLineStringParameter = parameters.getStringParameter('--max-workers');
     const findRelatedTestsParameter: CommandLineStringParameter =
-      taskSession.getStringParameter('--find-related-tests');
+      parameters.getStringParameter('--find-related-tests');
     const testNamePatternParameter: CommandLineStringParameter =
-      taskSession.getStringParameter('--test-name-pattern');
+      parameters.getStringParameter('--test-name-pattern');
     const testPathPatternParameter: CommandLineStringParameter =
-      taskSession.getStringParameter('--test-path-pattern');
+      parameters.getStringParameter('--test-path-pattern');
 
     // Integers
     const testTimeoutParameter: CommandLineIntegerParameter =
-      taskSession.getIntegerParameter('--test-timeout-ms');
+      parameters.getIntegerParameter('--test-timeout-ms');
 
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       // Jest's cache is not reliable.  For example, if a Jest configuration change causes files to be
@@ -269,8 +271,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       // watch: testStageProperties.watchMode,
 
       // In debug mode, avoid forking separate processes that are difficult to debug
-      runInBand: taskSession.debugMode,
-      debug: taskSession.debugMode,
+      runInBand: taskSession.parameters.debug,
+      debug: taskSession.parameters.debug,
       detectOpenHandles: options?.detectOpenHandles || false,
 
       cacheDirectory: taskSession.cacheFolder,
@@ -469,7 +471,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const reporterOptions: IHeftJestReporterOptions = {
       heftConfiguration,
       logger,
-      debugMode: taskSession.debugMode
+      debugMode: taskSession.parameters.debug
     };
     if (Array.isArray(config.reporters)) {
       // Harvest all the array indices that need to modified before altering the array
