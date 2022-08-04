@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.46.6",
+  "version": "0.47.0",
   "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
@@ -62,6 +62,6 @@
     "@types/semver": "7.3.5",
     "colors": "~1.2.1",
     "tslint": "~5.20.1",
-    "typescript": "~4.6.3"
+    "typescript": "~4.7.4"
   }
 }

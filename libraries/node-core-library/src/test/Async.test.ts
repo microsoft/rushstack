@@ -313,4 +313,149 @@ describe(Async.name, () => {
       ).rejects.toThrow(expectedError);
     });
   });
+
+  describe(Async.runWithRetriesAsync.name, () => {
+    it('Correctly handles a sync function that succeeds the first time', async () => {
+      const expectedResult: string = 'RESULT';
+      const result: string = await Async.runWithRetriesAsync({ action: () => expectedResult, maxRetries: 0 });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('Correctly handles an async function that succeeds the first time', async () => {
+      const expectedResult: string = 'RESULT';
+      const result: string = await Async.runWithRetriesAsync({
+        action: async () => expectedResult,
+        maxRetries: 0
+      });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('Correctly handles a sync function that throws and does not allow retries', async () => {
+      await expect(
+        async () =>
+          await Async.runWithRetriesAsync({
+            action: () => {
+              throw new Error('error');
+            },
+            maxRetries: 0
+          })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('Correctly handles an async function that throws and does not allow retries', async () => {
+      await expect(
+        async () =>
+          await Async.runWithRetriesAsync({
+            action: async () => {
+              throw new Error('error');
+            },
+            maxRetries: 0
+          })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('Correctly handles a sync function that always throws and allows several retries', async () => {
+      await expect(
+        async () =>
+          await Async.runWithRetriesAsync({
+            action: () => {
+              throw new Error('error');
+            },
+            maxRetries: 5
+          })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('Correctly handles an async function that always throws and allows several retries', async () => {
+      await expect(
+        async () =>
+          await Async.runWithRetriesAsync({
+            action: async () => {
+              throw new Error('error');
+            },
+            maxRetries: 5
+          })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('Correctly handles a sync function that throws once and then succeeds', async () => {
+      const expectedResult: string = 'RESULT';
+      let callCount: number = 0;
+      const result: string = await Async.runWithRetriesAsync({
+        action: () => {
+          if (callCount++ === 0) {
+            throw new Error('error');
+          } else {
+            return expectedResult;
+          }
+        },
+        maxRetries: 1
+      });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('Correctly handles an async function that throws once and then succeeds', async () => {
+      const expectedResult: string = 'RESULT';
+      let callCount: number = 0;
+      const result: string = await Async.runWithRetriesAsync({
+        action: () => {
+          if (callCount++ === 0) {
+            throw new Error('error');
+          } else {
+            return expectedResult;
+          }
+        },
+        maxRetries: 1
+      });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('Correctly handles a sync function that throws once and then succeeds with a timeout', async () => {
+      const expectedResult: string = 'RESULT';
+      let callCount: number = 0;
+      const sleepSpy: jest.SpyInstance = jest
+        .spyOn(Async, 'sleep')
+        .mockImplementation(() => Promise.resolve());
+
+      const resultPromise: Promise<string> = Async.runWithRetriesAsync({
+        action: () => {
+          if (callCount++ === 0) {
+            throw new Error('error');
+          } else {
+            return expectedResult;
+          }
+        },
+        maxRetries: 1,
+        retryDelayMs: 5
+      });
+
+      expect(await resultPromise).toEqual(expectedResult);
+      expect(sleepSpy).toHaveBeenCalledTimes(1);
+      expect(sleepSpy).toHaveBeenLastCalledWith(5);
+    });
+
+    it('Correctly handles an async function that throws once and then succeeds with a timeout', async () => {
+      const expectedResult: string = 'RESULT';
+      let callCount: number = 0;
+      const sleepSpy: jest.SpyInstance = jest
+        .spyOn(Async, 'sleep')
+        .mockImplementation(() => Promise.resolve());
+
+      const resultPromise: Promise<string> = Async.runWithRetriesAsync({
+        action: async () => {
+          if (callCount++ === 0) {
+            throw new Error('error');
+          } else {
+            return expectedResult;
+          }
+        },
+        maxRetries: 1,
+        retryDelayMs: 5
+      });
+
+      expect(await resultPromise).toEqual(expectedResult);
+      expect(sleepSpy).toHaveBeenCalledTimes(1);
+      expect(sleepSpy).toHaveBeenLastCalledWith(5);
+    });
+  });
 });

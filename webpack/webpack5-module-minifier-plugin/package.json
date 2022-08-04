@@ -1,17 +1,17 @@
 {
-  "name": "@rushstack/webpack4-module-minifier-plugin",
-  "version": "0.9.16",
+  "name": "@rushstack/webpack5-module-minifier-plugin",
+  "version": "5.1.18",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "lib/index.js",
-  "typings": "dist/webpack4-module-minifier-plugin.d.ts",
+  "typings": "dist/webpack5-module-minifier-plugin.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "webpack/module-minifier-plugin-4"
+    "directory": "webpack/webpack5-module-minifier-plugin"
   },
   "engines": {
-    "node": ">=10.17.1"
+    "node": ">=14.19.0"
   },
   "scripts": {
     "build": "heft build --clean",
@@ -19,37 +19,24 @@
     "_phase:test": "heft test --no-build"
   },
   "peerDependencies": {
-    "@types/webpack": "*",
-    "@types/webpack-sources": "*",
-    "webpack": "^4.31.0",
-    "webpack-sources": "~1.4.3"
-  },
-  "peerDependenciesMeta": {
-    "@types/webpack": {
-      "optional": true
-    },
-    "@types/webpack-sources": {
-      "optional": true
-    }
+    "@rushstack/module-minifier": "*",
+    "webpack": "^5.68.0"
   },
   "dependencies": {
-    "@rushstack/module-minifier": "workspace:*",
     "@rushstack/worker-pool": "workspace:*",
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
-    "tapable": "1.1.3"
+    "tapable": "2.2.1"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/module-minifier": "workspace:*",
+    "@types/estree": "0.0.50",
     "@types/heft-jest": "1.0.1",
-    "@types/webpack": "4.41.32",
-    "@types/webpack-sources": "1.4.2",
-    "webpack": "~4.44.2",
-    "webpack-sources": "~1.4.3"
+    "memfs": "3.4.3",
+    "webpack": "~5.68.0"
   },
-  "sideEffects": [
-    "./lib/OverrideWebpackIdentifierAllocation"
-  ]
+  "sideEffects": false
 }

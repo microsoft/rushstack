@@ -124,7 +124,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0 || >=14.15.0 <15.0.0 || >=16.13.0 <17.0.0",
+  "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
@@ -1051,32 +1051,8 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@rushstack/webpack4-localization-plugin",
-      "projectFolder": "webpack/localization-plugin-4",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/webpack5-localization-plugin",
-      "projectFolder": "webpack/localization-plugin-5",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@rushstack/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/webpack4-module-minifier-plugin",
-      "projectFolder": "webpack/module-minifier-plugin-4",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/webpack5-module-minifier-plugin",
-      "projectFolder": "webpack/module-minifier-plugin-5",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1089,6 +1065,30 @@
     {
       "packageName": "@rushstack/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack4-localization-plugin",
+      "projectFolder": "webpack/webpack4-localization-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack4-module-minifier-plugin",
+      "projectFolder": "webpack/webpack4-module-minifier-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack5-module-minifier-plugin",
+      "projectFolder": "webpack/webpack5-module-minifier-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "projectFolder": "webpack/webpack5-localization-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     }

@@ -1,6 +1,16 @@
 # Change Log - @rushstack/worker-pool
 
-This log was last generated on Thu, 21 Jul 2022 23:30:28 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+
+## 0.1.19
+Wed, 03 Aug 2022 18:40:35 GMT
+
+_Version update only_
+
+## 0.1.18
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
 
 ## 0.1.17
 Thu, 21 Jul 2022 23:30:28 GMT

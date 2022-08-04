@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Async runWithRetriesAsync Correctly handles a sync function that always throws and allows several retries 1`] = `"error"`;
+
+exports[`Async runWithRetriesAsync Correctly handles a sync function that throws and does not allow retries 1`] = `"error"`;
+
+exports[`Async runWithRetriesAsync Correctly handles an async function that always throws and allows several retries 1`] = `"error"`;
+
+exports[`Async runWithRetriesAsync Correctly handles an async function that throws and does not allow retries 1`] = `"error"`;

@@ -1,6 +1,18 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 28 Jun 2022 22:47:13 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+
+## 3.50.1
+Wed, 03 Aug 2022 18:40:35 GMT
+
+_Version update only_
+
+## 3.50.0
+Mon, 01 Aug 2022 02:45:32 GMT
+
+### Minor changes
+
+- Add an Async.runWithRetriesAsync() API to run and a retry an async function that may intermittently fail.
 
 ## 3.49.0
 Tue, 28 Jun 2022 22:47:13 GMT

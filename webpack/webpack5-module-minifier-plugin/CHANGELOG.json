@@ -2,6 +2,69 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.1.18",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.18",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.1.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.1.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.17",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.17",
+      "date": "Mon, 01 Aug 2022 02:45:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.1.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.1.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.16",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.16",
+      "date": "Thu, 28 Jul 2022 00:18:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix typings reference."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.1.15",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.15",
       "date": "Thu, 21 Jul 2022 23:30:27 GMT",

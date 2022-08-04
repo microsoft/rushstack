@@ -12,6 +12,6 @@ import type { IHeftPlugin } from '@rushstack/heft';
 import { DevCertPlugin } from './DevCertPlugin';
 
 /**
- * @internal
+ * @public
  */
 export default new DevCertPlugin() as IHeftPlugin;
