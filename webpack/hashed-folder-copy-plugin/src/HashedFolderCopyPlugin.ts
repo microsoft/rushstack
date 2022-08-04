@@ -268,7 +268,7 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
       }
 
       for (const globPattern of globPatterns) {
-        const globResults: string[] = glob.sync(globPattern, { cwd: resolvedGlobsBase });
+        const globResults: string[] = glob.sync(globPattern, { cwd: resolvedGlobsBase, nodir: true });
         for (const globResult of globResults) {
           const globResultFullPath: string = path.resolve(resolvedGlobsBase, globResult);
 
