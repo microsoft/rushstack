@@ -256,6 +256,9 @@ export abstract class HeftPluginDefinitionBase {
     return this._heftPluginDefinitionJson.parameters || [];
   }
 
+  /**
+   * Load the plugin associated with the definition.
+   */
   public async loadPluginAsync(logger: IScopedLogger): Promise<IHeftPlugin> {
     // Do not memoize the plugin here, since we want a new instance of the plugin each time it is loaded
     // from the definition
@@ -300,6 +303,9 @@ export abstract class HeftPluginDefinitionBase {
     return heftPlugin;
   }
 
+  /**
+   * Validate the provided plugin options against the plugin's options schema, if one is provided.
+   */
   public validateOptions(options: unknown): void {
     if (this._optionsSchema) {
       try {
@@ -314,11 +320,15 @@ export abstract class HeftPluginDefinitionBase {
 }
 
 export class HeftLifecyclePluginDefinition extends HeftPluginDefinitionBase {
+  /**
+   * Load a lifecycle plugin definition given the provided plugin definition options.
+   */
   public static loadFromObject(options: IHeftPluginDefinitionOptions): HeftLifecyclePluginDefinition {
     return new HeftLifecyclePluginDefinition(options);
   }
 
   /**
+   * {@inheritDoc HeftPluginDefinitionBase.loadPluginAsync}
    * @override
    */
   public loadPluginAsync(logger: IScopedLogger): Promise<IHeftPlugin<HeftLifecycleSession, object | void>> {
@@ -327,11 +337,15 @@ export class HeftLifecyclePluginDefinition extends HeftPluginDefinitionBase {
 }
 
 export class HeftTaskPluginDefinition extends HeftPluginDefinitionBase {
+  /**
+   * Load a task plugin definition given the provided plugin definition options.
+   */
   public static loadFromObject(options: IHeftPluginDefinitionOptions): HeftTaskPluginDefinition {
     return new HeftTaskPluginDefinition(options);
   }
 
   /**
+   * {@inheritDoc HeftPluginDefinitionBase.loadPluginAsync}
    * @override
    */
   public loadPluginAsync(logger: IScopedLogger): Promise<IHeftPlugin<HeftTaskSession, object | void>> {

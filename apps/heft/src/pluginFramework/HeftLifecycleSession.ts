@@ -17,33 +17,40 @@ import type { HeftPluginHost } from './HeftPluginHost';
  */
 export interface IHeftLifecycleSession {
   /**
+   * The hooks available to the lifecycle plugin.
+   *
    * @public
    */
   readonly hooks: IHeftLifecycleHooks;
 
   /**
+   * The parameters that were passed to the lifecycle plugin.
+   *
    * @public
    */
   readonly parameters: IHeftParameters;
 
   /**
+   * The cache folder for the lifecycle plugin. This folder is unique for each lifecycle plugin,
+   * and will not be cleaned when Heft is run with `--clean`. However, it will be cleaned when
+   * Heft is run with `--clean` and `--clean-cache`.
+   *
    * @public
    */
   readonly cacheFolder: string;
 
   /**
+   * The temp folder for the lifecycle plugin. This folder is unique for each lifecycle plugin,
+   * and will be cleaned when Heft is run with `--clean`.
+   *
    * @public
    */
   readonly tempFolder: string;
 
   /**
-   * If set to true, the build is running with the --debug flag
+   * The scoped logger for the lifecycle plugin. Messages logged with this logger will be prefixed
+   * with the plugin name, in the format "[lifecycle:<pluginName>]"
    *
-   * @public
-   */
-  readonly debugMode: boolean;
-
-  /**
    * @public
    */
   readonly logger: IScopedLogger;
@@ -67,9 +74,34 @@ export interface IHeftLifecycleSession {
  * @public
  */
 export interface IHeftLifecycleHooks {
+  /**
+   * The `clean` hook is called at the beginning of Heft execution. It can be used to clean up
+   * any files or folders that may be produced by the plugin. To use it, call
+   * `clean.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
+
+  /**
+   * The `toolStart` hook is called at the beginning of Heft execution, after the `clean` hook. It is
+   * called before any phases have begun to execute. To use it, call
+   * `toolStart.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
+
+  /**
+   * The `toolStart` hook is called at the end of Heft execution, after the `clean` hook. It is
+   * called before any phases have begun to execute. To use it, call
+   * `toolStart.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
   toolStop: AsyncParallelHook<IHeftLifecycleToolStopHookOptions>;
+
+  // TODO: Wire up and document this hook.
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
 }
 

@@ -27,14 +27,14 @@ export interface IHeftTaskSession {
   readonly taskName: string;
 
   /**
-   * The hooks available to the task.
+   * The hooks available to the task plugin.
    *
    * @public
    */
   readonly hooks: IHeftTaskHooks;
 
   /**
-   * The parameters that were passed to the task.
+   * The parameters that were passed to the task plugin.
    *
    * @public
    */
@@ -59,7 +59,7 @@ export interface IHeftTaskSession {
 
   /**
    * The scoped logger for the task. Messages logged with this logger will be prefixed with
-   * the phase and task name.
+   * the phase and task name, in the format "[<phaseName>:<taskName>]".
    *
    * @public
    */

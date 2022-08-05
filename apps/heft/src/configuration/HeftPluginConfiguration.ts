@@ -20,6 +20,9 @@ export interface IHeftPluginConfigurationJson {
 
 const HEFT_PLUGIN_CONFIGURATION_FILENAME: 'heft-plugin.json' = 'heft-plugin.json';
 
+/**
+ * Loads and validates the heft-plugin.json file.
+ */
 export class HeftPluginConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '..', 'schemas', 'heft-plugin.schema.json')
@@ -46,6 +49,9 @@ export class HeftPluginConfiguration {
     this._validate(heftPluginConfigurationJson, packageName);
   }
 
+  /**
+   * Load the heft-plugin.json file from the specified package.
+   */
   public static async loadFromPackageAsync(
     packageRoot: string,
     packageName: string
@@ -70,10 +76,16 @@ export class HeftPluginConfiguration {
     return await heftPluginConfigurationPromise;
   }
 
+  /**
+   * The path to the root of the package that contains the heft-plugin.json file.
+   */
   public get packageRoot(): string {
     return this._packageRoot;
   }
 
+  /**
+   * The package name of the package that contains the heft-plugin.json file.
+   */
   public get packageName(): string {
     return this._packageName;
   }
@@ -94,6 +106,9 @@ export class HeftPluginConfiguration {
     return this._lifecyclePluginDefinitions;
   }
 
+  /**
+   * Task plugin definitions sourced from the heft-plugin.json file.
+   */
   public get taskPluginDefinitions(): ReadonlySet<HeftTaskPluginDefinition> {
     if (!this._taskPluginDefinitions) {
       this._taskPluginDefinitions = new Set();
@@ -110,6 +125,10 @@ export class HeftPluginConfiguration {
     return this._taskPluginDefinitions;
   }
 
+  /**
+   * Returns a loaded plugin definition for the provided specifier. Specifiers are normally obtained from the
+   * heft.json file.
+   */
   public getPluginDefinitionBySpecifier(
     pluginSpecifier: IHeftConfigurationJsonPluginSpecifier
   ): HeftPluginDefinitionBase {
@@ -121,8 +140,8 @@ export class HeftPluginConfiguration {
       // Make an attempt at resolving the plugin without the name by looking for the first plugin
       if (pluginDefinitions.length > 1) {
         throw new Error(
-          `The specified plugin package "${pluginSpecifier.pluginPackage}" contains multiple plugins. You must ` +
-            'specify a plugin name.'
+          `The specified plugin package "${pluginSpecifier.pluginPackage}" contains multiple plugins. ` +
+            'You must specify a plugin name.'
         );
       }
       return pluginDefinitions[0];
@@ -141,6 +160,10 @@ export class HeftPluginConfiguration {
     }
   }
 
+  /**
+   * Returns a loaded lifecycle plugin definition for the provided plugin name. If one can't be found,
+   * returns undefined.
+   */
   public tryGetLifecyclePluginDefinitionByName(
     lifecyclePluginName: string
   ): HeftLifecyclePluginDefinition | undefined {
@@ -152,6 +175,10 @@ export class HeftPluginConfiguration {
     return this._lifecyclePluginDefinitionsMap.get(lifecyclePluginName);
   }
 
+  /**
+   * Returns a loaded task plugin definition for the provided plugin name. If one can't be found,
+   * returns undefined.
+   */
   public tryGetTaskPluginDefinitionByName(taskPluginName: string): HeftTaskPluginDefinition | undefined {
     if (!this._taskPluginDefinitionsMap) {
       this._taskPluginDefinitionsMap = new Map(

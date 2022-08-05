@@ -8,9 +8,6 @@ import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 
 const RESERVED_PHASE_NAMES: Set<string> = new Set(['lifecycle']);
 
-/**
- * @internal
- */
 export class HeftPhase {
   private _internalHeftSession: InternalHeftSession;
   private _phaseName: string;
@@ -33,21 +30,33 @@ export class HeftPhase {
     this._validate();
   }
 
+  /**
+   * The name of the phase.
+   */
   public get phaseName(): string {
     return this._phaseName;
   }
 
+  /**
+   * The description of the phase.
+   */
   public get phaseDescription(): string | undefined {
     return this._phaseSpecifier.phaseDescription;
   }
 
-  public get cleanAdditionalFiles(): Set<IDeleteOperation> {
+  /**
+   * Returns delete operations that are specified on the phase.
+   */
+  public get cleanAdditionalFiles(): ReadonlySet<IDeleteOperation> {
     if (!this._cleanAdditionalFiles) {
       this._cleanAdditionalFiles = new Set(this._phaseSpecifier.cleanAdditionalFiles || []);
     }
     return this._cleanAdditionalFiles;
   }
 
+  /**
+   * Returns the set of phases that depend on this phase.
+   */
   public get consumingPhases(): ReadonlySet<HeftPhase> {
     if (!this._consumingPhases) {
       // Force initialize all dependency relationships
@@ -68,6 +77,9 @@ export class HeftPhase {
     return this._consumingPhases!;
   }
 
+  /**
+   * Returns the set of phases that this phase depends on.
+   */
   public get dependencyPhases(): ReadonlySet<HeftPhase> {
     let dependencyPhases: Set<HeftPhase> | undefined = this._dependencyPhases;
     if (!dependencyPhases) {
@@ -86,11 +98,17 @@ export class HeftPhase {
     return dependencyPhases;
   }
 
+  /**
+   * Returns the set of tasks contained by this phase.
+   */
   public get tasks(): ReadonlySet<HeftTask> {
     this._ensureTasks();
     return this._tasks!;
   }
 
+  /**
+   * Returns a map of tasks by name.
+   */
   public get tasksByName(): ReadonlyMap<string, HeftTask> {
     this._ensureTasks();
     return this._tasksByName!;

@@ -33,9 +33,6 @@ export class HeftPhaseSession extends HeftPluginHost {
   public readonly loggingManager: LoggingManager;
   public readonly metricsCollector: MetricsCollector;
 
-  /**
-   * @internal
-   */
   public constructor(options: IHeftPhaseSessionOptions) {
     super();
     this._options = options;
@@ -46,6 +43,9 @@ export class HeftPhaseSession extends HeftPluginHost {
     this.cleanHook = new AsyncParallelHook(['cleanHookOptions']);
   }
 
+  /**
+   * Get a task session for the given task.
+   */
   public getSessionForTask(task: HeftTask): HeftTaskSession {
     let taskSession: HeftTaskSession | undefined = this._taskSessionsByTask.get(task);
     if (!taskSession) {
@@ -68,6 +68,9 @@ export class HeftPhaseSession extends HeftPluginHost {
     return taskSession;
   }
 
+  /**
+   * Apply all task plugins specified by the phase.
+   */
   public async applyPluginsAsync(): Promise<void> {
     const {
       heftConfiguration,

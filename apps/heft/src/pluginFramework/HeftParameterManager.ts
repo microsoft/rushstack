@@ -168,6 +168,10 @@ export class HeftParameterManager {
     this._options = options;
   }
 
+  /**
+   * Add parameters provided by the specified plugin definition. Parameters will be registered with the
+   * command line parameter provider after finalization.
+   */
   public addPluginParameters(pluginDefinition: HeftPluginDefinitionBase): void {
     if (this._isFinalized) {
       throw new InternalError('Parameters have already been finalized.');
@@ -177,6 +181,10 @@ export class HeftParameterManager {
     }
   }
 
+  /**
+   * Finalize and register parameters with the specified parameter provider. The parameter manager
+   * can only be finalized once.
+   */
   public finalizeParameters(commandLineParameterProvider: CommandLineParameterProvider): void {
     if (this._isFinalized) {
       throw new InternalError('Parameters have already been finalized.');
@@ -187,6 +195,9 @@ export class HeftParameterManager {
     }
   }
 
+  /**
+   * Get the finalized parameters for the specified plugin definition.
+   */
   public getParametersForPlugin(pluginDefinition: HeftPluginDefinitionBase): IHeftParameters {
     if (!this._isFinalized) {
       throw new InternalError('Parameters have not yet been finalized.');

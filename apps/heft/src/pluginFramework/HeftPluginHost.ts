@@ -12,6 +12,9 @@ export abstract class HeftPluginHost {
 
   public abstract applyPluginsAsync(): Promise<void>;
 
+  /**
+   * Registers a callback used to provide access to a requested plugin via the plugin accessor.
+   */
   public requestAccessToPluginByName<T extends object>(
     requestorName: string,
     pluginToAccessPackage: string,
@@ -33,10 +36,18 @@ export abstract class HeftPluginHost {
     pluginAccessRequestHook.tap(requestorName, accessorCallback);
   }
 
+  /**
+   * Gets the name of the hook that is registered with the plugin access request hook.
+   */
   public getPluginHookName(pluginPackageName: string, pluginName: string): string {
     return `${pluginPackageName};${pluginName}`;
   }
 
+  /**
+   * Resolves all plugin requests for the specified plugin. All plugins that requested access to the
+   * specified plugin will have their callbacks invoked, and will be provided with the accessor for
+   * the specified plugin.
+   */
   protected resolvePluginAccessRequests(
     plugin: IHeftPlugin,
     pluginDefinition: HeftPluginDefinitionBase

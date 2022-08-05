@@ -24,6 +24,9 @@ export interface IRigPackageResolverOptions {
   rigConfig: RigConfig;
 }
 
+/**
+ * Rig resolves requested tools from the project's Heft rig.
+ */
 export class RigPackageResolver implements IRigPackageResolver {
   private _buildFolder: string;
   private _projectPackageJson: IPackageJson;
@@ -31,15 +34,23 @@ export class RigPackageResolver implements IRigPackageResolver {
   private _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
   private _resolverCache: Map<string, Promise<string>> = new Map();
 
-  /**
-   * @internal
-   */
   public constructor(options: IRigPackageResolverOptions) {
     this._buildFolder = options.buildFolder;
     this._projectPackageJson = options.projectPackageJson;
     this._rigConfig = options.rigConfig;
   }
 
+  /**
+   * Rig resolve the path to a specific package.
+   *
+   * The following rules will apply when rig resolving a package:
+   * - If the local project has a devDependency (not regular or peer dependency) on the tool,
+   *   that has highest precedence.
+   * - OTHERWISE if there is a rig.json file, then look at the rig's package.json. Does it have a
+   *   regular dependency (not dev or peer dependency) on the tool? If yes, then
+   *   resolve the tool from the rig package folder.
+   * - OTHERWISE try to resolve it from the current project.
+   */
   public async resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string> {
     const buildFolder: string = this._buildFolder;
     const projectFolder: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(buildFolder);
@@ -58,14 +69,6 @@ export class RigPackageResolver implements IRigPackageResolver {
   }
 
   private async _resolvePackageInnerAsync(toolPackageName: string, terminal: ITerminal): Promise<string> {
-    // The following rules will apply:
-    // - If the local project has a devDependency (not regular or peer dependency) on the tool,
-    // that has highest precedence.
-    // - OTHERWISE if there is a rig.json file, then look at the rig's package.json. Does it have a
-    // regular dependency (not dev or peer dependency) on the tool? If yes, then
-    // resolve the tool from the rig package folder.
-    // - OTHERWISE try to resolve it from the current project.
-
     // See if the project has a devDependency on the package
     if (
       this._projectPackageJson.devDependencies &&
@@ -86,6 +89,7 @@ export class RigPackageResolver implements IRigPackageResolver {
       }
     }
 
+    // See if the project rig has a regular dependency on the package
     const rigConfiguration: RigConfig = this._rigConfig;
     if (rigConfiguration.rigFound) {
       const rigFolder: string = rigConfiguration.getResolvedProfileFolder();
@@ -117,6 +121,7 @@ export class RigPackageResolver implements IRigPackageResolver {
       }
     }
 
+    // Last attempt, try to resolve it from the current project using node resolution
     try {
       const resolvedPackageFolder: string = Import.resolvePackage({
         packageName: toolPackageName,
