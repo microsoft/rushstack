@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": " ",
+      "type": "none",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "BPapp-MS@users.noreply.github.com"
+}
