@@ -83,7 +83,7 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
     if (this.values.length > 0) {
       for (const value of this.values) {
         argList.push(this.longName);
-        argList.push(String(value));
+        argList.push(value.toString());
       }
     }
   }
