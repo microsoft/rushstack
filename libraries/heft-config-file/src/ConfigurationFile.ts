@@ -745,7 +745,7 @@ export class ConfigurationFile<TConfigurationFile> {
           case InheritanceType.append: {
             if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
               throw new Error(
-                `Issue in processing configuration file property "${propertyName}". ` +
+                `Issue in processing configuration file property "${String(propertyName)}". ` +
                   `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
               );
             }
@@ -767,7 +767,7 @@ export class ConfigurationFile<TConfigurationFile> {
           case InheritanceType.merge: {
             if (parentPropertyValue === null || propertyValue === null) {
               throw new Error(
-                `Issue in processing configuration file property "${propertyName}". ` +
+                `Issue in processing configuration file property "${String(propertyName)}". ` +
                   `Null values cannot be used when the inheritance type is set as "${InheritanceType.merge}"`
               );
             } else if (
@@ -775,12 +775,12 @@ export class ConfigurationFile<TConfigurationFile> {
               (parentPropertyValue && typeof parentPropertyValue !== 'object')
             ) {
               throw new Error(
-                `Issue in processing configuration file property "${propertyName}". ` +
+                `Issue in processing configuration file property "${String(propertyName)}". ` +
                   `Primitive types cannot be provided when the inheritance type is set as "${InheritanceType.merge}"`
               );
             } else if (Array.isArray(propertyValue) || Array.isArray(parentPropertyValue)) {
               throw new Error(
-                `Issue in processing configuration file property "${propertyName}". ` +
+                `Issue in processing configuration file property "${String(propertyName)}". ` +
                   `Property is not a keyed object, but the inheritance type is set as "${InheritanceType.merge}"`
               );
             }
