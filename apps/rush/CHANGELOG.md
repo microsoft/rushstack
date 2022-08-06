@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 28 Jun 2022 03:31:01 GMT and should not be manually modified.
+This log was last generated on Sat, 06 Aug 2022 05:35:19 GMT and should not be manually modified.
+
+## 5.76.0
+Sat, 06 Aug 2022 05:35:19 GMT
+
+### Updates
+
+- Validate that if shouldPublish is set, private is not set
+- "rush install/update" should always set "ignore-compatibility-db=true" and print warning if the rush.json pnpmVersion specifies a version affected by this problem. 
+- Reorder some initialization logic so that Rush's change analysis is not counted as part of the build time for the first project
+- (BREAKING API CHANGE) Rename cyclicDependencyProjects to decoupledLocalDependencies
 
 ## 5.75.0
 Tue, 28 Jun 2022 03:31:01 GMT
