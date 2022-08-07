@@ -419,7 +419,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
 
-    // Stage 2 rebuild pending
+    // Stage 2 pnpm rebuild pending scripts
     if (this.deferredInstallationScripts && !this.options.ignoreScripts) {
       // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
       const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
@@ -430,7 +430,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
 
       const rebuildArgs: string[] = ['rebuild', '--pending'];
-      this.pushRebuildArgs(rebuildArgs);
+      this.pushPnpmRebuildCommandArgs(rebuildArgs);
 
       console.log(
         os.EOL +
@@ -489,9 +489,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   /**
-   * Used when invoking pnpm rebuild for running deferred installation scripts.
+   * Used when invoking the "pnpm rebuild" command that runs installation scripts of NPM dependencies.
+   * NOTE: Despite the name, "pnpm rebuild" is purely an installation action -- it does not build Rush projects
+   * in the manner of "rush rebuild" or "rush build".
    */
-  protected pushRebuildArgs(args: string[]): void {
+  protected pushPnpmRebuildCommandArgs(args: string[]): void {
     args.push('--recursive');
 
     if (
