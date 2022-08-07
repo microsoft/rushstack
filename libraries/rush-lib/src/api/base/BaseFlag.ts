@@ -60,7 +60,7 @@ export class BaseFlag<T extends object = JsonObject> {
   /**
    * Merge new data into current state by lodash "merge"
    */
-  public mergeFromObject(data: JsonObject): void {
+  public mergeFromObject(data: Partial<T>): void {
     if (lodash.isMatch(this._state, data)) {
       return;
     }
@@ -78,6 +78,15 @@ export class BaseFlag<T extends object = JsonObject> {
       });
       this._isModified = false;
     }
+  }
+
+  /**
+   * Writes the flag file to disk with the current state
+   */
+  public save(): void {
+    JsonFile.save(this._state, this._path, {
+      ensureFolderExists: true
+    });
   }
 
   /**
@@ -99,5 +108,18 @@ export class BaseFlag<T extends object = JsonObject> {
    */
   protected get flagName(): string {
     throw new Error('Do not use this class directly, extends this class instead');
+  }
+
+  /**
+   * Returns the state by reading current flag file
+   */
+  protected get oldState(): T | undefined {
+    let oldState: T;
+    try {
+      oldState = JsonFile.load(this.path);
+    } catch {
+      return undefined;
+    }
+    return oldState;
   }
 }

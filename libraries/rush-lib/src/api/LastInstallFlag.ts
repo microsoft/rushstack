@@ -1,15 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, Import, IPackageJson } from '@rushstack/node-core-library';
+import { Import, IPackageJson } from '@rushstack/node-core-library';
 import { BaseFlag } from './base/BaseFlag';
 
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
+import { RushConfigurationProject } from './RushConfigurationProject';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
+
+/**
+ * Install project state
+ * @internal
+ */
+export interface IInstallProject
+  extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
+  ignoreScripts?: boolean;
+}
 
 /**
  * This represents the JSON data structure for the "last-install.flag" file.
@@ -19,7 +29,7 @@ export interface ILastInstallFlagJson {
   /**
    * Current node version
    */
-  node: string;
+  nodeVersion: string;
   /**
    * Current package manager name
    */
@@ -35,24 +45,19 @@ export interface ILastInstallFlagJson {
   /**
    * The content of package.json, used in the flag file of autoinstaller
    */
-  packageJson?: IPackageJson;
+  autoinstallerPackageJson?: IPackageJson;
   /**
    * Same with pnpmOptions.pnpmStorePath in rush.json
    */
-  storePath?: string;
+  pnpmStorePath?: string;
   /**
    * True when "useWorkspaces" is true in rush.json
    */
-  workspaces?: true;
+  useWorkspaces?: true;
   /**
-   * True when user explicitly specify "--ignore-scripts" CLI parameter or deferredInstallationScripts
+   * installed projects information indexed by packageName
    */
-  ignoreScripts?: true;
-  /**
-   * When specified, it is a list of selected projects during partial install
-   * It is undefined when full install
-   */
-  selectedProjectNames?: string[];
+  installProjects?: Record<string, IInstallProject>;
 }
 
 /**
@@ -63,6 +68,39 @@ export interface ILastInstallFlagJson {
  * @internal
  */
 export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
+  /**
+   * Check whether selected project is installed
+   * @internal
+   */
+  public isSelectedProjectInstalled(): boolean {
+    const oldState: ILastInstallFlagJson | undefined = this.oldState;
+    if (oldState === undefined) {
+      return false;
+    }
+    const newState: ILastInstallFlagJson = this._state;
+
+    if (oldState.installProjects && newState.installProjects) {
+      const newInstallProjectList: IInstallProject[] = Object.values(newState.installProjects);
+      const oldInstallProjectList: IInstallProject[] = Object.values(oldState.installProjects);
+      const omitProperties: (keyof IInstallProject)[] = ['ignoreScripts'];
+      if (oldInstallProjectList.length >= newInstallProjectList.length) {
+        if (
+          lodash.differenceWith(
+            Object.values(newState.installProjects),
+            Object.values(oldState.installProjects),
+            (a, b) => {
+              return lodash.isEqual(lodash.omit(a, omitProperties), lodash.omit(b, omitProperties));
+            }
+          ).length === 0
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   /**
    * @override
    * Returns true if the file exists and the contents match the current state.
@@ -82,16 +120,16 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
   }
 
   private _isValid(checkValidAndReportStoreIssues: boolean): boolean {
-    let oldState: ILastInstallFlagJson;
-    try {
-      oldState = JsonFile.load(this.path);
-    } catch (err) {
+    const oldState: ILastInstallFlagJson | undefined = this.oldState;
+    if (undefined === oldState) {
       return false;
     }
 
     const newState: ILastInstallFlagJson = this._state;
 
-    if (!lodash.isEqual(oldState, newState)) {
+    const omitProperties: (keyof ILastInstallFlagJson)[] = ['installProjects'];
+
+    if (!lodash.isEqual(lodash.omit(oldState, omitProperties), lodash.omit(newState, omitProperties))) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager;
         if (pkgManager === 'pnpm') {
@@ -99,10 +137,10 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
             // Only throw an error if the package manager hasn't changed from PNPM
             oldState.packageManager === pkgManager &&
             // Throw if the store path changed
-            oldState.storePath !== newState.storePath
+            oldState.pnpmStorePath !== newState.pnpmStorePath
           ) {
-            const oldStorePath: string = oldState.storePath || '<global>';
-            const newStorePath: string = newState.storePath || '<global>';
+            const oldStorePath: string = oldState.pnpmStorePath || '<global>';
+            const newStorePath: string = newState.pnpmStorePath || '<global>';
 
             throw new Error(
               'Current PNPM store path does not match the last one used. This may cause inconsistency in your builds.\n\n' +
@@ -111,29 +149,6 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
                 `New Path: ${newStorePath}`
             );
           }
-
-          // check ignoreScripts
-          if (newState.ignoreScripts !== oldState.ignoreScripts) {
-            return false;
-          } else {
-            // full install
-            if (!newState.selectedProjectNames && !oldState.selectedProjectNames) {
-              return true;
-            }
-          }
-
-          // check whether new selected projects are installed
-          if (newState.selectedProjectNames) {
-            if (!oldState.selectedProjectNames) {
-              // used to be a full install
-              return true;
-            } else if (
-              lodash.difference(newState.selectedProjectNames, oldState.selectedProjectNames).length === 0
-            ) {
-              // current selected projects are included in old selected projects
-              return true;
-            }
-          }
         }
       }
       return false;
@@ -141,7 +156,6 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
 
     return true;
   }
-
   /**
    * Returns the name of the flag file
    */
@@ -166,16 +180,16 @@ export class LastInstallFlagFactory {
    */
   public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastInstallFlag {
     const currentState: ILastInstallFlagJson = {
-      node: process.versions.node,
+      nodeVersion: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
       rushJsonFolder: rushConfiguration.rushJsonFolder
     };
 
     if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
-      currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+      currentState.pnpmStorePath = rushConfiguration.pnpmOptions.pnpmStorePath;
       if (rushConfiguration.pnpmOptions.useWorkspaces) {
-        currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
+        currentState.useWorkspaces = rushConfiguration.pnpmOptions.useWorkspaces;
       }
     }
 

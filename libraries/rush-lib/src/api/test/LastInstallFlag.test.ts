@@ -37,8 +37,8 @@ describe(LastInstallFlag.name, () => {
 
   it('can detect if the last flag was in a different state', () => {
     // preparation
-    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, { node: '5.0.0' });
-    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, { node: '8.9.4' });
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, { nodeVersion: '5.0.0' });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, { nodeVersion: '8.9.4' });
     FileSystem.deleteFile(flag1.path);
 
     // test state, should be invalid since the file doesn't exist
@@ -70,14 +70,14 @@ describe(LastInstallFlag.name, () => {
     FileSystem.deleteFile(flag.path);
   });
 
-  it("throws an error if new storePath doesn't match the old one", () => {
+  it("throws an error if new pnpmStorePath doesn't match the old one", () => {
     const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
-      storePath: `${TEMP_DIR_PATH}/pnpm-store`
+      pnpmStorePath: `${TEMP_DIR_PATH}/pnpm-store`
     });
     const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
-      storePath: `${TEMP_DIR_PATH}/temp-store`
+      pnpmStorePath: `${TEMP_DIR_PATH}/temp-store`
     });
 
     flag1.create();
@@ -89,7 +89,7 @@ describe(LastInstallFlag.name, () => {
   it("doesn't throw an error if conditions for error aren't met", () => {
     const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
-      storePath: `${TEMP_DIR_PATH}/pnpm-store`
+      pnpmStorePath: `${TEMP_DIR_PATH}/pnpm-store`
     });
     const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'npm'
@@ -100,5 +100,55 @@ describe(LastInstallFlag.name, () => {
       flag2.checkValidAndReportStoreIssues();
     }).not.toThrow();
     expect(flag2.checkValidAndReportStoreIssues()).toEqual(false);
+  });
+
+  it('can detect selected project installed', () => {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      installProjects: {
+        foo: {
+          packageName: 'foo',
+          projectRelativeFolder: 'packages/foo'
+        },
+        bar: {
+          packageName: 'bar',
+          projectRelativeFolder: 'packages/bar'
+        }
+      }
+    });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      installProjects: {
+        foo: {
+          packageName: 'foo',
+          projectRelativeFolder: 'packages/foo'
+        }
+      }
+    });
+    flag1.create();
+    expect(flag2.isSelectedProjectInstalled()).toBe(true);
+  });
+
+  it('can detect selected project not installed', () => {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      installProjects: {
+        foo: {
+          packageName: 'foo',
+          projectRelativeFolder: 'packages/foo'
+        }
+      }
+    });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      installProjects: {
+        foo: {
+          packageName: 'foo',
+          projectRelativeFolder: 'packages/foo'
+        },
+        bar: {
+          packageName: 'bar',
+          projectRelativeFolder: 'packages/bar'
+        }
+      }
+    });
+    flag1.create();
+    expect(flag2.isSelectedProjectInstalled()).toBe(false);
   });
 });

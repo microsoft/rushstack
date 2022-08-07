@@ -25,7 +25,7 @@ import { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
-import { LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
+import { IInstallProject, LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { PurgeManager } from '../PurgeManager';
@@ -122,8 +122,9 @@ export interface IInstallManagerOptions {
 
   /**
    * Selected projects during partial install.
+   * If undefined, that means a full install.
    */
-  selectedProjects?: Set<RushConfigurationProject>;
+  partialInstallSelectedProjects?: Set<RushConfigurationProject>;
 }
 
 /**
@@ -137,6 +138,7 @@ export abstract class BaseInstallManager {
   private _installRecycler: AsyncRecycler;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
+  private _selectedProjects: RushConfigurationProject[] = [];
 
   /**
    * If deferredInstallationScripts, installation will be divided into two stages:
@@ -194,6 +196,10 @@ export abstract class BaseInstallManager {
     return this._deferredInstallationScripts;
   }
 
+  protected get selectedProjects(): RushConfigurationProject[] {
+    return this._selectedProjects;
+  }
+
   public async doInstallAsync(): Promise<void> {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
@@ -204,7 +210,7 @@ export abstract class BaseInstallManager {
       this._deferredInstallationScripts = useWorkspaces && this.rushConfiguration.packageManager === 'pnpm';
     }
 
-    if (isFilteredInstall && !this.options.selectedProjects) {
+    if (isFilteredInstall && !this.options.partialInstallSelectedProjects) {
       // This should never even happen
       throw new InternalError(`Missing selectedProjects when filtered install`);
     }
@@ -255,22 +261,29 @@ export abstract class BaseInstallManager {
       os.EOL + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`)
     );
 
-    if (this.options.selectedProjects) {
-      this._commonTempInstallFlag.mergeFromObject({
-        selectedProjectNames: Array.from(this.options.selectedProjects).map((project) => project.packageName)
-      });
-    }
-    if (this._deferredInstallationScripts || this.options.ignoreScripts) {
-      this.commonTempInstallFlag.mergeFromObject({
-        ignoreScripts: true
-      });
-    }
+    this._selectedProjects = this.options.partialInstallSelectedProjects
+      ? Array.from(this.options.partialInstallSelectedProjects)
+      : this.rushConfiguration.projects;
+
+    this._commonTempInstallFlag.mergeFromObject({
+      installProjects: this._selectedProjects.reduce((acc, project) => {
+        const { packageName, projectRelativeFolder } = project;
+        acc[packageName] = {
+          packageName,
+          projectRelativeFolder,
+          ignoreScripts: this._deferredInstallationScripts || this.options.ignoreScripts
+        };
+        return acc;
+      }, {} as Record<string, IInstallProject>)
+    });
 
     // This marker file indicates that the last "rush install" completed successfully.
     // perform a clean install if selected projects are not matched. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
-    const cleanInstall: boolean = !this._commonTempInstallFlag.checkValidAndReportStoreIssues();
+    const cleanInstall: boolean =
+      !this._commonTempInstallFlag.checkValidAndReportStoreIssues() ||
+      !this.commonTempInstallFlag.isSelectedProjectInstalled();
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {

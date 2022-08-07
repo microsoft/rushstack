@@ -102,10 +102,10 @@ export class Autoinstaller {
     const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
 
     const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
-      node: process.versions.node,
+      nodeVersion: process.versions.node,
       packageManager: this._rushConfiguration.packageManager,
       packageManagerVersion: this._rushConfiguration.packageManagerToolVersion,
-      packageJson: packageJson,
+      autoinstallerPackageJson: packageJson,
       rushJsonFolder: this._rushConfiguration.rushJsonFolder
     });
 

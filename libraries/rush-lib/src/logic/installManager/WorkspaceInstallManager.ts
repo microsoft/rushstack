@@ -22,6 +22,7 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import { IInstallProject } from '../../api/LastInstallFlag';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -372,10 +373,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   protected async postInstallAsync(): Promise<void> {
-    if (this.deferredInstallationScripts) {
-      this.commonTempInstallFlag.saveIfModified();
-    }
-
     // Grab the temp shrinkwrap, as this was the most recently completed install. It may also be
     // more up-to-date than the checked-in shrinkwrap since filtered installs are not written back.
     // Note that if there are no projects, or if we're in PNPM workspace mode and there are no
@@ -461,11 +458,32 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           environment: packageManagerEnv,
           suppressOutput: false
         });
+        this.commonTempInstallFlag.mergeFromObject({
+          installProjects: this.selectedProjects.reduce((acc, project) => {
+            const { packageName, projectRelativeFolder } = project;
+            acc[packageName] = {
+              packageName,
+              projectRelativeFolder,
+              ignoreScripts: false
+            };
+            return acc;
+          }, {} as Record<string, IInstallProject>)
+        });
       } catch (err) {
+        this.commonTempInstallFlag.mergeFromObject({
+          installProjects: this.selectedProjects.reduce((acc, project) => {
+            const { packageName, projectRelativeFolder } = project;
+            acc[packageName] = {
+              packageName,
+              projectRelativeFolder,
+              ignoreScripts: true
+            };
+            return acc;
+          }, {} as Record<string, IInstallProject>)
+        });
         throw new Error(`Encounter an error when running install lifecycle scripts. error: ${err.message}`);
       } finally {
-        // Always save after pnpm rebuild to update timestamp of last install flag file.
-        this.commonTempInstallFlag.create();
+        this.commonTempInstallFlag.save();
       }
     }
   }

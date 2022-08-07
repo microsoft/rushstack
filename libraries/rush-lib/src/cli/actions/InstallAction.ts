@@ -85,7 +85,7 @@ export class InstallAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
       pnpmFilterArguments,
-      selectedProjects,
+      partialInstallSelectedProjects: selectedProjects,
       checkOnly: this._checkOnlyParameter.value
     };
   }

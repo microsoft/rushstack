@@ -65,9 +65,11 @@ export class _BaseFlag<T extends object = JsonObject> {
     protected get flagName(): string;
     protected _isModified: boolean;
     isValid(): boolean;
-    mergeFromObject(data: JsonObject): void;
+    mergeFromObject(data: Partial<T>): void;
+    protected get oldState(): T | undefined;
     get path(): string;
     protected _path: string;
+    save(): void;
     saveIfModified(): void;
     protected _state: T;
 }
@@ -349,16 +351,21 @@ export interface IGlobalCommand extends IRushCommand {
 }
 
 // @internal
+export interface _IInstallProject extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
+    // (undocumented)
+    ignoreScripts?: boolean;
+}
+
+// @internal
 export interface _ILastInstallFlagJson {
-    ignoreScripts?: true;
-    node: string;
-    packageJson?: IPackageJson;
+    autoinstallerPackageJson?: IPackageJson;
+    installProjects?: Record<string, _IInstallProject>;
+    nodeVersion: string;
     packageManager: PackageManagerName;
     packageManagerVersion: string;
+    pnpmStorePath?: string;
     rushJsonFolder: string;
-    selectedProjectNames?: string[];
-    storePath?: string;
-    workspaces?: true;
+    useWorkspaces?: true;
 }
 
 // @public
@@ -527,6 +534,7 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
     checkValidAndReportStoreIssues(): boolean;
     protected get flagName(): string;
+    isSelectedProjectInstalled(): boolean;
     // @override
     isValid(): boolean;
 }
