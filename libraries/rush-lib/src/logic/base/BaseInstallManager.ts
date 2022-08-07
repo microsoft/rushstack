@@ -665,6 +665,7 @@ export abstract class BaseInstallManager {
       }
 
       if (this._deferredInstallationScripts || this.options.ignoreScripts) {
+        // Stage 1 pnpm install with --ignore-scripts
         args.push('--ignore-scripts');
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
