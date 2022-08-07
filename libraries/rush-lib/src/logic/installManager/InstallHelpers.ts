@@ -4,28 +4,15 @@
 import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
-import {
-  FileConstants,
-  FileSystem,
-  Import,
-  IPackageJson,
-  JsonFile,
-  LockFile
-} from '@rushstack/node-core-library';
+import { FileConstants, FileSystem, IPackageJson, JsonFile, LockFile } from '@rushstack/node-core-library';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 import { PackageManagerName } from '../../api/packageManager/PackageManager';
 import { RushConfiguration, IConfigurationEnvironment } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
-import { RushConstants } from '../RushConstants';
-
-import type { IPnpmProjectManifestConfigurationJson } from '../../logic/pnpm/PnpmProjectManifestConfiguration';
-
-const semver: typeof import('semver') = Import.lazy('semver', require);
-
 interface ICommonPackageJson extends IPackageJson {
-  pnpm?: IPnpmProjectManifestConfigurationJson;
+  pnpm?: unknown;
 }
 
 export class InstallHelpers {
@@ -42,75 +29,9 @@ export class InstallHelpers {
     };
 
     if (rushConfiguration.packageManager === 'pnpm') {
-      const { packageManagerToolVersion, pnpmProjectManifestConfiguration } = rushConfiguration;
-      if (pnpmProjectManifestConfiguration.overrides) {
-        if (semver.lt(packageManagerToolVersion, '5.10.1')) {
-          console.log(
-            colors.yellow(
-              `WARNING: overrides is provided in ${RushConstants.pnpmProjectManifestConfigFilename}, but it only works for pnpmVersion >= 5.10.1, current ${packageManagerToolVersion}`
-            )
-          );
-        }
-        commonPackageJson.pnpm = {
-          ...commonPackageJson.pnpm,
-          overrides: pnpmProjectManifestConfiguration.overrides
-        };
-      }
-
-      if (pnpmProjectManifestConfiguration.neverBuiltDependencies) {
-        if (semver.lt(packageManagerToolVersion, '5.16.0')) {
-          console.log(
-            colors.yellow(
-              `WARNING: neverBuiltDependencies is provided in ${RushConstants.pnpmProjectManifestConfigFilename}, but it only works for pnpmVersion >= 5.16.0, current ${packageManagerToolVersion}`
-            )
-          );
-        }
-        commonPackageJson.pnpm = {
-          ...commonPackageJson.pnpm,
-          neverBuiltDependencies: pnpmProjectManifestConfiguration.neverBuiltDependencies
-        };
-      }
-
-      if (pnpmProjectManifestConfiguration.onlyBuiltDependencies) {
-        if (semver.lt(packageManagerToolVersion, '6.32.0')) {
-          console.log(
-            colors.yellow(
-              `WARNING: onlyBuiltDependencies is provided in ${RushConstants.pnpmProjectManifestConfigFilename}, but it only works for pnpmVersion >= 6.32.0, current ${packageManagerToolVersion}`
-            )
-          );
-        }
-        commonPackageJson.pnpm = {
-          ...commonPackageJson.pnpm,
-          onlyBuiltDependencies: pnpmProjectManifestConfiguration.onlyBuiltDependencies
-        };
-      }
-
-      if (pnpmProjectManifestConfiguration.peerDependencyRules) {
-        if (semver.lt(packageManagerToolVersion, '6.26.0')) {
-          console.log(
-            colors.yellow(
-              `WARNING: peerDependencyRules is provided in ${RushConstants.pnpmProjectManifestConfigFilename}, but it only works for pnpmVersion >= 6.26.0, current ${packageManagerToolVersion}`
-            )
-          );
-        }
-        commonPackageJson.pnpm = {
-          ...commonPackageJson.pnpm,
-          peerDependencyRules: pnpmProjectManifestConfiguration.peerDependencyRules
-        };
-      }
-
-      if (pnpmProjectManifestConfiguration.packageExtensions) {
-        if (semver.lt(rushConfiguration.packageManagerToolVersion, '6.9.0')) {
-          console.log(
-            colors.yellow(
-              `WARNING: packageExtensions is provided in ${RushConstants.pnpmProjectManifestConfigFilename}, but it only works for pnpmVersion >= 6.9.0, current ${packageManagerToolVersion}`
-            )
-          );
-        }
-        commonPackageJson.pnpm = {
-          ...commonPackageJson.pnpm,
-          packageExtensions: pnpmProjectManifestConfiguration.packageExtensions
-        };
+      const { pnpmProjectManifestConfiguration } = rushConfiguration;
+      if (pnpmProjectManifestConfiguration.pnpmFieldInRootPackageJson) {
+        commonPackageJson.pnpm = pnpmProjectManifestConfiguration.pnpmFieldInRootPackageJson;
       }
     }
 

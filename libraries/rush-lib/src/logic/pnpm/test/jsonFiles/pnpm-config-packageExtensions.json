@@ -1,8 +1,10 @@
 {
-  "packageExtensions": {
-    "react-redux": {
-      "peerDependencies": {
-        "react-dom": "*"
+  "pnpmFieldInRootPackageJson": {
+    "packageExtensions": {
+      "react-redux": {
+        "peerDependencies": {
+          "react-dom": "*"
+        }
       }
     }
   }

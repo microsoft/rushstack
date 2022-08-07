@@ -1,3 +1,5 @@
 {
-  "neverBuiltDependencies": ["fsevents", "level"]
+  "pnpmFieldInRootPackageJson": {
+    "neverBuiltDependencies": ["fsevents", "level"]
+  }
 }

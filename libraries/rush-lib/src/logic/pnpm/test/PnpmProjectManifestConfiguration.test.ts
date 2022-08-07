@@ -10,7 +10,7 @@ describe(PnpmProjectManifestConfiguration.name, () => {
       PnpmProjectManifestConfiguration.loadFromFile(
         path.join(__dirname, 'jsonFiles', 'pnpm-config-unknown.json')
       )
-    ).toThrow();
+    ).toThrow(/Additional properties not allowed: unknownProperty/);
   });
 
   it('loads overrides', () => {
@@ -19,11 +19,13 @@ describe(PnpmProjectManifestConfiguration.name, () => {
         path.join(__dirname, 'jsonFiles', 'pnpm-config-overrides.json')
       );
 
-    expect(pnpmProjectManifestConfiguration.overrides).toEqual({
-      foo: '^1.0.0',
-      quux: 'npm:@myorg/quux@^1.0.0',
-      'bar@^2.1.0': '3.0.0',
-      'qar@1>zoo': '2'
+    expect(pnpmProjectManifestConfiguration.pnpmFieldInRootPackageJson).toEqual({
+      overrides: {
+        foo: '^1.0.0',
+        quux: 'npm:@myorg/quux@^1.0.0',
+        'bar@^2.1.0': '3.0.0',
+        'qar@1>zoo': '2'
+      }
     });
   });
 
@@ -33,10 +35,12 @@ describe(PnpmProjectManifestConfiguration.name, () => {
         path.join(__dirname, 'jsonFiles', 'pnpm-config-packageExtensions.json')
       );
 
-    expect(pnpmProjectManifestConfiguration.packageExtensions).toEqual({
-      'react-redux': {
-        peerDependencies: {
-          'react-dom': '*'
+    expect(pnpmProjectManifestConfiguration.pnpmFieldInRootPackageJson).toEqual({
+      packageExtensions: {
+        'react-redux': {
+          peerDependencies: {
+            'react-dom': '*'
+          }
         }
       }
     });
@@ -48,8 +52,8 @@ describe(PnpmProjectManifestConfiguration.name, () => {
         path.join(__dirname, 'jsonFiles', 'pnpm-config-neverBuiltDependencies.json')
       );
 
-    expect(pnpmProjectManifestConfiguration.neverBuiltDependencies).toEqual(
-      expect.arrayContaining(['fsevents', 'level'])
-    );
+    expect(pnpmProjectManifestConfiguration.pnpmFieldInRootPackageJson).toEqual({
+      neverBuiltDependencies: ['fsevents', 'level']
+    });
   });
 });

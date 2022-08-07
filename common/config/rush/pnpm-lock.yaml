@@ -1760,7 +1760,6 @@ importers:
     specifiers:
       '@pnpm/link-bins': ~5.3.7
       '@pnpm/logger': 4.0.0
-      '@pnpm/types': ~8.0.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
@@ -1813,7 +1812,6 @@ importers:
       true-case-path: ~2.2.1
     dependencies:
       '@pnpm/link-bins': 5.3.25
-      '@pnpm/types': 8.0.0
       '@rushstack/heft-config-file': link:../heft-config-file
       '@rushstack/node-core-library': link:../node-core-library
       '@rushstack/package-deps-hash': link:../package-deps-hash
@@ -5130,11 +5128,6 @@ packages:
   /@pnpm/types/6.4.0:
     resolution: {integrity: sha512-nco4+4sZqNHn60Y4VE/fbtlShCBqipyUO+nKRPvDHqLrecMW9pzHWMVRxk4nrMRoeowj3q0rX3GYRBa8lsHTAg==}
     engines: {node: '>=10.16'}
-    dev: false
-
-  /@pnpm/types/8.0.0:
-    resolution: {integrity: sha512-Ahxjk7CtuPt+0mnqpKFksru3bnZdAZtmv6Lz+OFqOSSiEC1XLxVmkkuyhcAV58r6fa9PiOSBFXHtYnnJLo25/g==}
-    engines: {node: '>=14.19'}
     dev: false
 
   /@pnpm/write-project-manifest/1.1.7:

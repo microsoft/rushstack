@@ -17,7 +17,6 @@ import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
-import type { ProjectManifest } from '@pnpm/types';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
@@ -436,7 +435,9 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @beta
-export type IPnpmProjectManifestConfigurationJson = Required<ProjectManifest>['pnpm'];
+export interface IPnpmProjectManifestConfigurationJson {
+    pnpmFieldInRootPackageJson: unknown;
+}
 
 // @beta
 export interface IRushCommand {
@@ -652,11 +653,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 export class PnpmProjectManifestConfiguration {
     get filePath(): string;
     static loadFromFile(jsonFilename: string): PnpmProjectManifestConfiguration;
-    readonly neverBuiltDependencies: IPnpmProjectManifestConfigurationJson['neverBuiltDependencies'];
-    readonly onlyBuiltDependencies: IPnpmProjectManifestConfigurationJson['onlyBuiltDependencies'];
-    readonly overrides: IPnpmProjectManifestConfigurationJson['overrides'];
-    readonly packageExtensions: IPnpmProjectManifestConfigurationJson['packageExtensions'];
-    readonly peerDependencyRules?: IPnpmProjectManifestConfigurationJson['peerDependencyRules'];
+    // (undocumented)
+    readonly pnpmFieldInRootPackageJson: unknown | undefined;
 }
 
 // @public
