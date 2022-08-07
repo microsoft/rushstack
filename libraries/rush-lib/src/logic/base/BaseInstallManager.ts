@@ -221,6 +221,18 @@ export abstract class BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
+    if (this.options.ignoreScripts && this.rushConfiguration.packageManager !== 'pnpm') {
+      console.log();
+      console.log(
+        console.log(
+          colors.red(
+            `The --ignore-scripts parameter can only be used with "pnpm" package manager, current package manager is ${this.rushConfiguration.packageManager}.`
+          )
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
       console.log();
