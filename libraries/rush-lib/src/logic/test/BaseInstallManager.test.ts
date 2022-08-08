@@ -4,7 +4,11 @@ import * as path from 'path';
 import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 import { PurgeManager } from '../PurgeManager';
-import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
+import {
+  BaseInstallManager,
+  IInstallManagerOptions,
+  pnpmIgnoreCompatibilityDbParameter
+} from '../base/BaseInstallManager';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
@@ -77,19 +81,20 @@ describe('BaseInstallManager Test', () => {
 
     const argsPnpmV6: string[] = [];
     fakeBaseInstallManager6.pushConfigurationArgs(argsPnpmV6, options);
-
+    expect(argsPnpmV6).not.toContain(pnpmIgnoreCompatibilityDbParameter);
     expect(mockWrite.mock.calls[0][0]).toContain(
       "Warning: Your rush.json specifies a pnpmVersion with a known issue that may cause unintended version selections. It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. For details see: https://rushjs.io/link/pnpm-issue-5132"
     );
 
     const argsPnpmV7: string[] = [];
     fakeBaseInstallManager7.pushConfigurationArgs(argsPnpmV7, options);
+    expect(argsPnpmV7).not.toContain(pnpmIgnoreCompatibilityDbParameter);
     expect(mockWrite.mock.calls[0][0]).toContain(
       "Warning: Your rush.json specifies a pnpmVersion with a known issue that may cause unintended version selections. It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. For details see: https://rushjs.io/link/pnpm-issue-5132"
     );
   });
 
-  it('pnpm version gte 6.34.0 || gte 7.9.0 should add --ignore-compatibility-db', () => {
+  it(`pnpm version ^6.34.0 || gte 7.9.0 should add ${pnpmIgnoreCompatibilityDbParameter}`, () => {
     const rushJsonFile: string = path.resolve(__dirname, 'ignoreCompatibilityDb/rush3.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
     const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
@@ -102,14 +107,12 @@ describe('BaseInstallManager Test', () => {
       options
     );
 
-    const expected = ['--ignore-compatibility-db'];
-
     const mockWrite = jest.fn();
     jest.spyOn(ConsoleTerminalProvider.prototype, 'write').mockImplementation(mockWrite);
 
     const args: string[] = [];
     fakeBaseInstallManager.pushConfigurationArgs(args, options);
-    expect(args).toEqual(expect.arrayContaining(expected));
+    expect(args).toContain(pnpmIgnoreCompatibilityDbParameter);
 
     if (mockWrite.mock.calls.length) {
       expect(mockWrite.mock.calls[0][0]).not.toContain(

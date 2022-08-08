@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "rush install/update should always set `config.ignoreCompatibilityDb` and print warning if the rush.json pnpmVersion specifies a version affected by this problem.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
