@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.76.1",
+      "tag": "@microsoft/rush_v5.76.1",
+      "date": "Mon, 08 Aug 2022 07:32:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression where \"rush install\" would sometimes fail with \"Unknown option: 'ignore-compatibility-db'\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.76.0",
       "tag": "@microsoft/rush_v5.76.0",
       "date": "Sat, 06 Aug 2022 05:35:19 GMT",

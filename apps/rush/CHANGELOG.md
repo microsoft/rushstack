@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 06 Aug 2022 05:35:19 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Aug 2022 07:32:36 GMT and should not be manually modified.
+
+## 5.76.1
+Mon, 08 Aug 2022 07:32:36 GMT
+
+### Updates
+
+- Fix a recent regression where "rush install" would sometimes fail with "Unknown option: 'ignore-compatibility-db'"
 
 ## 5.76.0
 Sat, 06 Aug 2022 05:35:19 GMT
