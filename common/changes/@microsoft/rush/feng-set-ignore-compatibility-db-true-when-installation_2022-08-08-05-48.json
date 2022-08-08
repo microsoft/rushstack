@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "rush install/update should always set `config.ignoreCompatibilityDb` and print warning if the rush.json pnpmVersion specifies a version affected by this problem.",
+      "comment": "Fix a recent regression where \"rush install\" would sometimes fail with \"Unknown option: 'ignore-compatibility-db'\"",
       "type": "none"
     }
   ],
