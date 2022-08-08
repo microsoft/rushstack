@@ -108,6 +108,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         heftConfiguration: this._heftConfiguration
       };
 
+      // Add the run action and the individual phase actions
       this.addAction(new RunAction(actionOptions));
       for (const phase of internalHeftSession.phases) {
         this.addAction(new PhaseAction({ ...actionOptions, phase }));

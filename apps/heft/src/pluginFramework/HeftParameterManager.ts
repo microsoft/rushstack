@@ -68,6 +68,16 @@ export interface IHeftDefaultParameters {
    * @public
    */
   readonly locales: Iterable<string>;
+
+  /**
+   * Whether or not the Heft action is running in watch mode.
+   */
+  readonly watch: boolean;
+
+  /**
+   * Whether or not the `--serve` flag was passed to the Heft action.
+   */
+  readonly serve: boolean;
 }
 
 /**
@@ -132,6 +142,8 @@ export interface IHeftParameterManagerOptions {
   isDebug: () => boolean;
   isVerbose: () => boolean;
   isProduction: () => boolean;
+  isWatch: () => boolean;
+  isServe: () => boolean;
   getLocales: () => Iterable<string>;
 }
 
@@ -158,7 +170,9 @@ export class HeftParameterManager {
         debug: this._options.isDebug(),
         verbose: this._options.isVerbose(),
         production: this._options.isProduction(),
-        locales: this._options.getLocales()
+        locales: this._options.getLocales(),
+        watch: this._options.isWatch(),
+        serve: this._options.isServe()
       };
     }
     return this._defaultParameters;

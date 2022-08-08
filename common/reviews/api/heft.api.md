@@ -80,6 +80,18 @@ export interface _IHeftConfigurationInitializationOptions {
 }
 
 // @public
+export interface IHeftDefaultParameters {
+    readonly clean: boolean;
+    readonly cleanCache: boolean;
+    readonly debug: boolean;
+    readonly locales: Iterable<string>;
+    readonly production: boolean;
+    readonly serve: boolean;
+    readonly verbose: boolean;
+    readonly watch: boolean;
+}
+
+// @public
 export interface IHeftLifecycleCleanHookOptions {
     // (undocumented)
     addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
@@ -87,13 +99,10 @@ export interface IHeftLifecycleCleanHookOptions {
 
 // @public
 export interface IHeftLifecycleHooks {
-    // (undocumented)
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
     // (undocumented)
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
-    // (undocumented)
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
-    // (undocumented)
     toolStop: AsyncParallelHook<IHeftLifecycleToolStopHookOptions>;
 }
 
@@ -103,19 +112,11 @@ export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeft
 
 // @public (undocumented)
 export interface IHeftLifecycleSession {
-    // (undocumented)
     readonly cacheFolder: string;
-    readonly debugMode: boolean;
-    // (undocumented)
     readonly hooks: IHeftLifecycleHooks;
-    // (undocumented)
     readonly logger: IScopedLogger;
-    // Warning: (ae-forgotten-export) The symbol "IHeftParameters" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     readonly parameters: IHeftParameters;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
-    // (undocumented)
     readonly tempFolder: string;
 }
 
@@ -125,6 +126,17 @@ export interface IHeftLifecycleToolStartHookOptions {
 
 // @public
 export interface IHeftLifecycleToolStopHookOptions {
+}
+
+// @public
+export interface IHeftParameters extends IHeftDefaultParameters {
+    getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter;
+    getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter;
+    getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
+    getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter;
+    getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
+    getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
+    getStringParameter(parameterLongName: string): CommandLineStringParameter;
 }
 
 // @public (undocumented)

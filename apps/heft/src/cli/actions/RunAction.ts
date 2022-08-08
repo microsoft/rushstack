@@ -2,58 +2,49 @@
 // See LICENSE in the project root for license information.
 
 import {
-  CommandLineParameterProvider,
-  CommandLineStringListParameter,
-  ScopedCommandLineAction
+  ScopedCommandLineAction,
+  type CommandLineParameterProvider,
+  type CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-import { AlreadyReportedError, InternalError, ITerminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError, type ITerminal } from '@rushstack/node-core-library';
 
-import {
-  initializeAction,
-  defineHeftActionParameters,
-  executeHeftAction
-} from '../../utilities/HeftActionUtilities';
 import { Selection } from '../../utilities/Selection';
-import { HeftParameterManager } from '../../pluginFramework/HeftParameterManager';
-import type { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import type { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
-import type { MetricsCollector } from '../../metrics/MetricsCollector';
+import { HeftActionRunner } from '../HeftActionRunner';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 
 export class RunAction extends ScopedCommandLineAction implements IHeftAction {
-  public readonly internalHeftSession: InternalHeftSession;
-  public readonly terminal: ITerminal;
-  public readonly loggingManager: LoggingManager;
-  public readonly metricsCollector: MetricsCollector;
-  public readonly heftConfiguration: HeftConfiguration;
+  public readonly watch: boolean;
 
+  private readonly _internalHeftSession: InternalHeftSession;
+  private readonly _terminal: ITerminal;
+  private readonly _actionRunner: HeftActionRunner;
   private _toParameter: CommandLineStringListParameter | undefined;
   private _onlyParameter: CommandLineStringListParameter | undefined;
-
-  private _parameterManager: HeftParameterManager | undefined;
-  public get parameterManager(): HeftParameterManager {
-    if (!this._parameterManager) {
-      throw new InternalError(`onDefineParameters() has not been called.`);
-    }
-    return this._parameterManager;
-  }
-
-  public set parameterManager(parameterManager: HeftParameterManager) {
-    this._parameterManager = parameterManager;
-  }
-
   private _selectedPhases: Set<HeftPhase> | undefined;
+
+  public constructor(options: IHeftActionOptions) {
+    super({
+      actionName: `run${options.watch ? '-watch' : ''}`,
+      documentation: `Run a provided selection of Heft phases${options.watch ? ' in watch mode.' : ''}.`,
+      summary: `Run a provided selection of Heft phases${options.watch ? ' in watch mode.' : ''}.`
+    });
+
+    this.watch = options.watch ?? false;
+    this._terminal = options.terminal;
+    this._internalHeftSession = options.internalHeftSession;
+    this._actionRunner = new HeftActionRunner({ action: this, ...options });
+  }
+
   public get selectedPhases(): Set<HeftPhase> {
     if (!this._selectedPhases) {
-      const toPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._toParameter!, this.terminal);
-      const onlyPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._onlyParameter!, this.terminal);
+      const toPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this.toParameter, this._terminal);
+      const onlyPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this.onlyParameter, this._terminal);
       this._selectedPhases = Selection.union(
         Selection.recursiveExpand(toPhases, (phase: HeftPhase) => phase.dependencyPhases),
         onlyPhases
       );
-
       if (this._selectedPhases.size === 0) {
         throw new Error(
           'No phases were selected. Provide at least one phase to the "--to" or "--only" parameters.'
@@ -63,20 +54,18 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     return this._selectedPhases;
   }
 
-  public constructor(options: IHeftActionOptions) {
-    super({
-      actionName: 'run',
-      documentation: 'Run a provided selection of Heft phases.',
-      summary: 'Run a provided selection of Heft phases.'
-    });
+  protected get toParameter(): CommandLineStringListParameter {
+    if (!this._toParameter) {
+      throw new InternalError(`onDefineUnscopedParameters() has not been called.`);
+    }
+    return this._toParameter;
+  }
 
-    this.internalHeftSession = options.internalHeftSession;
-    this.terminal = options.terminal;
-    this.loggingManager = options.loggingManager;
-    this.metricsCollector = options.metricsCollector;
-    this.heftConfiguration = options.heftConfiguration;
-
-    initializeAction(this);
+  protected get onlyParameter(): CommandLineStringListParameter {
+    if (!this._onlyParameter) {
+      throw new InternalError(`onDefineUnscopedParameters() has not been called.`);
+    }
+    return this._onlyParameter;
   }
 
   protected onDefineUnscopedParameters(): void {
@@ -97,11 +86,11 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    defineHeftActionParameters(this, scopedParameterProvider);
+    this._actionRunner.defineParameters(scopedParameterProvider);
   }
 
   protected async onExecute(): Promise<void> {
-    await executeHeftAction(this);
+    await this._actionRunner.executeAsync();
   }
 
   private _evaluatePhaseParameter(
@@ -114,9 +103,8 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
 
     const parameterName: string = phaseParameter.longName;
     const selection: Set<HeftPhase> = new Set();
-
     for (const rawSelector of phaseParameter.values) {
-      const phase: HeftPhase | undefined = this.internalHeftSession.phasesByName.get(rawSelector);
+      const phase: HeftPhase | undefined = this._internalHeftSession.phasesByName.get(rawSelector);
       if (!phase) {
         terminal.writeErrorLine(
           `The phase name "${rawSelector}" passed to "${parameterName}" does not exist in heft.json.`

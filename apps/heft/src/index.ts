@@ -10,6 +10,8 @@ export { IRigPackageResolver } from './configuration/RigPackageResolver';
 
 export { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
 
+export { IHeftParameters, IHeftDefaultParameters } from './pluginFramework/HeftParameterManager';
+
 export {
   IHeftLifecycleSession,
   IHeftLifecycleHooks,

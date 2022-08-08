@@ -9,23 +9,17 @@ import type { MetricsCollector } from '../../metrics/MetricsCollector';
 import type { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
-import type { HeftParameterManager } from '../../pluginFramework/HeftParameterManager';
 
 export interface IHeftActionOptions {
-  internalHeftSession: InternalHeftSession;
-  terminal: ITerminal;
-  loggingManager: LoggingManager;
-  metricsCollector: MetricsCollector;
-  heftConfiguration: HeftConfiguration;
-}
-
-export interface IHeftAction extends CommandLineAction {
   readonly internalHeftSession: InternalHeftSession;
+  readonly heftConfiguration: HeftConfiguration;
   readonly terminal: ITerminal;
   readonly loggingManager: LoggingManager;
   readonly metricsCollector: MetricsCollector;
-  readonly heftConfiguration: HeftConfiguration;
-  readonly selectedPhases: Set<HeftPhase>;
+  readonly watch?: boolean;
+}
 
-  parameterManager: HeftParameterManager;
+export interface IHeftAction extends CommandLineAction {
+  readonly watch: boolean;
+  readonly selectedPhases: Set<HeftPhase>;
 }
