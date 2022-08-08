@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.76.1",
+      "tag": "@microsoft/rush_v5.76.1",
+      "date": "Mon, 08 Aug 2022 07:32:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression where \"rush install\" would sometimes fail with \"Unknown option: 'ignore-compatibility-db'\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.76.0",
+      "tag": "@microsoft/rush_v5.76.0",
+      "date": "Sat, 06 Aug 2022 05:35:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Validate that if shouldPublish is set, private is not set"
+          },
+          {
+            "comment": "\"rush install/update\" should always set \"ignore-compatibility-db=true\" and print warning if the rush.json pnpmVersion specifies a version affected by this problem. "
+          },
+          {
+            "comment": "Reorder some initialization logic so that Rush's change analysis is not counted as part of the build time for the first project"
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Rename cyclicDependencyProjects to decoupledLocalDependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.75.0",
       "tag": "@microsoft/rush_v5.75.0",
       "date": "Tue, 28 Jun 2022 03:31:01 GMT",

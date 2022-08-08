@@ -12,7 +12,10 @@ import {
   PosixModeBits,
   NewlineKind,
   AlreadyReportedError,
-  FileSystemStats
+  FileSystemStats,
+  ConsoleTerminalProvider,
+  Terminal,
+  ITerminalProvider
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -36,6 +39,11 @@ import { PolicyValidator } from '../policy/PolicyValidator';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
+
+/**
+ * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
+ */
+export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompatibilityDb';
 
 export interface IInstallManagerOptions {
   /**
@@ -123,6 +131,9 @@ export abstract class BaseInstallManager {
 
   private _options: IInstallManagerOptions;
 
+  private readonly _terminalProvider: ITerminalProvider;
+  private readonly _terminal: Terminal;
+
   public constructor(
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder,
@@ -136,6 +147,9 @@ export abstract class BaseInstallManager {
 
     this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
+
+    this._terminalProvider = new ConsoleTerminalProvider();
+    this._terminal = new Terminal(this._terminalProvider);
   }
 
   protected get rushConfiguration(): RushConfiguration {
@@ -584,6 +598,26 @@ export abstract class BaseInstallManager {
         if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
           args.push('--strict-peer-dependencies');
         }
+      }
+
+      if (
+        semver.satisfies(
+          this._rushConfiguration.packageManagerToolVersion,
+          '6.32.12 - 6.33.x || 7.0.1 - 7.8.x'
+        )
+      ) {
+        this._terminal.writeWarningLine(
+          'Warning: Your rush.json specifies a pnpmVersion with a known issue ' +
+            'that may cause unintended version selections.' +
+            " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
+            'For details see: https://rushjs.io/link/pnpm-issue-5132'
+        );
+      }
+      if (
+        semver.gte(this._rushConfiguration.packageManagerToolVersion, '7.9.0') ||
+        semver.satisfies(this._rushConfiguration.packageManagerToolVersion, '^6.34.0')
+      ) {
+        args.push(pnpmIgnoreCompatibilityDbParameter);
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');

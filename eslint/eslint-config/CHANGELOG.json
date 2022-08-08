@@ -2,6 +2,29 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.0.0",
+      "tag": "@rushstack/eslint-config_v3.0.0",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Upgrade TypeScript dependency to 4.7. This package now requires a peerDependency on TypeScript >=4.7"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.6.2",
       "tag": "@rushstack/eslint-config_v2.6.2",
       "date": "Tue, 28 Jun 2022 00:23:32 GMT",

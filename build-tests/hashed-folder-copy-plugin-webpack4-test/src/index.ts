@@ -19,7 +19,9 @@ function appendImageToBody(url: string): void {
 appendImageToBody(`${ASSETS_BASE_URL}/red.png`);
 appendImageToBody(`${ASSETS_BASE_URL}/green.png`);
 appendImageToBody(`${ASSETS_BASE_URL}/blue.png`);
+appendImageToBody(`${ASSETS_BASE_URL}/subfolder/yellow.png`);
 
 appendImageToBody(`${ASSETS_BASE_URL2}/red.png`);
 appendImageToBody(`${ASSETS_BASE_URL2}/green.png`);
 appendImageToBody(`${ASSETS_BASE_URL2}/blue.png`);
+appendImageToBody(`${ASSETS_BASE_URL2}/subfolder/yellow.png`);

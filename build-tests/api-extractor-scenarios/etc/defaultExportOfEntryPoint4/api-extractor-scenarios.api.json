@@ -175,7 +175,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "api-extractor-scenarios!_default:var",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

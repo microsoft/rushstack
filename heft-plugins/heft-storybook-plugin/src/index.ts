@@ -13,6 +13,6 @@ import { IStorybookPluginOptions, StorybookPlugin } from './StorybookPlugin';
 export { IStorybookPluginOptions };
 
 /**
- * @internal
+ * @public
  */
 export default new StorybookPlugin() as IHeftPlugin<IStorybookPluginOptions>;
