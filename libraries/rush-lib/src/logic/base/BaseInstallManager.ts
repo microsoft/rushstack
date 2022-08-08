@@ -40,6 +40,11 @@ import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 
+/**
+ * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
+ */
+export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompatibilityDb';
+
 export interface IInstallManagerOptions {
   /**
    * Whether the global "--debug" flag was specified.
@@ -610,9 +615,9 @@ export abstract class BaseInstallManager {
       }
       if (
         semver.gte(this._rushConfiguration.packageManagerToolVersion, '7.9.0') ||
-        semver.gte(this._rushConfiguration.packageManagerToolVersion, '6.34.0')
+        semver.satisfies(this._rushConfiguration.packageManagerToolVersion, '^6.34.0')
       ) {
-        args.push('--ignore-compatibility-db');
+        args.push(pnpmIgnoreCompatibilityDbParameter);
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');
