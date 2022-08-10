@@ -2,6 +2,30 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.50.1",
+      "tag": "@rushstack/node-core-library_v3.50.1",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.50.0",
+      "tag": "@rushstack/node-core-library_v3.50.0",
+      "date": "Mon, 01 Aug 2022 02:45:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an Async.runWithRetriesAsync() API to run and a retry an async function that may intermittently fail."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.49.0",
       "tag": "@rushstack/node-core-library_v3.49.0",
       "date": "Tue, 28 Jun 2022 22:47:13 GMT",

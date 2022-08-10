@@ -18,6 +18,18 @@ export interface IAsyncParallelismOptions {
 }
 
 /**
+ * @remarks
+ * Used with {@link Async.runWithRetriesAsync}.
+ *
+ * @beta
+ */
+export interface IRunWithRetriesOptions<TResult> {
+  action: () => Promise<TResult> | TResult;
+  maxRetries: number;
+  retryDelayMs?: number;
+}
+
+/**
  * Utilities for parallel asynchronous operations, for use with the system `Promise` APIs.
  *
  * @beta
@@ -153,5 +165,28 @@ export class Async {
     await new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
+  }
+
+  /**
+   * Executes an async function and optionally retries it if it fails.
+   */
+  public static async runWithRetriesAsync<TResult>({
+    action,
+    maxRetries,
+    retryDelayMs = 0
+  }: IRunWithRetriesOptions<TResult>): Promise<TResult> {
+    let retryCounter: number = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        return await action();
+      } catch (e) {
+        if (++retryCounter > maxRetries) {
+          throw e;
+        } else if (retryDelayMs > 0) {
+          await Async.sleep(retryDelayMs);
+        }
+      }
+    }
   }
 }
