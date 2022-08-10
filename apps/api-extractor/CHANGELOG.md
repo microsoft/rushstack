@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Aug 2022 08:12:16 GMT and should not be manually modified.
+
+## 7.29.1
+Wed, 10 Aug 2022 08:12:16 GMT
+
+### Patches
+
+- Fix a regression where .api.json excerpts were sometimes missing tokens (GitHub #3561), and generally improve the quality of excerpt generation
 
 ## 7.29.0
 Wed, 03 Aug 2022 18:40:35 GMT

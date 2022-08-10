@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-serverless-stack-plugin",
   "entries": [
     {
+      "version": "0.1.35",
+      "tag": "@rushstack/heft-serverless-stack-plugin_v0.1.35",
+      "date": "Wed, 10 Aug 2022 08:12:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.0` to `^0.47.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.34",
       "tag": "@rushstack/heft-serverless-stack-plugin_v0.1.34",
       "date": "Wed, 03 Aug 2022 18:40:35 GMT",

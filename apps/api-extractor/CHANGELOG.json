@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.29.1",
+      "tag": "@microsoft/api-extractor_v7.29.1",
+      "date": "Wed, 10 Aug 2022 08:12:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where .api.json excerpts were sometimes missing tokens (GitHub #3561), and generally improve the quality of excerpt generation"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.29.0",
       "tag": "@microsoft/api-extractor_v7.29.0",
       "date": "Wed, 03 Aug 2022 18:40:35 GMT",
