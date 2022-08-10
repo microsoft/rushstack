@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 10 Aug 2022 08:12:16 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Aug 2022 09:52:12 GMT and should not be manually modified.
+
+## 7.29.2
+Wed, 10 Aug 2022 09:52:12 GMT
+
+### Patches
+
+- Fix incorrect declaration references for local symbols within namespaces
 
 ## 7.29.1
 Wed, 10 Aug 2022 08:12:16 GMT
