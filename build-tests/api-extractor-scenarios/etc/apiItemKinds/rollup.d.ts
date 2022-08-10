@@ -18,6 +18,10 @@ export declare class ClassWithTypeLiterals {
 }
 
 /** @public */
+export declare class ClassWithTypeParameter<T> {
+}
+
+/** @public */
 export declare const CONST_VARIABLE: string;
 
 /** @public */
@@ -25,6 +29,10 @@ export declare const enum ConstEnum {
     Zero = 0,
     One = 1,
     Two = 2
+}
+
+/** @public */
+export declare class ExtendsClassWithTypeParameter extends ClassWithTypeParameter<SimpleClass> {
 }
 
 /** @public */
