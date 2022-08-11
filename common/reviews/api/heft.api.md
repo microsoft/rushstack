@@ -163,14 +163,14 @@ export interface IHeftRecordMetricsHookOptions {
 
 // @public
 export interface IHeftTaskCleanHookOptions {
-    addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+    readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 // @public
 export interface IHeftTaskHooks {
-    clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
-    run: AsyncParallelHook<IHeftTaskRunHookOptions>;
-    runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
+    readonly clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
+    readonly run: AsyncParallelHook<IHeftTaskRunHookOptions>;
+    readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
 }
 
 // @public (undocumented)
@@ -179,12 +179,12 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 
 // @public
 export interface IHeftTaskRunHookOptions {
-    addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
+    readonly addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
 // @public
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
-    changedFiles: ReadonlyMap<string, IChangedFileState>;
+    readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
 }
 
 // @public

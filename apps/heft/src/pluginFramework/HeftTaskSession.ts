@@ -91,7 +91,7 @@ export interface IHeftTaskHooks {
    *
    * @public
    */
-  clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
+  readonly clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
 
   /**
    * The `run` hook is called after all dependency task executions have completed during a normal
@@ -100,7 +100,7 @@ export interface IHeftTaskHooks {
    *
    * @public
    */
-  run: AsyncParallelHook<IHeftTaskRunHookOptions>;
+  readonly run: AsyncParallelHook<IHeftTaskRunHookOptions>;
 
   /**
    * If provided, the `runIncremental` hook is called after all dependency task executions have completed
@@ -109,7 +109,7 @@ export interface IHeftTaskHooks {
    *
    * @public
    */
-  runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
+  readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
 }
 
 /**
@@ -124,7 +124,7 @@ export interface IHeftTaskCleanHookOptions {
    *
    * @public
    */
-  addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+  readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 /**
@@ -139,7 +139,7 @@ export interface IHeftTaskRunHookOptions {
    *
    * @public
    */
-  addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
+  readonly addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
 /**
@@ -152,7 +152,7 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
    * A map of changed files to the corresponding change state. This can be used to track which
    * files have been changed during an incremental build.
    */
-  changedFiles: ReadonlyMap<string, IChangedFileState>;
+  readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
 }
 
 /**
