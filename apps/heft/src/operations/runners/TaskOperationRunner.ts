@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { performance } from 'perf_hooks';
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
 import { OperationStatus } from '../OperationStatus';
 import { copyFilesAsync, type ICopyOperation } from '../../plugins/CopyFilesPlugin';
@@ -11,7 +11,8 @@ import type { HeftTask } from '../../pluginFramework/HeftTask';
 import type {
   HeftTaskSession,
   IChangedFileState,
-  IHeftTaskRunHookOptions
+  IHeftTaskRunHookOptions,
+  IHeftTaskRunIncrementalHookOptions
 } from '../../pluginFramework/HeftTaskSession';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
@@ -43,25 +44,30 @@ export class TaskOperationRunner implements IOperationRunner {
     const { parentPhase } = task;
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(parentPhase);
     const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
-
-    if (taskSession.parameters.watch) {
-      return await this._executeTaskIncrementalAsync(taskSession);
-    } else {
-      return await this._executeTaskAsync(taskSession);
-    }
+    return await this._executeTaskAsync(taskSession);
   }
 
   private async _executeTaskAsync(taskSession: HeftTaskSession): Promise<OperationStatus> {
-    const { cancellationToken } = this._options;
+    const { cancellationToken, changedFiles } = this._options;
 
     // Exit the task early if cancellation is requested
     if (cancellationToken.isCancellationRequested) {
       return OperationStatus.Cancelled;
     }
 
-    if (taskSession.hooks.run.isUsed()) {
+    const shouldRunIncremental: boolean =
+      taskSession.parameters.watch && taskSession.hooks.runIncremental.isUsed();
+    // We must have the changed files map if we are running in incremental mode
+    if (shouldRunIncremental && !changedFiles) {
+      throw new InternalError('changedFiles must be provided when watch is true');
+    }
+
+    const shouldRun: boolean = taskSession.hooks.runIncremental.isUsed() || shouldRunIncremental;
+    if (shouldRun) {
       const startTime: number = performance.now();
-      taskSession.logger.terminal.writeVerboseLine('Starting task execution');
+      taskSession.logger.terminal.writeVerboseLine(
+        `Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`
+      );
 
       const copyOperations: ICopyOperation[] = [];
 
@@ -73,8 +79,16 @@ export class TaskOperationRunner implements IOperationRunner {
 
       // Run the plugin run hook
       try {
-        await taskSession.hooks.run.promise(runHookOptions);
-      } catch (e: unknown) {
+        if (shouldRunIncremental) {
+          const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
+            ...runHookOptions,
+            changedFiles: changedFiles!
+          };
+          await taskSession.hooks.runIncremental.promise(runIncrementalHookOptions);
+        } else {
+          await taskSession.hooks.run.promise(runHookOptions);
+        }
+      } catch (e) {
         // Log out using the task logger, and return an error status
         if (!(e instanceof AlreadyReportedError)) {
           taskSession.logger.emitError(e as Error);
@@ -93,21 +107,13 @@ export class TaskOperationRunner implements IOperationRunner {
       }
 
       taskSession.logger.terminal.writeVerboseLine(
-        `Finished task execution (${performance.now() - startTime}ms)`
+        `Finished ${shouldRunIncremental ? 'incremental ' : ''}task execution ` +
+          `(${performance.now() - startTime}ms)`
       );
     } else {
       taskSession.logger.terminal.writeVerboseLine('Task execution skipped, no implementation provided');
     }
 
     return OperationStatus.Success;
-  }
-
-  private async _executeTaskIncrementalAsync(taskSession: HeftTaskSession): Promise<OperationStatus> {
-    if (taskSession.hooks.runIncremental.isUsed()) {
-      throw new Error('Not implemented');
-    } else {
-      // If there is no incremental run hook, fall back to the normal run hook
-      return await this._executeTaskAsync(taskSession);
-    }
   }
 }
