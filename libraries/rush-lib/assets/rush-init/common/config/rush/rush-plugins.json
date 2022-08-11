@@ -7,7 +7,7 @@
     /**
      * Each item defines a plugin configuration used by Rush.
      */
-    /*[BEGIN "DEMO"]*/
+    /*[BEGIN "HYPOTHETICAL"]*/
     {
       /**
        * The name of the rush plugin package.
@@ -22,6 +22,6 @@
        */
       "autoinstallerName": "plugins"
     }
-    /*[END "DEMO"]*/
+    /*[END "HYPOTHETICAL"]*/
   ]
 }
