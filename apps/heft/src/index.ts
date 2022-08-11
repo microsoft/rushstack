@@ -23,8 +23,10 @@ export {
 export {
   IHeftTaskSession,
   IHeftTaskHooks,
+  IHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
-  IHeftTaskCleanHookOptions
+  IHeftTaskRunIncrementalHookOptions,
+  IChangedFileState
 } from './pluginFramework/HeftTaskSession';
 
 export { ICopyOperation } from './plugins/CopyFilesPlugin';

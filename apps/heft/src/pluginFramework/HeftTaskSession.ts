@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import type { AsyncParallelHook } from 'tapable';
+import { AsyncParallelHook } from 'tapable';
 
 import type { MetricsCollector } from '../metrics/MetricsCollector';
-import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
+import type { IScopedLogger } from './logging/ScopedLogger';
 import type { HeftTask } from './HeftTask';
 import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
 import type { IHeftParameters } from './HeftParameterManager';
@@ -94,12 +94,22 @@ export interface IHeftTaskHooks {
   clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
 
   /**
-   * The `run` hook is called after all dependency task executions have completed. It is
-   * where the plugin can perform its work. To use it, call `run.tapPromise(<pluginName>, <callback>)`.
+   * The `run` hook is called after all dependency task executions have completed during a normal
+   * run, or during a watch mode run when no `runIncremental` hook is provided. It is where the
+   * plugin can perform its work. To use it, call `run.tapPromise(<pluginName>, <callback>)`.
    *
    * @public
    */
   run: AsyncParallelHook<IHeftTaskRunHookOptions>;
+
+  /**
+   * If provided, the `runIncremental` hook is called after all dependency task executions have completed
+   * during a watch mode run. It is where the plugin can perform incremental work. To use it, call
+   * `run.tapPromise(<pluginName>, <callback>)`.
+   *
+   * @public
+   */
+  runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
 }
 
 /**
@@ -132,10 +142,54 @@ export interface IHeftTaskRunHookOptions {
   addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
 }
 
+/**
+ * Options provided to the 'runIncremental' hook.
+ *
+ * @public
+ */
+export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+  /**
+   * A map of changed files to the corresponding change state. This can be used to track which
+   * files have been changed during an incremental build.
+   */
+  changedFiles: ReadonlyMap<string, IChangedFileState>;
+}
+
+/**
+ * The state of a changed file.
+ *
+ * @public
+ */
+export interface IChangedFileState {
+  /**
+   * Whether or not the file is a source file. A source file is determined to be any file
+   * that is not ignored by Git.
+   *
+   * @public
+   */
+  readonly isSourceFile: boolean;
+
+  /**
+   * A version hash of a specific file properties that can be used to determine if a
+   * file has changed. The version hash will change when any of the following properties
+   * are changed:
+   * - path
+   * - file size
+   * - content last modified date (mtime)
+   * - metadata last modified date (ctime)
+   *
+   * @remarks The initial state of the version hash is "INITIAL_CHANGE_STATE", which
+   * should only ever be used on the first incremental run of the task. When a file
+   * is deleted, the version hash will be "REMOVED_CHANGE_STATE".
+   *
+   * @public
+   */
+  readonly version: string;
+}
+
 export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
-  logger: ScopedLogger;
+  cleanHook: AsyncParallelHook<IHeftTaskCleanHookOptions>;
   task: HeftTask;
-  taskHooks: IHeftTaskHooks;
   taskParameters: IHeftParameters;
   pluginHost: HeftPluginHost;
 }
@@ -156,26 +210,42 @@ export class HeftTaskSession implements IHeftTaskSession {
   public readonly metricsCollector: MetricsCollector;
 
   public constructor(options: IHeftTaskSessionOptions) {
-    this.logger = options.logger;
-    this.metricsCollector = options.metricsCollector;
-    this.taskName = options.task.taskName;
-    this.hooks = options.taskHooks;
-    this.parameters = options.taskParameters;
+    const {
+      cleanHook,
+      heftConfiguration: { cacheFolder, tempFolder },
+      loggingManager,
+      metricsCollector,
+      phase,
+      task,
+      taskParameters,
+      pluginHost
+    } = options;
+
+    this.logger = loggingManager.requestScopedLogger(`${phase.phaseName}:${task.taskName}`);
+    this.metricsCollector = metricsCollector;
+    this.taskName = task.taskName;
+    this.hooks = {
+      clean: cleanHook,
+      run: new AsyncParallelHook(['runHookOptions']),
+      runIncremental: new AsyncParallelHook(['runIncrementalHookOptions'])
+    };
+
+    this.parameters = taskParameters;
 
     // Guranteed to be unique since phases are uniquely named, tasks are uniquely named within
     // phases, and neither can have '.' in their names. We will also use the phase name and
     // task name as the folder name (instead of the plugin name) since we want to enable re-use
     // of plugins in multiple phases and tasks while maintaining unique temp/cache folders for
     // each task.
-    const uniqueTaskFolderName: string = `${options.phase.phaseName}.${options.task.taskName}`;
+    const uniqueTaskFolderName: string = `${phase.phaseName}.${task.taskName}`;
 
     // <projectFolder>/.cache/<phaseName>.<taskName>
-    this.cacheFolder = path.join(options.heftConfiguration.cacheFolder, uniqueTaskFolderName);
+    this.cacheFolder = path.join(cacheFolder, uniqueTaskFolderName);
 
     // <projectFolder>/temp/<phaseName>.<taskName>
-    this.tempFolder = path.join(options.heftConfiguration.tempFolder, uniqueTaskFolderName);
+    this.tempFolder = path.join(tempFolder, uniqueTaskFolderName);
 
-    this._pluginHost = options.pluginHost;
+    this._pluginHost = pluginHost;
   }
 
   public requestAccessToPluginByName<T extends object>(

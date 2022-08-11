@@ -10,6 +10,9 @@ import { LoggingManager } from './LoggingManager';
  * @public
  */
 export interface IScopedLogger {
+  /**
+   * The terminal used to write messages to the console.
+   */
   readonly terminal: Terminal;
 
   /**
@@ -32,8 +35,8 @@ export interface IScopedLoggerOptions {
 
 export class ScopedLogger implements IScopedLogger {
   private readonly _options: IScopedLoggerOptions;
-  private readonly _errors: Error[] = [];
-  private readonly _warnings: Error[] = [];
+  private _errors: Error[] = [];
+  private _warnings: Error[] = [];
 
   private get _shouldPrintStacks(): boolean {
     return this._options.getShouldPrintStacks();
@@ -87,5 +90,13 @@ export class ScopedLogger implements IScopedLogger {
     if (this._shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }
+  }
+
+  /**
+   * Reset the errors and warnings for this scoped logger.
+   */
+  public resetErrorsAndWarnings(): void {
+    this._errors = [];
+    this._warnings = [];
   }
 }

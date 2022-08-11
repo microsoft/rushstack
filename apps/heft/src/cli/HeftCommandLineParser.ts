@@ -114,6 +114,12 @@ export class HeftCommandLineParser extends CommandLineParser {
         this.addAction(new PhaseAction({ ...actionOptions, phase }));
       }
 
+      // Add the watch variant of the run action and the individual phase actions
+      this.addAction(new RunAction({ ...actionOptions, watch: true }));
+      for (const phase of internalHeftSession.phases) {
+        this.addAction(new PhaseAction({ ...actionOptions, phase, watch: true }));
+      }
+
       return await super.execute(args);
     } catch (e) {
       await this._reportErrorAndSetExitCode(e as Error);

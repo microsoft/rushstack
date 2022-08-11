@@ -168,6 +168,16 @@ export class OperationExecutionManager {
           }
         }
         this._hasReportedFailures = true;
+      } else if (record.status === OperationStatus.Cancelled) {
+        const cancelledQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
+        for (const cancelledRecord of cancelledQueue) {
+          if (cancelledRecord.status === OperationStatus.Ready) {
+            cancelledRecord.status = OperationStatus.Cancelled;
+            for (const dependent of cancelledRecord.consumers) {
+              cancelledQueue.add(dependent);
+            }
+          }
+        }
       }
 
       // Apply status changes to direct dependents
@@ -193,7 +203,11 @@ export class OperationExecutionManager {
         // Log out the group name and duration if it is the last operation in the group
         if (groupRecord?.finished && !this._finishedGroups.has(groupRecord)) {
           this._finishedGroups.add(groupRecord);
-          const finishedLoggingWord: string = groupRecord.hasFailures ? 'encountered an error' : 'finished';
+          const finishedLoggingWord: string = groupRecord.hasFailures
+            ? 'encountered an error'
+            : groupRecord.hasCancellations
+            ? 'cancelled'
+            : 'finished';
           this._terminal.writeLine(
             ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
           );

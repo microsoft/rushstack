@@ -11,19 +11,16 @@ import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { HeftTaskSession, IHeftTaskCleanHookOptions } from '../../pluginFramework/HeftTaskSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import type { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 export interface IPhaseOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
   phase: HeftPhase;
-  clean: boolean;
-  cleanCache: boolean;
 }
 
 export class PhaseOperationRunner implements IOperationRunner {
-  private readonly _options: IPhaseOperationRunnerOptions;
-
   public readonly silent: boolean = true;
+
+  private readonly _options: IPhaseOperationRunnerOptions;
 
   public get name(): string {
     return `Phase "${this._options.phase.phaseName}"`;
@@ -34,23 +31,26 @@ export class PhaseOperationRunner implements IOperationRunner {
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    // Load and apply the plugins for this phase only
-    const { internalHeftSession, phase, clean, cleanCache } = this._options;
+    const { internalHeftSession, phase } = this._options;
+    const { clean, cleanCache, watch } = internalHeftSession.parameterManager.defaultParameters;
 
+    // Load and apply the plugins for this phase only
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(phase);
-    const phaseLogger: ScopedLogger = phaseSession.loggingManager.requestScopedLogger(phase.phaseName);
+    const { phaseLogger, cleanLogger, cleanHook } = phaseSession;
     phaseLogger.terminal.writeVerboseLine('Applying task plugins');
     await phaseSession.applyPluginsAsync();
+
+    // Avoid running the phase operation when in watch mode
+    if (watch) {
+      return OperationStatus.Success;
+    }
 
     // Run the clean hook
     if (clean) {
       const startTime: number = performance.now();
-      const cleanLogger: ScopedLogger = phaseSession.loggingManager.requestScopedLogger(
-        `${phase.phaseName}:clean`
-      );
-      cleanLogger.terminal.writeVerboseLine('Starting clean');
 
       // Grab the additional clean operations from the phase
+      cleanLogger.terminal.writeVerboseLine('Starting clean');
       const deleteOperations: IDeleteOperation[] = [...phase.cleanAdditionalFiles];
 
       // Delete all temp folders for tasks by default
@@ -71,9 +71,9 @@ export class PhaseOperationRunner implements IOperationRunner {
       };
 
       // Run the plugin clean hook
-      if (phaseSession.cleanHook.isUsed()) {
+      if (cleanHook.isUsed()) {
         try {
-          await phaseSession.cleanHook.promise(cleanHookOptions);
+          await cleanHook.promise(cleanHookOptions);
         } catch (e: unknown) {
           // Log out using the clean logger, and return an error status
           if (!(e instanceof AlreadyReportedError)) {

@@ -27,6 +27,10 @@ export enum OperationStatus {
    */
   Failure = 'FAILURE',
   /**
+   * The operation was cancelled
+   */
+  Cancelled = 'CANCELLED',
+  /**
    * The Operation could not be executed because one or more of its dependencies failed
    */
   Blocked = 'BLOCKED'

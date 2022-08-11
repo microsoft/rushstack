@@ -31,6 +31,13 @@ export class LoggingManager {
     this._shouldPrintStacks = true;
   }
 
+  public resetScopedLoggerErrorsAndWarnings(): void {
+    this._hasAnyErrors = false;
+    for (const scopedLogger of this._scopedLoggers.values()) {
+      scopedLogger.resetErrorsAndWarnings();
+    }
+  }
+
   public requestScopedLogger(loggerName: string): ScopedLogger {
     const existingScopedLogger: ScopedLogger | undefined = this._scopedLoggers.get(loggerName);
     if (existingScopedLogger) {

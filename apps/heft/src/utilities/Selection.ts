@@ -5,6 +5,10 @@
  * This namespace contains functions for manipulating sets of projects
  */
 export class Selection {
+  public static difference<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Set<T> {
+    return new Set(generateDifference(first, ...rest));
+  }
+
   /**
    * Computes the intersection of two or more sets.
    */
@@ -24,6 +28,14 @@ export class Selection {
    */
   public static recursiveExpand<T>(input: Iterable<T>, expandFn: (target: T) => ReadonlySet<T>): Set<T> {
     return expandAll(input, expandFn);
+  }
+}
+
+function* generateDifference<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Iterable<T> {
+  for (const item of first) {
+    if (rest.every((set: ReadonlySet<T>) => !set.has(item))) {
+      yield item;
+    }
   }
 }
 

@@ -60,7 +60,7 @@ export class AsyncOperationQueue
     for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];
 
-      if (operation.status === OperationStatus.Blocked) {
+      if (operation.status === OperationStatus.Blocked || operation.status === OperationStatus.Cancelled) {
         // It shouldn't be on the queue, remove it
         queue.splice(i, 1);
       } else if (operation.status !== OperationStatus.Ready) {

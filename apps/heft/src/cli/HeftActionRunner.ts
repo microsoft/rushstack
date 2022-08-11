@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'fs';
+import * as crypto from 'crypto';
+import * as path from 'path';
 import { performance } from 'perf_hooks';
 import {
   AlreadyReportedError,
   Colors,
   ConsoleTerminalProvider,
   InternalError,
+  Path,
   type ITerminal,
   type IPackageJson
 } from '@rushstack/node-core-library';
@@ -15,11 +19,14 @@ import type {
   CommandLineParameterProvider,
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
+import type * as chokidar from 'chokidar';
 
 import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
+import { Selection } from '../utilities/Selection';
+import { GitUtilities } from '../utilities/GitUtilities';
 import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
 import {
   OperationExecutionManager,
@@ -33,9 +40,185 @@ import type { HeftPhase } from '../pluginFramework/HeftPhase';
 import type { IHeftAction, IHeftActionOptions } from '../cli/actions/IHeftAction';
 import type { HeftTask } from '../pluginFramework/HeftTask';
 import type { LifecycleOperationRunnerType } from '../operations/runners/LifecycleOperationRunner';
+import type { IChangedFileState } from '../pluginFramework/HeftTaskSession';
+import { CancellationToken, CancellationTokenSource } from '../utilities/CancellationToken';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;
+}
+
+interface IWaitForSourceChangesOptions {
+  readonly watcher: chokidar.FSWatcher;
+  readonly git: GitUtilities;
+  readonly changedFiles: Map<string, IChangedFileState>;
+}
+
+export const INITIAL_CHANGE_STATE: 'INITIAL_CHANGE_STATE' = 'INITIAL_CHANGE_STATE';
+export const REMOVED_CHANGE_STATE: 'REMOVED_CHANGE_STATE' = 'REMOVED_CHANGE_STATE';
+
+const FORBIDDEN_RELATIVE_PATHS: string[] = ['package.json', 'config'];
+
+// Use an async iterator to allow the caller to await for the next source file change.
+// The iterator will update a provided map with changes unrelated to source files.
+// When a source file changes, the iterator will yield.
+async function* _waitForSourceChangesAsync(
+  options: IWaitForSourceChangesOptions
+): AsyncIterableIterator<void> {
+  const { watcher, git } = options;
+  const changedFileStats: Map<string, fs.Stats | undefined> = new Map();
+  const forbiddenFilePaths: Set<string> = new Set(
+    FORBIDDEN_RELATIVE_PATHS.map((relativePath: string) => path.join(watcher.options.cwd!, relativePath))
+  );
+  const seenFilePaths: Set<string> = new Set();
+  const seenSourceFilePaths: Set<string> = new Set();
+  let resolveFileChange: () => void;
+  let rejectFileChange: (error: Error) => void;
+  let fileChangePromise: Promise<void>;
+
+  async function ingestFileChangesAsync(
+    filePaths: Iterable<string>,
+    ignoreForbidden: boolean = false
+  ): Promise<void> {
+    // We can short-circuit the call to git if we already know all files have been seen.
+    const unseenFilePaths: Set<string> = Selection.difference(filePaths, seenFilePaths);
+    if (unseenFilePaths.size !== 0) {
+      // Validate that all unseen files are safe for watch mode.
+      for (const filePath of unseenFilePaths) {
+        let isForbidden: boolean = false;
+        for (const forbiddenPath of forbiddenFilePaths) {
+          // Search under paths to allow forbidding folders.
+          if (Path.isUnderOrEqual(filePath, forbiddenPath)) {
+            isForbidden = true;
+            break;
+          }
+        }
+        if (isForbidden) {
+          // If it's forbidden and we're ignoring it, remove from the unseenFilePaths set, since we
+          // don't want to add it to the seenSourceFilePaths set below.
+          if (ignoreForbidden) {
+            unseenFilePaths.delete(filePath);
+          } else {
+            throw new Error(`Cannot change the file at path "${filePath}" while running watch mode.`);
+          }
+        } else {
+          seenFilePaths.add(filePath);
+        }
+      }
+
+      // Determine which files are ignored or otherwise and stash them away for later.
+      // We can perform this check in one call to git to save time.
+      const unseenIgnoredFilePaths: Set<string> = await git.checkIgnore(unseenFilePaths);
+      const unseenSourceFilePaths: Set<string> = Selection.difference(
+        unseenFilePaths,
+        unseenIgnoredFilePaths
+      );
+      for (const sourceFilePath of unseenSourceFilePaths) {
+        seenSourceFilePaths.add(sourceFilePath);
+      }
+    }
+  }
+
+  function generateChangeHash(filePath: string, fileStats?: fs.Stats): string {
+    // watcher.options.alwaysStat is true, so we can use the stats object directly.
+    // It should only be undefined when the file has been deleted.
+    if (fileStats) {
+      // Base the hash on the modification time, change time, size, and path
+      return crypto
+        .createHash('sha1')
+        .update(filePath)
+        .update(fileStats.mtimeMs.toString())
+        .update(fileStats.ctimeMs.toString())
+        .update(fileStats.size.toString())
+        .digest('hex');
+    } else {
+      return REMOVED_CHANGE_STATE;
+    }
+  }
+
+  function generateChangeState(filePath: string, stats?: fs.Stats): IChangedFileState {
+    const version: string = generateChangeHash(filePath, stats);
+    const isSourceFile: boolean = seenSourceFilePaths.has(filePath);
+    return { isSourceFile, version };
+  }
+
+  function onChange(relativeFilePath: string, fileStats?: fs.Stats): void {
+    // watcher.options.cwd is set below, use to resolve the absolute path
+    const filePath: string = path.join(watcher.options.cwd!, relativeFilePath);
+    changedFileStats.set(filePath, fileStats);
+    resolveFileChange();
+  }
+
+  function createFileChangePromise(): Promise<void> {
+    return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+      resolveFileChange = resolve;
+      rejectFileChange = reject;
+    });
+  }
+
+  // Before we enter the main loop, hydrate initial state and yield the changes.
+  const initialFilePaths: Set<string> = new Set();
+  for (const [directory, filenames] of Object.entries(watcher.getWatched())) {
+    for (const filename of filenames) {
+      const filePath: string = path.resolve(watcher.options.cwd!, directory, filename);
+      if (Path.isUnder(filePath, watcher.options.cwd!)) {
+        initialFilePaths.add(filePath);
+      }
+    }
+  }
+
+  // Ingest the initial files and set their state. We want to ignore forbidden files
+  // since they aren't being "changed", they're
+  await ingestFileChangesAsync(initialFilePaths, /*ignoreForbidden:*/ true);
+  for (const filePath of initialFilePaths) {
+    options.changedFiles.set(filePath, {
+      ...generateChangeState(filePath, /*stats:*/ undefined),
+      version: INITIAL_CHANGE_STATE
+    });
+  }
+
+  // Setup the promise to resolve when a file change is detected.
+  fileChangePromise = createFileChangePromise();
+
+  // Setup the watcher to resolve the promise when a file change is detected
+  watcher.on('add', onChange);
+  watcher.on('change', onChange);
+  watcher.on('unlink', onChange);
+  watcher.on('error', (error: Error) => rejectFileChange(error));
+
+  // Yield the initial changes.
+  yield;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    // Wait for the file change promise tick
+    await fileChangePromise;
+
+    // Clone the map so that we can hold on to the set of changed files
+    const fileChangesToProcess: Map<string, fs.Stats | undefined> = new Map(changedFileStats);
+    // Clear the map so that we can ensure the next time around will have only new changes
+    changedFileStats.clear();
+    // Reset the promise so that we can wait for the next change
+    fileChangePromise = createFileChangePromise();
+
+    // Process the file changes. In
+    await ingestFileChangesAsync(fileChangesToProcess.keys());
+
+    // Update the output map to contain the new file change state
+    let containsSourceFiles: boolean = false;
+    for (const [filePath, stats] of fileChangesToProcess) {
+      const state: IChangedFileState = generateChangeState(filePath, stats);
+      options.changedFiles.set(filePath, state);
+      if (state.isSourceFile) {
+        containsSourceFiles = true;
+      }
+    }
+
+    // Finally, yield only if any source files were modified to avoid re-triggering when output
+    // files are written. However, we will still update the change state in that case.
+    if (containsSourceFiles) {
+      yield;
+    }
+  }
 }
 
 export class HeftActionRunner {
@@ -45,14 +228,8 @@ export class HeftActionRunner {
   private readonly _metricsCollector: MetricsCollector;
   private readonly _loggingManager: LoggingManager;
   private readonly _heftConfiguration: HeftConfiguration;
+  private _chokidar: typeof chokidar | undefined;
   private _parameterManager: HeftParameterManager | undefined;
-
-  protected get parameterManager(): HeftParameterManager {
-    if (!this._parameterManager) {
-      throw new InternalError(`HeftActionRunner.defineParameters() has not been called.`);
-    }
-    return this._parameterManager;
-  }
 
   public constructor(options: IHeftActionRunnerOptions) {
     this._action = options.action;
@@ -65,6 +242,13 @@ export class HeftActionRunner {
     this._metricsCollector.setStartTime();
   }
 
+  protected get parameterManager(): HeftParameterManager {
+    if (!this._parameterManager) {
+      throw new InternalError(`HeftActionRunner.defineParameters() has not been called.`);
+    }
+    return this._parameterManager;
+  }
+
   public defineParameters(parameterProvider?: CommandLineParameterProvider | undefined): void {
     if (!this._parameterManager) {
       // Use the provided parameter provider if one was provided. This is used by the RunAction
@@ -74,16 +258,6 @@ export class HeftActionRunner {
       throw new InternalError(`HeftActionParameters.defineParameters() has already been called.`);
     }
 
-    const cleanFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
-      parameterLongName: '--clean',
-      description: 'If specified, clean the outputs before running each phase.'
-    });
-    const cleanCacheFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
-      parameterLongName: '--clean-cache',
-      description:
-        'If specified, clean the cache before running each phase. To use this flag, the ' +
-        '--clean flag must also be provided.'
-    });
     const verboseFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
@@ -98,23 +272,39 @@ export class HeftActionRunner {
       argumentName: 'LOCALE',
       description: 'Use the specified locale for this run, if applicable.'
     });
+
     let serveFlag: CommandLineFlagParameter | undefined;
+    let cleanFlag: CommandLineFlagParameter | undefined;
+    let cleanCacheFlag: CommandLineFlagParameter | undefined;
     if (this._action.watch) {
+      // Only enable the serve flag in watch mode
       serveFlag = parameterProvider.defineFlagParameter({
         parameterLongName: '--serve',
         description: 'If specified, serve the output. This flag can only be used with watch-enabled actions.'
       });
+    } else {
+      // Only enable the clean flags in non-watch mode
+      cleanFlag = parameterProvider.defineFlagParameter({
+        parameterLongName: '--clean',
+        description: 'If specified, clean the outputs before running each phase.'
+      });
+      cleanCacheFlag = parameterProvider.defineFlagParameter({
+        parameterLongName: '--clean-cache',
+        description:
+          'If specified, clean the cache before running each phase. To use this flag, the ' +
+          '--clean flag must also be provided.'
+      });
     }
 
     const parameterManager: HeftParameterManager = new HeftParameterManager({
-      isClean: () => cleanFlag.value,
-      isCleanCache: () => cleanCacheFlag.value,
       isDebug: () => this._internalHeftSession.debug,
       isVerbose: () => verboseFlag.value,
       isProduction: () => productionFlag.value,
       isWatch: () => this._action.watch,
-      isServe: () => serveFlag?.value ?? false,
-      getLocales: () => localesParameter.values
+      getLocales: () => localesParameter.values,
+      isServe: () => !!serveFlag?.value,
+      isClean: () => !!cleanFlag?.value,
+      isCleanCache: () => !!cleanCacheFlag?.value
     });
 
     // Add all the lifecycle parameters for the action
@@ -160,14 +350,105 @@ export class HeftActionRunner {
     this._terminal.writeVerboseLine(`Node version: ${process.version}`);
     this._terminal.writeVerboseLine('');
 
-    await this._executeOnceAsync();
+    if (this._action.watch) {
+      await this._executeWatchAsync();
+    } else {
+      await this._executeOnceAsync();
+    }
   }
 
-  private async _executeOnceAsync(): Promise<void> {
+  private async _executeWatchAsync(): Promise<void> {
+    const chokidarPkg: typeof chokidar = await this._loadChokidarAsync();
+
+    // Create a watcher for the build folder and remove all listeners once the watcher is created.
+    const watcherReadyPromise: Promise<chokidar.FSWatcher> = new Promise(
+      (resolve: (watcher: chokidar.FSWatcher) => void, reject: (error: Error) => void) => {
+        const watcher: chokidar.FSWatcher = chokidarPkg.watch(this._heftConfiguration.buildFolder, {
+          persistent: true,
+          cwd: this._heftConfiguration.buildFolder,
+          ignored: ['node_modules/**', '.cache/**', 'temp/**', '.rush/**'],
+          ignoreInitial: false,
+          alwaysStat: true,
+          awaitWriteFinish: {
+            stabilityThreshold: 500,
+            pollInterval: 100
+          }
+        });
+        watcher.on('ready', () => resolve(watcher.removeAllListeners()));
+        watcher.on('error', (error: Error) => reject(error));
+      }
+    );
+    const watcher: chokidar.FSWatcher = await watcherReadyPromise;
+    const git: GitUtilities = new GitUtilities(this._heftConfiguration.buildFolder);
+    const changedFiles: Map<string, IChangedFileState> = new Map();
+
+    // Create the async iterator. This will yield void when a changed source file is encountered, giving
+    // us a chance to kill the current build and start a new one. Await the first iteration, since the
+    // first iteration should be for the initial state.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const iterator: AsyncIterator<void> = _waitForSourceChangesAsync({ watcher, git, changedFiles });
+    await iterator.next();
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // Create the cancellation token which is passed to the incremental build.
+      const cancellationTokenSource: CancellationTokenSource = new CancellationTokenSource();
+      const cancellationToken: CancellationToken = cancellationTokenSource.token;
+
+      // Start the incremental build and wait for a source file to change
+      const sourceChangesPromise: Promise<true> = iterator.next().then(() => true);
+      const executePromise: Promise<false> = this._executeOnceAsync(cancellationToken).then(() => false);
+
+      try {
+        // Whichever promise settles first will be the result of the race.
+        const isSourceChange: boolean = await Promise.race([sourceChangesPromise, executePromise]);
+
+        if (isSourceChange) {
+          // If there's a source file change, we need to cancel the incremental build and wait for the
+          // execution to finish before we begin execution again.
+          cancellationTokenSource.cancel();
+          this._terminal.writeLine(
+            Colors.bold('Changes detected, cancelling and restarting incremental build...')
+          );
+          await executePromise;
+        } else {
+          // If the build is complete, clear the changed files map and await the next iteration. We
+          // will continue to use the existing map if the build is not complete, since it may contain
+          // unprocessed source changes for earlier tasks. Then, await the next source file change.
+          changedFiles.clear();
+          this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+          await sourceChangesPromise;
+        }
+      } catch (e) {
+        // Swallow AlreadyReportedErrors, since we likely have already logged them out to the terminal.
+        // We also need to wait for source file changes here so that we don't continuously loop after
+        // encountering an error.
+        if (e instanceof AlreadyReportedError) {
+          this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+          await sourceChangesPromise;
+        } else {
+          // We don't know where this error is coming from, throw
+          throw e;
+        }
+      }
+
+      // Write an empty line to the terminal for separation between iterations. We've already iterated
+      // at this point, so log out that we're about to start a new run.
+      this._terminal.writeLine('');
+      this._terminal.writeLine(Colors.bold('Starting incremental build...'));
+    }
+  }
+
+  private async _executeOnceAsync(
+    cancellationToken: CancellationToken = new CancellationToken()
+  ): Promise<void> {
+    const startTime: number = performance.now();
+    this._loggingManager.resetScopedLoggerErrorsAndWarnings();
+
     // Execute the action operations
     let encounteredError: boolean = false;
+    const operations: Set<Operation> = this._generateOperations(cancellationToken);
     try {
-      const operations: Set<Operation> = this._generateOperations();
       const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
         loggingManager: this._loggingManager,
         terminal: this._terminal,
@@ -186,7 +467,8 @@ export class HeftActionRunner {
       const warningStrings: string[] = this._loggingManager.getWarningStrings();
       const errorStrings: string[] = this._loggingManager.getErrorStrings();
 
-      const encounteredWarnings: boolean = warningStrings.length > 0;
+      const wasCancelled: boolean = cancellationToken.isCancellationRequested;
+      const encounteredWarnings: boolean = warningStrings.length > 0 || wasCancelled;
       encounteredError = encounteredError || errorStrings.length > 0;
 
       await this._metricsCollector.recordAsync(
@@ -197,10 +479,19 @@ export class HeftActionRunner {
         this._action.getParameterStringMap()
       );
 
+      const duration: number = performance.now() - startTime;
+      const finishedLoggingWord: string = encounteredError
+        ? 'Failed'
+        : wasCancelled
+        ? 'Cancelled'
+        : 'Finished';
+      const finishedLoggingLine: string = `-------------------- ${finishedLoggingWord} (${
+        Math.round(duration) / 1000
+      }s) --------------------`;
       this._terminal.writeLine(
         Colors.bold(
           (encounteredError ? Colors.red : encounteredWarnings ? Colors.yellow : Colors.green)(
-            `-------------------- Finished (${Math.round(performance.now()) / 1000}s) --------------------`
+            finishedLoggingLine
           )
         )
       );
@@ -229,7 +520,7 @@ export class HeftActionRunner {
     }
   }
 
-  private _generateOperations(): Set<Operation> {
+  private _generateOperations(cancellationToken: CancellationToken): Set<Operation> {
     const { selectedPhases } = this._action;
     const {
       defaultParameters: { clean, cleanCache }
@@ -273,7 +564,7 @@ export class HeftActionRunner {
 
       // Create operations for each task
       for (const task of phase.tasks) {
-        const taskOperation: Operation = this._getOrCreateTaskOperation(task, operations);
+        const taskOperation: Operation = this._getOrCreateTaskOperation(task, operations, cancellationToken);
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
         taskOperation.dependencies.add(phaseOperation);
         // Set the 'start' lifecycle operation as a dependency of all tasks to ensure the 'start' lifecycle
@@ -285,7 +576,9 @@ export class HeftActionRunner {
 
         // Set all dependency tasks as dependencies of the task operation
         for (const dependencyTask of task.dependencyTasks) {
-          taskOperation.dependencies.add(this._getOrCreateTaskOperation(dependencyTask, operations));
+          taskOperation.dependencies.add(
+            this._getOrCreateTaskOperation(dependencyTask, operations, cancellationToken)
+          );
         }
 
         // Set all tasks in a in a phase as dependencies of the consuming phase
@@ -310,21 +603,13 @@ export class HeftActionRunner {
     type: LifecycleOperationRunnerType,
     operations: Map<string, Operation>
   ): Operation {
-    const {
-      defaultParameters: { clean, cleanCache }
-    } = this.parameterManager;
     const key: string = `lifecycle.${type}`;
 
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
       operation = new Operation({
         groupName: 'lifecycle',
-        runner: new LifecycleOperationRunner({
-          clean,
-          cleanCache,
-          type,
-          internalHeftSession: this._internalHeftSession
-        })
+        runner: new LifecycleOperationRunner({ type, internalHeftSession: this._internalHeftSession })
       });
       operations.set(key, operation);
     }
@@ -332,9 +617,6 @@ export class HeftActionRunner {
   }
 
   private _getOrCreatePhaseOperation(phase: HeftPhase, operations: Map<string, Operation>): Operation {
-    const {
-      defaultParameters: { clean, cleanCache }
-    } = this.parameterManager;
     const key: string = phase.phaseName;
 
     let operation: Operation | undefined = operations.get(key);
@@ -342,11 +624,28 @@ export class HeftActionRunner {
       // Only create the operation. Dependencies are hooked up separately
       operation = new Operation({
         groupName: phase.phaseName,
-        runner: new PhaseOperationRunner({
-          clean,
-          cleanCache,
-          phase,
-          internalHeftSession: this._internalHeftSession
+        runner: new PhaseOperationRunner({ phase, internalHeftSession: this._internalHeftSession })
+      });
+      operations.set(key, operation);
+    }
+    return operation;
+  }
+
+  private _getOrCreateTaskOperation(
+    task: HeftTask,
+    operations: Map<string, Operation>,
+    cancellationToken: CancellationToken
+  ): Operation {
+    const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
+
+    let operation: Operation | undefined = operations.get(key);
+    if (!operation) {
+      operation = new Operation({
+        groupName: task.parentPhase.phaseName,
+        runner: new TaskOperationRunner({
+          internalHeftSession: this._internalHeftSession,
+          task,
+          cancellationToken
         })
       });
       operations.set(key, operation);
@@ -354,17 +653,11 @@ export class HeftActionRunner {
     return operation;
   }
 
-  private _getOrCreateTaskOperation(task: HeftTask, operations: Map<string, Operation>): Operation {
-    const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
-
-    let operation: Operation | undefined = operations.get(key);
-    if (!operation) {
-      operation = new Operation({
-        groupName: task.parentPhase.phaseName,
-        runner: new TaskOperationRunner({ internalHeftSession: this._internalHeftSession, task })
-      });
-      operations.set(key, operation);
+  // Defer-load chokidar to avoid loading it until it's actually needed
+  private async _loadChokidarAsync(): Promise<typeof chokidar> {
+    if (!this._chokidar) {
+      this._chokidar = await import('chokidar');
     }
-    return operation;
+    return this._chokidar;
   }
 }

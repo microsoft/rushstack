@@ -22,8 +22,6 @@ export type LifecycleOperationRunnerType = 'start' | 'stop';
 export interface ILifecycleOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
   type: LifecycleOperationRunnerType;
-  clean: boolean;
-  cleanCache: boolean;
 }
 
 export class LifecycleOperationRunner implements IOperationRunner {
@@ -40,8 +38,14 @@ export class LifecycleOperationRunner implements IOperationRunner {
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    // Load and apply the plugins for this phase only
-    const { internalHeftSession, type, clean, cleanCache } = this._options;
+    const { internalHeftSession, type } = this._options;
+    const { clean, cleanCache, watch } = internalHeftSession.parameterManager.defaultParameters;
+
+    // Avoid running the lifecycle operation when in watch mode
+    if (watch) {
+      return OperationStatus.Success;
+    }
+
     const lifecycle: HeftLifecycle = internalHeftSession.lifecycle;
     const lifecycleLogger: ScopedLogger = internalHeftSession.loggingManager.requestScopedLogger(
       `lifecycle:${this._options.type}`

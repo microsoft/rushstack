@@ -21,6 +21,15 @@ export class OperationGroupRecord {
     return this._remainingOperations.size === 0;
   }
 
+  public get hasCancellations(): boolean {
+    for (const operation of this._operations) {
+      if (operation.status === OperationStatus.Cancelled) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public get hasFailures(): boolean {
     for (const operation of this._operations) {
       if (operation.status === OperationStatus.Failure) {

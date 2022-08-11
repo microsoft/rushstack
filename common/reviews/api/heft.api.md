@@ -55,6 +55,12 @@ export class HeftConfiguration {
 }
 
 // @public
+export interface IChangedFileState {
+    readonly isSourceFile: boolean;
+    readonly version: string;
+}
+
+// @public
 export interface ICopyOperation extends IFileSelectionSpecifier {
     destinationFolders: string[];
     flatten?: boolean;
@@ -164,6 +170,7 @@ export interface IHeftTaskCleanHookOptions {
 export interface IHeftTaskHooks {
     clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
     run: AsyncParallelHook<IHeftTaskRunHookOptions>;
+    runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
 }
 
 // @public (undocumented)
@@ -173,6 +180,11 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 // @public
 export interface IHeftTaskRunHookOptions {
     addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
+}
+
+// @public
+export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+    changedFiles: ReadonlyMap<string, IChangedFileState>;
 }
 
 // @public
@@ -235,7 +247,6 @@ export interface IRunScriptOptions {
 export interface IScopedLogger {
     emitError(error: Error): void;
     emitWarning(warning: Error): void;
-    // (undocumented)
     readonly terminal: Terminal;
 }
 
