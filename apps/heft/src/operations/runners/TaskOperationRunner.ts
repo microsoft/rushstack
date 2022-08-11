@@ -52,8 +52,10 @@ export class TaskOperationRunner implements IOperationRunner {
   }
 
   private async _executeTaskAsync(taskSession: HeftTaskSession): Promise<OperationStatus> {
+    const { cancellationToken } = this._options;
+
     // Exit the task early if cancellation is requested
-    if (this._options.cancellationToken.isCancellationRequested) {
+    if (cancellationToken.isCancellationRequested) {
       return OperationStatus.Cancelled;
     }
 
@@ -81,7 +83,7 @@ export class TaskOperationRunner implements IOperationRunner {
       }
 
       // If the task was cancelled during the run hook, exit early
-      if (this._options.cancellationToken.isCancellationRequested) {
+      if (cancellationToken.isCancellationRequested) {
         return OperationStatus.Cancelled;
       }
 
