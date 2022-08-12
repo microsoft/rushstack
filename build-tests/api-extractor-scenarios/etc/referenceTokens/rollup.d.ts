@@ -34,6 +34,16 @@ declare class SomeClass2 {
 export declare class SomeClass3 extends SomeClass2 {
 }
 
+/**
+ * Reference to a symbol exported from another file, but not exported from the package.
+ * @public
+ */
+export declare class SomeClass4 extends SomeClass5 {
+}
+
+declare class SomeClass5 {
+}
+
 /** @public */
 export declare enum SomeEnum {
     A = "A",

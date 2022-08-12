@@ -42,6 +42,12 @@ export class SomeClass1 {
 export class SomeClass3 extends SomeClass2 {
 }
 
+// Warning: (ae-forgotten-export) The symbol "SomeClass5" needs to be exported by the entry point index.d.ts
+//
+// @public
+export class SomeClass4 extends SomeClass5 {
+}
+
 // @public (undocumented)
 export enum SomeEnum {
     // (undocumented)
