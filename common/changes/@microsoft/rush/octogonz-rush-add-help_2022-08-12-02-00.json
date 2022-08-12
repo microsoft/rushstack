@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update CLI docs for \"rush add\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
