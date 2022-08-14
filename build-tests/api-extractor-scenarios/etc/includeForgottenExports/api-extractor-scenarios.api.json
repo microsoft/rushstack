@@ -526,7 +526,7 @@
                 {
                   "kind": "Reference",
                   "text": "ForgottenExport3",
-                  "canonicalReference": "api-extractor-scenarios!~ForgottenExport3:class"
+                  "canonicalReference": "api-extractor-scenarios!SomeNamespace1~ForgottenExport3:class"
                 },
                 {
                   "kind": "Content",
