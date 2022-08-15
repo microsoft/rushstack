@@ -375,7 +375,7 @@
         },
         {
           "kind": "Namespace",
-          "canonicalReference": "api-extractor-scenarios!internal2:namespace",
+          "canonicalReference": "api-extractor-scenarios!~internal2:namespace",
           "docComment": "",
           "excerptTokens": [],
           "releaseTag": "None",
@@ -384,7 +384,7 @@
           "members": [
             {
               "kind": "Class",
-              "canonicalReference": "api-extractor-scenarios!internal2.ForgottenExport6:class",
+              "canonicalReference": "api-extractor-scenarios!~internal2.ForgottenExport6:class",
               "docComment": "",
               "excerptTokens": [
                 {

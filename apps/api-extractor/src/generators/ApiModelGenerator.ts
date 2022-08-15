@@ -124,7 +124,7 @@ export class ApiModelGenerator {
       //
       // This could be improved in the future, but it requires a stable mechanism for choosing an associated parent.
       // For thoughts about this:  https://github.com/microsoft/rushstack/issues/1308
-      this._processAstModule(astEntity.astModule, exportedName, parentApiItem);
+      this._processAstNamespaceImport(astEntity, exportedName, parentApiItem);
       return;
     }
 
@@ -133,13 +133,15 @@ export class ApiModelGenerator {
     // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
   }
 
-  private _processAstModule(
-    astModule: AstModule,
+  private _processAstNamespaceImport(
+    astNamespaceImport: AstNamespaceImport,
     exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin
   ): void {
+    const astModule: AstModule = astNamespaceImport.astModule;
     const name: string = exportedName ? exportedName : astModule.moduleSymbol.name;
     const containerKey: string = ApiNamespace.getContainerKey(name);
+    const isExported: boolean = this._isExported(astNamespaceImport);
 
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(
       containerKey
@@ -151,7 +153,7 @@ export class ApiModelGenerator {
         docComment: undefined,
         releaseTag: ReleaseTag.None,
         excerptTokens: [],
-        isExported: true
+        isExported
       });
       parentApiItem.addMember(apiNamespace);
     }
@@ -400,7 +402,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isExported: boolean = this._isExported(astDeclaration);
+      const isExported: boolean = this._isExported(astDeclaration.astSymbol.rootAstSymbol);
 
       apiClass = new ApiClass({
         name,
@@ -486,7 +488,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const preserveMemberOrder: boolean =
         this._collector.extractorConfig.enumMemberOrder === EnumMemberOrder.Preserve;
-      const isExported: boolean = this._isExported(astDeclaration);
+      const isExported: boolean = this._isExported(astDeclaration.astSymbol.rootAstSymbol);
 
       apiEnum = new ApiEnum({ name, docComment, releaseTag, excerptTokens, preserveMemberOrder, isExported });
       parentApiItem.addMember(apiEnum);
@@ -570,7 +572,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isExported: boolean = this._isExported(astDeclaration);
+      const isExported: boolean = this._isExported(astDeclaration.astSymbol.rootAstSymbol);
 
       apiFunction = new ApiFunction({
         name,
@@ -673,7 +675,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isExported: boolean = this._isExported(astDeclaration);
+      const isExported: boolean = this._isExported(astDeclaration.astSymbol.rootAstSymbol);
 
       apiInterface = new ApiInterface({
         name,
@@ -823,7 +825,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isExported: boolean = this._isExported(astDeclaration);
+      const isExported: boolean = this._isExported(astDeclaration.astSymbol.rootAstSymbol);
 
       apiNamespace = new ApiNamespace({ name, docComment, releaseTag, excerptTokens, isExported });
       parentApiItem.addMember(apiNamespace);
@@ -973,7 +975,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const isExported: boolean = this._isExported(astDeclaration);
+      const isExported: boolean = this._isExported(astDeclaration.astSymbol.rootAstSymbol);
 
       apiTypeAlias = new ApiTypeAlias({
         name,
@@ -1020,7 +1022,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const isExported: boolean = this._isExported(astDeclaration);
+      const isExported: boolean = this._isExported(astDeclaration.astSymbol.rootAstSymbol);
 
       apiVariable = new ApiVariable({
         name,
@@ -1136,17 +1138,13 @@ export class ApiModelGenerator {
     }
   }
 
-  private _isExported(astDeclaration: AstDeclaration): boolean {
+  private _isExported(astEntity: AstEntity): boolean {
     // Collector entities are only created for root symbols.
-    const entity: CollectorEntity | undefined = this._collector.tryGetCollectorEntity(
-      astDeclaration.astSymbol.rootAstSymbol
-    );
+    const entity: CollectorEntity | undefined = this._collector.tryGetCollectorEntity(astEntity);
 
     if (!entity) {
       // This should never happen.
-      throw new InternalError(
-        `Failed to get collector entity for root symbol of declaration ${astDeclaration.astSymbol.localName}`
-      );
+      throw new InternalError(`Failed to get collector entity for AstEntity "${astEntity.localName}"`);
     }
 
     return entity.exported;
