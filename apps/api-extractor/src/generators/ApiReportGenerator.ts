@@ -172,20 +172,21 @@ export class ApiReportGenerator {
           writer.increaseIndent();
 
           const exportClauses: string[] = [];
-          for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
-            const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(astEntity);
+          for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
+            const collectorEntity: CollectorEntity | undefined =
+              collector.tryGetCollectorEntity(exportedEntity);
             if (collectorEntity === undefined) {
               // This should never happen
               // top-level exports of local imported module should be added as collector entities before
               throw new InternalError(
-                `Cannot find collector entity for ${entity.nameForEmit}.${astEntity.localName}`
+                `Cannot find collector entity for ${entity.nameForEmit}.${exportedEntity.localName}`
               );
             }
 
-            if (collectorEntity.nameForEmit === exportName) {
+            if (collectorEntity.nameForEmit === exportedName) {
               exportClauses.push(collectorEntity.nameForEmit);
             } else {
-              exportClauses.push(`${collectorEntity.nameForEmit} as ${exportName}`);
+              exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
             }
           }
           writer.writeLine(exportClauses.join(',\n'));

@@ -4,6 +4,13 @@
 
 ```ts
 
+class AnotherDuplicateName {
+}
+
+// (undocumented)
+class AnotherDuplicateName_2 {
+}
+
 // @public
 export type DuplicateName = boolean;
 
@@ -58,6 +65,16 @@ export function someFunction4(): ForgottenExport4.ForgottenExport5;
 //
 // @public (undocumented)
 export function someFunction5(): internal2.ForgottenExport6;
+
+// Warning: (ae-forgotten-export) The symbol "AnotherDuplicateName" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export function someFunction6(): AnotherDuplicateName;
+
+// Warning: (ae-forgotten-export) The symbol "AnotherDuplicateName_2" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export function someFunction7(): AnotherDuplicateName_2;
 
 // @public (undocumented)
 export namespace SomeNamespace1 {

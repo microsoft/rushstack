@@ -8,3 +8,10 @@ type DuplicateName = number;
 export function someFunction2(): DuplicateName {
   return 5;
 }
+
+class AnotherDuplicateName {}
+
+/** @public */
+export function someFunction7(): AnotherDuplicateName {
+  return new AnotherDuplicateName();
+}

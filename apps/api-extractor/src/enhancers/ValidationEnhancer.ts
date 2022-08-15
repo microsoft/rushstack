@@ -21,7 +21,13 @@ export class ValidationEnhancer {
     const alreadyWarnedEntities: Set<AstEntity> = new Set<AstEntity>();
 
     for (const entity of collector.entities) {
-      if (!(entity.consumable || collector.extractorConfig.apiReportIncludeForgottenExports)) {
+      if (
+        !(
+          entity.consumable ||
+          collector.extractorConfig.apiReportIncludeForgottenExports ||
+          collector.extractorConfig.docModelIncludeForgottenExports
+        )
+      ) {
         continue;
       }
 

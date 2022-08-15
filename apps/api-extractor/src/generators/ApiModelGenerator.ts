@@ -1144,7 +1144,9 @@ export class ApiModelGenerator {
 
     if (!entity) {
       // This should never happen.
-      throw new InternalError('Failed to get collector entity for root symbol of declaration');
+      throw new InternalError(
+        `Failed to get collector entity for root symbol of declaration ${astDeclaration.astSymbol.localName}`
+      );
     }
 
     return entity.exported;
