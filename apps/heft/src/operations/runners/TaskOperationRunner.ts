@@ -57,21 +57,21 @@ export class TaskOperationRunner implements IOperationRunner {
 
     const shouldRunIncremental: boolean =
       taskSession.parameters.watch && taskSession.hooks.runIncremental.isUsed();
-    // We must have the changed files map if we are running in incremental mode
+
+    // We must have the changed files map provided if we are running in incremental mode
     if (shouldRunIncremental && !changedFiles) {
       throw new InternalError('changedFiles must be provided when watch is true');
     }
 
-    const shouldRun: boolean = taskSession.hooks.runIncremental.isUsed() || shouldRunIncremental;
+    const shouldRun: boolean = taskSession.hooks.run.isUsed() || shouldRunIncremental;
     if (shouldRun) {
       const startTime: number = performance.now();
       taskSession.logger.terminal.writeVerboseLine(
         `Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`
       );
 
-      const copyOperations: ICopyOperation[] = [];
-
       // Create the options and provide a utility method to obtain paths to copy
+      const copyOperations: ICopyOperation[] = [];
       const runHookOptions: IHeftTaskRunHookOptions = {
         addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
           copyOperations.push(...copyOperationsToAdd)
@@ -96,24 +96,24 @@ export class TaskOperationRunner implements IOperationRunner {
         return OperationStatus.Failure;
       }
 
-      // If the task was cancelled during the run hook, exit early
-      if (cancellationToken.isCancellationRequested) {
-        return OperationStatus.Cancelled;
-      }
-
-      // Copy the files if any were specified
+      // Copy the files if any were specified. Avoid checking the cancellation token here
+      // since plugins may be tracking state changes and would have already considered
+      // added copy operations as "processed" during hook execution.
       if (copyOperations.length) {
         await copyFilesAsync(copyOperations, taskSession.logger);
       }
 
+      const finishedWord: string = cancellationToken.isCancellationRequested ? 'Cancelled' : 'Finished';
       taskSession.logger.terminal.writeVerboseLine(
-        `Finished ${shouldRunIncremental ? 'incremental ' : ''}task execution ` +
+        `${finishedWord} ${shouldRunIncremental ? 'incremental ' : ''}task execution ` +
           `(${performance.now() - startTime}ms)`
       );
     } else {
       taskSession.logger.terminal.writeVerboseLine('Task execution skipped, no implementation provided');
     }
 
-    return OperationStatus.Success;
+    // Even if the entire process has completed, we should mark the operation as cancelled if
+    // cancellation has been requested.
+    return cancellationToken.isCancellationRequested ? OperationStatus.Cancelled : OperationStatus.Success;
   }
 }
