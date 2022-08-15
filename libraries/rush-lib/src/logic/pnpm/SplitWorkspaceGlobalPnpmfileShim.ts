@@ -9,6 +9,8 @@
 
 import path from 'path';
 
+import normalizePath from 'normalize-path';
+
 // This file can use "import type" but otherwise should not reference any other modules, since it will
 // be run from the "common/temp" directory
 import type * as TSemver from 'semver';
@@ -21,6 +23,7 @@ import type {
   IWorkspaceProjectInfo
 } from './IPnpmfile';
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
+import _ from 'lodash';
 
 let settings: ISplitWorkspacePnpmfileShimSettings;
 let userPnpmfile: IPnpmfile | undefined;
@@ -91,9 +94,11 @@ function rewriteRushProjectVersions(
         settings.workspaceProjects[dependencyName];
       if (workspaceProjectInfo) {
         // Case 1. "<package_name>": "workspace:*"
-        const relativePath: string = path.relative(
-          splitWorkspaceProject.projectRelativeFolder,
-          workspaceProjectInfo.projectRelativeFolder
+        const relativePath: string = normalizePath(
+          path.relative(
+            splitWorkspaceProject.projectRelativeFolder,
+            workspaceProjectInfo.projectRelativeFolder
+          )
         );
         const newVersion: string = 'link:' + relativePath;
         dependencies[dependencyName] = newVersion;
@@ -107,9 +112,11 @@ function rewriteRushProjectVersions(
         const aliasedWorkspaceProjectInfo: IWorkspaceProjectInfo | undefined =
           settings.workspaceProjects[aliasedPackageName];
         if (aliasedWorkspaceProjectInfo) {
-          const relativePath: string = path.relative(
-            splitWorkspaceProject.projectRelativeFolder,
-            aliasedWorkspaceProjectInfo.projectRelativeFolder
+          const relativePath: string = normalizePath(
+            path.relative(
+              splitWorkspaceProject.projectRelativeFolder,
+              aliasedWorkspaceProjectInfo.projectRelativeFolder
+            )
           );
           const newVersion: string = 'link:' + relativePath;
           dependencies[dependencyName] = newVersion;
@@ -125,9 +132,11 @@ function rewriteRushProjectVersions(
       const aliasedWorkspaceProjectInfo: IWorkspaceProjectInfo | undefined =
         settings.workspaceProjects[aliasedPackageName];
       if (aliasedWorkspaceProjectInfo) {
-        const relativePath: string = path.relative(
-          splitWorkspaceProject.projectRelativeFolder,
-          aliasedWorkspaceProjectInfo.projectRelativeFolder
+        const relativePath: string = normalizePath(
+          path.relative(
+            splitWorkspaceProject.projectRelativeFolder,
+            aliasedWorkspaceProjectInfo.projectRelativeFolder
+          )
         );
         const newVersion: string = 'link:' + relativePath;
         dependencies[dependencyName] = newVersion;
