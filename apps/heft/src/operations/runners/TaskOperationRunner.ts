@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { performance } from 'perf_hooks';
-import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError, LockFile } from '@rushstack/node-core-library';
 
 import { OperationStatus } from '../OperationStatus';
+import { FileEventListener } from '../../utilities/FileEventListener';
+import { HeftTask } from '../../pluginFramework/HeftTask';
 import { copyFilesAsync, type ICopyOperation } from '../../plugins/CopyFilesPlugin';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
-import type { HeftTask } from '../../pluginFramework/HeftTask';
 import type {
   HeftTaskSession,
   IChangedFileState,
@@ -23,6 +25,7 @@ export interface ITaskOperationRunnerOptions {
   task: HeftTask;
   cancellationToken: CancellationToken;
   changedFiles?: Map<string, IChangedFileState>;
+  fileEventListener?: FileEventListener;
 }
 
 export class TaskOperationRunner implements IOperationRunner {
@@ -48,27 +51,30 @@ export class TaskOperationRunner implements IOperationRunner {
   }
 
   private async _executeTaskAsync(taskSession: HeftTaskSession): Promise<OperationStatus> {
-    const { cancellationToken, changedFiles } = this._options;
+    const { cancellationToken, changedFiles, fileEventListener } = this._options;
+    const {
+      hooks,
+      logger: { terminal }
+    } = taskSession;
+    const lockFileName: string | undefined =
+      fileEventListener && taskSession.parameters.watch ? path.basename(taskSession.tempFolder) : undefined;
 
     // Exit the task early if cancellation is requested
     if (cancellationToken.isCancellationRequested) {
       return OperationStatus.Cancelled;
     }
 
-    const shouldRunIncremental: boolean =
-      taskSession.parameters.watch && taskSession.hooks.runIncremental.isUsed();
+    const shouldRunIncremental: boolean = taskSession.parameters.watch && hooks.runIncremental.isUsed();
 
     // We must have the changed files map provided if we are running in incremental mode
     if (shouldRunIncremental && !changedFiles) {
       throw new InternalError('changedFiles must be provided when watch is true');
     }
 
-    const shouldRun: boolean = taskSession.hooks.run.isUsed() || shouldRunIncremental;
+    const shouldRun: boolean = hooks.run.isUsed() || shouldRunIncremental;
     if (shouldRun) {
       const startTime: number = performance.now();
-      taskSession.logger.terminal.writeVerboseLine(
-        `Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`
-      );
+      terminal.writeVerboseLine(`Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`);
 
       // Create the options and provide a utility method to obtain paths to copy
       const copyOperations: ICopyOperation[] = [];
@@ -84,9 +90,9 @@ export class TaskOperationRunner implements IOperationRunner {
             ...runHookOptions,
             changedFiles: changedFiles!
           };
-          await taskSession.hooks.runIncremental.promise(runIncrementalHookOptions);
+          await hooks.runIncremental.promise(runIncrementalHookOptions);
         } else {
-          await taskSession.hooks.run.promise(runHookOptions);
+          await hooks.run.promise(runHookOptions);
         }
       } catch (e) {
         // Log out using the task logger, and return an error status
@@ -103,13 +109,42 @@ export class TaskOperationRunner implements IOperationRunner {
         await copyFilesAsync(copyOperations, taskSession.logger);
       }
 
+      if (lockFileName) {
+        // Wait for the release of the lockfile if one was acquired. This is done to ensure that all watched
+        // files created by the task are ingested and available for subsequent tasks.
+        terminal.writeVerboseLine(`Synchronizing watcher using lock file "${lockFileName}"`);
+        const lockFilePath: string = LockFile.getLockFilePath(taskSession.tempFolder, lockFileName);
+
+        // This can appear as a create or a change, depending on if the lockfile is dirty. Create both
+        // promises before creating the lockfile to ensure that we pick up the change.
+        const lockfileChangePromise: Promise<void> = Promise.race([
+          fileEventListener!.waitForChangeAsync(lockFilePath),
+          fileEventListener!.waitForCreateAsync(lockFilePath)
+        ]);
+        const taskOperationLockFile: LockFile | undefined = LockFile.tryAcquire(
+          taskSession.tempFolder,
+          lockFileName
+        );
+        if (!taskOperationLockFile) {
+          throw new InternalError(
+            `Failed to acquire lock file "${lockFileName}". Are multiple instances of Heft running?`
+          );
+        }
+
+        // Wait for the lockfile to be seen by the listener
+        await lockfileChangePromise;
+
+        // We can save some time by avoiding deleting the lockfile
+        taskOperationLockFile.release(/*deleteFile:*/ false);
+      }
+
       const finishedWord: string = cancellationToken.isCancellationRequested ? 'Cancelled' : 'Finished';
-      taskSession.logger.terminal.writeVerboseLine(
+      terminal.writeVerboseLine(
         `${finishedWord} ${shouldRunIncremental ? 'incremental ' : ''}task execution ` +
           `(${performance.now() - startTime}ms)`
       );
     } else {
-      taskSession.logger.terminal.writeVerboseLine('Task execution skipped, no implementation provided');
+      terminal.writeVerboseLine('Task execution skipped, no implementation provided');
     }
 
     // Even if the entire process has completed, we should mark the operation as cancelled if

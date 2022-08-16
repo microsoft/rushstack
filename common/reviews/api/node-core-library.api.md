@@ -694,7 +694,7 @@ export class LockFile {
     get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
     get isReleased(): boolean;
-    release(): void;
+    release(deleteFile?: boolean): void;
     static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
 }
 

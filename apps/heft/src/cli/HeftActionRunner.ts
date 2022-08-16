@@ -42,6 +42,7 @@ import type { HeftTask } from '../pluginFramework/HeftTask';
 import type { LifecycleOperationRunnerType } from '../operations/runners/LifecycleOperationRunner';
 import type { IChangedFileState } from '../pluginFramework/HeftTaskSession';
 import { CancellationToken, CancellationTokenSource } from '../utilities/CancellationToken';
+import { FileEventListener } from '../utilities/FileEventListener';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;
@@ -171,7 +172,7 @@ async function* _waitForSourceChangesAsync(
   await ingestFileChangesAsync(initialFilePaths, /*ignoreForbidden:*/ true);
   for (const filePath of initialFilePaths) {
     options.changedFiles.set(filePath, {
-      ...generateChangeState(filePath, /*stats:*/ undefined),
+      ...generateChangeState(filePath),
       version: INITIAL_CHANGE_STATE
     });
   }
@@ -360,20 +361,24 @@ export class HeftActionRunner {
   private async _executeWatchAsync(): Promise<void> {
     const chokidarPkg: typeof chokidar = await this._loadChokidarAsync();
 
-    // Create a watcher for the build folder and remove all listeners once the watcher is created.
+    // Create a watcher for the build folder which will return the initial state
     const watcherReadyPromise: Promise<chokidar.FSWatcher> = new Promise(
       (resolve: (watcher: chokidar.FSWatcher) => void, reject: (error: Error) => void) => {
         const watcher: chokidar.FSWatcher = chokidarPkg.watch(this._heftConfiguration.buildFolder, {
           persistent: true,
+          // All watcher-returned file paths will be relative to the build folder
           cwd: this._heftConfiguration.buildFolder,
-          ignored: ['node_modules/**', '.cache/**', 'temp/**', '.rush/**'],
+          // Ignore "node_modules" files and known-unimportant files. We do however allow an exception
+          // for temporary lock files to allow for their use in synchronizing the operation execution
+          // with the watcher via the LockFileManager
+          ignored: ['node_modules/**', '.cache/**', '.rush/**'],
+          // We will use the initial state to build a list of all watched files
           ignoreInitial: false,
-          alwaysStat: true,
-          awaitWriteFinish: {
-            stabilityThreshold: 500,
-            pollInterval: 100
-          }
+          // Handle 'unlink' + 'add' events within 100 ms of each other as atomic 'change' events,
+          // since some editors will do this (e.g. sublime text)
+          atomic: true
         });
+        // Remove all listeners once the initial state is returned
         watcher.on('ready', () => resolve(watcher.removeAllListeners()));
         watcher.on('error', (error: Error) => reject(error));
       }
@@ -389,6 +394,10 @@ export class HeftActionRunner {
     const iterator: AsyncIterator<void> = _waitForSourceChangesAsync({ watcher, git, changedFiles });
     await iterator.next();
 
+    // The file event listener is used to allow task operations to wait for a file change before
+    // progressing to the next task.
+    const fileEventListener: FileEventListener = new FileEventListener(watcher);
+
     // eslint-disable-next-line no-constant-condition
     while (true) {
       // Create the cancellation token which is passed to the incremental build.
@@ -397,7 +406,10 @@ export class HeftActionRunner {
 
       // Start the incremental build and wait for a source file to change
       const sourceChangesPromise: Promise<true> = iterator.next().then(() => true);
-      const executePromise: Promise<false> = this._executeOnceAsync(cancellationToken).then(() => false);
+      const executePromise: Promise<false> = this._executeOnceAsync(
+        cancellationToken,
+        fileEventListener
+      ).then(() => false);
 
       try {
         // Whichever promise settles first will be the result of the race.
@@ -440,14 +452,16 @@ export class HeftActionRunner {
   }
 
   private async _executeOnceAsync(
-    cancellationToken: CancellationToken = new CancellationToken()
+    cancellationToken?: CancellationToken,
+    fileEventListener?: FileEventListener
   ): Promise<void> {
     const startTime: number = performance.now();
+    cancellationToken = cancellationToken || new CancellationToken();
     this._loggingManager.resetScopedLoggerErrorsAndWarnings();
 
     // Execute the action operations
     let encounteredError: boolean = false;
-    const operations: Set<Operation> = this._generateOperations(cancellationToken);
+    const operations: Set<Operation> = this._generateOperations(cancellationToken, fileEventListener);
     try {
       const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
         loggingManager: this._loggingManager,
@@ -520,7 +534,10 @@ export class HeftActionRunner {
     }
   }
 
-  private _generateOperations(cancellationToken: CancellationToken): Set<Operation> {
+  private _generateOperations(
+    cancellationToken: CancellationToken,
+    fileEventListener?: FileEventListener
+  ): Set<Operation> {
     const { selectedPhases } = this._action;
     const {
       defaultParameters: { clean, cleanCache }
@@ -564,7 +581,12 @@ export class HeftActionRunner {
 
       // Create operations for each task
       for (const task of phase.tasks) {
-        const taskOperation: Operation = this._getOrCreateTaskOperation(task, operations, cancellationToken);
+        const taskOperation: Operation = this._getOrCreateTaskOperation(
+          task,
+          operations,
+          cancellationToken,
+          fileEventListener
+        );
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
         taskOperation.dependencies.add(phaseOperation);
         // Set the 'start' lifecycle operation as a dependency of all tasks to ensure the 'start' lifecycle
@@ -577,7 +599,7 @@ export class HeftActionRunner {
         // Set all dependency tasks as dependencies of the task operation
         for (const dependencyTask of task.dependencyTasks) {
           taskOperation.dependencies.add(
-            this._getOrCreateTaskOperation(dependencyTask, operations, cancellationToken)
+            this._getOrCreateTaskOperation(dependencyTask, operations, cancellationToken, fileEventListener)
           );
         }
 
@@ -634,7 +656,8 @@ export class HeftActionRunner {
   private _getOrCreateTaskOperation(
     task: HeftTask,
     operations: Map<string, Operation>,
-    cancellationToken: CancellationToken
+    cancellationToken: CancellationToken,
+    fileEventListener?: FileEventListener
   ): Operation {
     const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
 
@@ -645,7 +668,8 @@ export class HeftActionRunner {
         runner: new TaskOperationRunner({
           internalHeftSession: this._internalHeftSession,
           task,
-          cancellationToken
+          cancellationToken,
+          fileEventListener
         })
       });
       operations.set(key, operation);
