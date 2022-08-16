@@ -41,7 +41,7 @@ import type { IHeftAction, IHeftActionOptions } from '../cli/actions/IHeftAction
 import type { HeftTask } from '../pluginFramework/HeftTask';
 import type { LifecycleOperationRunnerType } from '../operations/runners/LifecycleOperationRunner';
 import type { IChangedFileState } from '../pluginFramework/HeftTaskSession';
-import { CancellationToken, CancellationTokenSource } from '../utilities/CancellationToken';
+import { CancellationToken, CancellationTokenSource } from '../pluginFramework/CancellationToken';
 import { FileEventListener } from '../utilities/FileEventListener';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {

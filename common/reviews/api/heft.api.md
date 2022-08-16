@@ -19,6 +19,24 @@ import { ITerminalProvider } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { Terminal } from '@rushstack/node-core-library';
 
+// @public
+export class CancellationToken {
+    // @internal
+    constructor(options?: _ICancellationTokenOptions);
+    get isCancellationRequested(): boolean;
+    get promise(): Promise<void>;
+}
+
+// @public
+export class CancellationTokenSource {
+    constructor(options?: ICancellationTokenSourceOptions);
+    cancel(): void;
+    get isCancellationRequested(): boolean;
+    // @internal (undocumented)
+    get _promise(): Promise<void>;
+    get token(): CancellationToken;
+}
+
 export { CommandLineChoiceListParameter }
 
 export { CommandLineChoiceParameter }
@@ -52,6 +70,17 @@ export class HeftConfiguration {
     get rigPackageResolver(): IRigPackageResolver;
     get tempFolder(): string;
     get terminalProvider(): ITerminalProvider;
+}
+
+// @internal
+export interface _ICancellationTokenOptions {
+    cancellationTokenSource?: CancellationTokenSource;
+    isCancelled?: boolean;
+}
+
+// @public
+export interface ICancellationTokenSourceOptions {
+    delayMs?: number;
 }
 
 // @public
@@ -184,6 +213,7 @@ export interface IHeftTaskRunHookOptions {
 
 // @public
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+    readonly cancellationToken: CancellationToken;
     readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
 }
 

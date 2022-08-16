@@ -4,20 +4,6 @@
 import { InternalError } from '@rushstack/node-core-library';
 
 /**
- * Options for the cancellation token source.
- *
- * @public
- */
-export interface ICancellationTokenSourceOptions {
-  /**
-   * Amount of time in milliseconds to wait before cancelling the token.
-   *
-   * @public
-   */
-  delayMs?: number;
-}
-
-/**
  * Options for the cancellation token.
  *
  * @internal
@@ -38,6 +24,20 @@ export interface ICancellationTokenOptions {
    * @internal
    */
   isCancelled?: boolean;
+}
+
+/**
+ * Options for the cancellation token source.
+ *
+ * @public
+ */
+export interface ICancellationTokenSourceOptions {
+  /**
+   * Amount of time in milliseconds to wait before cancelling the token.
+   *
+   * @public
+   */
+  delayMs?: number;
 }
 
 /**

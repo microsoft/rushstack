@@ -12,6 +12,7 @@ import type { IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
+import type { CancellationToken } from './CancellationToken';
 
 /**
  * The task session provided to the task.
@@ -153,6 +154,13 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
    * files have been changed during an incremental build.
    */
   readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
+
+  /**
+   * A cancellation token that is used to signal that the incremental build is cancelled. This
+   * can be used to stop incremental operations early and allow for a new incremental build to
+   * be started.
+   */
+  readonly cancellationToken: CancellationToken;
 }
 
 /**

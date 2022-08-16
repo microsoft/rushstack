@@ -5,10 +5,16 @@ import * as path from 'path';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
+import { REMOVED_CHANGE_STATE } from '../cli/HeftActionRunner';
 import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
+import type {
+  IHeftTaskSession,
+  IHeftTaskRunHookOptions,
+  IHeftTaskRunIncrementalHookOptions,
+  IChangedFileState
+} from '../pluginFramework/HeftTaskSession';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
 /**
@@ -46,11 +52,6 @@ interface ICopyFilesPluginOptions {
   copyOperations: ICopyOperation[];
 }
 
-interface ICopyFilesResult {
-  copiedFolderOrFileCount: number;
-  linkedFileCount: number;
-}
-
 interface ICopyDescriptor {
   sourcePath: string;
   destinationPath: string;
@@ -59,23 +60,7 @@ interface ICopyDescriptor {
 
 export async function copyFilesAsync(copyOperations: ICopyOperation[], logger: IScopedLogger): Promise<void> {
   const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(copyOperations);
-  if (copyDescriptors.length === 0) {
-    // No need to run copy and print to console
-    return;
-  }
-
-  const { copiedFolderOrFileCount, linkedFileCount } = await _copyFilesInnerAsync(copyDescriptors, logger);
-  const folderOrFilesPlural: string = copiedFolderOrFileCount === 1 ? '' : 's';
-  logger.terminal.writeLine(
-    `Copied ${copiedFolderOrFileCount} folder${folderOrFilesPlural} or file${folderOrFilesPlural} and ` +
-      `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
-  );
-
-  // TODO: Handle watch mode
-  // Then enter watch mode if requested
-  // if (options.watchMode) {
-  //   HeftAsync.runWatcherWithErrorHandling(async () => await this._runWatchAsync(options), logger);
-  // }
+  await _copyFilesInnerAsync(copyDescriptors, logger);
 }
 
 async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): Promise<ICopyDescriptor[]> {
@@ -172,9 +157,9 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
 async function _copyFilesInnerAsync(
   copyDescriptors: ICopyDescriptor[],
   logger: IScopedLogger
-): Promise<ICopyFilesResult> {
+): Promise<void> {
   if (copyDescriptors.length === 0) {
-    return { copiedFolderOrFileCount: 0, linkedFileCount: 0 };
+    return;
   }
 
   let copiedFolderOrFileCount: number = 0;
@@ -207,7 +192,29 @@ async function _copyFilesInnerAsync(
     { concurrency: Constants.maxParallelism }
   );
 
-  return { copiedFolderOrFileCount, linkedFileCount };
+  const folderOrFilesPlural: string = copiedFolderOrFileCount === 1 ? '' : 's';
+  logger.terminal.writeLine(
+    `Copied ${copiedFolderOrFileCount} folder${folderOrFilesPlural} or file${folderOrFilesPlural} and ` +
+      `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
+  );
+}
+
+function _resolveCopyOperationPaths(
+  heftConfiguration: HeftConfiguration,
+  copyOperations: Iterable<ICopyOperation>
+): void {
+  for (const copyOperation of copyOperations) {
+    if (!path.isAbsolute(copyOperation.sourcePath)) {
+      copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolder, copyOperation.sourcePath);
+    }
+    const destinationFolders: string[] = [];
+    for (const destinationFolder of copyOperation.destinationFolders) {
+      if (!path.isAbsolute(destinationFolder)) {
+        destinationFolders.push(path.resolve(heftConfiguration.buildFolder, destinationFolder));
+      }
+    }
+    copyOperation.destinationFolders = destinationFolders;
+  }
 }
 
 export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions> {
@@ -216,79 +223,51 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
     heftConfiguration: HeftConfiguration,
     pluginOptions: ICopyFilesPluginOptions
   ): void {
+    // TODO: Remove once improved heft-config-file is used to resolve paths
+    _resolveCopyOperationPaths(heftConfiguration, pluginOptions.copyOperations);
+
     taskSession.hooks.run.tapPromise(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
-      // TODO: Remove once improved heft-config-file is used
-      for (const copyOperation of pluginOptions.copyOperations) {
-        if (!path.isAbsolute(copyOperation.sourcePath)) {
-          copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolder, copyOperation.sourcePath);
-        }
-        const destinationFolders: string[] = [];
-        for (const destinationFolder of copyOperation.destinationFolders) {
-          if (!path.isAbsolute(destinationFolder)) {
-            destinationFolders.push(path.resolve(heftConfiguration.buildFolder, destinationFolder));
-          }
-        }
-        copyOperation.destinationFolders = destinationFolders;
-      }
       await copyFilesAsync(pluginOptions.copyOperations, taskSession.logger);
     });
+
+    const impactedFileStates: Map<string, IChangedFileState> = new Map();
+    taskSession.hooks.runIncremental.tapPromise(
+      taskSession.taskName,
+      async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
+        // TODO: Allow the copy descriptors to be resolved from a static list of files so
+        // that we don't have to query the file system for each copy operation
+        const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
+          pluginOptions.copyOperations
+        );
+        const incrementalCopyDescriptors: ICopyDescriptor[] = [];
+
+        // Cycle through the copy descriptors and check for incremental changes
+        for (const copyDescriptor of copyDescriptors) {
+          const changedFileState: IChangedFileState | undefined = runIncrementalOptions.changedFiles.get(
+            copyDescriptor.sourcePath
+          );
+          // We only care if the file has changed, ignore if not found or deleted
+          if (changedFileState && changedFileState.version !== REMOVED_CHANGE_STATE) {
+            const impactedFileState: IChangedFileState | undefined = impactedFileStates.get(
+              copyDescriptor.sourcePath
+            );
+            if (!impactedFileState || impactedFileState.version !== changedFileState.version) {
+              // If we haven't seen this file before or it's version has changed, copy it
+              incrementalCopyDescriptors.push(copyDescriptor);
+            }
+          }
+        }
+
+        await _copyFilesInnerAsync(incrementalCopyDescriptors, taskSession.logger);
+
+        // Update the copied file states with the new versions
+        for (const copyDescriptor of incrementalCopyDescriptors) {
+          impactedFileStates.set(
+            copyDescriptor.sourcePath,
+            runIncrementalOptions.changedFiles.get(copyDescriptor.sourcePath)!
+          );
+        }
+      }
+    );
   }
-
-  // TODO: Handle watch mode
-  // private async _runWatchAsync(options: ICopyFilesOptions): Promise<void> {
-  //   const { buildFolder, copyConfigurations, logger } = options;
-
-  //   for (const copyConfiguration of copyConfigurations) {
-  //     // Obtain the glob patterns to provide to the watcher
-  //     const globsToWatch: string[] = this._getIncludedGlobPatterns(copyConfiguration);
-  //     if (globsToWatch.length) {
-  //       const resolvedSourceFolderPath: string = path.join(buildFolder, copyConfiguration.sourceFolder);
-
-  //       const watcher: chokidar.FSWatcher = chokidar.watch(globsToWatch, {
-  //         cwd: resolvedSourceFolderPath,
-  //         ignoreInitial: true,
-  //         ignored: copyConfiguration.excludeGlobs
-  //       });
-
-  //       const copyAsset: (relativeAssetPath: string) => Promise<void> = async (relativeAssetPath: string) => {
-  //         const { copiedFileCount, linkedFileCount } = await this._copyFilesAsync(
-  //           copyConfiguration.resolvedDestinationFolderPaths.map((resolvedDestinationFolderPath) => {
-  //             return {
-  //               sourceFilePath: path.join(resolvedSourceFolderPath, relativeAssetPath),
-  //               destinationFilePath: path.join(
-  //                 resolvedDestinationFolderPath,
-  //                 copyConfiguration.flatten ? path.basename(relativeAssetPath) : relativeAssetPath
-  //               ),
-  //               hardlink: !!copyConfiguration.hardlink
-  //             };
-  //           })
-  //         );
-  //         logger.terminal.writeLine(
-  //           copyConfiguration.hardlink
-  //             ? `Linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
-  //             : `Copied ${copiedFileCount} file${copiedFileCount === 1 ? '' : 's'}`
-  //         );
-  //       };
-
-  //       const deleteAsset: (relativeAssetPath: string) => Promise<void> = async (relativeAssetPath) => {
-  //         const deletePromises: Promise<void>[] = copyConfiguration.resolvedDestinationFolderPaths.map(
-  //           (resolvedDestinationFolderPath) =>
-  //             FileSystem.deleteFileAsync(path.resolve(resolvedDestinationFolderPath, relativeAssetPath))
-  //         );
-  //         await Promise.all(deletePromises);
-  //         logger.terminal.writeLine(
-  //           `Deleted ${deletePromises.length} file${deletePromises.length === 1 ? '' : 's'}`
-  //         );
-  //       };
-
-  //       watcher.on('add', copyAsset);
-  //       watcher.on('change', copyAsset);
-  //       watcher.on('unlink', deleteAsset);
-  //     }
-  //   }
-
-  //   return new Promise(() => {
-  //     /* never resolve */
-  //   });
-  // }
 }

@@ -18,7 +18,7 @@ import type {
 } from '../../pluginFramework/HeftTaskSession';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import type { CancellationToken } from '../../utilities/CancellationToken';
+import type { CancellationToken } from '../../pluginFramework/CancellationToken';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
@@ -88,7 +88,8 @@ export class TaskOperationRunner implements IOperationRunner {
         if (shouldRunIncremental) {
           const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
             ...runHookOptions,
-            changedFiles: changedFiles!
+            changedFiles: changedFiles!,
+            cancellationToken: cancellationToken!
           };
           await hooks.runIncremental.promise(runIncrementalHookOptions);
         } else {

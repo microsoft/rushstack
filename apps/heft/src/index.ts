@@ -10,6 +10,13 @@ export { IRigPackageResolver } from './configuration/RigPackageResolver';
 
 export { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
 
+export {
+  CancellationTokenSource,
+  CancellationToken,
+  ICancellationTokenSourceOptions,
+  ICancellationTokenOptions as _ICancellationTokenOptions
+} from './pluginFramework/CancellationToken';
+
 export { IHeftParameters, IHeftDefaultParameters } from './pluginFramework/HeftParameterManager';
 
 export {

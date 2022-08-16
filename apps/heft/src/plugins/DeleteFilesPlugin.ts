@@ -22,15 +22,8 @@ interface IDeleteFilesPluginOptions {
   deleteOperations: IDeleteOperation[];
 }
 
-export async function deleteFilesAsync(
-  deleteOperations: IDeleteOperation[],
-  logger: IScopedLogger
-): Promise<void> {
-  let deletedFiles: number = 0;
-  let deletedFolders: number = 0;
-
+async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperation>): Promise<Set<string>> {
   const pathsToDelete: Set<string> = new Set();
-
   await Async.forEachAsync(
     deleteOperations,
     async (deleteOperation: IDeleteOperation) => {
@@ -52,6 +45,20 @@ export async function deleteFilesAsync(
     { concurrency: Constants.maxParallelism }
   );
 
+  return pathsToDelete;
+}
+
+export async function deleteFilesAsync(
+  deleteOperations: IDeleteOperation[],
+  logger: IScopedLogger
+): Promise<void> {
+  const pathsToDelete: Set<string> = await _getPathsToDeleteAsync(deleteOperations);
+  await _deleteFilesInnerAsync(pathsToDelete, logger);
+}
+
+async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScopedLogger): Promise<void> {
+  let deletedFiles: number = 0;
+  let deletedFolders: number = 0;
   await Async.forEachAsync(
     pathsToDelete,
     async (pathToDelete: string) => {
@@ -86,19 +93,27 @@ export async function deleteFilesAsync(
   }
 }
 
+function _resolveDeleteOperationPaths(
+  heftConfiguration: HeftConfiguration,
+  deleteOperations: Iterable<IDeleteOperation>
+): void {
+  for (const copyOperation of deleteOperations) {
+    if (!path.isAbsolute(copyOperation.sourcePath)) {
+      copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolder, copyOperation.sourcePath);
+    }
+  }
+}
+
 export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOptions> {
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     pluginOptions: IDeleteFilesPluginOptions
   ): void {
+    // TODO: Remove once improved heft-config-file is used
+    _resolveDeleteOperationPaths(heftConfiguration, pluginOptions.deleteOperations);
+
     taskSession.hooks.run.tapPromise(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
-      // TODO: Remove once improved heft-config-file is used
-      for (const copyOperation of pluginOptions.deleteOperations) {
-        if (!path.isAbsolute(copyOperation.sourcePath)) {
-          copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolder, copyOperation.sourcePath);
-        }
-      }
       await deleteFilesAsync(pluginOptions.deleteOperations, taskSession.logger);
     });
   }
