@@ -8,6 +8,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
   public packageName: string;
   private _fileManager: PackageJsonEditor;
+  private _project: RushConfigurationProject;
 
   public constructor(project: RushConfigurationProject) {
     super({
@@ -17,11 +18,16 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
     });
 
     this._fileManager = project.packageJsonEditor;
+    this._project = project;
     this.packageName = project.packageName;
   }
 
   public get filePath(): string {
     return this._fileManager.filePath;
+  }
+
+  public get project(): RushConfigurationProject {
+    return this._project;
   }
 
   public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
