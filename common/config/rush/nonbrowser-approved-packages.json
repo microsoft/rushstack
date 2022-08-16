@@ -567,6 +567,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "normalize-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "npm-package-arg",
       "allowedCategories": [ "libraries" ]
     },

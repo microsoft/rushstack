@@ -78,7 +78,7 @@ function rewriteRushProjectVersions(
     return;
   }
 
-  if (!settings) {
+  if (!settings || !normalizePath) {
     throw new Error(`splitWorkspaceGlobalPnpmfileShimSettings not initialized`);
   }
 
@@ -96,7 +96,7 @@ function rewriteRushProjectVersions(
         settings.workspaceProjects[dependencyName];
       if (workspaceProjectInfo) {
         // Case 1. "<package_name>": "workspace:*"
-        const relativePath: string = normalizePath!(
+        const relativePath: string = normalizePath(
           path.relative(
             splitWorkspaceProject.projectRelativeFolder,
             workspaceProjectInfo.projectRelativeFolder
@@ -114,7 +114,7 @@ function rewriteRushProjectVersions(
         const aliasedWorkspaceProjectInfo: IWorkspaceProjectInfo | undefined =
           settings.workspaceProjects[aliasedPackageName];
         if (aliasedWorkspaceProjectInfo) {
-          const relativePath: string = normalizePath!(
+          const relativePath: string = normalizePath(
             path.relative(
               splitWorkspaceProject.projectRelativeFolder,
               aliasedWorkspaceProjectInfo.projectRelativeFolder
@@ -134,7 +134,7 @@ function rewriteRushProjectVersions(
       const aliasedWorkspaceProjectInfo: IWorkspaceProjectInfo | undefined =
         settings.workspaceProjects[aliasedPackageName];
       if (aliasedWorkspaceProjectInfo) {
-        const relativePath: string = normalizePath!(
+        const relativePath: string = normalizePath(
           path.relative(
             splitWorkspaceProject.projectRelativeFolder,
             aliasedWorkspaceProjectInfo.projectRelativeFolder
