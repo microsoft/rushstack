@@ -593,6 +593,8 @@ export class PackageJsonEditor {
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
     get name(): string;
+    // (undocumented)
+    removeDependency(packageName: string, dependencyType: DependencyType): void;
     get resolutionsList(): ReadonlyArray<PackageJsonDependency>;
     // (undocumented)
     saveIfModified(): boolean;
@@ -601,6 +603,8 @@ export class PackageJsonEditor {
     tryGetDependency(packageName: string): PackageJsonDependency | undefined;
     // (undocumented)
     tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
+    // (undocumented)
+    tryGetResolution(packageName: string): PackageJsonDependency | undefined;
     // (undocumented)
     get version(): string;
 }

@@ -3,6 +3,7 @@
 
 import colors from 'colors/safe';
 import * as semver from 'semver';
+import { ConsoleTerminalProvider, Terminal, ITerminalProvider, Colors } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
@@ -44,6 +45,10 @@ export interface IPackageForRushAdd {
   version?: string;
 }
 
+export interface IPackageForRushRemove {
+  packageName: string;
+}
+
 /**
  * Options for adding a dependency to a particular project.
  */
@@ -79,6 +84,31 @@ export interface IPackageJsonUpdaterRushAddOptions {
 }
 
 /**
+ * Options for remove a dependency to a particular project.
+ */
+export interface IPackageJsonUpdaterRushRemoveOptions {
+  /**
+   * The projects whose package.jsons should get updated
+   */
+  projects: RushConfigurationProject[];
+  /**
+   * The dependencies to be added.
+   */
+  packagesToRemove: IPackageForRushRemove[];
+  /**
+   * If specified, "rush update" will not be run after updating the package.json file(s).
+   */
+  skipUpdate: boolean;
+  /**
+   * If specified, "rush update" will be run in debug mode.
+   */
+  debugInstall: boolean;
+  /**
+   * The variant to consider when performing installations and validating shrinkwrap updates.
+   */
+  variant?: string | undefined;
+}
+/**
  * Configuration options for adding or updating a dependency in a single project
  */
 export interface IUpdateProjectOptions {
@@ -99,6 +129,19 @@ export interface IUpdateProjectOptions {
   dependencyType?: DependencyType;
 }
 
+export interface IRemoveProjectOptions {
+  /**
+   * The project which will have its package.json removed
+   */
+  project: VersionMismatchFinderEntity;
+  /**
+   * Map of packages to removed
+   * Its key is the name of the dependency to be removed in the project
+   * Its value is the DependencyType of package to be removed in the project
+   */
+  dependenciesToRemove: Record<string, DependencyType>;
+}
+
 /**
  * A helper class for managing the dependencies of various package.json files.
  * @internal
@@ -107,9 +150,15 @@ export class PackageJsonUpdater {
   private _rushConfiguration: RushConfiguration;
   private _rushGlobalFolder: RushGlobalFolder;
 
+  private readonly _terminalProvider: ITerminalProvider;
+  private readonly _terminal: Terminal;
+
   public constructor(rushConfiguration: RushConfiguration, rushGlobalFolder: RushGlobalFolder) {
     this._rushConfiguration = rushConfiguration;
     this._rushGlobalFolder = rushGlobalFolder;
+
+    this._terminalProvider = new ConsoleTerminalProvider();
+    this._terminal = new Terminal(this._terminalProvider);
   }
 
   /**
@@ -266,6 +315,79 @@ export class PackageJsonUpdater {
   }
 
   /**
+   * Remove a dependency from a particular project. The core business logic for "rush remove".
+   */
+  public async doRushRemoveAsync(options: IPackageJsonUpdaterRushRemoveOptions): Promise<void> {
+    const { projects, packagesToRemove, skipUpdate, debugInstall, variant } = options;
+
+    console.log();
+    const dependenciesToRemove: Record<string, DependencyType> = {};
+
+    const allPackageUpdates: IRemoveProjectOptions[] = [];
+
+    for (const project of projects) {
+      for (const { packageName } of packagesToRemove) {
+        const dependency: PackageJsonDependency | undefined =
+          project.packageJsonEditor.tryGetDependency(packageName) ||
+          project.packageJsonEditor.tryGetDevDependency(packageName) ||
+          project.packageJsonEditor.tryGetDependency(packageName);
+        if (!dependency) {
+          throw new Error(`The project "${project.packageName}" do not have ${packageName} in package.json.`);
+        }
+        dependenciesToRemove[packageName] = dependency.dependencyType;
+      }
+
+      const currentProjectUpdate: IRemoveProjectOptions = {
+        project: new VersionMismatchFinderProject(project),
+        dependenciesToRemove: dependenciesToRemove
+      };
+      this.removePackageFromProject(currentProjectUpdate);
+
+      allPackageUpdates.push(currentProjectUpdate);
+    }
+
+    for (const { project } of allPackageUpdates) {
+      if (project.saveIfModified()) {
+        this._terminal.writeLine(`${Colors.green('Wrote ')}${project.filePath}`);
+      }
+    }
+
+    if (!skipUpdate) {
+      console.log();
+      this._terminal.writeLine(Colors.green('Running "rush update"'));
+      console.log();
+
+      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
+      const installManagerOptions: IInstallManagerOptions = {
+        debug: debugInstall,
+        allowShrinkwrapUpdates: true,
+        bypassPolicy: false,
+        noLink: false,
+        fullUpgrade: false,
+        recheckShrinkwrap: false,
+        networkConcurrency: undefined,
+        collectLogFile: false,
+        variant: variant,
+        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+        pnpmFilterArguments: [],
+        checkOnly: false
+      };
+
+      const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+        this._rushConfiguration,
+        this._rushGlobalFolder,
+        purgeManager,
+        installManagerOptions
+      );
+      try {
+        await installManager.doInstallAsync();
+      } finally {
+        purgeManager.deleteAll();
+      }
+    }
+  }
+
+  /**
    * Updates several projects' package.json files
    */
   public updateProjects(projectUpdates: IUpdateProjectOptions[]): void {
@@ -294,6 +416,14 @@ export class PackageJsonUpdater {
       dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 
       project.addOrUpdateDependency(packageName, newVersion, dependencyType!);
+    }
+  }
+
+  public removePackageFromProject(options: IRemoveProjectOptions): void {
+    const { project, dependenciesToRemove } = options;
+
+    for (const [packageName, dependencyType] of Object.entries(dependenciesToRemove)) {
+      project.removeDependency(packageName, dependencyType);
     }
   }
 

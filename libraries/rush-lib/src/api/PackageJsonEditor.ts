@@ -220,6 +220,10 @@ export class PackageJsonEditor {
     return this._devDependencies.get(packageName);
   }
 
+  public tryGetResolution(packageName: string): PackageJsonDependency | undefined {
+    return this._resolutions.get(packageName);
+  }
+
   public addOrUpdateDependency(
     packageName: string,
     newVersion: string,
@@ -245,6 +249,26 @@ export class PackageJsonEditor {
         break;
       case DependencyType.YarnResolutions:
         this._resolutions.set(packageName, dependency);
+        break;
+      default:
+        throw new InternalError('Unsupported DependencyType');
+    }
+
+    this._modified = true;
+  }
+
+  public removeDependency(packageName: string, dependencyType: DependencyType): void {
+    switch (dependencyType) {
+      case DependencyType.Regular:
+      case DependencyType.Optional:
+      case DependencyType.Peer:
+        this._dependencies.delete(packageName);
+        break;
+      case DependencyType.Dev:
+        this._devDependencies.delete(packageName);
+        break;
+      case DependencyType.YarnResolutions:
+        this._resolutions.delete(packageName);
         break;
       default:
         throw new InternalError('Unsupported DependencyType');

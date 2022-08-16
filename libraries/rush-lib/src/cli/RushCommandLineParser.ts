@@ -35,6 +35,7 @@ import { LinkAction } from './actions/LinkAction';
 import { ListAction } from './actions/ListAction';
 import { PublishAction } from './actions/PublishAction';
 import { PurgeAction } from './actions/PurgeAction';
+import { RemoveAction } from './actions/RemoveAction';
 import { ScanAction } from './actions/ScanAction';
 import { UnlinkAction } from './actions/UnlinkAction';
 import { UpdateAction } from './actions/UpdateAction';
@@ -254,6 +255,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new ListAction(this));
       this.addAction(new PublishAction(this));
       this.addAction(new PurgeAction(this));
+      this.addAction(new RemoveAction(this));
       this.addAction(new ScanAction(this));
       this.addAction(new SetupAction(this));
       this.addAction(new UnlinkAction(this));
