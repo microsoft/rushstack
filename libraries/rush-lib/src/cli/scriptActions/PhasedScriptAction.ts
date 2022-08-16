@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
@@ -36,6 +37,14 @@ import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
 import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
+import {
+  // DependencyAnalysisPlugin,
+  dependencyAnalysis,
+  IDependencyGraph,
+  makeDependencyGraph,
+  simulateBuildTime
+} from '../../logic/operations/DependencyAnalysisPlugin';
+import { IBuildTimeRecord, _setBuildTimes } from '../../logic/operations/BuildTimePlugin';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -112,6 +121,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _watchParameter: CommandLineFlagParameter | undefined;
   private _timelineParameter: CommandLineFlagParameter | undefined;
+  private _dependencyAnalysisParameter: CommandLineFlagParameter | undefined;
+  private _simulateParameter: CommandLineFlagParameter | undefined;
+  private _telemetryFileParameter: CommandLineStringParameter | undefined;
   private _installParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
@@ -167,6 +179,25 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const { ConsoleTimelinePlugin } = await import('../../logic/operations/ConsoleTimelinePlugin');
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
     }
+
+    const showDependencyAnalysis: boolean = this._dependencyAnalysisParameter
+      ? this._dependencyAnalysisParameter.value
+      : false;
+    if (showDependencyAnalysis) {
+      const telemetryFolderName: string = path.join(this.rushConfiguration.commonTempFolder, 'telemetry');
+      const fullPath: string = path.join(telemetryFolderName, this._telemetryFileParameter?.value ?? '');
+      dependencyAnalysis(fullPath, terminal);
+      return;
+    }
+
+    const doSimulation: boolean = this._simulateParameter ? this._simulateParameter.value : false;
+    if (doSimulation) {
+      const telemetryFolderName: string = path.join(this.rushConfiguration.commonTempFolder, 'telemetry');
+      const fullPath: string = path.join(telemetryFolderName, this._telemetryFileParameter?.value ?? '');
+      simulateBuildTime(fullPath, terminal);
+      return;
+    }
+
     // Enable the standard summary
     new OperationResultSummarizerPlugin(terminal).apply(this.hooks);
 
@@ -398,6 +429,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           'After the build is complete, print additional statistics and CPU usage information,' +
           ' including an ASCII chart of the start and stop times for each operation.'
       });
+      this._dependencyAnalysisParameter = this.defineFlagParameter({
+        parameterLongName: '--analysis',
+        description: 'After the build is complete, print build timing analysis by project'
+      });
+      this._simulateParameter = this.defineFlagParameter({
+        parameterLongName: '--simulate',
+        description:
+          'After the build is complete, simulate the build with different number of CPU cores and find the optimal number of CPU cores.'
+      });
+      if (this._simulateParameter || this._dependencyAnalysisParameter) {
+        this._telemetryFileParameter = this.defineStringParameter({
+          parameterLongName: '--file',
+          argumentName: 'FILE',
+          description:
+            'The name of the telemetry file for dependency analysis to utilize. The telemetry file should exist in the rush telemetry folder'
+        });
+      }
     }
 
     this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
@@ -541,6 +589,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         countNoOp: 0
       };
 
+      let buildTimings: IBuildTimeRecord[] = [];
+
       if (result) {
         for (const [operation, operationResult] of result.operationResults) {
           if (operation.runner?.silent) {
@@ -576,13 +626,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
               break;
           }
         }
+        buildTimings = _setBuildTimes(result);
       }
+      const dependencyGraph: IDependencyGraph = makeDependencyGraph();
 
       this.parser.telemetry.log({
         name: this.actionName,
         durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
-        extraData
+        extraData,
+        buildTimings,
+        dependencyGraph
       });
 
       this.parser.flushTelemetry();

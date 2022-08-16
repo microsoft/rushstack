@@ -7,6 +7,8 @@ import { FileSystem, FileSystemStats, JsonFile } from '@rushstack/node-core-libr
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
 import { RushSession } from '../pluginFramework/RushSession';
+import { IBuildTimeRecord } from './operations/BuildTimePlugin';
+import { IDependencyGraph } from './operations/DependencyAnalysisPlugin';
 
 /**
  * @beta
@@ -41,6 +43,8 @@ export interface ITelemetryData {
    */
   readonly rushVersion?: string;
   readonly extraData?: { [key: string]: string | number | boolean };
+  readonly buildTimings?: IBuildTimeRecord[];
+  readonly dependencyGraph?: IDependencyGraph;
 }
 
 const MAX_FILE_COUNT: number = 100;
