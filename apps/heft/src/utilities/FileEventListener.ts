@@ -16,6 +16,7 @@ export class FileEventListener {
 
   public constructor(watcher: chokidar.FSWatcher) {
     this._watchPath = watcher.options.cwd;
+    // Limit watcher usage by listening to all events and filtering out the ones we don't care about
     watcher.on('all', this._handleEvent.bind(this));
   }
 

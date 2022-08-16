@@ -57,7 +57,7 @@ interface IWaitForSourceChangesOptions {
 export const INITIAL_CHANGE_STATE: 'INITIAL_CHANGE_STATE' = 'INITIAL_CHANGE_STATE';
 export const REMOVED_CHANGE_STATE: 'REMOVED_CHANGE_STATE' = 'REMOVED_CHANGE_STATE';
 
-const FORBIDDEN_RELATIVE_PATHS: string[] = ['package.json', 'config'];
+const FORBIDDEN_RELATIVE_PATHS: string[] = ['package.json', 'config', '.rush'];
 
 // Use an async iterator to allow the caller to await for the next source file change.
 // The iterator will update a provided map with changes unrelated to source files.
@@ -368,10 +368,8 @@ export class HeftActionRunner {
           persistent: true,
           // All watcher-returned file paths will be relative to the build folder
           cwd: this._heftConfiguration.buildFolder,
-          // Ignore "node_modules" files and known-unimportant files. We do however allow an exception
-          // for temporary lock files to allow for their use in synchronizing the operation execution
-          // with the watcher via the LockFileManager
-          ignored: ['node_modules/**', '.cache/**', '.rush/**'],
+          // Ignore "node_modules" files and known-unimportant files
+          ignored: ['node_modules/**'],
           // We will use the initial state to build a list of all watched files
           ignoreInitial: false,
           // Handle 'unlink' + 'add' events within 100 ms of each other as atomic 'change' events,
