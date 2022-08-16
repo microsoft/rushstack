@@ -12,6 +12,7 @@ import path from 'path';
 // This file can use "import type" but otherwise should not reference any other modules, since it will
 // be run from the "common/temp" directory
 import type * as TSemver from 'semver';
+import type TNormalizePath from 'normalize-path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type {
@@ -25,6 +26,7 @@ import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 let settings: ISplitWorkspacePnpmfileShimSettings;
 let userPnpmfile: IPnpmfile | undefined;
 let semver: typeof TSemver | undefined;
+let normalizePath: typeof TNormalizePath | undefined;
 
 // Initialize all external aspects of the pnpmfile shim. When using the shim, settings
 // are always expected to be available. Init must be called before running any hook that
@@ -59,6 +61,9 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
   if (!semver && settings.semverPath) {
     semver = require(settings.semverPath);
   }
+  if (!normalizePath && settings.pathNormalizerPath) {
+    normalizePath = require(settings.pathNormalizerPath);
+  }
   // Return the normalized context
   return context as IPnpmfileContext;
 }
@@ -91,9 +96,11 @@ function rewriteRushProjectVersions(
         settings.workspaceProjects[dependencyName];
       if (workspaceProjectInfo) {
         // Case 1. "<package_name>": "workspace:*"
-        const relativePath: string = path.relative(
-          splitWorkspaceProject.projectRelativeFolder,
-          workspaceProjectInfo.projectRelativeFolder
+        const relativePath: string = normalizePath!(
+          path.relative(
+            splitWorkspaceProject.projectRelativeFolder,
+            workspaceProjectInfo.projectRelativeFolder
+          )
         );
         const newVersion: string = 'link:' + relativePath;
         dependencies[dependencyName] = newVersion;
@@ -107,9 +114,11 @@ function rewriteRushProjectVersions(
         const aliasedWorkspaceProjectInfo: IWorkspaceProjectInfo | undefined =
           settings.workspaceProjects[aliasedPackageName];
         if (aliasedWorkspaceProjectInfo) {
-          const relativePath: string = path.relative(
-            splitWorkspaceProject.projectRelativeFolder,
-            aliasedWorkspaceProjectInfo.projectRelativeFolder
+          const relativePath: string = normalizePath!(
+            path.relative(
+              splitWorkspaceProject.projectRelativeFolder,
+              aliasedWorkspaceProjectInfo.projectRelativeFolder
+            )
           );
           const newVersion: string = 'link:' + relativePath;
           dependencies[dependencyName] = newVersion;
@@ -125,9 +134,11 @@ function rewriteRushProjectVersions(
       const aliasedWorkspaceProjectInfo: IWorkspaceProjectInfo | undefined =
         settings.workspaceProjects[aliasedPackageName];
       if (aliasedWorkspaceProjectInfo) {
-        const relativePath: string = path.relative(
-          splitWorkspaceProject.projectRelativeFolder,
-          aliasedWorkspaceProjectInfo.projectRelativeFolder
+        const relativePath: string = normalizePath!(
+          path.relative(
+            splitWorkspaceProject.projectRelativeFolder,
+            aliasedWorkspaceProjectInfo.projectRelativeFolder
+          )
         );
         const newVersion: string = 'link:' + relativePath;
         dependencies[dependencyName] = newVersion;

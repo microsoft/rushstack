@@ -32,6 +32,7 @@ export interface IWorkspaceProjectInfo
  */
 export interface ISplitWorkspacePnpmfileShimSettings {
   semverPath: string;
+  pathNormalizerPath: string;
   workspaceProjects: Record<string, IWorkspaceProjectInfo>;
   splitWorkspaceProjects: Record<string, IWorkspaceProjectInfo>;
   userPnpmfilePath?: string;
