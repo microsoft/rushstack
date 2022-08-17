@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Validate that if shouldPublish is set, private is not set",
+      "comment": "Update CLI docs for \"rush add\"",
       "type": "none"
     }
   ],

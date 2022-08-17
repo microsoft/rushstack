@@ -1,6 +1,32 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 21 Jul 2022 23:30:27 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Aug 2022 09:52:12 GMT and should not be manually modified.
+
+## 7.29.2
+Wed, 10 Aug 2022 09:52:12 GMT
+
+### Patches
+
+- Fix incorrect declaration references for local symbols within namespaces
+
+## 7.29.1
+Wed, 10 Aug 2022 08:12:16 GMT
+
+### Patches
+
+- Fix a regression where .api.json excerpts were sometimes missing tokens (GitHub #3561), and generally improve the quality of excerpt generation
+
+## 7.29.0
+Wed, 03 Aug 2022 18:40:35 GMT
+
+### Minor changes
+
+- Upgrade TypeScript dependency to 4.7
+
+## 7.28.7
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
 
 ## 7.28.6
 Thu, 21 Jul 2022 23:30:27 GMT

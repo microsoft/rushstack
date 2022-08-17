@@ -239,7 +239,7 @@ export class ListAction extends BaseRushAction {
           versionPolicyDefinitionName = definitionName;
           versionPolicyName = project.versionPolicy.policyName;
         } else {
-          shouldPublish = `${String(project.shouldPublish)}`;
+          shouldPublish = `${project.shouldPublish}`;
         }
 
         if (project.reviewCategory) {

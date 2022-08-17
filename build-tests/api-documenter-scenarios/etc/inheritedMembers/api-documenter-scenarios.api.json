@@ -188,7 +188,11 @@
             },
             {
               "kind": "Content",
-              "text": "<number> "
+              "text": "<number>"
+            },
+            {
+              "kind": "Content",
+              "text": " "
             }
           ],
           "releaseTag": "Public",
@@ -303,7 +307,7 @@
           ],
           "extendsTokenRange": {
             "startIndex": 1,
-            "endIndex": 2
+            "endIndex": 3
           },
           "implementsTokenRanges": []
         },

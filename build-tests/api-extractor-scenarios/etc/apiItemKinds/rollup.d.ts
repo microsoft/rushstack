@@ -4,17 +4,7 @@ export declare abstract class AbstractClass {
 }
 
 /** @public */
-export declare class ClassWithTypeLiterals {
-    /** type literal in  */
-    method1(vector: {
-        x: number;
-        y: number;
-    }): void;
-    /** type literal output  */
-    method2(): {
-        classValue: ClassWithTypeLiterals;
-        callback: () => number;
-    } | undefined;
+export declare class ClassWithTypeParameter<T> {
 }
 
 /** @public */
@@ -28,14 +18,31 @@ export declare const enum ConstEnum {
 }
 
 /** @public */
+export declare class ExtendsClassWithTypeParameter extends ClassWithTypeParameter<SimpleClass> {
+}
+
+/** @public */
 export declare interface IInterface {
     member: string;
 }
 
 /** @public */
-export declare namespace NamespaceContainingVariable {
-    let variable: object[];
-    let constVariable: object[];
+export declare namespace n1 {
+    export class SomeClass1 {
+    }
+    export class SomeClass2 extends SomeClass1 {
+    }
+    export namespace n2 {
+        export class SomeClass3 {
+        }
+    }
+        {};
+}
+
+/** @public */
+export declare namespace n1 {
+    export class SomeClass4 {
+    }
 }
 
 /** @public */
@@ -67,6 +74,12 @@ export declare class SimpleClass {
     readonly someReadonlyProp = 5;
     readonly someReadonlyPropWithType: number;
 }
+
+/** @public */
+export declare function someFunction(): void;
+
+/** @public */
+export declare type SomeType = number;
 
 /** @public */
 export declare const VARIABLE_WITHOUT_EXPLICIT_TYPE = "hello";
