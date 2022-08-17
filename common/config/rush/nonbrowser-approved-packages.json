@@ -106,7 +106,6 @@
       "name": "@rushstack/heft",
       "allowedCategories": [ "libraries", "tests" ]
     },
-
     {
       "name": "@rushstack/heft-api-extractor-plugin",
       "allowedCategories": [ "libraries", "tests" ]
