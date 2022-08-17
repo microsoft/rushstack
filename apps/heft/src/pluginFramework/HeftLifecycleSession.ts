@@ -13,6 +13,11 @@ import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefini
 import type { HeftPluginHost } from './HeftPluginHost';
 
 /**
+ * The lifecycle session is responsible for providing session-specific information to Heft lifecycle
+ * plugins. The session provides access to the hooks that Heft will run as part of lifecycle execution,
+ * as well as access to parameters provided via the CLI. The session is also how you request access to
+ * other lifecycle plugins.
+ *
  * @public
  */
 export interface IHeftLifecycleSession {
