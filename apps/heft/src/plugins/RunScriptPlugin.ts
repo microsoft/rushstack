@@ -28,6 +28,9 @@ export interface IRunScriptOptions {
  * @beta
  */
 export interface IRunScript {
+  /**
+   * The method that is called by the RunScriptPlugin to run the script.
+   */
   runAsync?: (options: IRunScriptOptions) => Promise<void>;
 }
 

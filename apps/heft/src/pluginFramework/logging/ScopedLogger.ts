@@ -7,9 +7,17 @@ import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminal
 import { LoggingManager } from './LoggingManager';
 
 /**
+ * A logger which is used to emit errors and warnings to the console, as well as to write
+ * to the console. Messaged emitted by the scoped logger are prefixed with the name of the
+ * scoped logger.
+ *
  * @public
  */
 export interface IScopedLogger {
+  /**
+   * The name of the scoped logger. Logging messages will be prefixed with this name.
+   */
+  readonly loggerName: string;
   /**
    * The terminal used to write messages to the console.
    */

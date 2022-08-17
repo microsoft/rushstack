@@ -29,7 +29,8 @@ export interface IHeftLifecycleSession {
   readonly hooks: IHeftLifecycleHooks;
 
   /**
-   * The parameters that were passed to the lifecycle plugin.
+   * Contains default parameters provided by Heft, as well as CLI parameters requested by the lifecycle
+   * plugin.
    *
    * @public
    */
@@ -54,7 +55,9 @@ export interface IHeftLifecycleSession {
 
   /**
    * The scoped logger for the lifecycle plugin. Messages logged with this logger will be prefixed
-   * with the plugin name, in the format "[lifecycle:<pluginName>]"
+   * with the plugin name, in the format "[lifecycle:<pluginName>]". It is highly recommended that
+   * writing to the console be performed via the logger, as it will ensure that logging messages
+   * are labeled with the source of the message.
    *
    * @public
    */
@@ -116,6 +119,11 @@ export interface IHeftLifecycleHooks {
  * @public
  */
 export interface IHeftLifecycleCleanHookOptions {
+  /**
+   * Add delete operations, which will be performed at the beginning of Heft execution.
+   *
+   * @public
+   */
   addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 

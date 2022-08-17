@@ -15,7 +15,10 @@ import type { HeftPluginHost } from './HeftPluginHost';
 import type { CancellationToken } from './CancellationToken';
 
 /**
- * The task session provided to the task.
+ * The task session is responsible for providing session-specific information to Heft task plugins.
+ * The session provides access to the hooks that Heft will run as part of task execution, as well as
+ * access to parameters provided via the CLI. The session is also how you request access to other task
+ * plugins.
  *
  * @public
  */
@@ -35,7 +38,8 @@ export interface IHeftTaskSession {
   readonly hooks: IHeftTaskHooks;
 
   /**
-   * The parameters that were passed to the task plugin.
+   * Contains default parameters provided by Heft, as well as CLI parameters requested by the task
+   * plugin.
    *
    * @public
    */
@@ -60,7 +64,9 @@ export interface IHeftTaskSession {
 
   /**
    * The scoped logger for the task. Messages logged with this logger will be prefixed with
-   * the phase and task name, in the format "[<phaseName>:<taskName>]".
+   * the phase and task name, in the format "[<phaseName>:<taskName>]". It is highly recommended
+   * that writing to the console be performed via the logger, as it will ensure that logging messages
+   * are labeled with the source of the message.
    *
    * @public
    */
@@ -144,26 +150,6 @@ export interface IHeftTaskRunHookOptions {
 }
 
 /**
- * Options provided to the 'runIncremental' hook.
- *
- * @public
- */
-export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
-  /**
-   * A map of changed files to the corresponding change state. This can be used to track which
-   * files have been changed during an incremental build.
-   */
-  readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
-
-  /**
-   * A cancellation token that is used to signal that the incremental build is cancelled. This
-   * can be used to stop incremental operations early and allow for a new incremental build to
-   * be started.
-   */
-  readonly cancellationToken: CancellationToken;
-}
-
-/**
  * The state of a changed file.
  *
  * @public
@@ -193,6 +179,26 @@ export interface IChangedFileState {
    * @public
    */
   readonly version: string;
+}
+
+/**
+ * Options provided to the 'runIncremental' hook.
+ *
+ * @public
+ */
+export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+  /**
+   * A map of changed files to the corresponding change state. This can be used to track which
+   * files have been changed during an incremental build.
+   */
+  readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
+
+  /**
+   * A cancellation token that is used to signal that the incremental build is cancelled. This
+   * can be used to stop incremental operations early and allow for a new incremental build to
+   * be started.
+   */
+  readonly cancellationToken: CancellationToken;
 }
 
 export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
