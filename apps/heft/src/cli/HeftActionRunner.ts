@@ -10,7 +10,6 @@ import {
   Colors,
   ConsoleTerminalProvider,
   InternalError,
-  Path,
   type ITerminal,
   type IPackageJson
 } from '@rushstack/node-core-library';
@@ -68,7 +67,7 @@ async function* _waitForSourceChangesAsync(
   const { watcher, git } = options;
   const changedFileStats: Map<string, fs.Stats | undefined> = new Map();
   const forbiddenFilePaths: Set<string> = new Set(
-    FORBIDDEN_RELATIVE_PATHS.map((relativePath: string) => path.join(watcher.options.cwd!, relativePath))
+    FORBIDDEN_RELATIVE_PATHS.map((relativePath: string) => path.resolve(watcher.options.cwd!, relativePath))
   );
   const seenFilePaths: Set<string> = new Set();
   const seenSourceFilePaths: Set<string> = new Set();
@@ -88,7 +87,7 @@ async function* _waitForSourceChangesAsync(
         let isForbidden: boolean = false;
         for (const forbiddenPath of forbiddenFilePaths) {
           // Search under paths to allow forbidding folders.
-          if (Path.isUnderOrEqual(filePath, forbiddenPath)) {
+          if (filePath === forbiddenPath || filePath.startsWith(`${forbiddenPath}${path.sep}`)) {
             isForbidden = true;
             break;
           }
@@ -144,7 +143,7 @@ async function* _waitForSourceChangesAsync(
 
   function onChange(relativeFilePath: string, fileStats?: fs.Stats): void {
     // watcher.options.cwd is set below, use to resolve the absolute path
-    const filePath: string = path.join(watcher.options.cwd!, relativeFilePath);
+    const filePath: string = `${watcher.options.cwd!}${path.sep}${relativeFilePath}`;
     changedFileStats.set(filePath, fileStats);
     resolveFileChange();
   }
@@ -159,11 +158,17 @@ async function* _waitForSourceChangesAsync(
   // Before we enter the main loop, hydrate initial state and yield the changes.
   const initialFilePaths: Set<string> = new Set();
   for (const [directory, filenames] of Object.entries(watcher.getWatched())) {
+    // Avoid directories above the watch path, since we only care about the immediate children.
+    if (directory.startsWith('..')) {
+      continue;
+    }
+    // Resolve the parent folder from the directory
+    const parentFolder: string = `${watcher.options.cwd!}${
+      directory === '.' ? '' : `${path.sep}${directory}`
+    }`;
+    // Resolve absolute paths to the files
     for (const filename of filenames) {
-      const filePath: string = path.resolve(watcher.options.cwd!, directory, filename);
-      if (Path.isUnder(filePath, watcher.options.cwd!)) {
-        initialFilePaths.add(filePath);
-      }
+      initialFilePaths.add(`${parentFolder}${path.sep}${filename}`);
     }
   }
 
@@ -366,7 +371,9 @@ export class HeftActionRunner {
       (resolve: (watcher: chokidar.FSWatcher) => void, reject: (error: Error) => void) => {
         const watcher: chokidar.FSWatcher = chokidarPkg.watch(this._heftConfiguration.buildFolder, {
           persistent: true,
-          // All watcher-returned file paths will be relative to the build folder
+          // All watcher-returned file paths will be relative to the build folder. Chokidar on Windows
+          // has some issues with watching when not using a cwd, causing the 'ready' event to never be
+          // emitted, so we will have to manually resolve the absolute paths in the change handler.
           cwd: this._heftConfiguration.buildFolder,
           // Ignore "node_modules" files and known-unimportant files
           ignored: ['node_modules/**'],
