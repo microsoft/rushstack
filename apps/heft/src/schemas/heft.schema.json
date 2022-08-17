@@ -10,12 +10,6 @@
       "items": { "$ref": "#/definitions/anything" }
     },
 
-    "inheritance-type": {
-      "description": "The inheritance type that should be used when extending a configuration for a target property.",
-      "type": "string",
-      "enum": ["append", "replace", "merge"]
-    },
-
     "heft-plugin": {
       "description": "A plugin that can be used to extend Heft functionality.",
       "type": "object",
@@ -114,13 +108,11 @@
       "items": { "$ref": "#/definitions/heft-plugin" }
     },
 
-    "$phasesByName.inheritanceType": { "$ref": "#/definitions/inheritance-type" },
     "phasesByName": {
       "type": "object",
       "description": "Heft phases that can be run during an execution of Heft.",
       "additionalProperties": false,
       "patternProperties": {
-        "^\\$[a-zA-Z0-9-_]+\\.inheritanceType$": { "$ref": "#/definitions/inheritance-type" },
         "^[a-zA-Z0-9-_]+$": {
           "description": "Defines a Heft phase.",
           "type": "object",
@@ -146,13 +138,11 @@
               "items": { "$ref": "#/definitions/delete-operation" }
             },
 
-            "$tasksByName.inheritanceType": { "$ref": "#/definitions/inheritance-type" },
             "tasksByName": {
               "description": "Heft tasks that are run during an execution of the Heft phase.",
               "type": "object",
               "additionalProperties": false,
               "patternProperties": {
-                "^\\$[a-zA-Z0-9-_]+\\.inheritanceType$": { "$ref": "#/definitions/inheritance-type" },
                 "^[a-zA-Z0-9-_]+$": {
                   "type": "object",
                   "description": "Defines a Heft task.",

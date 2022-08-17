@@ -66,7 +66,6 @@ export class HeftConfiguration {
     get projectConfigFolder(): string;
     get projectPackageJson(): IPackageJson;
     get rigConfig(): RigConfig;
-    // (undocumented)
     get rigPackageResolver(): IRigPackageResolver;
     get tempFolder(): string;
     get terminalProvider(): ITerminalProvider;
@@ -128,7 +127,6 @@ export interface IHeftDefaultParameters {
 
 // @public
 export interface IHeftLifecycleCleanHookOptions {
-    // (undocumented)
     addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
@@ -141,11 +139,11 @@ export interface IHeftLifecycleHooks {
     toolStop: AsyncParallelHook<IHeftLifecycleToolStopHookOptions>;
 }
 
-// @public (undocumented)
+// @public
 export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeftLifecycleSession, TOptions> {
 }
 
-// @public (undocumented)
+// @public
 export interface IHeftLifecycleSession {
     readonly cacheFolder: string;
     readonly hooks: IHeftLifecycleHooks;
@@ -174,11 +172,9 @@ export interface IHeftParameters extends IHeftDefaultParameters {
     getStringParameter(parameterLongName: string): CommandLineStringParameter;
 }
 
-// @public (undocumented)
+// @public
 export interface IHeftPlugin<TSession extends IHeftLifecycleSession | IHeftTaskSession = IHeftLifecycleSession | IHeftTaskSession, TOptions = void> {
-    // (undocumented)
     readonly accessor?: object;
-    // (undocumented)
     apply(session: TSession, heftConfiguration: HeftConfiguration, pluginOptions?: TOptions): void;
 }
 
@@ -202,7 +198,7 @@ export interface IHeftTaskHooks {
     readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
 }
 
-// @public (undocumented)
+// @public
 export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskSession, TOptions> {
 }
 
@@ -249,7 +245,7 @@ export interface _IPerformanceData {
     taskTotalExecutionMs: number;
 }
 
-// @public (undocumented)
+// @public
 export interface IRigPackageResolver {
     // (undocumented)
     resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
@@ -257,7 +253,6 @@ export interface IRigPackageResolver {
 
 // @beta
 export interface IRunScript {
-    // (undocumented)
     runAsync?: (options: IRunScriptOptions) => Promise<void>;
 }
 
@@ -273,10 +268,11 @@ export interface IRunScriptOptions {
     scriptOptions: Record<string, unknown>;
 }
 
-// @public (undocumented)
+// @public
 export interface IScopedLogger {
     emitError(error: Error): void;
     emitWarning(warning: Error): void;
+    readonly loggerName: string;
     readonly terminal: Terminal;
 }
 
