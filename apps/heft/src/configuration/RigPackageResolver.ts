@@ -12,12 +12,20 @@ import {
 import type { RigConfig } from '@rushstack/rig-package';
 
 /**
+ * Rig resolves requested tools from the project's Heft rig.
+ *
+ * @remarks For more information on rig resolution, see
+ * https://rushstack.io/pages/heft/rig_packages/#3-riggable-dependencies
+ *
  * @public
  */
 export interface IRigPackageResolver {
   resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
 }
 
+/**
+ * Options for creating a RigPackageResolver.
+ */
 export interface IRigPackageResolverOptions {
   buildFolder: string;
   projectPackageJson: IPackageJson;

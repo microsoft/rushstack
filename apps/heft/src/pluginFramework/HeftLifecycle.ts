@@ -65,7 +65,7 @@ export class HeftLifecycle extends HeftPluginHost {
     };
   }
 
-  public async applyPluginsAsync(): Promise<void> {
+  public async applyPluginsInternalAsync(): Promise<void> {
     await this.ensureInitializedAsync();
 
     // Load up all plugins concurrently

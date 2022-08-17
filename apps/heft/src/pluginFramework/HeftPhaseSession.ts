@@ -35,7 +35,6 @@ export class HeftPhaseSession extends HeftPluginHost {
 
   private readonly _options: IHeftPhaseSessionOptions;
   private readonly _taskSessionsByTask: Map<HeftTask, HeftTaskSession> = new Map();
-  private _pluginsApplied: boolean = false;
 
   public constructor(options: IHeftPhaseSessionOptions) {
     super();
@@ -71,46 +70,42 @@ export class HeftPhaseSession extends HeftPluginHost {
   /**
    * Apply all task plugins specified by the phase.
    */
-  public async applyPluginsAsync(): Promise<void> {
-    if (!this._pluginsApplied) {
-      const {
-        heftConfiguration,
-        phase: { tasks }
-      } = this._options;
+  public async applyPluginsInternalAsync(): Promise<void> {
+    const {
+      heftConfiguration,
+      phase: { tasks }
+    } = this._options;
 
-      // Load up all plugins concurrently
-      const loadPluginPromises: Promise<IHeftTaskPlugin<object | void>>[] = [];
-      for (const task of tasks) {
-        const taskSession: HeftTaskSession = this.getSessionForTask(task);
-        loadPluginPromises.push(task.getPluginAsync(taskSession.logger));
+    // Load up all plugins concurrently
+    const loadPluginPromises: Promise<IHeftTaskPlugin<object | void>>[] = [];
+    for (const task of tasks) {
+      const taskSession: HeftTaskSession = this.getSessionForTask(task);
+      loadPluginPromises.push(task.getPluginAsync(taskSession.logger));
+    }
+
+    // Promise.all maintains the order of the input array
+    const plugins: IHeftTaskPlugin<object | void>[] = await Promise.all(loadPluginPromises);
+
+    // Iterate through and apply the plugins
+    let pluginIndex: number = 0;
+    for (const task of tasks) {
+      const taskSession: HeftTaskSession = this.getSessionForTask(task);
+      const taskPlugin: IHeftTaskPlugin<object | void> = plugins[pluginIndex++];
+      try {
+        taskPlugin.apply(taskSession, heftConfiguration, task.pluginOptions);
+      } catch (error) {
+        throw new Error(
+          `Error applying plugin "${task.pluginDefinition.pluginName}" from package ` +
+            `"${task.pluginDefinition.pluginPackageName}": ${error}`
+        );
       }
+    }
 
-      // Promise.all maintains the order of the input array
-      const plugins: IHeftTaskPlugin<object | void>[] = await Promise.all(loadPluginPromises);
-
-      // Iterate through and apply the plugins
-      let pluginIndex: number = 0;
-      for (const task of tasks) {
-        const taskSession: HeftTaskSession = this.getSessionForTask(task);
-        const taskPlugin: IHeftTaskPlugin<object | void> = plugins[pluginIndex++];
-        try {
-          taskPlugin.apply(taskSession, heftConfiguration, task.pluginOptions);
-        } catch (error) {
-          throw new Error(
-            `Error applying plugin "${task.pluginDefinition.pluginName}" from package ` +
-              `"${task.pluginDefinition.pluginPackageName}": ${error}`
-          );
-        }
-      }
-
-      // Do a second pass to apply the plugin access requests for each plugin
-      pluginIndex = 0;
-      for (const task of tasks) {
-        const taskPlugin: IHeftTaskPlugin<object | void> = plugins[pluginIndex++];
-        this.resolvePluginAccessRequests(taskPlugin, task.pluginDefinition);
-      }
-
-      this._pluginsApplied = true;
+    // Do a second pass to apply the plugin access requests for each plugin
+    pluginIndex = 0;
+    for (const task of tasks) {
+      const taskPlugin: IHeftTaskPlugin<object | void> = plugins[pluginIndex++];
+      this.resolvePluginAccessRequests(taskPlugin, task.pluginDefinition);
     }
   }
 }

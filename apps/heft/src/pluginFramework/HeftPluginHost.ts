@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { SyncHook } from 'tapable';
+import { InternalError } from '@rushstack/node-core-library';
 
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { IHeftPlugin } from './IHeftPlugin';
@@ -9,8 +10,17 @@ import type { IHeftPlugin } from './IHeftPlugin';
 export abstract class HeftPluginHost {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private readonly _pluginAccessRequestHooks: Map<string, SyncHook<any>> = new Map();
+  private _pluginsApplied: boolean = false;
 
-  public abstract applyPluginsAsync(): Promise<void>;
+  public async applyPluginsAsync(): Promise<void> {
+    if (this._pluginsApplied) {
+      throw new InternalError('Plugins have already been applied.');
+    }
+    await this.applyPluginsInternalAsync();
+    this._pluginsApplied = true;
+  }
+
+  protected abstract applyPluginsInternalAsync(): Promise<void>;
 
   /**
    * Registers a callback used to provide access to a requested plugin via the plugin accessor.
@@ -21,6 +31,12 @@ export abstract class HeftPluginHost {
     pluginToAccessName: string,
     accessorCallback: (pluginAccessor: T) => void
   ): void {
+    if (this._pluginsApplied) {
+      throw new Error(
+        `Requestor "${requestorName}" cannot request access to plugin "${pluginToAccessName}" from package "${pluginToAccessPackage}" after plugins have been applied.`
+      );
+    }
+
     const pluginHookName: string = this.getPluginHookName(pluginToAccessPackage, pluginToAccessName);
     let pluginAccessRequestHook: SyncHook<T> | undefined = this._pluginAccessRequestHooks.get(pluginHookName);
     if (!pluginAccessRequestHook) {
@@ -52,6 +68,9 @@ export abstract class HeftPluginHost {
     plugin: IHeftPlugin,
     pluginDefinition: HeftPluginDefinitionBase
   ): void {
+    if (this._pluginsApplied) {
+      throw new InternalError('Cannot resolve plugin access requests after plugins have been applied.');
+    }
     const pluginHookName: string = this.getPluginHookName(
       pluginDefinition.pluginPackageName,
       pluginDefinition.pluginName

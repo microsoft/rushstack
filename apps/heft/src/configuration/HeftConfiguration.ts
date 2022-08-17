@@ -104,6 +104,9 @@ export class HeftConfiguration {
     return this._rigConfig;
   }
 
+  /**
+   * The rig package resolver, which can be used to rig-resolve a requested package.
+   */
   public get rigPackageResolver(): IRigPackageResolver {
     if (!this._rigPackageResolver) {
       this._rigPackageResolver = new RigPackageResolver({
