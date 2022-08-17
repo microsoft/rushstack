@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+
+## 0.10.0
+Wed, 03 Aug 2022 18:40:35 GMT
+
+### Minor changes
+
+- Upgrade TypeScript dependency to 4.7
 
 ## 0.9.1
 Fri, 17 Jun 2022 00:16:18 GMT

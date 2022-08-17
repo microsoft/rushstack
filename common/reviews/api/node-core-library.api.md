@@ -33,6 +33,7 @@ export class AnsiEscape {
 export class Async {
     static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
     static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
+    static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
 }
 
@@ -593,6 +594,16 @@ export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
+}
+
+// @beta (undocumented)
+export interface IRunWithRetriesOptions<TResult> {
+    // (undocumented)
+    action: () => Promise<TResult> | TResult;
+    // (undocumented)
+    maxRetries: number;
+    // (undocumented)
+    retryDelayMs?: number;
 }
 
 // @beta (undocumented)

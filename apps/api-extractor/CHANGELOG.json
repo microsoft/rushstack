@@ -2,6 +2,74 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.29.2",
+      "tag": "@microsoft/api-extractor_v7.29.2",
+      "date": "Wed, 10 Aug 2022 09:52:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix incorrect declaration references for local symbols within namespaces"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.29.1",
+      "tag": "@microsoft/api-extractor_v7.29.1",
+      "date": "Wed, 10 Aug 2022 08:12:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where .api.json excerpts were sometimes missing tokens (GitHub #3561), and generally improve the quality of excerpt generation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.29.0",
+      "tag": "@microsoft/api-extractor_v7.29.0",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade TypeScript dependency to 4.7"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.23.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.28.7",
+      "tag": "@microsoft/api-extractor_v7.28.7",
+      "date": "Mon, 01 Aug 2022 02:45:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.22.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.28.6",
       "tag": "@microsoft/api-extractor_v7.28.6",
       "date": "Thu, 21 Jul 2022 23:30:27 GMT",

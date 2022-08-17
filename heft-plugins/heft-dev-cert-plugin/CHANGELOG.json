@@ -2,6 +2,111 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.1.55",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.1.55",
+      "date": "Wed, 10 Aug 2022 09:52:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.1.66`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.29.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.1` to `^0.47.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.54",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.1.54",
+      "date": "Wed, 10 Aug 2022 08:12:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.1.65`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.29.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.0` to `^0.47.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.53",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.1.53",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.1.64`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.29.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.46.7` to `^0.47.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.52",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.1.52",
+      "date": "Mon, 01 Aug 2022 02:45:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.1.63`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.28.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.46.6` to `^0.46.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.51",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.1.51",
       "date": "Thu, 21 Jul 2022 23:30:27 GMT",

@@ -230,10 +230,8 @@ export class DeclarationReferenceGenerator {
       if (!includeModuleSymbols) {
         return undefined;
       }
-      const sourceFile: ts.SourceFile | undefined =
-        followedSymbol.declarations &&
-        followedSymbol.declarations[0] &&
-        followedSymbol.declarations[0].getSourceFile();
+      const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
+      const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
       return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
     }
 
@@ -242,28 +240,8 @@ export class DeclarationReferenceGenerator {
       return undefined;
     }
 
-    const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(followedSymbol);
-    let parentRef: DeclarationReference | undefined;
-    if (parent) {
-      parentRef = this._symbolToDeclarationReference(
-        parent,
-        ts.SymbolFlags.Namespace,
-        /*includeModuleSymbols*/ true
-      );
-    } else {
-      // this may be a local symbol in a module...
-      const sourceFile: ts.SourceFile | undefined =
-        followedSymbol.declarations &&
-        followedSymbol.declarations[0] &&
-        followedSymbol.declarations[0].getSourceFile();
-      if (sourceFile && ts.isExternalModule(sourceFile)) {
-        parentRef = new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
-      } else {
-        parentRef = new DeclarationReference(GlobalSource.instance);
-      }
-    }
-
-    if (parentRef === undefined) {
+    let parentRef: DeclarationReference | undefined = this._getParentReference(followedSymbol);
+    if (!parentRef) {
       return undefined;
     }
 
@@ -304,6 +282,55 @@ export class DeclarationReferenceGenerator {
     return parentRef
       .addNavigationStep(navigation, localName)
       .withMeaning(DeclarationReferenceGenerator._getMeaningOfSymbol(followedSymbol, meaning));
+  }
+
+  private _getParentReference(symbol: ts.Symbol): DeclarationReference | undefined {
+    const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
+
+    // First, try to find a parent symbol via the symbol tree.
+    const parentSymbol: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
+    if (parentSymbol) {
+      return this._symbolToDeclarationReference(
+        parentSymbol,
+        parentSymbol.flags,
+        /*includeModuleSymbols*/ true
+      );
+    }
+
+    // If that doesn't work, try to find a parent symbol via the node tree. As far as we can tell,
+    // this logic is only needed for local symbols within namespaces. For example:
+    //
+    // ```
+    // export namespace n {
+    //   type SomeType = number;
+    //   export function someFunction(): SomeType { return 5; }
+    // }
+    // ```
+    //
+    // In the example above, `SomeType` doesn't have a parent symbol per the TS internal API above,
+    // but its reference still needs to be qualified with the parent reference for `n`.
+    const grandParent: ts.Node | undefined = declaration?.parent?.parent;
+    if (grandParent && ts.isModuleDeclaration(grandParent)) {
+      const grandParentSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(
+        grandParent,
+        this._typeChecker
+      );
+      if (grandParentSymbol) {
+        return this._symbolToDeclarationReference(
+          grandParentSymbol,
+          grandParentSymbol.flags,
+          /*includeModuleSymbols*/ true
+        );
+      }
+    }
+
+    // At this point, we have a local symbol in a module.
+    const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
+    if (sourceFile && ts.isExternalModule(sourceFile)) {
+      return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
+    } else {
+      return new DeclarationReference(GlobalSource.instance);
+    }
   }
 
   private _getPackageName(sourceFile: ts.SourceFile): string {

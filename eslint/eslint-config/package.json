@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-config",
-  "version": "2.6.2",
+  "version": "3.0.0",
   "description": "A TypeScript ESLint ruleset designed for large teams and projects",
   "license": "MIT",
   "repository": {
@@ -24,23 +24,23 @@
   ],
   "peerDependencies": {
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0",
-    "typescript": ">=3.0.0"
+    "typescript": ">=4.7.0"
   },
   "dependencies": {
     "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/eslint-plugin": "workspace:*",
     "@rushstack/eslint-plugin-packlets": "workspace:*",
     "@rushstack/eslint-plugin-security": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "~5.20.0",
-    "@typescript-eslint/experimental-utils": "~5.20.0",
-    "@typescript-eslint/parser": "~5.20.0",
-    "@typescript-eslint/typescript-estree": "~5.20.0",
+    "@typescript-eslint/eslint-plugin": "~5.30.3",
+    "@typescript-eslint/experimental-utils": "~5.30.3",
+    "@typescript-eslint/parser": "~5.30.3",
+    "@typescript-eslint/typescript-estree": "~5.30.3",
     "eslint-plugin-promise": "~6.0.0",
     "eslint-plugin-react": "~7.27.1",
     "eslint-plugin-tsdoc": "~0.2.16"
   },
   "devDependencies": {
     "eslint": "~8.7.0",
-    "typescript": "~4.6.3"
+    "typescript": "~4.7.4"
   }
 }

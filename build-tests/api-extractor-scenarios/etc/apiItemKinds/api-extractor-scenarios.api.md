@@ -11,15 +11,7 @@ export abstract class AbstractClass {
 }
 
 // @public (undocumented)
-export class ClassWithTypeLiterals {
-    method1(vector: {
-        x: number;
-        y: number;
-    }): void;
-    method2(): {
-        classValue: ClassWithTypeLiterals;
-        callback: () => number;
-    } | undefined;
+export class ClassWithTypeParameter<T> {
 }
 
 // @public (undocumented)
@@ -36,17 +28,37 @@ export const enum ConstEnum {
 }
 
 // @public (undocumented)
+export class ExtendsClassWithTypeParameter extends ClassWithTypeParameter<SimpleClass> {
+}
+
+// @public (undocumented)
 export interface IInterface {
     // (undocumented)
     member: string;
 }
 
 // @public (undocumented)
-export namespace NamespaceContainingVariable {
-    let // (undocumented)
-    variable: object[];
-    let // (undocumented)
-    constVariable: object[];
+export namespace n1 {
+    // (undocumented)
+    export namespace n2 {
+        // (undocumented)
+        export class SomeClass3 {
+        }
+    }
+    // (undocumented)
+    export class SomeClass1 {
+    }
+    // (undocumented)
+    export class SomeClass2 extends SomeClass1 {
+    }
+        {};
+}
+
+// @public (undocumented)
+export namespace n1 {
+    // (undocumented)
+    export class SomeClass4 {
+    }
 }
 
 // @public (undocumented)
@@ -75,6 +87,12 @@ export class SimpleClass {
     get writeableProperty(): string;
     set writeableProperty(value: string);
 }
+
+// @public (undocumented)
+export function someFunction(): void;
+
+// @public (undocumented)
+export type SomeType = number;
 
 // @public (undocumented)
 export const VARIABLE_WITHOUT_EXPLICIT_TYPE = "hello";
