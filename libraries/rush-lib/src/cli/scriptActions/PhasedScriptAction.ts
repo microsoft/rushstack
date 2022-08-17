@@ -38,7 +38,7 @@ import { IExecutionResult } from '../../logic/operations/IOperationExecutionResu
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 
 /**
- * Constructor parameters for BulkScriptAction.
+ * Constructor parameters for PhasedScriptAction.
  */
 export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPhasedCommandConfig> {
   enableParallelism: boolean;
@@ -51,6 +51,8 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
 
   alwaysWatch: boolean;
   alwaysInstall: boolean | undefined;
+
+  watchDebounceMilliseconds: number | undefined;
 }
 
 interface IRunPhasesOptions {
@@ -101,6 +103,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _disableBuildCache: boolean;
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
+  private readonly _watchDebounceMilliseconds: number;
   private readonly _alwaysWatch: boolean;
   private readonly _alwaysInstall: boolean | undefined;
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
@@ -121,6 +124,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._disableBuildCache = options.disableBuildCache;
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
+    this._watchDebounceMilliseconds = options.watchDebounceMilliseconds ?? 1000;
     this._alwaysWatch = options.alwaysWatch;
     this._alwaysInstall = options.alwaysInstall;
     this._knownPhases = options.phases;
@@ -304,7 +308,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
 
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
-      debounceMilliseconds: 1000,
+      debounceMilliseconds: this._watchDebounceMilliseconds,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
       terminal,
