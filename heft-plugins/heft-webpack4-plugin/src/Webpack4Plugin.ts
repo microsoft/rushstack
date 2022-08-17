@@ -17,7 +17,7 @@ import type {
 import type {
   IWebpackConfiguration,
   IWebpackConfigurationWithDevServer,
-  IWebpack4PluginAccessor
+  IWebpackPluginAccessor
 } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
@@ -41,7 +41,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
   private _webpack: typeof TWebpack | undefined;
   private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED = UNINITIALIZED;
 
-  public readonly accessor: IWebpack4PluginAccessor = {
+  public readonly accessor: IWebpackPluginAccessor = {
     hooks: {
       onLoadConfiguration: new AsyncSeriesBailHook(),
       onConfigure: new AsyncSeriesHook(['webpackConfiguration']),

@@ -13,19 +13,6 @@ import type { IHeftTaskSession } from '@rushstack/heft';
 import type * as TWebpack from 'webpack';
 
 // @public (undocumented)
-export interface IWebpack5PluginAccessor {
-    hooks: IWebpack5PluginAccessorHooks;
-}
-
-// @public (undocumented)
-export interface IWebpack5PluginAccessorHooks {
-    readonly onAfterConfigure: AsyncParallelHook<IWebpackConfiguration, never, never>;
-    readonly onConfigure: AsyncSeriesHook<IWebpackConfiguration, never, never>;
-    readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats, never, never>;
-    readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IWebpackConfiguration | false>;
-}
-
-// @public (undocumented)
 export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[];
 
 // @public
@@ -41,6 +28,19 @@ export interface IWebpackConfigurationFnEnvironment {
 export interface IWebpackConfigurationWithDevServer extends TWebpack.Configuration {
     // (undocumented)
     devServer?: Configuration;
+}
+
+// @public (undocumented)
+export interface IWebpackPluginAccessor {
+    hooks: IWebpackPluginAccessorHooks;
+}
+
+// @public (undocumented)
+export interface IWebpackPluginAccessorHooks {
+    readonly onAfterConfigure: AsyncParallelHook<IWebpackConfiguration, never, never>;
+    readonly onConfigure: AsyncSeriesHook<IWebpackConfiguration, never, never>;
+    readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats, never, never>;
+    readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IWebpackConfiguration | false>;
 }
 
 // @public (undocumented)

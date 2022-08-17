@@ -16,11 +16,11 @@ import type {
 import { FileSystem, Import, SubprocessTerminator } from '@rushstack/node-core-library';
 import type {
   PluginName as Webpack4PluginName,
-  IWebpack4PluginAccessor
+  IWebpackPluginAccessor as IWebpack4PluginAccessor
 } from '@rushstack/heft-webpack4-plugin';
 import type {
   PluginName as Webpack5PluginName,
-  IWebpack5PluginAccessor
+  IWebpackPluginAccessor as IWebpack5PluginAccessor
 } from '@rushstack/heft-webpack5-plugin';
 
 const PLUGIN_NAME: 'ServerlessStackPlugin' = 'ServerlessStackPlugin';
