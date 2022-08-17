@@ -1068,8 +1068,8 @@ export class FileSystem {
       ...options
     };
 
-    await FileSystem._wrapExceptionAsync(() => {
-      return fsx.copy(options.sourcePath, options.destinationPath, {
+    await FileSystem._wrapExceptionAsync(async () => {
+      await fsx.copy(options.sourcePath, options.destinationPath, {
         dereference: !!options.dereferenceSymlinks,
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
