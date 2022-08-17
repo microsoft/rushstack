@@ -244,10 +244,14 @@ export class PackageJsonLookup {
     return packageJson;
   }
 
-  // Try to load a package.json file as an INodePackageJson,
-  // returning undefined if the found file does not contain a `name` field.
+  /**
+   * Try to load a package.json file as an INodePackageJson,
+   * returning undefined if the found file does not contain a `name` field.
+   */
   private _tryLoadNodePackageJson(jsonFilename: string): INodePackageJson | undefined {
     if (!FileSystem.exists(jsonFilename)) {
+      // TODO: Return a more rich object noting that the file doesn't exist. Something called
+      // "tryLoad..." shouldn't throw in this case.
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
 
@@ -263,6 +267,8 @@ export class PackageJsonLookup {
       // Make sure this is really a package.json file.  CommonJS has fairly strict requirements,
       // but NPM only requires "name" and "version"
       if (!loadedPackageJson.name) {
+        // TODO: Return a more rich object noting that the reason we didn't load this `package.json` is because it
+        // doesn't contain a `"name"` field.
         return undefined;
       }
 
@@ -306,6 +312,7 @@ export class PackageJsonLookup {
 
     // Is resolvedFileOrFolderPath itself a folder with a valid package.json file?  If so, return it.
     const packageJsonFilePath: string = path.join(resolvedFileOrFolderPath, FileConstants.PackageJson);
+    // TODO: Remove this redundant `FileSystem.exists` call.
     if (FileSystem.exists(packageJsonFilePath)) {
       const packageJson: INodePackageJson | undefined = this._tryLoadNodePackageJson(packageJsonFilePath);
       if (packageJson) {

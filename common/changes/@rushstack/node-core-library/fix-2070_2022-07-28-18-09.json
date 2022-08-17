@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Require at least a \"name\" field in package.json files",
+      "comment": "Update `PackageJsonLookup` to only resolve to `package.json` files that contain a `\"name\"` field. See GitHub issue #2070",
       "type": "patch"
     }
   ],
