@@ -14,7 +14,8 @@ export abstract class HeftPluginHost {
 
   public async applyPluginsAsync(): Promise<void> {
     if (this._pluginsApplied) {
-      throw new InternalError('Plugins have already been applied.');
+      // No need to apply them a second time.
+      return;
     }
     await this.applyPluginsInternalAsync();
     this._pluginsApplied = true;

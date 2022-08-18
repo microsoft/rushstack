@@ -11,7 +11,8 @@ import {
   ConsoleTerminalProvider,
   InternalError,
   type ITerminal,
-  type IPackageJson
+  type IPackageJson,
+  Path
 } from '@rushstack/node-core-library';
 import type {
   CommandLineFlagParameter,
@@ -48,6 +49,7 @@ export interface IHeftActionRunnerOptions extends IHeftActionOptions {
 }
 
 interface IWaitForSourceChangesOptions {
+  readonly terminal: ITerminal;
   readonly watcher: chokidar.FSWatcher;
   readonly git: GitUtilities;
   readonly changedFiles: Map<string, IChangedFileState>;
@@ -57,6 +59,7 @@ export const INITIAL_CHANGE_STATE: 'INITIAL_CHANGE_STATE' = 'INITIAL_CHANGE_STAT
 export const REMOVED_CHANGE_STATE: 'REMOVED_CHANGE_STATE' = 'REMOVED_CHANGE_STATE';
 
 const FORBIDDEN_RELATIVE_PATHS: string[] = ['package.json', 'config', '.rush'];
+const IS_WINDOWS: boolean = process.platform === 'win32';
 
 // Use an async iterator to allow the caller to await for the next source file change.
 // The iterator will update a provided map with changes unrelated to source files.
@@ -64,7 +67,7 @@ const FORBIDDEN_RELATIVE_PATHS: string[] = ['package.json', 'config', '.rush'];
 async function* _waitForSourceChangesAsync(
   options: IWaitForSourceChangesOptions
 ): AsyncIterableIterator<void> {
-  const { watcher, git } = options;
+  const { terminal, watcher, git } = options;
   const changedFileStats: Map<string, fs.Stats | undefined> = new Map();
   const forbiddenFilePaths: Set<string> = new Set(
     FORBIDDEN_RELATIVE_PATHS.map((relativePath: string) => path.resolve(watcher.options.cwd!, relativePath))
@@ -176,10 +179,17 @@ async function* _waitForSourceChangesAsync(
   // since they aren't being "changed", they're
   await ingestFileChangesAsync(initialFilePaths, /*ignoreForbidden:*/ true);
   for (const filePath of initialFilePaths) {
-    options.changedFiles.set(filePath, {
+    const state: IChangedFileState = {
       ...generateChangeState(filePath),
       version: INITIAL_CHANGE_STATE
-    });
+    };
+    options.changedFiles.set(filePath, state);
+    if (IS_WINDOWS) {
+      // On Windows, we should also populate an entry for the non-backslash version of the path
+      // since we can't be sure what format the path was provided in, and this map is provided
+      // to the plugin.
+      options.changedFiles.set(Path.convertToSlashes(filePath), state);
+    }
   }
 
   // Setup the promise to resolve when a file change is detected.
@@ -213,9 +223,20 @@ async function* _waitForSourceChangesAsync(
     let containsSourceFiles: boolean = false;
     for (const [filePath, stats] of fileChangesToProcess) {
       const state: IChangedFileState = generateChangeState(filePath, stats);
-      options.changedFiles.set(filePath, state);
-      if (state.isSourceFile) {
-        containsSourceFiles = true;
+      // Dedupe the changed files so that we don't emit the same file twice.
+      const existingChange: IChangedFileState | undefined = options.changedFiles.get(filePath);
+      if (!existingChange || existingChange.version !== state.version) {
+        options.changedFiles.set(filePath, state);
+        if (IS_WINDOWS) {
+          // On Windows, we should also populate an entry for the non-backslash version of the path
+          // since we can't be sure what format the path was provided in, and this map is provided
+          // to the plugin.
+          options.changedFiles.set(Path.convertToSlashes(filePath), state);
+        }
+        if (state.isSourceFile) {
+          terminal.writeVerboseLine(`Detected change to source file "${filePath}"`);
+          containsSourceFiles = true;
+        }
       }
     }
 
@@ -388,6 +409,7 @@ export class HeftActionRunner {
         watcher.on('error', (error: Error) => reject(error));
       }
     );
+    const terminal: ITerminal = this._terminal;
     const watcher: chokidar.FSWatcher = await watcherReadyPromise;
     const git: GitUtilities = new GitUtilities(this._heftConfiguration.buildFolder);
     const changedFiles: Map<string, IChangedFileState> = new Map();
@@ -396,7 +418,12 @@ export class HeftActionRunner {
     // us a chance to kill the current build and start a new one. Await the first iteration, since the
     // first iteration should be for the initial state.
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const iterator: AsyncIterator<void> = _waitForSourceChangesAsync({ watcher, git, changedFiles });
+    const iterator: AsyncIterator<void> = _waitForSourceChangesAsync({
+      terminal,
+      watcher,
+      git,
+      changedFiles
+    });
     await iterator.next();
 
     // The file event listener is used to allow task operations to wait for a file change before
@@ -413,6 +440,7 @@ export class HeftActionRunner {
       const sourceChangesPromise: Promise<true> = iterator.next().then(() => true);
       const executePromise: Promise<false> = this._executeOnceAsync(
         cancellationToken,
+        changedFiles,
         fileEventListener
       ).then(() => false);
 
@@ -458,6 +486,7 @@ export class HeftActionRunner {
 
   private async _executeOnceAsync(
     cancellationToken?: CancellationToken,
+    changedFiles?: Map<string, IChangedFileState>,
     fileEventListener?: FileEventListener
   ): Promise<void> {
     const startTime: number = performance.now();
@@ -466,7 +495,11 @@ export class HeftActionRunner {
 
     // Execute the action operations
     let encounteredError: boolean = false;
-    const operations: Set<Operation> = this._generateOperations(cancellationToken, fileEventListener);
+    const operations: Set<Operation> = this._generateOperations(
+      cancellationToken,
+      changedFiles,
+      fileEventListener
+    );
     try {
       const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
         loggingManager: this._loggingManager,
@@ -541,6 +574,7 @@ export class HeftActionRunner {
 
   private _generateOperations(
     cancellationToken: CancellationToken,
+    changedFiles?: Map<string, IChangedFileState>,
     fileEventListener?: FileEventListener
   ): Set<Operation> {
     const { selectedPhases } = this._action;
@@ -590,6 +624,7 @@ export class HeftActionRunner {
           task,
           operations,
           cancellationToken,
+          changedFiles,
           fileEventListener
         );
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
@@ -604,7 +639,13 @@ export class HeftActionRunner {
         // Set all dependency tasks as dependencies of the task operation
         for (const dependencyTask of task.dependencyTasks) {
           taskOperation.dependencies.add(
-            this._getOrCreateTaskOperation(dependencyTask, operations, cancellationToken, fileEventListener)
+            this._getOrCreateTaskOperation(
+              dependencyTask,
+              operations,
+              cancellationToken,
+              changedFiles,
+              fileEventListener
+            )
           );
         }
 
@@ -662,6 +703,7 @@ export class HeftActionRunner {
     task: HeftTask,
     operations: Map<string, Operation>,
     cancellationToken: CancellationToken,
+    changedFiles?: Map<string, IChangedFileState>,
     fileEventListener?: FileEventListener
   ): Operation {
     const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
@@ -674,6 +716,7 @@ export class HeftActionRunner {
           internalHeftSession: this._internalHeftSession,
           task,
           cancellationToken,
+          changedFiles,
           fileEventListener
         })
       });
