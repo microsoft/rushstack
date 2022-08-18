@@ -24,6 +24,7 @@ import {
 } from '../api/CommandLineConfiguration';
 
 import { AddAction } from './actions/AddAction';
+import { AnalyzeAction } from './actions/AnalyzeAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
 import { DeployAction } from './actions/DeployAction';
@@ -243,6 +244,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
       // Alphabetical order
       this.addAction(new AddAction(this));
+      this.addAction(new AnalyzeAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
       this.addAction(new DeployAction(this));

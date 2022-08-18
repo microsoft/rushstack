@@ -13,7 +13,7 @@ import { IExecutionResult, IOperationExecutionResult } from './IOperationExecuti
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { JsonFile } from '@rushstack/node-core-library';
 import { IBuildTimeRecord, _setBuildTimes } from './BuildTimePlugin';
-import { ITelemetryData } from '../Telemetry';
+import { IMachineInfo, ITelemetryData } from '../Telemetry';
 import { Operation } from './Operation';
 
 const PLUGIN_NAME: 'DependencyAnalysisPlugin' = 'DependencyAnalysisPlugin';
@@ -51,10 +51,42 @@ export class DependencyAnalysisPlugin implements IPhasedCommandPlugin {
     hooks.afterExecuteOperations.tap(
       PLUGIN_NAME,
       (result: IExecutionResult, context: ICreateOperationsContext): void => {
-        _printDependencyAnalysis(this._terminal, result, this._rushConfiguration);
+        _printDependencyAnalysis(this._terminal, result);
       }
     );
   }
+}
+
+export function _printDependencyAnalysis(terminal: ITerminal, result: IExecutionResult): void {
+  const dependencyGraph: IDependencyGraph = makeDependencyGraph(result);
+
+  const buildTimingMap: Map<string, number> = new Map();
+
+  const buildTimingData: IBuildTimeRecord[] = _setBuildTimes(result);
+  buildTimingData.forEach((project: IBuildTimeRecord) => {
+    buildTimingMap.set(project.project, project.buildTime);
+  });
+
+  const totalBuildTime: number = calculateBuildTime(dependencyGraph, buildTimingMap);
+  terminal.writeLine(
+    `\nThe build took ${totalBuildTime} seconds to build with ${os.cpus().length} CPU cores.\n`
+  );
+  const buildTimeList: IBuildTimeSavedRecord[] = [];
+
+  Object.entries(dependencyGraph).forEach(([project]) => {
+    const buildTimePlaceHolder: number = buildTimingMap.get(project) ?? -1;
+    buildTimingMap.set(project, 0);
+    const secondsSaved: number = totalBuildTime - calculateBuildTime(dependencyGraph, buildTimingMap);
+    buildTimeList.push({
+      project,
+      secondsSaved: Number(secondsSaved.toFixed(2))
+    });
+    buildTimingMap.set(project, buildTimePlaceHolder);
+  });
+
+  buildTimeList.sort((a, b) => b.secondsSaved - a.secondsSaved);
+
+  writeDependencyAnalysisSummary(terminal, buildTimeList);
 }
 
 export function makeDependencyGraph(result: IExecutionResult): IDependencyGraph {
@@ -155,6 +187,7 @@ export function simulateBuildTime(filename: string, terminal: ITerminal): void {
   const telemetryFile: ITelemetryData = JsonFile.load(filename)[0];
   const buildTimes: IBuildTimeRecord[] = telemetryFile.buildTimings ?? [];
   const dependencyGraph: IDependencyGraph = telemetryFile.dependencyGraph ?? {};
+  const machineInfo: IMachineInfo = telemetryFile.machineInfo ?? ({} as IMachineInfo);
 
   const simulatedBuildTimes: number[] = [];
   const buildTimingMap: Map<string, number> = new Map();
@@ -162,6 +195,11 @@ export function simulateBuildTime(filename: string, terminal: ITerminal): void {
   buildTimes.forEach((project: IBuildTimeRecord) => {
     buildTimingMap.set(project.project, project.buildTime);
   });
+
+  const totalBuildTime: number = calculateBuildTime(dependencyGraph, buildTimingMap);
+  terminal.writeLine(
+    `\nThe original build took ${totalBuildTime} seconds to build with ${machineInfo.machineCores} CPU Cores.\n`
+  );
 
   for (let numCores: number = 1; numCores < MAX_CORES; numCores++) {
     const simulatedBuildTime: number = calculateBuildTime(dependencyGraph, buildTimingMap, numCores);
@@ -179,6 +217,40 @@ export function simulateBuildTime(filename: string, terminal: ITerminal): void {
   }
 }
 
+export function dependencyAnalysis(filename: string, terminal: ITerminal): void {
+  const telemetryFile: ITelemetryData = JsonFile.load(filename)[0];
+  const buildTimes: IBuildTimeRecord[] = telemetryFile.buildTimings ?? [];
+  const dependencyGraph: IDependencyGraph = telemetryFile.dependencyGraph ?? {};
+  const machineInfo: IMachineInfo = telemetryFile.machineInfo ?? ({} as IMachineInfo);
+
+  const buildTimingMap: Map<string, number> = new Map();
+
+  buildTimes.forEach((project: IBuildTimeRecord) => {
+    buildTimingMap.set(project.project, project.buildTime);
+  });
+
+  const totalBuildTime: number = calculateBuildTime(dependencyGraph, buildTimingMap);
+  terminal.writeLine(
+    `\nThe original build took ${totalBuildTime} seconds to build with ${machineInfo.machineCores} CPU Cores.\n`
+  );
+  const buildTimeList: IBuildTimeSavedRecord[] = [];
+
+  Object.entries(dependencyGraph).forEach(([project]) => {
+    const buildTimePlaceHolder: number = buildTimingMap.get(project) ?? -1;
+    buildTimingMap.set(project, 0);
+    const secondsSaved: number = totalBuildTime - calculateBuildTime(dependencyGraph, buildTimingMap);
+    buildTimeList.push({
+      project,
+      secondsSaved: Number(secondsSaved.toFixed(2))
+    });
+    buildTimingMap.set(project, buildTimePlaceHolder);
+  });
+
+  buildTimeList.sort((a, b) => b.secondsSaved - a.secondsSaved);
+
+  writeDependencyAnalysisSummary(terminal, buildTimeList);
+}
+
 function writeSimulationSummary(terminal: ITerminal, simulatedBuildTimes: number[]): void {
   terminal.writeLine(`Simulating build time given number of cores:`);
 
@@ -192,7 +264,7 @@ function writeSimulationSummary(terminal: ITerminal, simulatedBuildTimes: number
   );
 }
 
-function writeSummary(terminal: ITerminal, buildTimeList: IBuildTimeSavedRecord[]): void {
+function writeDependencyAnalysisSummary(terminal: ITerminal, buildTimeList: IBuildTimeSavedRecord[]): void {
   let longestTaskName: number = 0;
   for (const project of buildTimeList) {
     const nameLength: number = (project.project || '').length;
@@ -209,69 +281,4 @@ function writeSummary(terminal: ITerminal, buildTimeList: IBuildTimeSavedRecord[
     const padding: string = ' '.repeat(longestTaskName - (project.project || '').length);
     terminal.writeLine(`  ${project.project}${padding}    ${project.secondsSaved} seconds saved`);
   }
-}
-
-export function _printDependencyAnalysis(
-  terminal: ITerminal,
-  result: IExecutionResult,
-  rushConfiguration: RushConfiguration
-): void {
-  const dependencyGraph: IDependencyGraph = makeDependencyGraph(result);
-
-  const buildTimingMap: Map<string, number> = new Map();
-
-  const buildTimingData: IBuildTimeRecord[] = _setBuildTimes(result);
-  buildTimingData.forEach((project: IBuildTimeRecord) => {
-    buildTimingMap.set(project.project, project.buildTime);
-  });
-
-  const totalBuildTime: number = calculateBuildTime(dependencyGraph, buildTimingMap);
-  console.log(`\nThe build took ${totalBuildTime} seconds to build.\n`);
-  const buildTimeList: IBuildTimeSavedRecord[] = [];
-
-  Object.entries(dependencyGraph).forEach(([project]) => {
-    const buildTimePlaceHolder: number = buildTimingMap.get(project) ?? -1;
-    buildTimingMap.set(project, 0);
-    const secondsSaved: number = totalBuildTime - calculateBuildTime(dependencyGraph, buildTimingMap);
-    buildTimeList.push({
-      project,
-      secondsSaved: Number(secondsSaved.toFixed(2))
-    });
-    buildTimingMap.set(project, buildTimePlaceHolder);
-  });
-
-  buildTimeList.sort((a, b) => b.secondsSaved - a.secondsSaved);
-
-  writeSummary(terminal, buildTimeList);
-}
-
-export function dependencyAnalysis(filename: string, terminal: ITerminal): void {
-  const telemetryFile: ITelemetryData = JsonFile.load(filename)[0];
-  const buildTimes: IBuildTimeRecord[] = telemetryFile.buildTimings ?? [];
-  const dependencyGraph: IDependencyGraph = telemetryFile.dependencyGraph ?? {};
-
-  const buildTimingMap: Map<string, number> = new Map();
-
-  buildTimes.forEach((project: IBuildTimeRecord) => {
-    buildTimingMap.set(project.project, project.buildTime);
-  });
-
-  const totalBuildTime: number = calculateBuildTime(dependencyGraph, buildTimingMap);
-  console.log(`\nThe build took ${totalBuildTime} seconds to build.\n`);
-  const buildTimeList: IBuildTimeSavedRecord[] = [];
-
-  Object.entries(dependencyGraph).forEach(([project]) => {
-    const buildTimePlaceHolder: number = buildTimingMap.get(project) ?? -1;
-    buildTimingMap.set(project, 0);
-    const secondsSaved: number = totalBuildTime - calculateBuildTime(dependencyGraph, buildTimingMap);
-    buildTimeList.push({
-      project,
-      secondsSaved: Number(secondsSaved.toFixed(2))
-    });
-    buildTimingMap.set(project, buildTimePlaceHolder);
-  });
-
-  buildTimeList.sort((a, b) => b.secondsSaved - a.secondsSaved);
-
-  writeSummary(terminal, buildTimeList);
 }
