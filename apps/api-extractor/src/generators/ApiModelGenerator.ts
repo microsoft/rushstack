@@ -1132,8 +1132,10 @@ export class ApiModelGenerator {
 
   private _getSourceFile(declaration: ts.Declaration): string | undefined {
     const sourceFile: ts.SourceFile = declaration.getSourceFile();
-    const sourceLocation: ISourceLocation | undefined =
-      this._collector.sourceMapper.getSourceLocationFromFileAndPos(sourceFile, declaration.pos);
+    const sourceLocation: ISourceLocation = this._collector.sourceMapper.getSourceLocationFromFileAndPos(
+      sourceFile,
+      declaration.pos
+    );
 
     return path.relative(this._collector.extractorConfig.projectFolder, sourceLocation.sourceFilePath);
   }

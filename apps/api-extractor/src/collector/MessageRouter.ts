@@ -204,16 +204,14 @@ export class MessageRouter {
       // NOTE: Since compiler errors pertain to issues specific to the .d.ts files,
       // we do not apply source mappings for them.
       const sourceFile: ts.SourceFile = diagnostic.file;
-      const sourceLocation: ISourceLocation | undefined = this._sourceMapper.getSourceLocationFromFileAndPos(
+      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocationFromFileAndPos(
         sourceFile,
         diagnostic.start || 0,
         true /* useDtsLocation */
       );
-      if (sourceLocation) {
-        options.sourceFilePath = sourceLocation.sourceFilePath;
-        options.sourceFileLine = sourceLocation.sourceFileLine;
-        options.sourceFileColumn = sourceLocation.sourceFileColumn;
-      }
+      options.sourceFilePath = sourceLocation.sourceFilePath;
+      options.sourceFileLine = sourceLocation.sourceFileLine;
+      options.sourceFileColumn = sourceLocation.sourceFileColumn;
     }
 
     this._messages.push(new ExtractorMessage(options));
@@ -262,15 +260,13 @@ export class MessageRouter {
         text: message.unformattedText
       };
 
-      const sourceLocation: ISourceLocation | undefined = this._sourceMapper.getSourceLocationFromFileAndPos(
+      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocationFromFileAndPos(
         sourceFile,
         message.textRange.pos
       );
-      if (sourceLocation) {
-        options.sourceFilePath = sourceLocation.sourceFilePath;
-        options.sourceFileLine = sourceLocation.sourceFileLine;
-        options.sourceFileColumn = sourceLocation.sourceFileColumn;
-      }
+      options.sourceFilePath = sourceLocation.sourceFilePath;
+      options.sourceFileLine = sourceLocation.sourceFileLine;
+      options.sourceFileColumn = sourceLocation.sourceFileColumn;
 
       const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
 
@@ -382,15 +378,13 @@ export class MessageRouter {
       properties
     };
 
-    const sourceLocation: ISourceLocation | undefined = this._sourceMapper.getSourceLocationFromFileAndPos(
+    const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocationFromFileAndPos(
       sourceFile,
       pos
     );
-    if (sourceLocation) {
-      options.sourceFilePath = sourceLocation.sourceFilePath;
-      options.sourceFileLine = sourceLocation.sourceFileLine;
-      options.sourceFileColumn = sourceLocation.sourceFileColumn;
-    }
+    options.sourceFilePath = sourceLocation.sourceFilePath;
+    options.sourceFileLine = sourceLocation.sourceFileLine;
+    options.sourceFileColumn = sourceLocation.sourceFileColumn;
 
     const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
 
