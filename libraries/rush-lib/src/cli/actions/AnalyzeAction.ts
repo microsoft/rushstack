@@ -17,12 +17,10 @@ export class AnalyzeAction extends BaseRushAction {
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
-      'Adds specified package(s) to the dependencies of the current project (as determined by the current working directory)' +
-        ' and then runs "rush update". If no version is specified, a version will be automatically detected (typically' +
-        ' either the latest version or a version that won\'t break the "ensureConsistentVersions" policy). If a version' +
-        ' range (or a workspace range) is specified, the latest version in the range will be used. The version will be' +
-        ' automatically prepended with a tilde, unless the "--exact" or "--caret" flags are used. The "--make-consistent"' +
-        ' flag can be used to update all packages with the dependency.'
+      'Analyzes the provided telemetry file to provide insight into the build timing data. The "--dependency-analysis" flag' +
+        'will identify the projects which are chokepoints during the build. Reducing the build times of these projects will' +
+        'directly reduce the overall build time by 1 second. The --simulate flag will identify the optimal number of CPU cores' +
+        'to build your project to help teams make more informed decisions about the number of CPU cores to use to build their project.'
     ];
     super({
       actionName: 'analyze',
