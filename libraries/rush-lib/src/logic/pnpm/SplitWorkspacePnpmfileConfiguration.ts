@@ -93,7 +93,8 @@ export class SplitWorkspacePnpmfileConfiguration {
     const settings: ISplitWorkspacePnpmfileShimSettings = {
       workspaceProjects,
       splitWorkspaceProjects,
-      semverPath: require.resolve('semver')
+      semverPath: require.resolve('semver'),
+      pathNormalizerPath: require.resolve('normalize-path')
     };
 
     // common/config/rush/.pnpmfile-split-workspace.cjs

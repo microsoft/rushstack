@@ -53,7 +53,8 @@
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
     "tar": "~6.1.11",
-    "true-case-path": "~2.2.1"
+    "true-case-path": "~2.2.1",
+    "normalize-path": "~3.0.0"
   },
   "devDependencies": {
     "@pnpm/logger": "4.0.0",
@@ -74,7 +75,8 @@
     "@types/semver": "7.3.5",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
-    "@types/tar": "6.1.1"
+    "@types/tar": "6.1.1",
+    "@types/normalize-path": "~3.0.0"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:5.75.0-pr3481.2",

@@ -13,7 +13,6 @@ import { Utilities } from '../utilities/Utilities';
 import { DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
 import { RushConstants } from './RushConstants';
 import { InstallHelpers } from './installManager/InstallHelpers';
@@ -85,7 +84,7 @@ export interface IUpdateProjectOptions {
   /**
    * The project which will have its package.json updated
    */
-  project: VersionMismatchFinderEntity;
+  project: VersionMismatchFinderProject;
   /**
    * Map of packages to update
    * Its key is the name of the dependency to be added or updated in the project
@@ -224,9 +223,17 @@ export class PackageJsonUpdater {
       allPackageUpdates.push(currentProjectUpdate, ...otherPackageUpdates);
     }
 
+    const selectedProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    const splitWorkspacePackageNames: Set<string> = new Set<string>();
+
     for (const { project } of allPackageUpdates) {
       if (project.saveIfModified()) {
         console.log(colors.green('Wrote ') + project.filePath);
+
+        selectedProjects.add(project.project);
+        if (project.project.splitWorkspace) {
+          splitWorkspacePackageNames.add(project.packageName);
+        }
       }
     }
 
@@ -236,6 +243,14 @@ export class PackageJsonUpdater {
       console.log();
 
       const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
+
+      const includeSplitWorkspace: boolean = splitWorkspacePackageNames.size !== 0;
+      const splitWorkspacePnpmFilterArguments: string[] = [];
+      for (const splitWorkspacePackageName of splitWorkspacePackageNames) {
+        splitWorkspacePnpmFilterArguments.push('--filter');
+        splitWorkspacePnpmFilterArguments.push(splitWorkspacePackageName);
+      }
+
       const installManagerOptions: IInstallManagerOptions = {
         debug: debugInstall,
         allowShrinkwrapUpdates: true,
@@ -244,13 +259,14 @@ export class PackageJsonUpdater {
         noLink: false,
         fullUpgrade: false,
         recheckShrinkwrap: false,
-        includeSplitWorkspace: false,
+        includeSplitWorkspace,
         networkConcurrency: undefined,
         collectLogFile: false,
         variant: variant,
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         pnpmFilterArguments: [],
-        splitWorkspacePnpmFilterArguments: [],
+        splitWorkspacePnpmFilterArguments,
+        selectedProjects,
         checkOnly: false
       };
 

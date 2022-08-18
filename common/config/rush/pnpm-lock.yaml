@@ -1758,6 +1758,7 @@ importers:
       '@types/lodash': 4.14.116
       '@types/node': 12.20.24
       '@types/node-fetch': 1.6.9
+      '@types/normalize-path': ~3.0.0
       '@types/npm-package-arg': 6.1.0
       '@types/npm-packlist': ~1.1.1
       '@types/read-package-tree': 5.1.0
@@ -1780,6 +1781,7 @@ importers:
       jszip: ~3.7.1
       lodash: ~4.17.15
       node-fetch: 2.6.7
+      normalize-path: ~3.0.0
       npm-package-arg: ~6.1.0
       npm-packlist: ~2.1.2
       read-package-tree: ~5.1.5
@@ -1814,6 +1816,7 @@ importers:
       jszip: 3.7.1
       lodash: 4.17.21
       node-fetch: 2.6.7
+      normalize-path: 3.0.0
       npm-package-arg: 6.1.1
       npm-packlist: 2.1.5
       read-package-tree: 5.1.6
@@ -1836,6 +1839,7 @@ importers:
       '@types/js-yaml': 3.12.1
       '@types/lodash': 4.14.116
       '@types/node': 12.20.24
+      '@types/normalize-path': 3.0.0
       '@types/npm-package-arg': 6.1.0
       '@types/npm-packlist': 1.1.2
       '@types/read-package-tree': 5.1.0
@@ -7024,6 +7028,10 @@ packages:
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
+
+  /@types/normalize-path/3.0.0:
+    resolution: {integrity: sha512-Nd8y/5t/7CRakPYiyPzr/IAfYusy1FkcZYFEAcoMZkwpJv2n4Wm+olW+e7xBdHEXhOnWdG9ddbar0gqZWS4x5Q==}
+    dev: true
 
   /@types/npm-package-arg/6.1.0:
     resolution: {integrity: sha512-vbt5fb0y1svMhu++1lwtKmZL76d0uPChFlw7kEzyUmTwfmpHRcFb8i0R8ElT69q/L+QLgK2hgECivIAvaEDwag==}
