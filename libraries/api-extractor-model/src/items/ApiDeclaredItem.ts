@@ -12,10 +12,12 @@ import { DeserializerContext } from '../model/DeserializerContext';
  */
 export interface IApiDeclaredItemOptions extends IApiDocumentedItemOptions {
   excerptTokens: IExcerptToken[];
+  sourceFile?: string;
 }
 
 export interface IApiDeclaredItemJson extends IApiDocumentedItemJson {
   excerptTokens: IExcerptToken[];
+  sourceFile?: string;
 }
 
 /**
@@ -35,6 +37,7 @@ export interface IApiDeclaredItemJson extends IApiDocumentedItemJson {
 export class ApiDeclaredItem extends ApiDocumentedItem {
   private _excerptTokens: ExcerptToken[];
   private _excerpt: Excerpt;
+  private _sourceFile?: string;
 
   public constructor(options: IApiDeclaredItemOptions) {
     super(options);
@@ -47,6 +50,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
       return new ExcerptToken(token.kind, token.text, canonicalReference);
     });
     this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
+    this._sourceFile = options.sourceFile;
   }
 
   /** @override */
@@ -58,6 +62,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.excerptTokens = jsonObject.excerptTokens;
+    options.sourceFile = jsonObject.sourceFile;
   }
 
   /**
@@ -72,6 +77,20 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
    */
   public get excerptTokens(): ReadonlyArray<ExcerptToken> {
     return this._excerptTokens;
+  }
+
+  /**
+   * The source file where the API item is declared. Is `undefined` if the
+   * source file could not be determined.
+   *
+   * @remarks
+   * The source file path is relative with respect to the `<projectFolder>` token as defined in
+   * the `api-extractor.json` config. It points to the `.ts` source file where the API item was
+   * originally declared. However, in some cases, if source map resolution fails, it falls back
+   * to pointing to the `.d.ts` file instead.
+   */
+  public get sourceFile(): string | undefined {
+    return this._sourceFile;
   }
 
   /**
@@ -114,6 +133,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
       }
       return excerptToken;
     });
+    jsonObject.sourceFile = this.sourceFile;
   }
 
   /**

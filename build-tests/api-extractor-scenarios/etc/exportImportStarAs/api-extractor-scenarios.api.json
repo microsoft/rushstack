@@ -177,6 +177,7 @@
           "canonicalReference": "api-extractor-scenarios!calculator:namespace",
           "docComment": "",
           "excerptTokens": [],
+          "sourceFile": "",
           "releaseTag": "None",
           "name": "calculator",
           "preserveMemberOrder": false,
@@ -215,6 +216,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/exportImportStarAs/calculator.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -255,6 +257,7 @@
                   "text": "string"
                 }
               ],
+              "sourceFile": "src/exportImportStarAs/common.ts",
               "isReadonly": true,
               "releaseTag": "Public",
               "name": "calculatorVersion",
@@ -297,6 +300,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/exportImportStarAs/calculator.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -330,6 +334,7 @@
           "canonicalReference": "api-extractor-scenarios!calculator2:namespace",
           "docComment": "",
           "excerptTokens": [],
+          "sourceFile": "",
           "releaseTag": "None",
           "name": "calculator2",
           "preserveMemberOrder": false,
@@ -368,6 +373,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/exportImportStarAs/calculator2.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -408,6 +414,7 @@
                   "text": "string"
                 }
               ],
+              "sourceFile": "src/exportImportStarAs/common.ts",
               "isReadonly": true,
               "releaseTag": "Public",
               "name": "calculatorVersion",
@@ -450,6 +457,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/exportImportStarAs/calculator2.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6

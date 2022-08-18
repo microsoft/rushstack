@@ -186,6 +186,7 @@
               "text": "() => void"
             }
           ],
+          "sourceFile": "src/defaultExportOfEntryPoint2/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "defaultFunctionStatement",

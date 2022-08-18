@@ -182,6 +182,7 @@
               "text": "export declare class ClassΞ "
             }
           ],
+          "sourceFile": "src/internationalCharacters/index.ts",
           "releaseTag": "Public",
           "name": "ClassΞ",
           "preserveMemberOrder": false,
@@ -213,6 +214,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/internationalCharacters/index.ts",
               "typeParameters": [
                 {
                   "typeParameterName": "T",
@@ -265,6 +267,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/internationalCharacters/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -304,6 +307,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/internationalCharacters/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,

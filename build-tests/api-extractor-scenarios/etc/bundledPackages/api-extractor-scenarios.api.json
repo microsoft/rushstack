@@ -208,6 +208,7 @@
               "text": ";"
             }
           ],
+          "sourceFile": "src/bundledPackages/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -253,6 +254,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "../api-extractor-lib1-test/lib/index.d.ts",
           "releaseTag": "Public",
           "name": "Lib1Class",
           "preserveMemberOrder": false,
@@ -275,6 +277,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "../api-extractor-lib1-test/lib/index.d.ts",
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
@@ -304,6 +307,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "../api-extractor-lib1-test/lib/index.d.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",

@@ -182,6 +182,7 @@
               "text": "export declare class MyClass "
             }
           ],
+          "sourceFile": "src/ancillaryDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MyClass",
           "preserveMemberOrder": false,

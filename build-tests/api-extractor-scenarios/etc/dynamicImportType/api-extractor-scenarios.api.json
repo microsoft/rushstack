@@ -182,6 +182,7 @@
               "text": "export declare class Item "
             }
           ],
+          "sourceFile": "src/dynamicImportType/Item.ts",
           "releaseTag": "Public",
           "name": "Item",
           "preserveMemberOrder": false,
@@ -209,6 +210,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/dynamicImportType/Item.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -243,6 +245,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/dynamicImportType/Item.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -277,6 +280,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/dynamicImportType/Item.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -311,6 +315,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/dynamicImportType/Item.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -345,6 +350,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/dynamicImportType/Item.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",

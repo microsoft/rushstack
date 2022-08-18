@@ -182,6 +182,7 @@
               "text": "export declare class ClassWithTypeLiterals "
             }
           ],
+          "sourceFile": "src/typeLiterals/index.ts",
           "releaseTag": "Public",
           "name": "ClassWithTypeLiterals",
           "preserveMemberOrder": false,
@@ -212,6 +213,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/typeLiterals/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -260,6 +262,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/typeLiterals/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,

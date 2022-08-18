@@ -195,6 +195,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "Class1",
           "preserveMemberOrder": false,
@@ -217,6 +218,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -246,6 +248,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -283,6 +286,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -330,6 +334,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -365,6 +370,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -402,6 +408,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -441,6 +448,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -473,6 +481,7 @@
               "text": "{\n    new (): {\n        someProp: number;\n    };\n}"
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "ClassLikeVariable",
@@ -500,6 +509,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "ExtendsAnonymousClass",
           "preserveMemberOrder": false,
@@ -529,6 +539,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "ExtendsClassFromAnotherPackage",
           "preserveMemberOrder": false,
@@ -558,6 +569,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "ExtendsClassLikeVariable",
           "preserveMemberOrder": false,
@@ -587,6 +599,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "ExtendsUnexportedClass",
           "preserveMemberOrder": false,
@@ -625,6 +638,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IExtendsInterfaceLikeTypeAlias",
           "preserveMemberOrder": false,
@@ -668,6 +682,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IExtendsMultipleInterfaces",
           "preserveMemberOrder": false,
@@ -690,6 +705,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -717,6 +733,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -748,6 +765,7 @@
               "text": "export interface IInterface1 "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IInterface1",
           "preserveMemberOrder": false,
@@ -770,6 +788,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -797,6 +816,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -819,6 +839,7 @@
               "text": "export interface IInterface2 "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IInterface2",
           "preserveMemberOrder": false,
@@ -841,6 +862,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -871,6 +893,7 @@
               "text": ";"
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IInterfaceLikeTypeAlias",
           "typeTokenRange": {
@@ -888,6 +911,7 @@
               "text": "export declare namespace Namespace1 "
             }
           ],
+          "sourceFile": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "Namespace1",
           "preserveMemberOrder": false,
@@ -902,6 +926,7 @@
                   "text": "class Class3 "
                 }
               ],
+              "sourceFile": "src/inheritedMembers/index.ts",
               "releaseTag": "Public",
               "name": "Class3",
               "preserveMemberOrder": false,
@@ -932,6 +957,7 @@
                       "text": ";"
                     }
                   ],
+                  "sourceFile": "src/inheritedMembers/index.ts",
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 3,
@@ -979,6 +1005,7 @@
                       "text": ";"
                     }
                   ],
+                  "sourceFile": "src/inheritedMembers/index.ts",
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 3,
@@ -1026,6 +1053,7 @@
                       "text": ";"
                     }
                   ],
+                  "sourceFile": "src/inheritedMembers/index.ts",
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 3,
@@ -1065,6 +1093,7 @@
                       "text": ";"
                     }
                   ],
+                  "sourceFile": "src/inheritedMembers/index.ts",
                   "isReadonly": false,
                   "isOptional": false,
                   "releaseTag": "Public",

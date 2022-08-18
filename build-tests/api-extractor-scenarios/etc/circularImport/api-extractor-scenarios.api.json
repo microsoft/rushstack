@@ -182,6 +182,7 @@
               "text": "export declare class IFile "
             }
           ],
+          "sourceFile": "src/circularImport/IFile.ts",
           "releaseTag": "Public",
           "name": "IFile",
           "preserveMemberOrder": false,
@@ -205,6 +206,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/circularImport/IFile.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -229,6 +231,7 @@
               "text": "export declare class IFolder "
             }
           ],
+          "sourceFile": "src/circularImport/IFolder.ts",
           "releaseTag": "Public",
           "name": "IFolder",
           "preserveMemberOrder": false,
@@ -256,6 +259,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/circularImport/IFolder.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -290,6 +294,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/circularImport/IFolder.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",

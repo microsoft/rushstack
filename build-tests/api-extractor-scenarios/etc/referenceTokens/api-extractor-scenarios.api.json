@@ -182,6 +182,7 @@
               "text": "export declare namespace n1 "
             }
           ],
+          "sourceFile": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "n1",
           "preserveMemberOrder": false,
@@ -196,6 +197,7 @@
                   "text": "export namespace n2 "
                 }
               ],
+              "sourceFile": "src/referenceTokens/index.ts",
               "releaseTag": "Public",
               "name": "n2",
               "preserveMemberOrder": false,
@@ -210,6 +212,7 @@
                       "text": "export namespace n3 "
                     }
                   ],
+                  "sourceFile": "src/referenceTokens/index.ts",
                   "releaseTag": "Public",
                   "name": "n3",
                   "preserveMemberOrder": false,
@@ -233,6 +236,7 @@
                           "text": ";"
                         }
                       ],
+                      "sourceFile": "src/referenceTokens/index.ts",
                       "returnTypeTokenRange": {
                         "startIndex": 1,
                         "endIndex": 2
@@ -260,6 +264,7 @@
                           "text": ";"
                         }
                       ],
+                      "sourceFile": "src/referenceTokens/index.ts",
                       "releaseTag": "Public",
                       "name": "SomeType3",
                       "typeTokenRange": {
@@ -288,6 +293,7 @@
                       "text": ";"
                     }
                   ],
+                  "sourceFile": "src/referenceTokens/index.ts",
                   "returnTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
@@ -315,6 +321,7 @@
                       "text": ";"
                     }
                   ],
+                  "sourceFile": "src/referenceTokens/index.ts",
                   "releaseTag": "Public",
                   "name": "SomeType2",
                   "typeTokenRange": {
@@ -343,6 +350,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/referenceTokens/index.ts",
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -370,6 +378,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/referenceTokens/index.ts",
               "releaseTag": "Public",
               "name": "SomeType1",
               "typeTokenRange": {
@@ -389,6 +398,7 @@
               "text": "export declare class SomeClass1 "
             }
           ],
+          "sourceFile": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeClass1",
           "preserveMemberOrder": false,
@@ -411,6 +421,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/referenceTokens/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -444,6 +455,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeClass3",
           "preserveMemberOrder": false,
@@ -493,6 +505,7 @@
               "text": "export declare enum SomeEnum "
             }
           ],
+          "sourceFile": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeEnum",
           "preserveMemberOrder": false,
@@ -511,6 +524,7 @@
                   "text": "\"A\""
                 }
               ],
+              "sourceFile": "src/referenceTokens/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -532,6 +546,7 @@
                   "text": "\"B\""
                 }
               ],
+              "sourceFile": "src/referenceTokens/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -553,6 +568,7 @@
                   "text": "\"C\""
                 }
               ],
+              "sourceFile": "src/referenceTokens/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -581,6 +597,7 @@
               "text": ";"
             }
           ],
+          "sourceFile": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -613,6 +630,7 @@
               "text": ";"
             }
           ],
+          "sourceFile": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 3
@@ -658,6 +676,7 @@
               "text": ";"
             }
           ],
+          "sourceFile": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 4,
             "endIndex": 6
@@ -703,6 +722,7 @@
               "text": ";"
             }
           ],
+          "sourceFile": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 3,
             "endIndex": 4

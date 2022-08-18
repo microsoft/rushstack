@@ -191,6 +191,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/importType/index.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -221,6 +222,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/importType/index.ts",
           "releaseTag": "Public",
           "name": "B",
           "preserveMemberOrder": false,
@@ -251,6 +253,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/importType/index.ts",
           "releaseTag": "Public",
           "name": "C",
           "preserveMemberOrder": false,

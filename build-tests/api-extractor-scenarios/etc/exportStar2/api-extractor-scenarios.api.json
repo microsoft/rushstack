@@ -182,6 +182,7 @@
               "text": "export declare class A "
             }
           ],
+          "sourceFile": "src/exportStar2/reexportStar.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,

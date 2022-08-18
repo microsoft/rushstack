@@ -191,6 +191,7 @@
               "text": " "
             }
           ],
+          "sourceFile": "src/exportImportedExternalDefault/index.ts",
           "releaseTag": "Public",
           "name": "Child",
           "preserveMemberOrder": false,

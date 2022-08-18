@@ -107,6 +107,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, context: DeserializerContext, jsonObject: IApiDeclaredItemJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void;
+    get sourceFile(): string | undefined;
 }
 
 // @public
@@ -742,6 +743,8 @@ export interface IApiConstructSignatureOptions extends IApiTypeParameterListMixi
 export interface IApiDeclaredItemOptions extends IApiDocumentedItemOptions {
     // (undocumented)
     excerptTokens: IExcerptToken[];
+    // (undocumented)
+    sourceFile?: string;
 }
 
 // @public

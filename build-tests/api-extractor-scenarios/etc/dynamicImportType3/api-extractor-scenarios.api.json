@@ -182,6 +182,7 @@
               "text": "export interface IExample "
             }
           ],
+          "sourceFile": "src/dynamicImportType3/index.ts",
           "releaseTag": "Public",
           "name": "IExample",
           "preserveMemberOrder": false,
@@ -222,6 +223,7 @@
                   "text": ";"
                 }
               ],
+              "sourceFile": "src/dynamicImportType3/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
