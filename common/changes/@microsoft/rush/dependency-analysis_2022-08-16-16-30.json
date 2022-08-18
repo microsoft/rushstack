@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Added dependency analysis by enriching the telemetry data and two additional rush build flags: --analysis and --simulate. Both flags require the additional --file flag that will point to the telemetry file that has been written to the telemetry folder. --analysis uses the build times to identify which projects in the build are choke points where reducing the build time of these projects by 1 second will reduce the overall build time by 1 second. --simulate uses the build times to identify the optimal number of CPU cores to build your project with.",
+      "comment": "Enriched the logged telemetry data by appending the build machine’s information e.g. number of cores, architecture, etc., individual project build times and status, and the dependency graph for the projects. An additional command line action `rush analyze` was added to do analysis on the enriched telemetry data. `rush analyze —dependency-analysis` and `rush analyze —simulate` were. —dependency-analysis uses the build times to identify which projects in the build are choke points where reducing the build time of these projects by 1 second will reduce the overall build time by 1 second. —simulate uses the build times to identify the optimal number of CPu cores to build your project with.",
       "type": "none"
     }
   ],
