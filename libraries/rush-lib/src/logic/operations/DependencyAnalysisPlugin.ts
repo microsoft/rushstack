@@ -8,13 +8,13 @@ import {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import { IExecutionResult } from './IOperationExecutionResult';
+import { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { IPackageJsonDependencyTable, JsonFile } from '@rushstack/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
 import { IBuildTimeRecord, _setBuildTimes } from './BuildTimePlugin';
 import { ITelemetryData } from '../Telemetry';
+import { Operation } from './Operation';
 
 const PLUGIN_NAME: 'DependencyAnalysisPlugin' = 'DependencyAnalysisPlugin';
 const MAX_CORES: number = 128;
@@ -26,28 +26,10 @@ interface IBuildTimeSavedRecord {
 
 export interface IDependencyGraphEntry {
   dependencies: string[];
-  dependents: string[];
+  consumers: string[];
 }
 
 export type IDependencyGraph = Record<string, IDependencyGraphEntry>;
-
-interface IEnsureAndGetDependencyGraphEntryOptions {
-  packageName: string;
-  dependencyGraph: IDependencyGraph;
-}
-
-interface IAddDependenciesOptions {
-  dependencies: IPackageJsonDependencyTable | undefined;
-  dependencyGraph: IDependencyGraph;
-  project: RushConfigurationProject;
-  rushConfiguration: RushConfiguration;
-}
-
-interface IProcessPackageOptions {
-  dependencyGraph: IDependencyGraph;
-  project: RushConfigurationProject;
-  rushConfiguration: RushConfiguration;
-}
 
 interface IDependencyEntry {
   project: string;
@@ -58,85 +40,45 @@ interface IDependencyEntry {
 
 export class DependencyAnalysisPlugin implements IPhasedCommandPlugin {
   private readonly _terminal: ITerminal;
+  private readonly _rushConfiguration: RushConfiguration;
 
-  public constructor(terminal: ITerminal) {
+  public constructor(terminal: ITerminal, rushConfiguration: RushConfiguration) {
     this._terminal = terminal;
+    this._rushConfiguration = rushConfiguration;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
     hooks.afterExecuteOperations.tap(
       PLUGIN_NAME,
       (result: IExecutionResult, context: ICreateOperationsContext): void => {
-        _printDependencyAnalysis(this._terminal, result);
+        _printDependencyAnalysis(this._terminal, result, this._rushConfiguration);
       }
     );
   }
 }
 
-function ensureAndGetDependencyGraphEntry({
-  packageName,
-  dependencyGraph
-}: IEnsureAndGetDependencyGraphEntryOptions): IDependencyGraphEntry {
-  if (dependencyGraph[packageName] === undefined) {
-    dependencyGraph[packageName] = { dependencies: [], dependents: [] };
-  }
-
-  return dependencyGraph[packageName];
-}
-
-function addDependencies({
-  dependencies = {},
-  dependencyGraph,
-  project,
-  rushConfiguration
-}: IAddDependenciesOptions): void {
-  const dependencyGraphEntry: IDependencyGraphEntry = ensureAndGetDependencyGraphEntry({
-    dependencyGraph,
-    packageName: project.packageName
-  });
-  Object.keys(dependencies).forEach((dependencyName) => {
-    if (
-      rushConfiguration.projectsByName.has(dependencyName) &&
-      !project.cyclicDependencyProjects.has(dependencyName)
-    ) {
-      dependencyGraphEntry.dependencies.push(dependencyName);
-
-      const dependencyEntry: IDependencyGraphEntry = ensureAndGetDependencyGraphEntry({
-        dependencyGraph,
-        packageName: dependencyName
-      });
-      dependencyEntry.dependents.push(project.packageName);
-    }
-  });
-}
-
-function processPackage({ dependencyGraph, project, rushConfiguration }: IProcessPackageOptions): void {
-  [
-    project.packageJson.dependencies,
-    project.packageJson.devDependencies,
-    project.packageJson.peerDependencies
-  ].forEach((dependencies) =>
-    addDependencies({
-      dependencies,
-      dependencyGraph,
-      project,
-      rushConfiguration
-    })
-  );
-}
-
-export function makeDependencyGraph(): IDependencyGraph {
+export function makeDependencyGraph(result: IExecutionResult): IDependencyGraph {
   const dependencyGraph: IDependencyGraph = {};
-  const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
-    startingFolder: process.cwd()
+
+  result.operationResults.forEach((operationResults: IOperationExecutionResult, operation: Operation) => {
+    const projectName: string = operation.associatedProject?.packageName ?? '';
+    const dependencies: string[] = [];
+    const consumers: string[] = [];
+
+    operation.dependencies.forEach((dependency: Operation) => {
+      dependencies.push(dependency.associatedProject?.packageName ?? '');
+    });
+
+    operation.consumers.forEach((consumer: Operation) => {
+      consumers.push(consumer.associatedProject?.packageName ?? '');
+    });
+    const dependencyGraphEntry: IDependencyGraphEntry = {
+      dependencies,
+      consumers
+    };
+    dependencyGraph[projectName] = dependencyGraphEntry;
   });
-  rushConfiguration.projects.forEach((project) =>
-    processPackage({
-      dependencyGraph,
-      project,
-      rushConfiguration
-    })
-  );
+
   return dependencyGraph;
 }
 
@@ -162,7 +104,7 @@ function calculateBuildTime(
     const simpleDependencyEntry: IDependencyEntry = {
       project: project,
       dependencies: dependencyGraphEntry.dependencies,
-      dependents: dependencyGraphEntry.dependents,
+      dependents: dependencyGraphEntry.consumers,
       buildTime: buildTimes.get(project) ?? -1
     };
     simpleDependencyGraph.push(simpleDependencyEntry);
@@ -236,6 +178,7 @@ export function simulateBuildTime(filename: string, terminal: ITerminal): void {
     }
   }
 }
+
 function writeSimulationSummary(terminal: ITerminal, simulatedBuildTimes: number[]): void {
   terminal.writeLine(`Simulating build time given number of cores:`);
 
@@ -268,8 +211,12 @@ function writeSummary(terminal: ITerminal, buildTimeList: IBuildTimeSavedRecord[
   }
 }
 
-export function _printDependencyAnalysis(terminal: ITerminal, result: IExecutionResult): void {
-  const dependencyGraph: IDependencyGraph = makeDependencyGraph();
+export function _printDependencyAnalysis(
+  terminal: ITerminal,
+  result: IExecutionResult,
+  rushConfiguration: RushConfiguration
+): void {
+  const dependencyGraph: IDependencyGraph = makeDependencyGraph(result);
 
   const buildTimingMap: Map<string, number> = new Map();
 

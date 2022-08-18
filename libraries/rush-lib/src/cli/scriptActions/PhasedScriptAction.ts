@@ -38,13 +38,13 @@ import { OperationStatus } from '../../logic/operations/OperationStatus';
 import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import {
-  // DependencyAnalysisPlugin,
   dependencyAnalysis,
   IDependencyGraph,
   makeDependencyGraph,
   simulateBuildTime
 } from '../../logic/operations/DependencyAnalysisPlugin';
 import { IBuildTimeRecord, _setBuildTimes } from '../../logic/operations/BuildTimePlugin';
+import { IMachineInfo } from '../../logic/Telemetry';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -590,6 +590,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       };
 
       let buildTimings: IBuildTimeRecord[] = [];
+      let dependencyGraph: IDependencyGraph = {};
+      const machineInfo: IMachineInfo = {
+        machineArch: os.arch(),
+        machineOS: os.platform(),
+        machineCPU: os.cpus()[0].model,
+        machineCores: os.cpus().length,
+        machineTotalMemMB: Math.floor(os.totalmem() / 1024 / 1024),
+        machineFreeMemMB: Math.floor(os.freemem() / 1024 / 1024)
+      };
 
       if (result) {
         for (const [operation, operationResult] of result.operationResults) {
@@ -627,14 +636,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           }
         }
         buildTimings = _setBuildTimes(result);
+        dependencyGraph = makeDependencyGraph(result);
       }
-      const dependencyGraph: IDependencyGraph = makeDependencyGraph();
 
       this.parser.telemetry.log({
         name: this.actionName,
         durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData,
+        machineInfo,
         buildTimings,
         dependencyGraph
       });

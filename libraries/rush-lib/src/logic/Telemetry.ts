@@ -10,6 +10,15 @@ import { RushSession } from '../pluginFramework/RushSession';
 import { IBuildTimeRecord } from './operations/BuildTimePlugin';
 import { IDependencyGraph } from './operations/DependencyAnalysisPlugin';
 
+export interface IMachineInfo {
+  machineArch: string;
+  machineOS: string;
+  machineCPU: string;
+  machineCores: number;
+  machineTotalMemMB: number;
+  machineFreeMemMB: number;
+}
+
 /**
  * @beta
  */
@@ -43,6 +52,7 @@ export interface ITelemetryData {
    */
   readonly rushVersion?: string;
   readonly extraData?: { [key: string]: string | number | boolean };
+  readonly machineInfo?: IMachineInfo;
   readonly buildTimings?: IBuildTimeRecord[];
   readonly dependencyGraph?: IDependencyGraph;
 }

@@ -10,8 +10,7 @@ const PLUGIN_NAME: 'BuildTimePlugin' = 'BuildTimePlugin';
 
 interface ITimelineRecord {
   startTime: number;
-  endTime: number;
-  durationString: string;
+  duration: number;
   name: string;
   status: OperationStatus;
 }
@@ -29,14 +28,13 @@ export class BuildTimePlugin implements IPhasedCommandPlugin {
     this._buildTimes = [];
   }
 
-  public apply(hooks: PhasedCommandHooks): IBuildTimeRecord[] {
+  public apply(hooks: PhasedCommandHooks): void {
     hooks.afterExecuteOperations.tap(
       PLUGIN_NAME,
       (result: IExecutionResult, context: ICreateOperationsContext): void => {
         this._buildTimes = _setBuildTimes(result);
       }
     );
-    return this._buildTimes;
   }
 }
 
@@ -55,13 +53,11 @@ export function _setBuildTimes(result: IExecutionResult): IBuildTimeRecord[] {
 
     if (startTime && endTime) {
       const { duration } = stopwatch;
-      const durationString: string = duration.toFixed(2);
 
       data.push({
         startTime,
-        endTime,
-        durationString,
-        name: operation.name!.split(' ')[0],
+        duration,
+        name: operation.associatedProject?.packageName ?? '',
         status: operationResult.status
       });
     }
@@ -69,13 +65,13 @@ export function _setBuildTimes(result: IExecutionResult): IBuildTimeRecord[] {
 
   data.sort((a, b) => a.startTime - b.startTime);
 
-  for (const { startTime, endTime, durationString, name, status } of data) {
-    if (startTime && endTime) {
+  for (const { startTime, duration, name, status } of data) {
+    if (startTime) {
       // do nothing
     }
     buildTimes.push({
       project: name,
-      buildTime: Number(durationString),
+      buildTime: Number(duration.toFixed(2)),
       status: status
     });
   }
