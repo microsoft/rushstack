@@ -63,7 +63,6 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/cli-table": "0.3.0",
     "@types/glob": "7.1.1",
-    "@types/heft-jest": "1.0.1",
     "@types/inquirer": "7.3.1",
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",

@@ -23,6 +23,7 @@
     "@rushstack/heft-sass-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@types/heft-jest": "1.0.1",
     "autoprefixer": "~10.4.2",
     "css-loader": "~6.6.0",
     "css-minimizer-webpack-plugin": "~3.4.1",

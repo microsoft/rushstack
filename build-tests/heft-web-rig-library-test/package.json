@@ -12,7 +12,6 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-web-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1"
+    "@rushstack/heft-web-rig": "workspace:*"
   }
 }

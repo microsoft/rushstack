@@ -34,7 +34,6 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/module-minifier": "workspace:*",
     "@types/estree": "0.0.50",
-    "@types/heft-jest": "1.0.1",
     "memfs": "3.4.3",
     "webpack": "~5.68.0"
   },

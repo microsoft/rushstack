@@ -43,7 +43,6 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
     "@types/webpack": "4.41.32",
     "@types/webpack-sources": "1.4.2",
     "webpack": "~4.44.2",
