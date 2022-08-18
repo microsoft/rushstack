@@ -691,6 +691,7 @@ export class LegacyAdapters {
     // (undocumented)
     static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
+    // @deprecated
     static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void;
 }
 
@@ -805,8 +806,8 @@ export class ProtectableMap<K, V> {
 // @public
 export class Sort {
     static compareByValue(x: any, y: any): number;
-    static isSorted<T>(array: T[], comparer?: (x: any, y: any) => number): boolean;
-    static isSortedBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): boolean;
+    static isSorted<T>(collection: Iterable<T>, comparer?: (x: any, y: any) => number): boolean;
+    static isSortedBy<T>(collection: Iterable<T>, keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): boolean;
     static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): void;
     static sortMapKeys<K, V>(map: Map<K, V>, keyComparer?: (x: K, y: K) => number): void;
     static sortSet<T>(set: Set<T>, comparer?: (x: T, y: T) => number): void;
