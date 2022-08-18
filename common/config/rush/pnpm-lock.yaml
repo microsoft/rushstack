@@ -165,13 +165,13 @@ importers:
 
   ../../apps/rush:
     specifiers:
-      '@microsoft/rush-lib': workspace:5.75.0-pr3481.2
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.3
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
-      '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:5.75.0-pr3481.2
-      '@rushstack/rush-azure-storage-build-cache-plugin': workspace:5.75.0-pr3481.2
+      '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:5.75.0-pr3481.3
+      '@rushstack/rush-azure-storage-build-cache-plugin': workspace:5.75.0-pr3481.3
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/semver': 7.3.5
@@ -1058,7 +1058,7 @@ importers:
 
   ../../build-tests/install-test-workspace:
     specifiers:
-      '@microsoft/rush-lib': workspace:5.75.0-pr3481.2
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.3
       '@rushstack/node-core-library': workspace:*
     devDependencies:
       '@microsoft/rush-lib': link:../../libraries/rush-lib
@@ -1155,7 +1155,7 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/node-core-library': workspace:*
-      '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:5.75.0-pr3481.2
+      '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:5.75.0-pr3481.3
       '@types/http-proxy': ~1.17.8
       '@types/node': 12.20.24
       eslint: ~8.7.0
@@ -1174,7 +1174,7 @@ importers:
 
   ../../build-tests/rush-project-change-analyzer-test:
     specifiers:
-      '@microsoft/rush-lib': workspace:5.75.0-pr3481.2
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.3
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -1851,7 +1851,7 @@ importers:
 
   ../../libraries/rush-sdk:
     specifiers:
-      '@microsoft/rush-lib': workspace:5.75.0-pr3481.2
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.3
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -2053,7 +2053,7 @@ importers:
 
   ../../repo-scripts/repo-toolbox:
     specifiers:
-      '@microsoft/rush-lib': workspace:5.75.0-pr3481.2
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.3
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -2146,12 +2146,12 @@ importers:
 
   ../../rush-plugins/rush-amazon-s3-build-cache-plugin:
     specifiers:
-      '@microsoft/rush-lib': workspace:5.75.0-pr3481.2
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.3
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
-      '@rushstack/rush-sdk': workspace:5.75.0-pr3481.2
+      '@rushstack/rush-sdk': workspace:5.75.0-pr3481.3
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/node-fetch': 1.6.9
@@ -2175,12 +2175,12 @@ importers:
     specifiers:
       '@azure/identity': ~1.0.0
       '@azure/storage-blob': ~12.3.0
-      '@microsoft/rush-lib': workspace:5.75.0-pr3481.2
+      '@microsoft/rush-lib': workspace:5.75.0-pr3481.3
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
-      '@rushstack/rush-sdk': workspace:5.75.0-pr3481.2
+      '@rushstack/rush-sdk': workspace:5.75.0-pr3481.3
       '@rushstack/terminal': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
@@ -2204,7 +2204,7 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
-      '@rushstack/rush-sdk': workspace:5.75.0-pr3481.2
+      '@rushstack/rush-sdk': workspace:5.75.0-pr3481.3
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
     dependencies:
@@ -2226,7 +2226,7 @@ importers:
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rig-package': workspace:*
-      '@rushstack/rush-sdk': workspace:5.75.0-pr3481.2
+      '@rushstack/rush-sdk': workspace:5.75.0-pr3481.3
       '@rushstack/ts-command-line': workspace:*
       '@types/express': 4.17.13
       '@types/heft-jest': 1.0.1
