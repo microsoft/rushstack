@@ -13,7 +13,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:5.75.0-pr3481.2",
+    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:5.75.0-pr3481.3",
     "@rushstack/node-core-library": "workspace:*",
     "@types/node": "12.20.24",
     "eslint": "~8.7.0",
