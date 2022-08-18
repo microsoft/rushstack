@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -445,6 +445,57 @@
             }
           ],
           "extendsTokenRanges": []
+        },
+        {
+          "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!MergedNamespaces:namespace",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace MergedNamespaces "
+            }
+          ],
+          "sourceFile": "src/mergedDeclarations/index.ts",
+          "releaseTag": "Public",
+          "name": "MergedNamespaces",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!MergedNamespaces.AnotherClass:class",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "class AnotherClass "
+                }
+              ],
+              "sourceFile": "src/mergedDeclarations/index.ts",
+              "releaseTag": "Public",
+              "name": "AnotherClass",
+              "preserveMemberOrder": false,
+              "members": [],
+              "implementsTokenRanges": []
+            },
+            {
+              "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!MergedNamespaces.SomeClass:class",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "class SomeClass "
+                }
+              ],
+              "sourceFile": "src/mergedDeclarations/index.ts",
+              "releaseTag": "Public",
+              "name": "SomeClass",
+              "preserveMemberOrder": false,
+              "members": [],
+              "implementsTokenRanges": []
+            }
+          ]
         }
       ]
     }

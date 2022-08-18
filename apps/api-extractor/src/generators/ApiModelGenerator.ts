@@ -138,6 +138,7 @@ export class ApiModelGenerator {
     const astModule: AstModule = astNamespaceImport.astModule;
     const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiNamespace.getContainerKey(name);
+    const sourceFile: string | undefined = this._getSourceFile(astNamespaceImport.declaration);
 
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(
       containerKey
