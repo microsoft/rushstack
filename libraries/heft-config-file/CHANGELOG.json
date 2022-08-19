@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.9.3",
+      "tag": "@rushstack/heft-config-file_v0.9.3",
+      "date": "Fri, 19 Aug 2022 00:17:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.2",
       "tag": "@rushstack/heft-config-file_v0.9.2",
       "date": "Wed, 03 Aug 2022 18:40:35 GMT",

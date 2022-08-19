@@ -2,6 +2,24 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.1.22",
+      "tag": "@rushstack/module-minifier_v0.1.22",
+      "date": "Fri, 19 Aug 2022 00:17:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.1.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.21",
       "tag": "@rushstack/module-minifier_v0.1.21",
       "date": "Wed, 10 Aug 2022 09:52:12 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.50.2",
+      "tag": "@rushstack/node-core-library_v3.50.2",
+      "date": "Fri, 19 Aug 2022 00:17:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update `PackageJsonLookup` to only resolve to `package.json` files that contain a `\"name\"` field. See GitHub issue #2070"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.50.1",
       "tag": "@rushstack/node-core-library_v3.50.1",
       "date": "Wed, 03 Aug 2022 18:40:35 GMT",

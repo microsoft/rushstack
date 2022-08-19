@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+This log was last generated on Fri, 19 Aug 2022 00:17:19 GMT and should not be manually modified.
+
+## 3.50.2
+Fri, 19 Aug 2022 00:17:19 GMT
+
+### Patches
+
+- Update `PackageJsonLookup` to only resolve to `package.json` files that contain a `"name"` field. See GitHub issue #2070
 
 ## 3.50.1
 Wed, 03 Aug 2022 18:40:35 GMT
