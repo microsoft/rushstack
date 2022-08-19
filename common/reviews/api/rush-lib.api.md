@@ -471,11 +471,23 @@ export interface IStopwatchResult {
 
 // @beta (undocumented)
 export interface ITelemetryData {
+    // Warning: (ae-forgotten-export) The symbol "IBuildTimeRecord" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly buildTimings?: IBuildTimeRecord[];
+    // Warning: (ae-forgotten-export) The symbol "IDependencyGraph" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly dependencyGraph?: IDependencyGraph;
     readonly durationInSeconds: number;
     // (undocumented)
     readonly extraData?: {
         [key: string]: string | number | boolean;
     };
+    // Warning: (ae-forgotten-export) The symbol "IMachineInfo" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly machineInfo?: IMachineInfo;
     readonly name: string;
     readonly platform?: string;
     readonly result: 'Succeeded' | 'Failed';
