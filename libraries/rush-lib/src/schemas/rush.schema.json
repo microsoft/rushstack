@@ -237,11 +237,11 @@
       "type": "boolean"
     },
     "allowedProjectTags": {
-      "description": "This is an optional, but recommended, list of available tags that can be applied to projects. If this property is not specified, any tag is allowed. This list is useful in preventing typos when specifying tags for projects.",
+      "description": "This is an optional, but recommended, list of available tags that can be applied to projects. If this property is not specified, any tag is allowed. This list is useful in preventing typos when specifying tags for projects. A tag name must be one or more words separated by hyphens, where a word may contain lowercase letters, digits, and the period character.",
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^[A-Za-z0-9_@/.$-]+$"
+        "pattern": "^[a-z0-9.]+(-[a-z0-9.]+)*$"
       }
     },
     "projects": {
@@ -293,11 +293,11 @@
             "type": "string"
           },
           "tags": {
-            "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\".",
+            "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\". The tag name must be one or more words separated by hyphens, where a word may contain lowercase letters, digits, and the period character.",
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[A-Za-z0-9_@/.$-]+$"
+              "pattern": "^[a-z0-9.]+(-[a-z0-9.]+)*$"
             }
           }
         },
