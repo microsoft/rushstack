@@ -84,6 +84,12 @@ export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IO
 export { IExecutionResult, IOperationExecutionResult } from './logic/operations/IOperationExecutionResult';
 export { IOperationOptions, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
+export { IBuildTimeRecord, _setBuildTimes } from './logic/operations/BuildTimePlugin';
+export {
+  IDependencyGraph,
+  dependencyAnalysis,
+  simulateBuildTime
+} from './logic/operations/DependencyAnalysisPlugin';
 
 export {
   RushSession,
@@ -109,6 +115,6 @@ export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCachePro
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 
-export { ITelemetryData } from './logic/Telemetry';
+export { IMachineInfo, ITelemetryData } from './logic/Telemetry';
 
 export { IStopwatchResult } from './utilities/Stopwatch';

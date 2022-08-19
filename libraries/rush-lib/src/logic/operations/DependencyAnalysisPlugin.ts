@@ -29,6 +29,9 @@ export interface IDependencyGraphEntry {
   consumers: string[];
 }
 
+/**
+ * @beta
+ */
 export type IDependencyGraph = Record<string, IDependencyGraphEntry>;
 
 interface IDependencyEntry {
@@ -89,6 +92,9 @@ export function _printDependencyAnalysis(terminal: ITerminal, result: IExecution
   writeDependencyAnalysisSummary(terminal, buildTimeList);
 }
 
+/**
+ * @beta
+ */
 export function makeDependencyGraph(result: IExecutionResult): IDependencyGraph {
   const dependencyGraph: IDependencyGraph = {};
 
@@ -183,6 +189,9 @@ function calculateBuildTime(
   return totalBuildTime;
 }
 
+/**
+ * @beta
+ */
 export function simulateBuildTime(filename: string, terminal: ITerminal): void {
   const telemetryFile: ITelemetryData = JsonFile.load(filename)[0];
   const buildTimes: IBuildTimeRecord[] = telemetryFile.buildTimings ?? [];
@@ -217,6 +226,9 @@ export function simulateBuildTime(filename: string, terminal: ITerminal): void {
   }
 }
 
+/**
+ * @beta
+ */
 export function dependencyAnalysis(filename: string, terminal: ITerminal): void {
   const telemetryFile: ITelemetryData = JsonFile.load(filename)[0];
   const buildTimes: IBuildTimeRecord[] = telemetryFile.buildTimings ?? [];

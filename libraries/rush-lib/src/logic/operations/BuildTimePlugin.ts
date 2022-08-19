@@ -15,6 +15,9 @@ interface ITimelineRecord {
   status: OperationStatus;
 }
 
+/**
+ * @beta
+ */
 export interface IBuildTimeRecord {
   project: string;
   buildTime: number;
@@ -38,6 +41,9 @@ export class BuildTimePlugin implements IPhasedCommandPlugin {
   }
 }
 
+/**
+ * @beta
+ */
 export function _setBuildTimes(result: IExecutionResult): IBuildTimeRecord[] {
   const data: ITimelineRecord[] = [];
   const buildTimes: IBuildTimeRecord[] = [];

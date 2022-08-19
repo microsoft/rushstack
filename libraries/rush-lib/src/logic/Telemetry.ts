@@ -10,6 +10,9 @@ import { RushSession } from '../pluginFramework/RushSession';
 import { IBuildTimeRecord } from './operations/BuildTimePlugin';
 import { IDependencyGraph } from './operations/DependencyAnalysisPlugin';
 
+/**
+ * @beta
+ */
 export interface IMachineInfo {
   machineArch: string;
   machineOS: string;
