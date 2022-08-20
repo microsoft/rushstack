@@ -391,7 +391,7 @@
     * to projects. If this property is not specified, any tag is allowed. This
     * list is useful in preventing typos when specifying tags for projects.
     */
-  /*[LINE "HYPOTHETICAL"]*/ "allowedProjectTags": [ "apps", "Web", "tools" ],
+  /*[LINE "HYPOTHETICAL"]*/ "allowedProjectTags": [ "apps", "frontend-team", "1.0.0-release" ],
 
   /**
    * (Required) This is the inventory of projects to be managed by Rush.
