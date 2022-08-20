@@ -387,11 +387,13 @@
   /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
-    * This is an optional, but recommended, list of available tags that can be applied
-    * to projects. If this property is not specified, any tag is allowed. This
-    * list is useful in preventing typos when specifying tags for projects.
+    * This is an optional, but recommended, list of allowed tags that can be applied to Rush projects
+    * using the "tags" setting in this file.  This list is useful for preventing mistakes such as misspelling,
+    * and it also provides a centralized place to document your tags.  If "allowedProjectTags" list is
+    * not specified, then any valid tag is allowed.  A tag name must be one or more words separated
+    * by hyphens, where a word may contain lowercase letters, digits, and the period character.
     */
-  /*[LINE "HYPOTHETICAL"]*/ "allowedProjectTags": [ "apps", "frontend-team", "1.0.0-release" ],
+  /*[LINE "HYPOTHETICAL"]*/ "allowedProjectTags": [ "tools", "frontend-team", "1.0.0-release" ],
 
   /**
    * (Required) This is the inventory of projects to be managed by Rush.
@@ -483,21 +485,21 @@
        * command "rush list --only tag:my-custom-tag".  The tag name must be one or more words separated
        * by hyphens, where a word may contain lowercase letters, digits, and the period character.
        */
-      /*[LINE "HYPOTHETICAL"]*/ "tags": ["apps", "web"]
+      /*[LINE "HYPOTHETICAL"]*/ "tags": [ "1.0.0-release", "frontend-team" ]
     },
 
     {
       "packageName": "my-controls",
       "projectFolder": "libraries/my-controls",
       "reviewCategory": "production",
-      "tags": ["libraries", "web"]
+      "tags": [ "frontend-team" ]
     },
 
     {
       "packageName": "my-toolchain",
       "projectFolder": "tools/my-toolchain",
       "reviewCategory": "tools",
-      "tags": ["tools"]
+      "tags": [ "tools" ]
     }
     /*[END "DEMO"]*/
   ]
