@@ -492,7 +492,13 @@ export class RushConfigurationProject {
   }
 
   /**
-   * The set of tags applied to this project.
+   * An optional set of custom tags that can be used to select this project.
+   *
+   * @remarks
+   * For example, adding `my-custom-tag` will allow this project to be selected by the
+   * command `rush list --only tag:my-custom-tag`.  The tag name must be one or more words separated
+   * by hyphens, where a word may contain lowercase letters, digits, and the period character.
+   *
    * @beta
    */
   public get tags(): ReadonlySet<string> {
