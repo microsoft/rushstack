@@ -151,11 +151,13 @@ export class PackageJsonUpdater {
       console.log();
 
       const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(packageName);
+      const isAddToSingleSplitWorkspaceProject: boolean = projects.length === 1 && projects[0].splitWorkspace;
       if (
         existingSpecifiedVersions &&
         !existingSpecifiedVersions.has(version) &&
         this._rushConfiguration.ensureConsistentVersions &&
-        !updateOtherPackages
+        !updateOtherPackages &&
+        !isAddToSingleSplitWorkspaceProject
       ) {
         // There are existing versions, and the version we're going to use is not one of them, and this repo
         // requires consistent versions, and we aren't going to update other packages, so we can't proceed.
