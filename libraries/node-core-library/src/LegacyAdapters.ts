@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { sort as timsort } from 'timsort';
-import * as semver from 'semver';
-
 /**
  * Callback used by {@link LegacyAdapters}.
  * @public
@@ -16,8 +13,6 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
  * @public
  */
 export class LegacyAdapters {
-  private static _useTimsort: boolean | undefined = undefined;
-
   /**
    * This function wraps a function with a callback in a promise.
    */
@@ -106,18 +101,12 @@ export class LegacyAdapters {
    * Prior to Node 11.x, the `Array.sort()` algorithm is not guaranteed to be stable.
    * If you need a stable sort, you can use `sortStable()` as a workaround.
    *
+   * @deprecated
+   * Use native Array.sort(), since Node &lt; 14 is no longer supported
    * @remarks
    * On NodeJS 11.x and later, this method simply calls the native `Array.sort()`.
-   * For earlier versions, it uses an implementation of Timsort, which is the same algorithm used by modern NodeJS.
    */
   public static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void {
-    if (LegacyAdapters._useTimsort === undefined) {
-      LegacyAdapters._useTimsort = semver.major(process.versions.node) < 11;
-    }
-    if (LegacyAdapters._useTimsort) {
-      timsort(array, compare);
-    } else {
-      Array.prototype.sort.call(array, compare);
-    }
+    Array.prototype.sort.call(array, compare);
   }
 }
