@@ -82,9 +82,9 @@ export class Sort {
   /**
    * Returns true if the collection is already sorted.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static isSorted<T>(
     collection: Iterable<T>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer: (x: any, y: any) => number = Sort.compareByValue
   ): boolean {
     let previous: T | undefined = undefined;
