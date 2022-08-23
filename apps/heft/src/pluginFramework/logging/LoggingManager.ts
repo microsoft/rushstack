@@ -41,7 +41,7 @@ export class LoggingManager {
   public requestScopedLogger(loggerName: string): ScopedLogger {
     const existingScopedLogger: ScopedLogger | undefined = this._scopedLoggers.get(loggerName);
     if (existingScopedLogger) {
-      throw new Error(`A named logger with name "${loggerName}" has already been requested.`);
+      throw new Error(`A named logger with name ${JSON.stringify(loggerName)} has already been requested.`);
     } else {
       const scopedLogger: ScopedLogger = new ScopedLogger({
         loggerName,

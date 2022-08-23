@@ -145,8 +145,8 @@ export default class LintPlugin implements IHeftTaskPlugin {
       scopedLogger: taskSession.logger,
       eslintPackagePath: eslintToolPath,
       linterConfigFilePath: eslintConfigFilePath,
-      buildFolderPath: heftConfiguration.buildFolder,
-      buildMetadataFolderPath: taskSession.cacheFolder
+      buildFolderPath: heftConfiguration.buildFolderPath,
+      buildMetadataFolderPath: taskSession.cacheFolderPath
     });
 
     eslint.printVersionHeader();
@@ -171,8 +171,8 @@ export default class LintPlugin implements IHeftTaskPlugin {
       scopedLogger: taskSession.logger,
       tslintPackagePath: tslintToolPath,
       linterConfigFilePath: tslintConfigFilePath,
-      buildFolderPath: heftConfiguration.buildFolder,
-      buildMetadataFolderPath: taskSession.cacheFolder
+      buildFolderPath: heftConfiguration.buildFolderPath,
+      buildMetadataFolderPath: taskSession.cacheFolderPath
     });
 
     tslint.printVersionHeader();
@@ -188,7 +188,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
   private async _resolveTslintConfigFilePathAsync(
     heftConfiguration: HeftConfiguration
   ): Promise<string | undefined> {
-    const tslintConfigFilePath: string = `${heftConfiguration.buildFolder}/tslint.json`;
+    const tslintConfigFilePath: string = `${heftConfiguration.buildFolderPath}/tslint.json`;
     const tslintConfigFileExists: boolean = await FileSystem.existsAsync(tslintConfigFilePath);
     return tslintConfigFileExists ? tslintConfigFilePath : undefined;
   }
@@ -198,8 +198,8 @@ export default class LintPlugin implements IHeftTaskPlugin {
   ): Promise<string | undefined> {
     // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
     // so use it if it exists
-    const defaultPath: string = `${heftConfiguration.buildFolder}/${ESLINTRC_JS_FILENAME}`;
-    const alternativePath: string = `${heftConfiguration.buildFolder}/${ESLINTRC_CJS_FILENAME}`;
+    const defaultPath: string = `${heftConfiguration.buildFolderPath}/${ESLINTRC_JS_FILENAME}`;
+    const alternativePath: string = `${heftConfiguration.buildFolderPath}/${ESLINTRC_CJS_FILENAME}`;
     const [alternativePathExists, defaultPathExists] = await Promise.all([
       FileSystem.existsAsync(alternativePath),
       FileSystem.existsAsync(defaultPath)

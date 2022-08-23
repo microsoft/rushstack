@@ -34,7 +34,9 @@ export abstract class HeftPluginHost {
   ): void {
     if (this._pluginsApplied) {
       throw new Error(
-        `Requestor "${requestorName}" cannot request access to plugin "${pluginToAccessName}" from package "${pluginToAccessPackage}" after plugins have been applied.`
+        `Requestor ${JSON.stringify(requestorName)} cannot request access to plugin ` +
+          `${JSON.stringify(pluginToAccessName)} from package ${JSON.stringify(pluginToAccessPackage)} ` +
+          `after plugins have been applied.`
       );
     }
 
@@ -46,8 +48,8 @@ export abstract class HeftPluginHost {
     }
     if (pluginAccessRequestHook.taps.some((t) => t.name === requestorName)) {
       throw new Error(
-        `Plugin "${pluginToAccessName}" from "${pluginToAccessPackage}" has already been accessed ` +
-          `by "${requestorName}".`
+        `Plugin ${JSON.stringify(pluginToAccessName)} from ${JSON.stringify(pluginToAccessPackage)} has ` +
+          `already been accessed by ${JSON.stringify(requestorName)}.`
       );
     }
     pluginAccessRequestHook.tap(requestorName, accessorCallback);
@@ -84,8 +86,9 @@ export abstract class HeftPluginHost {
         pluginAccessRequestHook.call(accessor);
       } else {
         throw new Error(
-          `Plugin "${pluginDefinition.pluginName}" from package "${pluginDefinition.pluginPackageName}" ` +
-            'does not provide an accessor property, so it does not provide access to other plugins.'
+          `Plugin ${JSON.stringify(pluginDefinition.pluginName)} from package ` +
+            `${JSON.stringify(pluginDefinition.pluginPackageName)} does not provide an accessor property, ` +
+            `so it does not provide access to other plugins.`
         );
       }
     }

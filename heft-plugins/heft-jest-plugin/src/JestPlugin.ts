@@ -134,10 +134,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       // Jest's cache is not reliable.  For example, if a Jest configuration change causes files to be
       // transformed differently, the cache will continue to return the old results unless we manually
       // clean it.  Thus we need to ensure that we always cleans the Jest cache.
-      cleanOptions.addDeleteOperations({ sourcePath: taskSession.cacheFolder });
+      cleanOptions.addDeleteOperations({ sourcePath: taskSession.cacheFolderPath });
 
       // We should also clean the data file that we generate for the BuildTransformer
-      const dataFilePath: string = HeftJestDataFile.getConfigFilePath(heftConfiguration.buildFolder);
+      const dataFilePath: string = HeftJestDataFile.getConfigFilePath(heftConfiguration.buildFolderPath);
       cleanOptions.addDeleteOperations({ sourcePath: dataFilePath });
     });
 
@@ -199,7 +199,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     );
 
     // Validate, and write the Jest data file used by the BuildTransformer
-    await HeftJestDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
+    await HeftJestDataFile.saveForProjectAsync(heftConfiguration.buildFolderPath, {
       // Use as defaults for now.
       folderNameForTests: options?.folderNameForTests || 'lib',
       extensionForTests:
@@ -228,12 +228,12 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     // Write the jest data file used by the BuildTransformer
     await this._setupJestAsync(taskSession, heftConfiguration, options);
 
-    const buildFolder: string = heftConfiguration.buildFolder;
+    const buildFolderPath: string = heftConfiguration.buildFolderPath;
     const projectRelativeFilePath: string = options?.configurationPath ?? JEST_CONFIGURATION_LOCATION;
     let jestConfig: IHeftJestConfiguration;
     if (options?.disableConfigurationModuleResolution) {
       // Module resolution explicitly disabled, use the config as-is
-      const jestConfigPath: string = path.join(buildFolder, projectRelativeFilePath);
+      const jestConfigPath: string = path.join(buildFolderPath, projectRelativeFilePath);
       if (!(await FileSystem.existsAsync(jestConfigPath))) {
         logger.emitError(new Error(`Expected to find jest config file at "${jestConfigPath}".`));
         return;
@@ -242,11 +242,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     } else {
       // Load in and resolve the config file using the "extends" field
       jestConfig = await JestPlugin._getJestConfigurationLoader(
-        buildFolder,
+        buildFolderPath,
         projectRelativeFilePath
       ).loadConfigurationFileForProjectAsync(
         terminal,
-        heftConfiguration.buildFolder,
+        heftConfiguration.buildFolderPath,
         heftConfiguration.rigConfig
       );
       if (jestConfig.preset) {
@@ -275,11 +275,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       debug: taskSession.parameters.debug,
       detectOpenHandles: options?.detectOpenHandles || false,
 
-      cacheDirectory: taskSession.cacheFolder,
+      cacheDirectory: taskSession.cacheFolderPath,
       updateSnapshot: options?.updateSnapshots,
 
       listTests: false,
-      rootDir: buildFolder,
+      rootDir: buildFolderPath,
 
       silent: options?.silent || false,
       testNamePattern: options?.testNamePattern,
@@ -326,7 +326,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       globalConfig,
       results: jestResults
-    } = await runCLI(jestArgv, [buildFolder]);
+    } = await runCLI(jestArgv, [buildFolderPath]);
 
     if (jestResults.numFailedTests > 0) {
       logger.emitError(

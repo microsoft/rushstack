@@ -49,10 +49,10 @@ export class WebpackConfigurationLoader {
     let webpackConfigJs: IWebpackConfigJs | undefined;
 
     try {
-      const buildFolder: string = heftConfiguration.buildFolder;
+      const buildFolderPath: string = heftConfiguration.buildFolderPath;
       if (this._serveMode) {
         const devConfigPath: string = path.resolve(
-          buildFolder,
+          buildFolderPath,
           devConfigurationPath || DEFAULT_WEBPACK_DEV_CONFIG_PATH
         );
         this._logger.terminal.writeVerboseLine(
@@ -63,7 +63,7 @@ export class WebpackConfigurationLoader {
 
       if (!webpackConfigJs) {
         const configPath: string = path.resolve(
-          buildFolder,
+          buildFolderPath,
           configurationPath || DEFAULT_WEBPACK_CONFIG_PATH
         );
         this._logger.terminal.writeVerboseLine(

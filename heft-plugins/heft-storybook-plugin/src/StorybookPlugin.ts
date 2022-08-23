@@ -140,25 +140,25 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     this._logger.terminal.writeVerboseLine(`Probing for "${storykitPackageName}"`);
 
     // Example: "/path/to/my-project/node_modules/my-storykit"
-    let storykitFolder: string;
+    let storykitFolderPath: string;
     try {
-      storykitFolder = Import.resolvePackage({
+      storykitFolderPath = Import.resolvePackage({
         packageName: storykitPackageName,
-        baseFolderPath: heftConfiguration.buildFolder
+        baseFolderPath: heftConfiguration.buildFolderPath
       });
     } catch (ex) {
       throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
     }
 
-    this._logger.terminal.writeVerboseLine(`Found "${storykitPackageName}" in ` + storykitFolder);
+    this._logger.terminal.writeVerboseLine(`Found "${storykitPackageName}" in ` + storykitFolderPath);
 
     // Example: "/path/to/my-project/node_modules/my-storykit/node_modules"
-    const storykitModuleFolder: string = `${storykitFolder}/node_modules`;
-    const storykitModuleFolderExists: boolean = await FileSystem.existsAsync(storykitModuleFolder);
+    const storykitModuleFolderPath: string = `${storykitFolderPath}/node_modules`;
+    const storykitModuleFolderExists: boolean = await FileSystem.existsAsync(storykitModuleFolderPath);
     if (!storykitModuleFolderExists) {
       throw new Error(
         `The ${taskSession.taskName} task cannot start because the storykit module folder does not exist:\n` +
-          storykitModuleFolder +
+          storykitModuleFolderPath +
           '\nDid you forget to install it?'
       );
     }
@@ -168,7 +168,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     try {
       resolvedStartupModulePath = Import.resolveModule({
         modulePath: startupModulePath,
-        baseFolderPath: storykitModuleFolder
+        baseFolderPath: storykitModuleFolderPath
       });
     } catch (ex) {
       throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
@@ -177,11 +177,11 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     this._logger.terminal.writeVerboseLine(`Resolved startupModulePath is "${resolvedStartupModulePath}"`);
 
     // Example: "/path/to/my-project/.storybook"
-    const dotStorybookFolder: string = `${heftConfiguration.buildFolder}/.storybook`;
-    await FileSystem.ensureFolderAsync(dotStorybookFolder);
+    const dotStorybookFolderPath: string = `${heftConfiguration.buildFolderPath}/.storybook`;
+    await FileSystem.ensureFolderAsync(dotStorybookFolderPath);
 
     // Example: "/path/to/my-project/.storybook/node_modules"
-    const dotStorybookModuleFolder: string = `${dotStorybookFolder}/node_modules`;
+    const dotStorybookModuleFolderPath: string = `${dotStorybookFolderPath}/node_modules`;
 
     // Example:
     //   LINK FROM: "/path/to/my-project/.storybook/node_modules"
@@ -190,8 +190,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     // For node_modules links it's standard to use createSymbolicLinkJunction(), which avoids
     // administrator elevation on Windows; on other operating systems it will create a symbolic link.
     await FileSystem.createSymbolicLinkJunctionAsync({
-      newLinkPath: dotStorybookModuleFolder,
-      linkTargetPath: storykitModuleFolder,
+      newLinkPath: dotStorybookModuleFolderPath,
+      linkTargetPath: storykitModuleFolderPath,
       alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
     });
 

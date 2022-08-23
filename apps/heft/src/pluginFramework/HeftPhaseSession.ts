@@ -95,8 +95,8 @@ export class HeftPhaseSession extends HeftPluginHost {
         taskPlugin.apply(taskSession, heftConfiguration, task.pluginOptions);
       } catch (error) {
         throw new Error(
-          `Error applying plugin "${task.pluginDefinition.pluginName}" from package ` +
-            `"${task.pluginDefinition.pluginPackageName}": ${error}`
+          `Error applying plugin ${JSON.stringify(task.pluginDefinition.pluginName)} from package ` +
+            `${JSON.stringify(task.pluginDefinition.pluginPackageName)}: ${error}`
         );
       }
     }

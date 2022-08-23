@@ -63,7 +63,7 @@ export class RigPackageResolver implements IRigPackageResolver {
     const buildFolder: string = this._buildFolder;
     const projectFolder: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(buildFolder);
     if (!projectFolder) {
-      throw new Error(`Unable to find a package.json file for "${buildFolder}" `);
+      throw new Error(`Unable to find a package.json file for ${JSON.stringify(buildFolder)}.`);
     }
 
     const cacheKey: string = `${projectFolder};${packageName}`;
@@ -87,12 +87,14 @@ export class RigPackageResolver implements IRigPackageResolver {
           packageName: toolPackageName,
           baseFolderPath: this._buildFolder
         });
-        terminal.writeVerboseLine(`Resolved "${toolPackageName}" as a direct devDependency of the project.`);
+        terminal.writeVerboseLine(
+          `Resolved ${JSON.stringify(toolPackageName)} as a direct devDependency of the project.`
+        );
         return resolvedPackageFolder;
       } catch (e) {
         throw new Error(
-          `"${toolPackageName}" is listed as a direct devDependency of the project, but could not be resolved. ` +
-            'Have dependencies been installed?'
+          `${JSON.stringify(toolPackageName)} is listed as a direct devDependency of the project, but ` +
+            'could not be resolved. Have dependencies been installed?'
         );
       }
     }
@@ -105,7 +107,8 @@ export class RigPackageResolver implements IRigPackageResolver {
         this._packageJsonLookup.tryGetPackageJsonFilePathFor(rigFolder);
       if (!rigPackageJsonPath) {
         throw new Error(
-          `Unable to resolve the package.json file for the "${rigConfiguration.rigPackageName}" rig package.`
+          'Unable to resolve the package.json file for the ' +
+            `${JSON.stringify(rigConfiguration.rigPackageName)} rig package.`
         );
       }
       const rigPackageJson: INodePackageJson =
@@ -117,13 +120,15 @@ export class RigPackageResolver implements IRigPackageResolver {
             baseFolderPath: path.dirname(rigPackageJsonPath)
           });
           terminal.writeVerboseLine(
-            `Resolved "${toolPackageName}" as a dependency of the "${rigConfiguration.rigPackageName}" rig package.`
+            `Resolved ${JSON.stringify(toolPackageName)} as a dependency of the ` +
+              `${JSON.stringify(rigConfiguration.rigPackageName)} rig package.`
           );
           return resolvedPackageFolder;
         } catch (e) {
           throw new Error(
-            `"${toolPackageName}" is listed as a dependency of the "${rigConfiguration.rigPackageName}" rig package, ` +
-              'but could not be resolved. Have dependencies been installed?'
+            `${JSON.stringify(toolPackageName)} is listed as a dependency of the ` +
+              `${JSON.stringify(rigConfiguration.rigPackageName)} rig package, but could not be resolved. ` +
+              'Have dependencies been installed?'
           );
         }
       }
@@ -135,12 +140,12 @@ export class RigPackageResolver implements IRigPackageResolver {
         packageName: toolPackageName,
         baseFolderPath: this._buildFolder
       });
-      terminal.writeVerboseLine(`Resolved "${toolPackageName}" from ${resolvedPackageFolder}.`);
+      terminal.writeVerboseLine(`Resolved ${JSON.stringify(toolPackageName)} from ${resolvedPackageFolder}.`);
       return resolvedPackageFolder;
     } catch (e) {
       throw new Error(
-        `Unable to resolve "${toolPackageName}". For more information on riggable dependency resolution, ` +
-          'see https://rushstack.io/pages/heft/rig_packages/#3-riggable-dependencies'
+        `Unable to resolve ${JSON.stringify(toolPackageName)}. For more information on riggable ` +
+          'dependency resolution, see https://rushstack.io/pages/heft/rig_packages/#3-riggable-dependencies'
       );
     }
   }

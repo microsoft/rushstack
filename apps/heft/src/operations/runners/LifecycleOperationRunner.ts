@@ -17,7 +17,7 @@ import type {
   IHeftLifecycleToolStopHookOptions
 } from '../../pluginFramework/HeftLifecycleSession';
 
-export type LifecycleOperationRunnerType = 'start' | 'stop';
+export type LifecycleOperationRunnerType = 'start' | 'finish';
 
 export interface ILifecycleOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
@@ -30,7 +30,7 @@ export class LifecycleOperationRunner implements IOperationRunner {
   public readonly silent: boolean = true;
 
   public get name(): string {
-    return `Lifecycle "${this._options.type}"`;
+    return `Lifecycle ${JSON.stringify(this._options.type)}`;
   }
 
   public constructor(options: ILifecycleOperationRunnerOptions) {
@@ -41,9 +41,9 @@ export class LifecycleOperationRunner implements IOperationRunner {
     const { internalHeftSession, type } = this._options;
     const { clean, cleanCache, watch } = internalHeftSession.parameterManager.defaultParameters;
 
-    // Avoid running the lifecycle operation when in watch mode
     if (watch) {
-      return OperationStatus.Success;
+      // Avoid running the lifecycle operation when in watch mode
+      return OperationStatus.NoOp;
     }
 
     const lifecycle: HeftLifecycle = internalHeftSession.lifecycle;
@@ -70,11 +70,11 @@ export class LifecycleOperationRunner implements IOperationRunner {
           // Delete all temp folders for tasks by default
           for (const pluginDefinition of lifecycle.pluginDefinitions) {
             const { lifecycleSession } = await lifecycle.getContextForPluginDefinitionAsync(pluginDefinition);
-            deleteOperations.push({ sourcePath: lifecycleSession.tempFolder });
+            deleteOperations.push({ sourcePath: lifecycleSession.tempFolderPath });
 
             // Also delete the cache folder if requested
             if (cleanCache) {
-              deleteOperations.push({ sourcePath: lifecycleSession.cacheFolder });
+              deleteOperations.push({ sourcePath: lifecycleSession.cacheFolderPath });
             }
           }
 
@@ -112,7 +112,7 @@ export class LifecycleOperationRunner implements IOperationRunner {
         }
         break;
       }
-      case 'stop': {
+      case 'finish': {
         if (lifecycle.hooks.toolStop.isUsed()) {
           const lifeycleToolStopHookOptions: IHeftLifecycleToolStopHookOptions = {};
           await lifecycle.hooks.toolStop.promise(lifeycleToolStopHookOptions);

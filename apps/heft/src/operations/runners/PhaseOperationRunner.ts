@@ -23,7 +23,7 @@ export class PhaseOperationRunner implements IOperationRunner {
   private readonly _options: IPhaseOperationRunnerOptions;
 
   public get name(): string {
-    return `Phase "${this._options.phase.phaseName}"`;
+    return `Phase ${JSON.stringify(this._options.phase.phaseName)}`;
   }
 
   public constructor(options: IPhaseOperationRunnerOptions) {
@@ -40,9 +40,9 @@ export class PhaseOperationRunner implements IOperationRunner {
     phaseLogger.terminal.writeVerboseLine('Applying task plugins');
     await phaseSession.applyPluginsAsync();
 
-    // Avoid running the phase operation when in watch mode
     if (watch) {
-      return OperationStatus.Success;
+      // Avoid running the phase operation when in watch mode
+      return OperationStatus.NoOp;
     }
 
     // Run the clean hook
@@ -56,11 +56,11 @@ export class PhaseOperationRunner implements IOperationRunner {
       // Delete all temp folders for tasks by default
       for (const task of phase.tasks) {
         const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
-        deleteOperations.push({ sourcePath: taskSession.tempFolder });
+        deleteOperations.push({ sourcePath: taskSession.tempFolderPath });
 
         // Also delete the cache folder if requested
         if (cleanCache) {
-          deleteOperations.push({ sourcePath: taskSession.cacheFolder });
+          deleteOperations.push({ sourcePath: taskSession.cacheFolderPath });
         }
       }
 

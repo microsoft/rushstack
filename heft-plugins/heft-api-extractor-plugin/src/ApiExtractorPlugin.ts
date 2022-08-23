@@ -133,8 +133,8 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
         ignoreMissingEntryPoint,
         configObject: apiExtractorConfigurationObject,
         configObjectFullPath: apiExtractorConfigurationFilePath,
-        packageJsonFullPath: `${heftConfiguration.buildFolder}/package.json`,
-        projectFolderLookupToken: heftConfiguration.buildFolder
+        packageJsonFullPath: `${heftConfiguration.buildFolderPath}/package.json`,
+        projectFolderLookupToken: heftConfiguration.buildFolderPath
       });
 
     return { apiExtractorPackage, apiExtractorConfiguration };
@@ -167,7 +167,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
 
     return await this._apiExtractorTaskConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
       taskSession.logger.terminal,
-      heftConfiguration.buildFolder,
+      heftConfiguration.buildFolderPath,
       heftConfiguration.rigConfig
     );
   }
@@ -232,7 +232,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       apiExtractor,
       apiExtractorConfiguration,
       typescriptPackagePath,
-      buildFolder: heftConfiguration.buildFolder,
+      buildFolder: heftConfiguration.buildFolderPath,
       production: taskSession.parameters.production,
       scopedLogger: taskSession.logger
     });

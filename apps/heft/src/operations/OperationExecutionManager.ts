@@ -75,7 +75,8 @@ export class OperationExecutionManager {
         const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
         if (!dependencyRecord) {
           throw new Error(
-            `Operation "${consumer.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
+            `Operation ${JSON.stringify(consumer.name)} declares a dependency on operation ` +
+              `${JSON.stringify(dependency.name)} that is not in the set of operations to execute.`
           );
         }
         consumer.dependencies.add(dependencyRecord);
@@ -150,8 +151,8 @@ export class OperationExecutionManager {
     const onOperationComplete: (record: OperationExecutionRecord) => void = (
       record: OperationExecutionRecord
     ) => {
-      // This operation failed. Mark it as such and all reachable dependents as blocked.
       if (record.status === OperationStatus.Failure) {
+        // This operation failed. Mark it as such and all reachable dependents as blocked.
         // Failed operations get reported, even if silent.
         // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
         const message: string | undefined = record.error?.message;
@@ -169,6 +170,7 @@ export class OperationExecutionManager {
         }
         this._hasReportedFailures = true;
       } else if (record.status === OperationStatus.Cancelled) {
+        // This operation was cancelled. Mark it as such and all reachable dependents as cancelled.
         const cancelledQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
         for (const cancelledRecord of cancelledQueue) {
           if (cancelledRecord.status === OperationStatus.Ready) {

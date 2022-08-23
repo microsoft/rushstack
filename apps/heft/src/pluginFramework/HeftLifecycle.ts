@@ -89,8 +89,8 @@ export class HeftLifecycle extends HeftPluginHost {
         );
       } catch (error) {
         throw new Error(
-          `Error applying plugin "${pluginDefinition.pluginName}" from package ` +
-            `"${pluginDefinition.pluginPackageName}": ${error}`
+          `Error applying plugin ${JSON.stringify(pluginDefinition.pluginName)} from package ` +
+            `${JSON.stringify(pluginDefinition.pluginPackageName)}: ${error}`
         );
       }
     }
@@ -129,16 +129,16 @@ export class HeftLifecycle extends HeftPluginHost {
         // Ensure the plugin is a lifecycle plugin
         if (!pluginConfiguration.lifecyclePluginDefinitions.has(pluginDefinition)) {
           throw new Error(
-            `Plugin "${pluginDefinition.pluginName}" from package "${pluginSpecifier.pluginPackage}" ` +
-              'is not a lifecycle plugin.'
+            `Plugin ${JSON.stringify(pluginDefinition.pluginName)} from package ` +
+              `${JSON.stringify(pluginSpecifier.pluginPackage)} is not a lifecycle plugin.`
           );
         }
 
         // Ensure there are no duplicate plugin names within the same package
         if (this._lifecycleContextByDefinition.has(pluginDefinition)) {
           throw new Error(
-            `Lifecycle plugin "${pluginDefinition.pluginName}" from package ` +
-              `"${pluginSpecifier.pluginPackage}" cannot be specified more than once.`
+            `Lifecycle plugin ${JSON.stringify(pluginDefinition.pluginName)} from package ` +
+              `${JSON.stringify(pluginSpecifier.pluginPackage)} cannot be specified more than once.`
           );
         }
 
@@ -174,7 +174,7 @@ export class HeftLifecycle extends HeftPluginHost {
       this._lifecycleContextByDefinition.get(pluginDefinition);
     if (!lifecycleContext) {
       throw new InternalError(
-        `Could not find lifecycle context for plugin "${pluginDefinition.pluginName}".`
+        `Could not find lifecycle context for plugin ${JSON.stringify(pluginDefinition.pluginName)}.`
       );
     }
     return lifecycleContext;

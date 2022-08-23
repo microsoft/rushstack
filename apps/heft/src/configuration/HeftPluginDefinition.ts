@@ -204,8 +204,8 @@ export abstract class HeftPluginDefinitionBase {
     );
     if (existingPluginPath && existingPluginPath !== this._resolvedEntryPoint) {
       throw new Error(
-        `A plugin named "${this.pluginName}" has already been loaded from "${existingPluginPath}". ` +
-          `Plugins must have unique names.`
+        `A plugin named ${JSON.stringify(this.pluginName)} has already been loaded from ` +
+          `${JSON.stringify(existingPluginPath)}. Plugins must have unique names.`
       );
     } else if (!existingPluginPath) {
       HeftPluginDefinitionBase._loadedPluginPathsByName.set(this.pluginName, this._resolvedEntryPoint);
@@ -276,27 +276,27 @@ export abstract class HeftPluginDefinitionBase {
       if (error.message === 'heftPluginConstructor is not a constructor') {
         // Common error scenario, give a more helpful error message
         throw new Error(
-          `Could not load plugin from "${entryPointPath}": The target module does not export a ` +
-            'plugin class with a parameterless constructor.'
+          `Could not load plugin from ${JSON.stringify(entryPointPath)}: The target module does not ` +
+            'export a plugin class with a parameterless constructor.'
         );
       } else {
-        throw new InternalError(`Could not load plugin from "${entryPointPath}": ${error}`);
+        throw new InternalError(`Could not load plugin from ${JSON.stringify(entryPointPath)}: ${error}`);
       }
     }
 
     if (!heftPlugin) {
       throw new InternalError(
-        `Plugin "${this.pluginName}" loaded from "${entryPointPath}" is null or undefined.`
+        `Plugin ${JSON.stringify(this.pluginName)} loaded from ${JSON.stringify(entryPointPath)} is null ` +
+          'or undefined.'
       );
     }
 
-    logger.terminal.writeVerboseLine(`Loaded plugin from "${entryPointPath}"`);
+    logger.terminal.writeVerboseLine(`Loaded plugin from ${JSON.stringify(entryPointPath)}`);
 
-    if (!heftPlugin.apply || typeof heftPlugin.apply !== 'function') {
+    if (typeof heftPlugin.apply !== 'function') {
       throw new InternalError(
-        `Plugins must define an "apply" function. The plugin "${this.pluginName}" ` +
-          `loaded from "${entryPointPath}" either doesn\'t define an "apply" property, or its value ` +
-          "isn't a function."
+        `The plugin ${JSON.stringify(this.pluginName)} loaded from ${JSON.stringify(entryPointPath)} ` +
+          'doesn\'t define an "apply" function.'
       );
     }
 
@@ -312,7 +312,8 @@ export abstract class HeftPluginDefinitionBase {
         this._optionsSchema.validateObject(options || {}, '');
       } catch (error) {
         throw new Error(
-          `Provided options for plugin "${this.pluginName}" did not match the provided plugin schema.\n${error}`
+          `Provided options for plugin ${JSON.stringify(this.pluginName)} did not match the provided ` +
+            `plugin schema.\n${error}`
         );
       }
     }

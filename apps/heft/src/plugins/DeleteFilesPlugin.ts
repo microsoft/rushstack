@@ -64,7 +64,7 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScope
     async (pathToDelete: string) => {
       try {
         await FileSystem.deleteFileAsync(pathToDelete, { throwIfNotExists: true });
-        logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
+        logger.terminal.writeVerboseLine(`Deleted ${JSON.stringify(pathToDelete)}.`);
         deletedFiles++;
       } catch (error) {
         // If it doesn't exist, we can ignore the error.
@@ -74,7 +74,7 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScope
           // linux throws the EISDIR error.
           if (FileSystem.isUnlinkNotPermittedError(error) || FileSystem.isDirectoryError(error)) {
             await FileSystem.deleteFolderAsync(pathToDelete);
-            logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
+            logger.terminal.writeVerboseLine(`Deleted folder ${JSON.stringify(pathToDelete)}.`);
             deletedFolders++;
           } else {
             throw error;
@@ -99,7 +99,7 @@ function _resolveDeleteOperationPaths(
 ): void {
   for (const copyOperation of deleteOperations) {
     if (!path.isAbsolute(copyOperation.sourcePath)) {
-      copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolder, copyOperation.sourcePath);
+      copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolderPath, copyOperation.sourcePath);
     }
   }
 }

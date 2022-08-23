@@ -19,10 +19,6 @@ export enum OperationStatus {
    */
   Success = 'SUCCESS',
   /**
-   * The Operation completed successfully, but wrote to standard output
-   */
-  SuccessWithWarning = 'SUCCESS WITH WARNINGS',
-  /**
    * The Operation failed
    */
   Failure = 'FAILURE',
@@ -33,5 +29,9 @@ export enum OperationStatus {
   /**
    * The Operation could not be executed because one or more of its dependencies failed
    */
-  Blocked = 'BLOCKED'
+  Blocked = 'BLOCKED',
+  /**
+   * The operation performed no meaningful work.
+   */
+  NoOp = 'NO OP'
 }

@@ -90,7 +90,7 @@ export class HeftPhase {
         const dependencyPhase: HeftPhase | undefined =
           this._internalHeftSession.phasesByName.get(dependencyName);
         if (!dependencyPhase) {
-          throw new Error(`Could not find dependency phase "${dependencyName}".`);
+          throw new Error(`Could not find dependency phase ${JSON.stringify(dependencyName)}.`);
         }
         dependencyPhases.add(dependencyPhase);
       }
@@ -128,7 +128,9 @@ export class HeftPhase {
 
   private _validate(): void {
     if (RESERVED_PHASE_NAMES.has(this.phaseName)) {
-      throw new Error(`Phase name "${this.phaseName}" is reserved and cannot be used as a phase name.`);
+      throw new Error(
+        `Phase name ${JSON.stringify(this.phaseName)} is reserved and cannot be used as a phase name.`
+      );
     }
   }
 }

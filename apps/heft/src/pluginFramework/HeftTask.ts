@@ -130,7 +130,8 @@ export class HeftTask {
         const dependencyTask: HeftTask | undefined = this._parentPhase.tasksByName.get(dependencyName);
         if (!dependencyTask) {
           throw new Error(
-            `Could not find dependency task "${dependencyName}" within phase "${this._parentPhase.phaseName}"`
+            `Could not find dependency task ${JSON.stringify(dependencyName)} within phase ` +
+              `${JSON.stringify(this._parentPhase.phaseName)}.`
           );
         }
         this._dependencyTasks.add(dependencyTask);
@@ -168,6 +169,14 @@ export class HeftTask {
   }
 
   private async _loadTaskPluginDefintionAsync(): Promise<HeftTaskPluginDefinition> {
+    if (this._taskSpecifier.taskEvent && this._taskSpecifier.taskPlugin) {
+      // This is validated in the schema so this shouldn't happen, but throw just in case.
+      throw new Error(
+        `Task ${JSON.stringify(this._taskName)} has both a taskEvent and a taskPlugin. ` +
+          `Only one of these can be specified.`
+      );
+    }
+
     if (this._taskSpecifier.taskEvent) {
       switch (this._taskSpecifier.taskEvent.eventKind) {
         case 'copyFiles': {
@@ -180,7 +189,9 @@ export class HeftTask {
           return _getRunScriptPluginDefinition();
         }
         default: {
-          throw new InternalError(`Unknown task event kind "${this._taskSpecifier.taskEvent.eventKind}"`);
+          throw new InternalError(
+            `Unknown task event kind ${JSON.stringify(this._taskSpecifier.taskEvent.eventKind)}`
+          );
         }
       }
     } else if (this._taskSpecifier.taskPlugin) {
@@ -195,22 +206,27 @@ export class HeftTask {
         pluginConfiguration.getPluginDefinitionBySpecifier(pluginSpecifier);
       if (!pluginConfiguration.taskPluginDefinitions.has(pluginDefinition)) {
         throw new Error(
-          `Plugin "${pluginSpecifier.pluginName}" specified by task "${this._taskName}" is not a task plugin.`
+          `Plugin ${JSON.stringify(pluginSpecifier.pluginName)} specified by task ` +
+            `${JSON.stringify(this._taskName)} is not a task plugin.`
         );
       }
       return pluginDefinition as HeftTaskPluginDefinition;
     } else {
-      // Shouldn't happen but throw just in case
-      throw new InternalError(`Task "${this._taskName}" has no specified task event or task plugin.`);
+      // This is validated in the schema so this shouldn't happen, but throw just in case
+      throw new InternalError(
+        `Task ${JSON.stringify(this._taskName)} has no specified task event or task plugin.`
+      );
     }
   }
 
   private _validate(): void {
     if (RESERVED_TASK_NAMES.has(this.taskName)) {
-      throw new Error(`Task name "${this.taskName}" is reserved and cannot be used as a task name.`);
+      throw new Error(
+        `Task name ${JSON.stringify(this.taskName)} is reserved and cannot be used as a task name.`
+      );
     }
     if (!this._taskSpecifier.taskEvent && !this._taskSpecifier.taskPlugin) {
-      throw new Error(`Task "${this.taskName}" has no specified task event or task plugin.`);
+      throw new Error(`Task ${JSON.stringify(this.taskName)} has no specified task event or task plugin.`);
     }
   }
 }

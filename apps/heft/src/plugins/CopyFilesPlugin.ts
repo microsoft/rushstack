@@ -25,7 +25,7 @@ import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
  */
 export interface ICopyOperation extends IFileSelectionSpecifier {
   /**
-   * Absolute paths to folder(s) which files or folders should be copied to.
+   * Absolute paths to folders which files or folders should be copied to.
    */
   destinationFolders: string[];
 
@@ -132,7 +132,8 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
               continue;
             }
             throw new Error(
-              `Cannot copy multiple files to the same destination "${resolvedDestinationPath}"`
+              `Cannot copy multiple files to the same destination ` +
+                `${JSON.stringify(resolvedDestinationPath)}.`
             );
           }
 
@@ -175,7 +176,8 @@ async function _copyFilesInnerAsync(
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
         logger.terminal.writeVerboseLine(
-          `Linked "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}"`
+          `Linked ${JSON.stringify(copyDescriptor.sourcePath)} to ` +
+            `${JSON.stringify(copyDescriptor.destinationPath)}.`
         );
       } else {
         copiedFolderOrFileCount++;
@@ -185,7 +187,8 @@ async function _copyFilesInnerAsync(
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
         logger.terminal.writeVerboseLine(
-          `Copied "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}"`
+          `Copied ${JSON.stringify(copyDescriptor.sourcePath)} to ` +
+            `${JSON.stringify(copyDescriptor.destinationPath)}.`
         );
       }
     },
@@ -205,12 +208,12 @@ function _resolveCopyOperationPaths(
 ): void {
   for (const copyOperation of copyOperations) {
     if (!path.isAbsolute(copyOperation.sourcePath)) {
-      copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolder, copyOperation.sourcePath);
+      copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolderPath, copyOperation.sourcePath);
     }
     const destinationFolders: string[] = [];
     for (const destinationFolder of copyOperation.destinationFolders) {
       if (!path.isAbsolute(destinationFolder)) {
-        destinationFolders.push(path.resolve(heftConfiguration.buildFolder, destinationFolder));
+        destinationFolders.push(path.resolve(heftConfiguration.buildFolderPath, destinationFolder));
       }
     }
     copyOperation.destinationFolders = destinationFolders;

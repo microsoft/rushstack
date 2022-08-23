@@ -101,7 +101,9 @@ async function* _waitForSourceChangesAsync(
           if (ignoreForbidden) {
             unseenFilePaths.delete(filePath);
           } else {
-            throw new Error(`Cannot change the file at path "${filePath}" while running watch mode.`);
+            throw new Error(
+              `Cannot change the file at path ${JSON.stringify(filePath)} while running watch mode.`
+            );
           }
         } else {
           seenFilePaths.add(filePath);
@@ -234,7 +236,7 @@ async function* _waitForSourceChangesAsync(
           options.changedFiles.set(Path.convertToSlashes(filePath), state);
         }
         if (state.isSourceFile) {
-          terminal.writeVerboseLine(`Detected change to source file "${filePath}"`);
+          terminal.writeVerboseLine(`Detected change to source file ${JSON.stringify(filePath)}`);
           containsSourceFiles = true;
         }
       }
@@ -368,7 +370,7 @@ export class HeftActionRunner {
     // Log some information about the execution
     const projectPackageJson: IPackageJson = this._heftConfiguration.projectPackageJson;
     this._terminal.writeVerboseLine(`Project: ${projectPackageJson.name}@${projectPackageJson.version}`);
-    this._terminal.writeVerboseLine(`Project build folder: ${this._heftConfiguration.buildFolder}`);
+    this._terminal.writeVerboseLine(`Project build folder: ${this._heftConfiguration.buildFolderPath}`);
     if (this._heftConfiguration.rigConfig.rigFound) {
       this._terminal.writeVerboseLine(`Rig package: ${this._heftConfiguration.rigConfig.rigPackageName}`);
       this._terminal.writeVerboseLine(`Rig profile: ${this._heftConfiguration.rigConfig.rigProfile}`);
@@ -390,12 +392,12 @@ export class HeftActionRunner {
     // Create a watcher for the build folder which will return the initial state
     const watcherReadyPromise: Promise<chokidar.FSWatcher> = new Promise(
       (resolve: (watcher: chokidar.FSWatcher) => void, reject: (error: Error) => void) => {
-        const watcher: chokidar.FSWatcher = chokidarPkg.watch(this._heftConfiguration.buildFolder, {
+        const watcher: chokidar.FSWatcher = chokidarPkg.watch(this._heftConfiguration.buildFolderPath, {
           persistent: true,
           // All watcher-returned file paths will be relative to the build folder. Chokidar on Windows
           // has some issues with watching when not using a cwd, causing the 'ready' event to never be
           // emitted, so we will have to manually resolve the absolute paths in the change handler.
-          cwd: this._heftConfiguration.buildFolder,
+          cwd: this._heftConfiguration.buildFolderPath,
           // Ignore "node_modules" files and known-unimportant files
           ignored: ['node_modules/**'],
           // We will use the initial state to build a list of all watched files
@@ -411,7 +413,7 @@ export class HeftActionRunner {
     );
     const terminal: ITerminal = this._terminal;
     const watcher: chokidar.FSWatcher = await watcherReadyPromise;
-    const git: GitUtilities = new GitUtilities(this._heftConfiguration.buildFolder);
+    const git: GitUtilities = new GitUtilities(this._heftConfiguration.buildFolderPath);
     const changedFiles: Map<string, IChangedFileState> = new Map();
 
     // Create the async iterator. This will yield void when a changed source file is encountered, giving
@@ -519,7 +521,7 @@ export class HeftActionRunner {
       const warningStrings: string[] = this._loggingManager.getWarningStrings();
       const errorStrings: string[] = this._loggingManager.getErrorStrings();
 
-      const wasCancelled: boolean = cancellationToken.isCancellationRequested;
+      const wasCancelled: boolean = cancellationToken.isCancelled;
       const encounteredWarnings: boolean = warningStrings.length > 0 || wasCancelled;
       encounteredError = encounteredError || errorStrings.length > 0;
 
@@ -588,7 +590,7 @@ export class HeftActionRunner {
 
     const operations: Map<string, Operation> = new Map();
     const startLifecycleOperation: Operation = this._getOrCreateLifecycleOperation('start', operations);
-    const stopLifecycleOperation: Operation = this._getOrCreateLifecycleOperation('stop', operations);
+    const stopLifecycleOperation: Operation = this._getOrCreateLifecycleOperation('finish', operations);
 
     let hasWarnedAboutSkippedPhases: boolean = false;
     for (const phase of selectedPhases) {

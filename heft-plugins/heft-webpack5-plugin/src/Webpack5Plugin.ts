@@ -268,7 +268,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
       }
 
       if (stats) {
-        this._emitErrors(logger, stats, heftConfiguration.buildFolder);
+        this._emitErrors(logger, stats, heftConfiguration.buildFolderPath);
         if (this.accessor.hooks.onEmitStats.isUsed()) {
           await this.accessor.hooks.onEmitStats.promise(stats);
         }
@@ -279,26 +279,26 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
   private _emitErrors(
     logger: IScopedLogger,
     stats: TWebpack.Stats | TWebpack.MultiStats,
-    buildFolder: string
+    buildFolderPath: string
   ): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
       const serializedStats: TWebpack.StatsCompilation = stats.toJson('errors-warnings');
 
       if (serializedStats.warnings) {
         for (const warning of serializedStats.warnings) {
-          logger.emitWarning(this._normalizeError(buildFolder, warning));
+          logger.emitWarning(this._normalizeError(buildFolderPath, warning));
         }
       }
 
       if (serializedStats.errors) {
         for (const error of serializedStats.errors) {
-          logger.emitError(this._normalizeError(buildFolder, error));
+          logger.emitError(this._normalizeError(buildFolderPath, error));
         }
       }
     }
   }
 
-  private _normalizeError(buildFolder: string, error: TWebpack.StatsError): Error {
+  private _normalizeError(buildFolderPath: string, error: TWebpack.StatsError): Error {
     if (error instanceof Error) {
       return error;
     } else if (error.moduleIdentifier) {
@@ -325,7 +325,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
 
       return new FileError(error.message, {
         absolutePath: error.moduleIdentifier,
-        projectFolder: buildFolder,
+        projectFolder: buildFolderPath,
         line: lineNumber,
         column: columnNumber
       });

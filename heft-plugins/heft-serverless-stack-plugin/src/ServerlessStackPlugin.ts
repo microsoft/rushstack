@@ -84,7 +84,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     try {
       sstCliPackagePath = Import.resolvePackage({
         packageName: SST_CLI_PACKAGE_NAME,
-        baseFolderPath: options.heftConfiguration.buildFolder
+        baseFolderPath: options.heftConfiguration.buildFolderPath
       });
     } catch (e) {
       this._logger.emitError(
@@ -135,7 +135,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
       process.execPath,
       sstCommandArgs,
       {
-        cwd: options.heftConfiguration.buildFolder,
+        cwd: options.heftConfiguration.buildFolderPath,
         stdio: ['inherit', 'pipe', 'pipe'],
         env: sstCommandEnv,
         ...SubprocessTerminator.RECOMMENDED_OPTIONS

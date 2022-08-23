@@ -18,8 +18,8 @@ export interface ICancellationTokenOptions {
 
   /**
    * A static cancellation state. Mutually exclusive with `cancellationTokenSource`.
-   * If true, CancellationToken.isCancellationRequested will always return true. Otherwise,
-   * CancellationToken.isCancellationRequested will always return false.
+   * If true, CancellationToken.isCancelled will always return true. Otherwise,
+   * CancellationToken.isCancelled will always return false.
    *
    * @internal
    */
@@ -47,7 +47,7 @@ export interface ICancellationTokenSourceOptions {
  * @public
  */
 export class CancellationToken {
-  private readonly _isCancellationRequested: boolean | undefined;
+  private readonly _isCancelled: boolean | undefined;
   private readonly _cancellationTokenSource: CancellationTokenSource | undefined;
 
   /** @internal */
@@ -60,16 +60,16 @@ export class CancellationToken {
     }
 
     this._cancellationTokenSource = options.cancellationTokenSource;
-    this._isCancellationRequested = options.isCancelled;
+    this._isCancelled = options.isCancelled;
   }
 
   /**
-   * {@inheritdoc CancellationTokenSource.isCancellationRequested}
+   * {@inheritdoc CancellationTokenSource.isCancelled}
    */
-  public get isCancellationRequested(): boolean {
+  public get isCancelled(): boolean {
     // Returns the cancellation state if it's explicitly set, otherwise returns the cancellation
     // state from the source. If that too is not provided, the token is not cancellable.
-    return this._isCancellationRequested ?? this._cancellationTokenSource?.isCancellationRequested ?? false;
+    return this._isCancelled ?? this._cancellationTokenSource?.isCancelled ?? false;
   }
 
   /**
@@ -77,14 +77,14 @@ export class CancellationToken {
    *
    * @public
    */
-  public get promise(): Promise<void> {
-    if (this._isCancellationRequested !== undefined) {
+  public get onCancelledPromise(): Promise<void> {
+    if (this._isCancelled !== undefined) {
       // If the token is explicitly set to cancelled, return a resolved promise.
       // If the token is explicitly set to not cancelled, return a promise that never resolves.
-      return this._isCancellationRequested ? Promise.resolve() : new Promise(() => {});
+      return this._isCancelled ? Promise.resolve() : new Promise(() => {});
     } else if (this._cancellationTokenSource) {
       // Return the promise sourced from the cancellation token source
-      return this._cancellationTokenSource._promise;
+      return this._cancellationTokenSource._onCancelledPromise;
     } else {
       // Neither provided, token can never be cancelled. Return a promise that never resovles.
       return new Promise(() => {});
@@ -120,7 +120,7 @@ export class CancellationTokenSource {
    *
    * @public
    */
-  public get isCancellationRequested(): boolean {
+  public get isCancelled(): boolean {
     return this._isCancelled;
   }
 
@@ -134,7 +134,7 @@ export class CancellationTokenSource {
   }
 
   /** @internal */
-  public get _promise(): Promise<void> {
+  public get _onCancelledPromise(): Promise<void> {
     return this._cancellationPromise;
   }
 

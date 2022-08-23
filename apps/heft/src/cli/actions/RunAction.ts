@@ -20,8 +20,8 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   private readonly _internalHeftSession: InternalHeftSession;
   private readonly _terminal: ITerminal;
   private readonly _actionRunner: HeftActionRunner;
-  private _toParameter: CommandLineStringListParameter | undefined;
-  private _onlyParameter: CommandLineStringListParameter | undefined;
+  private readonly _toParameter: CommandLineStringListParameter;
+  private readonly _onlyParameter: CommandLineStringListParameter;
   private _selectedPhases: Set<HeftPhase> | undefined;
 
   public constructor(options: IHeftActionOptions) {
@@ -34,41 +34,8 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     this.watch = options.watch ?? false;
     this._terminal = options.terminal;
     this._internalHeftSession = options.internalHeftSession;
+
     this._actionRunner = new HeftActionRunner({ action: this, ...options });
-  }
-
-  public get selectedPhases(): Set<HeftPhase> {
-    if (!this._selectedPhases) {
-      const toPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this.toParameter, this._terminal);
-      const onlyPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this.onlyParameter, this._terminal);
-      this._selectedPhases = Selection.union(
-        Selection.recursiveExpand(toPhases, (phase: HeftPhase) => phase.dependencyPhases),
-        onlyPhases
-      );
-      if (this._selectedPhases.size === 0) {
-        throw new Error(
-          'No phases were selected. Provide at least one phase to the "--to" or "--only" parameters.'
-        );
-      }
-    }
-    return this._selectedPhases;
-  }
-
-  protected get toParameter(): CommandLineStringListParameter {
-    if (!this._toParameter) {
-      throw new InternalError(`onDefineUnscopedParameters() has not been called.`);
-    }
-    return this._toParameter;
-  }
-
-  protected get onlyParameter(): CommandLineStringListParameter {
-    if (!this._onlyParameter) {
-      throw new InternalError(`onDefineUnscopedParameters() has not been called.`);
-    }
-    return this._onlyParameter;
-  }
-
-  protected onDefineUnscopedParameters(): void {
     this._toParameter = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
@@ -85,6 +52,27 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     });
   }
 
+  public get selectedPhases(): Set<HeftPhase> {
+    if (!this._selectedPhases) {
+      const toPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._toParameter, this._terminal);
+      const onlyPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._onlyParameter, this._terminal);
+      this._selectedPhases = Selection.union(
+        Selection.recursiveExpand(toPhases, (phase: HeftPhase) => phase.dependencyPhases),
+        onlyPhases
+      );
+      if (this._selectedPhases.size === 0) {
+        throw new Error(
+          'No phases were selected. Provide at least one phase to the "--to" or "--only" parameters.'
+        );
+      }
+    }
+    return this._selectedPhases;
+  }
+
+  protected onDefineUnscopedParameters(): void {
+    // No-op. Defined in the constructor.
+  }
+
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
     this._actionRunner.defineParameters(scopedParameterProvider);
   }
@@ -94,7 +82,7 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   }
 
   private _evaluatePhaseParameter(
-    phaseParameter: CommandLineStringListParameter | undefined,
+    phaseParameter: CommandLineStringListParameter,
     terminal: ITerminal
   ): Set<HeftPhase> {
     if (!phaseParameter) {
@@ -107,7 +95,8 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
       const phase: HeftPhase | undefined = this._internalHeftSession.phasesByName.get(rawSelector);
       if (!phase) {
         terminal.writeErrorLine(
-          `The phase name "${rawSelector}" passed to "${parameterName}" does not exist in heft.json.`
+          `The phase name ${JSON.stringify(rawSelector)} passed to ${JSON.stringify(parameterName)} does ` +
+            'not exist in heft.json.'
         );
         throw new AlreadyReportedError();
       }

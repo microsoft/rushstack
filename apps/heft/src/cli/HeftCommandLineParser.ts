@@ -127,6 +127,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     }
   }
 
+  // TODO: Remove when releasing Heft 1.0.0
   private async _checkForUpgradeAsync(): Promise<void> {
     // The .heft/clean.json file is a fairly reliable heuristic for detecting projects created prior to
     // the big config file redesign with Heft 0.14.0
@@ -153,11 +154,13 @@ export class HeftCommandLineParser extends CommandLineParser {
   }
 
   private _normalizeCwd(): void {
-    const buildFolder: string = this._heftConfiguration.buildFolder;
+    const buildFolder: string = this._heftConfiguration.buildFolderPath;
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
-      this.globalTerminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to "${buildFolder}".`);
+      this.globalTerminal.writeVerboseLine(
+        `CWD is ${JSON.stringify(currentCwd)}. Normalizing to ${JSON.stringify(buildFolder)}.`
+      );
       // If `process.cwd()` and `buildFolder` differ only by casing on Windows, the chdir operation will not fix the casing, which is the entire purpose of the exercise.
       // As such, chdir to a different directory first. That directory needs to exist, so use the parent of the current directory.
       // This will not work if the current folder is the drive root, but that is a rather exotic case.
@@ -170,6 +173,11 @@ export class HeftCommandLineParser extends CommandLineParser {
     args: string[] = process.argv
   ): IPreInitializationArgumentValues {
     if (!this._debugFlag) {
+      // The `this._debugFlag` parameter (the parameter itself, not its value)
+      // has not yet been defined. Parameters need to be defined before we
+      // try to evaluate any parameters. This is to ensure that the
+      // `--debug` flag is defined correctly before we do this not-so-rigorous
+      // parameter parsing.
       throw new InternalError('onDefineParameters() has not yet been called.');
     }
 

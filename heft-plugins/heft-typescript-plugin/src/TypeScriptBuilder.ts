@@ -27,12 +27,12 @@ export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfiguratio
   /**
    * The root folder of the build.
    */
-  buildFolder: string;
+  buildFolderPath: string;
 
   /**
    * The folder to write build metadata.
    */
-  buildMetadataFolder: string;
+  buildMetadataFolderPath: string;
 
   /**
    * The path to the TypeScript tool.
@@ -144,8 +144,10 @@ export class TypeScriptBuilder {
       // This conversion is theoretically redundant, but it is here to make absolutely sure that the path is formatted
       // using only '/' as the directory separator so that incremental builds don't break on Windows.
       // TypeScript will normalize to '/' when serializing, but not on the direct input, and uses exact string equality.
-      const normalizedCacheFolder: string = Path.convertToSlashes(this._configuration.buildMetadataFolder);
-      this.__tsCacheFilePath = `${normalizedCacheFolder}/ts_${serializedConfigHash}.json`;
+      const normalizedCacheFolderPath: string = Path.convertToSlashes(
+        this._configuration.buildMetadataFolderPath
+      );
+      this.__tsCacheFilePath = `${normalizedCacheFolderPath}/ts_${serializedConfigHash}.json`;
     }
 
     return this.__tsCacheFilePath;
@@ -539,7 +541,7 @@ export class TypeScriptBuilder {
       const formattedMessage: string = `(TS${diagnostic.code}) ${message}`;
       errorObject = new FileError(formattedMessage, {
         absolutePath: diagnostic.file.fileName,
-        projectFolder: this._configuration.buildFolder,
+        projectFolder: this._configuration.buildFolderPath,
         line: line + 1,
         column: character + 1
       });
@@ -751,10 +753,10 @@ export class TypeScriptBuilder {
   ): string | undefined {
     let outFolderName: string;
     if (path.isAbsolute(outFolderPath)) {
-      outFolderName = path.relative(this._configuration.buildFolder, outFolderPath);
+      outFolderName = path.relative(this._configuration.buildFolderPath, outFolderPath);
     } else {
       outFolderName = outFolderPath;
-      outFolderPath = path.resolve(this._configuration.buildFolder, outFolderPath);
+      outFolderPath = path.resolve(this._configuration.buildFolderPath, outFolderPath);
     }
 
     outFolderPath = Path.convertToSlashes(outFolderPath);
@@ -913,7 +915,7 @@ export class TypeScriptBuilder {
         }
       },
       /* Use the Heft config's build folder because it has corrected casing */
-      getCurrentDirectory: () => this._configuration.buildFolder,
+      getCurrentDirectory: () => this._configuration.buildFolderPath,
       getDirectories: (folderPath: string) => {
         return this._cachedFileSystem.readFolderFilesAndDirectories(folderPath).directories;
       },

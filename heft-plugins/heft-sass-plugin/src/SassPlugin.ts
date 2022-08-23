@@ -71,22 +71,22 @@ export default class SassPlugin implements IHeftPlugin {
     heftConfiguration: HeftConfiguration,
     logger: IScopedLogger
   ): Promise<ISassConfiguration> {
-    const { buildFolder } = heftConfiguration;
+    const { buildFolderPath } = heftConfiguration;
     const sassConfigurationJson: ISassConfigurationJson | undefined =
       await SassPlugin._getSassConfigurationLoader().tryLoadConfigurationFileForProjectAsync(
         logger.terminal,
-        buildFolder,
+        buildFolderPath,
         heftConfiguration.rigConfig
       );
 
     if (sassConfigurationJson) {
       if (sassConfigurationJson.srcFolder) {
-        sassConfigurationJson.srcFolder = path.resolve(buildFolder, sassConfigurationJson.srcFolder);
+        sassConfigurationJson.srcFolder = path.resolve(buildFolderPath, sassConfigurationJson.srcFolder);
       }
 
       if (sassConfigurationJson.generatedTsFolder) {
         sassConfigurationJson.generatedTsFolder = path.resolve(
-          buildFolder,
+          buildFolderPath,
           sassConfigurationJson.generatedTsFolder
         );
       }
@@ -94,7 +94,7 @@ export default class SassPlugin implements IHeftPlugin {
       function resolveFolderArray(folders: string[] | undefined): void {
         if (folders) {
           for (let i: number = 0; i < folders.length; i++) {
-            folders[i] = path.resolve(buildFolder, folders[i]);
+            folders[i] = path.resolve(buildFolderPath, folders[i]);
           }
         }
       }
@@ -105,11 +105,11 @@ export default class SassPlugin implements IHeftPlugin {
 
     // Set defaults if no configuration file or option was found
     return {
-      srcFolder: `${buildFolder}/src`,
-      generatedTsFolder: `${buildFolder}/temp/sass-ts`,
+      srcFolder: `${buildFolderPath}/src`,
+      generatedTsFolder: `${buildFolderPath}/temp/sass-ts`,
       exportAsDefault: true,
       fileExtensions: ['.sass', '.scss', '.css'],
-      importIncludePaths: [`${buildFolder}/node_modules`, `${buildFolder}/src`],
+      importIncludePaths: [`${buildFolderPath}/node_modules`, `${buildFolderPath}/src`],
       ...sassConfigurationJson
     };
   }

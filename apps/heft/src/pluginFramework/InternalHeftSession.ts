@@ -48,7 +48,7 @@ export class InternalHeftSession {
     const heftConfigurationJson: IHeftConfigurationJson =
       await CoreConfigFiles.loadHeftConfigurationFileForProjectAsync(
         options.heftConfiguration.globalTerminal,
-        options.heftConfiguration.buildFolder,
+        options.heftConfiguration.buildFolderPath,
         options.heftConfiguration.rigConfig
       );
 

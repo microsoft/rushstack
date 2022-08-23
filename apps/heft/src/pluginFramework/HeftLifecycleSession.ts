@@ -43,7 +43,7 @@ export interface IHeftLifecycleSession {
    *
    * @public
    */
-  readonly cacheFolder: string;
+  readonly cacheFolderPath: string;
 
   /**
    * The temp folder for the lifecycle plugin. This folder is unique for each lifecycle plugin,
@@ -51,7 +51,7 @@ export interface IHeftLifecycleSession {
    *
    * @public
    */
-  readonly tempFolder: string;
+  readonly tempFolderPath: string;
 
   /**
    * The scoped logger for the lifecycle plugin. Messages logged with this logger will be prefixed
@@ -155,8 +155,8 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
 
   public readonly hooks: IHeftLifecycleHooks;
   public readonly parameters: IHeftParameters;
-  public readonly cacheFolder: string;
-  public readonly tempFolder: string;
+  public readonly cacheFolderPath: string;
+  public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
 
   public get debugMode(): boolean {
@@ -180,10 +180,10 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
     const uniquePluginFolderName: string = `lifecycle.${options.pluginDefinition.pluginName}`;
 
     // <projectFolder>/.cache/<phaseName>.<taskName>
-    this.cacheFolder = path.join(options.heftConfiguration.cacheFolder, uniquePluginFolderName);
+    this.cacheFolderPath = path.join(options.heftConfiguration.cacheFolderPath, uniquePluginFolderName);
 
     // <projectFolder>/temp/<phaseName>.<taskName>
-    this.tempFolder = path.join(options.heftConfiguration.tempFolder, uniquePluginFolderName);
+    this.tempFolderPath = path.join(options.heftConfiguration.tempFolderPath, uniquePluginFolderName);
 
     this._pluginHost = options.pluginHost;
   }

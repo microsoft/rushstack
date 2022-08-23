@@ -65,7 +65,9 @@ export class AsyncOperationQueue
         queue.splice(i, 1);
       } else if (operation.status !== OperationStatus.Ready) {
         // Sanity check
-        throw new Error(`Unexpected status "${operation.status}" for queued operation: ${operation.name}`);
+        throw new Error(
+          `Unexpected status ${JSON.stringify(operation.status)} for queued operation: ${operation.name}`
+        );
       } else if (operation.dependencies.size === 0) {
         // This task is ready to process, hand it to the iterator.
         queue.splice(i, 1);

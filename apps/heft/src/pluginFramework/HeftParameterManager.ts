@@ -223,8 +223,8 @@ export class HeftParameterManager {
         this._parametersByDefinition.get(pluginDefinition);
       if (!parameters) {
         throw new InternalError(
-          `Parameters from plugin "${pluginDefinition.pluginName}" in package ` +
-            `"${pluginDefinition.pluginPackageName}" were not added before finalization.`
+          `Parameters from plugin ${JSON.stringify(pluginDefinition.pluginName)} in package ` +
+            `${JSON.stringify(pluginDefinition.pluginPackageName)} were not added before finalization.`
         );
       }
 
@@ -269,8 +269,9 @@ export class HeftParameterManager {
     for (const parameter of pluginDefinition.pluginParameters) {
       if (definedPluginParametersByName.has(parameter.longName)) {
         throw new Error(
-          `Parameter "${parameter.longName}" is defined multiple times by the providing plugin ` +
-            `"${pluginDefinition.pluginName}" in package "${pluginDefinition.pluginPackageName}".`
+          `Parameter ${JSON.stringify(parameter.longName)} is defined multiple times by the providing ` +
+            `plugin ${JSON.stringify(pluginDefinition.pluginName)} in package ` +
+            `${JSON.stringify(pluginDefinition.pluginPackageName)}.`
         );
       }
 
@@ -372,13 +373,14 @@ export class HeftParameterManager {
     const parameter: CommandLineParameter | undefined = parametersByLongName.get(parameterLongName);
     if (!parameter) {
       throw new Error(
-        `Parameter "${parameterLongName}" not found. Are you sure it was defined in heft-plugin.json?`
+        `Parameter ${JSON.stringify(parameterLongName)} not found. Are you sure it was defined in ` +
+          'heft-plugin.json?'
       );
     } else if (parameter.kind !== expectedParameterKind) {
       throw new Error(
-        `Parameter "${parameterLongName}" is of kind "${
-          CommandLineParameterKind[parameter.kind]
-        }", not of kind "${CommandLineParameterKind[expectedParameterKind]}".`
+        `Parameter ${JSON.stringify(parameterLongName)} is of kind ` +
+          `${JSON.stringify(CommandLineParameterKind[parameter.kind])}, not of kind ` +
+          `${JSON.stringify(CommandLineParameterKind[expectedParameterKind])}.`
       );
     }
     return parameter as T;

@@ -60,7 +60,9 @@ export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPlugin
 
     const runScript: IRunScript = await import(resolvedModulePath);
     if (!runScript.runAsync) {
-      throw new Error(`The script at "${resolvedModulePath}" doesn\'t export a "runAsync" function`);
+      throw new Error(
+        `The script at ${JSON.stringify(resolvedModulePath)} doesn\'t export a "runAsync" function.`
+      );
     }
 
     const runScriptOptions: IRunScriptOptions = {

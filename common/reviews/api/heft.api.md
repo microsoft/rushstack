@@ -23,17 +23,17 @@ import { Terminal } from '@rushstack/node-core-library';
 export class CancellationToken {
     // @internal
     constructor(options?: _ICancellationTokenOptions);
-    get isCancellationRequested(): boolean;
-    get promise(): Promise<void>;
+    get isCancelled(): boolean;
+    get onCancelledPromise(): Promise<void>;
 }
 
 // @public
 export class CancellationTokenSource {
     constructor(options?: ICancellationTokenSourceOptions);
     cancel(): void;
-    get isCancellationRequested(): boolean;
+    get isCancelled(): boolean;
     // @internal (undocumented)
-    get _promise(): Promise<void>;
+    get _onCancelledPromise(): Promise<void>;
     get token(): CancellationToken;
 }
 
@@ -55,19 +55,19 @@ export { CommandLineStringParameter }
 
 // @public (undocumented)
 export class HeftConfiguration {
-    get buildFolder(): string;
-    get cacheFolder(): string;
+    get buildFolderPath(): string;
+    get cacheFolderPath(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
     get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
-    get projectConfigFolder(): string;
+    get projectConfigFolderPath(): string;
     get projectPackageJson(): IPackageJson;
     get rigConfig(): RigConfig;
     get rigPackageResolver(): IRigPackageResolver;
-    get tempFolder(): string;
+    get tempFolderPath(): string;
     get terminalProvider(): ITerminalProvider;
 }
 
@@ -145,12 +145,12 @@ export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeft
 
 // @public
 export interface IHeftLifecycleSession {
-    readonly cacheFolder: string;
+    readonly cacheFolderPath: string;
     readonly hooks: IHeftLifecycleHooks;
     readonly logger: IScopedLogger;
     readonly parameters: IHeftParameters;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
-    readonly tempFolder: string;
+    readonly tempFolderPath: string;
 }
 
 // @public
@@ -205,6 +205,7 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 // @public
 export interface IHeftTaskRunHookOptions {
     readonly addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
+    readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 // @public
@@ -215,13 +216,13 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
 
 // @public
 export interface IHeftTaskSession {
-    readonly cacheFolder: string;
+    readonly cacheFolderPath: string;
     readonly hooks: IHeftTaskHooks;
     readonly logger: IScopedLogger;
     readonly parameters: IHeftParameters;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly taskName: string;
-    readonly tempFolder: string;
+    readonly tempFolderPath: string;
 }
 
 // @public (undocumented)

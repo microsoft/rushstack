@@ -49,7 +49,7 @@ export default class HeftParameterPlugin implements IHeftTaskPlugin {
           `customStringListParameter: ${customStringListParameter.values?.join(', ')}\n` +
           `customChoiceParameter: ${customChoiceParameter.value}\n` +
           `customChoiceListParameter: ${customChoiceListParameter.values?.join(', ')}`;
-        await FileSystem.writeFileAsync(`${taskSession.tempFolder}/custom_output.txt`, customContent, {
+        await FileSystem.writeFileAsync(`${taskSession.tempFolderPath}/custom_output.txt`, customContent, {
           ensureFolderExists: true
         });
       }

@@ -56,10 +56,7 @@ export class HeftPluginConfiguration {
     packageRoot: string,
     packageName: string
   ): Promise<HeftPluginConfiguration> {
-    const resolvedHeftPluginConfigurationJsonFilename: string = path.resolve(
-      packageRoot,
-      HEFT_PLUGIN_CONFIGURATION_FILENAME
-    );
+    const resolvedHeftPluginConfigurationJsonFilename: string = `${packageRoot}/${HEFT_PLUGIN_CONFIGURATION_FILENAME}`;
     let heftPluginConfigurationPromise: Promise<HeftPluginConfiguration> | undefined =
       HeftPluginConfiguration._pluginConfigurationPromises.get(packageRoot);
     if (!heftPluginConfigurationPromise) {
@@ -140,8 +137,8 @@ export class HeftPluginConfiguration {
       // Make an attempt at resolving the plugin without the name by looking for the first plugin
       if (pluginDefinitions.length > 1) {
         throw new Error(
-          `The specified plugin package "${pluginSpecifier.pluginPackage}" contains multiple plugins. ` +
-            'You must specify a plugin name.'
+          `The specified plugin package ${JSON.stringify(pluginSpecifier.pluginPackage)} contains ` +
+            'multiple plugins. You must specify a plugin name.'
         );
       }
       return pluginDefinitions[0];
@@ -152,8 +149,8 @@ export class HeftPluginConfiguration {
         this.tryGetTaskPluginDefinitionByName(pluginSpecifier.pluginName);
       if (!pluginDefinition) {
         throw new Error(
-          `The specified plugin package "${pluginSpecifier.pluginPackage}" does not contain a plugin named ` +
-            `"${pluginSpecifier.pluginName}".`
+          `The specified plugin package ${JSON.stringify(pluginSpecifier.pluginPackage)} does not contain ` +
+            `a plugin named ${JSON.stringify(pluginSpecifier.pluginName)}.`
         );
       }
       return pluginDefinition;
@@ -193,7 +190,9 @@ export class HeftPluginConfiguration {
       !heftPluginConfigurationJson.lifecyclePlugins?.length &&
       !heftPluginConfigurationJson.taskPlugins?.length
     ) {
-      throw new Error(`The specified plugin package "${packageName}" does not contain any plugins.`);
+      throw new Error(
+        `The specified plugin package ${JSON.stringify(packageName)} does not contain any plugins.`
+      );
     }
 
     const lifecyclePluginNames: Set<string> = new Set();

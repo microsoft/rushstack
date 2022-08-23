@@ -34,31 +34,31 @@ export interface IHeftConfigurationInitializationOptions {
  * @public
  */
 export class HeftConfiguration {
-  private _buildFolder!: string;
-  private _projectConfigFolder: string | undefined;
-  private _cacheFolder: string | undefined;
-  private _tempFolder: string | undefined;
+  private _buildFolderPath!: string;
+  private _projectConfigFolderPath: string | undefined;
+  private _cacheFolderPath: string | undefined;
+  private _tempFolderPath: string | undefined;
   private _rigConfig: RigConfig | undefined;
   private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
   private _rigPackageResolver!: RigPackageResolver;
 
   /**
-   * Project build folder. This is the folder containing the project's package.json file.
+   * Project build folder path. This is the folder containing the project's package.json file.
    */
-  public get buildFolder(): string {
-    return this._buildFolder;
+  public get buildFolderPath(): string {
+    return this._buildFolderPath;
   }
 
   /**
    * The path to the project's "config" folder.
    */
-  public get projectConfigFolder(): string {
-    if (!this._projectConfigFolder) {
-      this._projectConfigFolder = path.join(this.buildFolder, Constants.projectConfigFolderName);
+  public get projectConfigFolderPath(): string {
+    if (!this._projectConfigFolderPath) {
+      this._projectConfigFolderPath = path.join(this.buildFolderPath, Constants.projectConfigFolderName);
     }
 
-    return this._projectConfigFolder;
+    return this._projectConfigFolderPath;
   }
 
   /**
@@ -67,14 +67,14 @@ export class HeftConfiguration {
    * @remarks This folder exists at \<project root\>/.cache. In general, this folder is used to store
    * cached output from tasks under task-specific subfolders, and is not intended to be directly
    * written to. Instead, plugins should write to the directory provided by
-   * HeftTaskSession.taskCacheFolder
+   * HeftTaskSession.taskCacheFolderPath
    */
-  public get cacheFolder(): string {
-    if (!this._cacheFolder) {
-      this._cacheFolder = path.join(this.buildFolder, Constants.cacheFolderName);
+  public get cacheFolderPath(): string {
+    if (!this._cacheFolderPath) {
+      this._cacheFolderPath = path.join(this.buildFolderPath, Constants.cacheFolderName);
     }
 
-    return this._cacheFolder;
+    return this._cacheFolderPath;
   }
 
   /**
@@ -82,14 +82,14 @@ export class HeftConfiguration {
    *
    * @remarks This folder exists at \<project root\>/temp. In general, this folder is used to store temporary
    * output from tasks under task-specific subfolders, and is not intended to be directly written to.
-   * Instead, plugins should write to the directory provided by HeftTaskSession.taskTempFolder
+   * Instead, plugins should write to the directory provided by HeftTaskSession.taskTempFolderPath
    */
-  public get tempFolder(): string {
-    if (!this._tempFolder) {
-      this._tempFolder = path.join(this._buildFolder, Constants.tempFolderName);
+  public get tempFolderPath(): string {
+    if (!this._tempFolderPath) {
+      this._tempFolderPath = path.join(this._buildFolderPath, Constants.tempFolderName);
     }
 
-    return this._tempFolder;
+    return this._tempFolderPath;
   }
 
   /**
@@ -110,7 +110,7 @@ export class HeftConfiguration {
   public get rigPackageResolver(): IRigPackageResolver {
     if (!this._rigPackageResolver) {
       this._rigPackageResolver = new RigPackageResolver({
-        buildFolder: this.buildFolder,
+        buildFolder: this.buildFolderPath,
         projectPackageJson: this.projectPackageJson,
         rigConfig: this.rigConfig
       });
@@ -143,7 +143,7 @@ export class HeftConfiguration {
    * The package.json of the project being built
    */
   public get projectPackageJson(): IPackageJson {
-    return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolder)!;
+    return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolderPath)!;
   }
 
   private constructor() {}
@@ -154,7 +154,9 @@ export class HeftConfiguration {
    */
   public async _checkForRigAsync(): Promise<void> {
     if (!this._rigConfig) {
-      this._rigConfig = await RigConfig.loadForProjectFolderAsync({ projectFolderPath: this._buildFolder });
+      this._rigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: this._buildFolderPath
+      });
     }
   }
 
@@ -168,13 +170,13 @@ export class HeftConfiguration {
       options.cwd
     );
     if (packageJsonPath) {
-      let buildFolder: string = path.dirname(packageJsonPath);
+      let buildFolderPath: string = path.dirname(packageJsonPath);
       // The CWD path's casing may be incorrect on a case-insensitive filesystem. Some tools, like Jest
       // expect the casing of the project path to be correct and produce unexpected behavior when the casing
       // isn't correct.
       // This ensures the casing of the project folder is correct.
-      buildFolder = trueCasePathSync(buildFolder);
-      configuration._buildFolder = buildFolder;
+      buildFolderPath = trueCasePathSync(buildFolderPath);
+      configuration._buildFolderPath = buildFolderPath;
     } else {
       throw new Error('No package.json file found. Are you in a project folder?');
     }

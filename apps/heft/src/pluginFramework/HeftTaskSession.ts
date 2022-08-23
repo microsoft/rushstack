@@ -52,7 +52,7 @@ export interface IHeftTaskSession {
    *
    * @public
    */
-  readonly cacheFolder: string;
+  readonly cacheFolderPath: string;
 
   /**
    * The temp folder for the task. This folder is unique for each task, and will be cleaned
@@ -60,7 +60,7 @@ export interface IHeftTaskSession {
    *
    * @public
    */
-  readonly tempFolder: string;
+  readonly tempFolderPath: string;
 
   /**
    * The scoped logger for the task. Messages logged with this logger will be prefixed with
@@ -147,6 +147,14 @@ export interface IHeftTaskRunHookOptions {
    * @public
    */
   readonly addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
+
+  /**
+   * Add delete operations to be performed during the `run` hook. These operations will be
+   * performed after the task `run` hook has completed.
+   *
+   * @public
+   */
+  readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 /**
@@ -214,8 +222,8 @@ export class HeftTaskSession implements IHeftTaskSession {
   public readonly taskName: string;
   public readonly hooks: IHeftTaskHooks;
   public readonly parameters: IHeftParameters;
-  public readonly cacheFolder: string;
-  public readonly tempFolder: string;
+  public readonly cacheFolderPath: string;
+  public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
 
   /**
@@ -226,7 +234,7 @@ export class HeftTaskSession implements IHeftTaskSession {
   public constructor(options: IHeftTaskSessionOptions) {
     const {
       cleanHook,
-      heftConfiguration: { cacheFolder, tempFolder },
+      heftConfiguration: { cacheFolderPath: cacheFolder, tempFolderPath: tempFolder },
       loggingManager,
       metricsCollector,
       phase,
@@ -254,10 +262,10 @@ export class HeftTaskSession implements IHeftTaskSession {
     const uniqueTaskFolderName: string = `${phase.phaseName}.${task.taskName}`;
 
     // <projectFolder>/.cache/<phaseName>.<taskName>
-    this.cacheFolder = path.join(cacheFolder, uniqueTaskFolderName);
+    this.cacheFolderPath = path.join(cacheFolder, uniqueTaskFolderName);
 
     // <projectFolder>/temp/<phaseName>.<taskName>
-    this.tempFolder = path.join(tempFolder, uniqueTaskFolderName);
+    this.tempFolderPath = path.join(tempFolder, uniqueTaskFolderName);
 
     this._pluginHost = pluginHost;
   }
