@@ -103,10 +103,6 @@ export interface IPackageJsonUpdaterRushRemoveOptions {
    * If specified, "rush update" will be run in debug mode.
    */
   debugInstall: boolean;
-  /**
-   * The variant to consider when performing installations and validating shrinkwrap updates.
-   */
-  variant?: string | undefined;
 }
 /**
  * Configuration options for adding or updating a dependency in a single project
@@ -139,7 +135,7 @@ export interface IRemoveProjectOptions {
    * Its key is the name of the dependency to be removed in the project
    * Its value is the DependencyType of package to be removed in the project
    */
-  dependenciesToRemove: Record<string, DependencyType>;
+  dependenciesToRemove: Record<string, DependencyType[]>;
 }
 
 /**
@@ -318,23 +314,35 @@ export class PackageJsonUpdater {
    * Remove a dependency from a particular project. The core business logic for "rush remove".
    */
   public async doRushRemoveAsync(options: IPackageJsonUpdaterRushRemoveOptions): Promise<void> {
-    const { projects, packagesToRemove, skipUpdate, debugInstall, variant } = options;
+    const { projects, packagesToRemove, skipUpdate, debugInstall } = options;
 
     console.log();
-    const dependenciesToRemove: Record<string, DependencyType> = {};
+    const dependenciesToRemove: Record<string, DependencyType[]> = {};
 
     const allPackageUpdates: IRemoveProjectOptions[] = [];
 
     for (const project of projects) {
       for (const { packageName } of packagesToRemove) {
+        const dependencyTypes: DependencyType[] = [];
         const dependency: PackageJsonDependency | undefined =
-          project.packageJsonEditor.tryGetDependency(packageName) ||
-          project.packageJsonEditor.tryGetDevDependency(packageName) ||
           project.packageJsonEditor.tryGetDependency(packageName);
-        if (!dependency) {
+        const devDependency: PackageJsonDependency | undefined =
+          project.packageJsonEditor.tryGetDevDependency(packageName);
+        const resolution: PackageJsonDependency | undefined =
+          project.packageJsonEditor.tryGetResolution(packageName);
+        if (dependency) {
+          dependencyTypes.push(dependency.dependencyType);
+        }
+        if (devDependency) {
+          dependencyTypes.push(devDependency.dependencyType);
+        }
+        if (resolution) {
+          dependencyTypes.push(resolution.dependencyType);
+        }
+        if (!dependencyTypes.length) {
           throw new Error(`The project "${project.packageName}" do not have ${packageName} in package.json.`);
         }
-        dependenciesToRemove[packageName] = dependency.dependencyType;
+        dependenciesToRemove[packageName] = dependencyTypes;
       }
 
       const currentProjectUpdate: IRemoveProjectOptions = {
@@ -367,7 +375,6 @@ export class PackageJsonUpdater {
         recheckShrinkwrap: false,
         networkConcurrency: undefined,
         collectLogFile: false,
-        variant: variant,
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         pnpmFilterArguments: [],
         checkOnly: false
@@ -422,8 +429,10 @@ export class PackageJsonUpdater {
   public removePackageFromProject(options: IRemoveProjectOptions): void {
     const { project, dependenciesToRemove } = options;
 
-    for (const [packageName, dependencyType] of Object.entries(dependenciesToRemove)) {
-      project.removeDependency(packageName, dependencyType);
+    for (const [packageName, dependencyTypes] of Object.entries(dependenciesToRemove)) {
+      for (const dependencyType of dependencyTypes) {
+        project.removeDependency(packageName, dependencyType);
+      }
     }
   }
 
