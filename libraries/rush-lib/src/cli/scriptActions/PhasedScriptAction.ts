@@ -36,6 +36,7 @@ import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
 import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
+import type { ITelemetryOperationResult } from '../../logic/Telemetry';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -527,6 +528,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     if (this.parser.telemetry) {
+      const operationResults: Record<string, ITelemetryOperationResult> = {};
+
       const extraData: IPhasedCommandTelemetry = {
         // Fields preserved across the command invocation
         ...this._selectionParameters.getTelemetry(),
@@ -546,11 +549,37 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       };
 
       if (result) {
+        const nonSilentDependenciesByOperation: Map<Operation, Set<string>> = new Map();
+        function getNonSilentDependencies(operation: Operation): ReadonlySet<string> {
+          let realDependencies: Set<string> | undefined = nonSilentDependenciesByOperation.get(operation);
+          if (!realDependencies) {
+            nonSilentDependenciesByOperation.set(operation, (realDependencies = new Set()));
+            for (const dependency of operation.dependencies) {
+              if (dependency.runner!.silent) {
+                for (const deepDependency of getNonSilentDependencies(dependency)) {
+                  realDependencies.add(deepDependency);
+                }
+              } else {
+                realDependencies.add(dependency.name!);
+              }
+            }
+          }
+          return realDependencies;
+        }
+
         for (const [operation, operationResult] of result.operationResults) {
           if (operation.runner?.silent) {
             // Architectural operation. Ignore.
             continue;
           }
+
+          const { startTime, endTime } = operationResult.stopwatch;
+          operationResults[operation.name!] = {
+            startSeconds: startTime === undefined ? startTime : Math.round(startTime) / 1000,
+            endSeconds: endTime === undefined ? endTime : Math.round(endTime) / 1000,
+            result: operationResult.status,
+            dependencies: Array.from(getNonSilentDependencies(operation)).sort()
+          };
 
           extraData.countAll++;
           switch (operationResult.status) {
@@ -586,7 +615,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         name: this.actionName,
         durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
-        extraData
+        extraData,
+        operationResults
       });
 
       this.parser.flushTelemetry();

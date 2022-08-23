@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update telemetry to machine architecture information, and phased command telemetry to have details of the dependency graph and individual build times and statuses.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
