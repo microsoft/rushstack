@@ -101,13 +101,13 @@ export interface IHeftLifecycleHooks {
   toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
 
   /**
-   * The `toolStart` hook is called at the end of Heft execution, after the `clean` hook. It is
-   * called before any phases have begun to execute. To use it, call
-   * `toolStart.tapPromise(<pluginName>, <callback>)`.
+   * The `toolFinish` hook is called at the end of Heft execution. It is called after all phases have
+   * completed execution. To use it, call
+   * `toolFinish.tapPromise(<pluginName>, <callback>)`.
    *
    * @public
    */
-  toolStop: AsyncParallelHook<IHeftLifecycleToolStopHookOptions>;
+  toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
 
   // TODO: Wire up and document this hook.
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
@@ -135,11 +135,11 @@ export interface IHeftLifecycleCleanHookOptions {
 export interface IHeftLifecycleToolStartHookOptions {}
 
 /**
- * Options provided to the toolStop hook.
+ * Options provided to the toolFinish hook.
  *
  * @public
  */
-export interface IHeftLifecycleToolStopHookOptions {}
+export interface IHeftLifecycleToolFinishHookOptions {}
 
 export interface IHeftLifecycleSessionOptions extends IInternalHeftSessionOptions {
   logger: ScopedLogger;

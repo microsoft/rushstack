@@ -15,7 +15,7 @@ import {
   type IHeftLifecycleCleanHookOptions,
   type IHeftLifecycleHooks,
   type IHeftLifecycleToolStartHookOptions,
-  type IHeftLifecycleToolStopHookOptions
+  type IHeftLifecycleToolFinishHookOptions
 } from './HeftLifecycleSession';
 
 export interface IHeftLifecycleContext {
@@ -60,7 +60,7 @@ export class HeftLifecycle extends HeftPluginHost {
     this._lifecycleHooks = {
       clean: new AsyncParallelHook<IHeftLifecycleCleanHookOptions>(),
       toolStart: new AsyncParallelHook<IHeftLifecycleToolStartHookOptions>(),
-      toolStop: new AsyncParallelHook<IHeftLifecycleToolStopHookOptions>(),
+      toolFinish: new AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>(),
       recordMetrics: internalHeftSession.metricsCollector.recordMetricsHook
     };
   }

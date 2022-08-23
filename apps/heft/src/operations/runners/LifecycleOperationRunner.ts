@@ -14,7 +14,7 @@ import type { IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type {
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
-  IHeftLifecycleToolStopHookOptions
+  IHeftLifecycleToolFinishHookOptions
 } from '../../pluginFramework/HeftLifecycleSession';
 
 export type LifecycleOperationRunnerType = 'start' | 'finish';
@@ -113,9 +113,9 @@ export class LifecycleOperationRunner implements IOperationRunner {
         break;
       }
       case 'finish': {
-        if (lifecycle.hooks.toolStop.isUsed()) {
-          const lifeycleToolStopHookOptions: IHeftLifecycleToolStopHookOptions = {};
-          await lifecycle.hooks.toolStop.promise(lifeycleToolStopHookOptions);
+        if (lifecycle.hooks.toolFinish.isUsed()) {
+          const lifeycleToolFinishHookOptions: IHeftLifecycleToolFinishHookOptions = {};
+          await lifecycle.hooks.toolFinish.promise(lifeycleToolFinishHookOptions);
         }
         break;
       }

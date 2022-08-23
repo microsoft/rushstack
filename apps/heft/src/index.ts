@@ -24,7 +24,7 @@ export {
   IHeftLifecycleHooks,
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
-  IHeftLifecycleToolStopHookOptions
+  IHeftLifecycleToolFinishHookOptions
 } from './pluginFramework/HeftLifecycleSession';
 
 export {

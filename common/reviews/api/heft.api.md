@@ -135,8 +135,8 @@ export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
     // (undocumented)
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+    toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
-    toolStop: AsyncParallelHook<IHeftLifecycleToolStopHookOptions>;
 }
 
 // @public
@@ -154,11 +154,11 @@ export interface IHeftLifecycleSession {
 }
 
 // @public
-export interface IHeftLifecycleToolStartHookOptions {
+export interface IHeftLifecycleToolFinishHookOptions {
 }
 
 // @public
-export interface IHeftLifecycleToolStopHookOptions {
+export interface IHeftLifecycleToolStartHookOptions {
 }
 
 // @public
