@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 24 Aug 2022 00:14:38 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Aug 2022 03:01:22 GMT and should not be manually modified.
+
+## 3.51.1
+Wed, 24 Aug 2022 03:01:22 GMT
+
+### Patches
+
+- Introduce JsonSyntax option for JsonFile.load() and related APIs
 
 ## 3.51.0
 Wed, 24 Aug 2022 00:14:38 GMT

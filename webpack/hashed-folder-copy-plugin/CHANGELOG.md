@@ -1,6 +1,11 @@
 # Change Log - @rushstack/hashed-folder-copy-plugin
 
-This log was last generated on Wed, 24 Aug 2022 00:14:38 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Aug 2022 03:01:22 GMT and should not be manually modified.
+
+## 0.1.30
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
 
 ## 0.1.29
 Wed, 24 Aug 2022 00:14:38 GMT

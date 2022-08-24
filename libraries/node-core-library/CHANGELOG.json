@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.51.1",
+      "tag": "@rushstack/node-core-library_v3.51.1",
+      "date": "Wed, 24 Aug 2022 03:01:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Introduce JsonSyntax option for JsonFile.load() and related APIs"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.51.0",
       "tag": "@rushstack/node-core-library_v3.51.0",
       "date": "Wed, 24 Aug 2022 00:14:38 GMT",
