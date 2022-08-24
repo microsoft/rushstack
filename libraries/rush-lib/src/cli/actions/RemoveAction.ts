@@ -17,8 +17,8 @@ export class RemoveAction extends BaseRushAction {
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
-      'Remove specified package(s) to the dependencies of the current project (as determined by the current working directory)' +
-        ' and then runs "rush update". If no package was found, there will be an Error thrown out'
+      'Removes specified package(s) from the dependencies of the current project (as determined by the current working directory)' +
+        ' and then runs "rush update".'
     ];
     super({
       actionName: 'remove',
