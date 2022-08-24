@@ -28,16 +28,18 @@ function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
 }
 
 export class InternalHeftSession {
-  private readonly _options: IInternalHeftSessionOptions;
-  private readonly _heftConfigurationJson: IHeftConfigurationJson;
   private readonly _phaseSessionsByPhase: Map<HeftPhase, HeftPhaseSession> = new Map();
+  private readonly _heftConfigurationJson: IHeftConfigurationJson;
   private _lifecycle: HeftLifecycle | undefined;
   private _phases: Set<HeftPhase> | undefined;
   private _phasesByName: Map<string, HeftPhase> | undefined;
   private _parameterManager: HeftParameterManager | undefined;
 
-  private constructor(options: IInternalHeftSessionOptions, heftConfigurationJson: IHeftConfigurationJson) {
-    this._options = options;
+  private constructor(heftConfigurationJson: IHeftConfigurationJson, options: IInternalHeftSessionOptions) {
+    this.heftConfiguration = options.heftConfiguration;
+    this.loggingManager = options.loggingManager;
+    this.metricsCollector = options.metricsCollector;
+    this.debug = options.debug;
     this._heftConfigurationJson = heftConfigurationJson;
   }
 
@@ -52,7 +54,7 @@ export class InternalHeftSession {
         options.heftConfiguration.rigConfig
       );
 
-    const internalHeftSession: InternalHeftSession = new InternalHeftSession(options, heftConfigurationJson);
+    const internalHeftSession: InternalHeftSession = new InternalHeftSession(heftConfigurationJson, options);
     await internalHeftSession.lifecycle.ensureInitializedAsync();
 
     const tasks: Iterable<HeftTask> = getAllTasks(internalHeftSession.phases);
@@ -67,6 +69,14 @@ export class InternalHeftSession {
     return internalHeftSession;
   }
 
+  public readonly heftConfiguration: HeftConfiguration;
+
+  public readonly loggingManager: LoggingManager;
+
+  public readonly metricsCollector: MetricsCollector;
+
+  public readonly debug: boolean;
+
   public get parameterManager(): HeftParameterManager {
     if (!this._parameterManager) {
       throw new InternalError('A parameter manager for the session has not been provided.');
@@ -78,27 +88,11 @@ export class InternalHeftSession {
     this._parameterManager = value;
   }
 
-  public get debug(): boolean {
-    return this._options.debug;
-  }
-
-  public get heftConfiguration(): HeftConfiguration {
-    return this._options.heftConfiguration;
-  }
-
-  public get loggingManager(): LoggingManager {
-    return this._options.loggingManager;
-  }
-
   public get lifecycle(): HeftLifecycle {
     if (!this._lifecycle) {
       this._lifecycle = new HeftLifecycle(this, this._heftConfigurationJson.heftPlugins || []);
     }
     return this._lifecycle;
-  }
-
-  public get metricsCollector(): MetricsCollector {
-    return this._options.metricsCollector;
   }
 
   public get phases(): ReadonlySet<HeftPhase> {
@@ -115,9 +109,12 @@ export class InternalHeftSession {
     let phaseSession: HeftPhaseSession | undefined = this._phaseSessionsByPhase.get(phase);
     if (!phaseSession) {
       phaseSession = new HeftPhaseSession({
-        ...this._options,
-        phase,
-        parameterManager: this.parameterManager
+        debug: this.debug,
+        heftConfiguration: this.heftConfiguration,
+        loggingManager: this.loggingManager,
+        metricsCollector: this.metricsCollector,
+        parameterManager: this.parameterManager,
+        phase
       });
       this._phaseSessionsByPhase.set(phase, phaseSession);
     }

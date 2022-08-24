@@ -36,11 +36,11 @@ export interface IRigPackageResolverOptions {
  * Rig resolves requested tools from the project's Heft rig.
  */
 export class RigPackageResolver implements IRigPackageResolver {
-  private _buildFolder: string;
-  private _projectPackageJson: IPackageJson;
-  private _rigConfig: RigConfig;
-  private _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-  private _resolverCache: Map<string, Promise<string>> = new Map();
+  private readonly _buildFolder: string;
+  private readonly _projectPackageJson: IPackageJson;
+  private readonly _rigConfig: RigConfig;
+  private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+  private readonly _resolverCache: Map<string, Promise<string>> = new Map();
 
   public constructor(options: IRigPackageResolverOptions) {
     this._buildFolder = options.buildFolder;

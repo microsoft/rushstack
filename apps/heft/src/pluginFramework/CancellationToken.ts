@@ -44,7 +44,11 @@ export interface ICancellationTokenSourceOptions {
  * A cancellation token. Can be used to signal that an ongoing process has either been cancelled
  * or timed out.
  *
- * @public
+ * @remarks This class will eventually be removed once the `AbortSignal` API is available in
+ * the lowest supported LTS version of Node.js. See here for more information:
+ * https://nodejs.org/docs/latest-v16.x/api/globals.html#class-abortsignal
+ *
+ * @beta
  */
 export class CancellationToken {
   private readonly _isCancelled: boolean | undefined;
@@ -96,7 +100,11 @@ export class CancellationToken {
  * A cancellation token source. Produces cancellation tokens that can be used to signal that
  * an ongoing process has either been cancelled or timed out.
  *
- * @public
+ * @remarks This class will eventually be removed once the `AbortController` API is available
+ * in the lowest supported LTS version of Node.js. See here for more information:
+ * https://nodejs.org/docs/latest-v16.x/api/globals.html#class-abortcontroller
+ *
+ * @beta
  */
 export class CancellationTokenSource {
   private readonly _cancellationToken: CancellationToken;

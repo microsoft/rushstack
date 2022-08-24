@@ -2,14 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { ArgumentParser } from 'argparse';
-import { CommandLineParser, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { CommandLineParser, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import {
-  ITerminal,
   Terminal,
   InternalError,
   ConsoleTerminalProvider,
   AlreadyReportedError,
-  FileSystem
+  type ITerminal
 } from '@rushstack/node-core-library';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
@@ -26,25 +25,20 @@ import type { IHeftActionOptions } from './actions/IHeftAction';
  * is fully initialized.
  */
 interface IPreInitializationArgumentValues {
-  plugins?: string[];
   debug?: boolean;
+  unmanaged?: boolean;
 }
 
 export class HeftCommandLineParser extends CommandLineParser {
   public readonly globalTerminal: ITerminal;
 
-  private _terminalProvider: ConsoleTerminalProvider;
-  private _loggingManager: LoggingManager;
-  private _metricsCollector: MetricsCollector;
-  private _heftConfiguration: HeftConfiguration;
-
-  private _preInitializationArgumentValues: IPreInitializationArgumentValues;
-
-  private _debugFlag: CommandLineFlagParameter | undefined;
-
-  public get isDebug(): boolean {
-    return !!this._preInitializationArgumentValues.debug;
-  }
+  private readonly _debugFlag: CommandLineFlagParameter;
+  private readonly _unmanagedFlag: CommandLineFlagParameter;
+  private readonly _debug: boolean;
+  private readonly _terminalProvider: ConsoleTerminalProvider;
+  private readonly _loggingManager: LoggingManager;
+  private readonly _metricsCollector: MetricsCollector;
+  private readonly _heftConfiguration: HeftConfiguration;
 
   public constructor() {
     super({
@@ -52,35 +46,48 @@ export class HeftCommandLineParser extends CommandLineParser {
       toolDescription: 'Heft is a pluggable build system designed for web projects.'
     });
 
+    // Initialize the debug flag as a parameter on the tool itself
+    this._debugFlag = this.defineFlagParameter({
+      parameterLongName: Constants.debugParameterLongName,
+      description: 'Show the full call stack if an error occurs while executing the tool'
+    });
+
+    // Initialize the unmanaged flag as a parameter on the tool itself. While this parameter
+    // is only used during version selection, we need to support parsing it here so that we
+    // don't throw due to an unrecognized parameter.
+    this._unmanagedFlag = this.defineFlagParameter({
+      parameterLongName: Constants.unmanagedParameterLongName,
+      description: 'Indicates that the tool is running in an unmanaged environment'
+    });
+
     // Pre-initialize with known argument values to determine state of "--debug"
-    this._preInitializationArgumentValues = this._getPreInitializationArgumentValues();
+    const preInitializationArgumentValues: IPreInitializationArgumentValues =
+      this._getPreInitializationArgumentValues();
+    this._debug = !!preInitializationArgumentValues.debug;
 
     // Enable debug and verbose logging if the "--debug" flag is set
     this._terminalProvider = new ConsoleTerminalProvider({
-      debugEnabled: this.isDebug,
-      verboseEnabled: this.isDebug
+      debugEnabled: this._debug,
+      verboseEnabled: this._debug
     });
-
     this.globalTerminal = new Terminal(this._terminalProvider);
     this._loggingManager = new LoggingManager({ terminalProvider: this._terminalProvider });
-    if (this.isDebug) {
+    if (this._debug) {
       // Enable printing stacktraces if the "--debug" flag is set
       this._loggingManager.enablePrintStacks();
       InternalError.breakInDebugger = true;
     }
 
-    this._metricsCollector = new MetricsCollector();
     this._heftConfiguration = HeftConfiguration.initialize({
       cwd: process.cwd(),
       terminalProvider: this._terminalProvider
     });
+
+    this._metricsCollector = new MetricsCollector();
   }
 
   protected onDefineParameters(): void {
-    this._debugFlag = this.defineFlagParameter({
-      parameterLongName: Constants.debugParameterLongName,
-      description: 'Show the full call stack if an error occurs while executing the tool'
-    });
+    // No-op. Defined in the constructor.
   }
 
   public async execute(args?: string[]): Promise<boolean> {
@@ -91,13 +98,11 @@ export class HeftCommandLineParser extends CommandLineParser {
     try {
       this._normalizeCwd();
 
-      await this._checkForUpgradeAsync();
-
       const internalHeftSession: InternalHeftSession = await InternalHeftSession.initializeAsync({
+        debug: this._debug,
         heftConfiguration: this._heftConfiguration,
         loggingManager: this._loggingManager,
-        metricsCollector: this._metricsCollector,
-        debug: this.isDebug
+        metricsCollector: this._metricsCollector
       });
 
       const actionOptions: IHeftActionOptions = {
@@ -124,21 +129,6 @@ export class HeftCommandLineParser extends CommandLineParser {
     } catch (e) {
       await this._reportErrorAndSetExitCode(e as Error);
       return false;
-    }
-  }
-
-  // TODO: Remove when releasing Heft 1.0.0
-  private async _checkForUpgradeAsync(): Promise<void> {
-    // The .heft/clean.json file is a fairly reliable heuristic for detecting projects created prior to
-    // the big config file redesign with Heft 0.14.0
-    if (await FileSystem.existsAsync('.heft/clean.json')) {
-      this.globalTerminal.writeErrorLine(
-        '\nThis project has a ".heft/clean.json" file, which is now obsolete as of Heft 0.14.0.'
-      );
-      this.globalTerminal.writeLine(
-        '\nFor instructions for migrating config files, please read UPGRADING.md in the @rushstack/heft package folder.\n'
-      );
-      throw new AlreadyReportedError();
     }
   }
 
@@ -184,6 +174,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     // This is a rough parsing of the --debug parameter
     const parser: ArgumentParser = new ArgumentParser({ addHelp: false });
     parser.addArgument(this._debugFlag.longName, { dest: 'debug', action: 'storeTrue' });
+    parser.addArgument(this._unmanagedFlag.longName, { dest: 'unmanaged', action: 'storeTrue' });
 
     const [result]: IPreInitializationArgumentValues[] = parser.parseKnownArgs(args);
     return result;
@@ -194,7 +185,7 @@ export class HeftCommandLineParser extends CommandLineParser {
       this.globalTerminal.writeErrorLine(error.toString());
     }
 
-    if (this.isDebug) {
+    if (this._debug) {
       this.globalTerminal.writeLine();
       this.globalTerminal.writeErrorLine(error.stack!);
     }

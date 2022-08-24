@@ -131,13 +131,11 @@ export class TaskOperationRunner implements IOperationRunner {
       // The task temp folder is a unique and relevant name, so re-use it for the lock file name
       const lockFileName: string = path.basename(taskSession.tempFolderPath);
 
-      // Wait for the release of the lockfile if one was acquired. This is done to ensure that all watched
-      // files created by the task are ingested and available for subsequent tasks.
+      // Create a lockfile and wait for it to appear in the watcher. This is done to ensure that all watched
+      // files created by the task are ingested and available before running subsequent tasks. This can
+      // appear as a create or a change, depending on if the lockfile is dirty.
       terminal.writeVerboseLine(`Synchronizing watcher using lock file ${JSON.stringify(lockFileName)}`);
       const lockFilePath: string = LockFile.getLockFilePath(taskSession.tempFolderPath, lockFileName);
-
-      // This can appear as a create or a change, depending on if the lockfile is dirty. Create both
-      // promises before creating the lockfile to ensure that we pick up the change.
       const lockfileChangePromise: Promise<void> = Promise.race([
         fileEventListener!.waitForChangeAsync(lockFilePath),
         fileEventListener!.waitForCreateAsync(lockFilePath)
@@ -152,8 +150,6 @@ export class TaskOperationRunner implements IOperationRunner {
             'Heft running?'
         );
       }
-
-      // Wait for the lockfile to be seen by the listener
       await lockfileChangePromise;
 
       // We can save some time by avoiding deleting the lockfile

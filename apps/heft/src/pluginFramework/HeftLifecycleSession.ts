@@ -158,10 +158,7 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
   public readonly cacheFolderPath: string;
   public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
-
-  public get debugMode(): boolean {
-    return this._options.debug;
-  }
+  public readonly debug: boolean;
 
   /**
    * @internal
@@ -174,6 +171,7 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
     this.metricsCollector = options.metricsCollector;
     this.hooks = options.lifecycleHooks;
     this.parameters = options.lifecycleParameters;
+    this.debug = options.debug;
 
     // Guranteed to be unique since phases are forbidden from using the name 'lifecycle'
     // and lifecycle plugin names are enforced to be unique.

@@ -144,6 +144,7 @@ export class HeftLifecycle extends HeftPluginHost {
 
         // Generate the plugin-specific session
         const lifecycleSession: HeftLifecycleSession = new HeftLifecycleSession({
+          debug: this._internalHeftSession.debug,
           heftConfiguration: this._internalHeftSession.heftConfiguration,
           loggingManager: this._internalHeftSession.loggingManager,
           metricsCollector: this._internalHeftSession.metricsCollector,
@@ -154,7 +155,6 @@ export class HeftLifecycle extends HeftPluginHost {
           lifecycleParameters:
             this._internalHeftSession.parameterManager.getParametersForPlugin(pluginDefinition),
           pluginDefinition: pluginDefinition,
-          debug: this._internalHeftSession.debug,
           pluginHost: this
         });
         const pluginOptions: object | undefined = pluginSpecifier.options;

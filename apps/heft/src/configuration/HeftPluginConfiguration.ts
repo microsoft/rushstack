@@ -29,10 +29,7 @@ export class HeftPluginConfiguration {
   );
   private static _pluginConfigurationPromises: Map<string, Promise<HeftPluginConfiguration>> = new Map();
 
-  private _heftPluginConfigurationJson: IHeftPluginConfigurationJson;
-  private _packageRoot: string;
-  private _packageName: string;
-
+  private readonly _heftPluginConfigurationJson: IHeftPluginConfigurationJson;
   private _lifecyclePluginDefinitions: Set<HeftLifecyclePluginDefinition> | undefined;
   private _lifecyclePluginDefinitionsMap: Map<string, HeftLifecyclePluginDefinition> | undefined;
   private _taskPluginDefinitions: Set<HeftTaskPluginDefinition> | undefined;
@@ -44,8 +41,8 @@ export class HeftPluginConfiguration {
     packageName: string
   ) {
     this._heftPluginConfigurationJson = heftPluginConfigurationJson;
-    this._packageRoot = packageRoot;
-    this._packageName = packageName;
+    this.packageRoot = packageRoot;
+    this.packageName = packageName;
     this._validate(heftPluginConfigurationJson, packageName);
   }
 
@@ -76,16 +73,12 @@ export class HeftPluginConfiguration {
   /**
    * The path to the root of the package that contains the heft-plugin.json file.
    */
-  public get packageRoot(): string {
-    return this._packageRoot;
-  }
+  public readonly packageRoot: string;
 
   /**
    * The package name of the package that contains the heft-plugin.json file.
    */
-  public get packageName(): string {
-    return this._packageName;
-  }
+  public readonly packageName: string;
 
   public get lifecyclePluginDefinitions(): ReadonlySet<HeftLifecyclePluginDefinition> {
     if (!this._lifecyclePluginDefinitions) {
@@ -94,8 +87,8 @@ export class HeftPluginConfiguration {
         this._lifecyclePluginDefinitions.add(
           HeftLifecyclePluginDefinition.loadFromObject({
             heftPluginDefinitionJson: lifecyclePluginDefinitionJson,
-            packageRoot: this._packageRoot,
-            packageName: this._packageName
+            packageRoot: this.packageRoot,
+            packageName: this.packageName
           })
         );
       }
@@ -113,8 +106,8 @@ export class HeftPluginConfiguration {
         this._taskPluginDefinitions.add(
           HeftTaskPluginDefinition.loadFromObject({
             heftPluginDefinitionJson: taskPluginDefinitionJson,
-            packageRoot: this._packageRoot,
-            packageName: this._packageName
+            packageRoot: this.packageRoot,
+            packageName: this.packageName
           })
         );
       }

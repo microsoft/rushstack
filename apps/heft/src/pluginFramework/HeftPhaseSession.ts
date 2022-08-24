@@ -15,14 +15,7 @@ import type { LoggingManager } from './logging/LoggingManager';
 import type { HeftParameterManager } from './HeftParameterManager';
 
 export interface IHeftPhaseSessionOptions extends IInternalHeftSessionOptions {
-  /**
-   * @beta
-   */
   phase: HeftPhase;
-
-  /**
-   * @beta
-   */
   parameterManager: HeftParameterManager;
 }
 

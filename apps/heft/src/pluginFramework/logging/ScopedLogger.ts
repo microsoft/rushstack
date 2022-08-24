@@ -47,6 +47,7 @@ export class ScopedLogger implements IScopedLogger {
   private _warnings: Error[] = [];
 
   private get _shouldPrintStacks(): boolean {
+    // TODO: Consider dumping stacks and more verbose logging to a file
     return this._options.getShouldPrintStacks();
   }
 

@@ -137,13 +137,13 @@ export interface IHeftParameters extends IHeftDefaultParameters {
 }
 
 export interface IHeftParameterManagerOptions {
-  isClean: () => boolean;
-  isCleanCache: () => boolean;
-  isDebug: () => boolean;
-  isVerbose: () => boolean;
-  isProduction: () => boolean;
-  isWatch: () => boolean;
-  isServe: () => boolean;
+  getIsClean: () => boolean;
+  getIsCleanCache: () => boolean;
+  getIsDebug: () => boolean;
+  getIsVerbose: () => boolean;
+  getIsProduction: () => boolean;
+  getIsWatch: () => boolean;
+  getIsServe: () => boolean;
   getLocales: () => Iterable<string>;
 }
 
@@ -165,14 +165,14 @@ export class HeftParameterManager {
 
     if (!this._defaultParameters) {
       this._defaultParameters = {
-        clean: this._options.isClean(),
-        cleanCache: this._options.isCleanCache(),
-        debug: this._options.isDebug(),
-        verbose: this._options.isVerbose(),
-        production: this._options.isProduction(),
+        clean: this._options.getIsClean(),
+        cleanCache: this._options.getIsCleanCache(),
+        debug: this._options.getIsDebug(),
+        verbose: this._options.getIsVerbose(),
+        production: this._options.getIsProduction(),
         locales: this._options.getLocales(),
-        watch: this._options.isWatch(),
-        serve: this._options.isServe()
+        watch: this._options.getIsWatch(),
+        serve: this._options.getIsServe()
       };
     }
     return this._defaultParameters;

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
+import type * as fs from 'fs';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
@@ -10,9 +10,9 @@ import {
   Colors,
   ConsoleTerminalProvider,
   InternalError,
+  Path,
   type ITerminal,
-  type IPackageJson,
-  Path
+  type IPackageJson
 } from '@rushstack/node-core-library';
 import type {
   CommandLineFlagParameter,
@@ -43,6 +43,7 @@ import type { LifecycleOperationRunnerType } from '../operations/runners/Lifecyc
 import type { IChangedFileState } from '../pluginFramework/HeftTaskSession';
 import { CancellationToken, CancellationTokenSource } from '../pluginFramework/CancellationToken';
 import { FileEventListener } from '../utilities/FileEventListener';
+import { Constants } from '../utilities/Constants';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;
@@ -288,16 +289,16 @@ export class HeftActionRunner {
     }
 
     const verboseFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
-      parameterLongName: '--verbose',
-      parameterShortName: '-v',
+      parameterLongName: Constants.verboseParameterLongName,
+      parameterShortName: Constants.verboseParameterShortName,
       description: 'If specified, log information useful for debugging.'
     });
     const productionFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
-      parameterLongName: '--production',
+      parameterLongName: Constants.productionParameterLongName,
       description: 'If specified, run Heft in production mode.'
     });
     const localesParameter: CommandLineStringListParameter = parameterProvider.defineStringListParameter({
-      parameterLongName: '--locales',
+      parameterLongName: Constants.localesParameterLongName,
       argumentName: 'LOCALE',
       description: 'Use the specified locale for this run, if applicable.'
     });
@@ -308,32 +309,32 @@ export class HeftActionRunner {
     if (this._action.watch) {
       // Only enable the serve flag in watch mode
       serveFlag = parameterProvider.defineFlagParameter({
-        parameterLongName: '--serve',
+        parameterLongName: Constants.serveParameterLongName,
         description: 'If specified, serve the output. This flag can only be used with watch-enabled actions.'
       });
     } else {
       // Only enable the clean flags in non-watch mode
       cleanFlag = parameterProvider.defineFlagParameter({
-        parameterLongName: '--clean',
+        parameterLongName: Constants.cleanParameterLongName,
         description: 'If specified, clean the outputs before running each phase.'
       });
       cleanCacheFlag = parameterProvider.defineFlagParameter({
-        parameterLongName: '--clean-cache',
+        parameterLongName: Constants.cleanCacheParameterLongName,
         description:
           'If specified, clean the cache before running each phase. To use this flag, the ' +
-          '--clean flag must also be provided.'
+          `${JSON.stringify(Constants.cleanParameterLongName)} flag must also be provided.`
       });
     }
 
     const parameterManager: HeftParameterManager = new HeftParameterManager({
-      isDebug: () => this._internalHeftSession.debug,
-      isVerbose: () => verboseFlag.value,
-      isProduction: () => productionFlag.value,
-      isWatch: () => this._action.watch,
+      getIsDebug: () => this._internalHeftSession.debug,
+      getIsVerbose: () => verboseFlag.value,
+      getIsProduction: () => productionFlag.value,
+      getIsWatch: () => this._action.watch,
       getLocales: () => localesParameter.values,
-      isServe: () => !!serveFlag?.value,
-      isClean: () => !!cleanFlag?.value,
-      isCleanCache: () => !!cleanCacheFlag?.value
+      getIsServe: () => !!serveFlag?.value,
+      getIsClean: () => !!cleanFlag?.value,
+      getIsCleanCache: () => !!cleanCacheFlag?.value
     });
 
     // Add all the lifecycle parameters for the action
@@ -387,7 +388,7 @@ export class HeftActionRunner {
   }
 
   private async _executeWatchAsync(): Promise<void> {
-    const chokidarPkg: typeof chokidar = await this._loadChokidarAsync();
+    const chokidarPkg: typeof chokidar = await this._ensureChokidarLoadedAsync();
 
     // Create a watcher for the build folder which will return the initial state
     const watcherReadyPromise: Promise<chokidar.FSWatcher> = new Promise(
@@ -590,7 +591,7 @@ export class HeftActionRunner {
 
     const operations: Map<string, Operation> = new Map();
     const startLifecycleOperation: Operation = this._getOrCreateLifecycleOperation('start', operations);
-    const stopLifecycleOperation: Operation = this._getOrCreateLifecycleOperation('finish', operations);
+    const finishLifecycleOperation: Operation = this._getOrCreateLifecycleOperation('finish', operations);
 
     let hasWarnedAboutSkippedPhases: boolean = false;
     for (const phase of selectedPhases) {
@@ -618,7 +619,7 @@ export class HeftActionRunner {
       phaseOperation.dependencies.add(startLifecycleOperation);
       // Set the phase operation as a dependency of the 'end' lifecycle operation to ensure the phase
       // operation runs first
-      stopLifecycleOperation.dependencies.add(phaseOperation);
+      finishLifecycleOperation.dependencies.add(phaseOperation);
 
       // Create operations for each task
       for (const task of phase.tasks) {
@@ -636,7 +637,7 @@ export class HeftActionRunner {
         taskOperation.dependencies.add(startLifecycleOperation);
         // Set the task operation as a dependency of the 'stop' lifecycle operation to ensure the task operation
         // runs first
-        stopLifecycleOperation.dependencies.add(taskOperation);
+        finishLifecycleOperation.dependencies.add(taskOperation);
 
         // Set all dependency tasks as dependencies of the task operation
         for (const dependencyTask of task.dependencyTasks) {
@@ -728,7 +729,7 @@ export class HeftActionRunner {
   }
 
   // Defer-load chokidar to avoid loading it until it's actually needed
-  private async _loadChokidarAsync(): Promise<typeof chokidar> {
+  private async _ensureChokidarLoadedAsync(): Promise<typeof chokidar> {
     if (!this._chokidar) {
       this._chokidar = await import('chokidar');
     }

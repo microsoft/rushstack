@@ -8,9 +8,19 @@ export class Constants {
 
   public static tempFolderName: string = 'temp';
 
-  public static unmanagedParameterLongName: string = '--unmanaged';
+  public static cleanParameterLongName: string = '--clean';
+
+  public static cleanCacheParameterLongName: string = '--clean-cache';
 
   public static debugParameterLongName: string = '--debug';
+
+  public static localesParameterLongName: string = '--locales';
+
+  public static productionParameterLongName: string = '--production';
+
+  public static serveParameterLongName: string = '--serve';
+
+  public static unmanagedParameterLongName: string = '--unmanaged';
 
   public static verboseParameterLongName: string = '--verbose';
 
