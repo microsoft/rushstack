@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add validation to ensure package.json files are strict JSON and the \"version\" field is strict SemVer",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

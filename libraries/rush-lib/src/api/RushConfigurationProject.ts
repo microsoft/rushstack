@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
+import { JsonFile, IPackageJson, FileSystem, FileConstants, JsonSyntax } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
@@ -106,7 +106,7 @@ export class RushConfigurationProject {
     const packageJsonFilename: string = path.join(this._projectFolder, FileConstants.PackageJson);
 
     try {
-      this._packageJson = JsonFile.load(packageJsonFilename);
+      this._packageJson = JsonFile.load(packageJsonFilename, { jsonSyntax: JsonSyntax.Strict });
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(
@@ -146,6 +146,13 @@ export class RushConfigurationProject {
       throw new Error(
         `The package name "${this._packageName}" specified in rush.json does not` +
           ` match the name "${this._packageJson.name}" from package.json`
+      );
+    }
+
+    if (!semver.valid(this._packageJson.version)) {
+      throw new Error(
+        `The package version "${this._packageJson.version}" specified in file` +
+          ` "${packageJsonFilename}" does not meet semver specification`
       );
     }
 
