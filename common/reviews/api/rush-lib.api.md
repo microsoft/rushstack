@@ -497,9 +497,9 @@ export interface ITelemetryMachineInfo {
 // @beta (undocumented)
 export interface ITelemetryOperationResult {
     dependencies: string[];
-    endSeconds?: number;
+    endTimestamp?: number;
     result: string;
-    startSeconds?: number;
+    startTimestamp?: number;
 }
 
 // @public

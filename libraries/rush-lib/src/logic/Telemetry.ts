@@ -49,15 +49,15 @@ export interface ITelemetryOperationResult {
    */
   result: string;
   /**
-   * A second-resolution timestamp when the operation started.
+   * A timestamp in milliseconds (from `performance.now()`)when the operation started.
    * If the operation was blocked, will be `undefined`.
    */
-  startSeconds?: number;
+  startTimestamp?: number;
   /**
-   * A second-resolution timestamp when the operation finished.
+   * A timestamp in milliseconds (from `performance.now()`) when the operation finished.
    * If the operation was blocked, will be `undefined`.
    */
-  endSeconds?: number;
+  endTimestamp?: number;
 }
 
 /**

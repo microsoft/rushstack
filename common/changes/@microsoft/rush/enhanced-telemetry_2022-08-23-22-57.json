@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update telemetry to machine architecture information, and phased command telemetry to have details of the dependency graph and individual build times and statuses.",
+      "comment": "Add machine architecture information, dependency graph information, and individual build times and statuses to the telemetry file.",
       "type": "none"
     }
   ],

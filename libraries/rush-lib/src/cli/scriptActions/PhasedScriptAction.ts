@@ -575,8 +575,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
           const { startTime, endTime } = operationResult.stopwatch;
           operationResults[operation.name!] = {
-            startSeconds: startTime === undefined ? startTime : Math.round(startTime) / 1000,
-            endSeconds: endTime === undefined ? endTime : Math.round(endTime) / 1000,
+            startTimestamp: startTime,
+            endTimestamp: endTime,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };
