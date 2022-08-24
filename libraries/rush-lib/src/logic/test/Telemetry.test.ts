@@ -3,7 +3,7 @@
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
-import { Telemetry, ITelemetryData } from '../Telemetry';
+import { Telemetry, ITelemetryData, ITelemetryMachineInfo } from '../Telemetry';
 import { RushSession } from '../../pluginFramework/RushSession';
 import { ConsoleTerminalProvider, JsonFile } from '@rushstack/node-core-library';
 
@@ -39,7 +39,8 @@ describe(Telemetry.name, () => {
       result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version
+      rushVersion: Rush.version,
+      machineInfo: {} as ITelemetryMachineInfo
     };
 
     const logData2: ITelemetryData = {
@@ -48,7 +49,8 @@ describe(Telemetry.name, () => {
       result: 'Failed',
       timestamp: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version
+      rushVersion: Rush.version,
+      machineInfo: {} as ITelemetryMachineInfo
     };
 
     telemetry.log(logData1);
@@ -91,7 +93,8 @@ describe(Telemetry.name, () => {
       result: 'Succeeded',
       timestamp: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version
+      rushVersion: Rush.version,
+      machineInfo: {} as ITelemetryMachineInfo
     };
 
     telemetry.log(logData);
