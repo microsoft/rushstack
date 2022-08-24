@@ -47,7 +47,7 @@ export class RemoveAction extends BaseRushAction {
     });
     this._allFlag = this.defineFlagParameter({
       parameterLongName: '--all',
-      description: 'If specified, the dependency will be removed from all projects.'
+      description: 'If specified, the dependency will be removed from all projects that declare it.'
     });
   }
 
