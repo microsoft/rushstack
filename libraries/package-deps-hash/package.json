@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-deps-hash",
-  "version": "3.2.41",
+  "version": "3.2.42",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
