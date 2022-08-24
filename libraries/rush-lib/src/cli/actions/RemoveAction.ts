@@ -36,8 +36,8 @@ export class RemoveAction extends BaseRushAction {
       required: true,
       argumentName: 'PACKAGE',
       description:
-        'The name of the package which should be removed' +
-        ' To remove multiple packages, write "rush remove --package foo --package bar".'
+        'The name of the package which should be removed.' +
+        ' To remove multiple packages, run "rush remove --package foo --package bar".'
     });
     this._skipUpdateFlag = this.defineFlagParameter({
       parameterLongName: '--skip-update',
