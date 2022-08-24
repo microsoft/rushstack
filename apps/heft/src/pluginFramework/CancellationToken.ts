@@ -29,13 +29,11 @@ export interface ICancellationTokenOptions {
 /**
  * Options for the cancellation token source.
  *
- * @public
+ * @beta
  */
 export interface ICancellationTokenSourceOptions {
   /**
    * Amount of time in milliseconds to wait before cancelling the token.
-   *
-   * @public
    */
   delayMs?: number;
 }
@@ -78,8 +76,6 @@ export class CancellationToken {
 
   /**
    * Obtain a promise that resolves when the token is cancelled.
-   *
-   * @public
    */
   public get onCancelledPromise(): Promise<void> {
     if (this._isCancelled !== undefined) {
@@ -125,8 +121,6 @@ export class CancellationTokenSource {
 
   /**
    * Whether or not the token has been cancelled.
-   *
-   * @public
    */
   public get isCancelled(): boolean {
     return this._isCancelled;
@@ -134,8 +128,6 @@ export class CancellationTokenSource {
 
   /**
    * Obtain the cancellation token produced by this source.
-   *
-   * @public
    */
   public get token(): CancellationToken {
     return this._cancellationToken;
@@ -148,8 +140,6 @@ export class CancellationTokenSource {
 
   /**
    * Cancel the token provided by the source.
-   *
-   * @public
    */
   public cancel(): void {
     this._isCancelled = true;

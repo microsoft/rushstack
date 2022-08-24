@@ -35,6 +35,14 @@ export class InternalHeftSession {
   private _phasesByName: Map<string, HeftPhase> | undefined;
   private _parameterManager: HeftParameterManager | undefined;
 
+  public readonly heftConfiguration: HeftConfiguration;
+
+  public readonly loggingManager: LoggingManager;
+
+  public readonly metricsCollector: MetricsCollector;
+
+  public readonly debug: boolean;
+
   private constructor(heftConfigurationJson: IHeftConfigurationJson, options: IInternalHeftSessionOptions) {
     this.heftConfiguration = options.heftConfiguration;
     this.loggingManager = options.loggingManager;
@@ -68,14 +76,6 @@ export class InternalHeftSession {
 
     return internalHeftSession;
   }
-
-  public readonly heftConfiguration: HeftConfiguration;
-
-  public readonly loggingManager: LoggingManager;
-
-  public readonly metricsCollector: MetricsCollector;
-
-  public readonly debug: boolean;
 
   public get parameterManager(): HeftParameterManager {
     if (!this._parameterManager) {

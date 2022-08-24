@@ -16,9 +16,17 @@ export class Constants {
 
   public static localesParameterLongName: string = '--locales';
 
+  public static onlyParameterLongName: string = '--only';
+
+  public static onlyParameterShortName: string = '-o';
+
   public static productionParameterLongName: string = '--production';
 
   public static serveParameterLongName: string = '--serve';
+
+  public static toParameterLongName: string = '--to';
+
+  public static toParameterShortName: string = '-t';
 
   public static unmanagedParameterLongName: string = '--unmanaged';
 

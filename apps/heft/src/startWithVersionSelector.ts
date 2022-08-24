@@ -48,13 +48,17 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
  */
 function tryStartLocalHeft(): boolean {
   if (process.argv.indexOf(Constants.unmanagedParameterLongName) >= 0) {
-    console.log('(Bypassing the Heft version selector because "--unmanaged" was specified.)');
+    console.log(
+      `Bypassing the Heft version selector because ${JSON.stringify(Constants.unmanagedParameterLongName)} ` +
+        'was specified.'
+    );
     console.log();
     return false;
   } else if (process.argv.indexOf(Constants.debugParameterLongName) >= 0) {
     // The unmanaged flag could be undiscoverable if it's not in their locally installed version
     console.log(
-      'Searching for a locally installed version of Heft. Use the --unmanaged flag if you want to avoid this'
+      'Searching for a locally installed version of Heft. Use the ' +
+        `${JSON.stringify(Constants.unmanagedParameterLongName)} flag if you want to avoid this.`
     );
   }
 

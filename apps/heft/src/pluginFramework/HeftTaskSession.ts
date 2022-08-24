@@ -113,8 +113,6 @@ export interface IHeftTaskHooks {
    * If provided, the `runIncremental` hook is called after all dependency task executions have completed
    * during a watch mode run. It is where the plugin can perform incremental work. To use it, call
    * `run.tapPromise(<pluginName>, <callback>)`.
-   *
-   * @public
    */
   readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
 }
@@ -205,6 +203,8 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
    * A cancellation token that is used to signal that the incremental build is cancelled. This
    * can be used to stop incremental operations early and allow for a new incremental build to
    * be started.
+   *
+   * @beta
    */
   readonly cancellationToken: CancellationToken;
 }

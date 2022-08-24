@@ -586,7 +586,10 @@ export class HeftActionRunner {
     } = this.parameterManager;
 
     if (cleanCache && !clean) {
-      throw new Error('The "--clean-cache" option can only be used in conjunction with "--clean".');
+      throw new Error(
+        `The ${JSON.stringify(Constants.cleanCacheParameterLongName)} option can only be used in ` +
+          `conjunction with ${JSON.stringify(Constants.cleanParameterLongName)}.`
+      );
     }
 
     const operations: Map<string, Operation> = new Map();

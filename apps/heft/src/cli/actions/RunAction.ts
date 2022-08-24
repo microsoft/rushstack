@@ -13,6 +13,7 @@ import { HeftActionRunner } from '../HeftActionRunner';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
+import { Constants } from '../../utilities/Constants';
 
 export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   public readonly watch: boolean;
@@ -37,15 +38,15 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
 
     this._actionRunner = new HeftActionRunner({ action: this, ...options });
     this._toParameter = this.defineStringListParameter({
-      parameterLongName: '--to',
-      parameterShortName: '-t',
+      parameterLongName: Constants.toParameterLongName,
+      parameterShortName: Constants.toParameterShortName,
       description: 'The phase to run to, including all transitive dependencies.',
       argumentName: 'PHASE',
       parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
     });
     this._onlyParameter = this.defineStringListParameter({
-      parameterLongName: '--only',
-      parameterShortName: '-o',
+      parameterLongName: Constants.onlyParameterLongName,
+      parameterShortName: Constants.onlyParameterShortName,
       description: 'The phase to run.',
       argumentName: 'PHASE',
       parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
@@ -62,7 +63,9 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
       );
       if (this._selectedPhases.size === 0) {
         throw new Error(
-          'No phases were selected. Provide at least one phase to the "--to" or "--only" parameters.'
+          'No phases were selected. Provide at least one phase to the ' +
+            `${JSON.stringify(Constants.toParameterLongName)} or ` +
+            `${JSON.stringify(Constants.onlyParameterLongName)} parameters.`
         );
       }
     }

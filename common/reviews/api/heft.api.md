@@ -19,7 +19,7 @@ import { ITerminalProvider } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { Terminal } from '@rushstack/node-core-library';
 
-// @public
+// @beta
 export class CancellationToken {
     // @internal
     constructor(options?: _ICancellationTokenOptions);
@@ -27,7 +27,7 @@ export class CancellationToken {
     get onCancelledPromise(): Promise<void>;
 }
 
-// @public
+// @beta
 export class CancellationTokenSource {
     constructor(options?: ICancellationTokenSourceOptions);
     cancel(): void;
@@ -77,7 +77,7 @@ export interface _ICancellationTokenOptions {
     isCancelled?: boolean;
 }
 
-// @public
+// @beta
 export interface ICancellationTokenSourceOptions {
     delayMs?: number;
 }
@@ -210,6 +210,7 @@ export interface IHeftTaskRunHookOptions {
 
 // @public
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+    // @beta
     readonly cancellationToken: CancellationToken;
     readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
 }

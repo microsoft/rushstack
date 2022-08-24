@@ -35,6 +35,16 @@ export class HeftPluginConfiguration {
   private _taskPluginDefinitions: Set<HeftTaskPluginDefinition> | undefined;
   private _taskPluginDefinitionsMap: Map<string, HeftTaskPluginDefinition> | undefined;
 
+  /**
+   * The path to the root of the package that contains the heft-plugin.json file.
+   */
+  public readonly packageRoot: string;
+
+  /**
+   * The package name of the package that contains the heft-plugin.json file.
+   */
+  public readonly packageName: string;
+
   private constructor(
     heftPluginConfigurationJson: IHeftPluginConfigurationJson,
     packageRoot: string,
@@ -69,16 +79,6 @@ export class HeftPluginConfiguration {
 
     return await heftPluginConfigurationPromise;
   }
-
-  /**
-   * The path to the root of the package that contains the heft-plugin.json file.
-   */
-  public readonly packageRoot: string;
-
-  /**
-   * The package name of the package that contains the heft-plugin.json file.
-   */
-  public readonly packageName: string;
 
   public get lifecyclePluginDefinitions(): ReadonlySet<HeftLifecyclePluginDefinition> {
     if (!this._lifecyclePluginDefinitions) {
