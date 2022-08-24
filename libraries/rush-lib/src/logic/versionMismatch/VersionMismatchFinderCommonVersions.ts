@@ -60,7 +60,7 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
   }
 
   public removeDependency(packageName: string): void {
-    throw new Error('should not use this function');
+    throw new Error('Not supported.');
   }
 
   public saveIfModified(): boolean {
