@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 19 Aug 2022 00:17:19 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Aug 2022 00:14:38 GMT and should not be manually modified.
+
+## 3.51.0
+Wed, 24 Aug 2022 00:14:38 GMT
+
+### Minor changes
+
+- Deprecate LegacyAdapters.sortStable and remove support for NodeJS < 11. If you are using NodeJS < 11, this is a breaking change.
 
 ## 3.50.2
 Fri, 19 Aug 2022 00:17:19 GMT
