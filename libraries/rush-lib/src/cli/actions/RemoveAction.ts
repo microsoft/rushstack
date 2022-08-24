@@ -22,7 +22,7 @@ export class RemoveAction extends BaseRushAction {
     ];
     super({
       actionName: 'remove',
-      summary: 'Remove one or more dependencies from the package.json and runs rush update.',
+      summary: 'Removes one or more dependencies from the package.json and runs rush update.',
       documentation: documentation.join(os.EOL),
       safeForSimultaneousRushProcesses: false,
       parser
