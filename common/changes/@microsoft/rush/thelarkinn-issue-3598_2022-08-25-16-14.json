@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixed a bug where rush add was not updating common-versions.json from --make-consistent",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
