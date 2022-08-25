@@ -549,17 +549,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         countNoOp: 0
       };
 
-      let buildTimings: IBuildTimeRecord[] = [];
-      let dependencyGraph: IDependencyGraph = {};
-      const machineInfo: IMachineInfo = {
-        machineArch: os.arch(),
-        machineOS: os.platform(),
-        machineCPU: os.cpus()[0].model,
-        machineCores: os.cpus().length,
-        machineTotalMemMB: Math.floor(os.totalmem() / 1024 / 1024),
-        machineFreeMemMB: Math.floor(os.freemem() / 1024 / 1024)
-      };
-
       if (result) {
         const nonSilentDependenciesByOperation: Map<Operation, Set<string>> = new Map();
         function getNonSilentDependencies(operation: Operation): ReadonlySet<string> {
@@ -621,8 +610,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
               break;
           }
         }
-        buildTimings = _setBuildTimes(result);
-        dependencyGraph = makeDependencyGraph(result);
       }
 
       this.parser.telemetry.log({

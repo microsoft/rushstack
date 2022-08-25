@@ -84,12 +84,6 @@ export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IO
 export { IExecutionResult, IOperationExecutionResult } from './logic/operations/IOperationExecutionResult';
 export { IOperationOptions, Operation } from './logic/operations/Operation';
 export { OperationStatus } from './logic/operations/OperationStatus';
-export { IBuildTimeRecord, _setBuildTimes } from './logic/operations/BuildTimePlugin';
-export {
-  IDependencyGraph,
-  dependencyAnalysis,
-  simulateBuildTime
-} from './logic/operations/DependencyAnalysisPlugin';
 
 export {
   RushSession,

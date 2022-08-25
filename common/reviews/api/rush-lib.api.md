@@ -505,10 +505,6 @@ export interface IStopwatchResult {
 
 // @beta (undocumented)
 export interface ITelemetryData {
-    // (undocumented)
-    readonly buildTimings?: IBuildTimeRecord[];
-    // (undocumented)
-    readonly dependencyGraph?: IDependencyGraph;
     readonly durationInSeconds: number;
     // (undocumented)
     readonly extraData?: {

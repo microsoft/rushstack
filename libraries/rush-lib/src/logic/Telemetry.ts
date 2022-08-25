@@ -8,20 +8,6 @@ import { FileSystem, FileSystemStats, JsonFile } from '@rushstack/node-core-libr
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
 import { RushSession } from '../pluginFramework/RushSession';
-import { IBuildTimeRecord } from './operations/BuildTimePlugin';
-import { IDependencyGraph } from './operations/DependencyAnalysisPlugin';
-
-/**
- * @beta
- */
-export interface IMachineInfo {
-  machineArch: string;
-  machineOS: string;
-  machineCPU: string;
-  machineCores: number;
-  machineTotalMemMB: number;
-  machineFreeMemMB: number;
-}
 
 /**
  * @beta
