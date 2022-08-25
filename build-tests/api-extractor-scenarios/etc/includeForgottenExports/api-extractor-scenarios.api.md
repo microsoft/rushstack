@@ -4,18 +4,21 @@
 
 ```ts
 
+// @public
 class AnotherDuplicateName {
 }
 
-// (undocumented)
+// @public (undocumented)
 class AnotherDuplicateName_2 {
 }
 
 // @public
 export type DuplicateName = boolean;
 
+// @public
 type DuplicateName_2 = number;
 
+// @public
 class ForgottenExport1 {
     constructor();
     // Warning: (ae-forgotten-export) The symbol "ForgottenExport2" needs to be exported by the entry point index.d.ts
@@ -26,17 +29,17 @@ class ForgottenExport1 {
 
 // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "api-extractor-scenarios" does not have an export "ForgottenExport1"
 //
-// (undocumented)
+// @public (undocumented)
 type ForgottenExport2 = number;
 
-// (undocumented)
+// @public (undocumented)
 namespace ForgottenExport4 {
     // (undocumented)
     class ForgottenExport5 {
     }
 }
 
-// (undocumented)
+// @public (undocumented)
 class ForgottenExport6 {
 }
 

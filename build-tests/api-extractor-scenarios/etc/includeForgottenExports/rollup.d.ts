@@ -1,10 +1,12 @@
 /**
  * This forgotten item has the same name as another forgotten item in another
  * file. They should be given unique names.
+ * @public
  */
 declare class AnotherDuplicateName {
 }
 
+/** @public */
 declare class AnotherDuplicateName_2 {
 }
 
@@ -19,26 +21,33 @@ export declare type DuplicateName = boolean;
 /**
  * Will be renamed to avoid a name conflict with the exported `DuplicateName` from
  * index.ts.
+ * @public
  */
 declare type DuplicateName_2 = number;
 
 /**
  * `ForgottenExport2` wants to inherit this doc comment, but unfortunately this isn't
  * supported yet
+ * @public
  */
 declare class ForgottenExport1 {
     prop?: ForgottenExport2;
     constructor();
 }
 
-/** {@inheritDoc ForgottenExport1} */
+/**
+ * @public
+ * {@inheritDoc ForgottenExport1}
+ */
 declare type ForgottenExport2 = number;
 
+/** @public */
 declare namespace ForgottenExport4 {
     class ForgottenExport5 {
     }
 }
 
+/** @public */
 declare class ForgottenExport6 {
 }
 

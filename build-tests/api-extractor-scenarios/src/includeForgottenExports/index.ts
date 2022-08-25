@@ -3,13 +3,17 @@ import * as internal2 from './internal2';
 /**
  * `ForgottenExport2` wants to inherit this doc comment, but unfortunately this isn't
  * supported yet
+ * @public
  */
 class ForgottenExport1 {
   prop?: ForgottenExport2;
   constructor() {}
 }
 
-/** {@inheritDoc ForgottenExport1} */
+/**
+ * @public
+ * {@inheritDoc ForgottenExport1}
+ */
 type ForgottenExport2 = number;
 
 /** @public */
@@ -36,6 +40,7 @@ export namespace SomeNamespace1 {
   }
 }
 
+/** @public */
 namespace ForgottenExport4 {
   export class ForgottenExport5 {}
 }
@@ -53,6 +58,7 @@ export function someFunction5(): internal2.ForgottenExport6 {
 /**
  * This forgotten item has the same name as another forgotten item in another
  * file. They should be given unique names.
+ * @public
  */
 class AnotherDuplicateName {}
 

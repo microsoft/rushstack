@@ -815,28 +815,30 @@ export class Collector {
     if (options.effectiveReleaseTag === ReleaseTag.None) {
       if (!astDeclaration.astSymbol.isExternal) {
         // for now, don't report errors for external code
-        // Don't report missing release tags for forgotten exports
+        // Don't report missing release tags for forgotten exports (unless we're including forgotten exports
+        // in either the API report or doc model).
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
         const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-        if (entity && entity.consumable) {
+        if (
+          entity &&
+          (entity.consumable ||
+            this.extractorConfig.apiReportIncludeForgottenExports ||
+            this.extractorConfig.docModelIncludeForgottenExports)
+        ) {
           // We also don't report errors for the default export of an entry point, since its doc comment
           // isn't easy to obtain from the .d.ts file
           if (astSymbol.rootAstSymbol.localName !== '_default') {
             this.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.MissingReleaseTag,
-              `"${entity.astEntity.localName}" is exported by the package, but it is missing ` +
+              `"${entity.astEntity.localName}" is part of the package's API, but it is missing ` +
                 `a release tag (@alpha, @beta, @public, or @internal)`,
               astSymbol
             );
           }
-
-          // All internal, exported APIs default to public if no release tag is specified.
-          options.effectiveReleaseTag = ReleaseTag.Public;
         }
-      } else {
-        // All external APIs default to public if no release tag is specified.
-        options.effectiveReleaseTag = ReleaseTag.Public;
       }
+
+      options.effectiveReleaseTag = ReleaseTag.Public;
     }
 
     const apiItemMetadata: ApiItemMetadata = new ApiItemMetadata(options);

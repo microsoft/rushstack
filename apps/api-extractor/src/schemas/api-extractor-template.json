@@ -86,7 +86,7 @@
    *
    * DEFAULT VALUE: "by-name"
    */
-  // enumMemberOrder?: EnumMemberOrder,
+  // "enumMemberOrder": "by-name",
 
   /**
    * Determines how the TypeScript compiler engine will be invoked by API Extractor.
@@ -185,7 +185,7 @@
      *
      * DEFAULT VALUE: "false"
      */
-    // includeForgottenExports?: boolean
+    // "includeForgottenExports": false
   },
 
   /**
@@ -215,7 +215,7 @@
      *
      * DEFAULT VALUE: "false"
      */
-    // includeForgottenExports?: boolean
+    // "includeForgottenExports": false
   },
 
   /**

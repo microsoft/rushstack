@@ -1,6 +1,7 @@
 /**
  * Will be renamed to avoid a name conflict with the exported `DuplicateName` from
  * index.ts.
+ * @public
  */
 type DuplicateName = number;
 
@@ -9,6 +10,7 @@ export function someFunction2(): DuplicateName {
   return 5;
 }
 
+/** @public */
 class AnotherDuplicateName {}
 
 /** @public */

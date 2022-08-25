@@ -175,14 +175,14 @@
         {
           "kind": "Class",
           "canonicalReference": "api-extractor-scenarios!~AnotherDuplicateName_2:class",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
               "text": "declare class AnotherDuplicateName "
             }
           ],
-          "releaseTag": "None",
+          "releaseTag": "Public",
           "name": "AnotherDuplicateName_2",
           "preserveMemberOrder": false,
           "members": [],
@@ -191,14 +191,14 @@
         {
           "kind": "Class",
           "canonicalReference": "api-extractor-scenarios!~AnotherDuplicateName:class",
-          "docComment": "/**\n * This forgotten item has the same name as another forgotten item in another file. They should be given unique names.\n */\n",
+          "docComment": "/**\n * This forgotten item has the same name as another forgotten item in another file. They should be given unique names.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
               "text": "declare class AnotherDuplicateName "
             }
           ],
-          "releaseTag": "None",
+          "releaseTag": "Public",
           "name": "AnotherDuplicateName",
           "preserveMemberOrder": false,
           "members": [],
@@ -207,7 +207,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "api-extractor-scenarios!~DuplicateName_2:type",
-          "docComment": "/**\n * Will be renamed to avoid a name conflict with the exported `DuplicateName` from index.ts.\n */\n",
+          "docComment": "/**\n * Will be renamed to avoid a name conflict with the exported `DuplicateName` from index.ts.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -222,7 +222,7 @@
               "text": ";"
             }
           ],
-          "releaseTag": "None",
+          "releaseTag": "Public",
           "name": "DuplicateName_2",
           "typeTokenRange": {
             "startIndex": 1,
@@ -257,14 +257,14 @@
         {
           "kind": "Class",
           "canonicalReference": "api-extractor-scenarios!~ForgottenExport1:class",
-          "docComment": "/**\n * `ForgottenExport2` wants to inherit this doc comment, but unfortunately this isn't supported yet\n */\n",
+          "docComment": "/**\n * `ForgottenExport2` wants to inherit this doc comment, but unfortunately this isn't supported yet\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
               "text": "declare class ForgottenExport1 "
             }
           ],
-          "releaseTag": "None",
+          "releaseTag": "Public",
           "name": "ForgottenExport1",
           "preserveMemberOrder": false,
           "members": [
@@ -278,7 +278,7 @@
                   "text": "constructor();"
                 }
               ],
-              "releaseTag": "None",
+              "releaseTag": "Public",
               "isProtected": false,
               "overloadIndex": 1,
               "parameters": []
@@ -304,7 +304,7 @@
               ],
               "isReadonly": false,
               "isOptional": true,
-              "releaseTag": "None",
+              "releaseTag": "Public",
               "name": "prop",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
@@ -319,7 +319,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "api-extractor-scenarios!~ForgottenExport2:type",
-          "docComment": "/**\n * {@inheritDoc ForgottenExport1}\n */\n",
+          "docComment": "/**\n * {@inheritDoc ForgottenExport1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -334,7 +334,7 @@
               "text": ";"
             }
           ],
-          "releaseTag": "None",
+          "releaseTag": "Public",
           "name": "ForgottenExport2",
           "typeTokenRange": {
             "startIndex": 1,
@@ -344,14 +344,14 @@
         {
           "kind": "Namespace",
           "canonicalReference": "api-extractor-scenarios!~ForgottenExport4:namespace",
-          "docComment": "",
+          "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
               "text": "declare namespace ForgottenExport4 "
             }
           ],
-          "releaseTag": "None",
+          "releaseTag": "Public",
           "name": "ForgottenExport4",
           "preserveMemberOrder": false,
           "members": [
@@ -365,7 +365,7 @@
                   "text": "class ForgottenExport5 "
                 }
               ],
-              "releaseTag": "None",
+              "releaseTag": "Public",
               "name": "ForgottenExport5",
               "preserveMemberOrder": false,
               "members": [],
@@ -385,14 +385,14 @@
             {
               "kind": "Class",
               "canonicalReference": "api-extractor-scenarios!~internal2.ForgottenExport6:class",
-              "docComment": "",
+              "docComment": "/**\n * @public\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
                   "text": "export declare class ForgottenExport6 "
                 }
               ],
-              "releaseTag": "None",
+              "releaseTag": "Public",
               "name": "ForgottenExport6",
               "preserveMemberOrder": false,
               "members": [],
