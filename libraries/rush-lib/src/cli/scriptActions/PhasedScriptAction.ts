@@ -172,7 +172,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const { ConsoleTimelinePlugin } = await import('../../logic/operations/ConsoleTimelinePlugin');
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
     }
-
     // Enable the standard summary
     new OperationResultSummarizerPlugin(terminal).apply(this.hooks);
 
