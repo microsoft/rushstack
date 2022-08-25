@@ -2,6 +2,56 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.29.5",
+      "tag": "@microsoft/api-extractor_v7.29.5",
+      "date": "Wed, 24 Aug 2022 03:01:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.23.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.29.4",
+      "tag": "@microsoft/api-extractor_v7.29.4",
+      "date": "Wed, 24 Aug 2022 00:14:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove use of LegacyAdapters.sortStable"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.23.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.29.3",
+      "tag": "@microsoft/api-extractor_v7.29.3",
+      "date": "Fri, 19 Aug 2022 00:17:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.23.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.29.2",
       "tag": "@microsoft/api-extractor_v7.29.2",
       "date": "Wed, 10 Aug 2022 09:52:12 GMT",

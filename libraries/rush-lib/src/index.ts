@@ -115,6 +115,6 @@ export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCachePro
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 
-export { IMachineInfo, ITelemetryData } from './logic/Telemetry';
+export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
 
 export { IStopwatchResult } from './utilities/Stopwatch';

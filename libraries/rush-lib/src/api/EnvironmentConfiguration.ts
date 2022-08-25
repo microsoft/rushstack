@@ -104,12 +104,12 @@ export enum EnvironmentVariableNames {
   RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER',
 
   /**
-   * Provides a credential for a remote build cache, if configured. Setting this environment variable
-   * overrides whatever credential has been saved in the local cloud cache credentials using
-   * `rush update-cloud-credentials`.
+   * Provides a credential for a remote build cache, if configured.  This credential overrides any cached credentials.
    *
    * @remarks
-   * This credential overrides any cached credentials.
+   * Setting this environment variable overrides whatever credential has been saved in the
+   * local cloud cache credentials using `rush update-cloud-credentials`.
+   *
    *
    * If Azure Blob Storage is used to store cache entries, this must be a SAS token serialized as query
    * parameters.
@@ -120,25 +120,31 @@ export enum EnvironmentVariableNames {
 
   /**
    * Setting this environment variable overrides the value of `buildCacheEnabled` in the `build-cache.json`
-   * configuration file. Specify `1` to enable the build cache or `0` to disable it.
+   * configuration file.
+   *
+   * @remarks
+   * Specify `1` to enable the build cache or `0` to disable it.
    *
    * If set to `0`, this is equivalent to passing the `--disable-build-cache` flag.
+   *
+   * If there is no build cache configured, then this environment variable is ignored.
    */
   RUSH_BUILD_CACHE_ENABLED = 'RUSH_BUILD_CACHE_ENABLED',
 
   /**
-   * Setting this environment variable overrides the value of `isCacheWriteAllowed` in the `build-cache.json`
-   * configuration file. Specify `1` to allow cache write and `0` to disable it.
+   * Overrides the value of `isCacheWriteAllowed` in the `build-cache.json` configuration file. The value of this
+   * environment variable must be `1` (for true) or `0` (for false). If there is no build cache configured, then
+   * this environment variable is ignored.
    */
   RUSH_BUILD_CACHE_WRITE_ALLOWED = 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
 
   /**
-   * Allows the git binary path to be explicitly specified.
+   * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
    */
   RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
 
   /**
-   * Allows the tar binary path to be explicitly specified.
+   * Explicitly specifies the path for the `tar` binary that is invoked by certain Rush operations.
    */
   RUSH_TAR_BINARY_PATH = 'RUSH_TAR_BINARY_PATH',
 
