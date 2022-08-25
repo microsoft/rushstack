@@ -92,20 +92,27 @@ export class DeclarationReferenceGenerator {
     const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
     const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
 
-    // If it's a global, then use an Exports navigation.
-    if (sourceFile && !ts.isExternalModule(sourceFile)) {
-      return Navigation.Exports;
-    }
+    // If it's global or from an external library, then use either Members or Exports. It's not possible for
+    // global symbols or external library symbols to be Locals.
+    const isGlobal: boolean = !!sourceFile && !ts.isExternalModule(sourceFile);
+    const isFromExternalLibrary: boolean =
+      !!sourceFile && this._collector.program.isSourceFileFromExternalLibrary(sourceFile);
+    if (isGlobal || isFromExternalLibrary) {
+      if (
+        parent &&
+        parent.members &&
+        DeclarationReferenceGenerator._isSameSymbol(parent.members.get(symbol.escapedName), symbol)
+      ) {
+        return Navigation.Members;
+      }
 
-    // If it's from an external library, then use an Exports navigation.
-    if (sourceFile && this._collector.program.isSourceFileFromExternalLibrary(sourceFile)) {
       return Navigation.Exports;
     }
 
     // Otherwise, this symbol is from the current package.
     if (parent) {
       // If we've found an exported CollectorEntity, then it's exported from the package entry point, so
-      // use an Exports navigation.
+      // use Exports.
       const namedDeclaration: ts.DeclarationName | undefined = (
         declaration as ts.NamedDeclaration | undefined
       )?.name;
@@ -117,10 +124,17 @@ export class DeclarationReferenceGenerator {
         }
       }
 
-      // If its parent symbol is not a source file, then use an Exports navigation. If the parent symbol is
-      // a source file, but it wasn't exported from the package entry point (in the check above), then the symbol
-      // is a local, so fall through below.
+      // If its parent symbol is not a source file, then use either Exports or Members. If the parent symbol
+      // is a source file, but it wasn't exported from the package entry point (in the check above), then the
+      // symbol is a local, so fall through below.
       if (!DeclarationReferenceGenerator._isExternalModuleSymbol(parent)) {
+        if (
+          parent.members &&
+          DeclarationReferenceGenerator._isSameSymbol(parent.members.get(symbol.escapedName), symbol)
+        ) {
+          return Navigation.Members;
+        }
+
         return Navigation.Exports;
       }
     }

@@ -64,6 +64,17 @@ export function someFunction6(): typeof SomeClass1.staticProp {
   return 5;
 }
 
+/** @public */
+export interface SomeInterface1 {
+  prop: number;
+}
+
+/**
+ * Interface member reference.
+ * @public
+ */
+export function someFunction9({ prop: prop2 }: SomeInterface1): void {}
+
 class SomeClass2 {}
 
 /**
@@ -76,17 +87,15 @@ export class SomeClass3 extends SomeClass2 {}
  * Global symbol reference.
  * @public
  */
-export function someFunction7(): Promise<void> {
-  return Promise.resolve();
+export function someFunction7({ then: then2 }: Promise<void>): typeof Date.prototype.getDate {
+  return () => 5;
 }
 
 /**
  * External symbol reference.
  * @public
  */
-export function someFunction8(): Lib2Class {
-  return new Lib2Class();
-}
+export function someFunction8({ prop: prop2 }: Lib2Class): void {}
 
 /**
  * Reference to a symbol exported from another file, but not exported from the package.
