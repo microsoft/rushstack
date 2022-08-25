@@ -60,3 +60,64 @@ Array [
   "",
 ]
 `;
+
+ exports[`Utilities printMessageInBox Correctly gets the console width 1`] = `
+ Array [
+   " ╔══════════════════════════════╗ ",
+   " ║    Lorem ipsum dolor sit     ║ ",
+   " ║      amet, consectetuer      ║ ",
+   " ║       adipiscing elit.       ║ ",
+   " ║      Maecenas porttitor      ║ ",
+   " ║     congue massa. Fusce      ║ ",
+   " ║      posuere, magna sed      ║ ",
+   " ║     pulvinar ultricies,      ║ ",
+   " ║         purus lectus         ║ ",
+   " ║    malesuada libero, sit     ║ ",
+   " ║      amet commodo magna      ║ ",
+   " ║       eros quis urna.        ║ ",
+   " ╚══════════════════════════════╝ ",
+   "",
+ ]
+ `;
+
+ exports[`Utilities printMessageInBox Correctly prints a narrow box 1`] = `
+ Array [
+   " ╔══════════════════╗ ",
+   " ║      Lorem       ║ ",
+   " ║      ipsum       ║ ",
+   " ║    dolor sit     ║ ",
+   " ║      amet,       ║ ",
+   " ║   consectetuer   ║ ",
+   " ║    adipiscing    ║ ",
+   " ║      elit.       ║ ",
+   " ║     Maecenas     ║ ",
+   " ║    porttitor     ║ ",
+   " ║      congue      ║ ",
+   " ║      massa.      ║ ",
+   " ║      Fusce       ║ ",
+   " ║     posuere,     ║ ",
+   " ║    magna sed     ║ ",
+   " ║     pulvinar     ║ ",
+   " ║    ultricies,    ║ ",
+   " ║      purus       ║ ",
+   " ║      lectus      ║ ",
+   " ║    malesuada     ║ ",
+   " ║     libero,      ║ ",
+   " ║     sit amet     ║ ",
+   " ║     commodo      ║ ",
+   " ║      magna       ║ ",
+   " ║    eros quis     ║ ",
+   " ║      urna.       ║ ",
+   " ╚══════════════════╝ ",
+   "",
+ ]
+ `;
+
+ exports[`Utilities printMessageInBox Correctly prints a wide box 1`] = `
+ Array [
+   " ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗ ",
+   " ║                                              Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.                                               ║ ",
+   " ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝ ",
+   "",
+ ]
+ `;
