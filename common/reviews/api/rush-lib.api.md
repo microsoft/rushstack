@@ -127,9 +127,6 @@ export class CredentialCache {
     static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
 }
 
-// @beta (undocumented)
-export function dependencyAnalysis(filename: string, terminal: ITerminal): void;
-
 // @public (undocumented)
 export enum DependencyType {
     // (undocumented)
@@ -223,16 +220,6 @@ export class FileSystemBuildCacheProvider {
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
-// @beta (undocumented)
-export interface IBuildTimeRecord {
-    // (undocumented)
-    buildTime: number;
-    // (undocumented)
-    project: string;
-    // (undocumented)
-    status: OperationStatus;
-}
-
 // @internal (undocumented)
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
     // (undocumented)
@@ -293,11 +280,6 @@ export interface ICredentialCacheOptions {
     // (undocumented)
     supportEditing: boolean;
 }
-
-// Warning: (ae-forgotten-export) The symbol "IDependencyGraphEntry" needs to be exported by the entry point index.d.ts
-//
-// @beta (undocumented)
-export type IDependencyGraph = Record<string, IDependencyGraphEntry>;
 
 // @beta (undocumented)
 export interface IEnvironmentConfigurationInitializeOptions {
@@ -365,22 +347,6 @@ export interface ILogger {
     emitWarning(warning: Error): void;
     // (undocumented)
     readonly terminal: Terminal;
-}
-
-// @beta (undocumented)
-export interface IMachineInfo {
-    // (undocumented)
-    machineArch: string;
-    // (undocumented)
-    machineCores: number;
-    // (undocumented)
-    machineCPU: string;
-    // (undocumented)
-    machineFreeMemMB: number;
-    // (undocumented)
-    machineOS: string;
-    // (undocumented)
-    machineTotalMemMB: number;
 }
 
 // @public
@@ -956,14 +922,6 @@ export class RushUserConfiguration {
     // (undocumented)
     static initializeAsync(): Promise<RushUserConfiguration>;
 }
-
-// Warning: (ae-incompatible-release-tags) The symbol "_setBuildTimes" is marked as @beta, but its signature references "IExecutionResult" which is marked as @alpha
-//
-// @beta (undocumented)
-export function _setBuildTimes(result: IExecutionResult): IBuildTimeRecord[];
-
-// @beta (undocumented)
-export function simulateBuildTime(filename: string, terminal: ITerminal): void;
 
 // @public
 export abstract class VersionPolicy {
