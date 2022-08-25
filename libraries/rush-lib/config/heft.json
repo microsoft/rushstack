@@ -7,11 +7,8 @@
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 
   // TODO: Add comments
-  "$phasesByName.inheritanceType": "merge",
   "phasesByName": {
-    "$build.inheritanceType": "merge",
     "build": {
-      "$tasksByName.inheritanceType": "merge",
       "tasksByName": {
         "copy-mock-flush-telemetry-plugin": {
           "taskDependencies": ["typescript"],

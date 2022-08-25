@@ -76,13 +76,9 @@ export class CoreConfigFiles {
       CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
         projectRelativeFilePath: 'config/heft.json',
         jsonSchemaPath: schemaPath,
-        propertyInheritance: {
-          heftPlugins: {
-            inheritanceType: InheritanceType.append
-          },
-          phasesByName: {
-            inheritanceType: InheritanceType.replace
-          }
+        propertyInheritanceDefaults: {
+          array: { inheritanceType: InheritanceType.append },
+          object: { inheritanceType: InheritanceType.merge }
         },
         jsonPathMetadata: {
           // Use a custom resolver for the plugin packages, since the NodeResolve algorithm will resolve to the

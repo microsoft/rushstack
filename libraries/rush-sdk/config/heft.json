@@ -7,9 +7,7 @@
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 
   // TODO: Add comments
-  "$phasesByName.inheritanceType": "merge",
   "phasesByName": {
-    "$build.inheritanceType": "merge",
     "build": {
       "cleanAdditionalFiles": [
         {
@@ -17,7 +15,6 @@
         }
       ],
 
-      "$tasksByName.inheritanceType": "merge",
       "tasksByName": {
         "copy-rush-lib-types": {
           "taskEvent": {
@@ -33,7 +30,6 @@
           }
         },
 
-        "$typescript.inheritanceType": "merge",
         "typescript": {
           "taskDependencies": ["copy-rush-lib-types"]
         }
