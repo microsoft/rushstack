@@ -84,8 +84,12 @@ export class AnalyzeTelemetryAction extends BaseRushAction {
     if (operationResults) {
       Object.entries(operationResults).forEach(
         ([project, operationTelemetry]: [string, ITelemetryOperationResult], index) => {
-          const durationSeconds: number =
-            (operationTelemetry.endTimestamp ?? 0) - (operationTelemetry.startTimestamp ?? 0);
+          const durationSeconds: number = Number(
+            (
+              ((operationTelemetry.endTimestamp ?? 0) - (operationTelemetry.startTimestamp ?? 0)) /
+              1000
+            ).toFixed(2)
+          );
           buildTimeMap.set(project, durationSeconds);
         }
       );
