@@ -25,6 +25,8 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
     jsonSchemaPath: string;
     projectRelativeFilePath: string;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
+    // Warning: (ae-forgotten-export) The symbol "IPropertyInheritanceDefaults" needs to be exported by the entry point index.d.ts
+    propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
 }
 
 // @beta
