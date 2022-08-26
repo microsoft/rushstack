@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "add changelog json schema and load validation",
+      "comment": "Add schema validation to changelog files.",
       "type": "none"
     }
   ],
