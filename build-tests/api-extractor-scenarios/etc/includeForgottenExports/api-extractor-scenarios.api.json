@@ -440,7 +440,7 @@
             {
               "kind": "Reference",
               "text": "DuplicateName",
-              "canonicalReference": "api-extractor-scenarios!~DuplicateName:type"
+              "canonicalReference": "api-extractor-scenarios!~DuplicateName_2:type"
             },
             {
               "kind": "Content",
@@ -556,7 +556,7 @@
             {
               "kind": "Reference",
               "text": "AnotherDuplicateName",
-              "canonicalReference": "api-extractor-scenarios!~AnotherDuplicateName:class"
+              "canonicalReference": "api-extractor-scenarios!~AnotherDuplicateName_2:class"
             },
             {
               "kind": "Content",

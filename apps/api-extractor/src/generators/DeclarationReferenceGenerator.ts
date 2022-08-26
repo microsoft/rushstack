@@ -228,7 +228,7 @@ export class DeclarationReferenceGenerator {
       return undefined;
     }
 
-    let localName: string = followedSymbol.name;
+    let localName: string = this._collector.getEmitName(followedSymbol);
     if (followedSymbol.escapedName === ts.InternalSymbolName.Constructor) {
       localName = 'constructor';
     } else {

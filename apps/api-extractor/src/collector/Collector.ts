@@ -82,6 +82,7 @@ export class Collector {
     AstEntity,
     CollectorEntity
   >();
+  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
@@ -301,6 +302,18 @@ export class Collector {
     return this._entitiesByAstEntity.get(astEntity);
   }
 
+  /**
+   * Returns the name to emit for the given `symbol`.
+   * This is usually the `name` of that `symbol`.
+   * Only if this `symbol` has a `CollectorEntity`, the `nameForEmit` of that entity is used.
+   * @param symbol the symbol to compute the name to emit for
+   * @returns the name to emit for the given `symbol`
+   */
+  public getEmitName(symbol: ts.Symbol): string {
+    const collectorEntity: CollectorEntity | undefined = this._entitiesBySymbol.get(symbol);
+    return collectorEntity?.nameForEmit ?? symbol.name;
+  }
+
   public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
     if (astSymbol.symbolMetadata === undefined) {
       this._fetchSymbolMetadata(astSymbol);
@@ -420,6 +433,9 @@ export class Collector {
       entity = new CollectorEntity(astEntity);
 
       this._entitiesByAstEntity.set(astEntity, entity);
+      if (astEntity instanceof AstSymbol) {
+        this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
+      }
       this._entities.push(entity);
       this._collectReferenceDirectives(astEntity);
     }
