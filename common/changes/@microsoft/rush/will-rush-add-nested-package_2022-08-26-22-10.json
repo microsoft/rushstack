@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Packages are now sorted in decreasing order of their paths so nested packages are located before root packages.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
