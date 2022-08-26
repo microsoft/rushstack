@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Changelog file for packages in rush which should be published",
+  "description": "This file represents a JSON format of changelog of a package",
+  "additionalProperties": false,
+  "properties": {
+    "entries": {
+      "description": "Entries within the changelog corresponding to each published version.",
+      "items": {
+        "$ref": "#/definitions/IChangeLogEntry"
+      },
+      "type": "array"
+    },
+    "name": {
+      "description": "Name of the project",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "entries"
+  ],
+  "type": "object",
+  "definitions": {
+    "IChangeLogComment": {
+      "additionalProperties": false,
+      "description": "Interface representing a single changelog comment within an entry.",
+      "properties": {
+        "author": {
+          "description": "The author, if applicable, that created the change request.",
+          "type": "string"
+        },
+        "comment": {
+          "description": "The given comment. (supports markdown.)",
+          "type": "string"
+        },
+        "commit": {
+          "description": "The commit, if applicable, including the change request.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "comment"
+      ],
+      "type": "object"
+    },
+    "IChangeLogEntry": {
+      "additionalProperties": false,
+      "description": "Interface representing a single published entry in the changelog.",
+      "properties": {
+        "comments": {
+          "$ref": "#/definitions/IChangeLogEntryComments",
+          "description": "Comments for the entry, where key represents the ChangeType string (Example: major)"
+        },
+        "date": {
+          "description": "The UTC date when the publish was applied. (Example: Fri, 02 Dec 2016 22:27:16 GMT)",
+          "type": "string"
+        },
+        "tag": {
+          "description": "Git tag used to identify the published commit. (Example: b7f55611e54910327a206476b185265498c66acf)",
+          "type": "string"
+        },
+        "version": {
+          "description": "Published version for the entry. (Example: 1.0.0)",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "tag",
+        "comments"
+      ],
+      "type": "object"
+    },
+    "IChangeLogEntryComments": {
+      "additionalProperties": false,
+      "description": "Interface representing a single published entry in the changelog.",
+      "properties": {
+        "dependency": {
+          "description": "Describes changes to the package's dependencies",
+          "items": {
+            "$ref": "#/definitions/IChangeLogComment"
+          },
+          "type": "array"
+        },
+        "hotfix": {
+          "description": "Describe changes that do not have version information",
+          "items": {
+            "$ref": "#/definitions/IChangeLogComment"
+          },
+          "type": "array"
+        },
+        "major": {
+          "description": "Describes changes which cause a major-level SemVer bump",
+          "items": {
+            "$ref": "#/definitions/IChangeLogComment"
+          },
+          "type": "array"
+        },
+        "minor": {
+          "description": "Describes changes which cause a minor-level SemVer bump",
+          "items": {
+            "$ref": "#/definitions/IChangeLogComment"
+          },
+          "type": "array"
+        },
+        "none": {
+          "description": "Describe changes that do not have version information",
+          "items": {
+            "$ref": "#/definitions/IChangeLogComment"
+          },
+          "type": "array"
+        },
+        "patch": {
+          "description": "Describes changes which cause a patch-level SemVer bump",
+          "items": {
+            "$ref": "#/definitions/IChangeLogComment"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  }
+}

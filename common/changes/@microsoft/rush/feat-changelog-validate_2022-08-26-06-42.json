@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "add changelog json schema and load validation",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
