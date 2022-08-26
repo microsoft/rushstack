@@ -1753,7 +1753,10 @@ export class RushConfiguration {
    */
   public tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined {
     const resolvedPath: string = path.resolve(currentFolderPath);
-    for (const project of this.projects) {
+    const sortedProjects: RushConfigurationProject[] = this.projects.sort(
+      (a, b) => b.projectFolder.length - a.projectFolder.length
+    );
+    for (const project of sortedProjects) {
       if (Path.isUnderOrEqual(resolvedPath, project.projectFolder)) {
         return project;
       }
