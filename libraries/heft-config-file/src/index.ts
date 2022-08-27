@@ -13,6 +13,7 @@ export {
   IOriginalValueOptions,
   IPropertiesInheritance,
   IPropertyInheritance,
+  IPropertyInheritanceDefaults,
   PathResolutionMethod,
   PropertyInheritanceCustomFunction
 } from './ConfigurationFile';
