@@ -6,7 +6,7 @@ import type * as TWebpack from 'webpack';
 import { FileSystem } from '@rushstack/node-core-library';
 import type { IScopedLogger, IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
-import type { IWebpack5PluginOptions } from './Webpack5Plugin';
+import type { IWebpackPluginOptions } from './Webpack5Plugin';
 import type { IWebpackConfiguration, IWebpackConfigurationFnEnvironment } from './shared';
 
 type IWebpackConfigJsExport =
@@ -18,7 +18,7 @@ type IWebpackConfigJsExport =
   | ((env: IWebpackConfigurationFnEnvironment) => Promise<TWebpack.Configuration | TWebpack.Configuration[]>);
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
-interface ILoadWebpackConfigurationOptions extends IWebpack5PluginOptions {
+interface ILoadWebpackConfigurationOptions extends IWebpackPluginOptions {
   taskSession: IHeftTaskSession;
   heftConfiguration: HeftConfiguration;
   loadWebpackAsyncFn: () => Promise<typeof TWebpack>;
