@@ -7,6 +7,11 @@ declare module 'webpack' {
   export type MultiStats = TWebpack.compilation.MultiStats;
   export type StatsOptions = unknown;
   export type StatsCompilation = TWebpack.compilation.Compilation;
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  export interface Compiler {
+    watching?: unknown;
+  }
 }
 import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import type { AsyncParallelHook, AsyncSeriesBailHook, AsyncSeriesHook } from 'tapable';
