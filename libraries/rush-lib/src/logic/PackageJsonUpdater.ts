@@ -30,11 +30,11 @@ export const enum SemVerStyle {
   Passthrough = 'passthrough'
 }
 
-export interface ICommonPackage {
+export interface IPackageForRushUpdate {
   packageName: string;
 }
 
-export interface IPackageForRushAdd extends ICommonPackage {
+export interface IPackageForRushAdd extends IPackageForRushUpdate {
   /**
    * The style of range that should be used if the version is automatically detected.
    */
@@ -47,7 +47,7 @@ export interface IPackageForRushAdd extends ICommonPackage {
   version?: string;
 }
 
-export interface IPackageForRushRemove extends ICommonPackage {}
+export interface IPackageForRushRemove extends IPackageForRushUpdate {}
 
 export interface IPackageJsonUpdaterRushBaseUpdateOptions {
   /**
@@ -57,7 +57,7 @@ export interface IPackageJsonUpdaterRushBaseUpdateOptions {
   /**
    * The dependencies to be added or removed.
    */
-  packagesToUpdate: ICommonPackage[];
+  packagesToUpdate: IPackageForRushUpdate[];
   /**
    * If specified, "rush update" will not be run after updating the package.json file(s).
    */
@@ -95,12 +95,13 @@ export interface IPackageJsonUpdaterRushAddOptions extends IPackageJsonUpdaterRu
 }
 
 /**
- * Options for remove a dependency to a particular project.
+ * Options for remove a dependency from a particular project.
  */
 export interface IPackageJsonUpdaterRushRemoveOptions extends IPackageJsonUpdaterRushBaseUpdateOptions {}
 
 /**
- * Configuration options for adding or updating or removing a dependency in a single project
+ * Configuration options for adding or updating a dependency in single project
+ * or removing a dependency from a particular project
  */
 export interface IBaseUpdateProjectOptions {
   /**
@@ -127,7 +128,7 @@ export interface IUpdateProjectOptions extends IBaseUpdateProjectOptions {
   dependencyType?: DependencyType;
 }
 /**
- * Configuration options for removing dependencies in a single project
+ * Configuration options for removing dependencies from a single project
  */
 export interface IRemoveProjectOptions extends IBaseUpdateProjectOptions {}
 

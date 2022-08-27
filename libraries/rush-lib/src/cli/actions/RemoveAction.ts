@@ -30,6 +30,23 @@ export class RemoveAction extends BaseAddAndRemoveAction {
     this._terminal = new Terminal(this._terminalProvider);
   }
 
+  public onDefineParameters(): void {
+    this._packageNameList = this.defineStringListParameter({
+      parameterLongName: '--package',
+      parameterShortName: '-p',
+      required: true,
+      argumentName: 'PACKAGE',
+      description:
+        'The name of the package which should be removed.' +
+        ' To remove multiple packages, run "rush remove --package foo --package bar".'
+    });
+    this._allFlag = this.defineFlagParameter({
+      parameterLongName: '--all',
+      description: 'If specified, the dependency will be removed from all projects that declare it.'
+    });
+    super.onDefineParameters();
+  }
+
   public getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushRemoveOptions {
     const projects: RushConfigurationProject[] = super.getProjects();
 

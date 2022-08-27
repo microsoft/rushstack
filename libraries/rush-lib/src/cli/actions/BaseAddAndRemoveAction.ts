@@ -17,7 +17,7 @@ export interface IBasePackageJsonUpdaterRushOptions {
   /**
    * The dependencies to be added.
    */
-  packagesToHandle: PackageJsonUpdaterType.ICommonPackage[];
+  packagesToHandle: PackageJsonUpdaterType.IPackageForRushUpdate[];
   /**
    * If specified, "rush update" will not be run after updating the package.json file(s).
    */
@@ -43,24 +43,11 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
   protected abstract getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushBaseUpdateOptions;
 
   protected onDefineParameters(): void {
-    this._packageNameList = this.defineStringListParameter({
-      parameterLongName: '--package',
-      parameterShortName: '-p',
-      required: true,
-      argumentName: 'PACKAGE',
-      description:
-        'The name of the package which should be removed.' +
-        ' To remove multiple packages, run "rush remove --package foo --package bar".'
-    });
     this._skipUpdateFlag = this.defineFlagParameter({
       parameterLongName: '--skip-update',
       parameterShortName: '-s',
       description:
         'If specified, the "rush update" command will not be run after updating the package.json files.'
-    });
-    this._allFlag = this.defineFlagParameter({
-      parameterLongName: '--all',
-      description: 'If specified, the dependency will be removed from all projects that declare it.'
     });
   }
 

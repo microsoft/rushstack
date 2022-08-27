@@ -38,7 +38,18 @@ export class AddAction extends BaseAddAndRemoveAction {
   }
 
   public onDefineParameters(): void {
-    super.onDefineParameters();
+    this._packageNameList = this.defineStringListParameter({
+      parameterLongName: '--package',
+      parameterShortName: '-p',
+      required: true,
+      argumentName: 'PACKAGE',
+      description:
+        'The name of the package which should be added as a dependency.' +
+        ' A SemVer version specifier can be appended after an "@" sign.  WARNING: Symbol characters' +
+        " are usually interpreted by your shell, so it's recommended to use quotes." +
+        ' For example, write "rush add --package "example@^1.2.3"" instead of "rush add --package example@^1.2.3".' +
+        ' To add multiple packages, write "rush add --package foo --package bar".'
+    });
     this._exactFlag = this.defineFlagParameter({
       parameterLongName: '--exact',
       description:
@@ -63,6 +74,11 @@ export class AddAction extends BaseAddAndRemoveAction {
         'If specified, other packages with this dependency will have their package.json' +
         ' files updated to use the same version of the dependency.'
     });
+    this._allFlag = this.defineFlagParameter({
+      parameterLongName: '--all',
+      description: 'If specified, the dependency will be added to all projects.'
+    });
+    super.onDefineParameters();
   }
 
   public getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushAddOptions {
