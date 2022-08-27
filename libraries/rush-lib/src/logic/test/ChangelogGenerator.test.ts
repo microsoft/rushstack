@@ -250,6 +250,39 @@ describe(ChangelogGenerator.updateIndividualChangelog.name, () => {
 
     expect(actualResult).toEqual(expectedResult);
   });
+
+  it('can throw right error when given valid file', () => {
+    const generateUpdateInvoke =
+      (projectPath: string): (() => void) =>
+      () => {
+        ChangelogGenerator.updateIndividualChangelog(
+          {
+            packageName: 'a',
+            newVersion: '0.0.2',
+            changeType: ChangeType.none,
+            changes: [
+              {
+                packageName: 'a',
+                type: 'none',
+                changeType: ChangeType.none,
+                comment: ''
+              }
+            ]
+          },
+          projectPath,
+          false,
+          rushConfiguration
+        );
+      };
+
+    const emptyFileInvoke = generateUpdateInvoke(`${__dirname}/exampleInvalidChangelog/emptyFile`);
+    expect(emptyFileInvoke).toThrow(Error);
+    expect(emptyFileInvoke).toThrow(/No data, empty input at 1:1/);
+
+    const emptyObjectFileInvoke = generateUpdateInvoke(`${__dirname}/exampleInvalidChangelog/emptyObject`);
+    expect(emptyObjectFileInvoke).toThrow(Error);
+    expect(emptyObjectFileInvoke).toThrow(/Missing required property: name/);
+  });
 });
 
 describe(ChangelogGenerator.updateChangelogs.name, () => {

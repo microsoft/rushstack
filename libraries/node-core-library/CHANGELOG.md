@@ -1,6 +1,27 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Aug 2022 03:01:22 GMT and should not be manually modified.
+
+## 3.51.1
+Wed, 24 Aug 2022 03:01:22 GMT
+
+### Patches
+
+- Introduce JsonSyntax option for JsonFile.load() and related APIs
+
+## 3.51.0
+Wed, 24 Aug 2022 00:14:38 GMT
+
+### Minor changes
+
+- Deprecate LegacyAdapters.sortStable and remove support for NodeJS < 11. If you are using NodeJS < 11, this is a breaking change.
+
+## 3.50.2
+Fri, 19 Aug 2022 00:17:19 GMT
+
+### Patches
+
+- Update `PackageJsonLookup` to only resolve to `package.json` files that contain a `"name"` field. See GitHub issue #2070
 
 ## 3.50.1
 Wed, 03 Aug 2022 18:40:35 GMT
