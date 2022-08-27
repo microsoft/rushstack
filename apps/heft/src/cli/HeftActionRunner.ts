@@ -403,9 +403,10 @@ export class HeftActionRunner {
           ignored: ['node_modules/**'],
           // We will use the initial state to build a list of all watched files
           ignoreInitial: false,
-          // Handle 'unlink' + 'add' events within 100 ms of each other as atomic 'change' events,
-          // since some editors will do this (e.g. sublime text)
-          atomic: true
+          // Debounce file write events within 100 ms of each other
+          awaitWriteFinish: {
+            stabilityThreshold: 100
+          }
         });
         // Remove all listeners once the initial state is returned
         watcher.on('ready', () => resolve(watcher.removeAllListeners()));
