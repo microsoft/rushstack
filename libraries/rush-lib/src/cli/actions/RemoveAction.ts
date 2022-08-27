@@ -2,18 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import { ConsoleTerminalProvider, Terminal, ITerminal } from '@rushstack/node-core-library';
 
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseRushAction } from './BaseRushAction';
+import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 
-export class RemoveAction extends BaseRushAction {
-  private _allFlag!: CommandLineFlagParameter;
-  private _skipUpdateFlag!: CommandLineFlagParameter;
-  private _packageNameList!: CommandLineStringListParameter;
+export class RemoveAction extends BaseAddAndRemoveAction {
+  private _terminalProvider: ConsoleTerminalProvider;
+  private _terminal: ITerminal;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -27,54 +26,16 @@ export class RemoveAction extends BaseRushAction {
       safeForSimultaneousRushProcesses: false,
       parser
     });
+    this._terminalProvider = new ConsoleTerminalProvider();
+    this._terminal = new Terminal(this._terminalProvider);
   }
 
-  public onDefineParameters(): void {
-    this._packageNameList = this.defineStringListParameter({
-      parameterLongName: '--package',
-      parameterShortName: '-p',
-      required: true,
-      argumentName: 'PACKAGE',
-      description:
-        'The name of the package which should be removed.' +
-        ' To remove multiple packages, run "rush remove --package foo --package bar".'
-    });
-    this._skipUpdateFlag = this.defineFlagParameter({
-      parameterLongName: '--skip-update',
-      parameterShortName: '-s',
-      description:
-        'If specified, the "rush update" command will not be run after updating the package.json files.'
-    });
-    this._allFlag = this.defineFlagParameter({
-      parameterLongName: '--all',
-      description: 'If specified, the dependency will be removed from all projects that declare it.'
-    });
-  }
+  public getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushRemoveOptions {
+    const projects: RushConfigurationProject[] = super.getProjects();
 
-  public async runAsync(): Promise<void> {
-    let projects: RushConfigurationProject[];
-    if (this._allFlag.value) {
-      projects = this.rushConfiguration.projects;
-    } else {
-      const currentProject: RushConfigurationProject | undefined =
-        this.rushConfiguration.tryGetProjectForPath(process.cwd());
-
-      if (!currentProject) {
-        throw new Error(
-          'The "rush remove" command must be invoked under a project' +
-            ` folder that is registered in rush.json unless the ${this._allFlag.longName} is used.`
-        );
-      }
-
-      projects = [currentProject];
-    }
-
-    const packageJsonUpdater: typeof PackageJsonUpdaterType = await import('../../logic/PackageJsonUpdater');
-
-    const specifiedPackageNameList: ReadonlyArray<string> = this._packageNameList.values!;
     const packagesToRemove: PackageJsonUpdaterType.IPackageForRushRemove[] = [];
 
-    for (const specifiedPackageName of specifiedPackageNameList) {
+    for (const specifiedPackageName of this.specifiedPackageNameList) {
       /**
        * Name
        */
@@ -87,26 +48,23 @@ export class RemoveAction extends BaseRushAction {
       for (const project of projects) {
         if (
           !project.packageJsonEditor.tryGetDependency(packageName) &&
-          !project.packageJsonEditor.tryGetDevDependency(packageName) &&
-          !project.packageJsonEditor.tryGetResolution(packageName)
+          !project.packageJsonEditor.tryGetDevDependency(packageName)
         ) {
-          throw new Error(`The project "${project.packageName}" do not have ${packageName} in package.json.`);
+          this._terminal.writeLine(
+            `The project "${project.packageName}" do not have ${packageName} in package.json.`
+          );
         }
       }
 
       packagesToRemove.push({ packageName });
     }
 
-    const updater: PackageJsonUpdaterType.PackageJsonUpdater = new packageJsonUpdater.PackageJsonUpdater(
-      this.rushConfiguration,
-      this.rushGlobalFolder
-    );
-
-    await updater.doRushRemoveAsync({
+    return {
       projects: projects,
-      packagesToRemove,
+      packagesToUpdate: packagesToRemove,
       skipUpdate: this._skipUpdateFlag.value,
-      debugInstall: this.parser.isDebug
-    });
+      debugInstall: this.parser.isDebug,
+      actionName: this.actionName
+    };
   }
 }

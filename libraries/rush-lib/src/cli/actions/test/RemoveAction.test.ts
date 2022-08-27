@@ -3,26 +3,24 @@
 
 import '../../test/mockRushCommandLineParser';
 
-import {
-  PackageJsonUpdater,
-  IPackageJsonUpdaterRushRemoveOptions,
-  IRemoveProjectOptions
-} from '../../../logic/PackageJsonUpdater';
-import { DependencyType } from '../../../api/PackageJsonEditor';
+import { PackageJsonUpdater, IPackageJsonUpdaterRushRemoveOptions } from '../../../logic/PackageJsonUpdater';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { RemoveAction } from '../RemoveAction';
+import { VersionMismatchFinderProject } from '../../../logic/versionMismatch/VersionMismatchFinderProject';
+import { DependencyType } from '../../../api/PackageJsonEditor';
 
 describe(RemoveAction.name, () => {
   describe('basic "rush remove" tests', () => {
     let doRushRemoveMock: jest.SpyInstance;
-    let removePackageFromProjectMock: jest.SpyInstance;
+    let removeDependencyMock: jest.SpyInstance;
     let oldExitCode: number | undefined;
     let oldArgs: string[];
 
     beforeEach(() => {
-      removePackageFromProjectMock = jest
-        .spyOn(PackageJsonUpdater.prototype, 'removePackageFromProject')
+      removeDependencyMock = jest
+        .spyOn(VersionMismatchFinderProject.prototype, 'removeDependency')
         .mockImplementation(() => {});
+
       jest.spyOn(process, 'exit').mockImplementation();
       oldExitCode = process.exitCode;
       oldArgs = process.argv;
@@ -52,21 +50,19 @@ describe(RemoveAction.name, () => {
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'remove', '-p', 'assert', '-s'];
 
         await expect(parser.execute()).resolves.toEqual(true);
-        expect(removePackageFromProjectMock).toHaveBeenCalledTimes(1);
-        const removePackageFromProjectOptions: IRemoveProjectOptions =
-          removePackageFromProjectMock.mock.calls[0][0];
-        expect(removePackageFromProjectOptions.project.friendlyName).toEqual('c');
-        expect(removePackageFromProjectOptions.dependenciesToRemove.assert).toHaveLength(2);
-        expect(removePackageFromProjectOptions.dependenciesToRemove.assert).toEqual([
-          DependencyType.Regular,
-          DependencyType.Dev
-        ]);
+        expect(removeDependencyMock).toHaveBeenCalledTimes(2);
+        const packageName: string = removeDependencyMock.mock.calls[0][0];
+        expect(packageName).toEqual('assert');
+        const dependencyType1: DependencyType = removeDependencyMock.mock.calls[0][1];
+        expect(dependencyType1).toEqual(DependencyType.Regular);
+        const dependencyType2: DependencyType = removeDependencyMock.mock.calls[1][1];
+        expect(dependencyType2).toEqual(DependencyType.Dev);
       });
       it(`remove a dependency to just one repo in the workspace`, async () => {
         const startPath: string = `${__dirname}/removeRepo`;
         const aPath: string = `${__dirname}/removeRepo/a`;
         doRushRemoveMock = jest
-          .spyOn(PackageJsonUpdater.prototype, 'doRushRemoveAsync')
+          .spyOn(PackageJsonUpdater.prototype, 'doRushUpdateAsync')
           .mockImplementation(() => Promise.resolve());
 
         // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
@@ -86,7 +82,7 @@ describe(RemoveAction.name, () => {
         const doRushRemoveOptions: IPackageJsonUpdaterRushRemoveOptions = doRushRemoveMock.mock.calls[0][0];
         expect(doRushRemoveOptions.projects).toHaveLength(1);
         expect(doRushRemoveOptions.projects[0].packageName).toEqual('a');
-        expect(doRushRemoveOptions.packagesToRemove).toMatchInlineSnapshot(`
+        expect(doRushRemoveOptions.packagesToUpdate).toMatchInlineSnapshot(`
           Array [
             Object {
               "packageName": "assert",
@@ -102,7 +98,7 @@ describe(RemoveAction.name, () => {
         const aPath: string = `${__dirname}/removeRepo/a`;
 
         doRushRemoveMock = jest
-          .spyOn(PackageJsonUpdater.prototype, 'doRushRemoveAsync')
+          .spyOn(PackageJsonUpdater.prototype, 'doRushUpdateAsync')
           .mockImplementation(() => Promise.resolve());
 
         // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
@@ -132,7 +128,7 @@ describe(RemoveAction.name, () => {
         expect(doRushRemoveOptions.projects[0].packageName).toEqual('a');
         expect(doRushRemoveOptions.projects[1].packageName).toEqual('b');
         expect(doRushRemoveOptions.projects[2].packageName).toEqual('c');
-        expect(doRushRemoveOptions.packagesToRemove).toMatchInlineSnapshot(`
+        expect(doRushRemoveOptions.packagesToUpdate).toMatchInlineSnapshot(`
           Array [
             Object {
               "packageName": "assert",

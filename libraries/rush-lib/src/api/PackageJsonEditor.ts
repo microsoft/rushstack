@@ -220,10 +220,6 @@ export class PackageJsonEditor {
     return this._devDependencies.get(packageName);
   }
 
-  public tryGetResolution(packageName: string): PackageJsonDependency | undefined {
-    return this._resolutions.get(packageName);
-  }
-
   public addOrUpdateDependency(
     packageName: string,
     newVersion: string,

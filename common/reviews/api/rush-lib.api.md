@@ -604,8 +604,6 @@ export class PackageJsonEditor {
     // (undocumented)
     tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
     // (undocumented)
-    tryGetResolution(packageName: string): PackageJsonDependency | undefined;
-    // (undocumented)
     get version(): string;
 }
 
