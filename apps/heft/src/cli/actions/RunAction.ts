@@ -22,6 +22,7 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   private readonly _terminal: ITerminal;
   private readonly _actionRunner: HeftActionRunner;
   private readonly _toParameter: CommandLineStringListParameter;
+  private readonly _toExceptParameter: CommandLineStringListParameter;
   private readonly _onlyParameter: CommandLineStringListParameter;
   private _selectedPhases: Set<HeftPhase> | undefined;
 
@@ -44,6 +45,13 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
       argumentName: 'PHASE',
       parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
     });
+    this._toExceptParameter = this.defineStringListParameter({
+      parameterLongName: Constants.toExceptParameterLongName,
+      parameterShortName: Constants.toExceptParameterShortName,
+      description: 'The phase to run to (but not include), including all transitive dependencies.',
+      argumentName: 'PHASE',
+      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
+    });
     this._onlyParameter = this.defineStringListParameter({
       parameterLongName: Constants.onlyParameterLongName,
       parameterShortName: Constants.onlyParameterShortName,
@@ -56,15 +64,24 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   public get selectedPhases(): Set<HeftPhase> {
     if (!this._selectedPhases) {
       const toPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._toParameter, this._terminal);
+      const toExceptPhases: Set<HeftPhase> = this._evaluatePhaseParameter(
+        this._toExceptParameter,
+        this._terminal
+      );
       const onlyPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._onlyParameter, this._terminal);
+
+      const expandFn: (phase: HeftPhase) => ReadonlySet<HeftPhase> = (phase: HeftPhase) =>
+        phase.dependencyPhases;
       this._selectedPhases = Selection.union(
-        Selection.recursiveExpand(toPhases, (phase: HeftPhase) => phase.dependencyPhases),
+        Selection.recursiveExpand(toPhases, expandFn),
+        Selection.recursiveExpand(Selection.directDependenciesOf(toExceptPhases, expandFn), expandFn),
         onlyPhases
       );
       if (this._selectedPhases.size === 0) {
         throw new Error(
           'No phases were selected. Provide at least one phase to the ' +
-            `${JSON.stringify(Constants.toParameterLongName)} or ` +
+            `${JSON.stringify(Constants.toParameterLongName)}, ` +
+            `${JSON.stringify(Constants.toExceptParameterLongName)}, or ` +
             `${JSON.stringify(Constants.onlyParameterLongName)} parameters.`
         );
       }

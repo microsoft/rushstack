@@ -28,6 +28,10 @@ export class Constants {
 
   public static toParameterShortName: string = '-t';
 
+  public static toExceptParameterLongName: string = '--to-except';
+
+  public static toExceptParameterShortName: string = '-T';
+
   public static unmanagedParameterLongName: string = '--unmanaged';
 
   public static verboseParameterLongName: string = '--verbose';

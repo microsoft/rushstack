@@ -5,8 +5,22 @@
  * This namespace contains functions for manipulating sets of projects
  */
 export class Selection {
+  /**
+   * Computes the set of projects that are not in the input set.
+   */
   public static difference<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Set<T> {
     return new Set(generateDifference(first, ...rest));
+  }
+
+  /**
+   * Computes the set of direct dependencies of the listed projects.
+   */
+  public static directDependenciesOf<T>(input: Iterable<T>, expandFn: (target: T) => ReadonlySet<T>): Set<T> {
+    const result: Set<T> = new Set();
+    for (const item of input) {
+      expandInto(result, item, expandFn);
+    }
+    return result;
   }
 
   /**
@@ -53,6 +67,12 @@ function* generateConcatenation<T>(...sets: Iterable<T>[]): Iterable<T> {
   }
 }
 
+function expandInto<T>(targetSet: Set<T>, input: T, expandFn: (target: T) => ReadonlySet<T>): void {
+  for (const child of expandFn(input)) {
+    targetSet.add(child);
+  }
+}
+
 /**
  * Computes a set derived from the input by cloning it, then iterating over every member of the new set and
  * calling a step function that may add more elements to the set.
@@ -60,9 +80,7 @@ function* generateConcatenation<T>(...sets: Iterable<T>[]): Iterable<T> {
 function expandAll<T>(input: Iterable<T>, expandFn: (target: T) => ReadonlySet<T>): Set<T> {
   const result: Set<T> = new Set(input);
   for (const item of result) {
-    for (const child of expandFn(item)) {
-      result.add(child);
-    }
+    expandInto(result, item, expandFn);
   }
   return result;
 }
