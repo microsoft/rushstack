@@ -22,8 +22,6 @@ export class Constants {
 
   public static productionParameterLongName: string = '--production';
 
-  public static serveParameterLongName: string = '--serve';
-
   public static toParameterLongName: string = '--to';
 
   public static toParameterShortName: string = '-t';

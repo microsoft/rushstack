@@ -73,11 +73,6 @@ export interface IHeftDefaultParameters {
    * Whether or not the Heft action is running in watch mode.
    */
   readonly watch: boolean;
-
-  /**
-   * Whether or not the `--serve` flag was passed to the Heft action.
-   */
-  readonly serve: boolean;
 }
 
 /**
@@ -143,7 +138,6 @@ export interface IHeftParameterManagerOptions {
   getIsVerbose: () => boolean;
   getIsProduction: () => boolean;
   getIsWatch: () => boolean;
-  getIsServe: () => boolean;
   getLocales: () => Iterable<string>;
 }
 
@@ -171,8 +165,7 @@ export class HeftParameterManager {
         verbose: this._options.getIsVerbose(),
         production: this._options.getIsProduction(),
         locales: this._options.getLocales(),
-        watch: this._options.getIsWatch(),
-        serve: this._options.getIsServe()
+        watch: this._options.getIsWatch()
       };
     }
     return this._defaultParameters;

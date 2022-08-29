@@ -55,6 +55,7 @@ export interface IWebpackPluginOptions {
  * @public
  */
 export const PLUGIN_NAME: 'Webpack4Plugin' = 'Webpack4Plugin';
+const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
 const WEBPACK_DEV_SERVER_ENV_VAR_NAME: 'WEBPACK_DEV_SERVER' = 'WEBPACK_DEV_SERVER';
@@ -65,6 +66,7 @@ const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
  * @internal
  */
 export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
+  private _serve: boolean = false;
   private _webpack: typeof TWebpack | undefined;
   private _webpackCompiler: ExtendedCompiler | ExtendedMultiCompiler | undefined;
   private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED = UNINITIALIZED;
@@ -86,6 +88,15 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions
   ): void {
+    this._serve = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
+    if (!taskSession.parameters.watch && this._serve) {
+      throw new Error(
+        `The ${JSON.stringify(
+          SERVE_PARAMETER_LONG_NAME
+        )} parameter is only available when running in watch mode.`
+      );
+    }
+
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
       // Obtain the finalized webpack configuration
       const webpackConfiguration: IWebpackConfiguration | undefined =
@@ -138,7 +149,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         const configurationLoader: WebpackConfigurationLoader = new WebpackConfigurationLoader(
           taskSession.logger,
           taskSession.parameters.production,
-          taskSession.parameters.watch && taskSession.parameters.serve
+          taskSession.parameters.watch && this._serve
         );
         webpackConfiguration = await configurationLoader.tryLoadWebpackConfigurationAsync({
           ...options,
@@ -202,7 +213,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     options: IWebpackPluginOptions
   ): Promise<void> {
     this._validateEnvironmentVariable(taskSession);
-    if (taskSession.parameters.watch || taskSession.parameters.serve) {
+    if (taskSession.parameters.watch || this._serve) {
       // Should never happen, but just in case
       throw new InternalError('Cannot run Webpack in compilation mode when watch mode is enabled');
     }
@@ -301,7 +312,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
       // Determine how we will run the compiler. When serving, we will run the compiler
       // via the webpack-dev-server. Otherwise, we will run the compiler directly.
-      if (taskSession.parameters.serve) {
+      if (this._serve) {
         const defaultDevServerOptions: TWebpackDevServer.Configuration = {
           host: 'localhost',
           devMiddleware: {
@@ -413,7 +424,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   }
 
   private _validateEnvironmentVariable(taskSession: IHeftTaskSession): void {
-    if (!taskSession.parameters.serve && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
+    if (!this._serve && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
       taskSession.logger.emitWarning(
         new Error(
           `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
