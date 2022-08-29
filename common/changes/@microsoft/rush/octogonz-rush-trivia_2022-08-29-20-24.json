@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add a new setting \"watchOptions.debounceMs\" in command-line.json",
+      "comment": "",
       "type": "none"
     }
   ],

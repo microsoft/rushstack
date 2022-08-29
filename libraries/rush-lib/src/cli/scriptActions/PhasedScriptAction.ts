@@ -53,7 +53,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   alwaysWatch: boolean;
   alwaysInstall: boolean | undefined;
 
-  watchDebounceMilliseconds: number | undefined;
+  watchDebounceMs: number | undefined;
 }
 
 interface IRunPhasesOptions {
@@ -104,7 +104,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _disableBuildCache: boolean;
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
-  private readonly _watchDebounceMilliseconds: number;
+  private readonly _watchDebounceMs: number;
   private readonly _alwaysWatch: boolean;
   private readonly _alwaysInstall: boolean | undefined;
   private readonly _knownPhases: ReadonlyMap<string, IPhase>;
@@ -125,7 +125,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._disableBuildCache = options.disableBuildCache;
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
-    this._watchDebounceMilliseconds = options.watchDebounceMilliseconds ?? 1000;
+    this._watchDebounceMs = options.watchDebounceMs ?? 1000;
     this._alwaysWatch = options.alwaysWatch;
     this._alwaysInstall = options.alwaysInstall;
     this._knownPhases = options.phases;
@@ -309,7 +309,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
 
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
-      debounceMilliseconds: this._watchDebounceMilliseconds,
+      debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
       terminal,
@@ -553,7 +553,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         function getNonSilentDependencies(operation: Operation): ReadonlySet<string> {
           let realDependencies: Set<string> | undefined = nonSilentDependenciesByOperation.get(operation);
           if (!realDependencies) {
-            nonSilentDependenciesByOperation.set(operation, (realDependencies = new Set()));
+            realDependencies = new Set();
+            nonSilentDependenciesByOperation.set(operation, realDependencies);
             for (const dependency of operation.dependencies) {
               if (dependency.runner!.silent) {
                 for (const deepDependency of getNonSilentDependencies(dependency)) {
@@ -575,8 +576,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
           const { startTime, endTime } = operationResult.stopwatch;
           operationResults[operation.name!] = {
-            startTimestamp: startTime,
-            endTimestamp: endTime,
+            startTimestampMs: startTime,
+            endTimestampMs: endTime,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };

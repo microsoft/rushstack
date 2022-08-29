@@ -482,14 +482,14 @@ export interface ITelemetryData {
     readonly platform?: string;
     readonly result: 'Succeeded' | 'Failed';
     readonly rushVersion?: string;
-    readonly timestamp?: number;
+    readonly timestampMs?: number;
 }
 
 // @beta (undocumented)
 export interface ITelemetryMachineInfo {
     machineArchitecture: string;
     machineCores: number;
-    machineCPU: string;
+    machineCpu: string;
     machineFreeMemoryMiB: number;
     machineTotalMemoryMiB: number;
 }
@@ -497,9 +497,9 @@ export interface ITelemetryMachineInfo {
 // @beta (undocumented)
 export interface ITelemetryOperationResult {
     dependencies: string[];
-    endTimestamp?: number;
+    endTimestampMs?: number;
     result: string;
-    startTimestamp?: number;
+    startTimestampMs?: number;
 }
 
 // @public
