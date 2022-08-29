@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.77.0",
+      "tag": "@microsoft/rush_v5.77.0",
+      "date": "Mon, 29 Aug 2022 21:09:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add machine architecture information, dependency graph information, and individual build times and statuses to the telemetry file."
+          },
+          {
+            "comment": "Add schema validation for change files."
+          },
+          {
+            "comment": "Fix a minor issue with the \"--rush-example-repo\" template"
+          },
+          {
+            "comment": "Update CLI docs for \"rush add\""
+          },
+          {
+            "comment": "Improve some config file documentation"
+          },
+          {
+            "comment": "Make the project tag name syntax more strict to avoid error-prone names such as \"tag:$PATH\" or \"tag://\""
+          },
+          {
+            "comment": "Add validation to ensure package.json files are strict JSON and the \"version\" field is strict SemVer"
+          },
+          {
+            "comment": "Add a new setting \"watchOptions.debounceMs\" in command-line.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.76.1",
       "tag": "@microsoft/rush_v5.76.1",
       "date": "Mon, 08 Aug 2022 07:32:36 GMT",
