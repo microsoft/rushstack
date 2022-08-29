@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Improve config file documentation",
+      "comment": "Improve some config file documentation",
       "type": "none"
     }
   ],

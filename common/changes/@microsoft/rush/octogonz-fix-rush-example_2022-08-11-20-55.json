@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix a minor issue with the  --rush-example-repo  template",
+      "comment": "Fix a minor issue with the \"--rush-example-repo\" template",
       "type": "none"
     }
   ],
