@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add ability to configure watch debounce timeout as \"watchOptions.debounceMilliseconds\" in phased commands.",
+      "comment": "Add a new setting \"watchOptions.debounceMs\" in command-line.json",
       "type": "none"
     }
   ],
