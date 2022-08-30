@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 29 Aug 2022 21:09:31 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Aug 2022 17:26:42 GMT and should not be manually modified.
+
+## 5.77.1
+Tue, 30 Aug 2022 17:26:42 GMT
+
+### Updates
+
+- Fixed an issue where "rush add" was not updating common-versions.json when using "--make-consistent"
 
 ## 5.77.0
 Mon, 29 Aug 2022 21:09:31 GMT
