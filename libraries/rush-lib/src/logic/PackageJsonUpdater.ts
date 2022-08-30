@@ -204,7 +204,7 @@ export class PackageJsonUpdater {
                   packageName,
                   mismatchedVersion
                 )!) {
-                  if (consumer instanceof VersionMismatchFinderProject) {
+                  if (consumer instanceof VersionMismatchFinderEntity) {
                     otherPackageUpdates.push({
                       project: consumer,
                       dependenciesToAddOrUpdate: {
