@@ -108,7 +108,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, context: DeserializerContext, jsonObject: IApiDeclaredItemJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void;
-    get sourceLocation(): SourceLocation | undefined;
+    get sourceLocation(): SourceLocation;
 }
 
 // @public
