@@ -6,6 +6,7 @@ import { noNewNullRule } from './no-new-null';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({
+  // In PNPN 7.0 using '@typescript-eslint/parser' unexpectedly fails, se we are resolving the absolute path of the parser
   parser: require.resolve('@typescript-eslint/parser') as '@typescript-eslint/parser'
 });
 
