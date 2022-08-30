@@ -13,8 +13,14 @@ const fs = require('fs');
 // reading and writing of cache files.
 
 const patchName = path.basename(__filename);
+const HEFT_JEST_DISABLE_CACHE_ENV_VARIABLE = 'HEFT_JEST_DISABLE_CACHE';
 
 function applyPatch() {
+  // Only apply the patch if the environment variable is set
+  if (!process.env[HEFT_JEST_DISABLE_CACHE_ENV_VARIABLE]) {
+    return;
+  }
+
   try {
     let contextFolder = __dirname;
     // Resolve the "@jest/core" package relative to heft-jest-plugin
