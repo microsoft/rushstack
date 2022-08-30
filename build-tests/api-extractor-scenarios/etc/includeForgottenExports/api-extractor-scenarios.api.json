@@ -468,7 +468,7 @@
             {
               "kind": "Reference",
               "text": "ForgottenExport4.ForgottenExport5",
-              "canonicalReference": "api-extractor-scenarios!~ForgottenExport4.ForgottenExport5:class"
+              "canonicalReference": "api-extractor-scenarios!ForgottenExport4.ForgottenExport5:class"
             },
             {
               "kind": "Content",
@@ -494,12 +494,8 @@
               "text": "export declare function someFunction5(): "
             },
             {
-              "kind": "Content",
-              "text": "internal2."
-            },
-            {
               "kind": "Reference",
-              "text": "ForgottenExport6",
+              "text": "internal2.ForgottenExport6",
               "canonicalReference": "api-extractor-scenarios!ForgottenExport6:class"
             },
             {
@@ -509,7 +505,7 @@
           ],
           "returnTypeTokenRange": {
             "startIndex": 1,
-            "endIndex": 3
+            "endIndex": 2
           },
           "releaseTag": "Public",
           "overloadIndex": 1,

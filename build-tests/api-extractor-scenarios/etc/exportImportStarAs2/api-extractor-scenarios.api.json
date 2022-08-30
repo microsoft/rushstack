@@ -191,12 +191,8 @@
                   "text": "export declare function exportedApi(): "
                 },
                 {
-                  "kind": "Content",
-                  "text": "forgottenNs."
-                },
-                {
                   "kind": "Reference",
-                  "text": "ForgottenClass",
+                  "text": "forgottenNs.ForgottenClass",
                   "canonicalReference": "api-extractor-scenarios!ForgottenClass:class"
                 },
                 {
@@ -206,7 +202,7 @@
               ],
               "returnTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 3
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,

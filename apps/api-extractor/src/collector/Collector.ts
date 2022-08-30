@@ -314,6 +314,25 @@ export class Collector {
     return collectorEntity?.nameForEmit ?? symbol.name;
   }
 
+  /**
+   * Returns (the symbol of) the namespace that exports the given `symbol`, if applicable.
+   * @param symbol the symbol representing the namespace that exports the given `symbol`,
+   *   or undefined if there is no such namespace
+   */
+  public getExportingNamespace(symbol: ts.Symbol): ts.Symbol | undefined {
+    const collectorEntity: CollectorEntity | undefined = this._entitiesBySymbol.get(symbol);
+    if (collectorEntity) {
+      const exportingNamespace: AstNamespaceImport | undefined = collectorEntity.getExportingNamespace();
+      if (exportingNamespace) {
+        return TypeScriptInternals.tryGetSymbolForDeclaration(
+          exportingNamespace.declaration,
+          this.typeChecker
+        );
+      }
+    }
+    return undefined;
+  }
+
   public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
     if (astSymbol.symbolMetadata === undefined) {
       this._fetchSymbolMetadata(astSymbol);
@@ -435,6 +454,8 @@ export class Collector {
       this._entitiesByAstEntity.set(astEntity, entity);
       if (astEntity instanceof AstSymbol) {
         this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
+      } else if (astEntity instanceof AstNamespaceImport) {
+        this._entitiesBySymbol.set((astEntity.declaration as unknown as ts.Type).symbol, entity);
       }
       this._entities.push(entity);
       this._collectReferenceDirectives(astEntity);

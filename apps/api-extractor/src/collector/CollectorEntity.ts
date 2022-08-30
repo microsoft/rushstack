@@ -7,6 +7,7 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
 import { Sort } from '@rushstack/node-core-library';
 import { AstEntity } from '../analyzer/AstEntity';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 
 /**
  * This is a data structure used by the Collector to track an AstEntity that may be emitted in the *.d.ts file.
@@ -187,6 +188,18 @@ export class CollectorEntity {
    */
   public get hasParents(): boolean {
     return this._localExportNamesByParent.size > 0;
+  }
+
+  /**
+   * Return the first namespace that exports this entity.
+   */
+  public getExportingNamespace(): AstNamespaceImport | undefined {
+    for (const [parent, localExportNames] of this._localExportNamesByParent) {
+      if (parent.consumable && localExportNames.size > 0 && parent.astEntity instanceof AstNamespaceImport) {
+        return parent.astEntity;
+      }
+    }
+    return undefined;
   }
 
   /**

@@ -88,9 +88,18 @@ export class DeclarationReferenceGenerator {
   }
 
   private _getNavigationToSymbol(symbol: ts.Symbol): Navigation {
+    // resolve alias first:
+    if (symbol.flags & ts.SymbolFlags.Alias) {
+      symbol = this._collector.typeChecker.getAliasedSymbol(symbol);
+    }
+    // namespace always uses ".":
+    if (symbol.flags & ts.SymbolFlags.Namespace) {
+      return Navigation.Exports;
+    }
     const declaration: ts.Declaration | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
     const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
-    const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
+    const parent: ts.Symbol | undefined =
+      TypeScriptInternals.getSymbolParent(symbol) ?? this._collector.getExportingNamespace(symbol);
 
     // If it's global or from an external library, then use either Members or Exports. It's not possible for
     // global symbols or external library symbols to be Locals.
@@ -208,7 +217,11 @@ export class DeclarationReferenceGenerator {
       followedSymbol = this._collector.typeChecker.getExportSymbolOfSymbol(followedSymbol);
     }
     if (followedSymbol.flags & ts.SymbolFlags.Alias) {
-      followedSymbol = this._collector.typeChecker.getAliasedSymbol(followedSymbol);
+      const nextFollowedSymbol: ts.Symbol = this._collector.typeChecker.getAliasedSymbol(followedSymbol);
+      // do not follow alias to namespace, as it results in a source file that no longer knows its short name:
+      if (!(nextFollowedSymbol.flags & ts.SymbolFlags.Namespace)) {
+        followedSymbol = nextFollowedSymbol;
+      }
     }
 
     if (DeclarationReferenceGenerator._isExternalModuleSymbol(followedSymbol)) {
@@ -266,9 +279,13 @@ export class DeclarationReferenceGenerator {
   }
 
   private _getParentReference(symbol: ts.Symbol): DeclarationReference | undefined {
-    const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
+    // First case: the symbol is exported via a namespace
+    const exportingNamespace: ts.Symbol | undefined = this._collector.getExportingNamespace(symbol);
+    if (exportingNamespace) {
+      return this._symbolToDeclarationReference(exportingNamespace, exportingNamespace.flags, true);
+    }
 
-    // First, try to find a parent symbol via the symbol tree.
+    // Next, try to find a parent symbol via the symbol tree.
     const parentSymbol: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
     if (parentSymbol) {
       return this._symbolToDeclarationReference(
@@ -290,6 +307,7 @@ export class DeclarationReferenceGenerator {
     //
     // In the example above, `SomeType` doesn't have a parent symbol per the TS internal API above,
     // but its reference still needs to be qualified with the parent reference for `n`.
+    const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
     const grandParent: ts.Node | undefined = declaration?.parent?.parent;
     if (grandParent && ts.isModuleDeclaration(grandParent)) {
       const grandParentSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(
