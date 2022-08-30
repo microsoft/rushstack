@@ -3,7 +3,6 @@
 
 // Load the Jest patches before anything else loads
 import './patches/jestWorkerPatch';
-import './patches/jestScriptTransformerPatch';
 
 import * as path from 'path';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
