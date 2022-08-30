@@ -53,7 +53,7 @@ export class ExtractorConfig {
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
     readonly enumMemberOrder: EnumMemberOrder;
-    static readonly FILENAME: string;
+    static readonly FILENAME: 'api-extractor.json';
     getDiagnosticDump(): string;
     // @internal
     _getShortFilePath(absolutePath: string): string;

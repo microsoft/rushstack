@@ -681,18 +681,6 @@
 
     // heft-* projects
     {
-      "packageName": "heft-action-plugin",
-      "projectFolder": "build-tests/heft-action-plugin",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-action-plugin-test",
-      "projectFolder": "build-tests/heft-action-plugin-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-copy-files-test",
       "projectFolder": "build-tests/heft-copy-files-test",
       "reviewCategory": "tests",

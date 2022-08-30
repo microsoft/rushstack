@@ -66,7 +66,7 @@ export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpac
 /**
  * @public
  */
-export interface IWebpack4PluginAccessorHooks {
+export interface IWebpackPluginAccessorHooks {
   /**
    * A hook that allows for loading custom configurations used by the Webpack
    * plugin. If a webpack configuration is provided, this will be populated automatically
@@ -98,9 +98,9 @@ export interface IWebpack4PluginAccessorHooks {
 /**
  * @public
  */
-export interface IWebpack4PluginAccessor {
+export interface IWebpackPluginAccessor {
   /**
    * Hooks that are called at various points in the Webpack plugin lifecycle.
    */
-  hooks: IWebpack4PluginAccessorHooks;
+  hooks: IWebpackPluginAccessorHooks;
 }

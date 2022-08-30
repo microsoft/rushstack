@@ -24,7 +24,7 @@ describe('JestPlugin', () => {
       requestedParameters.add(parameterLongName);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return undefined as any as T;
-    };
+    }
     const mockTaskSession: IHeftTaskSession = {
       hooks: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,13 +32,15 @@ describe('JestPlugin', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         run: { tapPromise: () => {} } as any
       },
-      getChoiceParameter: mockGetParameter,
-      getChoiceListParameter: mockGetParameter,
-      getFlagParameter: mockGetParameter,
-      getIntegerParameter: mockGetParameter,
-      getIntegerListParameter: mockGetParameter,
-      getStringParameter: mockGetParameter,
-      getStringListParameter: mockGetParameter,
+      parameters: {
+        getChoiceParameter: mockGetParameter,
+        getChoiceListParameter: mockGetParameter,
+        getFlagParameter: mockGetParameter,
+        getIntegerParameter: mockGetParameter,
+        getIntegerListParameter: mockGetParameter,
+        getStringParameter: mockGetParameter,
+        getStringListParameter: mockGetParameter
+      }
     } as IHeftTaskSession;
     const mockHeftConfiguration: HeftConfiguration = {} as HeftConfiguration;
 
@@ -46,8 +48,9 @@ describe('JestPlugin', () => {
     plugin.apply(mockTaskSession, mockHeftConfiguration, undefined);
 
     // Load up all the allowed parameters
-    const heftPluginJson: IPartialHeftPluginJson =
-      await JsonFile.loadAsync(`${__dirname}/../../heft-plugin.json`);
+    const heftPluginJson: IPartialHeftPluginJson = await JsonFile.loadAsync(
+      `${__dirname}/../../heft-plugin.json`
+    );
 
     // Verify that all parameters were requested
     expect(requestedParameters.size).toBe(heftPluginJson.taskPlugins![0].parameters!.length);
@@ -70,8 +73,7 @@ describe('JestConfigLoader', () => {
     // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
     // means that we don't run on the built test assets directly
     const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
-    const plugin: JestPlugin = new JestPlugin();
-    const loader: ConfigurationFile<IHeftJestConfiguration> = plugin._getJestConfigurationLoader(
+    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );
@@ -158,8 +160,7 @@ describe('JestConfigLoader', () => {
     // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
     // means that we don't run on the built test assets directly
     const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project2');
-    const plugin: JestPlugin = new JestPlugin();
-    const loader: ConfigurationFile<IHeftJestConfiguration> = plugin._getJestConfigurationLoader(
+    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );

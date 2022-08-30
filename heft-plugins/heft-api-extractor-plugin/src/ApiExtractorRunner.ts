@@ -65,10 +65,8 @@ export class ApiExtractorRunner {
     if (
       !apiExtractorVersion ||
       apiExtractorVersion.major < MIN_SUPPORTED_MAJOR_VERSION ||
-      (
-        apiExtractorVersion.major === MIN_SUPPORTED_MAJOR_VERSION &&
-        apiExtractorVersion.minor < MIN_SUPPORTED_MINOR_VERSION
-      )
+      (apiExtractorVersion.major === MIN_SUPPORTED_MAJOR_VERSION &&
+        apiExtractorVersion.minor < MIN_SUPPORTED_MINOR_VERSION)
     ) {
       this._scopedLogger.emitWarning(new Error(`Heft requires API Extractor version 7.10.0 or newer`));
     }

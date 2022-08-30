@@ -128,11 +128,11 @@ export async function loadTypeScriptConfigurationFileAsync(
   heftConfiguration: HeftConfiguration,
   terminal: ITerminal
 ): Promise<ITypeScriptConfigurationJson | undefined> {
-  const buildFolder: string = heftConfiguration.buildFolder;
+  const buildFolderPath: string = heftConfiguration.buildFolderPath;
 
   // Check the cache first
   let typescriptConfigurationFilePromise: Promise<ITypeScriptConfigurationJson | undefined> | undefined =
-    _typeScriptConfigurationFilePromiseCache.get(buildFolder);
+    _typeScriptConfigurationFilePromiseCache.get(buildFolderPath);
 
   if (!typescriptConfigurationFilePromise) {
     // Ensure that the file loader has been initialized.
@@ -153,10 +153,10 @@ export async function loadTypeScriptConfigurationFileAsync(
     typescriptConfigurationFilePromise =
       _typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
         terminal,
-        buildFolder,
+        buildFolderPath,
         heftConfiguration.rigConfig
       );
-    _typeScriptConfigurationFilePromiseCache.set(buildFolder, typescriptConfigurationFilePromise);
+    _typeScriptConfigurationFilePromiseCache.set(buildFolderPath, typescriptConfigurationFilePromise);
   }
 
   return await typescriptConfigurationFilePromise;
@@ -170,7 +170,7 @@ function getTsconfigFilePath(
   typeScriptConfigurationJson?: ITypeScriptConfigurationJson
 ): string {
   return Path.convertToSlashes(
-    `${heftConfiguration.buildFolder}/${typeScriptConfigurationJson?.project || './tsconfig.json'}`
+    `${heftConfiguration.buildFolderPath}/${typeScriptConfigurationJson?.project || './tsconfig.json'}`
   );
 }
 
@@ -182,11 +182,11 @@ export async function loadPartialTsconfigFileAsync(
   terminal: ITerminal,
   typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined
 ): Promise<IPartialTsconfig | undefined> {
-  const buildFolder: string = heftConfiguration.buildFolder;
+  const buildFolderPath: string = heftConfiguration.buildFolderPath;
 
   // Check the cache first
   let partialTsconfigFilePromise: Promise<IPartialTsconfig | undefined> | undefined =
-    _partialTsconfigFilePromiseCache.get(buildFolder);
+    _partialTsconfigFilePromiseCache.get(buildFolderPath);
 
   if (!partialTsconfigFilePromise) {
     // We don't want to load the tsconfig.json file through the rig, but we do want to take
@@ -220,11 +220,11 @@ export async function loadPartialTsconfigFileAsync(
 
       partialTsconfigFilePromise = _partialTsconfigFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
-        buildFolder,
+        buildFolderPath,
         heftConfiguration.rigConfig
       );
     }
-    _partialTsconfigFilePromiseCache.set(buildFolder, partialTsconfigFilePromise);
+    _partialTsconfigFilePromiseCache.set(buildFolderPath, partialTsconfigFilePromise);
   }
 
   return await partialTsconfigFilePromise;
@@ -272,7 +272,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     if (configurationFile?.additionalModuleKindsToEmit) {
       for (const additionalModuleKindToEmit of configurationFile.additionalModuleKindsToEmit) {
         cleanOptions.addDeleteOperations({
-          sourcePath: `${heftConfiguration.buildFolder}/${additionalModuleKindToEmit.outFolderName}`
+          sourcePath: `${heftConfiguration.buildFolderPath}/${additionalModuleKindToEmit.outFolderName}`
         });
       }
     }
@@ -304,7 +304,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         destinationFolderPaths.add(tsconfigOutDir);
       }
       for (const emitModule of typeScriptConfiguration?.additionalModuleKindsToEmit || []) {
-        destinationFolderPaths.add(`${heftConfiguration.buildFolder}/${emitModule.outFolderName}`);
+        destinationFolderPaths.add(`${heftConfiguration.buildFolderPath}/${emitModule.outFolderName}`);
       }
 
       runOptions.addCopyOperations({
@@ -346,8 +346,8 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
 
     // Build out the configuration
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
-      buildFolder: heftConfiguration.buildFolder,
-      buildMetadataFolder: taskSession.cacheFolder,
+      buildFolderPath: heftConfiguration.buildFolderPath,
+      buildMetadataFolderPath: taskSession.cacheFolderPath,
       typeScriptToolPath: typeScriptToolPath,
 
       buildProjectReferences: typeScriptConfigurationJson?.buildProjectReferences,

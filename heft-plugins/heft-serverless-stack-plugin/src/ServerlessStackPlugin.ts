@@ -24,7 +24,8 @@ import type {
 } from '@rushstack/heft-webpack5-plugin';
 
 const PLUGIN_NAME: 'ServerlessStackPlugin' = 'ServerlessStackPlugin';
-const WEBPACK_PLUGIN_NAME: typeof Webpack4PluginName & typeof Webpack5PluginName = 'WebpackPlugin';
+const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'Webpack4Plugin';
+const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'Webpack5Plugin';
 const SST_CLI_PACKAGE_NAME: string = '@serverless-stack/cli';
 
 export default class ServerlessStackPlugin implements IHeftTaskPlugin {
@@ -35,34 +36,31 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
 
     // Once https://github.com/serverless-stack/serverless-stack/issues/1537 is fixed, we may be
     // eliminate the need for this parameter.
-    const sstParameter: CommandLineFlagParameter = taskSession.getFlagParameter('--sst');
-    const sstStageParameter: CommandLineStringParameter = taskSession.getStringParameter('--sst-stage');
+    const sstParameter: CommandLineFlagParameter = taskSession.parameters.getFlagParameter('--sst');
+    const sstStageParameter: CommandLineStringParameter =
+      taskSession.parameters.getStringParameter('--sst-stage');
 
     // Only tap if the --sst flag is set.
     if (sstParameter.value) {
-      const configureWebpackTapOptions: { name: string; stage: number } = {
-        name: PLUGIN_NAME,
-        stage: Number.MAX_SAFE_INTEGER
-      };
-      const configureWebpackTap: () => Promise<null> = async () => {
+      const configureWebpackTap: () => Promise<false> = async () => {
         this._logger.terminal.writeLine(
           'The command line includes "--sst", redirecting Webpack to Serverless Stack'
         );
-        return null;
+        return false;
       };
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack4-plugin',
-        WEBPACK_PLUGIN_NAME,
+        WEBPACK4_PLUGIN_NAME,
         async (accessor: IWebpack4PluginAccessor) =>
-          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap)
       );
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack5-plugin',
-        WEBPACK_PLUGIN_NAME,
+        WEBPACK5_PLUGIN_NAME,
         async (accessor: IWebpack5PluginAccessor) =>
-          accessor.onConfigureWebpackHook.tapPromise(configureWebpackTapOptions, configureWebpackTap)
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap)
       );
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
@@ -70,9 +68,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
         await this._runServerlessStackAsync({
           taskSession,
           heftConfiguration,
-          sstStage: sstStageParameter.value,
-          debugMode: taskSession.debugMode,
-          verbose: runOptions.verbose
+          sstStage: sstStageParameter.value
         });
       });
     }
@@ -82,15 +78,13 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     taskSession: IHeftTaskSession;
     heftConfiguration: HeftConfiguration;
     sstStage?: string;
-    debugMode?: boolean;
     serveMode?: boolean;
-    verbose?: boolean;
   }): Promise<void> {
     let sstCliPackagePath: string;
     try {
       sstCliPackagePath = Import.resolvePackage({
         packageName: SST_CLI_PACKAGE_NAME,
-        baseFolderPath: options.heftConfiguration.buildFolder
+        baseFolderPath: options.heftConfiguration.buildFolderPath
       });
     } catch (e) {
       this._logger.emitError(
@@ -125,7 +119,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     } else {
       sstCommandArgs.push('build');
     }
-    if (options.debugMode) {
+    if (options.taskSession.parameters.debug || options.taskSession.parameters.verbose) {
       sstCommandArgs.push('--verbose');
     }
     if (options.sstStage) {
@@ -141,7 +135,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
       process.execPath,
       sstCommandArgs,
       {
-        cwd: options.heftConfiguration.buildFolder,
+        cwd: options.heftConfiguration.buildFolderPath,
         stdio: ['inherit', 'pipe', 'pipe'],
         env: sstCommandEnv,
         ...SubprocessTerminator.RECOMMENDED_OPTIONS

@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
     "@types/webpack": "^4.39.0",
@@ -34,7 +34,6 @@
     "@rushstack/heft": "workspace:*",
     "@types/enhanced-resolve": "3.0.7",
     "@types/glob": "7.1.1",
-    "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@types/webpack": "4.41.32",
     "webpack": "~4.44.2",

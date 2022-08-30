@@ -17,7 +17,7 @@ import type {
 import type {
   IWebpackConfiguration,
   IWebpackConfigurationWithDevServer,
-  IWebpack5PluginAccessor
+  IWebpackPluginAccessor
 } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
@@ -41,7 +41,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
   private _webpack: typeof TWebpack | undefined;
   private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED = UNINITIALIZED;
 
-  public readonly accessor: IWebpack5PluginAccessor = {
+  public readonly accessor: IWebpackPluginAccessor = {
     hooks: {
       onLoadConfiguration: new AsyncSeriesBailHook(),
       onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
@@ -77,8 +77,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
     };
 
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      // TODO: Improve how default parameters are surfaced, since this is a bit of a hack.
-      production = cleanOptions.production;
+      production = taskSession.parameters.production;
 
       // Obtain the finalized webpack configuration
       const webpackConfiguration: IWebpackConfiguration | undefined =
@@ -102,7 +101,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
     });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      production = runOptions.production;
+      production = taskSession.parameters.production;
       // TODO: Support watch mode
       watchMode = false;
       // TODO: Support serve mode
@@ -269,7 +268,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
       }
 
       if (stats) {
-        this._emitErrors(logger, stats, heftConfiguration.buildFolder);
+        this._emitErrors(logger, stats, heftConfiguration.buildFolderPath);
         if (this.accessor.hooks.onEmitStats.isUsed()) {
           await this.accessor.hooks.onEmitStats.promise(stats);
         }
@@ -280,26 +279,26 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
   private _emitErrors(
     logger: IScopedLogger,
     stats: TWebpack.Stats | TWebpack.MultiStats,
-    buildFolder: string
+    buildFolderPath: string
   ): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
       const serializedStats: TWebpack.StatsCompilation = stats.toJson('errors-warnings');
 
       if (serializedStats.warnings) {
         for (const warning of serializedStats.warnings) {
-          logger.emitWarning(this._normalizeError(buildFolder, warning));
+          logger.emitWarning(this._normalizeError(buildFolderPath, warning));
         }
       }
 
       if (serializedStats.errors) {
         for (const error of serializedStats.errors) {
-          logger.emitError(this._normalizeError(buildFolder, error));
+          logger.emitError(this._normalizeError(buildFolderPath, error));
         }
       }
     }
   }
 
-  private _normalizeError(buildFolder: string, error: TWebpack.StatsError): Error {
+  private _normalizeError(buildFolderPath: string, error: TWebpack.StatsError): Error {
     if (error instanceof Error) {
       return error;
     } else if (error.moduleIdentifier) {
@@ -326,7 +325,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpack5PluginOp
 
       return new FileError(error.message, {
         absolutePath: error.moduleIdentifier,
-        projectFolder: buildFolder,
+        projectFolder: buildFolderPath,
         line: lineNumber,
         column: columnNumber
       });

@@ -17,7 +17,7 @@ import type {
 import type {
   IWebpackConfiguration,
   IWebpackConfigurationWithDevServer,
-  IWebpack4PluginAccessor
+  IWebpackPluginAccessor
 } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
@@ -41,7 +41,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
   private _webpack: typeof TWebpack | undefined;
   private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED = UNINITIALIZED;
 
-  public readonly accessor: IWebpack4PluginAccessor = {
+  public readonly accessor: IWebpackPluginAccessor = {
     hooks: {
       onLoadConfiguration: new AsyncSeriesBailHook(),
       onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
@@ -77,8 +77,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
     };
 
     taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      // TODO: Improve how default parameters are surfaced, since this is a bit of a hack.
-      production = cleanOptions.production;
+      production = taskSession.parameters.production;
 
       // Obtain the finalized webpack configuration
       const webpackConfiguration: IWebpackConfiguration | undefined =
@@ -102,7 +101,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpack4PluginOp
     });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      production = runOptions.production;
+      production = taskSession.parameters.production;
       // TODO: Support watch mode
       watchMode = false;
       // TODO: Support serve mode

@@ -7,6 +7,6 @@ export type {
   IWebpackConfigurationWithDevServer,
   IWebpackConfiguration,
   IWebpackConfigurationFnEnvironment,
-  IWebpack5PluginAccessor,
-  IWebpack5PluginAccessorHooks
+  IWebpackPluginAccessor,
+  IWebpackPluginAccessorHooks
 } from './shared';

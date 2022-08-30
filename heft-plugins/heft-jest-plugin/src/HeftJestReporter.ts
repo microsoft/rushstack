@@ -34,12 +34,12 @@ export interface IHeftJestReporterOptions {
  */
 export default class HeftJestReporter implements Reporter {
   private _terminal: ITerminal;
-  private _buildFolder: string;
+  private _buildFolderPath: string;
   private _debugMode: boolean;
 
   public constructor(jestConfig: Config.GlobalConfig, options: IHeftJestReporterOptions) {
     this._terminal = options.logger.terminal;
-    this._buildFolder = options.heftConfiguration.buildFolder;
+    this._buildFolderPath = options.heftConfiguration.buildFolderPath;
     this._debugMode = options.debugMode;
   }
 
@@ -202,7 +202,7 @@ export default class HeftJestReporter implements Reporter {
   }
 
   private _getTestPath(fullTestPath: string): string {
-    return path.relative(this._buildFolder, fullTestPath);
+    return path.relative(this._buildFolderPath, fullTestPath);
   }
 
   private _formatWithPlural(num: number, singular: string, plural: string): string {

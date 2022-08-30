@@ -16,7 +16,7 @@
     "_phase:test": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged test --no-build"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.45.3"
+    "@rushstack/heft": "^0.47.2"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
@@ -26,14 +26,14 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@rushstack/heft-legacy": "npm:@rushstack/heft@0.45.14",
-    "@rushstack/heft-node-rig": "1.9.15",
+    "@rushstack/heft-legacy": "npm:@rushstack/heft@0.47.0",
+    "@rushstack/heft-node-rig": "1.10.0",
     "@types/eslint": "8.2.0",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@types/semver": "7.3.5",
     "eslint": "~8.7.0",
     "tslint": "~5.20.1",
-    "typescript": "~4.6.3"
+    "typescript": "~4.7.4"
   }
 }

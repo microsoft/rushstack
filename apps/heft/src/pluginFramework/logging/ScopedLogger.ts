@@ -3,22 +3,24 @@
 
 import { Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 
-import { IHeftPlugin } from '../IHeftPlugin';
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { LoggingManager } from './LoggingManager';
 
-export interface IScopedLoggerOptions {
-  requestingPlugin: IHeftPlugin;
-  loggerName: string;
-  terminalProvider: ITerminalProvider;
-  getShouldPrintStacks: () => boolean;
-  errorHasBeenEmittedCallback: () => void;
-}
-
 /**
+ * A logger which is used to emit errors and warnings to the console, as well as to write
+ * to the console. Messaged emitted by the scoped logger are prefixed with the name of the
+ * scoped logger.
+ *
  * @public
  */
 export interface IScopedLogger {
+  /**
+   * The name of the scoped logger. Logging messages will be prefixed with this name.
+   */
+  readonly loggerName: string;
+  /**
+   * The terminal used to write messages to the console.
+   */
   readonly terminal: Terminal;
 
   /**
@@ -32,15 +34,20 @@ export interface IScopedLogger {
   emitWarning(warning: Error): void;
 }
 
-/**
- * @public
- */
+export interface IScopedLoggerOptions {
+  loggerName: string;
+  terminalProvider: ITerminalProvider;
+  getShouldPrintStacks: () => boolean;
+  errorHasBeenEmittedCallback: () => void;
+}
+
 export class ScopedLogger implements IScopedLogger {
   private readonly _options: IScopedLoggerOptions;
-  private readonly _errors: Error[] = [];
-  private readonly _warnings: Error[] = [];
+  private _errors: Error[] = [];
+  private _warnings: Error[] = [];
 
   private get _shouldPrintStacks(): boolean {
+    // TODO: Consider dumping stacks and more verbose logging to a file
     return this._options.getShouldPrintStacks();
   }
 
@@ -51,11 +58,6 @@ export class ScopedLogger implements IScopedLogger {
   public get warnings(): ReadonlyArray<Error> {
     return [...this._warnings];
   }
-
-  /**
-   * @internal
-   */
-  public readonly _requestingPlugin: IHeftPlugin;
 
   public readonly loggerName: string;
 
@@ -68,7 +70,6 @@ export class ScopedLogger implements IScopedLogger {
    */
   public constructor(options: IScopedLoggerOptions) {
     this._options = options;
-    this._requestingPlugin = options.requestingPlugin;
     this.loggerName = options.loggerName;
 
     this.terminalProvider = new PrefixProxyTerminalProvider(
@@ -98,5 +99,13 @@ export class ScopedLogger implements IScopedLogger {
     if (this._shouldPrintStacks && warning.stack) {
       this.terminal.writeWarningLine(warning.stack);
     }
+  }
+
+  /**
+   * Reset the errors and warnings for this scoped logger.
+   */
+  public resetErrorsAndWarnings(): void {
+    this._errors = [];
+    this._warnings = [];
   }
 }

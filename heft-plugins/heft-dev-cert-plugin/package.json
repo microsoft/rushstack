@@ -26,7 +26,6 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "eslint": "~8.7.0"
   }

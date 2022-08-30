@@ -9,13 +9,15 @@
     "build": "heft build --clean",
     "deploy": "sst deploy",
     "remove": "sst remove",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-serverless-stack-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@serverless-stack/aws-lambda-ric": "^2.0.12",
     "@serverless-stack/cli": "0.67.0",
