@@ -4,9 +4,10 @@
 import * as path from 'path';
 import { Import, FileSystem } from '@rushstack/node-core-library';
 
-// This patch is to disable cache reads/writes in Jest. Cache reads/writes add a lot of overhead I/O to Jest,
-// which can especially impact Windows executions. In addition, cache interaction has lead to some issues with
-// Jest in the past, such as a race condition when attempting to rename the target cache file (see:
+// This patch is to disable cache reads/writes in Jest. Cache reads/writes add overhead I/O to running Jest
+// with the heft-jest-plugin, since cache files for the heft typescript jest transformer simply read a file
+// from disk and feed it to Jest. In addition, cache interaction has lead to some issues with Jest in the
+// past, such as a race condition when attempting to rename the target cache file (see:
 // https://github.com/facebook/jest/issues/4444). Passing '--no-cache' to Jest simply tells Jest to not read
 // the produced cache files, but does nothing to prevent writing of these files. This patch disables both
 // reading and writing of cache files.
