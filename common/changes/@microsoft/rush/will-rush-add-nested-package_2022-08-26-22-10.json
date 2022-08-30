@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Packages are now sorted in decreasing order of their paths so nested packages are located before root packages.",
+      "comment": "Fix an issue where \"rush add\" sometimes did not work correctly if a project is nested under another project's folder",
       "type": "none"
     }
   ],
