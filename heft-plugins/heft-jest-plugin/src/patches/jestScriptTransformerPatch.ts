@@ -63,7 +63,8 @@ function applyPatch(): void {
       '\n// return value:\nexports';
 
     // Patch the file contents
-    patchedCode = patchWriteCacheFileFn(scriptTransformerFilePath, patchedCode);
+    patchedCode = patchCacheFileFunction('readCacheFile', scriptTransformerFilePath, patchedCode);
+    patchedCode = patchCacheFileFunction('writeCacheFile', scriptTransformerFilePath, patchedCode);
 
     function evalInContext(): IScriptTransformerModule {
       // Remap the require() function for the eval() context
@@ -90,32 +91,28 @@ function applyPatch(): void {
   }
 }
 
-function patchWriteCacheFileFn(scriptPath: string, scriptContent: string): string {
+function patchCacheFileFunction(
+  functionName: 'readCacheFile' | 'writeCacheFile',
+  scriptPath: string,
+  scriptContent: string
+): string {
   // This patch is going to be very specific to the version of Jest that we are using.
   // This is intentional, because we want to make sure that we don't accidentally break
   // future versions of Jest that might have a different implementation.
   //
-  // We will replace the existing implementation of the method to wait for the rename
-  // to complete.
-  let matched: boolean = false;
-  scriptContent.replace(/\s*const cacheWriteErrorSafeToIgnore = \(e, cachePath\) =>[^;]+;/, () => {
-    matched = true;
-    return (
-      '' +
-      'const cacheWriteErrorSafeToIgnore = (e, cachePath) => {\n' +
-      "  if (process.platform !== 'win32' || e.code !== 'EPERM') {\n" +
-      '    return false;\n' +
-      '  }\n' +
-      '  do {} while (!fs().existsSync(cachePath));\n' +
-      '  return true;\n' +
-      '};'
-    );
-  });
-  if (!matched) {
+  // We will replace the existing implementation of the method to no-op.
+  const match: RegExpMatchArray | null = scriptContent.match(new RegExp(`^\\s*const ${functionName} =`, 'm'));
+  if (!match) {
     throw new Error(
-      `The "cacheWriteErrorSafeToIgnore" function was not found in the file ${JSON.stringify(scriptPath)}`
+      `The ${JSON.stringify(functionName)} function was not found in the file ${JSON.stringify(scriptPath)}`
     );
   }
+
+  const startIndex: number = match.index!;
+  const endIndex: number = scriptContent.indexOf('};', startIndex) + 2;
+  scriptContent =
+    scriptContent.slice(0, startIndex) + `const ${functionName} = () => {};` + scriptContent.slice(endIndex);
+
   return scriptContent;
 }
 
