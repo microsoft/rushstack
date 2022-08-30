@@ -4,21 +4,12 @@
 import * as path from 'path';
 import { Import, FileSystem } from '@rushstack/node-core-library';
 
-// This patch is a fix for a problem where Jest fails to rename the cache file on a machine that is under heavy load:
-//
-// "failed to cache transform results in: <jestCachePath>/jest-transform-cache-*/...
-// Failure message: EPERM: operation not permitted, rename
-//   '<jestCachePath/jest-transform-cache-*/...' -> '<jestCachePath>/jest-transform-cache-*/...'"
-//
-// The upstream issue is here: https://github.com/facebook/jest/issues/4444
-//
-// The relevant code is in jest-transform/src/ScriptTransformer.ts:
-// https://github.com/facebook/jest/blob/835a93666a69202de2a0429cd5445cb5f56d2cea/packages/jest-transform/src/ScriptTransformer.ts#L932
-//
-// The problem is that Jest encounters a race condition on Windows where the cache file has already been renamed by
-// another worker process. This only occurs because Windows does not support atomic writes, which are used on other
-// platforms. The fix is to wait for the rename to complete, instead of failing if the renamed file isn't immediately
-// available.
+// This patch is to disable cache reads/writes in Jest. Cache reads/writes add a lot of overhead I/O to Jest,
+// which can especially impact Windows executions. In addition, cache interaction has lead to some issues with
+// Jest in the past, such as a race condition when attempting to rename the target cache file (see:
+// https://github.com/facebook/jest/issues/4444). Passing '--no-cache' to Jest simply tells Jest to not read
+// the produced cache files, but does nothing to prevent writing of these files. This patch disables both
+// reading and writing of cache files.
 
 interface IScriptTransformerModule {
   createScriptTransformer: unknown;
