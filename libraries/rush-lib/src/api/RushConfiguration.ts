@@ -1752,6 +1752,7 @@ export class RushConfiguration {
    * If the path is not under any project's folder, returns undefined.
    */
   public tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined {
+    // TODO: Improve the method in which a package is found, perhaps without having to sort / loop though the entire package list
     const resolvedPath: string = path.resolve(currentFolderPath);
     const sortedProjects: RushConfigurationProject[] = this.projects.sort(
       (a, b) => b.projectFolder.length - a.projectFolder.length
