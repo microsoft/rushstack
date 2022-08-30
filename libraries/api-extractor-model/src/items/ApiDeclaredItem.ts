@@ -57,7 +57,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     const projectFolderUrl: string | undefined = this.getAssociatedPackage()?.projectFolderUrl;
     const fileUrlPath: string | undefined =
       options.parent instanceof ApiDeclaredItem
-        ? options.fileUrlPath || options.parent.sourceLocation?.fileUrlPath
+        ? options.fileUrlPath || options.parent.sourceLocation.fileUrlPath
         : options.fileUrlPath;
 
     this._sourceLocation = new SourceLocation({
