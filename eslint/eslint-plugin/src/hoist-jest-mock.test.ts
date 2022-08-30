@@ -6,7 +6,7 @@ import { hoistJestMock } from './hoist-jest-mock';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser',
+  parser: require.resolve('@typescript-eslint/parser') as '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: 'module'

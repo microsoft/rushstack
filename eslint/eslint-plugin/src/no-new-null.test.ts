@@ -6,7 +6,7 @@ import { noNewNullRule } from './no-new-null';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser'
+  parser: require.resolve('@typescript-eslint/parser') as '@typescript-eslint/parser'
 });
 
 ruleTester.run('no-new-null', noNewNullRule, {

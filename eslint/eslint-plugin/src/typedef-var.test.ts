@@ -6,7 +6,7 @@ import { typedefVar } from './typedef-var';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser'
+  parser: require.resolve('@typescript-eslint/parser') as '@typescript-eslint/parser'
 });
 
 ruleTester.run('typedef-var', typedefVar, {

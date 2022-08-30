@@ -6,7 +6,7 @@ import { noUnsafeRegExp } from './no-unsafe-regexp';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser'
+  parser: require.resolve('@typescript-eslint/parser') as '@typescript-eslint/parser'
 });
 
 ruleTester.run('no-unsafe-regexp', noUnsafeRegExp, {
