@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 const path = require('path');
-const { Import, FileSystem } = require('@rushstack/node-core-library');
+const fs = require('fs');
 
 // This patch is to disable cache reads/writes in Jest. Cache reads/writes add overhead I/O to running Jest
 // with the heft-jest-plugin, since cache files for the heft typescript jest transformer simply read a file
@@ -18,11 +18,12 @@ function applyPatch() {
   try {
     let contextFolder = __dirname;
     // Resolve the "@jest/core" package relative to heft-jest-plugin
-    contextFolder = Import.resolvePackage({ packageName: '@jest/core', baseFolderPath: contextFolder });
-    // Resolve the ScriptTransformer module in the "@jest/transform" package relative to the @jest/core package
-    const scriptTransformerFilePath = Import.resolveModule({
-      modulePath: '@jest/transform/build/ScriptTransformer',
-      baseFolderPath: contextFolder
+    contextFolder = path.dirname(require.resolve('@jest/core/package.json', { paths: [contextFolder] }));
+    // Resolve the "@jest/transform" package relative to the @jest/core package
+    contextFolder = path.dirname(require.resolve('@jest/transform/package.json', { paths: [contextFolder] }));
+    // Resolve the ScriptTransformer module in the @jest/transform package
+    const scriptTransformerFilePath = require.resolve('./build/ScriptTransformer', {
+      paths: [contextFolder]
     });
 
     // Patch the file contents
@@ -43,7 +44,7 @@ function patchScriptTransformer(scriptPath) {
   // future versions of Jest that might have a different implementation.
   //
   // We will replace the existing implementation of the method to no-op.
-  let scriptContent = FileSystem.readFile(scriptPath);
+  let scriptContent = fs.readFileSync(scriptPath, { encoding: 'utf8' });
   const functionsToReplace = ['readCacheFile', 'writeCacheFile'];
 
   for (const functionName of functionsToReplace) {
@@ -62,8 +63,8 @@ function patchScriptTransformer(scriptPath) {
       scriptContent.slice(endIndex);
   }
 
-  FileSystem.deleteFile(scriptPath);
-  FileSystem.writeFile(scriptPath, scriptContent);
+  fs.unlinkSync(scriptPath);
+  fs.writeFileSync(scriptPath, scriptContent);
 }
 
 if (typeof jest !== 'undefined' || process.env.JEST_WORKER_ID) {
