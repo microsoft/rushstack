@@ -63,6 +63,8 @@ function patchScriptTransformer(scriptPath) {
       scriptContent.slice(endIndex);
   }
 
+  // Delete instead of modifying the file. We want to break any hardlinks/symlinks
+  // used by the package manager to link to the original file
   fs.unlinkSync(scriptPath);
   fs.writeFileSync(scriptPath, scriptContent);
 }
