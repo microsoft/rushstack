@@ -190,7 +190,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/docReferences/index.ts",
+          "fileUrlPath": "src/docReferences/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -218,7 +218,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/docReferences/index.ts",
+          "fileUrlPath": "src/docReferences/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -238,7 +238,7 @@
               "text": "export declare namespace MyNamespace "
             }
           ],
-          "sourceFile": "src/docReferences/index.ts",
+          "fileUrlPath": "src/docReferences/index.ts",
           "releaseTag": "Public",
           "name": "MyNamespace",
           "preserveMemberOrder": false,
@@ -253,7 +253,6 @@
                   "text": "class MyClass "
                 }
               ],
-              "sourceFile": "src/docReferences/index.ts",
               "releaseTag": "Public",
               "name": "MyClass",
               "preserveMemberOrder": false,
@@ -284,7 +283,6 @@
                       "text": ";"
                     }
                   ],
-                  "sourceFile": "src/docReferences/index.ts",
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 3,
@@ -329,7 +327,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/docReferences/index.ts",
+          "fileUrlPath": "src/docReferences/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -357,7 +355,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/docReferences/index.ts",
+          "fileUrlPath": "src/docReferences/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

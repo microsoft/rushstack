@@ -182,7 +182,7 @@
               "text": "export declare class ExampleA "
             }
           ],
-          "sourceFile": "src/spanSorting/index.ts",
+          "fileUrlPath": "src/spanSorting/index.ts",
           "releaseTag": "Public",
           "name": "ExampleA",
           "preserveMemberOrder": false,
@@ -205,7 +205,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/spanSorting/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -240,7 +239,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/spanSorting/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -266,7 +264,7 @@
               "text": "export declare class ExampleB "
             }
           ],
-          "sourceFile": "src/spanSorting/index.ts",
+          "fileUrlPath": "src/spanSorting/index.ts",
           "releaseTag": "Public",
           "name": "ExampleB",
           "preserveMemberOrder": false,
@@ -297,7 +295,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/spanSorting/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -332,7 +329,7 @@
               "text": "export declare class ExampleC "
             }
           ],
-          "sourceFile": "src/spanSorting/index.ts",
+          "fileUrlPath": "src/spanSorting/index.ts",
           "releaseTag": "Public",
           "name": "ExampleC",
           "preserveMemberOrder": false,
@@ -355,7 +352,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/spanSorting/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -385,7 +381,7 @@
               "text": "(o: {\n    a: number;\n    b(): string;\n}) => void"
             }
           ],
-          "sourceFile": "src/spanSorting/index.ts",
+          "fileUrlPath": "src/spanSorting/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "exampleD",

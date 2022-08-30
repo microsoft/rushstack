@@ -182,7 +182,7 @@
               "text": "export declare class Date "
             }
           ],
-          "sourceFile": "src/ambientNameConflict2/Date.ts",
+          "fileUrlPath": "src/ambientNameConflict2/Date.ts",
           "releaseTag": "Public",
           "name": "Date_2",
           "preserveMemberOrder": false,
@@ -208,7 +208,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/ambientNameConflict2/getDate.ts",
+          "fileUrlPath": "src/ambientNameConflict2/getDate.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

@@ -27,6 +27,7 @@ export interface IApiPackageOptions
     IApiNameMixinOptions,
     IApiDocumentedItemOptions {
   tsdocConfiguration: TSDocConfiguration;
+  projectFolderUrl?: string;
 }
 
 export interface IApiPackageMetadataJson {
@@ -81,6 +82,12 @@ export interface IApiPackageJson extends IApiItemJson {
    * A file header that stores metadata about the tool that wrote the *.api.json file.
    */
   metadata: IApiPackageMetadataJson;
+
+  /**
+   * The URL to the `<projectFolder>` token where the project's source code can be viewed on a website like GitHub or
+   * Azure DevOps. Provided via the `api-extractor.json` config.
+   */
+  projectFolderUrl?: string;
 }
 
 /**
@@ -122,11 +129,24 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
   private readonly _tsdocConfiguration: TSDocConfiguration;
+  private readonly _projectFolderUrl?: string;
 
   public constructor(options: IApiPackageOptions) {
     super(options);
 
     this._tsdocConfiguration = options.tsdocConfiguration;
+    this._projectFolderUrl = options.projectFolderUrl;
+  }
+
+  /** @override */
+  public static onDeserializeInto(
+    options: Partial<IApiPackageOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiPackageJson
+  ): void {
+    super.onDeserializeInto(options, context, jsonObject);
+
+    options.projectFolderUrl = jsonObject.projectFolderUrl;
   }
 
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
@@ -228,6 +248,10 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     return this._tsdocConfiguration;
   }
 
+  public get projectFolderUrl(): string | undefined {
+    return this._projectFolderUrl;
+  }
+
   /** @override */
   public addMember(member: ApiEntryPoint): void {
     if (member.kind !== ApiItemKind.EntryPoint) {
@@ -261,6 +285,11 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
         tsdocConfig
       }
     } as IApiPackageJson;
+
+    if (this.projectFolderUrl) {
+      jsonObject.projectFolderUrl = this.projectFolderUrl;
+    }
+
     this.serializeInto(jsonObject);
     JsonFile.save(jsonObject, apiJsonFilename, options);
   }

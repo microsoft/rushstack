@@ -190,7 +190,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/defaultExportOfEntryPoint3/index.ts",
+          "fileUrlPath": "src/defaultExportOfEntryPoint3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

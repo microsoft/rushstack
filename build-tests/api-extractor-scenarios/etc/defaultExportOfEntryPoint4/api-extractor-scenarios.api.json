@@ -186,7 +186,7 @@
               "text": "\"literal\""
             }
           ],
-          "sourceFile": "src/defaultExportOfEntryPoint4/index.ts",
+          "fileUrlPath": "src/defaultExportOfEntryPoint4/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "_default",

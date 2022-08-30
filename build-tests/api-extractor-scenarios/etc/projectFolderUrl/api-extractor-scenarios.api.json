@@ -160,6 +160,7 @@
       "reportUnsupportedHtmlElements": false
     }
   },
+  "projectFolderUrl": "http://github.com/path/to/some/projectFolder",
   "kind": "Package",
   "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
@@ -174,17 +175,17 @@
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "api-extractor-scenarios!Example:class",
+          "canonicalReference": "api-extractor-scenarios!MyClass:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare class Example "
+              "text": "export declare class MyClass "
             }
           ],
-          "fileUrlPath": "src/ecmaScriptPrivateFields/index.ts",
+          "fileUrlPath": "src/projectFolderUrl/index.ts",
           "releaseTag": "Public",
-          "name": "Example",
+          "name": "MyClass",
           "preserveMemberOrder": false,
           "members": [],
           "implementsTokenRanges": []

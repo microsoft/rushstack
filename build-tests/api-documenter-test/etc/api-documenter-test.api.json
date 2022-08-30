@@ -192,7 +192,7 @@
               "text": "export interface Constraint "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "Constraint",
           "preserveMemberOrder": false,
@@ -213,7 +213,7 @@
               "text": "number"
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "constVariable",
@@ -232,7 +232,7 @@
               "text": "export declare class DecoratorExample "
             }
           ],
-          "sourceFile": "src/DecoratorExample.ts",
+          "fileUrlPath": "src/DecoratorExample.ts",
           "releaseTag": "Public",
           "name": "DecoratorExample",
           "preserveMemberOrder": false,
@@ -256,7 +256,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DecoratorExample.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -281,7 +280,7 @@
               "text": "export interface DefaultType "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "DefaultType",
           "preserveMemberOrder": false,
@@ -298,7 +297,7 @@
               "text": "export declare class DocBaseClass "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "DocBaseClass",
           "preserveMemberOrder": false,
@@ -313,7 +312,6 @@
                   "text": "constructor();"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "releaseTag": "Public",
               "isProtected": false,
               "overloadIndex": 1,
@@ -337,7 +335,6 @@
                   "text": ");"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "releaseTag": "Public",
               "isProtected": false,
               "overloadIndex": 2,
@@ -392,7 +389,7 @@
               "text": " "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "DocClass1",
           "preserveMemberOrder": false,
@@ -415,7 +412,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -462,7 +458,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
@@ -518,7 +513,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -584,7 +578,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "typeParameters": [
                 {
                   "typeParameterName": "T",
@@ -637,7 +630,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -669,7 +661,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -700,7 +691,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
@@ -730,7 +720,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
@@ -768,7 +757,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -808,7 +796,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -838,7 +825,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
@@ -869,7 +855,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -915,7 +900,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isStatic": true,
               "returnTypeTokenRange": {
                 "startIndex": 5,
@@ -963,7 +947,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -994,7 +977,6 @@
                   "text": ";\n\nset writeableProperty(value: string);"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -1024,7 +1006,6 @@
                   "text": ");"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -1062,7 +1043,7 @@
               "text": "export declare class DocClassInterfaceMerge "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "DocClassInterfaceMerge",
           "preserveMemberOrder": false,
@@ -1079,7 +1060,7 @@
               "text": "export interface DocClassInterfaceMerge "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "DocClassInterfaceMerge",
           "preserveMemberOrder": false,
@@ -1096,7 +1077,7 @@
               "text": "export declare enum DocEnum "
             }
           ],
-          "sourceFile": "src/DocEnums.ts",
+          "fileUrlPath": "src/DocEnums.ts",
           "releaseTag": "Public",
           "name": "DocEnum",
           "preserveMemberOrder": false,
@@ -1115,7 +1096,6 @@
                   "text": "1"
                 }
               ],
-              "sourceFile": "src/DocEnums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -1137,7 +1117,6 @@
                   "text": "2"
                 }
               ],
-              "sourceFile": "src/DocEnums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -1159,7 +1138,6 @@
                   "text": "0"
                 }
               ],
-              "sourceFile": "src/DocEnums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -1179,7 +1157,7 @@
               "text": "export declare enum DocEnumNamespaceMerge "
             }
           ],
-          "sourceFile": "src/DocEnums.ts",
+          "fileUrlPath": "src/DocEnums.ts",
           "releaseTag": "Public",
           "name": "DocEnumNamespaceMerge",
           "preserveMemberOrder": false,
@@ -1198,7 +1176,6 @@
                   "text": "0"
                 }
               ],
-              "sourceFile": "src/DocEnums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -1220,7 +1197,6 @@
                   "text": "1"
                 }
               ],
-              "sourceFile": "src/DocEnums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -1240,7 +1216,7 @@
               "text": "export declare namespace DocEnumNamespaceMerge "
             }
           ],
-          "sourceFile": "src/DocEnums.ts",
+          "fileUrlPath": "src/DocEnums.ts",
           "releaseTag": "Public",
           "name": "DocEnumNamespaceMerge",
           "preserveMemberOrder": false,
@@ -1263,7 +1239,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocEnums.ts",
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -1285,7 +1260,7 @@
               "text": "export declare namespace EcmaSmbols "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "EcmaSmbols",
           "preserveMemberOrder": false,
@@ -1304,7 +1279,6 @@
                   "text": "unique symbol"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": true,
               "releaseTag": "Public",
               "name": "example",
@@ -1343,7 +1317,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "releaseTag": "Public",
           "name": "ExampleDuplicateTypeAlias",
           "typeTokenRange": {
@@ -1387,7 +1361,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -1437,7 +1411,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "releaseTag": "Public",
           "name": "ExampleTypeAlias",
           "typeTokenRange": {
@@ -1473,7 +1447,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "releaseTag": "Public",
           "name": "ExampleUnionTypeAlias",
           "typeTokenRange": {
@@ -1491,7 +1465,7 @@
               "text": "export declare class Generic<T> "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -1529,7 +1503,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "releaseTag": "Public",
           "name": "GenericTypeAlias",
           "typeParameters": [
@@ -1560,7 +1534,7 @@
               "text": "export interface IDocInterface1 "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "IDocInterface1",
           "preserveMemberOrder": false,
@@ -1584,7 +1558,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -1616,7 +1589,7 @@
               "text": " "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "IDocInterface2",
           "preserveMemberOrder": false,
@@ -1639,7 +1612,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isOptional": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -1668,7 +1640,7 @@
               "text": "export interface IDocInterface3 "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "IDocInterface3",
           "preserveMemberOrder": false,
@@ -1691,7 +1663,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -1728,7 +1699,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -1764,7 +1734,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
@@ -1801,7 +1770,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -1836,7 +1804,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -1873,7 +1840,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -1896,7 +1862,7 @@
               "text": "export interface IDocInterface4 "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "IDocInterface4",
           "preserveMemberOrder": false,
@@ -1919,7 +1885,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -1952,7 +1917,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -1980,7 +1944,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2008,7 +1971,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2031,7 +1993,7 @@
               "text": "export interface IDocInterface5 "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "IDocInterface5",
           "preserveMemberOrder": false,
@@ -2054,7 +2016,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2077,7 +2038,7 @@
               "text": "export interface IDocInterface6 "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "IDocInterface6",
           "preserveMemberOrder": false,
@@ -2105,7 +2066,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2141,7 +2101,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isOptional": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -2202,7 +2161,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2230,7 +2188,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2276,7 +2233,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2318,7 +2274,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2356,7 +2311,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -2379,7 +2333,7 @@
               "text": "export interface IDocInterface7 "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "IDocInterface7",
           "preserveMemberOrder": false,
@@ -2402,7 +2356,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": true,
               "releaseTag": "Public",
@@ -2430,7 +2383,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isOptional": true,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -2459,7 +2411,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": true,
               "isOptional": true,
               "releaseTag": "Public",
@@ -2487,7 +2438,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isReadonly": false,
               "isOptional": true,
               "releaseTag": "Public",
@@ -2510,7 +2460,7 @@
               "text": "export declare namespace OuterNamespace "
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "releaseTag": "Public",
           "name": "OuterNamespace",
           "preserveMemberOrder": false,
@@ -2525,7 +2475,6 @@
                   "text": "namespace InnerNamespace "
                 }
               ],
-              "sourceFile": "src/index.ts",
               "releaseTag": "Public",
               "name": "InnerNamespace",
               "preserveMemberOrder": false,
@@ -2556,7 +2505,6 @@
                       "text": ";"
                     }
                   ],
-                  "sourceFile": "src/index.ts",
                   "returnTypeTokenRange": {
                     "startIndex": 3,
                     "endIndex": 4
@@ -2591,7 +2539,6 @@
                   "text": "boolean"
                 }
               ],
-              "sourceFile": "src/index.ts",
               "isReadonly": false,
               "releaseTag": "Public",
               "name": "nestedVariable",
@@ -2612,7 +2559,7 @@
               "text": "export declare class SystemEvent "
             }
           ],
-          "sourceFile": "src/DocClass1.ts",
+          "fileUrlPath": "src/DocClass1.ts",
           "releaseTag": "Public",
           "name": "SystemEvent",
           "preserveMemberOrder": false,
@@ -2643,7 +2590,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/DocClass1.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -2686,7 +2632,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "releaseTag": "Public",
           "name": "TypeAlias",
           "typeTokenRange": {
@@ -2713,7 +2659,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/index.ts",
+          "fileUrlPath": "src/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

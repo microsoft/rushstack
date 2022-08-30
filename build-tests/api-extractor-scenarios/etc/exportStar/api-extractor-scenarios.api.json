@@ -182,7 +182,7 @@
               "text": "export declare class A "
             }
           ],
-          "sourceFile": "src/exportStar/localFile.ts",
+          "fileUrlPath": "src/exportStar/localFile.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -199,7 +199,7 @@
               "text": "export declare class B "
             }
           ],
-          "sourceFile": "src/exportStar/localFile.ts",
+          "fileUrlPath": "src/exportStar/localFile.ts",
           "releaseTag": "Public",
           "name": "B",
           "preserveMemberOrder": false,
@@ -216,7 +216,7 @@
               "text": "export declare class C "
             }
           ],
-          "sourceFile": "src/exportStar/reexportStar.ts",
+          "fileUrlPath": "src/exportStar/reexportStar.ts",
           "releaseTag": "Public",
           "name": "C",
           "preserveMemberOrder": false,

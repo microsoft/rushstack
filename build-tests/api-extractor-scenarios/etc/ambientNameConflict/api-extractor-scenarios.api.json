@@ -216,7 +216,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/ambientNameConflict/index.ts",
+          "fileUrlPath": "src/ambientNameConflict/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 7,
             "endIndex": 8

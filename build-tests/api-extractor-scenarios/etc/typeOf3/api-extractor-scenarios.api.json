@@ -203,7 +203,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/typeOf3/index.ts",
+          "fileUrlPath": "src/typeOf3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 3,
             "endIndex": 5
@@ -253,7 +253,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/typeOf3/index.ts",
+          "fileUrlPath": "src/typeOf3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 3,
             "endIndex": 5
@@ -299,7 +299,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/typeOf3/index.ts",
+          "fileUrlPath": "src/typeOf3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 4

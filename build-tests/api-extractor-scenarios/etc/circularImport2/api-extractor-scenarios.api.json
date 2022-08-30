@@ -182,7 +182,7 @@
               "text": "export declare class A "
             }
           ],
-          "sourceFile": "src/circularImport2/IFile.ts",
+          "fileUrlPath": "src/circularImport2/IFile.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -199,7 +199,7 @@
               "text": "export declare class B "
             }
           ],
-          "sourceFile": "src/circularImport2/IFolder.ts",
+          "fileUrlPath": "src/circularImport2/IFolder.ts",
           "releaseTag": "Public",
           "name": "B",
           "preserveMemberOrder": false,
@@ -216,7 +216,7 @@
               "text": "export declare class IFile "
             }
           ],
-          "sourceFile": "src/circularImport2/IFile.ts",
+          "fileUrlPath": "src/circularImport2/IFile.ts",
           "releaseTag": "Public",
           "name": "IFile",
           "preserveMemberOrder": false,
@@ -240,7 +240,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/circularImport2/IFile.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -265,7 +264,7 @@
               "text": "export declare class IFolder "
             }
           ],
-          "sourceFile": "src/circularImport2/IFolder.ts",
+          "fileUrlPath": "src/circularImport2/IFolder.ts",
           "releaseTag": "Public",
           "name": "IFolder",
           "preserveMemberOrder": false,
@@ -293,7 +292,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/circularImport2/IFolder.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -328,7 +326,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/circularImport2/IFolder.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",

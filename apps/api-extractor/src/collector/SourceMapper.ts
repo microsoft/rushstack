@@ -41,6 +41,28 @@ export interface ISourceLocation {
   sourceFileColumn: number;
 }
 
+export interface IGetSourceLocationOptions {
+  /**
+   * The source file to get the source location from.
+   */
+  sourceFile: ts.SourceFile;
+
+  /**
+   * The position within the source file to get the source location from.
+   */
+  pos: number;
+
+  /**
+   * If `false` or not provided, then we attempt to follow source maps in order to resolve the
+   * location to the original `.ts` file. If resolution isn't possible for some reason, we fall
+   * back to the `.d.ts` location.
+   *
+   * If `true`, then we don't bother following source maps, and the location refers to the `.d.ts`
+   * location.
+   */
+  useDtsLocation?: boolean;
+}
+
 export class SourceMapper {
   // Map from .d.ts file path --> ISourceMap if a source map was found, or null if not found
   private _sourceMapByFilePath: Map<string, ISourceMap | null> = new Map<string, ISourceMap | null>();
@@ -51,28 +73,18 @@ export class SourceMapper {
   /**
    * Given a `.d.ts` source file and a specific position within the file, return the corresponding
    * `ISourceLocation`.
-   *
-   * @remarks
-   * If `useDtsLocation` is `false` (default), then we attempt to follow source maps in order to resolve
-   * the location to the original `.ts` file. If resolution isn't possible for some reason, we fall back
-   * to the `.d.ts` location.
-   *
-   * If `useDtsLocation` is `true`, then we don't bother following source maps, and the location refers
-   * to the `.d.ts` location.
    */
-  public getSourceLocationFromFileAndPos(
-    sourceFile: ts.SourceFile,
-    pos: number,
-    useDtsLocation: boolean = false
-  ): ISourceLocation {
-    const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(pos);
+  public getSourceLocation(options: IGetSourceLocationOptions): ISourceLocation {
+    const lineAndCharacter: ts.LineAndCharacter = options.sourceFile.getLineAndCharacterOfPosition(
+      options.pos
+    );
     const sourceLocation: ISourceLocation = {
-      sourceFilePath: sourceFile.fileName,
+      sourceFilePath: options.sourceFile.fileName,
       sourceFileLine: lineAndCharacter.line + 1,
       sourceFileColumn: lineAndCharacter.character + 1
     };
 
-    if (useDtsLocation) {
+    if (options.useDtsLocation) {
       return sourceLocation;
     }
 

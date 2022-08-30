@@ -190,7 +190,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/typeOf2/index.ts",
+          "fileUrlPath": "src/typeOf2/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -236,7 +236,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/typeOf2/index.ts",
+          "fileUrlPath": "src/typeOf2/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 4,
             "endIndex": 6

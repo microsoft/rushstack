@@ -182,7 +182,7 @@
               "text": "export declare class A "
             }
           ],
-          "sourceFile": "src/mixinPattern/index.ts",
+          "fileUrlPath": "src/mixinPattern/index.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -205,7 +205,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/mixinPattern/index.ts",
               "isReadonly": false,
               "isOptional": true,
               "releaseTag": "Public",
@@ -239,7 +238,7 @@
               "text": " "
             }
           ],
-          "sourceFile": "src/mixinPattern/index.ts",
+          "fileUrlPath": "src/mixinPattern/index.ts",
           "releaseTag": "Public",
           "name": "B",
           "preserveMemberOrder": false,

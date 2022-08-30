@@ -182,7 +182,7 @@
               "text": "export interface A "
             }
           ],
-          "sourceFile": "src/docReferences3/index.ts",
+          "fileUrlPath": "src/docReferences3/index.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -205,7 +205,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/docReferences3/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -228,7 +227,7 @@
               "text": "export declare namespace A "
             }
           ],
-          "sourceFile": "src/docReferences3/index.ts",
+          "fileUrlPath": "src/docReferences3/index.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -243,7 +242,6 @@
                   "text": "class B "
                 }
               ],
-              "sourceFile": "src/docReferences3/index.ts",
               "releaseTag": "Public",
               "name": "B",
               "preserveMemberOrder": false,
@@ -266,7 +264,6 @@
                       "text": ";"
                     }
                   ],
-                  "sourceFile": "src/docReferences3/index.ts",
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 1,
@@ -302,7 +299,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/docReferences3/index.ts",
+          "fileUrlPath": "src/docReferences3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -330,7 +327,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/docReferences3/index.ts",
+          "fileUrlPath": "src/docReferences3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -358,7 +355,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/docReferences3/index.ts",
+          "fileUrlPath": "src/docReferences3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

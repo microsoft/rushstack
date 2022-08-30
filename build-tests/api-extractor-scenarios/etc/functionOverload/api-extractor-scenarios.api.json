@@ -206,7 +206,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/functionOverload/index.ts",
+          "fileUrlPath": "src/functionOverload/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -267,7 +267,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/functionOverload/index.ts",
+          "fileUrlPath": "src/functionOverload/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -328,7 +328,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/functionOverload/index.ts",
+          "fileUrlPath": "src/functionOverload/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -365,7 +365,7 @@
               "text": "export declare class Combiner "
             }
           ],
-          "sourceFile": "src/functionOverload/index.ts",
+          "fileUrlPath": "src/functionOverload/index.ts",
           "releaseTag": "Public",
           "name": "Combiner",
           "preserveMemberOrder": false,
@@ -404,7 +404,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/functionOverload/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
@@ -468,7 +467,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/functionOverload/index.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,

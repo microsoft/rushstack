@@ -182,7 +182,7 @@
               "text": "export default class DefaultClass "
             }
           ],
-          "sourceFile": "src/defaultExportOfEntryPoint/index.ts",
+          "fileUrlPath": "src/defaultExportOfEntryPoint/index.ts",
           "releaseTag": "Public",
           "name": "DefaultClass",
           "preserveMemberOrder": false,

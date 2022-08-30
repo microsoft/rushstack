@@ -177,7 +177,7 @@
           "canonicalReference": "api-extractor-scenarios!ns:namespace",
           "docComment": "",
           "excerptTokens": [],
-          "sourceFile": "src/exportImportStarAs2/index.ts",
+          "fileUrlPath": "src/exportImportStarAs2/index.ts",
           "releaseTag": "None",
           "name": "ns",
           "preserveMemberOrder": false,
@@ -201,7 +201,7 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/exportImportStarAs2/ns.ts",
+              "fileUrlPath": "src/exportImportStarAs2/ns.ts",
               "returnTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

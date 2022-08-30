@@ -182,7 +182,7 @@
               "text": "export interface ITeamsContext "
             }
           ],
-          "sourceFile": "src/exportEquals/index.ts",
+          "fileUrlPath": "src/exportEquals/index.ts",
           "releaseTag": "Public",
           "name": "ITeamsContext",
           "preserveMemberOrder": false,
@@ -206,7 +206,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/exportEquals/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",

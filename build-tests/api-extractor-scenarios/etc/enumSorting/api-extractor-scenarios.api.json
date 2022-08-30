@@ -182,7 +182,7 @@
               "text": "export declare const enum ConstEnum "
             }
           ],
-          "sourceFile": "src/enumSorting/index.ts",
+          "fileUrlPath": "src/enumSorting/index.ts",
           "releaseTag": "Public",
           "name": "ConstEnum",
           "preserveMemberOrder": true,
@@ -201,7 +201,6 @@
                   "text": "0"
                 }
               ],
-              "sourceFile": "src/enumSorting/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -223,7 +222,6 @@
                   "text": "1"
                 }
               ],
-              "sourceFile": "src/enumSorting/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -245,7 +243,6 @@
                   "text": "2"
                 }
               ],
-              "sourceFile": "src/enumSorting/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -265,7 +262,7 @@
               "text": "export declare enum RegularEnum "
             }
           ],
-          "sourceFile": "src/enumSorting/index.ts",
+          "fileUrlPath": "src/enumSorting/index.ts",
           "releaseTag": "Public",
           "name": "RegularEnum",
           "preserveMemberOrder": true,
@@ -284,7 +281,6 @@
                   "text": "0"
                 }
               ],
-              "sourceFile": "src/enumSorting/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -306,7 +302,6 @@
                   "text": "1"
                 }
               ],
-              "sourceFile": "src/enumSorting/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -328,7 +323,6 @@
                   "text": "2"
                 }
               ],
-              "sourceFile": "src/enumSorting/index.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2

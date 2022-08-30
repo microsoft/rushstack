@@ -195,7 +195,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/importEquals/index.ts",
+          "fileUrlPath": "src/importEquals/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 3

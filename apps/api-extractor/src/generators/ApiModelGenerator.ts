@@ -75,7 +75,8 @@ export class ApiModelGenerator {
     const apiPackage: ApiPackage = new ApiPackage({
       name: this._collector.workingPackage.name,
       docComment: packageDocComment,
-      tsdocConfiguration: this._collector.extractorConfig.tsdocConfiguration
+      tsdocConfiguration: this._collector.extractorConfig.tsdocConfiguration,
+      projectFolderUrl: this._collector.extractorConfig.projectFolderUrl
     });
     this._apiModel.addMember(apiPackage);
 
@@ -138,7 +139,7 @@ export class ApiModelGenerator {
     const astModule: AstModule = astNamespaceImport.astModule;
     const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiNamespace.getContainerKey(name);
-    const sourceFile: string | undefined = this._getSourceFile(astNamespaceImport.declaration);
+    const fileUrlPath: string = this._getFileUrlPath(astNamespaceImport.declaration);
 
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(
       containerKey
@@ -151,7 +152,8 @@ export class ApiModelGenerator {
         releaseTag: ReleaseTag.None,
         excerptTokens: [],
         isExported,
-        sourceFile: ''
+        fileUrlPath,
+        parent: parentApiItem
       });
       parentApiItem.addMember(apiNamespace);
     }
@@ -297,7 +299,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const sourceFile: string | undefined = this._getSourceFile(callSignature);
+      const fileUrlPath: string = this._getFileUrlPath(callSignature);
 
       apiCallSignature = new ApiCallSignature({
         docComment,
@@ -307,7 +309,8 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiCallSignature);
@@ -339,7 +342,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
-      const sourceFile: string | undefined = this._getSourceFile(constructorDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(constructorDeclaration);
 
       apiConstructor = new ApiConstructor({
         docComment,
@@ -348,7 +351,8 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiConstructor);
@@ -393,7 +397,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const sourceFile: string | undefined = this._getSourceFile(classDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(classDeclaration);
 
       apiClass = new ApiClass({
         name,
@@ -404,7 +408,8 @@ export class ApiModelGenerator {
         extendsTokenRange,
         implementsTokenRanges,
         isExported,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiClass);
@@ -451,7 +456,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const sourceFile: string | undefined = this._getSourceFile(constructSignature);
+      const fileUrlPath: string = this._getFileUrlPath(constructSignature);
 
       apiConstructSignature = new ApiConstructSignature({
         docComment,
@@ -461,7 +466,8 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiConstructSignature);
@@ -481,7 +487,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const preserveMemberOrder: boolean =
         this._collector.extractorConfig.enumMemberOrder === EnumMemberOrder.Preserve;
-      const sourceFile: string | undefined = this._getSourceFile(astDeclaration.declaration);
+      const fileUrlPath: string = this._getFileUrlPath(astDeclaration.declaration);
 
       apiEnum = new ApiEnum({
         name,
@@ -490,7 +496,8 @@ export class ApiModelGenerator {
         excerptTokens,
         preserveMemberOrder,
         isExported,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
       parentApiItem.addMember(apiEnum);
     }
@@ -524,7 +531,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const sourceFile: string | undefined = this._getSourceFile(enumMember);
+      const fileUrlPath: string = this._getFileUrlPath(enumMember);
 
       apiEnumMember = new ApiEnumMember({
         name,
@@ -532,7 +539,8 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         initializerTokenRange,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiEnumMember);
@@ -570,7 +578,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const sourceFile: string | undefined = this._getSourceFile(functionDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(functionDeclaration);
 
       apiFunction = new ApiFunction({
         name,
@@ -582,7 +590,8 @@ export class ApiModelGenerator {
         excerptTokens,
         returnTypeTokenRange,
         isExported,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiFunction);
@@ -617,7 +626,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const sourceFile: string | undefined = this._getSourceFile(indexSignature);
+      const fileUrlPath: string = this._getFileUrlPath(indexSignature);
 
       apiIndexSignature = new ApiIndexSignature({
         docComment,
@@ -627,7 +636,8 @@ export class ApiModelGenerator {
         excerptTokens,
         returnTypeTokenRange,
         isReadonly,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiIndexSignature);
@@ -669,7 +679,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const sourceFile: string | undefined = this._getSourceFile(interfaceDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(interfaceDeclaration);
 
       apiInterface = new ApiInterface({
         name,
@@ -679,7 +689,8 @@ export class ApiModelGenerator {
         typeParameters,
         extendsTokenRanges,
         isExported,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiInterface);
@@ -727,7 +738,7 @@ export class ApiModelGenerator {
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
-      const sourceFile: string | undefined = this._getSourceFile(methodDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(methodDeclaration);
 
       apiMethod = new ApiMethod({
         name,
@@ -741,7 +752,8 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiMethod);
@@ -784,7 +796,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
-      const sourceFile: string | undefined = this._getSourceFile(methodSignature);
+      const fileUrlPath: string = this._getFileUrlPath(methodSignature);
 
       apiMethodSignature = new ApiMethodSignature({
         name,
@@ -796,7 +808,8 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiMethodSignature);
@@ -816,7 +829,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const sourceFile: string | undefined = this._getSourceFile(astDeclaration.declaration);
+      const fileUrlPath: string = this._getFileUrlPath(astDeclaration.declaration);
 
       apiNamespace = new ApiNamespace({
         name,
@@ -824,7 +837,8 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         isExported,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
       parentApiItem.addMember(apiNamespace);
     }
@@ -874,7 +888,7 @@ export class ApiModelGenerator {
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const sourceFile: string | undefined = this._getSourceFile(declaration);
+      const fileUrlPath: string = this._getFileUrlPath(declaration);
 
       apiProperty = new ApiProperty({
         name,
@@ -887,7 +901,8 @@ export class ApiModelGenerator {
         excerptTokens,
         propertyTypeTokenRange,
         initializerTokenRange,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
       parentApiItem.addMember(apiProperty);
     } else {
@@ -922,7 +937,7 @@ export class ApiModelGenerator {
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const sourceFile: string | undefined = this._getSourceFile(propertySignature);
+      const fileUrlPath: string = this._getFileUrlPath(propertySignature);
 
       apiPropertySignature = new ApiPropertySignature({
         name,
@@ -932,7 +947,8 @@ export class ApiModelGenerator {
         excerptTokens,
         propertyTypeTokenRange,
         isReadonly,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiPropertySignature);
@@ -969,7 +985,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      const sourceFile: string | undefined = this._getSourceFile(typeAliasDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(typeAliasDeclaration);
 
       apiTypeAlias = new ApiTypeAlias({
         name,
@@ -979,7 +995,8 @@ export class ApiModelGenerator {
         excerptTokens,
         typeTokenRange,
         isExported,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiTypeAlias);
@@ -1013,7 +1030,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
-      const sourceFile: string | undefined = this._getSourceFile(variableDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(variableDeclaration);
 
       apiVariable = new ApiVariable({
         name,
@@ -1024,7 +1041,8 @@ export class ApiModelGenerator {
         initializerTokenRange,
         isReadonly,
         isExported,
-        sourceFile
+        fileUrlPath,
+        parent: parentApiItem
       });
 
       parentApiItem.addMember(apiVariable);
@@ -1130,12 +1148,12 @@ export class ApiModelGenerator {
     }
   }
 
-  private _getSourceFile(declaration: ts.Declaration): string | undefined {
+  private _getFileUrlPath(declaration: ts.Declaration): string {
     const sourceFile: ts.SourceFile = declaration.getSourceFile();
-    const sourceLocation: ISourceLocation = this._collector.sourceMapper.getSourceLocationFromFileAndPos(
+    const sourceLocation: ISourceLocation = this._collector.sourceMapper.getSourceLocation({
       sourceFile,
-      declaration.pos
-    );
+      pos: declaration.pos
+    });
 
     return path.relative(this._collector.extractorConfig.projectFolder, sourceLocation.sourceFilePath);
   }

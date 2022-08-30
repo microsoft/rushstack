@@ -204,11 +204,11 @@ export class MessageRouter {
       // NOTE: Since compiler errors pertain to issues specific to the .d.ts files,
       // we do not apply source mappings for them.
       const sourceFile: ts.SourceFile = diagnostic.file;
-      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocationFromFileAndPos(
+      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
         sourceFile,
-        diagnostic.start || 0,
-        true /* useDtsLocation */
-      );
+        pos: diagnostic.start || 0,
+        useDtsLocation: true
+      });
       options.sourceFilePath = sourceLocation.sourceFilePath;
       options.sourceFileLine = sourceLocation.sourceFileLine;
       options.sourceFileColumn = sourceLocation.sourceFileColumn;
@@ -260,10 +260,10 @@ export class MessageRouter {
         text: message.unformattedText
       };
 
-      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocationFromFileAndPos(
+      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
         sourceFile,
-        message.textRange.pos
-      );
+        pos: message.textRange.pos
+      });
       options.sourceFilePath = sourceLocation.sourceFilePath;
       options.sourceFileLine = sourceLocation.sourceFileLine;
       options.sourceFileColumn = sourceLocation.sourceFileColumn;
@@ -378,10 +378,10 @@ export class MessageRouter {
       properties
     };
 
-    const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocationFromFileAndPos(
+    const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
       sourceFile,
       pos
-    );
+    });
     options.sourceFilePath = sourceLocation.sourceFilePath;
     options.sourceFileLine = sourceLocation.sourceFileLine;
     options.sourceFileColumn = sourceLocation.sourceFileColumn;

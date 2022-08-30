@@ -76,7 +76,7 @@ export enum ApiJsonSchemaVersion {
   V_1009 = 1009,
 
   /**
-   * Add a `sourceFile` field to `ApiDeclaredItem` to track a declared item's original source file.
+   * Add a `fileUrlPath` field to `ApiDeclaredItem` to track the URL to a declared item's source file.
    *
    * When loading older JSON files, the value defaults to `undefined`.
    */

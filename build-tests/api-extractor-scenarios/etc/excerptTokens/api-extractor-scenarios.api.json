@@ -186,7 +186,7 @@
               "text": "number"
             }
           ],
-          "sourceFile": "lib/excerptTokens/index.d.ts",
+          "fileUrlPath": "lib/excerptTokens/index.d.ts",
           "isReadonly": false,
           "releaseTag": "Public",
           "name": "MY_CONSTANT",
@@ -205,7 +205,7 @@
               "text": "export class MyClass "
             }
           ],
-          "sourceFile": "lib/excerptTokens/index.d.ts",
+          "fileUrlPath": "lib/excerptTokens/index.d.ts",
           "releaseTag": "Public",
           "name": "MyClass",
           "preserveMemberOrder": false,
@@ -244,7 +244,6 @@
                   "text": " ;"
                 }
               ],
-              "sourceFile": "lib/excerptTokens/index.d.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,

@@ -182,7 +182,7 @@
               "text": "export declare class MergedClassAndInterface "
             }
           ],
-          "sourceFile": "src/mergedDeclarations/index.ts",
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedClassAndInterface",
           "preserveMemberOrder": false,
@@ -205,7 +205,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/mergedDeclarations/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -230,7 +229,7 @@
               "text": "export interface MergedClassAndInterface "
             }
           ],
-          "sourceFile": "src/mergedDeclarations/index.ts",
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedClassAndInterface",
           "preserveMemberOrder": false,
@@ -253,7 +252,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/mergedDeclarations/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -289,7 +287,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/mergedDeclarations/index.ts",
               "isOptional": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -322,7 +319,7 @@
               "text": "export declare class MergedClassAndNamespace "
             }
           ],
-          "sourceFile": "src/mergedDeclarations/index.ts",
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedClassAndNamespace",
           "preserveMemberOrder": false,
@@ -345,7 +342,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/mergedDeclarations/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -370,7 +366,7 @@
               "text": "export declare namespace MergedClassAndNamespace "
             }
           ],
-          "sourceFile": "src/mergedDeclarations/index.ts",
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedClassAndNamespace",
           "preserveMemberOrder": false,
@@ -389,7 +385,6 @@
                   "text": "number"
                 }
               ],
-              "sourceFile": "src/mergedDeclarations/index.ts",
               "isReadonly": false,
               "releaseTag": "Public",
               "name": "anotherProp",
@@ -410,7 +405,7 @@
               "text": "export interface MergedInterfaces "
             }
           ],
-          "sourceFile": "src/mergedDeclarations/index.ts",
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedInterfaces",
           "preserveMemberOrder": false,
@@ -433,7 +428,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/mergedDeclarations/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -456,7 +450,7 @@
               "text": "export declare namespace MergedNamespaces "
             }
           ],
-          "sourceFile": "src/mergedDeclarations/index.ts",
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedNamespaces",
           "preserveMemberOrder": false,
@@ -471,7 +465,6 @@
                   "text": "class AnotherClass "
                 }
               ],
-              "sourceFile": "src/mergedDeclarations/index.ts",
               "releaseTag": "Public",
               "name": "AnotherClass",
               "preserveMemberOrder": false,
@@ -488,7 +481,6 @@
                   "text": "class SomeClass "
                 }
               ],
-              "sourceFile": "src/mergedDeclarations/index.ts",
               "releaseTag": "Public",
               "name": "SomeClass",
               "preserveMemberOrder": false,

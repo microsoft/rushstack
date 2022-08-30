@@ -182,7 +182,7 @@
               "text": "export interface DefaultImportTypes "
             }
           ],
-          "sourceFile": "src/namedDefaultImport/index.ts",
+          "fileUrlPath": "src/namedDefaultImport/index.ts",
           "releaseTag": "Public",
           "name": "DefaultImportTypes",
           "preserveMemberOrder": false,
@@ -210,7 +210,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/namedDefaultImport/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -239,7 +238,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/namedDefaultImport/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -268,7 +266,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/namedDefaultImport/index.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",

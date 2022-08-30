@@ -182,7 +182,7 @@
               "text": "export declare abstract class AbstractClass "
             }
           ],
-          "sourceFile": "src/apiItemKinds/classes.ts",
+          "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
           "name": "AbstractClass",
           "preserveMemberOrder": false,
@@ -205,7 +205,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/classes.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -231,7 +230,7 @@
               "text": "export declare class ClassWithTypeParameter<T> "
             }
           ],
-          "sourceFile": "src/apiItemKinds/classes.ts",
+          "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -265,7 +264,7 @@
               "text": "string"
             }
           ],
-          "sourceFile": "src/apiItemKinds/variables.ts",
+          "fileUrlPath": "src/apiItemKinds/variables.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "CONST_VARIABLE",
@@ -284,7 +283,7 @@
               "text": "export declare const enum ConstEnum "
             }
           ],
-          "sourceFile": "src/apiItemKinds/enums.ts",
+          "fileUrlPath": "src/apiItemKinds/enums.ts",
           "releaseTag": "Public",
           "name": "ConstEnum",
           "preserveMemberOrder": false,
@@ -303,7 +302,6 @@
                   "text": "1"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/enums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -325,7 +323,6 @@
                   "text": "2"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/enums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -347,7 +344,6 @@
                   "text": "0"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/enums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -389,7 +385,7 @@
               "text": " "
             }
           ],
-          "sourceFile": "src/apiItemKinds/classes.ts",
+          "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
           "name": "ExtendsClassWithTypeParameter",
           "preserveMemberOrder": false,
@@ -410,7 +406,7 @@
               "text": "export interface IInterface "
             }
           ],
-          "sourceFile": "src/apiItemKinds/interfaces.ts",
+          "fileUrlPath": "src/apiItemKinds/interfaces.ts",
           "releaseTag": "Public",
           "name": "IInterface",
           "preserveMemberOrder": false,
@@ -433,7 +429,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/interfaces.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -456,7 +451,7 @@
               "text": "export declare namespace n1 "
             }
           ],
-          "sourceFile": "src/apiItemKinds/namespaces.ts",
+          "fileUrlPath": "src/apiItemKinds/namespaces.ts",
           "releaseTag": "Public",
           "name": "n1",
           "preserveMemberOrder": false,
@@ -471,7 +466,6 @@
                   "text": "export namespace n2 "
                 }
               ],
-              "sourceFile": "src/apiItemKinds/namespaces.ts",
               "releaseTag": "Public",
               "name": "n2",
               "preserveMemberOrder": false,
@@ -486,7 +480,6 @@
                       "text": "class SomeClass3 "
                     }
                   ],
-                  "sourceFile": "src/apiItemKinds/namespaces.ts",
                   "releaseTag": "Public",
                   "name": "SomeClass3",
                   "preserveMemberOrder": false,
@@ -505,7 +498,6 @@
                   "text": "class SomeClass1 "
                 }
               ],
-              "sourceFile": "src/apiItemKinds/namespaces.ts",
               "releaseTag": "Public",
               "name": "SomeClass1",
               "preserveMemberOrder": false,
@@ -531,7 +523,6 @@
                   "text": " "
                 }
               ],
-              "sourceFile": "src/apiItemKinds/namespaces.ts",
               "releaseTag": "Public",
               "name": "SomeClass2",
               "preserveMemberOrder": false,
@@ -552,7 +543,6 @@
                   "text": "class SomeClass4 "
                 }
               ],
-              "sourceFile": "src/apiItemKinds/namespaces.ts",
               "releaseTag": "Public",
               "name": "SomeClass4",
               "preserveMemberOrder": false,
@@ -575,7 +565,7 @@
               "text": "string"
             }
           ],
-          "sourceFile": "src/apiItemKinds/variables.ts",
+          "fileUrlPath": "src/apiItemKinds/variables.ts",
           "isReadonly": false,
           "releaseTag": "Public",
           "name": "nonConstVariable",
@@ -594,7 +584,7 @@
               "text": "export declare enum RegularEnum "
             }
           ],
-          "sourceFile": "src/apiItemKinds/enums.ts",
+          "fileUrlPath": "src/apiItemKinds/enums.ts",
           "releaseTag": "Public",
           "name": "RegularEnum",
           "preserveMemberOrder": false,
@@ -613,7 +603,6 @@
                   "text": "1"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/enums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -635,7 +624,6 @@
                   "text": "2"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/enums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -657,7 +645,6 @@
                   "text": "0"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/enums.ts",
               "initializerTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -677,7 +664,7 @@
               "text": "export declare class SimpleClass "
             }
           ],
-          "sourceFile": "src/apiItemKinds/classes.ts",
+          "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
           "name": "SimpleClass",
           "preserveMemberOrder": false,
@@ -700,7 +687,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/classes.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
@@ -739,7 +725,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/classes.ts",
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -779,7 +764,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/classes.ts",
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
@@ -809,7 +793,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/classes.ts",
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
@@ -843,7 +826,6 @@
                   "text": ";"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/classes.ts",
               "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
@@ -873,7 +855,6 @@
                   "text": ";\n\nset writeableProperty(value: string);"
                 }
               ],
-              "sourceFile": "src/apiItemKinds/classes.ts",
               "isReadonly": false,
               "isOptional": false,
               "releaseTag": "Public",
@@ -906,7 +887,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/apiItemKinds/functions.ts",
+          "fileUrlPath": "src/apiItemKinds/functions.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -934,7 +915,7 @@
               "text": ";"
             }
           ],
-          "sourceFile": "src/apiItemKinds/typeAliases.ts",
+          "fileUrlPath": "src/apiItemKinds/typeAliases.ts",
           "releaseTag": "Public",
           "name": "SomeType",
           "typeTokenRange": {
@@ -956,7 +937,7 @@
               "text": "\"hello\""
             }
           ],
-          "sourceFile": "src/apiItemKinds/variables.ts",
+          "fileUrlPath": "src/apiItemKinds/variables.ts",
           "initializerTokenRange": {
             "startIndex": 1,
             "endIndex": 2
