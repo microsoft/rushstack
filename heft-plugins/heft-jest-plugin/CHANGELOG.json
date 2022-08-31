@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.3.30",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.30",
+      "date": "Wed, 31 Aug 2022 01:45:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Hide disabling Jest cache behind environment variable \"HEFT_JEST_DISABLE_CACHE\""
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.29",
       "tag": "@rushstack/heft-jest-plugin_v0.3.29",
       "date": "Wed, 31 Aug 2022 00:42:46 GMT",
