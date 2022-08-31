@@ -13,6 +13,7 @@ const fs = require('fs');
 // reading and writing of cache files.
 
 const patchName = path.basename(__filename);
+const HEFT_JEST_DISABLE_CACHE_ENV_VARIABLE = 'HEFT_JEST_DISABLE_CACHE';
 
 function applyPatch() {
   try {
@@ -48,7 +49,20 @@ function patchScriptTransformer(scriptPath) {
   const functionsToReplace = ['readCacheFile', 'writeCacheFile'];
 
   for (const functionName of functionsToReplace) {
-    const match = scriptContent.match(new RegExp(`^\\s*const ${functionName} =`, 'm'));
+    const originalFunctionName = `${functionName}Original`;
+
+    // First, attempt to remove the existing patch, if one is present
+    let match = scriptContent.match(new RegExp(`^\\s*const ${originalFunctionName} =`, 'm'));
+    let originalFunctionContent;
+    if (match) {
+      const startIndex = match.index;
+      const endIndex = scriptContent.indexOf('};', startIndex) + 2;
+      originalFunctionContent = scriptContent.slice(startIndex, endIndex);
+      scriptContent = scriptContent.slice(0, startIndex) + scriptContent.slice(endIndex);
+    }
+
+    // Then, attempt to find the function to patch
+    match = scriptContent.match(new RegExp(`^\\s*const ${functionName} =`, 'm'));
     if (!match) {
       throw new Error(
         `The ${JSON.stringify(functionName)} function was not found in the file ${JSON.stringify(scriptPath)}`
@@ -57,9 +71,25 @@ function patchScriptTransformer(scriptPath) {
 
     const startIndex = match.index;
     const endIndex = scriptContent.indexOf('};', startIndex) + 2;
+
+    // If we already have the original function content, no need to extract it again
+    if (originalFunctionContent === undefined) {
+      originalFunctionContent = scriptContent
+        .slice(startIndex, endIndex)
+        .replace(`const ${functionName} =`, `const ${originalFunctionName} =`);
+    }
+
     scriptContent =
       scriptContent.slice(0, startIndex) +
-      `const ${functionName} = () => {};` +
+      `${originalFunctionContent}\n` +
+      `const ${functionName} = (...args) => {\n` +
+      `  // Patched by @rushstack/heft-jest-plugin. For more information, see:\n` +
+      `  // https://github.com/microsoft/rushstack/pull/3606\n` +
+      `  if (process.env['${HEFT_JEST_DISABLE_CACHE_ENV_VARIABLE}']) {\n` +
+      `    return;\n` +
+      `  }\n` +
+      `  return ${originalFunctionName}(...args);\n` +
+      '};' +
       scriptContent.slice(endIndex);
   }
 
