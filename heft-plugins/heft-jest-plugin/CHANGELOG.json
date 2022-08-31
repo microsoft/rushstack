@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.3.29",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.29",
+      "date": "Wed, 31 Aug 2022 00:42:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Disable reading and writing of Jest cache due to unexpected caching behavior"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.28",
       "tag": "@rushstack/heft-jest-plugin_v0.3.28",
       "date": "Wed, 24 Aug 2022 03:01:22 GMT",
