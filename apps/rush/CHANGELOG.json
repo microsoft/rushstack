@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.77.2",
+      "tag": "@microsoft/rush_v5.77.2",
+      "date": "Wed, 31 Aug 2022 00:43:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush add\" sometimes did not work correctly if a project is nested under another project's folder"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.77.1",
       "tag": "@microsoft/rush_v5.77.1",
       "date": "Tue, 30 Aug 2022 17:26:42 GMT",

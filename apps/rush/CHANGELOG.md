@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 30 Aug 2022 17:26:42 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Aug 2022 00:43:07 GMT and should not be manually modified.
+
+## 5.77.2
+Wed, 31 Aug 2022 00:43:07 GMT
+
+### Updates
+
+- Fix an issue where "rush add" sometimes did not work correctly if a project is nested under another project's folder
 
 ## 5.77.1
 Tue, 30 Aug 2022 17:26:42 GMT
