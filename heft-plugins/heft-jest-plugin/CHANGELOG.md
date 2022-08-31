@@ -1,6 +1,65 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Wed, 13 Jul 2022 21:31:13 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Aug 2022 01:45:06 GMT and should not be manually modified.
+
+## 0.3.30
+Wed, 31 Aug 2022 01:45:06 GMT
+
+### Patches
+
+- Hide disabling Jest cache behind environment variable "HEFT_JEST_DISABLE_CACHE"
+
+## 0.3.29
+Wed, 31 Aug 2022 00:42:46 GMT
+
+### Patches
+
+- Disable reading and writing of Jest cache due to unexpected caching behavior
+
+## 0.3.28
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 0.3.27
+Wed, 24 Aug 2022 00:14:38 GMT
+
+_Version update only_
+
+## 0.3.26
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 0.3.25
+Wed, 10 Aug 2022 09:52:12 GMT
+
+_Version update only_
+
+## 0.3.24
+Wed, 10 Aug 2022 08:12:16 GMT
+
+_Version update only_
+
+## 0.3.23
+Wed, 03 Aug 2022 18:40:35 GMT
+
+_Version update only_
+
+## 0.3.22
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
+
+## 0.3.21
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
+
+## 0.3.20
+Thu, 21 Jul 2022 00:16:14 GMT
+
+_Version update only_
 
 ## 0.3.19
 Wed, 13 Jul 2022 21:31:13 GMT

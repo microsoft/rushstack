@@ -103,4 +103,9 @@ export interface IConfigFile {
 
   /** {@inheritDoc IConfigTableOfContents} */
   tableOfContents?: IConfigTableOfContents;
+
+  /**
+   * Specifies whether inherited members should also be shown on an API item's page.
+   */
+  showInheritedMembers?: boolean;
 }

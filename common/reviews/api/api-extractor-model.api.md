@@ -256,6 +256,7 @@ export class ApiItem {
     static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem;
     // @virtual
     get displayName(): string;
+    getAssociatedModel(): ApiModel | undefined;
     getAssociatedPackage(): ApiPackage | undefined;
     getHierarchy(): ReadonlyArray<ApiItem>;
     getMergedSiblings(): ReadonlyArray<ApiItem>;
@@ -281,6 +282,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 export interface ApiItemContainerMixin extends ApiItem {
     addMember(member: ApiItem): void;
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
+    findMembersWithInheritance(): IFindApiItemsResult;
     // @internal
     _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
     readonly preserveMemberOrder: boolean;
@@ -688,6 +690,14 @@ export enum ExcerptTokenKind {
 }
 
 // @public
+export enum FindApiItemsMessageId {
+    DeclarationResolutionFailed = "declaration-resolution-failed",
+    ExtendsClauseMissingReference = "extends-clause-missing-reference",
+    NoAssociatedApiModel = "no-associated-api-model",
+    UnsupportedKind = "unsupported-kind"
+}
+
+// @public
 export class HeritageType {
     constructor(excerpt: Excerpt);
     readonly excerpt: Excerpt;
@@ -914,6 +924,20 @@ export interface IExcerptToken {
 export interface IExcerptTokenRange {
     endIndex: number;
     startIndex: number;
+}
+
+// @public
+export interface IFindApiItemsMessage {
+    // @beta
+    messageId: FindApiItemsMessageId;
+    text: string;
+}
+
+// @public
+export interface IFindApiItemsResult {
+    items: ApiItem[];
+    maybeIncompleteResult: boolean;
+    messages: IFindApiItemsMessage[];
 }
 
 // @public

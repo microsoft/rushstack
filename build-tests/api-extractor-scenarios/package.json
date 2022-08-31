@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
-  "typings": "dist/internal/api-extractor-test-01.d.ts",
+  "typings": "dist/internal/some-fake-file.d.ts",
   "scripts": {
     "build": "node build.js",
     "_phase:build": "node build.js"
@@ -20,6 +20,6 @@
     "api-extractor-lib3-test": "workspace:*",
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
-    "typescript": "~4.6.3"
+    "typescript": "~4.7.4"
   }
 }

@@ -21,7 +21,7 @@ export function runScenarios(buildConfigPath: string): void {
     sourcePath: './src/',
     destinationPath: './lib/',
     alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite,
-    filter: (sourcePath: string, destinationPath: string): boolean => {
+    filter: (sourcePath: string): boolean => {
       if (sourcePath.endsWith('.d.ts') || !sourcePath.endsWith('.ts')) {
         // console.log('COPY ' + sourcePath);
         return true;
@@ -32,8 +32,6 @@ export function runScenarios(buildConfigPath: string): void {
 
   const entryPoints: string[] = [];
 
-  // TODO: Eliminate this workaround
-  // See GitHub issue https://github.com/microsoft/rushstack/issues/1017
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
     const entryPoint: string = path.resolve(`./lib/${scenarioFolderName}/index.d.ts`);
     entryPoints.push(entryPoint);
@@ -47,17 +45,17 @@ export function runScenarios(buildConfigPath: string): void {
 
       apiReport: {
         enabled: true,
-        reportFolder: `<projectFolder>/etc/test-outputs/${scenarioFolderName}`
+        reportFolder: `<projectFolder>/etc/${scenarioFolderName}`
       },
 
       dtsRollup: {
         enabled: true,
-        untrimmedFilePath: `<projectFolder>/etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
+        untrimmedFilePath: `<projectFolder>/etc/${scenarioFolderName}/rollup.d.ts`
       },
 
       docModel: {
         enabled: true,
-        apiJsonFilePath: `<projectFolder>/etc/test-outputs/${scenarioFolderName}/<unscopedPackageName>.api.json`
+        apiJsonFilePath: `<projectFolder>/etc/${scenarioFolderName}/<unscopedPackageName>.api.json`
       },
 
       messages: {
@@ -89,11 +87,10 @@ export function runScenarios(buildConfigPath: string): void {
   process.exitCode = 1;
 
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
-    const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
-
     console.log('Scenario: ' + scenarioFolderName);
 
-    // Run the API Extractor command-line
+    // Run the API Extractor programmatically
+    const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath);
 
     if (!compilerState) {

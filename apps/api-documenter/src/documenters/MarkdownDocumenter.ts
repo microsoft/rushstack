@@ -43,7 +43,8 @@ import {
   ApiOptionalMixin,
   ApiInitializerMixin,
   ApiProtectedMixin,
-  ApiReadonlyMixin
+  ApiReadonlyMixin,
+  IFindApiItemsResult
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -118,7 +119,7 @@ export class MarkdownDocumenter {
 
   private _writeApiItemPage(apiItem: ApiItem): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
-    const output: DocSection = new DocSection({ configuration: this._tsdocConfiguration });
+    const output: DocSection = new DocSection({ configuration });
 
     this._writeBreadcrumb(output, apiItem);
 
@@ -190,10 +191,10 @@ export class MarkdownDocumenter {
 
         if (tsdocComment.deprecatedBlock) {
           output.appendNode(
-            new DocNoteBox({ configuration: this._tsdocConfiguration }, [
-              new DocParagraph({ configuration: this._tsdocConfiguration }, [
+            new DocNoteBox({ configuration }, [
+              new DocParagraph({ configuration }, [
                 new DocPlainText({
-                  configuration: this._tsdocConfiguration,
+                  configuration,
                   text: 'Warning: This API is now obsolete. '
                 })
               ]),
@@ -339,7 +340,7 @@ export class MarkdownDocumenter {
         output.appendNode(extendsParagraph);
       }
       if (apiItem.implementsTypes.length > 0) {
-        const extendsParagraph: DocParagraph = new DocParagraph({ configuration }, [
+        const implementsParagraph: DocParagraph = new DocParagraph({ configuration }, [
           new DocEmphasisSpan({ configuration, bold: true }, [
             new DocPlainText({ configuration, text: 'Implements: ' })
           ])
@@ -347,12 +348,12 @@ export class MarkdownDocumenter {
         let needsComma: boolean = false;
         for (const implementsType of apiItem.implementsTypes) {
           if (needsComma) {
-            extendsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
+            implementsParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
           }
-          this._appendExcerptWithHyperlinks(extendsParagraph, implementsType.excerpt);
+          this._appendExcerptWithHyperlinks(implementsParagraph, implementsType.excerpt);
           needsComma = true;
         }
-        output.appendNode(extendsParagraph);
+        output.appendNode(implementsParagraph);
       }
     }
 
@@ -409,13 +410,15 @@ export class MarkdownDocumenter {
   }
 
   private _writeRemarksSection(output: DocSection, apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
     if (apiItem instanceof ApiDocumentedItem) {
       const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
 
       if (tsdocComment) {
         // Write the @remarks block
         if (tsdocComment.remarksBlock) {
-          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
+          output.appendNode(new DocHeading({ configuration, title: 'Remarks' }));
           this._appendSection(output, tsdocComment.remarksBlock.content);
         }
 
@@ -428,7 +431,7 @@ export class MarkdownDocumenter {
         for (const exampleBlock of exampleBlocks) {
           const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
 
-          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
+          output.appendNode(new DocHeading({ configuration, title: heading }));
 
           this._appendSection(output, exampleBlock.content);
 
@@ -439,6 +442,8 @@ export class MarkdownDocumenter {
   }
 
   private _writeThrowsSection(output: DocSection, apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
     if (apiItem instanceof ApiDocumentedItem) {
       const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
 
@@ -450,7 +455,7 @@ export class MarkdownDocumenter {
 
         if (throwsBlocks.length > 0) {
           const heading: string = 'Exceptions';
-          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
+          output.appendNode(new DocHeading({ configuration, title: heading }));
 
           for (const throwsBlock of throwsBlocks) {
             this._appendSection(output, throwsBlock.content);
@@ -486,7 +491,7 @@ export class MarkdownDocumenter {
     }
 
     if (packagesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Packages' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Packages' }));
       output.appendNode(packagesTable);
     }
   }
@@ -582,36 +587,36 @@ export class MarkdownDocumenter {
     }
 
     if (classesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Classes' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Classes' }));
       output.appendNode(classesTable);
     }
 
     if (enumerationsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Enumerations' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Enumerations' }));
       output.appendNode(enumerationsTable);
     }
     if (functionsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Functions' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Functions' }));
       output.appendNode(functionsTable);
     }
 
     if (interfacesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Interfaces' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Interfaces' }));
       output.appendNode(interfacesTable);
     }
 
     if (namespacesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Namespaces' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Namespaces' }));
       output.appendNode(namespacesTable);
     }
 
     if (variablesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Variables' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Variables' }));
       output.appendNode(variablesTable);
     }
 
     if (typeAliasesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Type Aliases' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Type Aliases' }));
       output.appendNode(typeAliasesTable);
     }
   }
@@ -642,14 +647,16 @@ export class MarkdownDocumenter {
       headerTitles: ['Method', 'Modifiers', 'Description']
     });
 
-    for (const apiMember of apiClass.members) {
+    const apiMembers: readonly ApiItem[] = this._getMembersAndWriteIncompleteWarning(apiClass, output);
+    for (const apiMember of apiMembers) {
+      const isInherited: boolean = apiMember.parent !== apiClass;
       switch (apiMember.kind) {
         case ApiItemKind.Constructor: {
           constructorsTable.addRow(
             new DocTableRow({ configuration }, [
               this._createTitleCell(apiMember),
               this._createModifiersCell(apiMember),
-              this._createDescriptionCell(apiMember)
+              this._createDescriptionCell(apiMember, isInherited)
             ])
           );
 
@@ -661,7 +668,7 @@ export class MarkdownDocumenter {
             new DocTableRow({ configuration }, [
               this._createTitleCell(apiMember),
               this._createModifiersCell(apiMember),
-              this._createDescriptionCell(apiMember)
+              this._createDescriptionCell(apiMember, isInherited)
             ])
           );
 
@@ -675,7 +682,7 @@ export class MarkdownDocumenter {
                 this._createTitleCell(apiMember),
                 this._createModifiersCell(apiMember),
                 this._createPropertyTypeCell(apiMember),
-                this._createDescriptionCell(apiMember)
+                this._createDescriptionCell(apiMember, isInherited)
               ])
             );
           } else {
@@ -684,7 +691,7 @@ export class MarkdownDocumenter {
                 this._createTitleCell(apiMember),
                 this._createModifiersCell(apiMember),
                 this._createPropertyTypeCell(apiMember),
-                this._createDescriptionCell(apiMember)
+                this._createDescriptionCell(apiMember, isInherited)
               ])
             );
           }
@@ -696,22 +703,22 @@ export class MarkdownDocumenter {
     }
 
     if (eventsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Events' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Events' }));
       output.appendNode(eventsTable);
     }
 
     if (constructorsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Constructors' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Constructors' }));
       output.appendNode(constructorsTable);
     }
 
     if (propertiesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Properties' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Properties' }));
       output.appendNode(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Methods' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Methods' }));
       output.appendNode(methodsTable);
     }
   }
@@ -742,9 +749,7 @@ export class MarkdownDocumenter {
     }
 
     if (enumMembersTable.rows.length > 0) {
-      output.appendNode(
-        new DocHeading({ configuration: this._tsdocConfiguration, title: 'Enumeration Members' })
-      );
+      output.appendNode(new DocHeading({ configuration, title: 'Enumeration Members' }));
       output.appendNode(enumMembersTable);
     }
   }
@@ -752,7 +757,7 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: INTERFACE
    */
-  private _writeInterfaceTables(output: DocSection, apiClass: ApiInterface): void {
+  private _writeInterfaceTables(output: DocSection, apiInterface: ApiInterface): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const eventsTable: DocTable = new DocTable({
@@ -770,14 +775,16 @@ export class MarkdownDocumenter {
       headerTitles: ['Method', 'Description']
     });
 
-    for (const apiMember of apiClass.members) {
+    const apiMembers: readonly ApiItem[] = this._getMembersAndWriteIncompleteWarning(apiInterface, output);
+    for (const apiMember of apiMembers) {
+      const isInherited: boolean = apiMember.parent !== apiInterface;
       switch (apiMember.kind) {
         case ApiItemKind.ConstructSignature:
         case ApiItemKind.MethodSignature: {
           methodsTable.addRow(
             new DocTableRow({ configuration }, [
               this._createTitleCell(apiMember),
-              this._createDescriptionCell(apiMember)
+              this._createDescriptionCell(apiMember, isInherited)
             ])
           );
 
@@ -791,7 +798,7 @@ export class MarkdownDocumenter {
                 this._createTitleCell(apiMember),
                 this._createModifiersCell(apiMember),
                 this._createPropertyTypeCell(apiMember),
-                this._createDescriptionCell(apiMember)
+                this._createDescriptionCell(apiMember, isInherited)
               ])
             );
           } else {
@@ -800,7 +807,7 @@ export class MarkdownDocumenter {
                 this._createTitleCell(apiMember),
                 this._createModifiersCell(apiMember),
                 this._createPropertyTypeCell(apiMember),
-                this._createDescriptionCell(apiMember)
+                this._createDescriptionCell(apiMember, isInherited)
               ])
             );
           }
@@ -812,17 +819,17 @@ export class MarkdownDocumenter {
     }
 
     if (eventsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Events' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Events' }));
       output.appendNode(eventsTable);
     }
 
     if (propertiesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Properties' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Properties' }));
       output.appendNode(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Methods' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Methods' }));
       output.appendNode(methodsTable);
     }
   }
@@ -869,7 +876,7 @@ export class MarkdownDocumenter {
     }
 
     if (parametersTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Parameters' }));
+      output.appendNode(new DocHeading({ configuration, title: 'Parameters' }));
       output.appendNode(parametersTable);
     }
 
@@ -972,7 +979,7 @@ export class MarkdownDocumenter {
    * We mostly assume that the input is an ApiDocumentedItem, but it's easier to perform this as a runtime
    * check than to have each caller perform a type cast.
    */
-  private _createDescriptionCell(apiItem: ApiItem): DocTableCell {
+  private _createDescriptionCell(apiItem: ApiItem, isInherited: boolean = false): DocTableCell {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const section: DocSection = new DocSection({ configuration });
@@ -1001,6 +1008,21 @@ export class MarkdownDocumenter {
       if (apiItem.tsdocComment !== undefined) {
         this._appendAndMergeSection(section, apiItem.tsdocComment.summarySection);
       }
+    }
+
+    if (isInherited && apiItem.parent) {
+      section.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocPlainText({ configuration, text: '(Inherited from ' }),
+          new DocLinkTag({
+            configuration,
+            tagName: '@link',
+            linkText: apiItem.parent.displayName,
+            urlDestination: this._getLinkFilenameForApiItem(apiItem.parent)
+          }),
+          new DocPlainText({ configuration, text: ')' })
+        ])
+      );
     }
 
     return new DocTableCell({ configuration }, section.nodes);
@@ -1067,9 +1089,11 @@ export class MarkdownDocumenter {
   }
 
   private _writeBreadcrumb(output: DocSection, apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
     output.appendNodeInParagraph(
       new DocLinkTag({
-        configuration: this._tsdocConfiguration,
+        configuration,
         tagName: '@link',
         linkText: 'Home',
         urlDestination: this._getLinkFilenameForApiItem(this._apiModel)
@@ -1087,11 +1111,11 @@ export class MarkdownDocumenter {
         default:
           output.appendNodesInParagraph([
             new DocPlainText({
-              configuration: this._tsdocConfiguration,
+              configuration,
               text: ' > '
             }),
             new DocLinkTag({
-              configuration: this._tsdocConfiguration,
+              configuration,
               tagName: '@link',
               linkText: hierarchyItem.displayName,
               urlDestination: this._getLinkFilenameForApiItem(hierarchyItem)
@@ -1133,6 +1157,40 @@ export class MarkdownDocumenter {
 
       output.appendNode(node);
     }
+  }
+
+  private _getMembersAndWriteIncompleteWarning(
+    apiClassOrInterface: ApiClass | ApiInterface,
+    output: DocSection
+  ): readonly ApiItem[] {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+    const showInheritedMembers: boolean = !!this._documenterConfig?.configFile.showInheritedMembers;
+    if (!showInheritedMembers) {
+      return apiClassOrInterface.members;
+    }
+
+    const result: IFindApiItemsResult = apiClassOrInterface.findMembersWithInheritance();
+
+    // If the result is potentially incomplete, write a short warning communicating this.
+    if (result.maybeIncompleteResult) {
+      output.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, italic: true }, [
+            new DocPlainText({
+              configuration,
+              text: '(Some inherited members may not be shown because they are not represented in the documentation.)'
+            })
+          ])
+        ])
+      );
+    }
+
+    // Log the messages for diagnostic purposes.
+    for (const message of result.messages) {
+      console.log(`Diagnostic message for findMembersWithInheritance: ${message.text}`);
+    }
+
+    return result.items;
   }
 
   private _getFilenameForApiItem(apiItem: ApiItem): string {

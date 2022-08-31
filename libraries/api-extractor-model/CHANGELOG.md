@@ -1,6 +1,49 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Thu, 30 Jun 2022 04:48:53 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Aug 2022 03:01:22 GMT and should not be manually modified.
+
+## 7.23.3
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 7.23.2
+Wed, 24 Aug 2022 00:14:38 GMT
+
+### Patches
+
+- Remove use of LegacyAdapters.sortStable
+
+## 7.23.1
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 7.23.0
+Wed, 03 Aug 2022 18:40:35 GMT
+
+### Minor changes
+
+- Upgrade TypeScript dependency to 4.7
+
+## 7.22.2
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
+
+## 7.22.1
+Thu, 21 Jul 2022 23:30:27 GMT
+
+### Patches
+
+- Improve IFindApiItemMessage and fix two small bugs with ApiItemContainerMixin.findMembersWithInheritance()
+
+## 7.22.0
+Thu, 21 Jul 2022 00:16:14 GMT
+
+### Minor changes
+
+- Add a new ApiItemContainerMixin.findMembersWithInheritance() method for finding an item's inherited members
 
 ## 7.21.0
 Thu, 30 Jun 2022 04:48:53 GMT
