@@ -428,11 +428,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
 
-      const { pnpmVerifyStoreIntegrity } = EnvironmentConfiguration;
-      if (pnpmVerifyStoreIntegrity !== undefined) {
-        args.push(`--verify-store-integrity`, `${pnpmVerifyStoreIntegrity}`);
-      }
-
       for (const arg of this.options.pnpmFilterArguments) {
         args.push(arg);
       }

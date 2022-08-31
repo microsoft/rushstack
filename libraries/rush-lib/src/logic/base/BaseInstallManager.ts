@@ -567,6 +567,11 @@ export abstract class BaseInstallManager {
         args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
       }
 
+      const { pnpmVerifyStoreIntegrity } = EnvironmentConfiguration;
+      if (pnpmVerifyStoreIntegrity !== undefined) {
+        args.push(`--verify-store-integrity`, `${pnpmVerifyStoreIntegrity}`);
+      }
+
       const { configuration: experiments } = this._rushConfiguration.experimentsConfiguration;
 
       if (experiments.usePnpmFrozenLockfileForRushInstall && !this._options.allowShrinkwrapUpdates) {
