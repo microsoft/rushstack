@@ -18,7 +18,7 @@
 
     "incrementalBuildIgnoredGlobs": {
       "type": "array",
-      "description": "The incremental analyzer can skip Rush commands for projects whose input files have not changed since the last build. Normally, every Git-tracked file under the project folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific files, specified as globs relative to the project folder. The list of file globs will be interpreted the same way your .gitignore file is.",
+      "description": "The incremental analyzer can skip Rush commands for projects whose input files have not changed since the last build. Normally, every Git-tracked file under the project folder is assumed to be an input. Use \"incrementalBuildIgnoredGlobs\" to ignore specific files, specified as globs relative to the project folder.  The glob syntax is based on the .gitignore file format.",
       "items": {
         "type": "string"
       }
@@ -39,7 +39,7 @@
         "properties": {
           "operationName": {
             "type": "string",
-            "description": "The name of the operation. This should be a key in the `package.json`'s `scripts` object."
+            "description": "The name of the operation. This should be a key in the \"package.json\" file's \"scripts\" section."
           },
 
           "outputFolderNames": {

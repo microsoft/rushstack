@@ -16,6 +16,7 @@
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
     "build": "heft build --clean",
+    "test": "heft test --no-build",
     "_phase:build": "heft build --clean",
     "_phase:test": "heft test --no-build"
   },

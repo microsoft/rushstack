@@ -4,7 +4,9 @@
 import { Excerpt } from '../mixins/Excerpt';
 
 /**
- * Represents a type referenced via an "extends" or "implements" heritage clause for a TypeScript class.
+ * Represents a type referenced via an "extends" or "implements" heritage clause for a TypeScript class
+ * or interface.
+ *
  * @remarks
  *
  * For example, consider this declaration:

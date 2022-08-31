@@ -9,7 +9,7 @@
 
 export { AlreadyReportedError } from './AlreadyReportedError';
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
-export { Async, IAsyncParallelismOptions } from './Async';
+export { Async, IAsyncParallelismOptions, IRunWithRetriesOptions } from './Async';
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export { Enum } from './Enum';
@@ -37,7 +37,16 @@ export {
   IImportResolvePackageOptions
 } from './Import';
 export { InternalError } from './InternalError';
-export { JsonObject, JsonFile, JsonNull, IJsonFileSaveOptions, IJsonFileStringifyOptions } from './JsonFile';
+export {
+  JsonObject,
+  JsonNull,
+  JsonSyntax,
+  IJsonFileParseOptions,
+  IJsonFileLoadAndValidateOptions,
+  IJsonFileStringifyOptions,
+  IJsonFileSaveOptions,
+  JsonFile
+} from './JsonFile';
 export {
   JsonSchema,
   IJsonSchemaErrorInfo,

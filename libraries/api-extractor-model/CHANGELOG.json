@@ -2,6 +2,103 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.23.3",
+      "tag": "@microsoft/api-extractor-model_v7.23.3",
+      "date": "Wed, 24 Aug 2022 03:01:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.2",
+      "tag": "@microsoft/api-extractor-model_v7.23.2",
+      "date": "Wed, 24 Aug 2022 00:14:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove use of LegacyAdapters.sortStable"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.1",
+      "tag": "@microsoft/api-extractor-model_v7.23.1",
+      "date": "Fri, 19 Aug 2022 00:17:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.0",
+      "tag": "@microsoft/api-extractor-model_v7.23.0",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade TypeScript dependency to 4.7"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.22.2",
+      "tag": "@microsoft/api-extractor-model_v7.22.2",
+      "date": "Mon, 01 Aug 2022 02:45:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.22.1",
+      "tag": "@microsoft/api-extractor-model_v7.22.1",
+      "date": "Thu, 21 Jul 2022 23:30:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve IFindApiItemMessage and fix two small bugs with ApiItemContainerMixin.findMembersWithInheritance()"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.22.0",
+      "tag": "@microsoft/api-extractor-model_v7.22.0",
+      "date": "Thu, 21 Jul 2022 00:16:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new ApiItemContainerMixin.findMembersWithInheritance() method for finding an item's inherited members"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.21.0",
       "tag": "@microsoft/api-extractor-model_v7.21.0",
       "date": "Thu, 30 Jun 2022 04:48:53 GMT",

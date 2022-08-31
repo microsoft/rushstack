@@ -8,6 +8,7 @@ import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
 import { InternalError } from '@rushstack/node-core-library';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
+import { ApiModel } from '../model/ApiModel';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -257,6 +258,19 @@ export class ApiItem {
     for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
       if (current.kind === ApiItemKind.Package) {
         return current as ApiPackage;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * If this item is an ApiModel or has an ApiModel as one of its parents, then that object is returned.
+   * Otherwise undefined is returned.
+   */
+  public getAssociatedModel(): ApiModel | undefined {
+    for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
+      if (current.kind === ApiItemKind.Model) {
+        return current as ApiModel;
       }
     }
     return undefined;

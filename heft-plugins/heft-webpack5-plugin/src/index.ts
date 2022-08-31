@@ -13,6 +13,6 @@ export {
 } from './shared';
 
 /**
- * @internal
+ * @public
  */
 export default new WebpackPlugin() as IHeftPlugin;

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
+import { JsonFile, IPackageJson, FileSystem, FileConstants, JsonSyntax } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
@@ -108,7 +108,7 @@ export class RushConfigurationProject {
     const packageJsonFilename: string = path.join(this._projectFolder, FileConstants.PackageJson);
 
     try {
-      this._packageJson = JsonFile.load(packageJsonFilename);
+      this._packageJson = JsonFile.load(packageJsonFilename, { jsonSyntax: JsonSyntax.Strict });
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(
@@ -148,6 +148,13 @@ export class RushConfigurationProject {
       throw new Error(
         `The package name "${this._packageName}" specified in rush.json does not` +
           ` match the name "${this._packageJson.name}" from package.json`
+      );
+    }
+
+    if (!semver.valid(this._packageJson.version)) {
+      throw new Error(
+        `The value "${this._packageJson.version}" is not valid SemVer syntax for the \"version\" field` +
+          ` in the file "${packageJsonFilename}"`
       );
     }
 
@@ -496,7 +503,13 @@ export class RushConfigurationProject {
   }
 
   /**
-   * The set of tags applied to this project.
+   * An optional set of custom tags that can be used to select this project.
+   *
+   * @remarks
+   * For example, adding `my-custom-tag` will allow this project to be selected by the
+   * command `rush list --only tag:my-custom-tag`.  The tag name must be one or more words separated
+   * by hyphens, where a word may contain lowercase letters, digits, and the period character.
+   *
    * @beta
    */
   public get tags(): ReadonlySet<string> {

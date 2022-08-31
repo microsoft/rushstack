@@ -39,6 +39,11 @@ export { IApiNameMixinOptions, ApiNameMixin } from './mixins/ApiNameMixin';
 export { IApiOptionalMixinOptions, ApiOptionalMixin } from './mixins/ApiOptionalMixin';
 export { IApiReadonlyMixinOptions, ApiReadonlyMixin } from './mixins/ApiReadonlyMixin';
 export { IApiInitializerMixinOptions, ApiInitializerMixin } from './mixins/ApiInitializerMixin';
+export {
+  IFindApiItemsResult,
+  IFindApiItemsMessage,
+  FindApiItemsMessageId
+} from './mixins/IFindApiItemsResult';
 
 export { ExcerptTokenKind, IExcerptTokenRange, IExcerptToken, ExcerptToken, Excerpt } from './mixins/Excerpt';
 export { Constructor, PropertiesOf } from './mixins/Mixin';

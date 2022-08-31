@@ -17,6 +17,7 @@ import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchF
 import { RushConstants } from './RushConstants';
 import { InstallHelpers } from './installManager/InstallHelpers';
 import type { DependencyAnalyzer, IDependencyAnalysis } from './DependencyAnalyzer';
+import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -84,7 +85,7 @@ export interface IUpdateProjectOptions {
   /**
    * The project which will have its package.json updated
    */
-  project: VersionMismatchFinderProject;
+  project: VersionMismatchFinderEntity;
   /**
    * Map of packages to update
    * Its key is the name of the dependency to be added or updated in the project
@@ -205,7 +206,7 @@ export class PackageJsonUpdater {
                   packageName,
                   mismatchedVersion
                 )!) {
-                  if (consumer instanceof VersionMismatchFinderProject) {
+                  if (consumer instanceof VersionMismatchFinderEntity) {
                     otherPackageUpdates.push({
                       project: consumer,
                       dependenciesToAddOrUpdate: {
@@ -232,9 +233,11 @@ export class PackageJsonUpdater {
       if (project.saveIfModified()) {
         console.log(colors.green('Wrote ') + project.filePath);
 
-        selectedProjects.add(project.project);
-        if (project.project.splitWorkspace) {
-          splitWorkspacePackageNames.add(project.packageName);
+        if (project instanceof VersionMismatchFinderProject) {
+          selectedProjects.add(project.project);
+          if (project.project.splitWorkspace) {
+            splitWorkspacePackageNames.add(project.packageName);
+          }
         }
       }
     }

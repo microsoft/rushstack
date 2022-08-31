@@ -127,8 +127,8 @@ export interface IRushRepositoryJsonMultipleUrls extends IRushRepositoryJsonBase
   /**
    * Remote url(s) of the repository. If a value is provided, \"rush change\" will
    * use one of these to find the right remote to compare against. Specifying multiple URLs
-   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
-   * "dev.azure.com/<projectName>" URLs.
+   * is useful if a GitHub repository is renamed or for `<projectName>.visualstudio.com` versus
+   * `dev.azure.com/<projectName>` URLs.
    */
   urls?: string[];
 }
@@ -1347,7 +1347,7 @@ export class RushConfiguration {
    * The minimum allowable folder depth for the projectFolder field in the rush.json file.
    * This setting provides a way for repository maintainers to discourage nesting of project folders
    * that makes the directory tree more difficult to navigate.  The default value is 2,
-   * which implements a standard 2-level hierarchy of <categoryFolder>/<projectFolder>/package.json.
+   * which implements a standard 2-level hierarchy of `<categoryFolder>/<projectFolder>/package.json`.
    */
   public get projectFolderMinDepth(): number {
     return this._projectFolderMinDepth;
@@ -1357,7 +1357,7 @@ export class RushConfiguration {
    * The maximum allowable folder depth for the projectFolder field in the rush.json file.
    * This setting provides a way for repository maintainers to discourage nesting of project folders
    * that makes the directory tree more difficult to navigate.  The default value is 2,
-   * which implements on a standard convention of <categoryFolder>/<projectFolder>/package.json.
+   * which implements on a standard convention of `<categoryFolder>/<projectFolder>/package.json`.
    */
   public get projectFolderMaxDepth(): number {
     return this._projectFolderMaxDepth;
@@ -1441,8 +1441,8 @@ export class RushConfiguration {
   /**
    * Remote URL(s) of the repository. If a value is provided, \"rush change\" will
    * use one of these to find the right remote to compare against. Specifying multiple URLs
-   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
-   * "dev.azure.com/<projectName>" URLs.
+   * is useful if a GitHub repository is renamed or for `<projectName>.visualstudio.com` versus
+   * `dev.azure.com/<projectName>` URLs.
    */
   public get repositoryUrls(): string[] {
     return this._repositoryUrls;
@@ -1865,8 +1865,12 @@ export class RushConfiguration {
    * If the path is not under any project's folder, returns undefined.
    */
   public tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined {
+    // TODO: Improve the method in which a package is found, perhaps without having to sort / loop though the entire package list
     const resolvedPath: string = path.resolve(currentFolderPath);
-    for (const project of this.projects) {
+    const sortedProjects: RushConfigurationProject[] = this.projects.sort(
+      (a, b) => b.projectFolder.length - a.projectFolder.length
+    );
+    for (const project of sortedProjects) {
       if (Path.isUnderOrEqual(resolvedPath, project.projectFolder)) {
         return project;
       }
