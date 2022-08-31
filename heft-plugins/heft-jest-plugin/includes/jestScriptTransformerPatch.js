@@ -83,6 +83,8 @@ function patchScriptTransformer(scriptPath) {
       scriptContent.slice(0, startIndex) +
       `${originalFunctionContent}\n` +
       `const ${functionName} = (...args) => {\n` +
+      `  // Patched by @rushstack/heft-jest-plugin. For more information, see:\n` +
+      `  // https://github.com/microsoft/rushstack/pull/3606\n` +
       `  if (process.env['${HEFT_JEST_DISABLE_CACHE_ENV_VARIABLE}']) {\n` +
       `    return;\n` +
       `  }\n` +
