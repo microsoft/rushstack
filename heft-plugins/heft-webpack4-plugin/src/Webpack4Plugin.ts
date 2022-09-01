@@ -353,22 +353,24 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           devServerOptions = { ...defaultDevServerOptions, ...webpackConfiguration.devServer };
         }
 
-        // Add the certificate and key to the devServerOptions
-        const certificateManager: CertificateManager = new CertificateManager();
-        const certificate: ICertificate = await certificateManager.ensureCertificateAsync(
-          true,
-          taskSession.logger.terminal
-        );
-        devServerOptions = {
-          ...devServerOptions,
-          server: {
-            type: 'https',
-            options: {
-              key: certificate.pemKey,
-              cert: certificate.pemCertificate
+        // Add the certificate and key to the devServerOptions if these fields don't already have values
+        if (!devServerOptions.server) {
+          const certificateManager: CertificateManager = new CertificateManager();
+          const certificate: ICertificate = await certificateManager.ensureCertificateAsync(
+            true,
+            taskSession.logger.terminal
+          );
+          devServerOptions = {
+            ...devServerOptions,
+            server: {
+              type: 'https',
+              options: {
+                key: certificate.pemKey,
+                cert: certificate.pemCertificate
+              }
             }
-          }
-        };
+          };
+        }
 
         // Since the webpack-dev-server does not return infrastructure errors via a callback like
         // compiler.watch(...), we will need to intercept them and log them ourselves.
