@@ -4,7 +4,7 @@
 import colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { Sort, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
+import { Sort, InternalError } from '@rushstack/node-core-library';
 
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { AstSymbol } from '../analyzer/AstSymbol';
@@ -635,7 +635,7 @@ export class MessageRouter {
    * Sorts an array of messages according to a reasonable ordering
    */
   private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
-    LegacyAdapters.sortStable(messages, (a, b) => {
+    messages.sort((a, b) => {
       let diff: number;
       // First sort by file name
       diff = Sort.compareByValue(a.sourceFilePath, b.sourceFilePath);

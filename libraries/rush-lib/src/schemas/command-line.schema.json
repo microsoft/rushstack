@@ -200,6 +200,11 @@
                   "description": "Indicates that this command will always watch for changes after the initial execution, as if the \"--watch\" CLI flag was passed.",
                   "type": "boolean"
                 },
+                "debounceMs": {
+                  "title": "Debounce Timeout in Milliseconds",
+                  "description": "When watching, how long to wait after the last encountered file system event before execution. If another file system event occurs in this interval, the timeout will reset.",
+                  "type": "number"
+                },
                 "watchPhases": {
                   "title": "Watch Phases",
                   "description": "List *exactly* the phases that should be run in watch mode for this command. If this property is specified and non-empty, after the phases defined in the \"phases\" property run, a file watcher will be started to watch projects for changes, and will run the phases listed in this property on changed projects.",
