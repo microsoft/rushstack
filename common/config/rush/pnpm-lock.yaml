@@ -1638,6 +1638,7 @@ importers:
 
   ../../heft-plugins/heft-webpack4-plugin:
     specifiers:
+      '@rushstack/debug-certificate-manager': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -1649,6 +1650,7 @@ importers:
       webpack: ~4.44.2
       webpack-dev-server: ~4.9.3
     dependencies:
+      '@rushstack/debug-certificate-manager': link:../../libraries/debug-certificate-manager
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@types/tapable': 1.0.6
       tapable: 1.1.3
@@ -1663,6 +1665,7 @@ importers:
 
   ../../heft-plugins/heft-webpack5-plugin:
     specifiers:
+      '@rushstack/debug-certificate-manager': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -1673,6 +1676,7 @@ importers:
       webpack: ~5.68.0
       webpack-dev-server: ~4.9.3
     dependencies:
+      '@rushstack/debug-certificate-manager': link:../../libraries/debug-certificate-manager
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@types/tapable': 1.0.6
       tapable: 1.1.3

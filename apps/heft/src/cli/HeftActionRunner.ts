@@ -303,16 +303,9 @@ export class HeftActionRunner {
       description: 'Use the specified locale for this run, if applicable.'
     });
 
-    let serveFlag: CommandLineFlagParameter | undefined;
     let cleanFlag: CommandLineFlagParameter | undefined;
     let cleanCacheFlag: CommandLineFlagParameter | undefined;
-    if (this._action.watch) {
-      // Only enable the serve flag in watch mode
-      serveFlag = parameterProvider.defineFlagParameter({
-        parameterLongName: Constants.serveParameterLongName,
-        description: 'If specified, serve the output. This flag can only be used with watch-enabled actions.'
-      });
-    } else {
+    if (!this._action.watch) {
       // Only enable the clean flags in non-watch mode
       cleanFlag = parameterProvider.defineFlagParameter({
         parameterLongName: Constants.cleanParameterLongName,
@@ -332,7 +325,6 @@ export class HeftActionRunner {
       getIsProduction: () => productionFlag.value,
       getIsWatch: () => this._action.watch,
       getLocales: () => localesParameter.values,
-      getIsServe: () => !!serveFlag?.value,
       getIsClean: () => !!cleanFlag?.value,
       getIsCleanCache: () => !!cleanCacheFlag?.value
     });
