@@ -120,7 +120,6 @@ export interface IHeftDefaultParameters {
     readonly debug: boolean;
     readonly locales: Iterable<string>;
     readonly production: boolean;
-    readonly serve: boolean;
     readonly verbose: boolean;
     readonly watch: boolean;
 }
