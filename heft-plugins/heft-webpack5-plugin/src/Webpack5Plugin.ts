@@ -372,9 +372,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       }
 
       // Store the watchers to be used for suspend/resume
-      this._webpackWatchers = (compiler as ExtendedMultiCompiler).compilers?.map(
-        (compiler: ExtendedCompiler) => compiler.watching
-      ) ?? [(compiler as ExtendedCompiler).watching];
+      this._webpackWatchers = (
+        (compiler as ExtendedMultiCompiler).compilers ?? [compiler as ExtendedCompiler]
+      ).map((compiler: ExtendedCompiler) => compiler.watching);
     }
 
     // Resume the compilation, wait for the compilation to complete, then suspend the watchers until the

@@ -24,26 +24,31 @@ import type {
 } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
+type ExtendedWatching = TWebpack.Watching & {
+  resume: () => void;
+  suspend: () => void;
+};
+
+type ExtendedMultiWatching = TWebpack.MultiWatching & {
+  resume: () => void;
+  suspend: () => void;
+};
+
 type ExtendedCompiler = TWebpack.Compiler & {
   hooks: TWebpack.Compiler['hooks'] & {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     infrastructureLog: SyncBailHook<string, string, any[]>;
   };
-  watching: TWebpack.Watching;
+  watching: ExtendedWatching;
 };
 
 type ExtendedMultiCompiler = TWebpack.MultiCompiler & {
   compilers: ExtendedCompiler[];
-  hooks: TWebpack.Compiler['hooks'] & {
+  hooks: TWebpack.MultiCompiler['hooks'] & {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     infrastructureLog: SyncBailHook<string, string, any[]>;
   };
-  watching: TWebpack.MultiWatching;
-};
-
-type ExtendedWatching = TWebpack.Watching & {
-  resume: () => void;
-  suspend: () => void;
+  watching: ExtendedMultiWatching;
 };
 
 export interface IWebpackPluginOptions {
@@ -305,7 +310,9 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         watchOptions: TWebpack.ICompiler.WatchOptions,
         handler: TWebpack.ICompiler.Handler & TWebpack.ICompiler.MultiHandler
       ) => {
-        const watcher: TWebpack.Watching | TWebpack.MultiWatching = originalWatch(watchOptions, handler);
+        const watcher: ExtendedWatching | ExtendedMultiWatching = originalWatch(watchOptions, handler) as
+          | ExtendedWatching
+          | ExtendedMultiWatching;
         compiler.watching = watcher;
         return watcher;
       };
@@ -405,11 +412,9 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       }
 
       // Store the watchers to be used for suspend/resume
-      this._webpackWatchers = (compiler as ExtendedMultiCompiler).compilers?.map(
-        (compiler: ExtendedCompiler) => {
-          return compiler.watching as ExtendedWatching;
-        }
-      ) ?? [(compiler as ExtendedCompiler).watching as ExtendedWatching];
+      this._webpackWatchers = (
+        (compiler as ExtendedMultiCompiler).compilers ?? [compiler as ExtendedCompiler]
+      ).map((compiler: ExtendedCompiler) => compiler.watching);
     }
 
     // Resume the compilation, wait for the compilation to complete, then suspend the watchers until the
