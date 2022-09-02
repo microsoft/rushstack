@@ -10,38 +10,26 @@ import {
   Navigation,
   Meaning
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import { PackageJsonLookup, INodePackageJson, InternalError } from '@rushstack/node-core-library';
+import { INodePackageJson, InternalError } from '@rushstack/node-core-library';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import { Collector } from '../collector/Collector';
+import { CollectorEntity } from '../collector/CollectorEntity';
 
 export class DeclarationReferenceGenerator {
   public static readonly unknownReference: string = '?';
 
-  private _packageJsonLookup: PackageJsonLookup;
-  private _workingPackageName: string;
-  private _program: ts.Program;
-  private _typeChecker: ts.TypeChecker;
-  private _bundledPackageNames: ReadonlySet<string>;
+  private _collector: Collector;
 
-  public constructor(
-    packageJsonLookup: PackageJsonLookup,
-    workingPackageName: string,
-    program: ts.Program,
-    typeChecker: ts.TypeChecker,
-    bundledPackageNames: ReadonlySet<string>
-  ) {
-    this._packageJsonLookup = packageJsonLookup;
-    this._workingPackageName = workingPackageName;
-    this._program = program;
-    this._typeChecker = typeChecker;
-    this._bundledPackageNames = bundledPackageNames;
+  public constructor(collector: Collector) {
+    this._collector = collector;
   }
 
   /**
    * Gets the UID for a TypeScript Identifier that references a type.
    */
   public getDeclarationReferenceForIdentifier(node: ts.Identifier): DeclarationReference | undefined {
-    const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(node);
+    const symbol: ts.Symbol | undefined = this._collector.typeChecker.getSymbolAtLocation(node);
     if (symbol !== undefined) {
       const isExpression: boolean = DeclarationReferenceGenerator._isInExpressionContext(node);
       return (
@@ -99,68 +87,62 @@ export class DeclarationReferenceGenerator {
     );
   }
 
-  private static _getNavigationToSymbol(symbol: ts.Symbol): Navigation | 'global' {
+  private _getNavigationToSymbol(symbol: ts.Symbol): Navigation {
+    const declaration: ts.Declaration | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
+    const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
     const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
-    // First, try to determine navigation to symbol via its parent.
-    if (parent) {
+
+    // If it's global or from an external library, then use either Members or Exports. It's not possible for
+    // global symbols or external library symbols to be Locals.
+    const isGlobal: boolean = !!sourceFile && !ts.isExternalModule(sourceFile);
+    const isFromExternalLibrary: boolean =
+      !!sourceFile && this._collector.program.isSourceFileFromExternalLibrary(sourceFile);
+    if (isGlobal || isFromExternalLibrary) {
       if (
-        parent.exports &&
-        DeclarationReferenceGenerator._isSameSymbol(parent.exports.get(symbol.escapedName), symbol)
-      ) {
-        return Navigation.Exports;
-      }
-      if (
+        parent &&
         parent.members &&
         DeclarationReferenceGenerator._isSameSymbol(parent.members.get(symbol.escapedName), symbol)
       ) {
         return Navigation.Members;
       }
-      if (
-        parent.globalExports &&
-        DeclarationReferenceGenerator._isSameSymbol(parent.globalExports.get(symbol.escapedName), symbol)
-      ) {
-        return 'global';
+
+      return Navigation.Exports;
+    }
+
+    // Otherwise, this symbol is from the current package.
+    if (parent) {
+      // If we've found an exported CollectorEntity, then it's exported from the package entry point, so
+      // use Exports.
+      const namedDeclaration: ts.DeclarationName | undefined = (
+        declaration as ts.NamedDeclaration | undefined
+      )?.name;
+      if (namedDeclaration && ts.isIdentifier(namedDeclaration)) {
+        const collectorEntity: CollectorEntity | undefined =
+          this._collector.tryGetEntityForNode(namedDeclaration);
+        if (collectorEntity && collectorEntity.exported) {
+          return Navigation.Exports;
+        }
+      }
+
+      // If its parent symbol is not a source file, then use either Exports or Members. If the parent symbol
+      // is a source file, but it wasn't exported from the package entry point (in the check above), then the
+      // symbol is a local, so fall through below.
+      if (!DeclarationReferenceGenerator._isExternalModuleSymbol(parent)) {
+        if (
+          parent.members &&
+          DeclarationReferenceGenerator._isSameSymbol(parent.members.get(symbol.escapedName), symbol)
+        ) {
+          return Navigation.Members;
+        }
+
+        return Navigation.Exports;
       }
     }
 
-    // Next, try determining navigation to symbol by its node
-    if (symbol.valueDeclaration) {
-      const declaration: ts.Declaration = ts.isBindingElement(symbol.valueDeclaration)
-        ? ts.walkUpBindingElementsAndPatterns(symbol.valueDeclaration)
-        : symbol.valueDeclaration;
-      if (ts.isClassElement(declaration) && ts.isClassLike(declaration.parent)) {
-        // class members are an "export" if they have the static modifier.
-        return ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Static
-          ? Navigation.Exports
-          : Navigation.Members;
-      }
-      if (ts.isTypeElement(declaration) || ts.isObjectLiteralElement(declaration)) {
-        // type and object literal element members are just members
-        return Navigation.Members;
-      }
-      if (ts.isEnumMember(declaration)) {
-        // enum members are exports
-        return Navigation.Exports;
-      }
-      if (
-        ts.isExportSpecifier(declaration) ||
-        ts.isExportAssignment(declaration) ||
-        ts.isExportSpecifier(declaration) ||
-        ts.isExportDeclaration(declaration) ||
-        ts.isNamedExports(declaration)
-      ) {
-        return Navigation.Exports;
-      }
-      // declarations are exports if they have an `export` modifier.
-      if (ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Export) {
-        return Navigation.Exports;
-      }
-      if (ts.isSourceFile(declaration.parent) && !ts.isExternalModule(declaration.parent)) {
-        // declarations in a source file are global if the source file is not a module.
-        return 'global';
-      }
-    }
-    // all other declarations are locals
+    // Otherwise, we have a local symbol, so use a Locals navigation. These are either:
+    //
+    // 1. Symbols that are exported from a file module but not the package entry point.
+    // 2. Symbols that are not exported from their parent module.
     return Navigation.Locals;
   }
 
@@ -218,20 +200,21 @@ export class DeclarationReferenceGenerator {
     meaning: ts.SymbolFlags,
     includeModuleSymbols: boolean
   ): DeclarationReference | undefined {
+    const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
+    const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
+
     let followedSymbol: ts.Symbol = symbol;
     if (followedSymbol.flags & ts.SymbolFlags.ExportValue) {
-      followedSymbol = this._typeChecker.getExportSymbolOfSymbol(followedSymbol);
+      followedSymbol = this._collector.typeChecker.getExportSymbolOfSymbol(followedSymbol);
     }
     if (followedSymbol.flags & ts.SymbolFlags.Alias) {
-      followedSymbol = this._typeChecker.getAliasedSymbol(followedSymbol);
+      followedSymbol = this._collector.typeChecker.getAliasedSymbol(followedSymbol);
     }
 
     if (DeclarationReferenceGenerator._isExternalModuleSymbol(followedSymbol)) {
       if (!includeModuleSymbols) {
         return undefined;
       }
-      const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
-      const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
       return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
     }
 
@@ -270,13 +253,11 @@ export class DeclarationReferenceGenerator {
       }
     }
 
-    let navigation: Navigation | 'global' =
-      DeclarationReferenceGenerator._getNavigationToSymbol(followedSymbol);
-    if (navigation === 'global') {
-      if (parentRef.source !== GlobalSource.instance) {
-        parentRef = new DeclarationReference(GlobalSource.instance);
-      }
-      navigation = Navigation.Exports;
+    const navigation: Navigation = this._getNavigationToSymbol(followedSymbol);
+
+    // If the symbol is a global, ensure the source is global.
+    if (sourceFile && !ts.isExternalModule(sourceFile) && parentRef.source !== GlobalSource.instance) {
+      parentRef = new DeclarationReference(GlobalSource.instance);
     }
 
     return parentRef
@@ -313,7 +294,7 @@ export class DeclarationReferenceGenerator {
     if (grandParent && ts.isModuleDeclaration(grandParent)) {
       const grandParentSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(
         grandParent,
-        this._typeChecker
+        this._collector.typeChecker
       );
       if (grandParentSymbol) {
         return this._symbolToDeclarationReference(
@@ -334,28 +315,27 @@ export class DeclarationReferenceGenerator {
   }
 
   private _getPackageName(sourceFile: ts.SourceFile): string {
-    if (this._program.isSourceFileFromExternalLibrary(sourceFile)) {
-      const packageJson: INodePackageJson | undefined = this._packageJsonLookup.tryLoadNodePackageJsonFor(
-        sourceFile.fileName
-      );
+    if (this._collector.program.isSourceFileFromExternalLibrary(sourceFile)) {
+      const packageJson: INodePackageJson | undefined =
+        this._collector.packageJsonLookup.tryLoadNodePackageJsonFor(sourceFile.fileName);
 
       if (packageJson && packageJson.name) {
         return packageJson.name;
       }
       return DeclarationReferenceGenerator.unknownReference;
     }
-    return this._workingPackageName;
+    return this._collector.workingPackage.name;
   }
 
   private _sourceFileToModuleSource(sourceFile: ts.SourceFile | undefined): GlobalSource | ModuleSource {
     if (sourceFile && ts.isExternalModule(sourceFile)) {
       const packageName: string = this._getPackageName(sourceFile);
 
-      if (this._bundledPackageNames.has(packageName)) {
+      if (this._collector.bundledPackageNames.has(packageName)) {
         // The api-extractor.json config file has a "bundledPackages" setting, which causes imports from
         // certain NPM packages to be treated as part of the working project.  In this case, we need to
         // substitute the working package name.
-        return new ModuleSource(this._workingPackageName);
+        return new ModuleSource(this._collector.workingPackage.name);
       } else {
         return new ModuleSource(packageName);
       }

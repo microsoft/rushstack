@@ -11,7 +11,9 @@
  */
 
 /** @public */
-export class Lib2Class {}
+export class Lib2Class {
+  prop: number;
+}
 
 /** @alpha */
 export interface Lib2Interface {}

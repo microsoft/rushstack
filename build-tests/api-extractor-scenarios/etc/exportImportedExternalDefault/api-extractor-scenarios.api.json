@@ -184,7 +184,7 @@
             {
               "kind": "Reference",
               "text": "Base",
-              "canonicalReference": "api-extractor-lib2-test!~DefaultClass:class"
+              "canonicalReference": "api-extractor-lib2-test!DefaultClass:class"
             },
             {
               "kind": "Content",

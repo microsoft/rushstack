@@ -42,6 +42,12 @@ export class SomeClass1 {
 export class SomeClass3 extends SomeClass2 {
 }
 
+// Warning: (ae-forgotten-export) The symbol "SomeClass5" needs to be exported by the entry point index.d.ts
+//
+// @public
+export class SomeClass4 extends SomeClass5 {
+}
+
 // @public (undocumented)
 export enum SomeEnum {
     // (undocumented)
@@ -59,10 +65,19 @@ export function someFunction5(): SomeEnum.A;
 export function someFunction6(): typeof SomeClass1.staticProp;
 
 // @public
-export function someFunction7(): Promise<void>;
+export function someFunction7({ then: then2 }: Promise<void>): typeof Date.prototype.getDate;
 
 // @public
-export function someFunction8(): Lib2Class;
+export function someFunction8({ prop: prop2 }: Lib2Class): void;
+
+// @public
+export function someFunction9({ prop: prop2 }: SomeInterface1): void;
+
+// @public (undocumented)
+export interface SomeInterface1 {
+    // (undocumented)
+    prop: number;
+}
 
 // (No @packageDocumentation comment for this package)
 
