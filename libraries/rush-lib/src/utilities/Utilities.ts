@@ -4,6 +4,7 @@
 import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
+import { performance } from 'perf_hooks';
 import {
   JsonFile,
   IPackageJson,
@@ -147,8 +148,7 @@ export class Utilities {
    * Node.js equivalent of performance.now().
    */
   public static getTimeInMs(): number {
-    const [seconds, nanoseconds] = process.hrtime();
-    return seconds * 1000 + nanoseconds / 1000000;
+    return performance.now();
   }
 
   /**
@@ -156,11 +156,7 @@ export class Utilities {
    */
   public static getSetAsArray<T>(set: Set<T>): T[] {
     // When ES6 is supported, we can use Array.from() instead.
-    const result: T[] = [];
-    set.forEach((value: T) => {
-      result.push(value);
-    });
-    return result;
+    return Array.from(set);
   }
 
   /**

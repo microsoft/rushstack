@@ -13,7 +13,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export interface IProjectWatcherOptions {
-  debounceMilliseconds?: number;
+  debounceMs?: number;
   rushConfiguration: RushConfiguration;
   projectsToWatch: ReadonlySet<RushConfigurationProject>;
   terminal: ITerminal;
@@ -42,7 +42,7 @@ export interface IProjectChangeResult {
  * more projects differ from the value the previous time it was invoked. The first time will always resolve with the full selection.
  */
 export class ProjectWatcher {
-  private readonly _debounceMilliseconds: number;
+  private readonly _debounceMs: number;
   private readonly _repoRoot: string;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
@@ -52,15 +52,9 @@ export class ProjectWatcher {
   private _previousState: ProjectChangeAnalyzer | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
-    const {
-      debounceMilliseconds = 1000,
-      rushConfiguration,
-      projectsToWatch,
-      terminal,
-      initialState
-    } = options;
+    const { debounceMs = 1000, rushConfiguration, projectsToWatch, terminal, initialState } = options;
 
-    this._debounceMilliseconds = debounceMilliseconds;
+    this._debounceMs = debounceMs;
     this._rushConfiguration = rushConfiguration;
     this._projectsToWatch = projectsToWatch;
     this._terminal = terminal;
@@ -119,7 +113,7 @@ export class ProjectWatcher {
         let timeout: NodeJS.Timeout | undefined;
         let terminated: boolean = false;
 
-        const debounceMilliseconds: number = this._debounceMilliseconds;
+        const debounceMs: number = this._debounceMs;
 
         const resolveIfChanged = async (): Promise<void> => {
           timeout = undefined;
@@ -218,7 +212,7 @@ export class ProjectWatcher {
               clearTimeout(timeout);
             }
 
-            timeout = setTimeout(resolveIfChanged, debounceMilliseconds);
+            timeout = setTimeout(resolveIfChanged, debounceMs);
           } catch (err) {
             terminated = true;
             reject(err as NodeJS.ErrnoException);

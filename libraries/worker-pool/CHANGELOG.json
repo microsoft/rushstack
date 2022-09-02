@@ -2,6 +2,75 @@
   "name": "@rushstack/worker-pool",
   "entries": [
     {
+      "version": "0.1.26",
+      "tag": "@rushstack/worker-pool_v0.1.26",
+      "date": "Wed, 31 Aug 2022 01:45:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.25",
+      "tag": "@rushstack/worker-pool_v0.1.25",
+      "date": "Wed, 31 Aug 2022 00:42:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.24",
+      "tag": "@rushstack/worker-pool_v0.1.24",
+      "date": "Wed, 24 Aug 2022 03:01:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.23",
+      "tag": "@rushstack/worker-pool_v0.1.23",
+      "date": "Wed, 24 Aug 2022 00:14:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.22",
+      "tag": "@rushstack/worker-pool_v0.1.22",
+      "date": "Fri, 19 Aug 2022 00:17:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.21",
       "tag": "@rushstack/worker-pool_v0.1.21",
       "date": "Wed, 10 Aug 2022 09:52:12 GMT",

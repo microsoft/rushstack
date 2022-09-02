@@ -11,6 +11,8 @@ export default DefaultClass;
 
 // @public (undocumented)
 export class Lib2Class {
+    // (undocumented)
+    prop: number;
 }
 
 // @alpha (undocumented)

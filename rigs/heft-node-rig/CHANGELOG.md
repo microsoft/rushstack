@@ -1,6 +1,31 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Wed, 10 Aug 2022 09:52:12 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Aug 2022 01:45:06 GMT and should not be manually modified.
+
+## 1.10.7
+Wed, 31 Aug 2022 01:45:06 GMT
+
+_Version update only_
+
+## 1.10.6
+Wed, 31 Aug 2022 00:42:46 GMT
+
+_Version update only_
+
+## 1.10.5
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 1.10.4
+Wed, 24 Aug 2022 00:14:38 GMT
+
+_Version update only_
+
+## 1.10.3
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
 
 ## 1.10.2
 Wed, 10 Aug 2022 09:52:12 GMT

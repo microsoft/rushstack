@@ -197,7 +197,7 @@
             {
               "kind": "Reference",
               "text": "MyPromise",
-              "canonicalReference": "api-extractor-scenarios!Promise:class"
+              "canonicalReference": "api-extractor-scenarios!~Promise:class"
             },
             {
               "kind": "Content",

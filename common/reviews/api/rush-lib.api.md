@@ -476,11 +476,30 @@ export interface ITelemetryData {
     readonly extraData?: {
         [key: string]: string | number | boolean;
     };
+    readonly machineInfo?: ITelemetryMachineInfo;
     readonly name: string;
+    readonly operationResults?: Record<string, ITelemetryOperationResult>;
     readonly platform?: string;
     readonly result: 'Succeeded' | 'Failed';
     readonly rushVersion?: string;
-    readonly timestamp?: number;
+    readonly timestampMs?: number;
+}
+
+// @beta (undocumented)
+export interface ITelemetryMachineInfo {
+    machineArchitecture: string;
+    machineCores: number;
+    machineCpu: string;
+    machineFreeMemoryMiB: number;
+    machineTotalMemoryMiB: number;
+}
+
+// @beta (undocumented)
+export interface ITelemetryOperationResult {
+    dependencies: string[];
+    endTimestampMs?: number;
+    result: string;
+    startTimestampMs?: number;
 }
 
 // @public

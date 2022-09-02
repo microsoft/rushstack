@@ -197,7 +197,7 @@
                 {
                   "kind": "Reference",
                   "text": "ForgottenClass",
-                  "canonicalReference": "api-extractor-scenarios!ForgottenClass:class"
+                  "canonicalReference": "api-extractor-scenarios!~ForgottenClass:class"
                 },
                 {
                   "kind": "Content",
