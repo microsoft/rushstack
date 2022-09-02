@@ -82,6 +82,14 @@ export class RushLifecycleHooks {
   }, 'runPhasedCommand');
 
   /**
+   * The hook to run between preparing the common/temp folder and invoking the package manager during "rush install" or "rush update".
+   */
+  public beforeInstall: AsyncSeriesHook<IGlobalCommand> = new AsyncSeriesHook<IGlobalCommand>(
+    ['command'],
+    'beforeInstall'
+  );
+
+  /**
    * A hook to allow plugins to hook custom logic to process telemetry data.
    */
   public flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]> = new AsyncParallelHook(
