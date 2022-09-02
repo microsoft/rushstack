@@ -237,11 +237,11 @@
       "type": "boolean"
     },
     "allowedProjectTags": {
-      "description": "This is an optional, but recommended, list of available tags that can be applied to projects. If this property is not specified, any tag is allowed. This list is useful in preventing typos when specifying tags for projects.",
+      "description": "This is an optional, but recommended, list of allowed tags that can be applied to Rush projects using the \"tags\" setting in this file.  This list is useful for preventing mistakes such as misspelling, and it also provides a centralized place to document your tags.  If \"allowedProjectTags\" list is not specified, then any valid tag is allowed.  A tag name must be one or more words separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits, \".\", and \"@\" characters.",
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^[A-Za-z0-9_@/.$-]+$"
+        "pattern": "^[a-z0-9.@]+([-/][a-z0-9.@]+)*$"
       }
     },
     "projects": {
@@ -293,11 +293,11 @@
             "type": "string"
           },
           "tags": {
-            "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\".",
+            "description": "An optional set of custom tags that can be used to select this project. For example, adding \"my-custom-tag\" will allow this project to be selected by the command \"rush list --only tag:my-custom-tag\". The tag name must be one or more words separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits, \".\", and \"@\" characters.",
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[A-Za-z0-9_@/.$-]+$"
+              "pattern": "^[a-z0-9.@]+([-/][a-z0-9.@]+)*$"
             }
           }
         },

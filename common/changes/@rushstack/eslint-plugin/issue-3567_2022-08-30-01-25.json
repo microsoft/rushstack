@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Update resolution for typescript-eslint/parser",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin"
+}

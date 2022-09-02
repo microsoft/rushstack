@@ -376,11 +376,11 @@ export class ProjectChangeAnalyzer {
       let i: number = 0;
       for (const projectDeps of projectHashDeps.values()) {
         const projectDependencyManifestPath: string = projectDependencyManifestPaths[i];
-        if (!hashes.has(projectDependencyManifestPath)) {
+        const hash: string | undefined = hashes.get(projectDependencyManifestPath);
+        if (hash === undefined) {
           throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
         }
 
-        const hash: string = hashes.get(projectDependencyManifestPath)!;
         projectDeps.set(projectDependencyManifestPath, hash);
         i++;
       }

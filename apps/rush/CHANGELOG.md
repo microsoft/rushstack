@@ -1,6 +1,34 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 08 Aug 2022 07:32:36 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Aug 2022 00:43:07 GMT and should not be manually modified.
+
+## 5.77.2
+Wed, 31 Aug 2022 00:43:07 GMT
+
+### Updates
+
+- Fix an issue where "rush add" sometimes did not work correctly if a project is nested under another project's folder
+
+## 5.77.1
+Tue, 30 Aug 2022 17:26:42 GMT
+
+### Updates
+
+- Fixed an issue where "rush add" was not updating common-versions.json when using "--make-consistent"
+
+## 5.77.0
+Mon, 29 Aug 2022 21:09:31 GMT
+
+### Updates
+
+- Add machine architecture information, dependency graph information, and individual build times and statuses to the telemetry file.
+- Add schema validation for change files.
+- Fix a minor issue with the "--rush-example-repo" template
+- Update CLI docs for "rush add"
+- Improve some config file documentation
+- Make the project tag name syntax more strict to avoid error-prone names such as "tag:$PATH" or "tag://"
+- Add validation to ensure package.json files are strict JSON and the "version" field is strict SemVer
+- Add a new setting "watchOptions.debounceMs" in command-line.json
 
 ## 5.76.1
 Mon, 08 Aug 2022 07:32:36 GMT
