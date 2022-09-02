@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Add new ApiExportedMixin mixin class for determining whether an API item is exported or not",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}

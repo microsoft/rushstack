@@ -9,10 +9,6 @@
 // @public (undocumented)
 function exportedApi(): forgottenNs.ForgottenClass;
 
-// @public (undocumented)
-class ForgottenClass {
-}
-
 declare namespace ns {
     export {
         exportedApi

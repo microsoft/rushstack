@@ -39,6 +39,7 @@ export { IApiNameMixinOptions, ApiNameMixin } from './mixins/ApiNameMixin';
 export { IApiOptionalMixinOptions, ApiOptionalMixin } from './mixins/ApiOptionalMixin';
 export { IApiReadonlyMixinOptions, ApiReadonlyMixin } from './mixins/ApiReadonlyMixin';
 export { IApiInitializerMixinOptions, ApiInitializerMixin } from './mixins/ApiInitializerMixin';
+export { IApiExportedMixinOptions, ApiExportedMixin } from './mixins/ApiExportedMixin';
 export {
   IFindApiItemsResult,
   IFindApiItemsMessage,

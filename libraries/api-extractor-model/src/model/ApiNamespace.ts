@@ -12,6 +12,7 @@ import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { IApiExportedMixinOptions, ApiExportedMixin } from '../mixins/ApiExportedMixin';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -21,7 +22,8 @@ export interface IApiNamespaceOptions
   extends IApiItemContainerMixinOptions,
     IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
-    IApiDeclaredItemOptions {}
+    IApiDeclaredItemOptions,
+    IApiExportedMixinOptions {}
 
 /**
  * Represents a TypeScript namespace declaration.
@@ -45,7 +47,9 @@ export interface IApiNamespaceOptions
  *
  * @public
  */
-export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+export class ApiNamespace extends ApiItemContainerMixin(
+  ApiNameMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem)))
+) {
   public constructor(options: IApiNamespaceOptions) {
     super(options);
   }
@@ -67,8 +71,9 @@ export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseT
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Exports, nameComponent)
+      .addNavigationStep(navigation, nameComponent)
       .withMeaning(Meaning.Namespace);
   }
 }

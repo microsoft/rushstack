@@ -18,12 +18,14 @@
     // ("enabled" is required)
     "reportFileName": "<unscopedPackageName>.api.md",
     "reportFolder": "<projectFolder>/etc/",
-    "reportTempFolder": "<projectFolder>/temp/"
+    "reportTempFolder": "<projectFolder>/temp/",
+    "includeForgottenExports": false
   },
 
   "docModel": {
     // ("enabled" is required)
-    "apiJsonFilePath": "<projectFolder>/temp/<unscopedPackageName>.api.json"
+    "apiJsonFilePath": "<projectFolder>/temp/<unscopedPackageName>.api.json",
+    "includeForgottenExports": false
   },
 
   "dtsRollup": {

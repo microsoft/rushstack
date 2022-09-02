@@ -20,6 +20,11 @@ import {
   IApiTypeParameterListMixinJson
 } from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
+import {
+  IApiExportedMixinJson,
+  IApiExportedMixinOptions,
+  ApiExportedMixin
+} from '../mixins/ApiExportedMixin';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -30,12 +35,16 @@ export interface IApiClassOptions
     IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiDeclaredItemOptions,
-    IApiTypeParameterListMixinOptions {
+    IApiTypeParameterListMixinOptions,
+    IApiExportedMixinOptions {
   extendsTokenRange: IExcerptTokenRange | undefined;
   implementsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiClassJson extends IApiDeclaredItemJson, IApiTypeParameterListMixinJson {
+export interface IApiClassJson
+  extends IApiDeclaredItemJson,
+    IApiTypeParameterListMixinJson,
+    IApiExportedMixinJson {
   extendsTokenRange?: IExcerptTokenRange;
   implementsTokenRanges: IExcerptTokenRange[];
 }
@@ -57,7 +66,7 @@ export interface IApiClassJson extends IApiDeclaredItemJson, IApiTypeParameterLi
  * @public
  */
 export class ApiClass extends ApiItemContainerMixin(
-  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)))
+  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem))))
 ) {
   /**
    * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.
@@ -128,8 +137,9 @@ export class ApiClass extends ApiItemContainerMixin(
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Exports, nameComponent)
+      .addNavigationStep(navigation, nameComponent)
       .withMeaning(Meaning.Class);
   }
 }
