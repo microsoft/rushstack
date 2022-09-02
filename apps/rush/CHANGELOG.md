@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 31 Aug 2022 00:43:07 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Sep 2022 17:49:09 GMT and should not be manually modified.
+
+## 5.77.3
+Fri, 02 Sep 2022 17:49:09 GMT
+
+_Version update only_
 
 ## 5.77.2
 Wed, 31 Aug 2022 00:43:07 GMT
