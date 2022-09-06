@@ -4,9 +4,7 @@
 import { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
-
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 
 export interface IBasePackageJsonUpdaterRushOptions {
