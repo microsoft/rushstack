@@ -151,8 +151,8 @@ export class RushConfigurationProject {
 
     if (!semver.valid(this._packageJson.version)) {
       throw new Error(
-        `The package version "${this._packageJson.version}" specified in file` +
-          ` "${packageJsonFilename}" does not meet semver specification`
+        `The value "${this._packageJson.version}" is not valid SemVer syntax for the \"version\" field` +
+          ` in the file "${packageJsonFilename}"`
       );
     }
 

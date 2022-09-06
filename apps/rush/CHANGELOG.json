@@ -2,6 +2,69 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.77.3",
+      "tag": "@microsoft/rush_v5.77.3",
+      "date": "Fri, 02 Sep 2022 17:49:09 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.77.2",
+      "tag": "@microsoft/rush_v5.77.2",
+      "date": "Wed, 31 Aug 2022 00:43:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush add\" sometimes did not work correctly if a project is nested under another project's folder"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.77.1",
+      "tag": "@microsoft/rush_v5.77.1",
+      "date": "Tue, 30 Aug 2022 17:26:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an issue where \"rush add\" was not updating common-versions.json when using \"--make-consistent\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.77.0",
+      "tag": "@microsoft/rush_v5.77.0",
+      "date": "Mon, 29 Aug 2022 21:09:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add machine architecture information, dependency graph information, and individual build times and statuses to the telemetry file."
+          },
+          {
+            "comment": "Add schema validation for change files."
+          },
+          {
+            "comment": "Fix a minor issue with the \"--rush-example-repo\" template"
+          },
+          {
+            "comment": "Update CLI docs for \"rush add\""
+          },
+          {
+            "comment": "Improve some config file documentation"
+          },
+          {
+            "comment": "Make the project tag name syntax more strict to avoid error-prone names such as \"tag:$PATH\" or \"tag://\""
+          },
+          {
+            "comment": "Add validation to ensure package.json files are strict JSON and the \"version\" field is strict SemVer"
+          },
+          {
+            "comment": "Add a new setting \"watchOptions.debounceMs\" in command-line.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.76.1",
       "tag": "@microsoft/rush_v5.76.1",
       "date": "Mon, 08 Aug 2022 07:32:36 GMT",

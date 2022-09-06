@@ -37,7 +37,7 @@ describe(Telemetry.name, () => {
       name: 'testData1',
       durationInSeconds: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime(),
+      timestampMs: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version,
       machineInfo: {} as ITelemetryMachineInfo
@@ -47,7 +47,7 @@ describe(Telemetry.name, () => {
       name: 'testData2',
       durationInSeconds: 100,
       result: 'Failed',
-      timestamp: new Date().getTime(),
+      timestampMs: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version,
       machineInfo: {} as ITelemetryMachineInfo
@@ -70,7 +70,7 @@ describe(Telemetry.name, () => {
       name: 'testData',
       durationInSeconds: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime(),
+      timestampMs: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version
     };
@@ -91,7 +91,7 @@ describe(Telemetry.name, () => {
       name: 'testData1',
       durationInSeconds: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime(),
+      timestampMs: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version,
       machineInfo: {} as ITelemetryMachineInfo
@@ -126,7 +126,7 @@ describe(Telemetry.name, () => {
     const result: ITelemetryData = telemetry.store[0];
     expect(result.platform).toEqual(process.platform);
     expect(result.rushVersion).toEqual(Rush.version);
-    expect(result.timestamp).toBeDefined();
+    expect(result.timestampMs).toBeDefined();
   });
 
   it('calls custom flush telemetry', async () => {

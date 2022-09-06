@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.30.0",
+      "tag": "@microsoft/api-extractor_v7.30.0",
+      "date": "Fri, 02 Sep 2022 17:48:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new \"apiReport.includeForgottenExports\" and \"docModel.includeForgottenExports\" properties to control whether forgotten exports are included in the API report and doc model files."
+          },
+          {
+            "comment": "Fix incorrect declaration references for symbols not exported from the package's entry point."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.24.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.29.5",
       "tag": "@microsoft/api-extractor_v7.29.5",
       "date": "Wed, 24 Aug 2022 03:01:22 GMT",

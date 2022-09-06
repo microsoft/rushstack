@@ -4,7 +4,7 @@
 
 ```ts
 
-// Warning: (ae-forgotten-export) The symbol "Promise" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "Promise_2" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
 export function ambientNameConflict(p1: Promise<void>, p2: Promise_2<void>): void;

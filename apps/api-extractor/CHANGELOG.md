@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 24 Aug 2022 03:01:22 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Sep 2022 17:48:42 GMT and should not be manually modified.
+
+## 7.30.0
+Fri, 02 Sep 2022 17:48:42 GMT
+
+### Minor changes
+
+- Add new "apiReport.includeForgottenExports" and "docModel.includeForgottenExports" properties to control whether forgotten exports are included in the API report and doc model files.
+- Fix incorrect declaration references for symbols not exported from the package's entry point.
 
 ## 7.29.5
 Wed, 24 Aug 2022 03:01:22 GMT
