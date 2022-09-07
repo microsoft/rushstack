@@ -111,15 +111,14 @@ export class DeclarationReferenceGenerator {
 
     // Otherwise, this symbol is from the current package.
     if (parent) {
-      // If we've found an exported CollectorEntity, then it's exported from the package entry point, so
-      // use Exports.
+      // If we've found a CollectorEntity that is exported from the package entry point, use Exports.
       const namedDeclaration: ts.DeclarationName | undefined = (
         declaration as ts.NamedDeclaration | undefined
       )?.name;
       if (namedDeclaration && ts.isIdentifier(namedDeclaration)) {
         const collectorEntity: CollectorEntity | undefined =
           this._collector.tryGetEntityForNode(namedDeclaration);
-        if (collectorEntity && collectorEntity.exported) {
+        if (collectorEntity && collectorEntity.exportedFromEntryPoint) {
           return Navigation.Exports;
         }
       }
