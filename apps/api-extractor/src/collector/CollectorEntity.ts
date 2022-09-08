@@ -96,8 +96,7 @@ export class CollectorEntity {
   }
 
   /**
-   * Indicates that this entity is exported from the package entry point. Compare to
-   * `CollectorEntity.exported`.
+   * Indicates that this entity is exported from the package entry point. Compare to `CollectorEntity.exported`.
    */
   public get exportedFromEntryPoint(): boolean {
     return this.exportNames.size > 0;

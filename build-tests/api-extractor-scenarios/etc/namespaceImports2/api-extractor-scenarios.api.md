@@ -4,32 +4,19 @@
 
 ```ts
 
-declare namespace i1 {
-    export {
-        internal
-    }
-}
-export { i1 }
-
-declare namespace i2 {
-    export {
-        internal
-    }
-}
-export { i2 }
-
 declare namespace internal {
     export {
         SomeClass
     }
 }
+export { internal }
 
 // @public (undocumented)
-class SomeClass {
+export class SomeClass {
 }
 
 // @public (undocumented)
-export function someFunction(): i1.internal.SomeClass;
+export function someFunction(): SomeClass;
 
 // (No @packageDocumentation comment for this package)
 

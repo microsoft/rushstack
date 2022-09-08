@@ -174,79 +174,46 @@
       "members": [
         {
           "kind": "Namespace",
-          "canonicalReference": "api-extractor-scenarios!i1:namespace",
+          "canonicalReference": "api-extractor-scenarios!internal:namespace",
           "docComment": "",
           "excerptTokens": [],
           "releaseTag": "None",
-          "name": "i1",
+          "name": "internal",
           "preserveMemberOrder": false,
           "members": [
             {
-              "kind": "Namespace",
-              "canonicalReference": "api-extractor-scenarios!i1.internal:namespace",
-              "docComment": "",
-              "excerptTokens": [],
-              "releaseTag": "None",
-              "name": "internal",
-              "preserveMemberOrder": false,
-              "members": [
+              "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!internal.SomeClass:class",
+              "docComment": "/**\n * @public\n */\n",
+              "excerptTokens": [
                 {
-                  "kind": "Class",
-                  "canonicalReference": "api-extractor-scenarios!i1.internal.SomeClass:class",
-                  "docComment": "/**\n * @public\n */\n",
-                  "excerptTokens": [
-                    {
-                      "kind": "Content",
-                      "text": "export declare class SomeClass "
-                    }
-                  ],
-                  "releaseTag": "Public",
-                  "name": "SomeClass",
-                  "preserveMemberOrder": false,
-                  "members": [],
-                  "implementsTokenRanges": []
+                  "kind": "Content",
+                  "text": "export declare class SomeClass "
                 }
-              ]
+              ],
+              "releaseTag": "Public",
+              "name": "SomeClass",
+              "preserveMemberOrder": false,
+              "members": [],
+              "implementsTokenRanges": []
             }
           ]
         },
         {
-          "kind": "Namespace",
-          "canonicalReference": "api-extractor-scenarios!i2:namespace",
-          "docComment": "",
-          "excerptTokens": [],
-          "releaseTag": "None",
-          "name": "i2",
-          "preserveMemberOrder": false,
-          "members": [
+          "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!SomeClass:class",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
             {
-              "kind": "Namespace",
-              "canonicalReference": "api-extractor-scenarios!i2.internal:namespace",
-              "docComment": "",
-              "excerptTokens": [],
-              "releaseTag": "None",
-              "name": "internal",
-              "preserveMemberOrder": false,
-              "members": [
-                {
-                  "kind": "Class",
-                  "canonicalReference": "api-extractor-scenarios!i2.internal.SomeClass:class",
-                  "docComment": "/**\n * @public\n */\n",
-                  "excerptTokens": [
-                    {
-                      "kind": "Content",
-                      "text": "export declare class SomeClass "
-                    }
-                  ],
-                  "releaseTag": "Public",
-                  "name": "SomeClass",
-                  "preserveMemberOrder": false,
-                  "members": [],
-                  "implementsTokenRanges": []
-                }
-              ]
+              "kind": "Content",
+              "text": "export declare class SomeClass "
             }
-          ]
+          ],
+          "releaseTag": "Public",
+          "name": "SomeClass",
+          "preserveMemberOrder": false,
+          "members": [],
+          "implementsTokenRanges": []
         },
         {
           "kind": "Function",
@@ -256,10 +223,6 @@
             {
               "kind": "Content",
               "text": "export declare function someFunction(): "
-            },
-            {
-              "kind": "Content",
-              "text": "i1.internal."
             },
             {
               "kind": "Reference",
@@ -273,7 +236,7 @@
           ],
           "returnTypeTokenRange": {
             "startIndex": 1,
-            "endIndex": 3
+            "endIndex": 2
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
