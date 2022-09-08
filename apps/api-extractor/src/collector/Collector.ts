@@ -296,41 +296,18 @@ export class Collector {
   }
 
   /**
+   * For a given analyzed ts.Symbol, return the CollectorEntity that it refers to. Returns undefined if it
+   * doesn't refer to anything interesting.
+   */
+  public tryGetEntityForSymbol(symbol: ts.Symbol): CollectorEntity | undefined {
+    return this._entitiesBySymbol.get(symbol);
+  }
+
+  /**
    * Returns the associated `CollectorEntity` for the given `astEntity`, if one was created during analysis.
    */
   public tryGetCollectorEntity(astEntity: AstEntity): CollectorEntity | undefined {
     return this._entitiesByAstEntity.get(astEntity);
-  }
-
-  /**
-   * Returns the name to emit for the given `symbol`.
-   * This is usually the `name` of that `symbol`.
-   * Only if this `symbol` has a `CollectorEntity`, the `nameForEmit` of that entity is used.
-   * @param symbol the symbol to compute the name to emit for
-   * @returns the name to emit for the given `symbol`
-   */
-  public getEmitName(symbol: ts.Symbol): string {
-    const collectorEntity: CollectorEntity | undefined = this._entitiesBySymbol.get(symbol);
-    return collectorEntity?.nameForEmit ?? symbol.name;
-  }
-
-  /**
-   * Returns (the symbol of) the namespace that exports the given `symbol`, if applicable.
-   * @param symbol the symbol representing the namespace that exports the given `symbol`,
-   *   or undefined if there is no such namespace
-   */
-  public getExportingNamespace(symbol: ts.Symbol): ts.Symbol | undefined {
-    const collectorEntity: CollectorEntity | undefined = this._entitiesBySymbol.get(symbol);
-    if (collectorEntity) {
-      const exportingNamespace: AstNamespaceImport | undefined = collectorEntity.getExportingNamespace();
-      if (exportingNamespace) {
-        return TypeScriptInternals.tryGetSymbolForDeclaration(
-          exportingNamespace.declaration,
-          this.typeChecker
-        );
-      }
-    }
-    return undefined;
   }
 
   public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
@@ -455,7 +432,7 @@ export class Collector {
       if (astEntity instanceof AstSymbol) {
         this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
       } else if (astEntity instanceof AstNamespaceImport) {
-        this._entitiesBySymbol.set((astEntity.declaration as unknown as ts.Type).symbol, entity);
+        this._entitiesBySymbol.set(astEntity.symbol, entity);
       }
       this._entities.push(entity);
       this._collectReferenceDirectives(astEntity);

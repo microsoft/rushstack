@@ -468,7 +468,7 @@
             {
               "kind": "Reference",
               "text": "ForgottenExport4.ForgottenExport5",
-              "canonicalReference": "api-extractor-scenarios!ForgottenExport4.ForgottenExport5:class"
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport4.ForgottenExport5:class"
             },
             {
               "kind": "Content",

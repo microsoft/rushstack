@@ -7,7 +7,6 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
 import { Sort } from '@rushstack/node-core-library';
 import { AstEntity } from '../analyzer/AstEntity';
-import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 
 /**
  * This is a data structure used by the Collector to track an AstEntity that may be emitted in the *.d.ts file.
@@ -97,6 +96,13 @@ export class CollectorEntity {
   }
 
   /**
+   * Indicates that this entity is exported from the package entry point. Compare to `CollectorEntity.exported`.
+   */
+  public get exportedFromEntryPoint(): boolean {
+    return this.exportNames.size > 0;
+  }
+
+  /**
    * Indicates that this entity is exported from its parent module (i.e. either the package entry point or
    * a local namespace). Compare to `CollectorEntity.consumable`.
    *
@@ -117,7 +123,7 @@ export class CollectorEntity {
    */
   public get exported(): boolean {
     // Exported from top-level?
-    if (this.exportNames.size > 0) return true;
+    if (this.exportedFromEntryPoint) return true;
 
     // Exported from parent?
     for (const localExportNames of this._localExportNamesByParent.values()) {
@@ -157,7 +163,7 @@ export class CollectorEntity {
    */
   public get consumable(): boolean {
     // Exported from top-level?
-    if (this.exportNames.size > 0) return true;
+    if (this.exportedFromEntryPoint) return true;
 
     // Exported from consumable parent?
     for (const [parent, localExportNames] of this._localExportNamesByParent) {
@@ -191,12 +197,13 @@ export class CollectorEntity {
   }
 
   /**
-   * Return the first namespace that exports this entity.
+   * Return the first consumable parent that exports this entity. If there is none, returns
+   * `undefined`.
    */
-  public getExportingNamespace(): AstNamespaceImport | undefined {
+  public get firstExportingConsumableParent(): CollectorEntity | undefined {
     for (const [parent, localExportNames] of this._localExportNamesByParent) {
-      if (parent.consumable && localExportNames.size > 0 && parent.astEntity instanceof AstNamespaceImport) {
-        return parent.astEntity;
+      if (parent.consumable && localExportNames.size > 0) {
+        return parent;
       }
     }
     return undefined;
