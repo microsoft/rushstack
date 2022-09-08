@@ -110,10 +110,12 @@ export class DeclarationReferenceGenerator {
       return Navigation.Exports;
     }
 
-    // Otherwise, this symbol is from the current package. If we've found an exported CollectorEntity, then use
-    // Exports.
+    // Otherwise, this symbol is from the current package. If we've found an associated consumable
+    // `CollectorEntity`, then use Exports. We use `consumable` here instead of `exported` because
+    // if the symbol is exported from a non-consumable `AstNamespaceImport`, we don't want to use
+    // Exports. We should use Locals instead.
     const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(symbol);
-    if (entity && entity.exported) {
+    if (entity?.consumable) {
       return Navigation.Exports;
     }
 

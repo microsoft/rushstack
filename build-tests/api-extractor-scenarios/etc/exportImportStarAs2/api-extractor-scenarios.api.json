@@ -193,7 +193,7 @@
                 {
                   "kind": "Reference",
                   "text": "forgottenNs.ForgottenClass",
-                  "canonicalReference": "api-extractor-scenarios!ForgottenClass:class"
+                  "canonicalReference": "api-extractor-scenarios!~ForgottenClass:class"
                 },
                 {
                   "kind": "Content",
