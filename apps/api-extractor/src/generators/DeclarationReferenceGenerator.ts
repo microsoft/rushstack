@@ -272,6 +272,9 @@ export class DeclarationReferenceGenerator {
     const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
     const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
 
+    // Note that it's possible for a symbol to be exported from an entry point as well as one or more
+    // namespaces. In that case, it's not clear what to choose as its parent. Today's logic is neither
+    // perfect nor particularly stable to API items being renamed and shuffled around.
     const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(symbol);
     if (entity) {
       if (entity.exportedFromEntryPoint) {
