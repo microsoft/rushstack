@@ -626,7 +626,8 @@ export class ExportAnalyzer {
             namespaceImport = new AstNamespaceImport({
               namespaceName: declarationSymbol.name,
               astModule: astModule,
-              declaration: declaration
+              declaration: declaration,
+              symbol: declarationSymbol
             });
             this._astNamespaceImportByModule.set(astModule, namespaceImport);
           }
