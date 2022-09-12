@@ -157,6 +157,7 @@ export class EnvironmentConfiguration {
     // (undocumented)
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
     static get pnpmStorePathOverride(): string | undefined;
+    static get pnpmVerifyStoreIntegrity(): boolean | undefined;
     static reset(): void;
     static get rushGlobalFolderOverride(): string | undefined;
     static get rushTempFolderOverride(): string | undefined;
@@ -178,6 +179,7 @@ export enum EnvironmentVariableNames {
     RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
+    RUSH_PNPM_VERIFY_STORE_INTEGRITY = "RUSH_PNPM_VERIFY_STORE_INTEGRITY",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
     RUSH_TAR_BINARY_PATH = "RUSH_TAR_BINARY_PATH",
     RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
@@ -891,6 +893,7 @@ export class _RushGlobalFolder {
 
 // @beta
 export class RushLifecycleHooks {
+    beforeInstall: AsyncSeriesHook<IGlobalCommand>;
     flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
     initialize: AsyncSeriesHook<IRushCommand>;
     runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;

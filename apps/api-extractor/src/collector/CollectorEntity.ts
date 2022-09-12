@@ -176,27 +176,6 @@ export class CollectorEntity {
   }
 
   /**
-   * Whether the entity has any parent entities.
-   *
-   * @remarks
-   * In the example below:
-   *
-   * ```ts
-   * declare function add(): void;
-   * declare namespace calculator {
-   *  export {
-   *    add
-   *  }
-   * }
-   * ```
-   *
-   * The `CollectorEntity` for `calculator` is the parent of the `CollectorEntity` for `add`.
-   */
-  public get hasParents(): boolean {
-    return this._localExportNamesByParent.size > 0;
-  }
-
-  /**
    * Return the first consumable parent that exports this entity. If there is none, returns
    * `undefined`.
    */

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Define an environment variable RUSH_PNPM_VERIFY_STORE_INTEGRITY that can be used to enable or disable PNPM's store integrity verification during installation for performance.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
