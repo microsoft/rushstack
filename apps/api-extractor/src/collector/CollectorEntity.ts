@@ -96,6 +96,13 @@ export class CollectorEntity {
   }
 
   /**
+   * Indicates that this entity is exported from the package entry point. Compare to `CollectorEntity.exported`.
+   */
+  public get exportedFromEntryPoint(): boolean {
+    return this.exportNames.size > 0;
+  }
+
+  /**
    * Indicates that this entity is exported from its parent module (i.e. either the package entry point or
    * a local namespace). Compare to `CollectorEntity.consumable`.
    *
@@ -116,7 +123,7 @@ export class CollectorEntity {
    */
   public get exported(): boolean {
     // Exported from top-level?
-    if (this.exportNames.size > 0) return true;
+    if (this.exportedFromEntryPoint) return true;
 
     // Exported from parent?
     for (const localExportNames of this._localExportNamesByParent.values()) {
@@ -156,7 +163,7 @@ export class CollectorEntity {
    */
   public get consumable(): boolean {
     // Exported from top-level?
-    if (this.exportNames.size > 0) return true;
+    if (this.exportedFromEntryPoint) return true;
 
     // Exported from consumable parent?
     for (const [parent, localExportNames] of this._localExportNamesByParent) {
@@ -166,27 +173,6 @@ export class CollectorEntity {
     }
 
     return false;
-  }
-
-  /**
-   * Whether the entity has any parent entities.
-   *
-   * @remarks
-   * In the example below:
-   *
-   * ```ts
-   * declare function add(): void;
-   * declare namespace calculator {
-   *  export {
-   *    add
-   *  }
-   * }
-   * ```
-   *
-   * The `CollectorEntity` for `calculator` is the parent of the `CollectorEntity` for `add`.
-   */
-  public get hasParents(): boolean {
-    return this._localExportNamesByParent.size > 0;
   }
 
   /**

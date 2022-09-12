@@ -39,6 +39,8 @@
     "mergedDeclarations",
     "mixinPattern",
     "namedDefaultImport",
+    "namespaceImports",
+    "namespaceImports2",
     "preapproved",
     "readonlyDeclarations",
     "referenceTokens",
