@@ -80,7 +80,3 @@ dist
 
 # Heft
 .heft
-
-# IntelliJ IDEA
-.idea
-*.iml
