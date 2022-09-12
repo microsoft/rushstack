@@ -258,13 +258,9 @@
               "text": "export declare function someFunction(): "
             },
             {
-              "kind": "Content",
-              "text": "i1.internal."
-            },
-            {
               "kind": "Reference",
-              "text": "SomeClass",
-              "canonicalReference": "api-extractor-scenarios!SomeClass:class"
+              "text": "i1.internal.SomeClass",
+              "canonicalReference": "api-extractor-scenarios!i1.internal.SomeClass:class"
             },
             {
               "kind": "Content",
@@ -273,7 +269,7 @@
           ],
           "returnTypeTokenRange": {
             "startIndex": 1,
-            "endIndex": 3
+            "endIndex": 2
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
