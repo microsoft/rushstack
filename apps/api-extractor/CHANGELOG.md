@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 02 Sep 2022 17:48:42 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Sep 2022 22:27:48 GMT and should not be manually modified.
+
+## 7.30.1
+Mon, 12 Sep 2022 22:27:48 GMT
+
+### Patches
+
+- Fix a recent regression where items exported from both the entry point and from an exported namespace appeared only once in the API doc model (GitHub #3619)
 
 ## 7.30.0
 Fri, 02 Sep 2022 17:48:42 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.30.1",
+      "tag": "@microsoft/api-extractor_v7.30.1",
+      "date": "Mon, 12 Sep 2022 22:27:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a recent regression where items exported from both the entry point and from an exported namespace appeared only once in the API doc model (GitHub #3619)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.30.0",
       "tag": "@microsoft/api-extractor_v7.30.0",
       "date": "Fri, 02 Sep 2022 17:48:42 GMT",

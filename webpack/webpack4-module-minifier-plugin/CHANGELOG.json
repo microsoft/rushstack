@@ -2,6 +2,27 @@
   "name": "@rushstack/webpack4-module-minifier-plugin",
   "entries": [
     {
+      "version": "0.9.27",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.9.27",
+      "date": "Mon, 12 Sep 2022 22:27:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.1.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.1.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.26",
       "tag": "@rushstack/webpack4-module-minifier-plugin_v0.9.26",
       "date": "Fri, 02 Sep 2022 17:48:43 GMT",
