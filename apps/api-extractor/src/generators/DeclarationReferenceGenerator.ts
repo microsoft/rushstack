@@ -284,7 +284,7 @@ export class DeclarationReferenceGenerator {
       }
 
       const firstExportingConsumableParent: CollectorEntity | undefined =
-        entity.firstExportingConsumableParent;
+        entity.getFirstExportingConsumableParent();
       if (
         firstExportingConsumableParent &&
         firstExportingConsumableParent.astEntity instanceof AstNamespaceImport
