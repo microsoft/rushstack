@@ -82,6 +82,7 @@ export class Collector {
     AstEntity,
     CollectorEntity
   >();
+  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
@@ -295,6 +296,14 @@ export class Collector {
   }
 
   /**
+   * For a given analyzed ts.Symbol, return the CollectorEntity that it refers to. Returns undefined if it
+   * doesn't refer to anything interesting.
+   */
+  public tryGetEntityForSymbol(symbol: ts.Symbol): CollectorEntity | undefined {
+    return this._entitiesBySymbol.get(symbol);
+  }
+
+  /**
    * Returns the associated `CollectorEntity` for the given `astEntity`, if one was created during analysis.
    */
   public tryGetCollectorEntity(astEntity: AstEntity): CollectorEntity | undefined {
@@ -420,6 +429,11 @@ export class Collector {
       entity = new CollectorEntity(astEntity);
 
       this._entitiesByAstEntity.set(astEntity, entity);
+      if (astEntity instanceof AstSymbol) {
+        this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
+      } else if (astEntity instanceof AstNamespaceImport) {
+        this._entitiesBySymbol.set(astEntity.symbol, entity);
+      }
       this._entities.push(entity);
       this._collectReferenceDirectives(astEntity);
     }

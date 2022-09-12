@@ -456,7 +456,7 @@
             {
               "kind": "Reference",
               "text": "DuplicateName",
-              "canonicalReference": "api-extractor-scenarios!~DuplicateName:type"
+              "canonicalReference": "api-extractor-scenarios!~DuplicateName_2:type"
             },
             {
               "kind": "Content",
@@ -510,13 +510,9 @@
               "text": "export declare function someFunction5(): "
             },
             {
-              "kind": "Content",
-              "text": "internal2."
-            },
-            {
               "kind": "Reference",
-              "text": "ForgottenExport6",
-              "canonicalReference": "api-extractor-scenarios!ForgottenExport6:class"
+              "text": "internal2.ForgottenExport6",
+              "canonicalReference": "api-extractor-scenarios!~ForgottenExport6:class"
             },
             {
               "kind": "Content",
@@ -525,7 +521,7 @@
           ],
           "returnTypeTokenRange": {
             "startIndex": 1,
-            "endIndex": 3
+            "endIndex": 2
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
@@ -572,7 +568,7 @@
             {
               "kind": "Reference",
               "text": "AnotherDuplicateName",
-              "canonicalReference": "api-extractor-scenarios!~AnotherDuplicateName:class"
+              "canonicalReference": "api-extractor-scenarios!~AnotherDuplicateName_2:class"
             },
             {
               "kind": "Content",

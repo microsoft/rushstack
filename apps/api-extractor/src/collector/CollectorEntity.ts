@@ -176,6 +176,19 @@ export class CollectorEntity {
   }
 
   /**
+   * Return the first consumable parent that exports this entity. If there is none, returns
+   * `undefined`.
+   */
+  public getFirstExportingConsumableParent(): CollectorEntity | undefined {
+    for (const [parent, localExportNames] of this._localExportNamesByParent) {
+      if (parent.consumable && localExportNames.size > 0) {
+        return parent;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Adds a new export name to the entity.
    */
   public addExportName(exportName: string): void {

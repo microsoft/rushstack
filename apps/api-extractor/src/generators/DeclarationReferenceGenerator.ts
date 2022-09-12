@@ -15,6 +15,7 @@ import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { Collector } from '../collector/Collector';
 import { CollectorEntity } from '../collector/CollectorEntity';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 
 export class DeclarationReferenceGenerator {
   public static readonly unknownReference: string = '?';
@@ -109,34 +110,27 @@ export class DeclarationReferenceGenerator {
       return Navigation.Exports;
     }
 
-    // Otherwise, this symbol is from the current package.
-    if (parent) {
-      // If we've found an exported CollectorEntity, then it's exported from the package entry point, so
-      // use Exports.
-      const namedDeclaration: ts.DeclarationName | undefined = (
-        declaration as ts.NamedDeclaration | undefined
-      )?.name;
-      if (namedDeclaration && ts.isIdentifier(namedDeclaration)) {
-        const collectorEntity: CollectorEntity | undefined =
-          this._collector.tryGetEntityForNode(namedDeclaration);
-        if (collectorEntity && collectorEntity.exported) {
-          return Navigation.Exports;
-        }
+    // Otherwise, this symbol is from the current package. If we've found an associated consumable
+    // `CollectorEntity`, then use Exports. We use `consumable` here instead of `exported` because
+    // if the symbol is exported from a non-consumable `AstNamespaceImport`, we don't want to use
+    // Exports. We should use Locals instead.
+    const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(symbol);
+    if (entity?.consumable) {
+      return Navigation.Exports;
+    }
+
+    // If its parent symbol is not a source file, then use either Exports or Members. If the parent symbol
+    // is a source file, but it wasn't exported from the package entry point (in the check above), then the
+    // symbol is a local, so fall through below.
+    if (parent && !DeclarationReferenceGenerator._isExternalModuleSymbol(parent)) {
+      if (
+        parent.members &&
+        DeclarationReferenceGenerator._isSameSymbol(parent.members.get(symbol.escapedName), symbol)
+      ) {
+        return Navigation.Members;
       }
 
-      // If its parent symbol is not a source file, then use either Exports or Members. If the parent symbol
-      // is a source file, but it wasn't exported from the package entry point (in the check above), then the
-      // symbol is a local, so fall through below.
-      if (!DeclarationReferenceGenerator._isExternalModuleSymbol(parent)) {
-        if (
-          parent.members &&
-          DeclarationReferenceGenerator._isSameSymbol(parent.members.get(symbol.escapedName), symbol)
-        ) {
-          return Navigation.Members;
-        }
-
-        return Navigation.Exports;
-      }
+      return Navigation.Exports;
     }
 
     // Otherwise, we have a local symbol, so use a Locals navigation. These are either:
@@ -209,6 +203,12 @@ export class DeclarationReferenceGenerator {
     }
     if (followedSymbol.flags & ts.SymbolFlags.Alias) {
       followedSymbol = this._collector.typeChecker.getAliasedSymbol(followedSymbol);
+
+      // Without this logic, we end up following the symbol `ns` in `import * as ns from './file'` to
+      // the actual file `file.ts`. We don't want to do this, so revert to the original symbol.
+      if (followedSymbol.flags & ts.SymbolFlags.ValueModule) {
+        followedSymbol = symbol;
+      }
     }
 
     if (DeclarationReferenceGenerator._isExternalModuleSymbol(followedSymbol)) {
@@ -229,6 +229,11 @@ export class DeclarationReferenceGenerator {
     }
 
     let localName: string = followedSymbol.name;
+    const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(followedSymbol);
+    if (entity?.nameForEmit) {
+      localName = entity.nameForEmit;
+    }
+
     if (followedSymbol.escapedName === ts.InternalSymbolName.Constructor) {
       localName = 'constructor';
     } else {
@@ -267,8 +272,38 @@ export class DeclarationReferenceGenerator {
 
   private _getParentReference(symbol: ts.Symbol): DeclarationReference | undefined {
     const declaration: ts.Node | undefined = TypeScriptHelpers.tryGetADeclaration(symbol);
+    const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
 
-    // First, try to find a parent symbol via the symbol tree.
+    // Note that it's possible for a symbol to be exported from an entry point as well as one or more
+    // namespaces. In that case, it's not clear what to choose as its parent. Today's logic is neither
+    // perfect nor particularly stable to API items being renamed and shuffled around.
+    const entity: CollectorEntity | undefined = this._collector.tryGetEntityForSymbol(symbol);
+    if (entity) {
+      if (entity.exportedFromEntryPoint) {
+        return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
+      }
+
+      const firstExportingConsumableParent: CollectorEntity | undefined =
+        entity.getFirstExportingConsumableParent();
+      if (
+        firstExportingConsumableParent &&
+        firstExportingConsumableParent.astEntity instanceof AstNamespaceImport
+      ) {
+        const parentSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(
+          firstExportingConsumableParent.astEntity.declaration,
+          this._collector.typeChecker
+        );
+        if (parentSymbol) {
+          return this._symbolToDeclarationReference(
+            parentSymbol,
+            parentSymbol.flags,
+            /*includeModuleSymbols*/ true
+          );
+        }
+      }
+    }
+
+    // Next, try to find a parent symbol via the symbol tree.
     const parentSymbol: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(symbol);
     if (parentSymbol) {
       return this._symbolToDeclarationReference(
@@ -306,7 +341,6 @@ export class DeclarationReferenceGenerator {
     }
 
     // At this point, we have a local symbol in a module.
-    const sourceFile: ts.SourceFile | undefined = declaration?.getSourceFile();
     if (sourceFile && ts.isExternalModule(sourceFile)) {
       return new DeclarationReference(this._sourceFileToModuleSource(sourceFile));
     } else {
