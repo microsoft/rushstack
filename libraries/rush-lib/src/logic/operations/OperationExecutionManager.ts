@@ -127,7 +127,7 @@ export class OperationExecutionManager {
             );
           }
 
-          const workers: number = Math.floor((parallelismAsNumber / 100) * numberOfCores);
+          const workers: number = Math.floor((parsedPercentage / 100) * numberOfCores);
           this._parallelism = Math.max(workers, 1);
         } else if (!isNaN(parallelismAsNumber)) {
           this._parallelism = Math.max(parallelismAsNumber, 1);
