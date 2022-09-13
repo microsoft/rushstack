@@ -1,6 +1,11 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Mon, 12 Sep 2022 22:27:48 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Sep 2022 00:16:55 GMT and should not be manually modified.
+
+## 0.1.24
+Tue, 13 Sep 2022 00:16:55 GMT
+
+_Version update only_
 
 ## 0.1.23
 Mon, 12 Sep 2022 22:27:48 GMT

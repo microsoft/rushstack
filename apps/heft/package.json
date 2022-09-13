@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.47.7",
+  "version": "0.47.8",
   "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
