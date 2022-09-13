@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import path from 'path';
+import { FileSystem } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -68,14 +69,31 @@ export default class SassPlugin implements IHeftPlugin {
     // If we have the incremental options, use them to determine which files to process.
     // Otherwise, process all files. The typings generator also provides the file paths
     // as relative paths from the sourceFolderPath.
-    const filePaths: string[] | undefined = runIncrementalOptions?.globChangedFiles(
-      sassProcessor.inputFileGlob,
-      {
+    let changedFilePaths: string[] | undefined;
+    if (runIncrementalOptions) {
+      changedFilePaths = [];
+      const filePaths: string[] = runIncrementalOptions.globChangedFiles(sassProcessor.inputFileGlob, {
         cwd: sassProcessor.sourceFolderPath,
         ignore: Array.from(sassProcessor.ignoredFileGlobs)
+      });
+      const deleteFilePromises: Promise<void>[] = [];
+      for (const filePath of filePaths) {
+        // Filter out and delete any files that are removed and all their output files
+        const absoluteFilePath: string = path.join(sassProcessor.sourceFolderPath, filePath);
+        if (runIncrementalOptions.changedFiles.get(absoluteFilePath)!.version === undefined) {
+          deleteFilePromises.push(
+            ...sassProcessor.getOutputFilePaths(filePath).map(async (outputFilePath) => {
+              await FileSystem.deleteFileAsync(outputFilePath);
+            })
+          );
+        } else {
+          changedFilePaths.push(filePath);
+        }
       }
-    );
-    await sassProcessor.generateTypingsAsync(filePaths);
+      await Promise.all(deleteFilePromises);
+    }
+
+    await sassProcessor.generateTypingsAsync(changedFilePaths);
     taskSession.logger.terminal.writeLine('Generated sass typings');
   }
 
