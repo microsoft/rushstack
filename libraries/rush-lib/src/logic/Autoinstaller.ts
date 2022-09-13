@@ -110,8 +110,8 @@ export class Autoinstaller {
     });
 
     // Example: ../common/autoinstallers/my-task/node_modules
-    const nodeModulesFolder = path.join(autoinstallerFullPath, RushConstants.nodeModulesFolderName);
-    const isLastInstallFlagDirty =
+    const nodeModulesFolder: string = path.join(autoinstallerFullPath, RushConstants.nodeModulesFolderName);
+    const isLastInstallFlagDirty: boolean =
       !lastInstallFlag.isValid() ||
       !Utilities.isFileTimestampCurrent(FileSystem.getStatistics(lastInstallFlag.path).mtime, [
         nodeModulesFolder
