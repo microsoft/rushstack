@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 12 Sep 2022 22:27:48 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Sep 2022 00:16:55 GMT and should not be manually modified.
+
+## 7.31.0
+Tue, 13 Sep 2022 00:16:55 GMT
+
+### Minor changes
+
+- Fix an issue where aliased classes sometimes had incorrect canonical references in *.api.json (GitHub  #3593)
 
 ## 7.30.1
 Mon, 12 Sep 2022 22:27:48 GMT

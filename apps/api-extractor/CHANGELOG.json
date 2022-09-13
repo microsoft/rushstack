@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.31.0",
+      "tag": "@microsoft/api-extractor_v7.31.0",
+      "date": "Tue, 13 Sep 2022 00:16:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where aliased classes sometimes had incorrect canonical references in *.api.json (GitHub  #3593)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.30.1",
       "tag": "@microsoft/api-extractor_v7.30.1",
       "date": "Mon, 12 Sep 2022 22:27:48 GMT",
