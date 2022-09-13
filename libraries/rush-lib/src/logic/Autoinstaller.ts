@@ -109,10 +109,15 @@ export class Autoinstaller {
       rushJsonFolder: this._rushConfiguration.rushJsonFolder
     });
 
-    if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
-      // Example: ../common/autoinstallers/my-task/node_modules
-      const nodeModulesFolder: string = path.join(autoinstallerFullPath, 'node_modules');
+    // Example: ../common/autoinstallers/my-task/node_modules
+    const nodeModulesFolder = path.join(autoinstallerFullPath, RushConstants.nodeModulesFolderName);
+    const isLastInstallFlagDirty =
+      !lastInstallFlag.isValid() ||
+      !Utilities.isFileTimestampCurrent(FileSystem.getStatistics(lastInstallFlag.path).mtime, [
+        nodeModulesFolder
+      ]);
 
+    if (isLastInstallFlagDirty || lock.dirtyWhenAcquired) {
       if (FileSystem.exists(nodeModulesFolder)) {
         this._logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
         FileSystem.ensureEmptyFolder(nodeModulesFolder);
