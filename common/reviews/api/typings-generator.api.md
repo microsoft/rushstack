@@ -61,14 +61,17 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
 export class TypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
     // (undocumented)
-    generateTypingsAsync(): Promise<void>;
+    generateTypingsAsync(filePaths?: string[]): Promise<void>;
     // (undocumented)
     getOutputFilePaths(relativePath: string): string[];
+    readonly ignoredFileGlobs: readonly string[];
+    readonly inputFileGlob: string;
     // (undocumented)
     protected _options: ITypingsGeneratorOptions;
     registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
+    readonly sourceFolderPath: string;
 }
 
 // (No @packageDocumentation comment for this package)

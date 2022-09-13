@@ -6,14 +6,14 @@ import type {
   HeftConfiguration,
   IHeftTaskSession,
   IHeftPlugin,
+  IScopedLogger,
   IHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
-  IScopedLogger
+  IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
 
 import { ISassConfiguration, SassProcessor } from './SassProcessor';
-import { Async } from './utilities/Async';
 
 export interface ISassConfigurationJson extends Partial<ISassConfiguration> {}
 
@@ -22,7 +22,8 @@ const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-sass-plugin.schema
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
 export default class SassPlugin implements IHeftPlugin {
-  private static _sassConfigurationLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
+  private _sassConfiguration: ISassConfiguration | undefined;
+  private _sassProcessor: SassProcessor | undefined;
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -43,84 +44,108 @@ export default class SassPlugin implements IHeftPlugin {
     });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      // TODO: Handle watch mode
-      await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration, false);
+      await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration);
     });
+
+    taskSession.hooks.runIncremental.tapPromise(
+      PLUGIN_NAME,
+      async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
+        await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration, runIncrementalOptions);
+      }
+    );
   }
 
   private async _runSassTypingsGeneratorAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    isWatchMode: boolean
+    runIncrementalOptions?: IHeftTaskRunIncrementalHookOptions
   ): Promise<void> {
-    const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
+    taskSession.logger.terminal.writeVerboseLine('Starting sass typings generation...');
+    const sassProcessor: SassProcessor = await this._loadSassProcessorAsync(
       heftConfiguration,
       taskSession.logger
     );
-    const sassTypingsGenerator: SassProcessor = new SassProcessor({ sassConfiguration });
-    await sassTypingsGenerator.generateTypingsAsync();
-    if (isWatchMode) {
-      Async.runWatcherWithErrorHandling(
-        async () => await sassTypingsGenerator.runWatcherAsync(),
-        taskSession.logger
+    // If we have the incremental options, use them to determine which files to process.
+    // Otherwise, process all files. The typings generator also provides the file paths
+    // as relative paths from the sourceFolderPath.
+    const filePaths: string[] | undefined = runIncrementalOptions?.globChangedFiles(
+      sassProcessor.inputFileGlob,
+      {
+        cwd: sassProcessor.sourceFolderPath,
+        ignore: Array.from(sassProcessor.ignoredFileGlobs)
+      }
+    );
+    await sassProcessor.generateTypingsAsync(filePaths);
+    taskSession.logger.terminal.writeLine('Generated sass typings');
+  }
+
+  private async _loadSassProcessorAsync(
+    heftConfiguration: HeftConfiguration,
+    logger: IScopedLogger
+  ): Promise<SassProcessor> {
+    if (!this._sassProcessor) {
+      const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
+        heftConfiguration,
+        logger
       );
+      this._sassProcessor = new SassProcessor({ sassConfiguration });
     }
+    return this._sassProcessor;
   }
 
   private async _loadSassConfigurationAsync(
     heftConfiguration: HeftConfiguration,
     logger: IScopedLogger
   ): Promise<ISassConfiguration> {
-    const { buildFolderPath } = heftConfiguration;
-    const sassConfigurationJson: ISassConfigurationJson | undefined =
-      await SassPlugin._getSassConfigurationLoader().tryLoadConfigurationFileForProjectAsync(
-        logger.terminal,
-        buildFolderPath,
-        heftConfiguration.rigConfig
-      );
-
-    if (sassConfigurationJson) {
-      if (sassConfigurationJson.srcFolder) {
-        sassConfigurationJson.srcFolder = path.resolve(buildFolderPath, sassConfigurationJson.srcFolder);
-      }
-
-      if (sassConfigurationJson.generatedTsFolder) {
-        sassConfigurationJson.generatedTsFolder = path.resolve(
+    if (!this._sassConfiguration) {
+      const { buildFolderPath } = heftConfiguration;
+      const configurationLoader: ConfigurationFile<ISassConfigurationJson> =
+        new ConfigurationFile<ISassConfigurationJson>({
+          projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
+          jsonSchemaPath: PLUGIN_SCHEMA_PATH
+        });
+      const sassConfigurationJson: ISassConfigurationJson | undefined =
+        await configurationLoader.tryLoadConfigurationFileForProjectAsync(
+          logger.terminal,
           buildFolderPath,
-          sassConfigurationJson.generatedTsFolder
+          heftConfiguration.rigConfig
         );
-      }
 
-      function resolveFolderArray(folders: string[] | undefined): void {
-        if (folders) {
-          for (let i: number = 0; i < folders.length; i++) {
-            folders[i] = path.resolve(buildFolderPath, folders[i]);
+      if (sassConfigurationJson) {
+        if (sassConfigurationJson.srcFolder) {
+          sassConfigurationJson.srcFolder = path.resolve(buildFolderPath, sassConfigurationJson.srcFolder);
+        }
+
+        if (sassConfigurationJson.generatedTsFolder) {
+          sassConfigurationJson.generatedTsFolder = path.resolve(
+            buildFolderPath,
+            sassConfigurationJson.generatedTsFolder
+          );
+        }
+
+        function resolveFolderArray(folders: string[] | undefined): void {
+          if (folders) {
+            for (let i: number = 0; i < folders.length; i++) {
+              folders[i] = path.resolve(buildFolderPath, folders[i]);
+            }
           }
         }
+
+        resolveFolderArray(sassConfigurationJson.cssOutputFolders);
+        resolveFolderArray(sassConfigurationJson.secondaryGeneratedTsFolders);
       }
 
-      resolveFolderArray(sassConfigurationJson.cssOutputFolders);
-      resolveFolderArray(sassConfigurationJson.secondaryGeneratedTsFolders);
+      // Set defaults if no configuration file or option was found
+      this._sassConfiguration = {
+        srcFolder: `${buildFolderPath}/src`,
+        generatedTsFolder: `${buildFolderPath}/temp/sass-ts`,
+        exportAsDefault: true,
+        fileExtensions: ['.sass', '.scss', '.css'],
+        importIncludePaths: [`${buildFolderPath}/node_modules`, `${buildFolderPath}/src`],
+        ...sassConfigurationJson
+      };
     }
 
-    // Set defaults if no configuration file or option was found
-    return {
-      srcFolder: `${buildFolderPath}/src`,
-      generatedTsFolder: `${buildFolderPath}/temp/sass-ts`,
-      exportAsDefault: true,
-      fileExtensions: ['.sass', '.scss', '.css'],
-      importIncludePaths: [`${buildFolderPath}/node_modules`, `${buildFolderPath}/src`],
-      ...sassConfigurationJson
-    };
-  }
-
-  private static _getSassConfigurationLoader(): ConfigurationFile<ISassConfigurationJson> {
-    if (!SassPlugin._sassConfigurationLoader) {
-      SassPlugin._sassConfigurationLoader = new ConfigurationFile<ISassConfigurationJson>({
-        projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
-        jsonSchemaPath: PLUGIN_SCHEMA_PATH
-      });
-    }
-    return SassPlugin._sassConfigurationLoader;
+    return this._sassConfiguration;
   }
 }

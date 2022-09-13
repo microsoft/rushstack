@@ -64,7 +64,20 @@ export class TypingsGenerator {
 
   protected _options: ITypingsGeneratorOptions;
 
-  private readonly _fileGlob: string;
+  /**
+   * The folder path that contains all input source files.
+   */
+  public readonly sourceFolderPath: string;
+
+  /**
+   * The glob pattern used to find input files to process.
+   */
+  public readonly inputFileGlob: string;
+
+  /**
+   * The glob patterns that should be ignored when finding input files to process.
+   */
+  public readonly ignoredFileGlobs: readonly string[];
 
   public constructor(options: ITypingsGeneratorOptions) {
     this._options = {
@@ -82,6 +95,7 @@ export class TypingsGenerator {
     if (!this._options.srcFolder) {
       throw new Error('srcFolder must be provided');
     }
+    this.sourceFolderPath = this._options.srcFolder;
 
     if (Path.isUnder(this._options.srcFolder, this._options.generatedTsFolder)) {
       throw new Error('srcFolder must not be under generatedTsFolder');
@@ -95,9 +109,7 @@ export class TypingsGenerator {
       throw new Error('At least one file extension must be provided.');
     }
 
-    if (!this._options.globsToIgnore) {
-      this._options.globsToIgnore = [];
-    }
+    this.ignoredFileGlobs = this._options.globsToIgnore || [];
 
     if (!this._options.terminal) {
       this._options.terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
@@ -109,20 +121,18 @@ export class TypingsGenerator {
     this._consumersOfFile = new Map();
     this._relativePaths = new Map();
 
-    this._fileGlob = `**/*+(${this._options.fileExtensions.join('|')})`;
+    this.inputFileGlob = `**/*+(${this._options.fileExtensions.join('|')})`;
   }
 
-  public async generateTypingsAsync(): Promise<void> {
-    await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
-
-    const filePaths: string[] = await LegacyAdapters.convertCallbackToPromise(glob, this._fileGlob, {
-      cwd: this._options.srcFolder,
-      absolute: true,
-      nosort: true,
-      nodir: true,
-      ignore: this._options.globsToIgnore
-    });
-
+  public async generateTypingsAsync(filePaths?: string[]): Promise<void> {
+    if (!filePaths?.length) {
+      filePaths = await LegacyAdapters.convertCallbackToPromise(glob, this.inputFileGlob, {
+        cwd: this.sourceFolderPath,
+        ignore: this.ignoredFileGlobs,
+        nosort: true,
+        nodir: true
+      });
+    }
     await this._reprocessFiles(filePaths);
   }
 
@@ -130,9 +140,9 @@ export class TypingsGenerator {
     await FileSystem.ensureFolderAsync(this._options.generatedTsFolder);
 
     await new Promise((resolve, reject): void => {
-      const watcher: chokidar.FSWatcher = chokidar.watch(this._fileGlob, {
-        cwd: this._options.srcFolder,
-        ignored: this._options.globsToIgnore
+      const watcher: chokidar.FSWatcher = chokidar.watch(this.inputFileGlob, {
+        cwd: this.sourceFolderPath,
+        ignored: this.ignoredFileGlobs
       });
 
       const queue: Set<string> = new Set();
