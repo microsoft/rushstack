@@ -13,6 +13,7 @@ import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFil
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type {
   HeftTaskSession,
+  GlobChangedFilesFn,
   IChangedFileState,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions
@@ -26,6 +27,7 @@ export interface ITaskOperationRunnerOptions {
   task: HeftTask;
   cancellationToken: CancellationToken;
   changedFiles?: Map<string, IChangedFileState>;
+  globChangedFilesFn?: GlobChangedFilesFn;
   fileEventListener?: FileEventListener;
 }
 
@@ -93,6 +95,7 @@ export class TaskOperationRunner implements IOperationRunner {
       if (shouldRunIncremental) {
         const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
           ...runHookOptions,
+          globChangedFiles: this._options.globChangedFilesFn!,
           changedFiles: changedFiles!,
           cancellationToken: cancellationToken!
         };

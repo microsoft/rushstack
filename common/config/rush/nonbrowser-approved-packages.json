@@ -67,6 +67,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@nodelib/fs.scandir",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@nodelib/fs.stat",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/link-bins",
       "allowedCategories": [ "libraries" ]
     },

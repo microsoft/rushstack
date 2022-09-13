@@ -188,6 +188,50 @@ export interface IChangedFileState {
 }
 
 /**
+ * Options that are used when globbing the set of changed files.
+ *
+ * @public
+ */
+export interface IGlobChangedFilesOptions {
+  /**
+   * Current working directory that the glob pattern will be applied to.
+   */
+  cwd?: string;
+
+  /**
+   * Whether or not the returned file paths should be absolute.
+   *
+   * @defaultValue false
+   */
+  absolute?: boolean;
+
+  /**
+   * Patterns to ignore when globbing.
+   */
+  ignore?: string[];
+
+  /**
+   * Whether or not to include dot files when globbing.
+   *
+   * @defaultValue false
+   */
+  dot?: boolean;
+}
+
+/**
+ * Glob the set of changed files and return a list of absolute paths that match the provided patterns.
+ *
+ * @param patterns - Glob patterns to match against.
+ * @param options - Options that are used when globbing the set of changed files.
+ *
+ * @public
+ */
+export type GlobChangedFilesFn = (
+  patterns: string | string[],
+  options?: IGlobChangedFilesOptions
+) => string[];
+
+/**
  * Options provided to the 'runIncremental' hook.
  *
  * @public
@@ -198,6 +242,12 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
    * files have been changed during an incremental build.
    */
   readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
+
+  /**
+   * Glob the map of changed files and return the subset of changed files that match the provided
+   * globs.
+   */
+  readonly globChangedFiles: GlobChangedFilesFn;
 
   /**
    * A cancellation token that is used to signal that the incremental build is cancelled. This

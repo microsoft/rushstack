@@ -53,6 +53,9 @@ export { CommandLineStringListParameter }
 
 export { CommandLineStringParameter }
 
+// @public
+export type GlobChangedFilesFn = (patterns: string | string[], options?: IGlobChangedFilesOptions) => string[];
+
 // @public (undocumented)
 export class HeftConfiguration {
     get buildFolderPath(): string;
@@ -105,6 +108,14 @@ export interface IFileSelectionSpecifier {
     fileExtensions?: string[];
     includeGlobs?: string[];
     sourcePath: string;
+}
+
+// @public
+export interface IGlobChangedFilesOptions {
+    absolute?: boolean;
+    cwd?: string;
+    dot?: boolean;
+    ignore?: string[];
 }
 
 // @internal (undocumented)
@@ -212,6 +223,7 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
     // @beta
     readonly cancellationToken: CancellationToken;
     readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
+    readonly globChangedFiles: GlobChangedFilesFn;
 }
 
 // @public
