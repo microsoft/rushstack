@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Autodetect if an autoinstaller's flag is outdated or node_modules folder is missing",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
