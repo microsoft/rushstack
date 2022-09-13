@@ -60,9 +60,7 @@ interface IWaitForSourceChangesOptions {
   readonly staticFileSystemAdapter: StaticFileSystemAdapter;
 }
 
-export const INITIAL_CHANGE_STATE: 'INITIAL_CHANGE_STATE' = 'INITIAL_CHANGE_STATE';
-export const REMOVED_CHANGE_STATE: 'REMOVED_CHANGE_STATE' = 'REMOVED_CHANGE_STATE';
-
+const INITIAL_CHANGE_STATE: '0' = '0';
 const FORBIDDEN_RELATIVE_PATHS: string[] = ['package.json', 'config', '.rush'];
 const IS_WINDOWS: boolean = process.platform === 'win32';
 
@@ -128,7 +126,7 @@ async function* _waitForSourceChangesAsync(
     }
   }
 
-  function generateChangeHash(filePath: string, fileStats?: fs.Stats): string {
+  function generateChangeHash(filePath: string, fileStats?: fs.Stats): string | undefined {
     // watcher.options.alwaysStat is true, so we can use the stats object directly.
     // It should only be undefined when the file has been deleted.
     if (fileStats) {
@@ -141,12 +139,13 @@ async function* _waitForSourceChangesAsync(
         .update(fileStats.size.toString())
         .digest('hex');
     } else {
-      return REMOVED_CHANGE_STATE;
+      // File was deleted, return undefined for the change hash
+      return undefined;
     }
   }
 
   function generateChangeState(filePath: string, stats?: fs.Stats): IChangedFileState {
-    const version: string = generateChangeHash(filePath, stats);
+    const version: string | undefined = generateChangeHash(filePath, stats);
     const isSourceFile: boolean = seenSourceFilePaths.has(filePath);
     return { isSourceFile, version };
   }

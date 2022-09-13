@@ -178,13 +178,13 @@ export interface IChangedFileState {
    * - content last modified date (mtime)
    * - metadata last modified date (ctime)
    *
-   * @remarks The initial state of the version hash is "INITIAL_CHANGE_STATE", which
-   * should only ever be used on the first incremental run of the task. When a file
-   * is deleted, the version hash will be "REMOVED_CHANGE_STATE".
+   * @remarks The initial state of the version hash is "0", which should only ever be
+   * returned on the first incremental run of the task. When a file is deleted, the
+   * version hash will be undefined.
    *
    * @public
    */
-  readonly version: string;
+  readonly version: string | undefined;
 }
 
 /**

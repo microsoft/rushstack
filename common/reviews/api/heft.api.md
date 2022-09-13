@@ -88,7 +88,7 @@ export interface ICancellationTokenSourceOptions {
 // @public
 export interface IChangedFileState {
     readonly isSourceFile: boolean;
-    readonly version: string;
+    readonly version: string | undefined;
 }
 
 // @public
