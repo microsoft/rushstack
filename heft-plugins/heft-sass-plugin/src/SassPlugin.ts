@@ -23,6 +23,7 @@ const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-sass-plugin.schema
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
 export default class SassPlugin implements IHeftPlugin {
+  private static _sassConfigurationLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
   private _sassConfiguration: ISassConfiguration | undefined;
   private _sassProcessor: SassProcessor | undefined;
 
@@ -81,11 +82,14 @@ export default class SassPlugin implements IHeftPlugin {
         // Filter out and delete any files that are removed and all their output files
         const absoluteFilePath: string = path.join(sassProcessor.sourceFolderPath, filePath);
         if (runIncrementalOptions.changedFiles.get(absoluteFilePath)!.version === undefined) {
-          deleteFilePromises.push(
-            ...sassProcessor.getOutputFilePaths(filePath).map(async (outputFilePath) => {
+          const deletePromises: Promise<void>[] = sassProcessor
+            .getOutputFilePaths(filePath)
+            .map(async (outputFilePath) => {
               await FileSystem.deleteFileAsync(outputFilePath);
-            })
-          );
+            });
+          for (const deletePromise of deletePromises) {
+            deleteFilePromises.push(deletePromise);
+          }
         } else {
           changedFilePaths.push(filePath);
         }
@@ -117,18 +121,19 @@ export default class SassPlugin implements IHeftPlugin {
   ): Promise<ISassConfiguration> {
     if (!this._sassConfiguration) {
       const { buildFolderPath } = heftConfiguration;
-      const configurationLoader: ConfigurationFile<ISassConfigurationJson> =
-        new ConfigurationFile<ISassConfigurationJson>({
+      if (!SassPlugin._sassConfigurationLoader) {
+        SassPlugin._sassConfigurationLoader = new ConfigurationFile<ISassConfigurationJson>({
           projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
           jsonSchemaPath: PLUGIN_SCHEMA_PATH
         });
+      }
+
       const sassConfigurationJson: ISassConfigurationJson | undefined =
-        await configurationLoader.tryLoadConfigurationFileForProjectAsync(
+        await SassPlugin._sassConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
           logger.terminal,
           buildFolderPath,
           heftConfiguration.rigConfig
         );
-
       if (sassConfigurationJson) {
         if (sassConfigurationJson.srcFolder) {
           sassConfigurationJson.srcFolder = path.resolve(buildFolderPath, sassConfigurationJson.srcFolder);
