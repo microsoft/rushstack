@@ -5,7 +5,6 @@ import * as path from 'path';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { REMOVED_CHANGE_STATE } from '../cli/HeftActionRunner';
 import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
@@ -250,7 +249,7 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
             copyDescriptor.sourcePath
           );
           // We only care if the file has changed, ignore if not found or deleted
-          if (changedFileState && changedFileState.version !== REMOVED_CHANGE_STATE) {
+          if (changedFileState && changedFileState.version) {
             const impactedFileState: IChangedFileState | undefined = impactedFileStates.get(
               copyDescriptor.sourcePath
             );
