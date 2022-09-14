@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Switch compilation target to ES2017",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles"
+}

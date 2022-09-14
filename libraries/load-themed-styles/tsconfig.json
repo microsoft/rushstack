@@ -3,6 +3,7 @@
   "compilerOptions": {
     "importHelpers": false,
     "module": "commonjs",
+    "target": "ES2017",
     "types": ["heft-jest", "webpack-env"]
   }
 }
