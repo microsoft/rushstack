@@ -476,6 +476,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeClass4",
           "preserveMemberOrder": false,
@@ -756,6 +757,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 3,
             "endIndex": 4
@@ -784,6 +786,7 @@
               "text": "export interface SomeInterface1 "
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeInterface1",
           "preserveMemberOrder": false,

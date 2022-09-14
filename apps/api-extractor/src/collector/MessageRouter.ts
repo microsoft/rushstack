@@ -639,7 +639,7 @@ export class MessageRouter {
    * Sorts an array of messages according to a reasonable ordering
    */
   private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
-    LegacyAdapters.sortStable(messages, (a: ExtractorMessage, b: ExtractorMessage) => {
+    messages.sort((a, b) => {
       let diff: number;
       // First sort by file name
       diff = Sort.compareByValue(a.sourceFilePath, b.sourceFilePath);
