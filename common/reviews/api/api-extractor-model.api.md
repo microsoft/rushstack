@@ -752,8 +752,6 @@ export interface IApiDeclaredItemOptions extends IApiDocumentedItemOptions {
     excerptTokens: IExcerptToken[];
     // (undocumented)
     fileUrlPath?: string;
-    // (undocumented)
-    parent?: ApiItemContainerMixin;
 }
 
 // @public

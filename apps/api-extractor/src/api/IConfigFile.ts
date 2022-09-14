@@ -141,7 +141,7 @@ export interface IConfigDocModel {
    *
    * @defaultValue `false`
    */
-   includeForgottenExports?: boolean;
+  includeForgottenExports?: boolean;
 
   /**
    * The URL to the `<projectFolder>` token where the project's source code can be viewed on a website like GitHub or
@@ -153,9 +153,9 @@ export interface IConfigDocModel {
    * item's file path is "api/ExtractorConfig.ts", the full URL file path would be
    * "https://github.com/microsoft/rushstack/tree/main/apps/api-extractor/api/ExtractorConfig.js".
    *
-   * Can be omitted if you don't care about including source code links in your API documentation reference.
+   * Can be omitted if you don't need source code links in your API documentation reference.
    */
-   projectFolderUrl?: string;
+  projectFolderUrl?: string;
 }
 
 /**

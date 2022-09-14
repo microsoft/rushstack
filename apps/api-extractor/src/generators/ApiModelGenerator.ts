@@ -152,8 +152,7 @@ export class ApiModelGenerator {
         releaseTag: ReleaseTag.None,
         excerptTokens: [],
         isExported,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
       parentApiItem.addMember(apiNamespace);
     }
@@ -309,8 +308,7 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiCallSignature);
@@ -351,8 +349,7 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiConstructor);
@@ -408,8 +405,7 @@ export class ApiModelGenerator {
         extendsTokenRange,
         implementsTokenRanges,
         isExported,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiClass);
@@ -466,8 +462,7 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiConstructSignature);
@@ -496,8 +491,7 @@ export class ApiModelGenerator {
         excerptTokens,
         preserveMemberOrder,
         isExported,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
       parentApiItem.addMember(apiEnum);
     }
@@ -539,8 +533,7 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         initializerTokenRange,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiEnumMember);
@@ -590,8 +583,7 @@ export class ApiModelGenerator {
         excerptTokens,
         returnTypeTokenRange,
         isExported,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiFunction);
@@ -636,8 +628,7 @@ export class ApiModelGenerator {
         excerptTokens,
         returnTypeTokenRange,
         isReadonly,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiIndexSignature);
@@ -689,8 +680,7 @@ export class ApiModelGenerator {
         typeParameters,
         extendsTokenRanges,
         isExported,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiInterface);
@@ -752,8 +742,7 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiMethod);
@@ -808,8 +797,7 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiMethodSignature);
@@ -837,8 +825,7 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         isExported,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
       parentApiItem.addMember(apiNamespace);
     }
@@ -901,8 +888,7 @@ export class ApiModelGenerator {
         excerptTokens,
         propertyTypeTokenRange,
         initializerTokenRange,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
       parentApiItem.addMember(apiProperty);
     } else {
@@ -947,8 +933,7 @@ export class ApiModelGenerator {
         excerptTokens,
         propertyTypeTokenRange,
         isReadonly,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiPropertySignature);
@@ -995,8 +980,7 @@ export class ApiModelGenerator {
         excerptTokens,
         typeTokenRange,
         isExported,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiTypeAlias);
@@ -1041,8 +1025,7 @@ export class ApiModelGenerator {
         initializerTokenRange,
         isReadonly,
         isExported,
-        fileUrlPath,
-        parent: parentApiItem
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiVariable);

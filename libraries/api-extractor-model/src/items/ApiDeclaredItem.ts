@@ -6,7 +6,6 @@ import { ApiDocumentedItem, IApiDocumentedItemJson, IApiDocumentedItemOptions } 
 import { Excerpt, ExcerptToken, IExcerptTokenRange, IExcerptToken } from '../mixins/Excerpt';
 import { DeserializerContext } from '../model/DeserializerContext';
 import { SourceLocation } from '../model/SourceLocation';
-import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
 /**
  * Constructor options for {@link ApiDeclaredItem}.
@@ -14,7 +13,6 @@ import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
  */
 export interface IApiDeclaredItemOptions extends IApiDocumentedItemOptions {
   excerptTokens: IExcerptToken[];
-  parent?: ApiItemContainerMixin;
   fileUrlPath?: string;
 }
 
@@ -55,10 +53,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
 
     const projectFolderUrl: string | undefined = this.getAssociatedPackage()?.projectFolderUrl;
-    const fileUrlPath: string | undefined =
-      options.parent instanceof ApiDeclaredItem
-        ? options.fileUrlPath || options.parent.sourceLocation.fileUrlPath
-        : options.fileUrlPath;
+    const fileUrlPath: string | undefined = options.fileUrlPath || this._parentSourceLocation?.fileUrlPath;
 
     this._sourceLocation = new SourceLocation({
       projectFolderUrl: projectFolderUrl,
@@ -140,16 +135,11 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
       return excerptToken;
     });
 
-    let parentSourceLocation: SourceLocation | undefined;
-    if (this.parent instanceof ApiDeclaredItem) {
-      parentSourceLocation = this.parent.sourceLocation;
-    }
-
     // Only serialize this API item's file URL path if it exists and it's different from its parent's
     // (a little optimization to keep the doc model succinct).
     if (
       this._sourceLocation.fileUrlPath &&
-      this._sourceLocation.fileUrlPath !== parentSourceLocation?.fileUrlPath
+      this._sourceLocation.fileUrlPath !== this._parentSourceLocation?.fileUrlPath
     ) {
       jsonObject.fileUrlPath = this._sourceLocation.fileUrlPath;
     }
@@ -160,5 +150,9 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
    */
   public buildExcerpt(tokenRange: IExcerptTokenRange): Excerpt {
     return new Excerpt(this.excerptTokens, tokenRange);
+  }
+
+  private get _parentSourceLocation(): SourceLocation | undefined {
+    return this.parent instanceof ApiDeclaredItem ? this.parent.sourceLocation : undefined;
   }
 }
