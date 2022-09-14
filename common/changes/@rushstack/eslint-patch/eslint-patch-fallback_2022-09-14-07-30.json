@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/eslint-patch",
       "comment": "Use original resolver if patched resolver fails.",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/eslint-patch"
