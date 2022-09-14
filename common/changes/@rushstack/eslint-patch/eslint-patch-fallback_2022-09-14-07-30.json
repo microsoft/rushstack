@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Use original resolver if patched resolver fails.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}

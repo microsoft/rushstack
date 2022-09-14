@@ -209,8 +209,15 @@ if (!ConfigArrayFactory.__patched) {
       const originalResolve = ModuleResolver.resolve;
       try {
         ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
-          // resolve using importerPath instead of relativeToPath
-          return originalResolve.call(this, moduleName, importerPath);
+          try {
+            // resolve using importerPath instead of relativeToPath
+            return originalResolve.call(this, moduleName, importerPath);
+          } catch (e) {
+            if (isModuleResolutionError(e)) {
+              return originalResolve.call(this, moduleName, relativeToPath);
+            }
+            throw e;
+          }
         };
         return originalLoadPlugin.apply(this, arguments);
       } finally {
@@ -223,8 +230,15 @@ if (!ConfigArrayFactory.__patched) {
       const originalResolve = ModuleResolver.resolve;
       try {
         ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
-          // resolve using ctx.filePath instead of relativeToPath
-          return originalResolve.call(this, moduleName, ctx.filePath);
+          try {
+            // resolve using ctx.filePath instead of relativeToPath
+            return originalResolve.call(this, moduleName, ctx.filePath);
+          } catch (e) {
+            if (isModuleResolutionError(e)) {
+              return originalResolve.call(this, moduleName, relativeToPath);
+            }
+            throw e;
+          }
         };
         return originalLoadPlugin.apply(this, arguments);
       } finally {
