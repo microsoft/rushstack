@@ -48,6 +48,8 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
+    "@nodelib/fs.scandir": "2.1.5",
+    "@nodelib/fs.stat": "2.0.5",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.47.0",
     "@rushstack/heft-node-rig": "1.10.0",

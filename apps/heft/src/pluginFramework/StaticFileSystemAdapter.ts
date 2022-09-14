@@ -1,5 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import type { ReaddirAsynchronousMethod, ReaddirSynchronousMethod } from '@nodelib/fs.scandir';
+import type { StatAsynchronousMethod, StatSynchronousMethod } from '@nodelib/fs.stat';
 import type { FileSystemAdapter } from 'fast-glob';
 import { Path } from '@rushstack/node-core-library';
 
@@ -31,6 +33,132 @@ const IS_WINDOWS: boolean = process.platform === 'win32';
  */
 export class StaticFileSystemAdapter implements FileSystemAdapter {
   private _directoryMap: Map<string, IVirtualFileSystemEntry> = new Map<string, IVirtualFileSystemEntry>();
+
+  /** { @inheritdoc fs.lstat } */
+  public lstat: StatAsynchronousMethod = ((filePath: string, callback: StatCallback) => {
+    process.nextTick(() => {
+      let result: fs.Stats;
+      try {
+        result = this.lstatSync(filePath);
+      } catch (e) {
+        callback(e, {} as fs.Stats);
+        return;
+      }
+      // eslint-disable-next-line @rushstack/no-new-null
+      callback(null, result);
+    });
+  }) as StatAsynchronousMethod;
+
+  /** { @inheritdoc fs.lstatSync } */
+  public lstatSync: StatSynchronousMethod = ((filePath: string) => {
+    filePath = this._normalizePath(filePath);
+    const entry: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
+    if (!entry) {
+      const error: NodeJS.ErrnoException = new Error(`ENOENT: no such file or directory, stat '${filePath}'`);
+      error.code = 'ENOENT';
+      error.syscall = 'stat';
+      error.errno = -4058;
+      error.path = filePath;
+      throw error;
+    }
+    // We should only need to implement these methods for the purposes of fast-glob
+    return {
+      isDirectory: () => !!entry.children,
+      isFile: () => !entry.children
+    } as fs.Stats;
+  }) as StatSynchronousMethod;
+
+  /** { @inheritdoc fs.stat } */
+  public stat: StatAsynchronousMethod = ((filePath: string, callback: StatCallback) => {
+    this.lstat(filePath, callback);
+  }) as StatAsynchronousMethod;
+
+  /** { @inheritdoc fs.statSync } */
+  public statSync: StatSynchronousMethod = ((filePath: string) => {
+    return this.lstatSync(filePath);
+  }) as StatSynchronousMethod;
+
+  /** { @inheritdoc fs.readdir } */
+  public readdir: ReaddirAsynchronousMethod = ((
+    filePath: string,
+    optionsOrCallback: IReaddirOptions | ReaddirStringCallback,
+    callback?: ReaddirDirentCallback | ReaddirStringCallback
+  ) => {
+    // Default to no options, which will return a string callback
+    let options: IReaddirOptions | undefined;
+    if (typeof optionsOrCallback === 'object') {
+      options = optionsOrCallback;
+    } else if (typeof optionsOrCallback === 'function') {
+      callback = optionsOrCallback;
+    }
+
+    // Perform the readdir on the next tick to avoid blocking the event loop
+    process.nextTick(() => {
+      let result: fs.Dirent[] | string[];
+      try {
+        if (options?.withFileTypes) {
+          result = this.readdirSync(filePath, options);
+        } else {
+          result = this.readdirSync(filePath);
+        }
+      } catch (e) {
+        callback!(e, []);
+        return;
+      }
+
+      // When "withFileTypes" is false or undefined, the callback is expected to return a string array.
+      // Otherwise, we return a fs.Dirent array.
+      if (options?.withFileTypes) {
+        // eslint-disable-next-line @rushstack/no-new-null
+        (callback as ReaddirDirentCallback)(null, result as fs.Dirent[]);
+      } else {
+        // eslint-disable-next-line @rushstack/no-new-null
+        (callback as ReaddirStringCallback)(null, result as string[]);
+      }
+    });
+  }) as ReaddirAsynchronousMethod;
+
+  /** { @inheritdoc fs.readdirSync } */
+  public readdirSync: ReaddirSynchronousMethod = ((filePath: string, options?: IReaddirOptions) => {
+    filePath = this._normalizePath(filePath);
+    const virtualDirectory: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
+    if (!virtualDirectory) {
+      // Immitate a missing directory read from fs.readdir
+      const error: NodeJS.ErrnoException = new Error(
+        `ENOENT: no such file or directory, scandir '${filePath}'`
+      );
+      error.code = 'ENOENT';
+      error.syscall = 'scandir';
+      error.errno = -4058;
+      error.path = filePath;
+      throw error;
+    } else if (!virtualDirectory.children) {
+      // Immitate a directory read of a file from fs.readdir
+      const error: NodeJS.ErrnoException = new Error(`ENOTDIR: not a directory, scandir '${filePath}'`);
+      error.code = 'ENOTDIR';
+      error.syscall = 'scandir';
+      error.errno = -4052;
+      error.path = filePath;
+      throw error;
+    }
+
+    // When "withFileTypes" is false or undefined, the method is expected to return a string array.
+    // Otherwise, we return a fs.Dirent array.
+    const result: IVirtualFileSystemEntry[] = Array.from(virtualDirectory.children);
+    if (options?.withFileTypes) {
+      return result.map((entry: IVirtualFileSystemEntry) => {
+        // Partially implement the fs.Dirent interface, only including the properties used by fast-glob
+        return {
+          name: entry.name,
+          isDirectory: () => !!entry.children,
+          isFile: () => !entry.children,
+          isSymbolicLink: () => false
+        } as fs.Dirent;
+      });
+    } else {
+      return result.map((entry: IVirtualFileSystemEntry) => entry.name);
+    }
+  }) as ReaddirSynchronousMethod;
 
   /**
    * Create a new StaticFileSystemAdapter instance with the provided file paths.
@@ -95,134 +223,6 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
    */
   public removeAllFiles(): void {
     this._directoryMap.clear();
-  }
-
-  /** { @inheritdoc fs.lstat } */
-  public lstat(filePath: string, callback: StatCallback): void {
-    process.nextTick(() => {
-      let result: fs.Stats;
-      try {
-        result = this.lstatSync(filePath);
-      } catch (e) {
-        callback(e, {} as fs.Stats);
-        return;
-      }
-      // eslint-disable-next-line @rushstack/no-new-null
-      callback(null, result);
-    });
-  }
-
-  /** { @inheritdoc fs.lstatSync } */
-  public lstatSync(filePath: string): fs.Stats {
-    filePath = this._normalizePath(filePath);
-    const entry: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
-    if (!entry) {
-      const error: NodeJS.ErrnoException = new Error(`ENOENT: no such file or directory, stat '${filePath}'`);
-      error.code = 'ENOENT';
-      error.syscall = 'stat';
-      error.errno = -4058;
-      error.path = filePath;
-      throw error;
-    }
-    // We should only need to implement these methods for the purposes of fast-glob
-    return {
-      isDirectory: () => !!entry.children,
-      isFile: () => !entry.children
-    } as fs.Stats;
-  }
-
-  /** { @inheritdoc fs.stat } */
-  public stat(filePath: string, callback: StatCallback): void {
-    this.lstat(filePath, callback);
-  }
-
-  /** { @inheritdoc fs.statSync } */
-  public statSync(filePath: string): fs.Stats {
-    return this.lstatSync(filePath);
-  }
-
-  /** { @inheritdoc fs.readdir } */
-  public readdir(
-    filePath: string,
-    optionsOrCallback: IReaddirOptions | ReaddirStringCallback,
-    callback?: ReaddirDirentCallback | ReaddirStringCallback
-  ): void {
-    // Default to no options, which will return a string callback
-    let options: IReaddirOptions | undefined;
-    if (typeof optionsOrCallback === 'object') {
-      options = optionsOrCallback;
-    } else if (typeof optionsOrCallback === 'function') {
-      callback = optionsOrCallback;
-    }
-
-    // Perform the readdir on the next tick to avoid blocking the event loop
-    process.nextTick(() => {
-      let result: fs.Dirent[] | string[];
-      try {
-        if (options?.withFileTypes) {
-          result = this.readdirSync(filePath, options);
-        } else {
-          result = this.readdirSync(filePath);
-        }
-      } catch (e) {
-        callback!(e, []);
-        return;
-      }
-
-      // When "withFileTypes" is false or undefined, the callback is expected to return a string array.
-      // Otherwise, we return a fs.Dirent array.
-      if (options?.withFileTypes) {
-        // eslint-disable-next-line @rushstack/no-new-null
-        (callback as ReaddirDirentCallback)(null, result as fs.Dirent[]);
-      } else {
-        // eslint-disable-next-line @rushstack/no-new-null
-        (callback as ReaddirStringCallback)(null, result as string[]);
-      }
-    });
-  }
-
-  /** { @inheritdoc fs.readdirSync } */
-  public readdirSync(filePath: string): string[];
-  public readdirSync(filePath: string, options: IReaddirOptions): fs.Dirent[];
-  public readdirSync(filePath: string, options?: IReaddirOptions): fs.Dirent[] | string[] {
-    filePath = this._normalizePath(filePath);
-    const virtualDirectory: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
-    if (!virtualDirectory) {
-      // Immitate a missing directory read from fs.readdir
-      const error: NodeJS.ErrnoException = new Error(
-        `ENOENT: no such file or directory, scandir '${filePath}'`
-      );
-      error.code = 'ENOENT';
-      error.syscall = 'scandir';
-      error.errno = -4058;
-      error.path = filePath;
-      throw error;
-    } else if (!virtualDirectory.children) {
-      // Immitate a directory read of a file from fs.readdir
-      const error: NodeJS.ErrnoException = new Error(`ENOTDIR: not a directory, scandir '${filePath}'`);
-      error.code = 'ENOTDIR';
-      error.syscall = 'scandir';
-      error.errno = -4052;
-      error.path = filePath;
-      throw error;
-    }
-
-    // When "withFileTypes" is false or undefined, the method is expected to return a string array.
-    // Otherwise, we return a fs.Dirent array.
-    const result: IVirtualFileSystemEntry[] = Array.from(virtualDirectory.children);
-    if (options?.withFileTypes) {
-      return result.map((entry: IVirtualFileSystemEntry) => {
-        // Partially implement the fs.Dirent interface, only including the properties used by fast-glob
-        return {
-          name: entry.name,
-          isDirectory: () => !!entry.children,
-          isFile: () => !entry.children,
-          isSymbolicLink: () => false
-        } as fs.Dirent;
-      });
-    } else {
-      return result.map((entry: IVirtualFileSystemEntry) => entry.name);
-    }
   }
 
   private _normalizePath(filePath: string): string {
