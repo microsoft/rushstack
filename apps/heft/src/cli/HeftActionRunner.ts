@@ -166,10 +166,8 @@ async function* _waitForSourceChangesAsync(
 
   // Before we enter the main loop, hydrate initial state and yield the changes.
   const initialFilePaths: Set<string> = new Set();
-  // Get the map of directory -> children
-  const watchedRecord: Record<string, string[]> = watcher.getWatched();
-  const watchedDirectories: Set<string> = new Set(Object.keys(watchedRecord));
-  for (const directory of watchedDirectories) {
+  const watchedDirectories: Map<string, string[]> = new Map(Object.entries(watcher.getWatched()));
+  for (const [directory, childNames] of watchedDirectories) {
     // Avoid directories above the watch path, since we only care about the immediate children.
     if (directory.startsWith('..')) {
       continue;
@@ -177,7 +175,6 @@ async function* _waitForSourceChangesAsync(
 
     // Resolve absolute paths to the files
     const isRootDirectory: boolean = directory === '.';
-    const childNames: string[] = watchedRecord[directory];
     for (const childName of childNames) {
       const childRelativePath: string = isRootDirectory ? childName : `${directory}${path.sep}${childName}`;
       if (!watchedDirectories.has(childRelativePath)) {

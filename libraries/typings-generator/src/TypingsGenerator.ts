@@ -124,6 +124,12 @@ export class TypingsGenerator {
     this.inputFileGlob = `**/*+(${this._options.fileExtensions.join('|')})`;
   }
 
+  /**
+   * Generate typings for the provided input files.
+   *
+   * @param filePaths - The input files to process, relative to the source folder. If not provided,
+   * all input files will be processed.
+   */
   public async generateTypingsAsync(filePaths?: string[]): Promise<void> {
     if (!filePaths?.length) {
       filePaths = await LegacyAdapters.convertCallbackToPromise(glob, this.inputFileGlob, {

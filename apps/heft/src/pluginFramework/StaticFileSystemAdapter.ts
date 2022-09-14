@@ -1,7 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { ReaddirAsynchronousMethod, ReaddirSynchronousMethod } from '@nodelib/fs.scandir';
-import type { StatAsynchronousMethod, StatSynchronousMethod } from '@nodelib/fs.stat';
 import type { FileSystemAdapter } from 'fast-glob';
 import { Path } from '@rushstack/node-core-library';
 
@@ -11,7 +9,7 @@ interface IVirtualFileSystemEntry {
 }
 
 interface IReaddirOptions {
-  withFileTypes?: boolean;
+  withFileTypes: true;
 }
 
 /* eslint-disable @rushstack/no-new-null */
@@ -33,26 +31,6 @@ const IS_WINDOWS: boolean = process.platform === 'win32';
  */
 export class StaticFileSystemAdapter implements FileSystemAdapter {
   private _directoryMap: Map<string, IVirtualFileSystemEntry> = new Map<string, IVirtualFileSystemEntry>();
-
-  /** { @inheritdoc fs.lstat } */
-  public lstat: StatAsynchronousMethod = this._statInternal.bind(this);
-
-  /** { @inheritdoc fs.lstatSync } */
-  public lstatSync: StatSynchronousMethod = this._statSyncInternal.bind(this);
-
-  /** { @inheritdoc fs.stat } */
-  public stat: StatAsynchronousMethod = this._statInternal.bind(this);
-
-  /** { @inheritdoc fs.statSync } */
-  public statSync: StatSynchronousMethod = this._statSyncInternal.bind(this);
-
-  /** { @inheritdoc fs.readdir } */
-  public readdir: ReaddirAsynchronousMethod = this._readdirInternal.bind(this);
-
-  /** { @inheritdoc fs.readdirSync } */
-  public readdirSync: ReaddirSynchronousMethod = (this._readdirSyncInternal as ReaddirSynchronousMethod).bind(
-    this
-  );
 
   /**
    * Create a new StaticFileSystemAdapter instance with the provided file paths.
@@ -119,11 +97,12 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
     this._directoryMap.clear();
   }
 
-  private _statInternal(filePath: string, callback: StatCallback): void {
+  /** { @inheritdoc fs.lstat } */
+  public lstat(filePath: string, callback: StatCallback): void {
     process.nextTick(() => {
       let result: fs.Stats;
       try {
-        result = this._statSyncInternal(filePath);
+        result = this.lstatSync(filePath);
       } catch (e) {
         callback(e, {} as fs.Stats);
         return;
@@ -133,7 +112,8 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
     });
   }
 
-  private _statSyncInternal(filePath: string): fs.Stats {
+  /** { @inheritdoc fs.lstatSync } */
+  public lstatSync(filePath: string): fs.Stats {
     filePath = this._normalizePath(filePath);
     const entry: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
     if (!entry) {
@@ -151,13 +131,24 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
     } as fs.Stats;
   }
 
-  private _readdirInternal(
+  /** { @inheritdoc fs.stat } */
+  public stat(filePath: string, callback: StatCallback): void {
+    this.lstat(filePath, callback);
+  }
+
+  /** { @inheritdoc fs.statSync } */
+  public statSync(filePath: string): fs.Stats {
+    return this.lstatSync(filePath);
+  }
+
+  /** { @inheritdoc fs.readdir } */
+  public readdir(
     filePath: string,
     optionsOrCallback: IReaddirOptions | ReaddirStringCallback,
     callback?: ReaddirDirentCallback | ReaddirStringCallback
   ): void {
     // Default to no options, which will return a string callback
-    let options: IReaddirOptions = {};
+    let options: IReaddirOptions | undefined;
     if (typeof optionsOrCallback === 'object') {
       options = optionsOrCallback;
     } else if (typeof optionsOrCallback === 'function') {
@@ -168,7 +159,11 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
     process.nextTick(() => {
       let result: fs.Dirent[] | string[];
       try {
-        result = this._readdirSyncInternal(filePath, options);
+        if (options?.withFileTypes) {
+          result = this.readdirSync(filePath, options);
+        } else {
+          result = this.readdirSync(filePath);
+        }
       } catch (e) {
         callback!(e, []);
         return;
@@ -176,7 +171,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
 
       // When "withFileTypes" is false or undefined, the callback is expected to return a string array.
       // Otherwise, we return a fs.Dirent array.
-      if (options.withFileTypes) {
+      if (options?.withFileTypes) {
         // eslint-disable-next-line @rushstack/no-new-null
         (callback as ReaddirDirentCallback)(null, result as fs.Dirent[]);
       } else {
@@ -186,7 +181,10 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
     });
   }
 
-  private _readdirSyncInternal(filePath: string, options?: IReaddirOptions): fs.Dirent[] | string[] {
+  /** { @inheritdoc fs.readdirSync } */
+  public readdirSync(filePath: string): string[];
+  public readdirSync(filePath: string, options: IReaddirOptions): fs.Dirent[];
+  public readdirSync(filePath: string, options?: IReaddirOptions): fs.Dirent[] | string[] {
     filePath = this._normalizePath(filePath);
     const virtualDirectory: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
     if (!virtualDirectory) {
