@@ -173,15 +173,12 @@ export class AzureStorageAuthentication {
       throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
     }
 
-    const DeveloperSignOnClientId: string = '04b07795-8ddb-461a-bbee-02f9e1bf7b46';
-    const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential(
-      'organizations',
-      DeveloperSignOnClientId,
-      (deviceCodeInfo: DeviceCodeInfo) => {
+    const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential({
+      authorityHost: authorityHost,
+      userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
         PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
-      },
-      { authorityHost: authorityHost }
-    );
+      }
+    });
     const blobServiceClient: BlobServiceClient = new BlobServiceClient(
       this._storageAccountUrl,
       deviceCodeCredential

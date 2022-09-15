@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgrade the @azure/identity and @azure/storage-blob packages.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
