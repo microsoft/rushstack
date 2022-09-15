@@ -60,6 +60,7 @@ export class DeclarationReferenceGenerator {
   private static _isInExpressionContext(node: ts.Node): boolean {
     switch (node.parent.kind) {
       case ts.SyntaxKind.TypeQuery:
+      case ts.SyntaxKind.ComputedPropertyName:
         return true;
       case ts.SyntaxKind.QualifiedName:
         return DeclarationReferenceGenerator._isInExpressionContext(node.parent);
