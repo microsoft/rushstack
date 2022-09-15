@@ -2,6 +2,74 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@microsoft/load-themed-styles_v2.0.0",
+      "date": "Thu, 15 Sep 2022 00:18:51 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Switch compilation target to ES2017"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.11.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.295",
+      "tag": "@microsoft/load-themed-styles_v1.10.295",
+      "date": "Tue, 13 Sep 2022 00:16:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.11.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.294",
+      "tag": "@microsoft/load-themed-styles_v1.10.294",
+      "date": "Mon, 12 Sep 2022 22:27:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.11.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.293",
+      "tag": "@microsoft/load-themed-styles_v1.10.293",
+      "date": "Fri, 02 Sep 2022 17:48:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.11.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.292",
       "tag": "@microsoft/load-themed-styles_v1.10.292",
       "date": "Wed, 31 Aug 2022 01:45:06 GMT",

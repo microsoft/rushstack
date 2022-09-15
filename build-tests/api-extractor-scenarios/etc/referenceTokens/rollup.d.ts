@@ -34,6 +34,16 @@ declare class SomeClass2 {
 export declare class SomeClass3 extends SomeClass2 {
 }
 
+/**
+ * Reference to a symbol exported from another file, but not exported from the package.
+ * @public
+ */
+export declare class SomeClass4 extends SomeClass5 {
+}
+
+declare class SomeClass5 {
+}
+
 /** @public */
 export declare enum SomeEnum {
     A = "A",
@@ -57,12 +67,23 @@ export declare function someFunction6(): typeof SomeClass1.staticProp;
  * Global symbol reference.
  * @public
  */
-export declare function someFunction7(): Promise<void>;
+export declare function someFunction7({ then: then2 }: Promise<void>): typeof Date.prototype.getDate;
 
 /**
  * External symbol reference.
  * @public
  */
-export declare function someFunction8(): Lib2Class;
+export declare function someFunction8({ prop: prop2 }: Lib2Class): void;
+
+/**
+ * Interface member reference.
+ * @public
+ */
+export declare function someFunction9({ prop: prop2 }: SomeInterface1): void;
+
+/** @public */
+export declare interface SomeInterface1 {
+    prop: number;
+}
 
 export { }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix \"--parallelism XX%\" parsing to return a finite number of CPU cores.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
