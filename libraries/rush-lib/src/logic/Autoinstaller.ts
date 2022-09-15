@@ -113,9 +113,7 @@ export class Autoinstaller {
     const nodeModulesFolder: string = path.join(autoinstallerFullPath, RushConstants.nodeModulesFolderName);
     const isLastInstallFlagDirty: boolean =
       !lastInstallFlag.isValid() ||
-      !Utilities.isFileTimestampCurrent(FileSystem.getStatistics(lastInstallFlag.path).mtime, [
-        nodeModulesFolder
-      ]);
+      !FileSystem.exists(path.join(nodeModulesFolder, 'rush-autoinstaller.log'));
 
     if (isLastInstallFlagDirty || lock.dirtyWhenAcquired) {
       if (FileSystem.exists(nodeModulesFolder)) {
@@ -137,6 +135,14 @@ export class Autoinstaller {
 
       // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
       lastInstallFlag.create();
+
+      FileSystem.writeFile(
+        path.join(nodeModulesFolder, 'rush-autoinstaller.log'),
+        'If this file is deleted, Rush will assume that the node_modules folder has been cleaned and will reinstall it.',
+        {
+          ensureFolderExists: false
+        }
+      );
 
       this._logIfConsoleOutputIsNotRestricted('Auto install completed successfully\n');
     } else {
