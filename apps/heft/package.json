@@ -51,7 +51,7 @@
     "@nodelib/fs.scandir": "2.1.5",
     "@nodelib/fs.stat": "2.0.5",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.47.0",
+    "@rushstack/heft": "0.47.9",
     "@rushstack/heft-node-rig": "1.10.0",
     "@types/argparse": "1.0.38",
     "@types/heft-jest": "1.0.1",
