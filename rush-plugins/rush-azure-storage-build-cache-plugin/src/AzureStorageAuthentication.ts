@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
+import { DeviceCodeCredential, DeviceCodeInfo, AzureAuthorityHosts } from '@azure/identity';
 import {
   BlobServiceClient,
   ContainerSASPermissions,
@@ -12,20 +12,6 @@ import {
 import type { ITerminal } from '@rushstack/node-core-library';
 import { CredentialCache, ICredentialCacheEntry, RushConstants } from '@rushstack/rush-sdk';
 import { PrintUtilities } from '@rushstack/terminal';
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// TODO: This is a temporary workaround; it should be reverted when we upgrade to "@azure/identity" version 2.x
-// import { AzureAuthorityHosts } from '@azure/identity';
-/**
- * @public
- */
-export enum AzureAuthorityHosts {
-  AzureChina = 'https://login.chinacloudapi.cn',
-  AzureGermany = 'https://login.microsoftonline.de',
-  AzureGovernment = 'https://login.microsoftonline.us',
-  AzurePublicCloud = 'https://login.microsoftonline.com'
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 /**
  * @public
