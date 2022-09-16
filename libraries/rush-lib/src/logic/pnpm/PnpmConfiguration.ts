@@ -5,10 +5,10 @@ import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 /**
- * Pnpm config in package.json
+ * Pnpm configuration
  * @beta
  */
-export interface IPnpmProjectManifestConfigurationJson {
+export interface IPnpmConfigurationJson {
   /**
    * Pnpm field in root package.json. See https://pnpm.io/package_json
    * The type of value is unknown because these fields are not validated by Rush.js
@@ -21,7 +21,7 @@ export interface IPnpmProjectManifestConfigurationJson {
  * The fields in the configuration will be patched into package.json under common temp folder.
  * @beta
  */
-export class PnpmProjectManifestConfiguration {
+export class PnpmConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.resolve(__dirname, '../../schemas/pnpm-config.schema.json')
   );
@@ -30,15 +30,12 @@ export class PnpmProjectManifestConfiguration {
 
   public readonly pnpmFieldInRootPackageJson: unknown | undefined;
 
-  private constructor(
-    pnpmProjectManifestConfigurationJson: IPnpmProjectManifestConfigurationJson | undefined,
-    jsonFilename: string
-  ) {
+  private constructor(pnpmConfigurationJson: IPnpmConfigurationJson | undefined, jsonFilename: string) {
     this._jsonFilename = jsonFilename;
 
-    if (pnpmProjectManifestConfigurationJson) {
-      if ('pnpmFieldInRootPackageJson' in pnpmProjectManifestConfigurationJson) {
-        this.pnpmFieldInRootPackageJson = pnpmProjectManifestConfigurationJson.pnpmFieldInRootPackageJson;
+    if (pnpmConfigurationJson) {
+      if ('pnpmFieldInRootPackageJson' in pnpmConfigurationJson) {
+        this.pnpmFieldInRootPackageJson = pnpmConfigurationJson.pnpmFieldInRootPackageJson;
       }
     }
   }
@@ -46,15 +43,12 @@ export class PnpmProjectManifestConfiguration {
   /**
    * Loads pnpm-config.json data from the specified file path.
    */
-  public static loadFromFile(jsonFilename: string): PnpmProjectManifestConfiguration {
-    let pnpmProjectManifestConfigurationJson: IPnpmProjectManifestConfigurationJson | undefined;
+  public static loadFromFile(jsonFilename: string): PnpmConfiguration {
+    let pnpmConfigurationJson: IPnpmConfigurationJson | undefined;
     if (FileSystem.exists(jsonFilename)) {
-      pnpmProjectManifestConfigurationJson = JsonFile.loadAndValidate(
-        jsonFilename,
-        PnpmProjectManifestConfiguration._jsonSchema
-      );
+      pnpmConfigurationJson = JsonFile.loadAndValidate(jsonFilename, PnpmConfiguration._jsonSchema);
     }
-    return new PnpmProjectManifestConfiguration(pnpmProjectManifestConfigurationJson, jsonFilename);
+    return new PnpmConfiguration(pnpmConfigurationJson, jsonFilename);
   }
 
   /**

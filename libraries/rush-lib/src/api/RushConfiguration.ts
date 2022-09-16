@@ -35,7 +35,7 @@ import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { RushPluginsConfiguration } from './RushPluginsConfiguration';
-import { PnpmProjectManifestConfiguration } from '../logic/pnpm/PnpmProjectManifestConfiguration';
+import { PnpmConfiguration } from '../logic/pnpm/PnpmConfiguration';
 
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 
@@ -513,8 +513,8 @@ export class RushConfiguration {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
-  private _pnpmProjectManifestConfiguration: PnpmProjectManifestConfiguration;
-  private _pnpmProjectManifestConfigurationFilePath: string;
+  private _pnpmConfiguration: PnpmConfiguration;
+  private _pnpmConfigurationFilePath: string;
 
   private __rushPluginsConfiguration: RushPluginsConfiguration;
 
@@ -655,13 +655,11 @@ export class RushConfiguration {
       parsedPath.name + '-preinstall' + parsedPath.ext
     );
 
-    this._pnpmProjectManifestConfigurationFilePath = path.join(
+    this._pnpmConfigurationFilePath = path.join(
       this._commonRushConfigFolder,
       RushConstants.pnpmProjectManifestConfigFilename
     );
-    this._pnpmProjectManifestConfiguration = PnpmProjectManifestConfiguration.loadFromFile(
-      this._pnpmProjectManifestConfigurationFilePath
-    );
+    this._pnpmConfiguration = PnpmConfiguration.loadFromFile(this._pnpmConfigurationFilePath);
 
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
@@ -1756,15 +1754,15 @@ export class RushConfiguration {
   /**
    * @beta
    */
-  public get pnpmProjectManifestConfiguration(): PnpmProjectManifestConfiguration {
-    return this._pnpmProjectManifestConfiguration;
+  public get pnpmConfiguration(): PnpmConfiguration {
+    return this._pnpmConfiguration;
   }
 
   /**
    * @beta
    */
-  public get pnpmProjectManifestConfigurationFilePath(): string {
-    return this._pnpmProjectManifestConfigurationFilePath;
+  public get pnpmConfigurationFilePath(): string {
+    return this._pnpmConfigurationFilePath;
   }
 
   /**

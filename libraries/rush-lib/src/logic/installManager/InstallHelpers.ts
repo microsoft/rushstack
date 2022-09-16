@@ -29,9 +29,9 @@ export class InstallHelpers {
     };
 
     if (rushConfiguration.packageManager === 'pnpm') {
-      const { pnpmProjectManifestConfiguration } = rushConfiguration;
-      if (pnpmProjectManifestConfiguration.pnpmFieldInRootPackageJson) {
-        commonPackageJson.pnpm = pnpmProjectManifestConfiguration.pnpmFieldInRootPackageJson;
+      const { pnpmConfiguration } = rushConfiguration;
+      if (pnpmConfiguration.pnpmFieldInRootPackageJson) {
+        commonPackageJson.pnpm = pnpmConfiguration.pnpmFieldInRootPackageJson;
       }
     }
 

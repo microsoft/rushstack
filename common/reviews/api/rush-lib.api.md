@@ -428,17 +428,17 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
 }
 
+// @beta
+export interface IPnpmConfigurationJson {
+    pnpmFieldInRootPackageJson: unknown;
+}
+
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
     useWorkspaces?: boolean;
-}
-
-// @beta
-export interface IPnpmProjectManifestConfigurationJson {
-    pnpmFieldInRootPackageJson: unknown;
 }
 
 // @beta
@@ -659,6 +659,14 @@ export class PhasedCommandHooks {
     readonly waitingForChanges: SyncHook<void>;
 }
 
+// @beta
+export class PnpmConfiguration {
+    get filePath(): string;
+    static loadFromFile(jsonFilename: string): PnpmConfiguration;
+    // (undocumented)
+    readonly pnpmFieldInRootPackageJson: unknown | undefined;
+}
+
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
@@ -668,14 +676,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly preventManualShrinkwrapChanges: boolean;
     readonly strictPeerDependencies: boolean;
     readonly useWorkspaces: boolean;
-}
-
-// @beta
-export class PnpmProjectManifestConfiguration {
-    get filePath(): string;
-    static loadFromFile(jsonFilename: string): PnpmProjectManifestConfiguration;
-    // (undocumented)
-    readonly pnpmFieldInRootPackageJson: unknown | undefined;
 }
 
 // @public
@@ -767,11 +767,11 @@ export class RushConfiguration {
     // @beta
     get packageManagerWrapper(): PackageManager;
     get packageNameParser(): PackageNameParser;
+    // @beta (undocumented)
+    get pnpmConfiguration(): PnpmConfiguration;
+    // @beta (undocumented)
+    get pnpmConfigurationFilePath(): string;
     get pnpmOptions(): PnpmOptionsConfiguration;
-    // @beta (undocumented)
-    get pnpmProjectManifestConfiguration(): PnpmProjectManifestConfiguration;
-    // @beta (undocumented)
-    get pnpmProjectManifestConfigurationFilePath(): string;
     get projectFolderMaxDepth(): number;
     get projectFolderMinDepth(): number;
     // (undocumented)
