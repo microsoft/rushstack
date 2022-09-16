@@ -6,77 +6,59 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json",
 
   /**
-   * If true, then `rush install` will use the PNPM workspaces feature to perform the
-   * install.
+   * If true, then `rush install` and `rush update` will use the PNPM workspaces feature
+   * to perform the install, instead of the old model where Rush generated the symlinks
+   * for each projects's node_modules folder.
    *
-   * This feature uses PNPM to perform the entire monorepo install. When using workspaces, Rush will
-   * generate a "pnpm-workspace.yaml" file referencing all local projects to install. Rush will
-   * also generate a "pnpmfile.js" which is used to provide preferred versions support. When install
-   * is run, this pnpmfile will be used to replace dependency version ranges with a smaller subset
-   * of the original range. If the preferred version is not fully a subset of the original version
-   * range, it will be left as-is. After this, the pnpmfile.js provided in the repository (if one
-   * exists) will be called to further modify package dependencies.
+   * When using workspaces, Rush will generate a `common/temp/pnpm-workspace.yaml` file referencing
+   * all local projects to install. Rush will also generate a `.pnpmfile.cjs` shim which implements
+   * Rush-specific features such as preferred versions.  The user's `common/config/rush/.pnpmfile.cjs`
+   * is invoked by the shim.
    *
-   * This option is recommended. The default value is false.
+   * This option is strongly recommended. The default value is false.
    */
    "useWorkspaces": true,
 
   /**
-   * If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM.
-   * This causes "rush install" to fail if there are unsatisfied peer dependencies, which is
+   * If true, then Rush will add the `--strict-peer-dependencies` option when invoking PNPM.
+   * This causes `rush update` to fail if there are unsatisfied peer dependencies, which is
    * an invalid state that can cause build failures or incompatible dependency versions.
    * (For historical reasons, JavaScript package managers generally do not treat this invalid
    * state as an error.)
    *
    * The default value is false to avoid legacy compatibility issues.
-   * It is strongly recommended to set strictPeerDependencies=true.
+   * It is strongly recommended to set `strictPeerDependencies=true`.
    */
   /*[LINE "DEMO"]*/ "strictPeerDependencies": true,
 
   /**
    * Specifies the location of the PNPM store.  There are two possible values:
    *
-   * - "local" - use the "pnpm-store" folder in the current configured temp folder:
-   *   "common/temp/pnpm-store" by default.
-   * - "global" - use PNPM's global store, which has the benefit of being shared
+   * - `local` - use the `pnpm-store` folder in the current configured temp folder:
+   *   `common/temp/pnpm-store` by default.
+   * - `global` - use PNPM's global store, which has the benefit of being shared
    *    across multiple repo folders, but the disadvantage of less isolation for builds
-   *    (e.g. bugs or incompatibilities when two repos use different releases of PNPM)
+   *    (for example, bugs or incompatibilities when two repos use different releases of PNPM)
    *
-   * RUSH_PNPM_STORE_PATH will override the directory that will be used as the store
+   * In both cases, the store path can be overridden by the environment variable `RUSH_PNPM_STORE_PATH`.
    *
-   * In all cases, the store path will be overridden by the environment variable RUSH_PNPM_STORE_PATH.
-   *
-   * The default value is "local".
+   * The default value is `local`.
    */
   /*[LINE "HYPOTHETICAL"]*/ "pnpmStore": "local",
 
   /**
-   * Configures the strategy used to select versions during installation.
-   *
-   * This feature requires PNPM version 3.1 or newer.  It corresponds to the "--resolution-strategy" command-line
-   * option for PNPM.  Possible values are "fast" and "fewer-dependencies".  PNPM's default is "fast", but this may
-   * be incompatible with certain packages, for example the "@types" packages from DefinitelyTyped.  Rush's default
-   * is "fewer-dependencies", which causes PNPM to avoid installing a newer version if an already installed version
-   * can be reused; this is more similar to NPM's algorithm.
-   *
-   * After modifying this field, it's recommended to run "rush update --full" so that the package manager
-   * will recalculate all version selections.
-   */
-  /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast",
-
-  /**
    * If true, then `rush install` will report an error if manual modifications
-   * were made to the PNPM shrinkwrap file without running "rush update" afterwards.
+   * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
    *
    * This feature protects against accidental inconsistencies that may be introduced
-   * if the PNPM shrinkwrap file ("pnpm-lock.yaml") is manually edited.  When this
-   * feature is enabled, "rush update" will append a hash to the file as a YAML comment,
-   * and then "rush update" and "rush install" will validate the hash.  Note that this does not prohibit
-   * manual modifications, but merely requires "rush update" be run
+   * if the PNPM shrinkwrap file (`pnpm-lock.yaml`) is manually edited.  When this
+   * feature is enabled, `rush update` will append a hash to the file as a YAML comment,
+   * and then `rush update` and `rush install` will validate the hash.  Note that this
+   * does not prohibit manual modifications, but merely requires `rush update` be run
    * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
    *
-   * To temporarily disable this validation when invoking "rush install", use the
-   * "--bypass-policy" command-line parameter.
+   * To temporarily disable this validation when invoking `rush install`, use the
+   * `--bypass-policy` command-line parameter.
    *
    * The default value is false.
    */
