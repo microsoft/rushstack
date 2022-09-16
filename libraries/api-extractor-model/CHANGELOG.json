@@ -2,6 +2,74 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.24.1",
+      "tag": "@microsoft/api-extractor-model_v7.24.1",
+      "date": "Thu, 15 Sep 2022 00:18:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.24.0",
+      "tag": "@microsoft/api-extractor-model_v7.24.0",
+      "date": "Fri, 02 Sep 2022 17:48:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new ApiExportedMixin mixin class for determining whether an API item is exported or not"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.3",
+      "tag": "@microsoft/api-extractor-model_v7.23.3",
+      "date": "Wed, 24 Aug 2022 03:01:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.2",
+      "tag": "@microsoft/api-extractor-model_v7.23.2",
+      "date": "Wed, 24 Aug 2022 00:14:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove use of LegacyAdapters.sortStable"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.1",
+      "tag": "@microsoft/api-extractor-model_v7.23.1",
+      "date": "Fri, 19 Aug 2022 00:17:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.23.0",
       "tag": "@microsoft/api-extractor-model_v7.23.0",
       "date": "Wed, 03 Aug 2022 18:40:35 GMT",

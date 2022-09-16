@@ -1,6 +1,64 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Sep 2022 00:18:51 GMT and should not be manually modified.
+
+## 7.31.1
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 7.31.0
+Tue, 13 Sep 2022 00:16:55 GMT
+
+### Minor changes
+
+- Fix an issue where aliased classes sometimes had incorrect canonical references in *.api.json (GitHub  #3593)
+
+## 7.30.1
+Mon, 12 Sep 2022 22:27:48 GMT
+
+### Patches
+
+- Fix a recent regression where items exported from both the entry point and from an exported namespace appeared only once in the API doc model (GitHub #3619)
+
+## 7.30.0
+Fri, 02 Sep 2022 17:48:42 GMT
+
+### Minor changes
+
+- Add new "apiReport.includeForgottenExports" and "docModel.includeForgottenExports" properties to control whether forgotten exports are included in the API report and doc model files.
+- Fix incorrect declaration references for symbols not exported from the package's entry point.
+
+## 7.29.5
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 7.29.4
+Wed, 24 Aug 2022 00:14:38 GMT
+
+### Patches
+
+- Remove use of LegacyAdapters.sortStable
+
+## 7.29.3
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 7.29.2
+Wed, 10 Aug 2022 09:52:12 GMT
+
+### Patches
+
+- Fix incorrect declaration references for local symbols within namespaces
+
+## 7.29.1
+Wed, 10 Aug 2022 08:12:16 GMT
+
+### Patches
+
+- Fix a regression where .api.json excerpts were sometimes missing tokens (GitHub #3561), and generally improve the quality of excerpt generation
 
 ## 7.29.0
 Wed, 03 Aug 2022 18:40:35 GMT

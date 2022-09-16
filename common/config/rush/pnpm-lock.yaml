@@ -1686,14 +1686,12 @@ importers:
       '@types/node': 12.20.24
       '@types/resolve': 1.17.1
       '@types/semver': 7.3.5
-      '@types/timsort': 0.3.0
       colors: ~1.2.1
       fs-extra: ~7.0.1
       import-lazy: ~4.0.0
       jju: ~1.4.0
       resolve: ~1.17.0
       semver: ~7.3.0
-      timsort: ~0.3.0
       z-schema: ~5.0.2
     dependencies:
       '@types/node': 12.20.24
@@ -1703,7 +1701,6 @@ importers:
       jju: 1.4.0
       resolve: 1.17.0
       semver: 7.3.7
-      timsort: 0.3.0
       z-schema: 5.0.3
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -1714,7 +1711,6 @@ importers:
       '@types/jju': 1.4.1
       '@types/resolve': 1.17.1
       '@types/semver': 7.3.5
-      '@types/timsort': 0.3.0
 
   ../../libraries/package-deps-hash:
     specifiers:
@@ -7179,10 +7175,6 @@ packages:
     resolution: {integrity: sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==}
     dependencies:
       '@types/node': 12.20.24
-    dev: true
-
-  /@types/timsort/0.3.0:
-    resolution: {integrity: sha512-SFjNmiiq4uCs9eXvxbaJMa8pnmlepV8dT2p0nCfdRL1h/UU7ZQFsnCLvtXRHTb3rnyILpQz4Kh8JoTqvDdgxYw==}
     dev: true
 
   /@types/tunnel/0.0.1:
@@ -18679,6 +18671,7 @@ packages:
 
   /timsort/0.3.0:
     resolution: {integrity: sha512-qsdtZH+vMoCARQtyod4imc2nIJwg9Cc7lPRrw9CzF8ZKR0khdr8+2nX80PBhET3tcyTtJDxAffGh2rXH4tyU8A==}
+    dev: true
 
   /tiny-lru/7.0.6:
     resolution: {integrity: sha512-zNYO0Kvgn5rXzWpL0y3RS09sMK67eGaQj9805jlK9G6pSadfriTczzLHFXa/xcW4mIRfmlB9HyQ/+SgL0V1uow==}

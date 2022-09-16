@@ -28,7 +28,7 @@ export const enum ExtractorMessageId {
   IncompatibleReleaseTags = 'ae-incompatible-release-tags',
 
   /**
-   * "___ is exported by the package, but it is missing a release tag (`@alpha`, `@beta`, `@public`, or `@internal`)."
+   * "___ is part of the package's API, but it is missing a release tag (`@alpha`, `@beta`, `@public`, or `@internal`)."
    */
   MissingReleaseTag = 'ae-missing-release-tag',
 

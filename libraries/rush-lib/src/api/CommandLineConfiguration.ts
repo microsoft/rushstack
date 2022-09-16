@@ -91,6 +91,10 @@ export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, I
    */
   watchPhases: Set<IPhase>;
   /**
+   * How many milliseconds to wait after receiving a file system notification before executing in watch mode.
+   */
+  watchDebounceMs?: number;
+  /**
    * If set to `true`, then this phased command will always perform an install before executing, regardless of CLI flags.
    * If set to `false`, then Rush will define a built-in "--install" CLI flag for this command.
    * If undefined, then Rush does not define a built-in "--install" CLI flag for this command and no installation is performed.
@@ -326,6 +330,7 @@ export class CommandLineConfiguration {
 
             if (watchOptions) {
               normalizedCommand.alwaysWatch = watchOptions.alwaysWatch;
+              normalizedCommand.watchDebounceMs = watchOptions.debounceMs;
 
               // No implicit phase dependency expansion for watch mode.
               for (const phaseName of watchOptions.watchPhases) {

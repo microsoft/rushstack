@@ -3,7 +3,7 @@
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
-import { Telemetry, ITelemetryData } from '../Telemetry';
+import { Telemetry, ITelemetryData, ITelemetryMachineInfo } from '../Telemetry';
 import { RushSession } from '../../pluginFramework/RushSession';
 import { ConsoleTerminalProvider, JsonFile } from '@rushstack/node-core-library';
 
@@ -37,18 +37,20 @@ describe(Telemetry.name, () => {
       name: 'testData1',
       durationInSeconds: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime(),
+      timestampMs: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version
+      rushVersion: Rush.version,
+      machineInfo: {} as ITelemetryMachineInfo
     };
 
     const logData2: ITelemetryData = {
       name: 'testData2',
       durationInSeconds: 100,
       result: 'Failed',
-      timestamp: new Date().getTime(),
+      timestampMs: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version
+      rushVersion: Rush.version,
+      machineInfo: {} as ITelemetryMachineInfo
     };
 
     telemetry.log(logData1);
@@ -68,7 +70,7 @@ describe(Telemetry.name, () => {
       name: 'testData',
       durationInSeconds: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime(),
+      timestampMs: new Date().getTime(),
       platform: process.platform,
       rushVersion: Rush.version
     };
@@ -89,9 +91,10 @@ describe(Telemetry.name, () => {
       name: 'testData1',
       durationInSeconds: 100,
       result: 'Succeeded',
-      timestamp: new Date().getTime(),
+      timestampMs: new Date().getTime(),
       platform: process.platform,
-      rushVersion: Rush.version
+      rushVersion: Rush.version,
+      machineInfo: {} as ITelemetryMachineInfo
     };
 
     telemetry.log(logData);
@@ -123,7 +126,7 @@ describe(Telemetry.name, () => {
     const result: ITelemetryData = telemetry.store[0];
     expect(result.platform).toEqual(process.platform);
     expect(result.rushVersion).toEqual(Rush.version);
-    expect(result.timestamp).toBeDefined();
+    expect(result.timestampMs).toBeDefined();
   });
 
   it('calls custom flush telemetry', async () => {

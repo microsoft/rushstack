@@ -68,7 +68,9 @@ export class InstallAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
       pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal),
-      checkOnly: this._checkOnlyParameter.value
+      checkOnly: this._checkOnlyParameter.value,
+
+      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };
   }
 }

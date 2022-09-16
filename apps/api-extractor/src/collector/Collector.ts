@@ -82,6 +82,7 @@ export class Collector {
     AstEntity,
     CollectorEntity
   >();
+  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
@@ -246,28 +247,23 @@ export class Collector {
       this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
 
-    const exportedAstEntities: AstEntity[] = [];
-
-    // Create a CollectorEntity for each top-level export
-
     const astModuleExportInfo: AstModuleExportInfo =
       this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
 
+    // Create a CollectorEntity for each top-level export.
+    const processedAstEntities: AstEntity[] = [];
     for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
       this._createCollectorEntity(astEntity, exportName);
-
-      exportedAstEntities.push(astEntity);
+      processedAstEntities.push(astEntity);
     }
 
-    // Create a CollectorEntity for each indirectly referenced export.
-    // Note that we do this *after* the above loop, so that references to exported AstSymbols
-    // are encountered first as exports.
-    const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
-    for (const exportedAstEntity of exportedAstEntities) {
-      this._createEntityForIndirectReferences(exportedAstEntity, alreadySeenAstSymbols);
-
-      if (exportedAstEntity instanceof AstSymbol) {
-        this.fetchSymbolMetadata(exportedAstEntity);
+    // Recursively create the remaining CollectorEntities after the top-level entities
+    // have been processed.
+    const alreadySeenAstEntities: Set<AstEntity> = new Set<AstEntity>();
+    for (const astEntity of processedAstEntities) {
+      this._recursivelyCreateEntities(astEntity, alreadySeenAstEntities);
+      if (astEntity instanceof AstSymbol) {
+        this.fetchSymbolMetadata(astEntity);
       }
     }
 
@@ -297,6 +293,14 @@ export class Collector {
       return this._entitiesByAstEntity.get(astEntity);
     }
     return undefined;
+  }
+
+  /**
+   * For a given analyzed ts.Symbol, return the CollectorEntity that it refers to. Returns undefined if it
+   * doesn't refer to anything interesting.
+   */
+  public tryGetEntityForSymbol(symbol: ts.Symbol): CollectorEntity | undefined {
+    return this._entitiesBySymbol.get(symbol);
   }
 
   /**
@@ -414,61 +418,74 @@ export class Collector {
     return overloadIndex;
   }
 
-  private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): CollectorEntity {
+  private _createCollectorEntity(
+    astEntity: AstEntity,
+    exportName?: string,
+    parent?: CollectorEntity
+  ): CollectorEntity {
     let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
       entity = new CollectorEntity(astEntity);
 
       this._entitiesByAstEntity.set(astEntity, entity);
+      if (astEntity instanceof AstSymbol) {
+        this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
+      } else if (astEntity instanceof AstNamespaceImport) {
+        this._entitiesBySymbol.set(astEntity.symbol, entity);
+      }
       this._entities.push(entity);
       this._collectReferenceDirectives(astEntity);
     }
 
-    if (exportedName) {
-      entity.addExportName(exportedName);
+    if (exportName) {
+      if (parent) {
+        entity.addLocalExportName(exportName, parent);
+      } else {
+        entity.addExportName(exportName);
+      }
     }
 
     return entity;
   }
 
-  private _createEntityForIndirectReferences(
-    astEntity: AstEntity,
-    alreadySeenAstEntities: Set<AstEntity>
-  ): void {
-    if (alreadySeenAstEntities.has(astEntity)) {
-      return;
-    }
+  private _recursivelyCreateEntities(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
+    if (alreadySeenAstEntities.has(astEntity)) return;
     alreadySeenAstEntities.add(astEntity);
 
     if (astEntity instanceof AstSymbol) {
       astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
         for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
           if (referencedAstEntity instanceof AstSymbol) {
-            // We only create collector entities for root-level symbols.
-            // For example, if a symbols is nested inside a namespace, only the root-level namespace
-            // get a collector entity
+            // We only create collector entities for root-level symbols. For example, if a symbol is
+            // nested inside a namespace, only the namespace gets a collector entity. Note that this
+            // is not true for AstNamespaceImports below.
             if (referencedAstEntity.parentAstSymbol === undefined) {
-              this._createCollectorEntity(referencedAstEntity, undefined);
+              this._createCollectorEntity(referencedAstEntity);
             }
           } else {
-            this._createCollectorEntity(referencedAstEntity, undefined);
+            this._createCollectorEntity(referencedAstEntity);
           }
 
-          this._createEntityForIndirectReferences(referencedAstEntity, alreadySeenAstEntities);
+          this._recursivelyCreateEntities(referencedAstEntity, alreadySeenAstEntities);
         }
       });
     }
 
     if (astEntity instanceof AstNamespaceImport) {
       const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(this);
+      const parentEntity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
+      if (!parentEntity) {
+        // This should never happen, as we've already created entities for all AstNamespaceImports.
+        throw new InternalError(
+          `Failed to get CollectorEntity for AstNamespaceImport with namespace name "${astEntity.namespaceName}"`
+        );
+      }
 
-      for (const exportedEntity of astModuleExportInfo.exportedLocalEntities.values()) {
-        // Create a CollectorEntity for each top-level export of AstImportInternal entity
-        const entity: CollectorEntity = this._createCollectorEntity(exportedEntity, undefined);
-        entity.addAstNamespaceImports(astEntity);
-
-        this._createEntityForIndirectReferences(exportedEntity, alreadySeenAstEntities);
+      for (const [localExportName, localAstEntity] of astModuleExportInfo.exportedLocalEntities) {
+        // Create a CollectorEntity for each local export within an AstNamespaceImport entity.
+        this._createCollectorEntity(localAstEntity, localExportName, parentEntity);
+        this._recursivelyCreateEntities(localAstEntity, alreadySeenAstEntities);
       }
     }
   }
@@ -812,16 +829,22 @@ export class Collector {
     if (options.effectiveReleaseTag === ReleaseTag.None) {
       if (!astDeclaration.astSymbol.isExternal) {
         // for now, don't report errors for external code
-        // Don't report missing release tags for forgotten exports
+        // Don't report missing release tags for forgotten exports (unless we're including forgotten exports
+        // in either the API report or doc model).
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
         const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-        if (entity && entity.consumable) {
+        if (
+          entity &&
+          (entity.consumable ||
+            this.extractorConfig.apiReportIncludeForgottenExports ||
+            this.extractorConfig.docModelIncludeForgottenExports)
+        ) {
           // We also don't report errors for the default export of an entry point, since its doc comment
           // isn't easy to obtain from the .d.ts file
           if (astSymbol.rootAstSymbol.localName !== '_default') {
             this.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.MissingReleaseTag,
-              `"${entity.astEntity.localName}" is exported by the package, but it is missing ` +
+              `"${entity.astEntity.localName}" is part of the package's API, but it is missing ` +
                 `a release tag (@alpha, @beta, @public, or @internal)`,
               astSymbol
             );

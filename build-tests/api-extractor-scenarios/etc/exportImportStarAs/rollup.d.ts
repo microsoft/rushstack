@@ -20,7 +20,7 @@ declare namespace calculator {
     export {
         add,
         subtract,
-        calucatorVersion
+        calculatorVersion
     }
 }
 export { calculator }
@@ -29,7 +29,7 @@ declare namespace calculator2 {
     export {
         add_2 as add,
         subtract_2 as subtract,
-        calucatorVersion
+        calculatorVersion
     }
 }
 export { calculator2 }
@@ -38,7 +38,7 @@ export { calculator2 }
  * Returns the version of the calculator.
  * @public
  */
-declare const calucatorVersion: string;
+declare const calculatorVersion: string;
 
 /**
  * Returns the sum of subtracting `b` from `a`

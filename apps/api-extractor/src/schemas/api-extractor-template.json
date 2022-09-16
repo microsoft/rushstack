@@ -80,12 +80,13 @@
   // "testMode": false,
 
   /**
-   * Specifies how API Extractor sorts members of an enum when generating api.json. By default, the output files
-   * will be sorted alphabetically, which is "by-name". To keep the ordering in the source code, specify "preserve".
+   * Specifies how API Extractor sorts members of an enum when generating the .api.json file. By default, the output
+   * files will be sorted alphabetically, which is "by-name". To keep the ordering in the source code, specify
+   * "preserve".
    *
    * DEFAULT VALUE: "by-name"
    */
-  // enumMemberOrder?: EnumMemberOrder,
+  // "enumMemberOrder": "by-name",
 
   /**
    * Determines how the TypeScript compiler engine will be invoked by API Extractor.
@@ -175,7 +176,16 @@
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: "<projectFolder>/temp/"
      */
-    // "reportTempFolder": "<projectFolder>/temp/"
+    // "reportTempFolder": "<projectFolder>/temp/",
+
+    /**
+     * Whether "forgotten exports" should be included in the API report file. Forgotten exports are declarations
+     * flagged with `ae-forgotten-export` warnings. See https://api-extractor.com/pages/messages/ae-forgotten-export/ to
+     * learn more.
+     *
+     * DEFAULT VALUE: "false"
+     */
+    // "includeForgottenExports": false
   },
 
   /**
@@ -196,7 +206,16 @@
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: "<projectFolder>/temp/<unscopedPackageName>.api.json"
      */
-    // "apiJsonFilePath": "<projectFolder>/temp/<unscopedPackageName>.api.json"
+    // "apiJsonFilePath": "<projectFolder>/temp/<unscopedPackageName>.api.json",
+
+    /**
+     * Whether "forgotten exports" should be included in the doc model file. Forgotten exports are declarations
+     * flagged with `ae-forgotten-export` warnings. See https://api-extractor.com/pages/messages/ae-forgotten-export/ to
+     * learn more.
+     *
+     * DEFAULT VALUE: "false"
+     */
+    // "includeForgottenExports": false
   },
 
   /**

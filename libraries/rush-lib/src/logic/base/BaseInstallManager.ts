@@ -40,6 +40,11 @@ import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 
+/**
+ * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
+ */
+export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompatibilityDb';
+
 export interface IInstallManagerOptions {
   /**
    * Whether the global "--debug" flag was specified.
@@ -110,6 +115,11 @@ export interface IInstallManagerOptions {
    * These restrict the scope of a workspace installation.
    */
   pnpmFilterArguments: string[];
+
+  /**
+   * Callback to invoke between preparing the common/temp folder and running installation.
+   */
+  beforeInstallAsync?: () => Promise<void>;
 }
 
 /**
@@ -240,6 +250,11 @@ export abstract class BaseInstallManager {
       // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
       // this ensures that a full "rush link" is required next time
       this._commonTempLinkFlag.clear();
+
+      // Give plugins an opportunity to act before invoking the installation process
+      if (this.options.beforeInstallAsync !== undefined) {
+        await this.options.beforeInstallAsync();
+      }
 
       // Perform the actual install
       await this.installAsync(cleanInstall);
@@ -562,6 +577,11 @@ export abstract class BaseInstallManager {
         args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
       }
 
+      const { pnpmVerifyStoreIntegrity } = EnvironmentConfiguration;
+      if (pnpmVerifyStoreIntegrity !== undefined) {
+        args.push(`--verify-store-integrity`, `${pnpmVerifyStoreIntegrity}`);
+      }
+
       const { configuration: experiments } = this._rushConfiguration.experimentsConfiguration;
 
       if (experiments.usePnpmFrozenLockfileForRushInstall && !this._options.allowShrinkwrapUpdates) {
@@ -610,9 +630,9 @@ export abstract class BaseInstallManager {
       }
       if (
         semver.gte(this._rushConfiguration.packageManagerToolVersion, '7.9.0') ||
-        semver.gte(this._rushConfiguration.packageManagerToolVersion, '6.34.0')
+        semver.satisfies(this._rushConfiguration.packageManagerToolVersion, '^6.34.0')
       ) {
-        args.push('--ignore-compatibility-db');
+        args.push(pnpmIgnoreCompatibilityDbParameter);
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');

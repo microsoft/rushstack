@@ -202,7 +202,7 @@
                 {
                   "kind": "Reference",
                   "text": "default",
-                  "canonicalReference": "api-extractor-lib2-test!~DefaultClass:class"
+                  "canonicalReference": "api-extractor-lib2-test!DefaultClass:class"
                 },
                 {
                   "kind": "Content",
@@ -230,7 +230,7 @@
                 {
                   "kind": "Reference",
                   "text": "DefaultClass_namedImport",
-                  "canonicalReference": "api-extractor-lib2-test!~DefaultClass:class"
+                  "canonicalReference": "api-extractor-lib2-test!DefaultClass:class"
                 },
                 {
                   "kind": "Content",
@@ -258,7 +258,7 @@
                 {
                   "kind": "Reference",
                   "text": "DefaultClass_reExport",
-                  "canonicalReference": "api-extractor-lib2-test!~DefaultClass:class"
+                  "canonicalReference": "api-extractor-lib2-test!DefaultClass:class"
                 },
                 {
                   "kind": "Content",

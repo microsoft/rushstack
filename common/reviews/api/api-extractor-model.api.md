@@ -172,6 +172,21 @@ export class ApiEnumMember extends ApiEnumMember_base {
     get kind(): ApiItemKind;
 }
 
+// @public
+export function ApiExportedMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiExportedMixin);
+
+// @public
+export interface ApiExportedMixin extends ApiItem {
+    readonly isExported: boolean;
+    // @override (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+// @public
+export namespace ApiExportedMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiExportedMixin;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ApiFunction_base" needs to be exported by the entry point index.d.ts
 //
 // @public
@@ -708,7 +723,7 @@ export interface IApiCallSignatureOptions extends IApiTypeParameterListMixinOpti
 }
 
 // @public
-export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions {
+export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions, IApiExportedMixinOptions {
     // (undocumented)
     extendsTokenRange: IExcerptTokenRange | undefined;
     // (undocumented)
@@ -744,11 +759,17 @@ export interface IApiEnumMemberOptions extends IApiNameMixinOptions, IApiRelease
 }
 
 // @public
-export interface IApiEnumOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiEnumOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiExportedMixinOptions {
 }
 
 // @public
-export interface IApiFunctionOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+export interface IApiExportedMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    isExported: boolean;
+}
+
+// @public
+export interface IApiFunctionOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions, IApiExportedMixinOptions {
 }
 
 // @public
@@ -762,7 +783,7 @@ export interface IApiInitializerMixinOptions extends IApiItemOptions {
 }
 
 // @public
-export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiExportedMixinOptions {
     // (undocumented)
     extendsTokenRanges: IExcerptTokenRange[];
 }
@@ -798,7 +819,7 @@ export interface IApiNameMixinOptions extends IApiItemOptions {
 }
 
 // @public
-export interface IApiNamespaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiNamespaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiExportedMixinOptions {
 }
 
 // @public
@@ -883,7 +904,7 @@ export interface IApiStaticMixinOptions extends IApiItemOptions {
 }
 
 // @public
-export interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions {
+export interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions, IApiExportedMixinOptions {
     // (undocumented)
     typeTokenRange: IExcerptTokenRange;
 }
@@ -905,7 +926,7 @@ export interface IApiTypeParameterOptions {
 }
 
 // @public
-export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions, IApiInitializerMixinOptions {
+export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiReadonlyMixinOptions, IApiDeclaredItemOptions, IApiInitializerMixinOptions, IApiExportedMixinOptions {
     // (undocumented)
     variableTypeTokenRange: IExcerptTokenRange;
 }
