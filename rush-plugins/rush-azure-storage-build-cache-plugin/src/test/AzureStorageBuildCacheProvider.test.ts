@@ -5,7 +5,7 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-lib
 import { CredentialCache, EnvironmentConfiguration, RushUserConfiguration } from '@rushstack/rush-sdk';
 
 import { AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
-import type { AzureEnvironmentNames } from '../AzureStorageAuthentication';
+import type { AzureEnvironmentName } from '../AzureStorageAuthentication';
 
 describe(AzureStorageBuildCacheProvider.name, () => {
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe(AzureStorageBuildCacheProvider.name, () => {
         new AzureStorageBuildCacheProvider({
           storageAccountName: 'storage-account',
           storageContainerName: 'container-name',
-          azureEnvironment: 'INCORRECT_AZURE_ENVIRONMENT' as AzureEnvironmentNames,
+          azureEnvironment: 'INCORRECT_AZURE_ENVIRONMENT' as AzureEnvironmentName,
           isCacheWriteAllowed: false
         })
     ).toThrowErrorMatchingSnapshot();

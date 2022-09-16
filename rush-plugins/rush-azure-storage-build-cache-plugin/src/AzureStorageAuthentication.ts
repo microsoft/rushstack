@@ -16,7 +16,7 @@ import { PrintUtilities } from '@rushstack/terminal';
 /**
  * @public
  */
-export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
+export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 
 /**
  * @public
@@ -24,7 +24,7 @@ export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
 export interface IAzureStorageAuthenticationOptions {
   storageContainerName: string;
   storageAccountName: string;
-  azureEnvironment?: AzureEnvironmentNames;
+  azureEnvironment?: AzureEnvironmentName;
   isCacheWriteAllowed: boolean;
 }
 
@@ -34,7 +34,7 @@ const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
  * @public
  */
 export class AzureStorageAuthentication {
-  protected readonly _azureEnvironment: AzureEnvironmentNames;
+  protected readonly _azureEnvironment: AzureEnvironmentName;
   protected readonly _storageAccountName: string;
   protected readonly _storageContainerName: string;
   protected readonly _isCacheWriteAllowedByConfiguration: boolean;

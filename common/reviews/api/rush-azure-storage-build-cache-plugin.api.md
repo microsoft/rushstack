@@ -4,31 +4,20 @@
 
 ```ts
 
+import { AzureAuthorityHosts } from '@azure/identity';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { ITerminal } from '@rushstack/node-core-library';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
 
 // @public (undocumented)
-export enum AzureAuthorityHosts {
-    // (undocumented)
-    AzureChina = "https://login.chinacloudapi.cn",
-    // (undocumented)
-    AzureGermany = "https://login.microsoftonline.de",
-    // (undocumented)
-    AzureGovernment = "https://login.microsoftonline.us",
-    // (undocumented)
-    AzurePublicCloud = "https://login.microsoftonline.com"
-}
-
-// @public (undocumented)
-export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
+export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 
 // @public (undocumented)
 export class AzureStorageAuthentication {
     constructor(options: IAzureStorageAuthenticationOptions);
     // (undocumented)
-    protected readonly _azureEnvironment: AzureEnvironmentNames;
+    protected readonly _azureEnvironment: AzureEnvironmentName;
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
@@ -49,7 +38,7 @@ export class AzureStorageAuthentication {
 // @public (undocumented)
 export interface IAzureStorageAuthenticationOptions {
     // (undocumented)
-    azureEnvironment?: AzureEnvironmentNames;
+    azureEnvironment?: AzureEnvironmentName;
     // (undocumented)
     isCacheWriteAllowed: boolean;
     // (undocumented)

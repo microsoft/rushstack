@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@rushstack/rush-sdk';
-import type { AzureEnvironmentNames } from './AzureStorageAuthentication';
+import type { AzureEnvironmentName } from './AzureStorageAuthentication';
 
 const PLUGIN_NAME: 'AzureInteractiveAuthPlugin' = 'AzureInteractiveAuthPlugin';
 
@@ -23,7 +23,7 @@ export interface IAzureInteractiveAuthOptions {
   /**
    * The Azure environment the storage account exists in. Defaults to AzureCloud.
    */
-  readonly azureEnvironment?: AzureEnvironmentNames;
+  readonly azureEnvironment?: AzureEnvironmentName;
 
   /**
    * If specified and a credential exists that will be valid for at least this many minutes from the time
