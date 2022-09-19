@@ -40,11 +40,6 @@ export class SourceLocation {
     this._fileUrlPath = options.fileUrlPath;
   }
 
-  /** {@inheritDoc ISourceLocationOptions.fileUrlPath} */
-  public get fileUrlPath(): string | undefined {
-    return this._fileUrlPath;
-  }
-
   /**
    * Returns the file URL to the given source location. Returns `undefined` if the file URL
    * cannot be determined.

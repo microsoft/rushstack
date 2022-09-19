@@ -101,6 +101,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     buildExcerpt(tokenRange: IExcerptTokenRange): Excerpt;
     get excerpt(): Excerpt;
     get excerptTokens(): ReadonlyArray<ExcerptToken>;
+    get fileUrlPath(): string | undefined;
     getExcerptWithModifiers(): string;
     // Warning: (ae-forgotten-export) The symbol "IApiDeclaredItemJson" needs to be exported by the entry point index.d.ts
     //
@@ -1044,7 +1045,6 @@ export namespace ReleaseTag {
 export class SourceLocation {
     constructor(options: ISourceLocationOptions);
     get fileUrl(): string | undefined;
-    get fileUrlPath(): string | undefined;
 }
 
 // @public

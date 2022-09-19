@@ -3,6 +3,7 @@
 
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiDocumentedItem, IApiDocumentedItemJson, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { ApiItem } from './ApiItem';
 import { Excerpt, ExcerptToken, IExcerptTokenRange, IExcerptToken } from '../mixins/Excerpt';
 import { DeserializerContext } from '../model/DeserializerContext';
 import { SourceLocation } from '../model/SourceLocation';
@@ -38,7 +39,8 @@ export interface IApiDeclaredItemJson extends IApiDocumentedItemJson {
 export class ApiDeclaredItem extends ApiDocumentedItem {
   private _excerptTokens: ExcerptToken[];
   private _excerpt: Excerpt;
-  private _sourceLocation: SourceLocation;
+  private _fileUrlPath?: string;
+  private _sourceLocation?: SourceLocation;
 
   public constructor(options: IApiDeclaredItemOptions) {
     super(options);
@@ -51,14 +53,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
       return new ExcerptToken(token.kind, token.text, canonicalReference);
     });
     this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
-
-    const projectFolderUrl: string | undefined = this.getAssociatedPackage()?.projectFolderUrl;
-    const fileUrlPath: string | undefined = options.fileUrlPath || this._parentSourceLocation?.fileUrlPath;
-
-    this._sourceLocation = new SourceLocation({
-      projectFolderUrl: projectFolderUrl,
-      fileUrlPath: fileUrlPath
-    });
+    this._fileUrlPath = options.fileUrlPath;
   }
 
   /** @override */
@@ -88,9 +83,21 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   }
 
   /**
-   * The source location where the API item is declared.
+   * The file URL path relative to the `projectFolder` and `projectFolderURL` fields
+   * as defined in the `api-extractor.json` config. Is `undefined` if the path is
+   * the same as the parent API item's.
+   */
+  public get fileUrlPath(): string | undefined {
+    return this._fileUrlPath;
+  }
+
+  /**
+   * Returns the source location where the API item is declared.
    */
   public get sourceLocation(): SourceLocation {
+    if (!this._sourceLocation) {
+      this._sourceLocation = this._buildSourceLocation();
+    }
     return this._sourceLocation;
   }
 
@@ -137,11 +144,10 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
 
     // Only serialize this API item's file URL path if it exists and it's different from its parent's
     // (a little optimization to keep the doc model succinct).
-    if (
-      this._sourceLocation.fileUrlPath &&
-      this._sourceLocation.fileUrlPath !== this._parentSourceLocation?.fileUrlPath
-    ) {
-      jsonObject.fileUrlPath = this._sourceLocation.fileUrlPath;
+    if (this.fileUrlPath) {
+      if (!(this.parent instanceof ApiDeclaredItem) || this.fileUrlPath !== this.parent.fileUrlPath) {
+        jsonObject.fileUrlPath = this.fileUrlPath;
+      }
     }
   }
 
@@ -152,7 +158,23 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     return new Excerpt(this.excerptTokens, tokenRange);
   }
 
-  private get _parentSourceLocation(): SourceLocation | undefined {
-    return this.parent instanceof ApiDeclaredItem ? this.parent.sourceLocation : undefined;
+  /**
+   * Builds the cached object used by the `sourceLocation` property.
+   */
+  private _buildSourceLocation(): SourceLocation {
+    const projectFolderUrl: string | undefined = this.getAssociatedPackage()?.projectFolderUrl;
+
+    let fileUrlPath: string | undefined;
+    for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
+      if (current instanceof ApiDeclaredItem && current.fileUrlPath) {
+        fileUrlPath = current.fileUrlPath;
+        break;
+      }
+    }
+
+    return new SourceLocation({
+      projectFolderUrl: projectFolderUrl,
+      fileUrlPath: fileUrlPath
+    });
   }
 }
