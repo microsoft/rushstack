@@ -1118,9 +1118,17 @@ importers:
   ../../build-tests/install-test-workspace:
     specifiers:
       '@microsoft/rush-lib': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-lint-plugin': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
     devDependencies:
       '@microsoft/rush-lib': link:../../libraries/rush-lib
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/node-core-library': link:../../libraries/node-core-library
 
   ../../build-tests/localization-plugin-test-01:
