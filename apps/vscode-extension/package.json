@@ -49,6 +49,9 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
   },
+  "dependencies": {
+    "@rushstack/rush-sdk": "workspace:*"
+  },
   "devDependencies": {
     "@types/vscode": "^1.71.0",
     "@types/glob": "7.1.1",
