@@ -5,8 +5,9 @@ import * as path from 'path';
 import { FileSystem, IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
 
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import { PnpmOptionsConfiguration, RushConfiguration } from '../../api/RushConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import * as pnpmfile from './PnpmfileShim';
 
 import type { IPnpmfileContext, IPnpmfileShimSettings } from './IPnpmfile';

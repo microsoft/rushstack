@@ -428,16 +428,19 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
 }
 
-// @beta
-export interface IPnpmConfigurationJson {
-    pnpmFieldInRootPackageJson: unknown;
-}
-
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    globalAllowedDeprecatedVersions?: Record<string, string>;
+    globalNeverBuiltDependencies?: string[];
+    globalOverrides?: Record<string, string>;
+    // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtension" needs to be exported by the entry point index.d.ts
+    globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
+    // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
+    globalPeerDependencyRules?: IPnpmPeerDependencyRules;
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
+    unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
 }
 
@@ -659,22 +662,22 @@ export class PhasedCommandHooks {
     readonly waitingForChanges: SyncHook<void>;
 }
 
-// @beta
-export class PnpmConfiguration {
-    get filePath(): string;
-    static loadFromFile(jsonFilename: string): PnpmConfiguration;
-    // (undocumented)
-    readonly pnpmFieldInRootPackageJson: unknown | undefined;
-}
-
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
-    // @internal
-    constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
+    readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
+    readonly globalNeverBuiltDependencies: string[] | undefined;
+    readonly globalOverrides: Record<string, string> | undefined;
+    readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
+    readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
+    // @internal (undocumented)
+    static loadFromJson(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
+    // @internal (undocumented)
+    static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
     readonly strictPeerDependencies: boolean;
+    readonly unsupportedPackageJsonSettings: unknown | undefined;
     readonly useWorkspaces: boolean;
 }
 
@@ -767,10 +770,6 @@ export class RushConfiguration {
     // @beta
     get packageManagerWrapper(): PackageManager;
     get packageNameParser(): PackageNameParser;
-    // @beta (undocumented)
-    get pnpmConfiguration(): PnpmConfiguration;
-    // @beta (undocumented)
-    get pnpmConfigurationFilePath(): string;
     get pnpmOptions(): PnpmOptionsConfiguration;
     get projectFolderMaxDepth(): number;
     get projectFolderMinDepth(): number;
@@ -875,9 +874,9 @@ export class RushConstants {
     static readonly phaseNamePrefix: '_phase:';
     // @deprecated
     static readonly pinnedVersionsFilename: string;
+    static readonly pnpmConfigFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
-    static readonly pnpmProjectManifestConfigFilename: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
     static readonly projectRushFolderName: string;
     static readonly projectShrinkwrapFilename: string;

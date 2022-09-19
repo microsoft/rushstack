@@ -4,13 +4,23 @@
 import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
-import { FileConstants, FileSystem, IPackageJson, JsonFile, LockFile } from '@rushstack/node-core-library';
+import {
+  FileConstants,
+  FileSystem,
+  Import,
+  IPackageJson,
+  JsonFile,
+  LockFile
+} from '@rushstack/node-core-library';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 import { PackageManagerName } from '../../api/packageManager/PackageManager';
-import { RushConfiguration, IConfigurationEnvironment } from '../../api/RushConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
+import { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: unknown;
@@ -30,9 +40,32 @@ export class InstallHelpers {
     };
 
     if (rushConfiguration.packageManager === 'pnpm') {
-      const { pnpmConfiguration } = rushConfiguration;
-      if (pnpmConfiguration.pnpmFieldInRootPackageJson) {
-        commonPackageJson.pnpm = pnpmConfiguration.pnpmFieldInRootPackageJson;
+      const { pnpmOptions } = rushConfiguration;
+      if (pnpmOptions.globalOverrides) {
+        lodash.set(commonPackageJson, 'pnpm.overrides', pnpmOptions.globalOverrides);
+      }
+      if (pnpmOptions.globalPackageExtensions) {
+        lodash.set(commonPackageJson, 'pnpm.packageExtensions', pnpmOptions.globalPackageExtensions);
+      }
+      if (pnpmOptions.globalPeerDependencyRules) {
+        lodash.set(commonPackageJson, 'pnpm.peerDependencyRules', pnpmOptions.globalPeerDependencyRules);
+      }
+      if (pnpmOptions.globalNeverBuiltDependencies) {
+        lodash.set(
+          commonPackageJson,
+          'pnpm.neverBuiltDependencies',
+          pnpmOptions.globalNeverBuiltDependencies
+        );
+      }
+      if (pnpmOptions.globalAllowedDeprecatedVersions) {
+        lodash.set(
+          commonPackageJson,
+          'pnpm.allowedDeprecatedVersions',
+          pnpmOptions.globalAllowedDeprecatedVersions
+        );
+      }
+      if (pnpmOptions.unsupportedPackageJsonSettings) {
+        lodash.merge(commonPackageJson, pnpmOptions.unsupportedPackageJsonSettings);
       }
     }
 
