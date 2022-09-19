@@ -1069,7 +1069,7 @@ export class FileSystem {
     };
 
     await FileSystem._wrapExceptionAsync(async () => {
-      fsx.copySync(options.sourcePath, options.destinationPath, {
+      await fsx.copy(options.sourcePath, options.destinationPath, {
         dereference: !!options.dereferenceSymlinks,
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite,
@@ -1378,6 +1378,13 @@ export class FileSystem {
   }
 
   /**
+   * Returns true if the error object indicates the target is not a directory (`ENOTDIR`).
+   */
+  public static isNotDirectoryError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && error.code === 'ENOTDIR';
+  }
+
+  /**
    * Returns true if the error object indicates that the `unlink` system call failed
    * due to a permissions issue (`EPERM`).
    */
@@ -1513,6 +1520,9 @@ export class FileSystem {
       } else if (FileSystem.isDirectoryError(error)) {
         // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Target is a folder, not a file: ${error.path}\n${error.message}`;
+      } else if (FileSystem.isNotDirectoryError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `Target is not a folder: ${error.path}\n${error.message}`;
       }
     }
   }

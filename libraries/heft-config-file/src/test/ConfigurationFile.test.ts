@@ -123,7 +123,7 @@ describe(ConfigurationFile.name, () => {
     });
   });
 
-  describe('A simple config file containing an array', () => {
+  describe('A simple config file containing an array and an object', () => {
     const configFileFolderName: string = 'simpleConfigFile';
     const projectRelativeFilePath: string = `${configFileFolderName}/simpleConfigFile.json`;
     const schemaPath: string = nodeJsPath.resolve(
@@ -134,6 +134,7 @@ describe(ConfigurationFile.name, () => {
 
     interface ISimpleConfigFile {
       things: string[];
+      thingsObj: { A: { B: string }; D: { E: string } };
       booleanProp: boolean;
     }
 
@@ -148,7 +149,11 @@ describe(ConfigurationFile.name, () => {
         terminal,
         __dirname
       );
-      const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C'], booleanProp: true };
+      const expectedConfigFile: ISimpleConfigFile = {
+        things: ['A', 'B', 'C'],
+        thingsObj: { A: { B: 'C' }, D: { E: 'F' } },
+        booleanProp: true
+      };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
@@ -159,6 +164,9 @@ describe(ConfigurationFile.name, () => {
           jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
             '$.things.*': {
+              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
+            },
+            '$.thingsObj.*.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
             }
           }
@@ -174,6 +182,10 @@ describe(ConfigurationFile.name, () => {
           nodeJsPath.resolve(__dirname, configFileFolderName, 'B'),
           nodeJsPath.resolve(__dirname, configFileFolderName, 'C')
         ],
+        thingsObj: {
+          A: { B: nodeJsPath.resolve(__dirname, configFileFolderName, 'C') },
+          D: { E: nodeJsPath.resolve(__dirname, configFileFolderName, 'F') }
+        },
         booleanProp: true
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
@@ -186,6 +198,9 @@ describe(ConfigurationFile.name, () => {
           jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
             '$.things.*': {
+              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+            },
+            '$.thingsObj.*.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
             }
           }
@@ -201,6 +216,10 @@ describe(ConfigurationFile.name, () => {
           nodeJsPath.resolve(projectRoot, 'B'),
           nodeJsPath.resolve(projectRoot, 'C')
         ],
+        thingsObj: {
+          A: { B: nodeJsPath.resolve(projectRoot, 'C') },
+          D: { E: nodeJsPath.resolve(projectRoot, 'F') }
+        },
         booleanProp: true
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
@@ -218,6 +237,7 @@ describe(ConfigurationFile.name, () => {
 
     interface ISimpleConfigFile {
       things: string[];
+      thingsObj: { A: { B?: string; D?: string }; D?: { E: string }; F?: { G: string } };
       booleanProp: boolean;
     }
 
@@ -232,11 +252,15 @@ describe(ConfigurationFile.name, () => {
         terminal,
         __dirname
       );
-      const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C', 'D', 'E'], booleanProp: false };
+      const expectedConfigFile: ISimpleConfigFile = {
+        things: ['A', 'B', 'C', 'D', 'E'],
+        thingsObj: { A: { D: 'E' }, F: { G: 'H' } },
+        booleanProp: false
+      };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
-    it('Correctly loads the config file with "append" in config meta', async () => {
+    it('Correctly loads the config file with "append" and "merge" in config meta', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
         {
           projectRelativeFilePath,
@@ -244,6 +268,9 @@ describe(ConfigurationFile.name, () => {
           propertyInheritance: {
             things: {
               inheritanceType: InheritanceType.append
+            },
+            thingsObj: {
+              inheritanceType: InheritanceType.merge
             }
           }
         }
@@ -252,7 +279,11 @@ describe(ConfigurationFile.name, () => {
         terminal,
         __dirname
       );
-      const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C', 'D', 'E'], booleanProp: false };
+      const expectedConfigFile: ISimpleConfigFile = {
+        things: ['A', 'B', 'C', 'D', 'E'],
+        thingsObj: { A: { D: 'E' }, D: { E: 'F' }, F: { G: 'H' } },
+        booleanProp: false
+      };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
@@ -264,6 +295,9 @@ describe(ConfigurationFile.name, () => {
           propertyInheritance: {
             things: {
               inheritanceType: InheritanceType.replace
+            },
+            thingsObj: {
+              inheritanceType: InheritanceType.replace
             }
           }
         }
@@ -272,7 +306,34 @@ describe(ConfigurationFile.name, () => {
         terminal,
         __dirname
       );
-      const expectedConfigFile: ISimpleConfigFile = { things: ['D', 'E'], booleanProp: false };
+      const expectedConfigFile: ISimpleConfigFile = {
+        things: ['D', 'E'],
+        thingsObj: { A: { D: 'E' }, F: { G: 'H' } },
+        booleanProp: false
+      };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+    });
+
+    it('Correctly loads the config file with modified merge behaviors for arrays and objects', async () => {
+      const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
+        {
+          projectRelativeFilePath,
+          jsonSchemaPath: schemaPath,
+          propertyInheritanceDefaults: {
+            array: { inheritanceType: InheritanceType.replace },
+            object: { inheritanceType: InheritanceType.merge }
+          }
+        }
+      );
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
+        __dirname
+      );
+      const expectedConfigFile: ISimpleConfigFile = {
+        things: ['D', 'E'],
+        thingsObj: { A: { B: 'C', D: 'E' }, D: { E: 'F' }, F: { G: 'H' } },
+        booleanProp: false
+      };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
@@ -285,6 +346,17 @@ describe(ConfigurationFile.name, () => {
             things: {
               inheritanceType: InheritanceType.custom,
               inheritanceFunction: (current: string[], parent: string[]) => ['X', 'Y', 'Z']
+            },
+            thingsObj: {
+              inheritanceType: InheritanceType.custom,
+              inheritanceFunction: (
+                current: { A: { B?: string; D?: string }; D?: { E: string }; F?: { G: string } },
+                parent: { A: { B?: string; D?: string }; D?: { E: string }; F?: { G: string } }
+              ) => {
+                return {
+                  A: { B: 'Y', D: 'Z' }
+                };
+              }
             }
           }
         }
@@ -293,7 +365,11 @@ describe(ConfigurationFile.name, () => {
         terminal,
         __dirname
       );
-      const expectedConfigFile: ISimpleConfigFile = { things: ['X', 'Y', 'Z'], booleanProp: false };
+      const expectedConfigFile: ISimpleConfigFile = {
+        things: ['X', 'Y', 'Z'],
+        thingsObj: { A: { B: 'Y', D: 'Z' } },
+        booleanProp: false
+      };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 
@@ -304,6 +380,9 @@ describe(ConfigurationFile.name, () => {
           jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
             '$.things.*': {
+              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
+            },
+            '$.thingsObj.*.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
             }
           }
@@ -328,6 +407,10 @@ describe(ConfigurationFile.name, () => {
           nodeJsPath.resolve(__dirname, configFileFolderName, 'D'),
           nodeJsPath.resolve(__dirname, configFileFolderName, 'E')
         ],
+        thingsObj: {
+          A: { D: nodeJsPath.resolve(__dirname, configFileFolderName, 'E') },
+          F: { G: nodeJsPath.resolve(__dirname, configFileFolderName, 'H') }
+        },
         booleanProp: false
       };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));

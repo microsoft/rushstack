@@ -1,25 +1,20 @@
-import { IHeftPlugin, HeftSession, HeftConfiguration } from '@rushstack/heft';
-import { PluginNames as OtherPluginNames, IExamplePlugin01Accessor } from 'heft-example-plugin-01';
+import type { IHeftTaskSession, HeftConfiguration, IHeftTaskPlugin } from '@rushstack/heft';
+import { PLUGIN_NAME as ExamplePlugin01Name, IExamplePlugin01Accessor } from 'heft-example-plugin-01';
 
-const enum PluginNames {
-  ExamplePlugin02 = 'example-plugin-02'
-}
+export const PLUGIN_NAME: 'ExamplePlugin02' = 'ExamplePlugin02';
 
-export class ExamplePlugin02 implements IHeftPlugin {
-  public pluginName: string = PluginNames.ExamplePlugin02;
-
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.requestAccessToPluginByName(
-      OtherPluginNames.ExamplePlugin01,
+export default class ExamplePlugin02 implements IHeftTaskPlugin {
+  public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    taskSession.requestAccessToPluginByName(
+      'heft-example-plugin-01',
+      ExamplePlugin01Name,
       (accessor: IExamplePlugin01Accessor) => {
-        accessor.exampleHook.tap(PluginNames.ExamplePlugin02, () => {
-          heftConfiguration.globalTerminal.writeLine(
-            `!!!!!!!!!!!!!!! Plugin "${OtherPluginNames.ExamplePlugin01}" hook called !!!!!!!!!!!!!!! `
+        accessor.exampleHook.tap(PLUGIN_NAME, () => {
+          taskSession.logger.terminal.writeLine(
+            `!!!!!!!!!!!!!!! Plugin "${ExamplePlugin01Name}" hook called !!!!!!!!!!!!!!! `
           );
         });
       }
     );
   }
 }
-
-export default new ExamplePlugin02();

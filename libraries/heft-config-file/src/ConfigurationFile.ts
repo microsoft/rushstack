@@ -166,6 +166,14 @@ export type IPropertiesInheritance<TConfigurationFile> = {
 /**
  * @beta
  */
+export interface IPropertyInheritanceDefaults {
+  array?: IPropertyInheritance<InheritanceType.append | InheritanceType.replace>;
+  object?: IPropertyInheritance<InheritanceType.merge | InheritanceType.replace>;
+}
+
+/**
+ * @beta
+ */
 export type IJsonPathMetadata = ICustomJsonPathMetadata | INonCustomJsonPathMetadata;
 
 /**
@@ -202,6 +210,12 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
    * configuration files.
    */
   propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
+
+  /**
+   * Use this property to control how specific property types are handled between parent and child
+   * configuration files.
+   */
+  propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
 }
 
 interface IJsonPathCallbackObject {
@@ -230,6 +244,7 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
   private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
+  private readonly _defaultPropertyInheritance: IPropertyInheritanceDefaults;
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
@@ -247,6 +262,7 @@ export class ConfigurationFile<TConfigurationFile> {
     this._schemaPath = options.jsonSchemaPath;
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritance || {};
+    this._defaultPropertyInheritance = options.propertyInheritanceDefaults || {};
   }
 
   /**
@@ -604,6 +620,7 @@ export class ConfigurationFile<TConfigurationFile> {
       parentConfiguration as { [key: string]: unknown },
       configurationJson as { [key: string]: unknown },
       resolvedConfigurationFilePath,
+      this._defaultPropertyInheritance,
       this._propertyInheritanceTypes as IPropertiesInheritance<{ [key: string]: unknown }>,
       ignoreProperties
     ) as Partial<TConfigurationFile>;
@@ -613,6 +630,7 @@ export class ConfigurationFile<TConfigurationFile> {
     parentObject: Partial<TField>,
     currentObject: Partial<TField>,
     resolvedConfigurationFilePath: string,
+    defaultPropertyInheritance: IPropertyInheritanceDefaults,
     configuredPropertyInheritance?: IPropertiesInheritance<TField>,
     ignoreProperties?: Set<string>
   ): Partial<TField> {
@@ -722,17 +740,35 @@ export class ConfigurationFile<TConfigurationFile> {
       } else if (parentPropertyValue !== undefined && propertyValue === undefined) {
         useParentPropertyValue();
       } else if (propertyValue !== undefined && parentPropertyValue !== undefined) {
-        // If the property is an inheritance type annotation, use it. Fallback to the configuration file inheritance
-        // behavior, and if one isn't specified, use the default.
+        // If the property is an inheritance type annotation, use it, otherwise fallback to the configured
+        // top-level property inheritance, if one is specified.
         let propertyInheritance: IPropertyInheritance<InheritanceType> | undefined =
-          inheritanceTypeMap.get(propertyName);
+          inheritanceTypeMap.get(propertyName) ?? configuredPropertyInheritance?.[propertyName];
         if (!propertyInheritance) {
           const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
-          propertyInheritance =
-            configuredPropertyInheritance?.[propertyName] ??
-            (bothAreArrays
-              ? { inheritanceType: InheritanceType.append }
-              : { inheritanceType: InheritanceType.replace });
+          if (bothAreArrays) {
+            // If both are arrays, use the configured default array inheritance and fallback to appending
+            // if one is not specified
+            propertyInheritance = defaultPropertyInheritance.array ?? {
+              inheritanceType: InheritanceType.append
+            };
+          } else {
+            const bothAreObjects: boolean =
+              propertyValue &&
+              parentPropertyValue &&
+              typeof propertyValue === 'object' &&
+              typeof parentPropertyValue === 'object';
+            if (bothAreObjects) {
+              // If both are objects, use the configured default object inheritance and fallback to replacing
+              // if one is not specified
+              propertyInheritance = defaultPropertyInheritance.object ?? {
+                inheritanceType: InheritanceType.replace
+              };
+            } else {
+              // Fall back to replacing if they are of different types, since we don't know how to merge these
+              propertyInheritance = { inheritanceType: InheritanceType.replace };
+            }
+          }
         }
 
         switch (propertyInheritance.inheritanceType) {
@@ -791,7 +827,8 @@ export class ConfigurationFile<TConfigurationFile> {
             newValue = this._mergeObjects(
               parentPropertyValue as { [key: string]: unknown },
               propertyValue as { [key: string]: unknown },
-              resolvedConfigurationFilePath
+              resolvedConfigurationFilePath,
+              defaultPropertyInheritance
             ) as TField[keyof TField];
 
             break;

@@ -1,25 +1,30 @@
 {
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 
-  "eventActions": [
-    {
-      "actionKind": "deleteGlobs",
-      "heftEvent": "clean",
-      "actionId": "defaultClean",
-      "globsToDelete": ["ambientTypes.d.ts"]
-    },
-
-    {
-      "actionKind": "copyFiles",
-      "heftEvent": "bundle",
-      "actionId": "copyAmbientTypesToRoot",
-      "copyOperations": [
+  // TODO: Add comments
+  "phasesByName": {
+    "build": {
+      "cleanAdditionalFiles": [
         {
-          "sourceFolder": "src",
-          "destinationFolders": ["."],
-          "includeGlobs": ["ambientTypes.d.ts"]
+          "sourcePath": "ambientTypes.d.ts"
         }
-      ]
+      ],
+
+      "tasksByName": {
+        "copy-ambient-types": {
+          "taskEvent": {
+            "eventKind": "copyFiles",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "./src/ambientTypes.d.ts",
+                  "destinationFolders": ["."]
+                }
+              ]
+            }
+          }
+        }
+      }
     }
-  ]
+  }
 }

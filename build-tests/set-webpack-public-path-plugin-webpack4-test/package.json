@@ -6,13 +6,14 @@
   "scripts": {
     "build": "heft build --clean",
     "start": "heft start",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",
     "@types/webpack-env": "1.13.0",
     "eslint": "~8.7.0",

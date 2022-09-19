@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "main": "lib/index.js",
   "module": "lib-es6/index.js",
@@ -20,7 +20,6 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-web-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
     "@types/webpack-env": "1.13.0"
   }
 }

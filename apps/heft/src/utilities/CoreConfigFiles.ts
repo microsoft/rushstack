@@ -2,348 +2,136 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  ConfigurationFile,
-  IConfigurationFileOptions,
-  InheritanceType,
-  PathResolutionMethod
-} from '@rushstack/heft-config-file';
-import { ITerminal } from '@rushstack/node-core-library';
+import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
+import { Import, ITerminal } from '@rushstack/node-core-library';
+import type { RigConfig } from '@rushstack/rig-package';
 
-import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
-import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
-import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 
-export enum HeftEvent {
-  // Part of the 'clean' stage
-  clean = 'clean',
+export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript';
 
-  // Part of the 'build' stage
-  preCompile = 'pre-compile',
-  compile = 'compile',
-  bundle = 'bundle',
-  postBuild = 'post-build',
-
-  // Part of the 'test' stage
-  test = 'test'
-}
-
-export interface IHeftConfigurationJsonEventActionBase {
-  actionKind: string;
-  heftEvent: 'clean' | 'pre-compile' | 'compile' | 'bundle' | 'post-build' | 'test';
-  actionId: string;
-}
-
-export interface IHeftConfigurationDeleteGlobsEventAction extends IHeftConfigurationJsonEventActionBase {
-  actionKind: 'deleteGlobs';
-  globsToDelete: string[];
-}
-
-export interface IHeftConfigurationRunScriptEventAction extends IHeftConfigurationJsonEventActionBase {
-  actionKind: 'runScript';
-  scriptPath: string;
-  scriptOptions: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-}
-
-export interface ISharedCopyConfiguration {
-  /**
-   * File extensions that should be copied from the source folder to the destination folder(s)
-   */
-  fileExtensions?: string[];
-
-  /**
-   * Globs that should be explicitly excluded. This takes precedence over globs listed in "includeGlobs" and
-   * files that match the file extensions provided in "fileExtensions".
-   */
-  excludeGlobs?: string[];
-
-  /**
-   * Globs that should be explicitly included.
-   */
-  includeGlobs?: string[];
-
-  /**
-   * Copy only the file and discard the relative path from the source folder.
-   */
-  flatten?: boolean;
-
-  /**
-   * Hardlink files instead of copying.
-   */
-  hardlink?: boolean;
-}
-
-export interface IExtendedSharedCopyConfiguration extends ISharedCopyConfiguration {
-  /**
-   * The folder from which files should be copied, relative to the project root. For example, "src".
-   */
-  sourceFolder: string;
-
-  /**
-   * Folder(s) to which files should be copied, relative to the project root. For example ["lib", "lib-cjs"].
-   */
-  destinationFolders: string[];
-}
-
-export interface IHeftConfigurationCopyFilesEventAction extends IHeftConfigurationJsonEventActionBase {
-  actionKind: 'copyFiles';
-  copyOperations: IExtendedSharedCopyConfiguration[];
-}
-
-export interface IHeftConfigurationJsonPluginSpecifier {
-  plugin: string;
+export interface IHeftConfigurationJsonEventSpecifier {
+  eventKind: HeftEventKind;
   options?: object;
 }
 
-export interface IHeftConfigurationJson {
-  eventActions?: IHeftConfigurationJsonEventActionBase[];
-  heftPlugins?: IHeftConfigurationJsonPluginSpecifier[];
+export interface IHeftConfigurationJsonPluginSpecifier {
+  pluginPackage: string;
+  pluginPackageRoot: string;
+  pluginName?: string;
+  options?: object;
 }
 
-export interface IHeftEventActions {
-  copyFiles: Map<HeftEvent, IHeftConfigurationCopyFilesEventAction[]>;
-  deleteGlobs: Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>;
-  runScript: Map<HeftEvent, IHeftConfigurationRunScriptEventAction[]>;
+export interface IHeftConfigurationJsonTaskSpecifier {
+  taskDependencies?: string[];
+  taskEvent?: IHeftConfigurationJsonEventSpecifier;
+  taskPlugin?: IHeftConfigurationJsonPluginSpecifier;
+}
+
+export interface IHeftConfigurationJsonTasks {
+  [taskName: string]: IHeftConfigurationJsonTaskSpecifier;
+}
+
+export interface IHeftConfigurationJsonPhaseSpecifier {
+  phaseDescription?: string;
+  phaseDependencies?: string[];
+  cleanAdditionalFiles?: IDeleteOperation[];
+  tasksByName?: IHeftConfigurationJsonTasks;
+}
+
+export interface IHeftConfigurationJsonPhases {
+  [phaseName: string]: IHeftConfigurationJsonPhaseSpecifier;
+}
+
+export interface IHeftConfigurationJson {
+  heftPlugins?: IHeftConfigurationJsonPluginSpecifier[];
+  phasesByName?: IHeftConfigurationJsonPhases;
 }
 
 export class CoreConfigFiles {
   private static _heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> | undefined;
 
-  private static _heftConfigFileEventActionsCache: Map<HeftConfiguration, IHeftEventActions> = new Map<
-    HeftConfiguration,
-    IHeftEventActions
-  >();
-
-  private static _apiExtractorTaskConfigurationLoader:
-    | ConfigurationFile<IApiExtractorPluginConfiguration>
-    | undefined;
-  private static _typeScriptConfigurationFileLoader:
-    | ConfigurationFile<ITypeScriptConfigurationJson>
-    | undefined;
-  private static _nodeServiceConfigurationLoader:
-    | ConfigurationFile<INodeServicePluginConfiguration>
-    | undefined;
-
   /**
    * Returns the loader for the `config/heft.json` config file.
    */
-  public static get heftConfigFileLoader(): ConfigurationFile<IHeftConfigurationJson> {
+  public static async loadHeftConfigurationFileForProjectAsync(
+    terminal: ITerminal,
+    projectPath: string,
+    rigConfig?: RigConfig | undefined
+  ): Promise<IHeftConfigurationJson> {
     if (!CoreConfigFiles._heftConfigFileLoader) {
+      const pluginPackageResolver: (
+        configurationFilePath: string,
+        propertyName: string,
+        propertyValue: string
+      ) => string = (configurationFilePath: string, propertyName: string, propertyValue: string) => {
+        const configurationFileDirectory: string = path.dirname(configurationFilePath);
+        return Import.resolvePackage({
+          packageName: propertyValue,
+          baseFolderPath: configurationFileDirectory
+        });
+      };
+
       const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
       CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
         projectRelativeFilePath: 'config/heft.json',
         jsonSchemaPath: schemaPath,
-        propertyInheritance: {
-          heftPlugins: {
-            inheritanceType: InheritanceType.append
-          }
+        propertyInheritanceDefaults: {
+          array: { inheritanceType: InheritanceType.append },
+          object: { inheritanceType: InheritanceType.merge }
         },
         jsonPathMetadata: {
-          '$.heftPlugins.*.plugin': {
-            pathResolutionMethod: PathResolutionMethod.NodeResolve
+          // Use a custom resolver for the plugin packages, since the NodeResolve algorithm will resolve to the
+          // package.json exports/module property, which may or may not exist.
+          '$.heftPlugins.*.pluginPackage': {
+            pathResolutionMethod: PathResolutionMethod.custom,
+            customResolver: pluginPackageResolver
           },
-          '$.eventActions.[?(@.actionKind==="runScript")].scriptPath': {
-            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-          }
+          // Use a custom resolver for the plugin packages, since the NodeResolve algorithm will resolve to the
+          // package.json exports/module property, which may or may not exist.
+          '$.phasesByName.*.tasksByName.*.taskPlugin.pluginPackage': {
+            pathResolutionMethod: PathResolutionMethod.custom,
+            customResolver: pluginPackageResolver
+          },
+          // Special handling for "runScript" task events to resolve the script path
+          '$.phasesByName.*.tasksByName[?(@.taskEvent && @.taskEvent.eventKind == "runScript")].taskEvent.options.scriptPath':
+            {
+              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+            }
         }
       });
     }
 
-    return CoreConfigFiles._heftConfigFileLoader;
-  }
+    const configurationFile: IHeftConfigurationJson =
+      await CoreConfigFiles._heftConfigFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
+        projectPath,
+        rigConfig
+      );
 
-  /**
-   * Gets the eventActions from config/heft.json
-   */
-  public static async getConfigConfigFileEventActionsAsync(
-    terminal: ITerminal,
-    heftConfiguration: HeftConfiguration
-  ): Promise<IHeftEventActions> {
-    let result: IHeftEventActions | undefined =
-      CoreConfigFiles._heftConfigFileEventActionsCache.get(heftConfiguration);
-    if (!result) {
-      const heftConfigJson: IHeftConfigurationJson | undefined =
-        await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
-          terminal,
-          heftConfiguration.buildFolder,
-          heftConfiguration.rigConfig
-        );
-
-      result = {
-        copyFiles: new Map<HeftEvent, IHeftConfigurationCopyFilesEventAction[]>(),
-        deleteGlobs: new Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>(),
-        runScript: new Map<HeftEvent, IHeftConfigurationRunScriptEventAction[]>()
-      };
-      CoreConfigFiles._heftConfigFileEventActionsCache.set(heftConfiguration, result);
-
-      for (const eventAction of heftConfigJson?.eventActions || []) {
-        switch (eventAction.actionKind) {
-          case 'copyFiles': {
-            CoreConfigFiles._addEventActionToMap(
-              eventAction as IHeftConfigurationCopyFilesEventAction,
-              result.copyFiles
-            );
-            break;
-          }
-
-          case 'deleteGlobs': {
-            CoreConfigFiles._addEventActionToMap(
-              eventAction as IHeftConfigurationDeleteGlobsEventAction,
-              result.deleteGlobs
-            );
-            break;
-          }
-
-          case 'runScript': {
-            CoreConfigFiles._addEventActionToMap(
-              eventAction as IHeftConfigurationRunScriptEventAction,
-              result.runScript
-            );
-            break;
-          }
-
-          default: {
-            throw new Error(
-              `Unknown heft eventAction actionKind "${eventAction.actionKind}" in ` +
-                `"${CoreConfigFiles.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}" `
-            );
-          }
+    // The pluginPackage field was resolved to the root of the package, but we also want to have
+    // the original plugin package name in the config file. Gather all the plugin specifiers so we can
+    // add the original data ourselves.
+    const pluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] = [
+      ...(configurationFile.heftPlugins || [])
+    ];
+    for (const { tasksByName } of Object.values(configurationFile.phasesByName || {})) {
+      for (const { taskPlugin } of Object.values(tasksByName || {})) {
+        if (taskPlugin) {
+          pluginSpecifiers.push(taskPlugin);
         }
       }
     }
 
-    return result;
-  }
-
-  /**
-   * Returns the loader for the `config/api-extractor-task.json` config file.
-   */
-  public static get apiExtractorTaskConfigurationLoader(): ConfigurationFile<IApiExtractorPluginConfiguration> {
-    if (!CoreConfigFiles._apiExtractorTaskConfigurationLoader) {
-      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'api-extractor-task.schema.json');
-      CoreConfigFiles._apiExtractorTaskConfigurationLoader =
-        new ConfigurationFile<IApiExtractorPluginConfiguration>({
-          projectRelativeFilePath: 'config/api-extractor-task.json',
-          jsonSchemaPath: schemaPath
-        });
+    for (const pluginSpecifier of pluginSpecifiers) {
+      const pluginPackageName: string = CoreConfigFiles._heftConfigFileLoader.getPropertyOriginalValue({
+        parentObject: pluginSpecifier,
+        propertyName: 'pluginPackage'
+      })!;
+      pluginSpecifier.pluginPackageRoot = pluginSpecifier.pluginPackage;
+      pluginSpecifier.pluginPackage = pluginPackageName;
     }
 
-    return CoreConfigFiles._apiExtractorTaskConfigurationLoader;
-  }
-
-  /**
-   * Returns the loader for the `config/typescript.json` config file.
-   */
-  public static get typeScriptConfigurationFileLoader(): ConfigurationFile<ITypeScriptConfigurationJson> {
-    if (!CoreConfigFiles._typeScriptConfigurationFileLoader) {
-      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'typescript.schema.json');
-      CoreConfigFiles._typeScriptConfigurationFileLoader =
-        new ConfigurationFile<ITypeScriptConfigurationJson>({
-          projectRelativeFilePath: 'config/typescript.json',
-          jsonSchemaPath: schemaPath,
-          propertyInheritance: {
-            staticAssetsToCopy: {
-              inheritanceType: InheritanceType.custom,
-              inheritanceFunction: (
-                currentObject: ISharedCopyConfiguration,
-                parentObject: ISharedCopyConfiguration
-              ): ISharedCopyConfiguration => {
-                const result: ISharedCopyConfiguration = {};
-
-                CoreConfigFiles._inheritArray(result, 'fileExtensions', currentObject, parentObject);
-                CoreConfigFiles._inheritArray(result, 'includeGlobs', currentObject, parentObject);
-                CoreConfigFiles._inheritArray(result, 'excludeGlobs', currentObject, parentObject);
-
-                return result;
-              }
-            }
-          }
-        } as IConfigurationFileOptions<ITypeScriptConfigurationJson>);
-    }
-
-    return CoreConfigFiles._typeScriptConfigurationFileLoader;
-  }
-
-  /**
-   * Returns the loader for the `config/api-extractor-task.json` config file.
-   */
-  public static get nodeServiceConfigurationLoader(): ConfigurationFile<INodeServicePluginConfiguration> {
-    if (!CoreConfigFiles._nodeServiceConfigurationLoader) {
-      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'node-service.schema.json');
-      CoreConfigFiles._nodeServiceConfigurationLoader =
-        new ConfigurationFile<INodeServicePluginConfiguration>({
-          projectRelativeFilePath: 'config/node-service.json',
-          jsonSchemaPath: schemaPath
-        });
-    }
-
-    return CoreConfigFiles._nodeServiceConfigurationLoader;
-  }
-
-  private static _addEventActionToMap<TEventAction extends IHeftConfigurationJsonEventActionBase>(
-    eventAction: TEventAction,
-    map: Map<HeftEvent, TEventAction[]>
-  ): void {
-    const heftEvent: HeftEvent = CoreConfigFiles._parseHeftEvent(eventAction);
-    let eventArray: TEventAction[] | undefined = map.get(heftEvent);
-    if (!eventArray) {
-      eventArray = [];
-      map.set(heftEvent, eventArray);
-    }
-
-    eventArray.push(eventAction);
-  }
-
-  private static _parseHeftEvent(eventAction: IHeftConfigurationJsonEventActionBase): HeftEvent {
-    switch (eventAction.heftEvent) {
-      case 'clean':
-        return HeftEvent.clean;
-
-      case 'pre-compile':
-        return HeftEvent.preCompile;
-
-      case 'compile':
-        return HeftEvent.compile;
-
-      case 'bundle':
-        return HeftEvent.bundle;
-
-      case 'post-build':
-        return HeftEvent.postBuild;
-
-      case 'test':
-        return HeftEvent.test;
-
-      default:
-        throw new Error(
-          `Unknown heft event "${eventAction.heftEvent}" in ` +
-            ` "${CoreConfigFiles.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}".`
-        );
-    }
-  }
-
-  private static _inheritArray<
-    TResultObject extends { [P in TArrayKeys]?: unknown[] },
-    TArrayKeys extends keyof TResultObject
-  >(
-    resultObject: TResultObject,
-    propertyName: TArrayKeys,
-    currentObject: TResultObject,
-    parentObject: TResultObject
-  ): void {
-    let newValue: unknown[] | undefined;
-    if (currentObject[propertyName] && parentObject[propertyName]) {
-      newValue = [
-        ...(currentObject[propertyName] as unknown[]),
-        ...(parentObject[propertyName] as unknown[])
-      ];
-    } else {
-      newValue = currentObject[propertyName] || parentObject[propertyName];
-    }
-
-    if (newValue !== undefined) {
-      resultObject[propertyName] = newValue as TResultObject[TArrayKeys];
-    }
+    return configurationFile;
   }
 }

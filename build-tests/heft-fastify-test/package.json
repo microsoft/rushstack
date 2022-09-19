@@ -9,11 +9,13 @@
     "build": "heft build --clean",
     "start": "heft start --clean",
     "serve": "node lib/start.js",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "eslint": "~8.7.0",

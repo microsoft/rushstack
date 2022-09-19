@@ -25,6 +25,7 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
     jsonSchemaPath: string;
     projectRelativeFilePath: string;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
+    propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
 }
 
 // @beta
@@ -77,6 +78,14 @@ export type IPropertiesInheritance<TConfigurationFile> = {
 export interface IPropertyInheritance<TInheritanceType extends InheritanceType> {
     // (undocumented)
     inheritanceType: TInheritanceType;
+}
+
+// @beta (undocumented)
+export interface IPropertyInheritanceDefaults {
+    // (undocumented)
+    array?: IPropertyInheritance<InheritanceType.append | InheritanceType.replace>;
+    // (undocumented)
+    object?: IPropertyInheritance<InheritanceType.merge | InheritanceType.replace>;
 }
 
 // @beta (undocumented)
