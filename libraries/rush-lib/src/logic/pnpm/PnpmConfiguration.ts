@@ -4,16 +4,12 @@
 import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
-/**
- * Pnpm configuration
- * @beta
- */
-export interface IPnpmConfigurationJson {
+interface IPnpmConfigurationJson {
   /**
    * Pnpm field in root package.json. See https://pnpm.io/package_json
    * The type of value is unknown because these fields are not validated by Rush.js
    */
-  pnpmFieldInRootPackageJson: unknown;
+  pnpmFieldInRootPackageJson?: unknown;
 }
 
 /**
@@ -33,11 +29,7 @@ export class PnpmConfiguration {
   private constructor(pnpmConfigurationJson: IPnpmConfigurationJson | undefined, jsonFilename: string) {
     this._jsonFilename = jsonFilename;
 
-    if (pnpmConfigurationJson) {
-      if ('pnpmFieldInRootPackageJson' in pnpmConfigurationJson) {
-        this.pnpmFieldInRootPackageJson = pnpmConfigurationJson.pnpmFieldInRootPackageJson;
-      }
-    }
+    this.pnpmFieldInRootPackageJson = pnpmConfigurationJson?.pnpmFieldInRootPackageJson;
   }
 
   /**
@@ -45,8 +37,14 @@ export class PnpmConfiguration {
    */
   public static loadFromFile(jsonFilename: string): PnpmConfiguration {
     let pnpmConfigurationJson: IPnpmConfigurationJson | undefined;
-    if (FileSystem.exists(jsonFilename)) {
+    try {
       pnpmConfigurationJson = JsonFile.loadAndValidate(jsonFilename, PnpmConfiguration._jsonSchema);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e as Error)) {
+        pnpmConfigurationJson = undefined;
+      } else {
+        throw e;
+      }
     }
     return new PnpmConfiguration(pnpmConfigurationJson, jsonFilename);
   }

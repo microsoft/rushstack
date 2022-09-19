@@ -11,6 +11,7 @@ import { PackageManagerName } from '../../api/packageManager/PackageManager';
 import { RushConfiguration, IConfigurationEnvironment } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
+
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: unknown;
 }

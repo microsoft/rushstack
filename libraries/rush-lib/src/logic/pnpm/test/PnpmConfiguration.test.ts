@@ -5,6 +5,12 @@ import * as path from 'path';
 import { PnpmConfiguration } from '../PnpmConfiguration';
 
 describe(PnpmConfiguration.name, () => {
+  it('not throw error if pnpm-config.json does not exist', () => {
+    expect(() => {
+      PnpmConfiguration.loadFromFile(path.resolve(__dirname, 'pnpm-config-not-exist.json'));
+    }).not.toThrow();
+  });
+
   it('validates unknown property', () => {
     expect(() =>
       PnpmConfiguration.loadFromFile(path.join(__dirname, 'jsonFiles', 'pnpm-config-unknown.json'))

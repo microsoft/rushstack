@@ -78,7 +78,7 @@ export { ILaunchOptions, Rush } from './api/Rush';
 
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
 
-export { PnpmConfiguration, IPnpmConfigurationJson } from './logic/pnpm/PnpmConfiguration';
+export { PnpmConfiguration } from './logic/pnpm/PnpmConfiguration';
 
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 
