@@ -44,6 +44,30 @@
 			"type": "node",
 			"request": "attach",
 			"port": 5858
+		},
+		{
+			"name": "Run Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}/apps/vscode-extension"
+			],
+			"outFiles": [
+				"${workspaceFolder}/apps/vscode-extension/dist/**/*.js"
+			]
+		},
+		{
+			"name": "Extension Tests",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}/apps/vscode-extension",
+				"--extensionTestsPath=${workspaceFolder}/apps/vscode-extension/out/test/suite/index"
+			],
+			"outFiles": [
+				"${workspaceFolder}/apps/vscode-extension/out/**/*.js",
+				"${workspaceFolder}/apps/vscode-extension/dist/**/*.js"
+			]
 		}
 	]
 }
