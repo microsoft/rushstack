@@ -512,6 +512,12 @@
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
+    {
+      "packageName": "@rushstack/vscode-extension",
+      "projectFolder": "apps/vscode-extension",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "build-tests" folder (alphabetical order)
     {
@@ -1006,7 +1012,6 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
-
     // "repo-scripts" folder (alphabetical order)
     {
       "packageName": "doc-plugin-rush-stack",
