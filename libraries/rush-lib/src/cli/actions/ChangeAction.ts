@@ -50,6 +50,7 @@ export class ChangeAction extends BaseRushAction {
   private _bulkChangeMessageParameter!: CommandLineStringParameter;
   private _bulkChangeBumpTypeParameter!: CommandLineChoiceParameter;
   private _overwriteFlagParameter!: CommandLineFlagParameter;
+  private _commitChangesFlagParameter!: CommandLineFlagParameter;
 
   private _targetBranchName: string | undefined;
 
@@ -130,6 +131,13 @@ export class ChangeAction extends BaseRushAction {
         `(or erroring in ${BULK_LONG_NAME} mode).`
     });
 
+    this._commitChangesFlagParameter = this.defineFlagParameter({
+      parameterLongName: '--commit',
+      parameterShortName: '-c',
+      description:
+        `Commits the change files to git.`
+    })
+
     this._changeEmailParameter = this.defineStringParameter({
       parameterLongName: '--email',
       argumentName: 'EMAIL',
@@ -167,7 +175,8 @@ export class ChangeAction extends BaseRushAction {
         this._bulkChangeParameter,
         this._bulkChangeMessageParameter,
         this._bulkChangeBumpTypeParameter,
-        this._overwriteFlagParameter
+        this._overwriteFlagParameter,
+        this._commitChangesFlagParameter,
       ]
         .map((parameter) => {
           return parameter.value
@@ -288,7 +297,7 @@ export class ChangeAction extends BaseRushAction {
     }
 
     try {
-      return await this._writeChangeFiles(
+      await this._writeChangeFiles(
         promptModule,
         changeFileData,
         this._overwriteFlagParameter.value,
@@ -297,6 +306,10 @@ export class ChangeAction extends BaseRushAction {
     } catch (error) {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
+    if (this._commitChangesFlagParameter.value) {
+      console.log("Commiting changes");
+    }
+    return;
   }
 
   private _generateHostMap(): Map<RushConfigurationProject, string> {
