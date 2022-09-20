@@ -110,7 +110,7 @@ export class Autoinstaller {
     });
 
     // Example: ../common/autoinstallers/my-task/node_modules
-    const nodeModulesFolder: string = path.join(autoinstallerFullPath, RushConstants.nodeModulesFolderName);
+    const nodeModulesFolder: string = `${autoinstallerFullPath}/${RushConstants.nodeModulesFolderName}`;
     const isLastInstallFlagDirty: boolean =
       !lastInstallFlag.isValid() ||
       !FileSystem.exists(`${nodeModulesFolder}/rush-autoinstaller.flag`);
