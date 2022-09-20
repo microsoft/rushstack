@@ -306,7 +306,7 @@ export class ChangeAction extends BaseRushAction {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
     if (this._commitChangesFlagParameter.value) {
-      this._stageAndCommitGitChanges([this.rushConfiguration.changesFolder]);
+      this._stageAndCommitGitChanges([this.rushConfiguration.changesFolder], 'Rush changes');
     }
     return;
   }
@@ -713,10 +713,10 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private _stageAndCommitGitChanges(patterns: string[]) {
+  private _stageAndCommitGitChanges(patterns: string[], message: string) {
     try {
       this._stageGitChanges(patterns);
-      child_process.execSync(`git commit -m "Rush changes"`);
+      child_process.execSync(`git commit -m "${message}"`);
     } catch (error) {
       console.error(`Cannot stage and commit git changes ${(error as Error).message}`);
     }
