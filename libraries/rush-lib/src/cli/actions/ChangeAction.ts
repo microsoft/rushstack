@@ -134,9 +134,8 @@ export class ChangeAction extends BaseRushAction {
     this._commitChangesFlagParameter = this.defineFlagParameter({
       parameterLongName: '--commit',
       parameterShortName: '-c',
-      description:
-        `Commits the change files to git.`
-    })
+      description: `Commits the change files to git.`
+    });
 
     this._changeEmailParameter = this.defineStringParameter({
       parameterLongName: '--email',
@@ -176,7 +175,7 @@ export class ChangeAction extends BaseRushAction {
         this._bulkChangeMessageParameter,
         this._bulkChangeBumpTypeParameter,
         this._overwriteFlagParameter,
-        this._commitChangesFlagParameter,
+        this._commitChangesFlagParameter
       ]
         .map((parameter) => {
           return parameter.value
@@ -307,7 +306,7 @@ export class ChangeAction extends BaseRushAction {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
     if (this._commitChangesFlagParameter.value) {
-      console.log("Commiting changes");
+      this._stageAndCommitGitChanges([this.rushConfiguration.changesFolder]);
     }
     return;
   }
@@ -702,5 +701,24 @@ export class ChangeAction extends BaseRushAction {
 
   private _logNoChangeFileRequired(): void {
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
+  }
+
+  private _stageGitChanges(patterns: string[]): void {
+    try {
+      patterns.forEach((pattern) => {
+        child_process.execSync(`git add "${pattern}"`);
+      });
+    } catch (error) {
+      console.error(`Cannot stage git changes ${(error as Error).message}`);
+    }
+  }
+
+  private _stageAndCommitGitChanges(patterns: string[]) {
+    try {
+      this._stageGitChanges(patterns);
+      child_process.execSync(`git commit -m "Rush changes"`);
+    } catch (error) {
+      console.error(`Cannot stage and commit git changes ${(error as Error).message}`);
+    }
   }
 }
