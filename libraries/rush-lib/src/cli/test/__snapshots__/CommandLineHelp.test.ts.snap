@@ -250,7 +250,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: change 1`] = `
-"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--overwrite]
+"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--overwrite] [-c]
                    [--email EMAIL] [--bulk] [--message MESSAGE]
                    [--bump-type {major,minor,patch,none}]
                    
@@ -288,6 +288,7 @@ Optional arguments:
                         the \\"main\\" branch.
   --overwrite           If a changefile already exists, overwrite without 
                         prompting (or erroring in --bulk mode).
+  -c, --commit          Commits the change files to git.
   --email EMAIL         The email address to use in changefiles. If this 
                         parameter is not provided, the email address will be 
                         detected or prompted for in interactive mode.
