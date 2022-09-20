@@ -113,7 +113,7 @@ export class Autoinstaller {
     const nodeModulesFolder: string = path.join(autoinstallerFullPath, RushConstants.nodeModulesFolderName);
     const isLastInstallFlagDirty: boolean =
       !lastInstallFlag.isValid() ||
-      !FileSystem.exists(path.join(nodeModulesFolder, 'rush-autoinstaller.log'));
+      !FileSystem.exists(`${nodeModulesFolder}/rush-autoinstaller.flag`);
 
     if (isLastInstallFlagDirty || lock.dirtyWhenAcquired) {
       if (FileSystem.exists(nodeModulesFolder)) {
