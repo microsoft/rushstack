@@ -138,10 +138,7 @@ export class Autoinstaller {
 
       FileSystem.writeFile(
         path.join(nodeModulesFolder, 'rush-autoinstaller.log'),
-        'If this file is deleted, Rush will assume that the node_modules folder has been cleaned and will reinstall it.',
-        {
-          ensureFolderExists: false
-        }
+        'If this file is deleted, Rush will assume that the node_modules folder has been cleaned and will reinstall it.'
       );
 
       this._logIfConsoleOutputIsNotRestricted('Auto install completed successfully\n');
