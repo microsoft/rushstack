@@ -137,7 +137,7 @@ export class Autoinstaller {
       lastInstallFlag.create();
 
       FileSystem.writeFile(
-        path.join(nodeModulesFolder, 'rush-autoinstaller.log'),
+        `${nodeModulesFolder}/rush-autoinstaller.flag`,
         'If this file is deleted, Rush will assume that the node_modules folder has been cleaned and will reinstall it.'
       );
 
