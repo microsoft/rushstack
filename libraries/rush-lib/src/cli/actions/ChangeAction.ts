@@ -712,7 +712,7 @@ export class ChangeAction extends BaseRushAction {
       });
       Utilities.executeCommand({
         command: 'git',
-        args: ['commit', '-m', message],
+        args: ['commit', pattern, '-m', message],
         workingDirectory: this.rushConfiguration.changesFolder
       });
     } catch (error) {
