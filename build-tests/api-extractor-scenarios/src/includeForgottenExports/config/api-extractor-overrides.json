@@ -1,0 +1,13 @@
+{
+  "apiReport": {
+    "enabled": true,
+    "reportFolder": "<projectFolder>/etc/includeForgottenExports",
+    "includeForgottenExports": true
+  },
+
+  "docModel": {
+    "enabled": true,
+    "apiJsonFilePath": "<projectFolder>/etc/includeForgottenExports/<unscopedPackageName>.api.json",
+    "includeForgottenExports": true
+  }
+}

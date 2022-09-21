@@ -17,6 +17,7 @@ import {
   IApiTypeParameterListMixinOptions,
   ApiTypeParameterListMixin
 } from '../mixins/ApiTypeParameterListMixin';
+import { IApiExportedMixinOptions, ApiExportedMixin } from '../mixins/ApiExportedMixin';
 
 /**
  * Constructor options for {@link ApiFunction}.
@@ -28,7 +29,8 @@ export interface IApiFunctionOptions
     IApiParameterListMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiReturnTypeMixinOptions,
-    IApiDeclaredItemOptions {}
+    IApiDeclaredItemOptions,
+    IApiExportedMixinOptions {}
 
 /**
  * Represents a TypeScript function declaration.
@@ -52,7 +54,9 @@ export interface IApiFunctionOptions
  * @public
  */
 export class ApiFunction extends ApiNameMixin(
-  ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))))
+  ApiTypeParameterListMixin(
+    ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiExportedMixin(ApiDeclaredItem))))
+  )
 ) {
   public constructor(options: IApiFunctionOptions) {
     super(options);
@@ -75,8 +79,9 @@ export class ApiFunction extends ApiNameMixin(
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Exports, nameComponent)
+      .addNavigationStep(navigation, nameComponent)
       .withMeaning(Meaning.Function)
       .withOverloadIndex(this.overloadIndex);
   }

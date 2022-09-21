@@ -183,11 +183,11 @@
             },
             {
               "kind": "Content",
-              "text": "typeof colors."
+              "text": "typeof "
             },
             {
               "kind": "Reference",
-              "text": "zebra",
+              "text": "colors.zebra",
               "canonicalReference": "colors!zebra:var"
             },
             {

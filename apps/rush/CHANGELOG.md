@@ -1,6 +1,22 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 31 Aug 2022 00:43:07 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Sep 2022 00:56:37 GMT and should not be manually modified.
+
+## 5.78.0
+Sat, 17 Sep 2022 00:56:37 GMT
+
+### Updates
+
+- Add a "beforeInstall" hook to the plugin API, for plugins to examine the environment immediately before "rush install" or "rush update" invoke the package manager.
+- Fix "--parallelism XX%" parsing to return a finite number of CPU cores.
+- Update the "rush init" template to include .gitignore patterns for IntellJ IDEA
+- Upgrade the @azure/identity and @azure/storage-blob packages to eliminate a deprecation message during installation.
+- Define an environment variable RUSH_PNPM_VERIFY_STORE_INTEGRITY that can be used to enable or disable PNPM's store integrity verification during installation for performance.
+
+## 5.77.3
+Fri, 02 Sep 2022 17:49:09 GMT
+
+_Version update only_
 
 ## 5.77.2
 Wed, 31 Aug 2022 00:43:07 GMT

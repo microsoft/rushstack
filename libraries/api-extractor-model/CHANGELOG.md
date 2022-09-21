@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Wed, 24 Aug 2022 03:01:22 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Sep 2022 00:18:52 GMT and should not be manually modified.
+
+## 7.24.1
+Thu, 15 Sep 2022 00:18:52 GMT
+
+_Version update only_
+
+## 7.24.0
+Fri, 02 Sep 2022 17:48:42 GMT
+
+### Minor changes
+
+- Add new ApiExportedMixin mixin class for determining whether an API item is exported or not
 
 ## 7.23.3
 Wed, 24 Aug 2022 03:01:22 GMT

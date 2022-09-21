@@ -169,7 +169,9 @@ export class UpdateAction extends BaseInstallAction {
       pnpmFilterArguments,
       splitWorkspacePnpmFilterArguments,
       selectedProjects,
-      checkOnly: false
+      checkOnly: false,
+
+      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };
   }
 }
