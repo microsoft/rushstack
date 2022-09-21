@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Thu, 15 Sep 2022 00:18:52 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+
+## 0.10.0
+Wed, 21 Sep 2022 20:21:10 GMT
+
+### Minor changes
+
+- Add a "propertyInheritanceDefaults" option that allows the default property inheritance type to be configured.
 
 ## 0.9.6
 Thu, 15 Sep 2022 00:18:52 GMT

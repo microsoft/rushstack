@@ -2,6 +2,32 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/typings-generator_v0.8.0",
+      "date": "Wed, 21 Sep 2022 20:21:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose the \"ignoredFileGlobs,\" \"inputFileGlob,\" and \"sourceFolderPath\" properties."
+          },
+          {
+            "comment": "Add an optional parameter to the `TypingsGenerator.generateTypingsAsync` function allowing the paths of files for which typings will be generated to be provided."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.23",
       "tag": "@rushstack/typings-generator_v0.7.23",
       "date": "Thu, 15 Sep 2022 00:18:52 GMT",

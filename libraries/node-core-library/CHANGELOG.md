@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 15 Sep 2022 00:18:51 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+
+## 3.52.0
+Wed, 21 Sep 2022 20:21:10 GMT
+
+### Minor changes
+
+- Add a "FileSystem.isNotDirectoryError" function that returns `true` if the passed-in error object is an ENOTDIR error.
+- Add a parameter to the `LockFile.release` function to optionally delete the lockfile.
 
 ## 3.51.2
 Thu, 15 Sep 2022 00:18:51 GMT

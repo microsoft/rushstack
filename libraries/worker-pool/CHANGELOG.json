@@ -2,6 +2,21 @@
   "name": "@rushstack/worker-pool",
   "entries": [
     {
+      "version": "0.1.31",
+      "tag": "@rushstack/worker-pool_v0.1.31",
+      "date": "Wed, 21 Sep 2022 20:21:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.30",
       "tag": "@rushstack/worker-pool_v0.1.30",
       "date": "Thu, 15 Sep 2022 00:18:52 GMT",
