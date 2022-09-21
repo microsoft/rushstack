@@ -288,7 +288,8 @@ Optional arguments:
                         the \\"main\\" branch.
   --overwrite           If a changefile already exists, overwrite without 
                         prompting (or erroring in --bulk mode).
-  -c, --commit          Commits the change files to git.
+  -c, --commit          If this flag is specified generated changefiles will 
+                        be commited automatically.
   --email EMAIL         The email address to use in changefiles. If this 
                         parameter is not provided, the email address will be 
                         detected or prompted for in interactive mode.
