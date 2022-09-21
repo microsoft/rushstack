@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Sep 2022 20:46:06 GMT and should not be manually modified.
+
+## 0.48.0-dev.0
+Wed, 21 Sep 2022 20:46:06 GMT
+
+### Minor changes
+
+- Initial relelease of resdesign.
 
 ## 0.47.10
 Wed, 21 Sep 2022 20:21:10 GMT
@@ -353,7 +360,7 @@ Wed, 06 Oct 2021 15:08:25 GMT
 
 ### Patches
 
-- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. 
+- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters.
 
 ## 0.41.1
 Wed, 06 Oct 2021 02:41:48 GMT
@@ -974,7 +981,7 @@ Sat, 24 Oct 2020 00:11:18 GMT
 
 ### Patches
 
-- Add fileExtensions config to SassTypingsGenerator. 
+- Add fileExtensions config to SassTypingsGenerator.
 
 ## 0.17.1
 Wed, 21 Oct 2020 05:09:44 GMT
