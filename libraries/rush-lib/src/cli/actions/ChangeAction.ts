@@ -308,7 +308,6 @@ export class ChangeAction extends BaseRushAction {
     if (this._commitChangesFlagParameter.value) {
       this._stageAndCommitGitChanges([this.rushConfiguration.changesFolder], 'Rush changes');
     }
-    return;
   }
 
   private _generateHostMap(): Map<RushConfigurationProject, string> {
