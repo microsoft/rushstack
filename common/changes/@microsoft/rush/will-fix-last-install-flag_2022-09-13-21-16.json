@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an error that ocurred if an autoinstaller's  \"node_modules\" folder was manually deleted (GitHub #2987)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
