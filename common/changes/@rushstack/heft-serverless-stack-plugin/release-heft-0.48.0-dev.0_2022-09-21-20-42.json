@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-serverless-stack-plugin",
+      "comment": "Initial relelease of resdesign.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-serverless-stack-plugin"
+}

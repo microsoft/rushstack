@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Initial relelease of resdesign.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

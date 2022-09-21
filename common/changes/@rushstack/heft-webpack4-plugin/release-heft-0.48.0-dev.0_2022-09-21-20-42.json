@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "comment": "Initial relelease of resdesign.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin"
+}

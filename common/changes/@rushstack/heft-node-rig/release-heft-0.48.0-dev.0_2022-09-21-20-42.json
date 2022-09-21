@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Initial relelease of resdesign.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}
