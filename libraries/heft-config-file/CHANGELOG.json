@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@rushstack/heft-config-file_v0.10.0",
+      "date": "Wed, 21 Sep 2022 20:21:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a \"propertyInheritanceDefaults\" option that allows the default property inheritance type to be configured."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.52.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.6",
       "tag": "@rushstack/heft-config-file_v0.9.6",
       "date": "Thu, 15 Sep 2022 00:18:52 GMT",

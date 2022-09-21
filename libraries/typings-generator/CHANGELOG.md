@@ -1,6 +1,14 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Thu, 15 Sep 2022 00:18:52 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+
+## 0.8.0
+Wed, 21 Sep 2022 20:21:10 GMT
+
+### Minor changes
+
+- Expose the "ignoredFileGlobs," "inputFileGlob," and "sourceFolderPath" properties.
+- Add an optional parameter to the `TypingsGenerator.generateTypingsAsync` function allowing the paths of files for which typings will be generated to be provided.
 
 ## 0.7.23
 Thu, 15 Sep 2022 00:18:52 GMT

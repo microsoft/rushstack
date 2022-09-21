@@ -5,8 +5,7 @@ import { RushAzureStorageBuildCachePlugin } from './RushAzureStorageBuildCachePl
 export {
   AzureStorageAuthentication,
   IAzureStorageAuthenticationOptions,
-  AzureEnvironmentNames,
-  AzureAuthorityHosts
+  AzureEnvironmentName
 } from './AzureStorageAuthentication';
 
 export default RushAzureStorageBuildCachePlugin;

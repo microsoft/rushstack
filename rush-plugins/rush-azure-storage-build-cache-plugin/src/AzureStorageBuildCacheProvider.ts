@@ -9,12 +9,9 @@ import {
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
 import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient } from '@azure/storage-blob';
+import { AzureAuthorityHosts } from '@azure/identity';
 
-import {
-  AzureAuthorityHosts,
-  AzureStorageAuthentication,
-  IAzureStorageAuthenticationOptions
-} from './AzureStorageAuthentication';
+import { AzureStorageAuthentication, IAzureStorageAuthenticationOptions } from './AzureStorageAuthentication';
 
 export interface IAzureStorageBuildCacheProviderOptions extends IAzureStorageAuthenticationOptions {
   blobPrefix?: string;

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update the \"rush init\" template to include .gitignore patterns for IntellJ IDEA",
+      "comment": "Fix an error that ocurred if an autoinstaller's  \"node_modules\" folder was manually deleted (GitHub #2987)",
       "type": "none"
     }
   ],

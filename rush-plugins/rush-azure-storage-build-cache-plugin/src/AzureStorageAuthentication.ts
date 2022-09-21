@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
+import { DeviceCodeCredential, DeviceCodeInfo, AzureAuthorityHosts } from '@azure/identity';
 import {
   BlobServiceClient,
   ContainerSASPermissions,
@@ -13,24 +13,10 @@ import type { ITerminal } from '@rushstack/node-core-library';
 import { CredentialCache, ICredentialCacheEntry, RushConstants } from '@rushstack/rush-sdk';
 import { PrintUtilities } from '@rushstack/terminal';
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// TODO: This is a temporary workaround; it should be reverted when we upgrade to "@azure/identity" version 2.x
-// import { AzureAuthorityHosts } from '@azure/identity';
 /**
  * @public
  */
-export enum AzureAuthorityHosts {
-  AzureChina = 'https://login.chinacloudapi.cn',
-  AzureGermany = 'https://login.microsoftonline.de',
-  AzureGovernment = 'https://login.microsoftonline.us',
-  AzurePublicCloud = 'https://login.microsoftonline.com'
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-/**
- * @public
- */
-export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
+export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 
 /**
  * @public
@@ -38,7 +24,7 @@ export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
 export interface IAzureStorageAuthenticationOptions {
   storageContainerName: string;
   storageAccountName: string;
-  azureEnvironment?: AzureEnvironmentNames;
+  azureEnvironment?: AzureEnvironmentName;
   isCacheWriteAllowed: boolean;
 }
 
@@ -48,7 +34,7 @@ const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
  * @public
  */
 export class AzureStorageAuthentication {
-  protected readonly _azureEnvironment: AzureEnvironmentNames;
+  protected readonly _azureEnvironment: AzureEnvironmentName;
   protected readonly _storageAccountName: string;
   protected readonly _storageContainerName: string;
   protected readonly _isCacheWriteAllowedByConfiguration: boolean;
@@ -173,15 +159,12 @@ export class AzureStorageAuthentication {
       throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
     }
 
-    const DeveloperSignOnClientId: string = '04b07795-8ddb-461a-bbee-02f9e1bf7b46';
-    const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential(
-      'organizations',
-      DeveloperSignOnClientId,
-      (deviceCodeInfo: DeviceCodeInfo) => {
+    const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential({
+      authorityHost: authorityHost,
+      userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
         PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
-      },
-      { authorityHost: authorityHost }
-    );
+      }
+    });
     const blobServiceClient: BlobServiceClient = new BlobServiceClient(
       this._storageAccountUrl,
       deviceCodeCredential

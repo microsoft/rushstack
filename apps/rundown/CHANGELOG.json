@@ -2,6 +2,24 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.221",
+      "tag": "@rushstack/rundown_v1.0.221",
+      "date": "Wed, 21 Sep 2022 20:21:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.220",
       "tag": "@rushstack/rundown_v1.0.220",
       "date": "Thu, 15 Sep 2022 00:18:52 GMT",
