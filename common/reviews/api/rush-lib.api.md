@@ -736,6 +736,7 @@ export class RushConfiguration {
     getRepoState(variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(variant?: string | undefined): string;
     get gitAllowedEmailRegExps(): string[];
+    get gitChangefilesCommitMessage(): string | undefined;
     get gitChangeLogUpdateCommitMessage(): string | undefined;
     get gitSampleEmail(): string;
     get gitTagSeparator(): string | undefined;

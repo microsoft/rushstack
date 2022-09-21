@@ -83,6 +83,7 @@ export interface IRushGitPolicyJson {
   sampleEmail?: string;
   versionBumpCommitMessage?: string;
   changeLogUpdateCommitMessage?: string;
+  changefilesCommitMessage?: string;
   tagSeparator?: string;
 }
 
@@ -473,6 +474,7 @@ export class RushConfiguration {
   private _gitSampleEmail: string;
   private _gitVersionBumpCommitMessage: string | undefined;
   private _gitChangeLogUpdateCommitMessage: string | undefined;
+  private _gitChangefilesCommitMessage: string | undefined;
   private _gitTagSeparator: string | undefined;
 
   // "hotfixChangeEnabled" feature
@@ -703,6 +705,10 @@ export class RushConfiguration {
 
       if (rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage) {
         this._gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
+      }
+
+      if (rushConfigurationJson.gitPolicy.changefilesCommitMessage) {
+        this._gitChangefilesCommitMessage = rushConfigurationJson.gitPolicy.changefilesCommitMessage;
       }
 
       if (rushConfigurationJson.gitPolicy.tagSeparator) {
@@ -1346,6 +1352,14 @@ export class RushConfiguration {
    */
   public get gitChangeLogUpdateCommitMessage(): string | undefined {
     return this._gitChangeLogUpdateCommitMessage;
+  }
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * The commit message to use when committing change log files 'rush version'
+   */
+  public get gitChangefilesCommitMessage(): string | undefined {
+    return this._gitChangefilesCommitMessage;
   }
 
   /**

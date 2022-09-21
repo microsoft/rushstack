@@ -267,6 +267,13 @@
      * in the commit message, and then customize Rush's message to contain that string.
      */
     // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]"
+
+    /**
+     * The commit message to use when commiting changefiles during 'rush change --commit'
+     *
+     * If no commit message is set it will default to 'Rush change'
+     */
+    // "changefilesCommitMessage": "Added Rush changefiles"
   },
 
   "repository": {

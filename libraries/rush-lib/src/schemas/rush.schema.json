@@ -181,6 +181,10 @@
           "description": "The commit message to use when committing change log files \"rush version\". Defaults to \"Update changelogs [skip ci]\"",
           "type": "string"
         },
+        "changefilesCommitMessage": {
+          "description": "The commit message to use when commiting change files made by \"rush change\". Defaults to\"Rush change\"",
+          "type": "string"
+        },
         "tagSeparator": {
           "description": "The separator between package name and version in git tag. Defaults to \"_\"",
           "type": "string"

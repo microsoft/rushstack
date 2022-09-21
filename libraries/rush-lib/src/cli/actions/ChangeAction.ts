@@ -307,7 +307,10 @@ export class ChangeAction extends BaseRushAction {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
     if (this._commitChangesFlagParameter.value) {
-      this._stageAndCommitGitChanges('*', 'Rush changes');
+      this._stageAndCommitGitChanges(
+        '*',
+        this.rushConfiguration.gitChangefilesCommitMessage || 'Rush change'
+      );
     }
   }
 
