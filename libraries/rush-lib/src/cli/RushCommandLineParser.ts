@@ -23,32 +23,12 @@ import {
   IPhasedCommandConfig
 } from '../api/CommandLineConfiguration';
 
-import { AddAction } from './actions/AddAction';
-import { ChangeAction } from './actions/ChangeAction';
-import { CheckAction } from './actions/CheckAction';
-import { DeployAction } from './actions/DeployAction';
-import { InitAction } from './actions/InitAction';
-import { InitAutoinstallerAction } from './actions/InitAutoinstallerAction';
-import { InitDeployAction } from './actions/InitDeployAction';
-import { InstallAction } from './actions/InstallAction';
-import { LinkAction } from './actions/LinkAction';
-import { ListAction } from './actions/ListAction';
-import { PublishAction } from './actions/PublishAction';
-import { PurgeAction } from './actions/PurgeAction';
-import { ScanAction } from './actions/ScanAction';
-import { UnlinkAction } from './actions/UnlinkAction';
-import { UpdateAction } from './actions/UpdateAction';
-import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
-import { VersionAction } from './actions/VersionAction';
-import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
-
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
-import { SetupAction } from './actions/SetupAction';
 import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
@@ -61,6 +41,7 @@ export interface IRushCommandLineParserOptions {
   cwd: string; // Defaults to `cwd`
   alreadyReportedNodeTooNewError: boolean;
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
+  excludeDefaultActions: boolean;
 }
 
 export class RushCommandLineParser extends CommandLineParser {
@@ -222,7 +203,8 @@ export class RushCommandLineParser extends CommandLineParser {
     return {
       cwd: options.cwd || process.cwd(),
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
-      builtInPluginConfigurations: options.builtInPluginConfigurations || []
+      builtInPluginConfigurations: options.builtInPluginConfigurations || [],
+      excludeDefaultActions: options.excludeDefaultActions || false
     };
   }
 
@@ -241,26 +223,10 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       this.rushGlobalFolder = new RushGlobalFolder();
 
-      // Alphabetical order
-      this.addAction(new AddAction(this));
-      this.addAction(new ChangeAction(this));
-      this.addAction(new CheckAction(this));
-      this.addAction(new DeployAction(this));
-      this.addAction(new InitAction(this));
-      this.addAction(new InitAutoinstallerAction(this));
-      this.addAction(new InitDeployAction(this));
-      this.addAction(new InstallAction(this));
-      this.addAction(new LinkAction(this));
-      this.addAction(new ListAction(this));
-      this.addAction(new PublishAction(this));
-      this.addAction(new PurgeAction(this));
-      this.addAction(new ScanAction(this));
-      this.addAction(new SetupAction(this));
-      this.addAction(new UnlinkAction(this));
-      this.addAction(new UpdateAction(this));
-      this.addAction(new UpdateAutoinstallerAction(this));
-      this.addAction(new UpdateCloudCredentialsAction(this));
-      this.addAction(new VersionAction(this));
+      if (!this._rushOptions.excludeDefaultActions) {
+        const { addDefaultRushActions }: typeof import('./DefaultActions') = require('./DefaultActions');
+        addDefaultRushActions(this);
+      }
 
       this._populateScriptActions();
     } catch (error) {
