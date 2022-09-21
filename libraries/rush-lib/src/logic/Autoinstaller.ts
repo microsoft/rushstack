@@ -111,9 +111,8 @@ export class Autoinstaller {
 
     // Example: ../common/autoinstallers/my-task/node_modules
     const nodeModulesFolder: string = `${autoinstallerFullPath}/${RushConstants.nodeModulesFolderName}`;
-    const isLastInstallFlagDirty: boolean =
-      !lastInstallFlag.isValid() ||
-      !FileSystem.exists(`${nodeModulesFolder}/rush-autoinstaller.flag`);
+    const flagPath: string = `${nodeModulesFolder}/rush-autoinstaller.flag`;
+    const isLastInstallFlagDirty: boolean = !lastInstallFlag.isValid() || !FileSystem.exists(flagPath);
 
     if (isLastInstallFlagDirty || lock.dirtyWhenAcquired) {
       if (FileSystem.exists(nodeModulesFolder)) {
@@ -137,7 +136,7 @@ export class Autoinstaller {
       lastInstallFlag.create();
 
       FileSystem.writeFile(
-        `${nodeModulesFolder}/rush-autoinstaller.flag`,
+        flagPath,
         'If this file is deleted, Rush will assume that the node_modules folder has been cleaned and will reinstall it.'
       );
 
