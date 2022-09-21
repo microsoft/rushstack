@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Test commit only changefile",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
