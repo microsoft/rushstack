@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { render, Result, SassError } from 'node-sass';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
 import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
@@ -83,9 +82,8 @@ export class SassProcessor extends StringValuesTypingsGenerator {
    */
   public constructor(options: ISassTypingsGeneratorOptions) {
     const { buildFolder, sassConfiguration } = options;
-    const srcFolder: string = sassConfiguration.srcFolder || path.join(buildFolder, 'src');
-    const generatedTsFolder: string =
-      sassConfiguration.generatedTsFolder || path.join(buildFolder, 'temp', 'sass-ts');
+    const srcFolder: string = sassConfiguration.srcFolder || `${buildFolder}/src`;
+    const generatedTsFolder: string = sassConfiguration.generatedTsFolder || `${buildFolder}/temp/sass-ts`;
     const exportAsDefault: boolean =
       sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
     const exportAsDefaultInterfaceName: string = 'IExportStyles';
@@ -129,7 +127,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
         let classMap: IClassMap = {};
         const cssModulesClassMapPlugin: postcss.Plugin = cssModules({
           getJSON: (cssFileName: string, json: IClassMap) => {
-            // This callback will be invoked durint the promise evaluation of the postcss process() function.
+            // This callback will be invoked during the promise evaluation of the postcss process() function.
             classMap = json;
           },
           // Avoid unnecessary name hashing.
@@ -170,7 +168,8 @@ export class SassProcessor extends StringValuesTypingsGenerator {
    * Partial filenames always begin with a leading underscore and do not produce a CSS output file.
    */
   private _isSassPartial(filePath: string): boolean {
-    return path.basename(filePath)[0] === '_';
+    const lastSlashIndex: number = filePath.lastIndexOf('/');
+    return filePath.charAt(lastSlashIndex + 1) === '_';
   }
 
   private async _transpileSassAsync(
@@ -179,29 +178,24 @@ export class SassProcessor extends StringValuesTypingsGenerator {
     buildFolder: string,
     importIncludePaths: string[] | undefined
   ): Promise<string> {
-    const result: Result = await new Promise(
-      (resolve: (result: Result) => void, reject: (err: Error) => void) => {
-        render(
-          {
-            data: fileContents,
-            file: filePath,
-            importer: (url: string) => ({ file: this._patchSassUrl(url) }),
-            includePaths: importIncludePaths
-              ? importIncludePaths
-              : [path.join(buildFolder, 'node_modules'), path.join(buildFolder, 'src')],
-            indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
-          },
-          (err: SassError, result: Result) => {
-            if (err) {
-              // Extract location information and format into the error message until we have a concept
-              // of location-aware diagnostics in Heft.
-              return reject(new Error(`${err.file}(${err.column},${err.line}): ${err.message}`));
-            }
-            resolve(result);
-          }
-        );
-      }
-    );
+    let result: Result;
+    try {
+      result = await LegacyAdapters.convertCallbackToPromise(render, {
+        data: fileContents,
+        file: filePath,
+        importer: (url: string) => ({ file: this._patchSassUrl(url) }),
+        includePaths: importIncludePaths
+          ? importIncludePaths
+          : [`${buildFolder}/node_modules`, `${buildFolder}/src`],
+        indentedSyntax: filePath.toLowerCase().endsWith('.sass')
+      });
+    } catch (err) {
+      const typedError: SassError = err;
+
+      // Extract location information and format into the error message until we have a concept
+      // of location-aware diagnostics in Heft.
+      throw new Error(`${typedError.file}(${typedError.column},${typedError.line}): ${typedError.message}`);
+    }
 
     // Register any @import files as dependencies.
     for (const dependency of result.stats.includedFiles) {

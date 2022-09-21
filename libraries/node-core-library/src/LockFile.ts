@@ -421,16 +421,20 @@ export class LockFile {
   }
 
   /**
-   * Unlocks a file and removes it from disk.
+   * Unlocks a file and optionally removes it from disk.
    * This can only be called once.
+   *
+   * @param deleteFile - Whether to delete the lockfile from disk. Defaults to true.
    */
-  public release(): void {
+  public release(deleteFile: boolean = true): void {
     if (this.isReleased) {
       throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
     }
 
     this._fileWriter!.close();
-    FileSystem.deleteFile(this._filePath);
+    if (deleteFile) {
+      FileSystem.deleteFile(this._filePath);
+    }
     this._fileWriter = undefined;
   }
 

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Add an optional parameter to the `TypingsGenerator.generateTypingsAsync` function allowing the paths of files for which typings to be generated to be provided.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}
