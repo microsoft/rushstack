@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Add commit flag that commits the change files.",
-      "type": "none"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/rush"
