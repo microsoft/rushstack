@@ -2,6 +2,38 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.11.0-dev.0",
+      "tag": "@rushstack/heft-node-rig_v1.11.0-dev.0",
+      "date": "Wed, 21 Sep 2022 20:46:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial relelease of resdesign."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.1.0-dev.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.4.0-dev.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.1.0-dev.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.1.0-dev.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0-dev.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.10` to `^0.48.0-dev.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.12",
       "tag": "@rushstack/heft-node-rig_v1.10.12",
       "date": "Wed, 21 Sep 2022 20:21:10 GMT",

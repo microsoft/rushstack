@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.48.0-dev.0",
+      "tag": "@rushstack/heft_v0.48.0-dev.0",
+      "date": "Wed, 21 Sep 2022 20:46:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial relelease of resdesign."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.47.10",
       "tag": "@rushstack/heft_v0.47.10",
       "date": "Wed, 21 Sep 2022 20:21:10 GMT",
