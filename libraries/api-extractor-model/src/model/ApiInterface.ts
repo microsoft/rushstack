@@ -28,6 +28,11 @@ import {
   ApiTypeParameterListMixin
 } from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
+import {
+  IApiExportedMixinJson,
+  IApiExportedMixinOptions,
+  ApiExportedMixin
+} from '../mixins/ApiExportedMixin';
 
 /**
  * Constructor options for {@link ApiInterface}.
@@ -38,7 +43,8 @@ export interface IApiInterfaceOptions
     IApiNameMixinOptions,
     IApiTypeParameterListMixinOptions,
     IApiReleaseTagMixinOptions,
-    IApiDeclaredItemOptions {
+    IApiDeclaredItemOptions,
+    IApiExportedMixinOptions {
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
@@ -47,7 +53,8 @@ export interface IApiInterfaceJson
     IApiNameMixinJson,
     IApiTypeParameterListMixinJson,
     IApiReleaseTagMixinJson,
-    IApiDeclaredItemJson {
+    IApiDeclaredItemJson,
+    IApiExportedMixinJson {
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
@@ -69,7 +76,7 @@ export interface IApiInterfaceJson
  * @public
  */
 export class ApiInterface extends ApiItemContainerMixin(
-  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)))
+  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem))))
 ) {
   private readonly _extendsTypes: HeritageType[] = [];
 
@@ -123,8 +130,9 @@ export class ApiInterface extends ApiItemContainerMixin(
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Exports, nameComponent)
+      .addNavigationStep(navigation, nameComponent)
       .withMeaning(Meaning.Interface);
   }
 }

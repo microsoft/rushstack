@@ -132,6 +132,11 @@ export interface IInstallManagerOptions {
   pnpmFilterArguments: string[];
 
   /**
+   * Callback to invoke between preparing the common/temp folder and running installation.
+   */
+  beforeInstallAsync?: () => Promise<void>;
+
+  /**
    * Filters to be passed to PNPM during installation for split workspace.
    */
   splitWorkspacePnpmFilterArguments: string[];
@@ -347,6 +352,11 @@ export abstract class BaseInstallManager {
       // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
       // this ensures that a full "rush link" is required next time
       this._commonTempLinkFlag.clear();
+
+      // Give plugins an opportunity to act before invoking the installation process
+      if (this.options.beforeInstallAsync !== undefined) {
+        await this.options.beforeInstallAsync();
+      }
 
       // Perform the actual install
       await this.installAsync(cleanInstall);
@@ -753,6 +763,11 @@ export abstract class BaseInstallManager {
         EnvironmentConfiguration.pnpmStorePathOverride
       ) {
         args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
+      }
+
+      const { pnpmVerifyStoreIntegrity } = EnvironmentConfiguration;
+      if (pnpmVerifyStoreIntegrity !== undefined) {
+        args.push(`--verify-store-integrity`, `${pnpmVerifyStoreIntegrity}`);
       }
 
       const { configuration: experiments } = this._rushConfiguration.experimentsConfiguration;

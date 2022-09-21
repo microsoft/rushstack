@@ -130,7 +130,9 @@ export class InstallAction extends BaseInstallAction {
       pnpmFilterArguments,
       splitWorkspacePnpmFilterArguments,
       selectedProjects,
-      checkOnly: this._checkOnlyParameter.value
+      checkOnly: this._checkOnlyParameter.value,
+
+      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };
   }
 }

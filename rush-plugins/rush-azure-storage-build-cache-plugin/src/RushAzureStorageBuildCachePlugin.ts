@@ -3,7 +3,7 @@
 
 import { Import } from '@rushstack/node-core-library';
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
-import type { AzureEnvironmentNames } from './AzureStorageAuthentication';
+import type { AzureEnvironmentName } from './AzureStorageAuthentication';
 
 const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCacheProvider') = Import.lazy(
   './AzureStorageBuildCacheProvider',
@@ -29,7 +29,7 @@ interface IAzureBlobStorageConfigurationJson {
   /**
    * The Azure environment the storage account exists in. Defaults to AzureCloud.
    */
-  azureEnvironment?: AzureEnvironmentNames;
+  azureEnvironment?: AzureEnvironmentName;
 
   /**
    * An optional prefix for cache item blob names.

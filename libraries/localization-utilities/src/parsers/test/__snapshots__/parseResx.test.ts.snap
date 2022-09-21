@@ -24,6 +24,21 @@ Array [
 
 exports[`parseResx correctly ignores a string: terminal output 1`] = `Object {}`;
 
+exports[`parseResx fails to parse a RESX file with a duplicate string: Loc file 1`] = `
+Object {
+  "stringA": Object {
+    "comment": undefined,
+    "value": "Another string",
+  },
+}
+`;
+
+exports[`parseResx fails to parse a RESX file with a duplicate string: terminal output 1`] = `
+Object {
+  "errorOutput": "test.resx(6,45): Duplicate string value \\"stringA\\"[n]",
+}
+`;
+
 exports[`parseResx ignoreMissingResxComments when set to false, warns on a missing comment: Loc file 1`] = `
 Object {
   "stringWithoutAComment": Object {

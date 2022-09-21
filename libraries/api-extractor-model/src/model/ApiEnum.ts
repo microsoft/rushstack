@@ -13,6 +13,7 @@ import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiRel
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiEnumMember } from './ApiEnumMember';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { IApiExportedMixinOptions, ApiExportedMixin } from '../mixins/ApiExportedMixin';
 
 /**
  * Constructor options for {@link ApiEnum}.
@@ -22,7 +23,8 @@ export interface IApiEnumOptions
   extends IApiItemContainerMixinOptions,
     IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
-    IApiDeclaredItemOptions {}
+    IApiDeclaredItemOptions,
+    IApiExportedMixinOptions {}
 
 /**
  * Represents a TypeScript enum declaration.
@@ -44,7 +46,9 @@ export interface IApiEnumOptions
  *
  * @public
  */
-export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+export class ApiEnum extends ApiItemContainerMixin(
+  ApiNameMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem)))
+) {
   public constructor(options: IApiEnumOptions) {
     super(options);
   }
@@ -79,8 +83,9 @@ export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMix
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Exports, nameComponent)
+      .addNavigationStep(navigation, nameComponent)
       .withMeaning(Meaning.Enum);
   }
 }

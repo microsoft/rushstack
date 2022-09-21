@@ -28,7 +28,11 @@ export class DocCommentEnhancer {
   public analyze(): void {
     for (const entity of this._collector.entities) {
       if (entity.astEntity instanceof AstSymbol) {
-        if (entity.consumable) {
+        if (
+          entity.consumable ||
+          this._collector.extractorConfig.apiReportIncludeForgottenExports ||
+          this._collector.extractorConfig.docModelIncludeForgottenExports
+        ) {
           entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
             this._analyzeApiItem(astDeclaration);
           });

@@ -5,13 +5,13 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-3.0.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.47.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.47.6.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.7.4
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-3.0.0.tgz_valmiib6gbzc7jhcbpocdsabay
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.47.5.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.47.6.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.7.4
       typescript: 4.7.4
@@ -19,13 +19,13 @@ importers:
   typescript-v3-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-3.0.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.47.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.47.6.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.7.4
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-3.0.0.tgz_valmiib6gbzc7jhcbpocdsabay
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.47.5.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.47.6.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.7.4
       typescript: 4.7.4
@@ -328,7 +328,7 @@ packages:
     dev: true
 
   /argparse/2.0.1:
-    resolution: {integrity: sha1-JG9Q88p4oyQPbJl+ipvR6sSeSzg=}
+    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
     dev: true
 
   /array-includes/3.1.5:
@@ -460,7 +460,7 @@ packages:
     dev: true
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
     dev: true
 
   /cross-spawn/7.0.3:
@@ -1799,10 +1799,10 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.47.5.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.47.5.tgz}
+  file:../temp/tarballs/rushstack-heft-0.47.6.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.47.6.tgz}
     name: '@rushstack/heft'
-    version: 0.47.5
+    version: 0.47.6
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:

@@ -58,6 +58,8 @@ export function runScenarios(buildConfigPath: string): void {
         apiJsonFilePath: `<projectFolder>/etc/${scenarioFolderName}/<unscopedPackageName>.api.json`
       },
 
+      newlineKind: 'os',
+
       messages: {
         extractorMessageReporting: {
           // For test purposes, write these warnings into .api.md
