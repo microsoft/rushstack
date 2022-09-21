@@ -134,7 +134,7 @@ export class ChangeAction extends BaseRushAction {
     this._commitChangesFlagParameter = this.defineFlagParameter({
       parameterLongName: '--commit',
       parameterShortName: '-c',
-      description: `Commits the change files to git.`
+      description: `If this flag is specified generated changefiles will be commited automatically.`
     });
 
     this._changeEmailParameter = this.defineStringParameter({
