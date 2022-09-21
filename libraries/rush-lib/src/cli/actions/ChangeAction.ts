@@ -37,6 +37,7 @@ import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Git } from '../../logic/Git';
 
 import type * as inquirerTypes from 'inquirer';
+import { Utilities } from '../../utilities/Utilities';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
@@ -306,7 +307,7 @@ export class ChangeAction extends BaseRushAction {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
     if (this._commitChangesFlagParameter.value) {
-      this._stageAndCommitGitChanges([this.rushConfiguration.changesFolder], 'Rush changes');
+      this._stageAndCommitGitChanges('*', 'Rush changes');
     }
   }
 
@@ -702,20 +703,18 @@ export class ChangeAction extends BaseRushAction {
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 
-  private _stageGitChanges(patterns: string[]): void {
+  private _stageAndCommitGitChanges(pattern: string, message: string): void {
     try {
-      patterns.forEach((pattern) => {
-        child_process.execSync(`git add "${pattern}"`);
+      Utilities.executeCommand({
+        command: 'git',
+        args: ['add', pattern],
+        workingDirectory: this.rushConfiguration.changesFolder
       });
-    } catch (error) {
-      console.error(`Cannot stage git changes ${(error as Error).message}`);
-    }
-  }
-
-  private _stageAndCommitGitChanges(patterns: string[], message: string) {
-    try {
-      this._stageGitChanges(patterns);
-      child_process.execSync(`git commit -m "${message}"`);
+      Utilities.executeCommand({
+        command: 'git',
+        args: ['commit', '-m', message],
+        workingDirectory: this.rushConfiguration.changesFolder
+      });
     } catch (error) {
       console.error(`Cannot stage and commit git changes ${(error as Error).message}`);
     }
