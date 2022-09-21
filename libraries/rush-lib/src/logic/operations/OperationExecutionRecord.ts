@@ -11,6 +11,7 @@ import { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
 
 export interface IOperationExecutionRecordContext {
+  onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
   streamCollator: StreamCollator;
 
   debugMode: boolean;
@@ -66,6 +67,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    */
   public criticalPathLength: number | undefined = undefined;
 
+  public silent: boolean = false;
+
+  public isCacheWriteAllowed: boolean = false;
+
   /**
    * The set of operations that must complete before this operation executes.
    */
@@ -93,6 +98,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
         `Operation for phase '${operation.associatedPhase?.name}' and project '${operation.associatedProject?.packageName}' has no runner.`
       );
     }
+    this.silent = runner.silent;
+    this.isCacheWriteAllowed = runner.isCacheWriteAllowed;
 
     this.runner = runner;
     this.weight = operation.weight;
@@ -122,6 +129,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {
     this.status = OperationStatus.Executing;
     this.stopwatch.start();
+    this._context.onOperationStatusChanged?.(this);
 
     try {
       this.status = await this.runner.executeAsync(this);
@@ -133,9 +141,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       // Delegate global state reporting
       onResult(this);
     } finally {
+      this.silent = this.runner.silent;
       this._collatedWriter?.close();
       this.stdioSummarizer.close();
       this.stopwatch.stop();
+      this._context.onOperationStatusChanged?.(this);
     }
   }
 }

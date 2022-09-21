@@ -34,7 +34,10 @@ import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperatio
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
-import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
+import {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryOperationResult } from '../../logic/Telemetry';
 
@@ -63,7 +66,7 @@ interface IRunPhasesOptions {
   terminal: Terminal;
 }
 
-interface IExecutionOperationsOptions {
+export interface IExecutionOperationsOptions {
   createOperationsContext: ICreateOperationsContext;
   executionManagerOptions: IOperationExecutionManagerOptions;
   ignoreHooks: boolean;
@@ -476,8 +479,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
   /**
    * Runs a set of operations and reports the results.
+   * @internal
    */
-  private async _executeOperations(options: IExecutionOperationsOptions): Promise<void> {
+  public async _executeOperations(options: IExecutionOperationsOptions): Promise<void> {
     const { executionManagerOptions, ignoreHooks, operations, stopwatch, terminal } = options;
 
     const executionManager: OperationExecutionManager = new OperationExecutionManager(
@@ -549,6 +553,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       };
 
       if (result) {
+        const { operationResults: rawOperationResults } = result;
         const nonSilentDependenciesByOperation: Map<Operation, Set<string>> = new Map();
         function getNonSilentDependencies(operation: Operation): ReadonlySet<string> {
           let realDependencies: Set<string> | undefined = nonSilentDependenciesByOperation.get(operation);
@@ -556,7 +561,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             realDependencies = new Set();
             nonSilentDependenciesByOperation.set(operation, realDependencies);
             for (const dependency of operation.dependencies) {
-              if (dependency.runner!.silent) {
+              const operationResult: IOperationExecutionResult = rawOperationResults.get(dependency)!;
+              if (operationResult.silent) {
                 for (const deepDependency of getNonSilentDependencies(dependency)) {
                   realDependencies.add(deepDependency);
                 }
@@ -568,8 +574,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           return realDependencies;
         }
 
-        for (const [operation, operationResult] of result.operationResults) {
-          if (operation.runner?.silent) {
+        for (const [operation, operationResult] of rawOperationResults) {
+          if (operationResult.silent) {
             // Architectural operation. Ignore.
             continue;
           }

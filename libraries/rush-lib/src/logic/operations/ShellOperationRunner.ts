@@ -372,7 +372,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
-        const setCacheEntryPromise: Promise<boolean> | undefined = this.isCacheWriteAllowed
+        const setCacheEntryPromise: Promise<boolean> | undefined = context.isCacheWriteAllowed
           ? (await this._tryGetProjectBuildCacheAsync(terminal, trackedFiles))?.trySetCacheEntryAsync(
               terminal
             )

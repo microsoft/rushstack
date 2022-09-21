@@ -18,19 +18,27 @@ export interface IOperationExecutionResult {
    * 'failure'.
    */
   readonly status: OperationStatus;
+
   /**
    * The error which occurred while executing this operation, this is stored in case we need
    * it later (for example to re-print errors at end of execution).
    */
   readonly error: Error | undefined;
+
   /**
    * Object tracking execution timing.
    */
   readonly stopwatch: IStopwatchResult;
+
   /**
    * Object used to report a summary at the end of the Rush invocation.
    */
   readonly stdioSummarizer: StdioSummarizer;
+
+  /**
+   * Indicates that this operation should be ignored for results collation.
+   */
+  readonly silent: boolean;
 }
 
 /**

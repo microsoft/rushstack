@@ -11,7 +11,6 @@ import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQue
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
-import { IExecutionResult } from './IOperationExecutionResult';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -19,6 +18,15 @@ export interface IOperationExecutionManagerOptions {
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
+
+  onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => void;
+  afterCreateRecords?: (records: Map<Operation, OperationExecutionRecord>) => void;
+}
+
+export interface IFullExecutionResult {
+  status: OperationStatus;
+  operationResults: Map<Operation, OperationExecutionRecord>;
 }
 
 /**
@@ -45,18 +53,31 @@ export class OperationExecutionManager {
 
   private readonly _terminal: CollatedTerminal;
 
+  private readonly _onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  private readonly _beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => void;
+
   // Variables for current status
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
   private _completedOperations: number;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
-    const { quietMode, debugMode, parallelism, changedProjectsOnly } = options;
+    const {
+      quietMode,
+      debugMode,
+      parallelism,
+      changedProjectsOnly,
+      onOperationStatusChanged,
+      beforeExecuteOperations,
+      afterCreateRecords
+    } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
+    this._onOperationStatusChanged = onOperationStatusChanged;
+    this._beforeExecuteOperations = beforeExecuteOperations;
 
     // TERMINAL PIPELINE:
     //
@@ -77,6 +98,7 @@ export class OperationExecutionManager {
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
+      onOperationStatusChanged,
       debugMode,
       quietMode
     };
@@ -109,6 +131,8 @@ export class OperationExecutionManager {
         dependencyRecord.consumers.add(consumer);
       }
     }
+
+    afterCreateRecords?.(executionRecords);
 
     const numberOfCores: number = os.cpus().length;
 
@@ -191,7 +215,7 @@ export class OperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all the
    * operations are completed successfully, or rejects when any operation fails.
    */
-  public async executeAsync(): Promise<IExecutionResult> {
+  public async executeAsync(): Promise<IFullExecutionResult> {
     this._completedOperations = 0;
     const totalOperations: number = this._totalOperations;
 
@@ -224,6 +248,8 @@ export class OperationExecutionManager {
       this._executionRecords.values(),
       prioritySort
     );
+
+    this._beforeExecuteOperations?.(this._executionRecords);
 
     // This function is a callback because it may write to the collatedWriter before
     // operation.executeAsync returns (and cleans up the writer)
@@ -288,10 +314,11 @@ export class OperationExecutionManager {
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
             // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
             // operations. However, the existing behavior is a bit simpler, so keeping that for now.
-            if (!blockedRecord.runner.silent) {
+            if (!blockedRecord.silent) {
               terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
+            this._onOperationStatusChanged?.(blockedRecord);
 
             for (const dependent of blockedRecord.consumers) {
               blockedQueue.add(dependent);
@@ -363,10 +390,11 @@ export class OperationExecutionManager {
     // Apply status changes to direct dependents
     for (const item of record.consumers) {
       if (blockCacheWrite) {
-        item.runner.isCacheWriteAllowed = false;
+        item.isCacheWriteAllowed = false;
       }
 
       if (blockSkip) {
+        // Only relevant in legacy non-build cache flow
         item.runner.isSkipAllowed = false;
       }
 

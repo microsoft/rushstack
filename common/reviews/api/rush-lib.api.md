@@ -372,6 +372,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 // @alpha
 export interface IOperationExecutionResult {
     readonly error: Error | undefined;
+    readonly silent: boolean;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
@@ -399,6 +400,7 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
+    isCacheWriteAllowed: boolean;
     quietMode: boolean;
     stdioSummarizer: StdioSummarizer;
 }

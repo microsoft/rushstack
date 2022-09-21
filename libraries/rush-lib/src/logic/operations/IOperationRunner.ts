@@ -25,6 +25,10 @@ export interface IOperationRunnerContext {
    */
   quietMode: boolean;
   /**
+   * Defaults to `true`. Will be `false` if a dependency is in an unknown state.
+   */
+  isCacheWriteAllowed: boolean;
+  /**
    * Object used to report a summary at the end of the Rush invocation.
    */
   stdioSummarizer: StdioSummarizer;
