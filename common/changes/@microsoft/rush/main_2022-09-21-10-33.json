@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Test custom commit message",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
