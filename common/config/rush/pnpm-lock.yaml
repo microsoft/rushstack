@@ -194,6 +194,7 @@ importers:
 
   ../../apps/vscode-extension:
     specifiers:
+      '@microsoft/rush': workspace:*
       '@microsoft/rush-lib': workspace:*
       '@rushstack/rush-sdk': workspace:*
       '@rushstack/webpack-preserve-dynamic-require-plugin': workspace:*
@@ -214,6 +215,7 @@ importers:
     dependencies:
       '@rushstack/rush-sdk': link:../../libraries/rush-sdk
     devDependencies:
+      '@microsoft/rush': link:../rush
       '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/webpack-preserve-dynamic-require-plugin': link:../../webpack/preserve-dynamic-require-plugin
       '@types/glob': 7.1.1

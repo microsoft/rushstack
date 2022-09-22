@@ -130,7 +130,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     const rush = await loadRush();
 
-    worker = rush.createPhasedCommandWorker(['build']);
+    worker = rush.createPhasedCommandWorker(['build'], {
+      cwd: workspaceRoot
+    });
 
     try {
       await worker.readyAsync();
