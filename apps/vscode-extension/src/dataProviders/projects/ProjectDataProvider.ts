@@ -2,11 +2,7 @@ import * as vscode from 'vscode';
 import * as Rush from '@rushstack/rush-sdk';
 import * as path from 'path';
 
-declare const global: NodeJS.Global &
-  typeof globalThis & {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    ___rush___workingDirectory?: string;
-  };
+export type StateGroupName = 'Active' | 'Included' | 'Excluded';
 
 export class ProjectDataProvider
   implements vscode.TreeDataProvider<StateGroup | Project | OperationPhase | Message>
@@ -27,9 +23,12 @@ export class ProjectDataProvider
   private _activeGroup: StateGroup;
   private _includedGroup: StateGroup;
   private _excludedGroup: StateGroup;
+  private _loadRush: () => Promise<typeof Rush>;
 
-  constructor(workspaceRoot: string | undefined) {
+  constructor(workspaceRoot: string | undefined, loadRush: () => Promise<typeof Rush>) {
     this._workspaceRoot = workspaceRoot;
+    this._loadRush = loadRush;
+
     this._onDidChangeTreeData = new vscode.EventEmitter<
       StateGroup | Project | OperationPhase | (StateGroup | Project | OperationPhase)[] | undefined
     >();
@@ -50,29 +49,32 @@ export class ProjectDataProvider
     this._includedGroup.projects.clear();
     this._excludedGroup.projects.clear();
 
-    vscode.commands.executeCommand('setContext', 'rush.canBuild', false);
+    vscode.commands.executeCommand('setContext', 'rush.activeProjects.count', 0);
+    vscode.commands.executeCommand('setContext', 'rush.includedProjects.count', 0);
+    vscode.commands.executeCommand('setContext', 'rush.excludedProjects.count', 0);
     vscode.commands.executeCommand('setContext', 'rush.activeProjects', {});
 
     this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._excludedGroup]);
 
     if (workspaceRoot) {
-      global.___rush___workingDirectory = workspaceRoot;
-
       this._pendingRush = (async () => {
-        const rushSdk = await import('@rushstack/rush-sdk');
+        const rushSdk = await this._loadRush();
+
+        if (!rushSdk.RushConfiguration) {
+          return;
+        }
 
         const rushConfigurationFile = rushSdk.RushConfiguration.tryFindRushJsonLocation({
           startingFolder: this._workspaceRoot
         });
 
-        if (rushConfigurationFile) {
-          const rushConfiguration =
-            rushSdk.RushConfiguration.loadFromConfigurationFile(rushConfigurationFile);
-
-          return rushConfiguration;
+        if (!rushConfigurationFile) {
+          return;
         }
 
-        return undefined;
+        const rushConfiguration = rushSdk.RushConfiguration.loadFromConfigurationFile(rushConfigurationFile);
+
+        return rushConfiguration;
       })();
     }
 
@@ -109,7 +111,21 @@ export class ProjectDataProvider
       activeProjectsContext[`project:${activeProject.rushProject.packageName}`] = true;
     }
 
-    vscode.commands.executeCommand('setContext', 'rush.canBuild', this._activeGroup.projects.size > 0);
+    vscode.commands.executeCommand(
+      'setContext',
+      'rush.activeProjects.count',
+      this._activeGroup.projects.size
+    );
+    vscode.commands.executeCommand(
+      'setContext',
+      'rush.includedProjects.count',
+      this._includedGroup.projects.size
+    );
+    vscode.commands.executeCommand(
+      'setContext',
+      'rush.excludedProjects.count',
+      this._excludedGroup.projects.size
+    );
     vscode.commands.executeCommand('setContext', 'rush.activeProjects', activeProjectsContext);
 
     this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._excludedGroup]);
@@ -129,6 +145,7 @@ export class ProjectDataProvider
     this._excludedGroup.projects.clear();
 
     for (const project of projects) {
+      project.stateGroupName = 'Excluded';
       this._excludedGroup.projects.add(project);
     }
 
@@ -149,6 +166,7 @@ export class ProjectDataProvider
     const queue: Project[] = [];
 
     for (const activeProject of this._activeGroup.projects) {
+      activeProject.stateGroupName = 'Active';
       seenProjects.add(activeProject.rushProject.packageName);
       this._excludedGroup.projects.delete(activeProject);
       queue.push(activeProject);
@@ -164,6 +182,7 @@ export class ProjectDataProvider
           const dependencyProject = projectsByRushProject.get(dependency.packageName);
 
           if (dependencyProject) {
+            dependencyProject.stateGroupName = 'Included';
             this._includedGroup.projects.add(dependencyProject);
             this._excludedGroup.projects.delete(dependencyProject);
             queue.push(dependencyProject);
@@ -180,7 +199,21 @@ export class ProjectDataProvider
       activeProjectsContext[`project:${activeProject.rushProject.packageName}`] = true;
     }
 
-    vscode.commands.executeCommand('setContext', 'rush.canBuild', this._activeGroup.projects.size > 0);
+    vscode.commands.executeCommand(
+      'setContext',
+      'rush.activeProjects.count',
+      this._activeGroup.projects.size
+    );
+    vscode.commands.executeCommand(
+      'setContext',
+      'rush.includedProjects.count',
+      this._includedGroup.projects.size
+    );
+    vscode.commands.executeCommand(
+      'setContext',
+      'rush.excludedProjects.count',
+      this._excludedGroup.projects.size
+    );
     vscode.commands.executeCommand('setContext', 'rush.activeProjects', activeProjectsContext);
 
     this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._excludedGroup]);
@@ -247,9 +280,22 @@ export class ProjectDataProvider
       treeItem.contextValue = `project:${element.rushProject.packageName}`;
       treeItem.resourceUri = vscode.Uri.file(path.join(element.rushProject.projectFolder, 'package.json'));
       treeItem.tooltip = element.rushProject.packageJson.description;
-      treeItem.description = 'Ready';
+
+      switch (element.stateGroupName) {
+        case 'Active':
+          treeItem.description = 'Active';
+          break;
+        case 'Included':
+          treeItem.description = 'Ready';
+          break;
+        case 'Excluded':
+          treeItem.description = 'Out of scope';
+          break;
+      }
 
       treeItem.id = `project:${element.rushProject.packageName}`;
+
+      treeItem.iconPath = new vscode.ThemeIcon('package');
 
       return treeItem;
     } else if (element instanceof OperationPhase) {
@@ -275,8 +321,12 @@ export class ProjectDataProvider
 export class Project {
   public readonly rushProject: Rush.RushConfigurationProject;
 
+  public stateGroupName: StateGroupName;
+
   constructor(rushProject: Rush.RushConfigurationProject) {
     this.rushProject = rushProject;
+
+    this.stateGroupName = 'Excluded';
   }
 }
 
@@ -291,11 +341,11 @@ export class OperationPhase {
 }
 
 export class StateGroup {
-  public readonly groupName: 'Active' | 'Included' | 'Excluded';
+  public readonly groupName: StateGroupName;
 
   public readonly projects: Set<Project>;
 
-  constructor(groupName: 'Active' | 'Included' | 'Excluded') {
+  constructor(groupName: StateGroupName) {
     this.groupName = groupName;
 
     this.projects = new Set<Project>();

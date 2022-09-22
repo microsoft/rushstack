@@ -22,6 +22,8 @@ const extensionConfig = {
     libraryTarget: 'commonjs2'
   },
   externals: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '@microsoft/rush-lib': 'commonjs @microsoft/rush-lib',
     vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
     // modules added here also need to be added in the .vscodeignore file
   },

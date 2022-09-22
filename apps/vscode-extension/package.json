@@ -16,14 +16,10 @@
   "contributes": {
     "commands": [
       {
-        "command": "rush.openProject",
-        "title": "Open",
-        "category": "Rush"
-      },
-      {
-        "command": "rush.toggleActiveProject",
-        "title": "Toggle active",
-        "category": "Rush"
+        "command": "rush.revealProjectInExplorer",
+        "title": "Reveal in Explorer view",
+        "category": "Rush",
+        "icon": "$(folder)"
       },
       {
         "command": "rush.activateProject",
@@ -50,8 +46,8 @@
         "icon": "$(eye)"
       },
       {
-        "command": "rush.buildActiveProjects",
-        "title": "Build",
+        "command": "rush.runAction",
+        "title": "Run",
         "category": "Rush",
         "icon": "$(run)"
       },
@@ -62,31 +58,25 @@
         "icon": "$(refresh)"
       }
     ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "rush",
-          "title": "Rush",
-          "icon": "resources/rush.svg"
+    "configuration": {
+      "title": "Rush",
+      "properties": {
+        "rush.useWorkspaceRushVersion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Specifies whether to use the version of Rush from the workspace"
         }
-      ]
-    },
-    "views": {
-      "rush": [
-        {
-          "id": "rushProjects",
-          "name": "Projects"
-        }
-      ]
+      }
     },
     "menus": {
       "view/item/context": [
         {
-          "command": "rush.openProject",
-          "when": "view == rushProjects && viewItem =~ /^project:/"
+          "command": "rush.revealProjectInExplorer",
+          "when": "view == rushProjects && viewItem =~ /^project:/",
+          "group": "inline"
         },
         {
-          "command": "rush.toggleActiveProject",
+          "command": "rush.revealProjectInExplorer",
           "when": "view == rushProjects && viewItem =~ /^project:/"
         },
         {
@@ -101,17 +91,17 @@
         },
         {
           "command": "rush.activateProject",
-          "when": "view == rushProjects && viewItem == group:Included",
+          "when": "view == rushProjects && viewItem == group:Included && rush.includedProjects`.count > 0",
           "group": "inline"
         },
         {
           "command": "rush.activateProject",
-          "when": "view == rushProjects && viewItem == group:Excluded",
+          "when": "view == rushProjects && viewItem == group:Excluded && rush.excludedProjects.count > 0",
           "group": "inline"
         },
         {
           "command": "rush.deactivateProject",
-          "when": "view == rushProjects && viewItem == group:Active",
+          "when": "view == rushProjects && viewItem == group:Active && rush.activeProjects.count > 0",
           "group": "inline"
         },
         {
@@ -121,28 +111,58 @@
         {
           "command": "rush.deactivateProject",
           "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem in rush.activeProjects"
+        },
+        {
+          "command": "rush.runAction",
+          "when": "view == rushCommands && viewItem =~ /^command:/ && rush.watcher == 'sleep'",
+          "group": "inline"
+        },
+        {
+          "command": "rush.runAction",
+          "when": "view == rushCommands && viewItem =~ /^command:/ && rush.watcher == 'sleep'"
         }
       ],
       "view/title": [
         {
           "command": "rush.enableWatch",
-          "when": "view == rushProjects && rush.watching == false",
+          "when": "view == rushProjects && rush.watcher == 'sleep'",
           "group": "navigation"
         },
         {
           "command": "rush.disableWatch",
-          "when": "view == rushProjects && rush.watching == true",
+          "when": "view == rushProjects && rush.watcher == 'starting'",
           "group": "navigation"
         },
         {
-          "command": "rush.buildActiveProjects",
-          "when": "view == rushProjects && rush.canBuild == true && rush.watching == false",
+          "command": "rush.disableWatch",
+          "when": "view == rushProjects && rush.watcher == 'ready'",
           "group": "navigation"
         },
         {
           "command": "rush.refreshProjects",
           "when": "view == rushProjects",
           "group": "navigation"
+        }
+      ]
+    },
+    "views": {
+      "rush": [
+        {
+          "id": "rushProjects",
+          "name": "Projects"
+        },
+        {
+          "id": "rushCommands",
+          "name": "Commands"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rush",
+          "title": "Rush",
+          "icon": "resources/rush.svg"
         }
       ]
     }
@@ -159,8 +179,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "dependencies": {
-    "@rushstack/rush-sdk": "workspace:*",
-    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*"
+    "@rushstack/rush-sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/vscode": "^1.71.0",
@@ -176,6 +195,8 @@
     "ts-loader": "9.4.0",
     "webpack": "~5.68.0",
     "webpack-cli": "~4.10.0",
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@vscode/test-electron": "^2.1.5"
   }
 }
