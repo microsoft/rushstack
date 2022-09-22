@@ -43,13 +43,14 @@ function includePlugin(pluginName: string, pluginPackageName?: string): void {
   if (!pluginPackageName) {
     pluginPackageName = `@rushstack/${pluginName}`;
   }
+  const pluginPackageFolder: string = Import.resolvePackage({
+    packageName: pluginPackageName,
+    baseFolderPath: pluginOrigin
+  });
   builtInPluginConfigurations.push({
     packageName: pluginPackageName,
     pluginName: pluginName,
-    pluginPackageFolder: Import.resolvePackage({
-      packageName: pluginPackageName,
-      baseFolderPath: pluginOrigin
-    })
+    pluginPackageFolder
   });
 }
 
@@ -323,4 +324,4 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
   }
 );
 
-parser.executeWithoutErrorHandling(workerData.argv).catch(console.error);
+parser.execute(workerData.argv).catch(console.error);
