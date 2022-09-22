@@ -719,7 +719,7 @@ export class ChangeAction extends BaseRushAction {
         workingDirectory: this.rushConfiguration.changesFolder
       });
     } catch (error) {
-      console.error(`Cannot stage and commit git changes ${(error as Error).message}`);
+      this._terminal.writeErrorLine(`Cannot stage and commit git changes ${(error as Error).message}`);
     }
   }
 }
