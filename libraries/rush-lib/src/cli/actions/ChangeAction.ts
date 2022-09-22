@@ -313,7 +313,7 @@ export class ChangeAction extends BaseRushAction {
           this.rushConfiguration.gitChangefilesCommitMessage || 'Rush change'
         );
       } else {
-        this._terminal.writeWarningLine('No change files generated, nothing to commit.');
+        this._terminal.writeWarningLine('Warning: No change files generated, nothing to commit.');
       }
     }
   }
@@ -732,7 +732,7 @@ export class ChangeAction extends BaseRushAction {
         workingDirectory: this.rushConfiguration.changesFolder
       });
     } catch (error) {
-      this._terminal.writeErrorLine(`Cannot stage and commit git changes ${(error as Error).message}`);
+      this._terminal.writeErrorLine(`ERROR: Cannot stage and commit git changes ${(error as Error).message}`);
     }
   }
 }
