@@ -4,13 +4,16 @@
 import * as os from 'os';
 import colors from 'colors/safe';
 import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
-import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { NewlineKind, Async } from '@rushstack/node-core-library';
+import { StreamCollator, CollatedWriter } from '@rushstack/stream-collator';
+import { NewlineKind, Async, Terminal, ITerminal } from '@rushstack/node-core-library';
 
 import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
+import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -21,7 +24,11 @@ export interface IOperationExecutionManagerOptions {
 
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
   beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => void;
-  afterCreateRecords?: (records: Map<Operation, OperationExecutionRecord>) => void;
+  afterOperationHashes?: (records: Map<Operation, OperationExecutionRecord>) => void;
+}
+
+export interface IAbortSignal {
+  aborted: boolean;
 }
 
 export interface IFullExecutionResult {
@@ -45,21 +52,22 @@ export class OperationExecutionManager {
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
-  private readonly _totalOperations: number;
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
   private readonly _streamCollator: StreamCollator;
 
-  private readonly _terminal: CollatedTerminal;
+  private readonly _terminal: ITerminal;
 
   private readonly _onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  private readonly _afterOperationHashes?: (records: Map<Operation, OperationExecutionRecord>) => void;
   private readonly _beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => void;
 
   // Variables for current status
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
   private _completedOperations: number;
+  private _totalOperations: number;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
     const {
@@ -69,14 +77,16 @@ export class OperationExecutionManager {
       changedProjectsOnly,
       onOperationStatusChanged,
       beforeExecuteOperations,
-      afterCreateRecords
+      afterOperationHashes
     } = options;
     this._completedOperations = 0;
+    this._totalOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._onOperationStatusChanged = onOperationStatusChanged;
+    this._afterOperationHashes = afterOperationHashes;
     this._beforeExecuteOperations = beforeExecuteOperations;
 
     // TERMINAL PIPELINE:
@@ -93,7 +103,7 @@ export class OperationExecutionManager {
       destination: this._colorsNewlinesTransform,
       onWriterActive: this._streamCollator_onWriterActive
     });
-    this._terminal = this._streamCollator.terminal;
+    this._terminal = new Terminal(new CollatedTerminalProvider(this._streamCollator.terminal));
 
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
@@ -103,7 +113,6 @@ export class OperationExecutionManager {
       quietMode
     };
 
-    let totalOperations: number = 0;
     const executionRecords: Map<Operation, OperationExecutionRecord> = (this._executionRecords = new Map());
     for (const operation of operations) {
       const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
@@ -112,12 +121,7 @@ export class OperationExecutionManager {
       );
 
       executionRecords.set(operation, executionRecord);
-      if (!executionRecord.runner.silent) {
-        // Only count non-silent operations
-        totalOperations++;
-      }
     }
-    this._totalOperations = totalOperations;
 
     for (const [operation, consumer] of executionRecords) {
       for (const dependency of operation.dependencies) {
@@ -131,8 +135,6 @@ export class OperationExecutionManager {
         dependencyRecord.consumers.add(consumer);
       }
     }
-
-    afterCreateRecords?.(executionRecords);
 
     const numberOfCores: number = os.cpus().length;
 
@@ -203,10 +205,10 @@ export class OperationExecutionManager {
 
       const middlePart: string = colors.gray(']' + '='.repeat(middlePartLengthMinusTwoBrackets) + '[');
 
-      this._terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart);
+      this._terminal.writeLine('\n' + leftPart + middlePart + rightPart);
 
       if (!this._quietMode) {
-        this._terminal.writeStdoutLine('');
+        this._terminal.writeLine('');
       }
     }
   };
@@ -215,27 +217,76 @@ export class OperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all the
    * operations are completed successfully, or rejects when any operation fails.
    */
-  public async executeAsync(): Promise<IFullExecutionResult> {
+  public async executeAsync(
+    projectChangeAnalyzer?: ProjectChangeAnalyzer,
+    abortSignal?: IAbortSignal
+  ): Promise<IFullExecutionResult> {
     this._completedOperations = 0;
-    const totalOperations: number = this._totalOperations;
 
-    if (!this._quietMode) {
-      const plural: string = totalOperations === 1 ? '' : 's';
-      this._terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
-      const nonSilentOperations: string[] = [];
-      for (const record of this._executionRecords.values()) {
-        if (!record.runner.silent) {
-          nonSilentOperations.push(record.name);
+    if (projectChangeAnalyzer) {
+      const state: ProjectChangeAnalyzer = projectChangeAnalyzer;
+      this._terminal.writeLine(`Updating state hashes`);
+      const trackedFilesByProject: Map<RushConfigurationProject, Map<string, string> | undefined> = new Map();
+      for (const { associatedProject } of this._executionRecords.keys()) {
+        if (associatedProject) {
+          trackedFilesByProject.set(associatedProject, undefined);
         }
       }
-      nonSilentOperations.sort();
-      for (const name of nonSilentOperations) {
-        this._terminal.writeStdoutLine(`  ${name}`);
+
+      await Async.forEachAsync(trackedFilesByProject.keys(), async (project) => {
+        const trackedFiles: Map<string, string> | undefined = await state._tryGetProjectDependenciesAsync(
+          project,
+          this._terminal
+        );
+        trackedFilesByProject.set(project, trackedFiles);
+      });
+
+      function getOperationHash(record: OperationExecutionRecord): string {
+        let { stateHash } = record;
+        if (stateHash === undefined) {
+          const { associatedProject } = record.operation;
+          stateHash = '';
+          if (associatedProject) {
+            const trackedFiles: Map<string, string> | undefined =
+              trackedFilesByProject.get(associatedProject);
+            record.trackedFileHashes = trackedFiles;
+            const localHash: string = trackedFiles ? state._hashProjectDependencies(trackedFiles) : '';
+            if (localHash) {
+              stateHash = state._getOperationStateHash(
+                localHash,
+                Array.from(record.dependencies, getOperationHash)
+              );
+            }
+          }
+          record.stateHash = stateHash;
+        }
+        return stateHash;
       }
-      this._terminal.writeStdoutLine('');
+
+      for (const record of this._executionRecords.values()) {
+        getOperationHash(record);
+      }
     }
 
-    this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
+    this._afterOperationHashes?.(this._executionRecords);
+    const nonSilentOperations: string[] = [];
+    for (const record of this._executionRecords.values()) {
+      if (!record.silent) {
+        nonSilentOperations.push(record.name);
+      }
+    }
+    const totalOperations: number = (this._totalOperations = nonSilentOperations.length);
+    if (!this._quietMode) {
+      const plural: string = totalOperations === 1 ? '' : 's';
+      this._terminal.writeLine(`Selected ${totalOperations} operation${plural}:`);
+      nonSilentOperations.sort();
+      for (const name of nonSilentOperations) {
+        this._terminal.writeLine(`  ${name}`);
+      }
+      this._terminal.writeLine('');
+    }
+
+    this._terminal.writeLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     const maxParallelism: number = Math.min(totalOperations, this._parallelism);
     const prioritySort: IOperationSortFunction = (
@@ -262,7 +313,9 @@ export class OperationExecutionManager {
     await Async.forEachAsync(
       executionQueue,
       async (operation: OperationExecutionRecord) => {
-        await operation.executeAsync(onOperationComplete);
+        if (!abortSignal?.aborted) {
+          await operation.executeAsync(onOperationComplete);
+        }
       },
       {
         concurrency: maxParallelism

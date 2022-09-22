@@ -71,6 +71,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public isCacheWriteAllowed: boolean = false;
 
+  public trackedFileHashes: Map<string, string> | undefined = undefined;
+
+  public stateHash: string | undefined = undefined;
+
   /**
    * The set of operations that must complete before this operation executes.
    */
@@ -80,10 +84,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    */
   public readonly consumers: Set<OperationExecutionRecord> = new Set();
 
+  public readonly operation: Operation;
+
   public readonly stopwatch: Stopwatch = new Stopwatch();
   public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer();
 
-  public readonly runner: IOperationRunner;
+  public runner: IOperationRunner;
   public readonly weight: number;
 
   private readonly _context: IOperationExecutionRecordContext;
@@ -91,6 +97,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   private _collatedWriter: CollatedWriter | undefined = undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
+    this.operation = operation;
     const { runner } = operation;
 
     if (!runner) {

@@ -150,6 +150,8 @@ export class ShellOperationRunner implements IOperationRunner {
     );
 
     try {
+      const { trackedFileHashes, stateHash } = context;
+
       const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
         destination: projectLogWritable,
         removeColors: true,
@@ -207,40 +209,25 @@ export class ShellOperationRunner implements IOperationRunner {
       }
 
       let projectDeps: IProjectDeps | undefined;
-      let trackedFiles: string[] | undefined;
-      try {
-        const fileHashes: Map<string, string> | undefined =
-          await this._projectChangeAnalyzer._tryGetProjectDependenciesAsync(this._rushProject, terminal);
-
-        if (fileHashes) {
-          const files: { [filePath: string]: string } = {};
-          trackedFiles = [];
-          for (const [filePath, fileHash] of fileHashes) {
-            files[filePath] = fileHash;
-            trackedFiles.push(filePath);
-          }
-
-          projectDeps = {
-            files,
-            arguments: this._commandToRun
-          };
-        } else if (this.isSkipAllowed) {
-          // To test this code path:
-          // Remove the `.git` folder then run "rush build --verbose"
-          terminal.writeLine({
-            text: PrintUtilities.wrapWords(
-              'This workspace does not appear to be tracked by Git. ' +
-                'Rush will proceed without incremental execution, caching, and change detection.'
-            ),
-            foregroundColor: ColorValue.Cyan
-          });
+      const trackedFiles: Iterable<string> | undefined = trackedFileHashes?.keys();
+      if (trackedFileHashes) {
+        const files: { [filePath: string]: string } = {};
+        for (const [filePath, fileHash] of trackedFileHashes) {
+          files[filePath] = fileHash;
         }
-      } catch (error) {
+
+        projectDeps = {
+          files,
+          arguments: this._commandToRun
+        };
+      } else if (this.isSkipAllowed) {
         // To test this code path:
-        // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
-        terminal.writeLine('Unable to calculate incremental state: ' + (error as Error).toString());
+        // Remove the `.git` folder then run "rush build --verbose"
         terminal.writeLine({
-          text: 'Rush will proceed without incremental execution, caching, and change detection.',
+          text: PrintUtilities.wrapWords(
+            'This workspace does not appear to be tracked by Git. ' +
+              'Rush will proceed without incremental execution, caching, and change detection.'
+          ),
           foregroundColor: ColorValue.Cyan
         });
       }
@@ -262,15 +249,15 @@ export class ShellOperationRunner implements IOperationRunner {
       //     false if a dependency wasn't able to be skipped.
       //
       let buildCacheReadAttempted: boolean = false;
+      let projectBuildCache: ProjectBuildCache | false | undefined;
       if (this._isCacheReadAllowed) {
-        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
-          terminal,
-          trackedFiles
-        );
+        projectBuildCache =
+          (await this._tryGetProjectBuildCacheAsync(terminal, trackedFiles, stateHash)) || false;
 
         buildCacheReadAttempted = !!projectBuildCache;
-        const restoreFromCacheSuccess: boolean | undefined =
-          await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
+        const restoreFromCacheSuccess: boolean | undefined = projectBuildCache
+          ? await projectBuildCache.tryRestoreFromCacheAsync(terminal)
+          : undefined;
 
         if (restoreFromCacheSuccess) {
           return OperationStatus.FromCache;
@@ -372,11 +359,15 @@ export class ShellOperationRunner implements IOperationRunner {
 
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
-        const setCacheEntryPromise: Promise<boolean> | undefined = context.isCacheWriteAllowed
-          ? (await this._tryGetProjectBuildCacheAsync(terminal, trackedFiles))?.trySetCacheEntryAsync(
-              terminal
-            )
-          : undefined;
+        let setCacheEntryPromise: Promise<boolean> | undefined;
+        if (context.isCacheWriteAllowed) {
+          if (projectBuildCache === undefined) {
+            projectBuildCache = await this._tryGetProjectBuildCacheAsync(terminal, trackedFiles, stateHash);
+          }
+          if (projectBuildCache) {
+            setCacheEntryPromise = projectBuildCache.trySetCacheEntryAsync(terminal);
+          }
+        }
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 
@@ -403,57 +394,62 @@ export class ShellOperationRunner implements IOperationRunner {
 
   private async _tryGetProjectBuildCacheAsync(
     terminal: ITerminal,
-    trackedProjectFiles: string[] | undefined
+    trackedProjectFiles: Iterable<string> | undefined,
+    stateHash: string | undefined
   ): Promise<ProjectBuildCache | undefined> {
-    if (this._projectBuildCache === UNINITIALIZED) {
-      this._projectBuildCache = undefined;
-
-      if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
-        // Disable legacy skip logic if the build cache is in play
-        this.isSkipAllowed = false;
-
-        const projectConfiguration: RushProjectConfiguration | undefined =
-          await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
-        if (projectConfiguration) {
-          projectConfiguration.validatePhaseConfiguration(this._selectedPhases, terminal);
-          if (projectConfiguration.disableBuildCacheForProject) {
-            terminal.writeVerboseLine('Caching has been disabled for this project.');
-          } else {
-            const operationSettings: IOperationSettings | undefined =
-              projectConfiguration.operationSettingsByOperationName.get(this._commandName);
-            if (!operationSettings) {
-              terminal.writeVerboseLine(
-                `This project does not define the caching behavior of the "${this._commandName}" command, so caching has been disabled.`
-              );
-            } else if (operationSettings.disableBuildCacheForOperation) {
-              terminal.writeVerboseLine(
-                `Caching has been disabled for this project's "${this._commandName}" command.`
-              );
-            } else {
-              const projectOutputFolderNames: ReadonlyArray<string> =
-                operationSettings.outputFolderNames || [];
-              this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
-                projectConfiguration,
-                projectOutputFolderNames,
-                buildCacheConfiguration: this._buildCacheConfiguration,
-                terminal,
-                command: this._commandToRun,
-                trackedProjectFiles: trackedProjectFiles,
-                projectChangeAnalyzer: this._projectChangeAnalyzer,
-                phaseName: this._phase.name
-              });
-            }
-          }
-        } else {
-          terminal.writeVerboseLine(
-            `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-              'or one provided by a rig, so it does not support caching.'
-          );
-        }
-      }
+    if (!stateHash) {
+      // To test this code path:
+      // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
+      terminal.writeLine('Unable to calculate incremental state.');
+      terminal.writeLine({
+        text: 'Rush will proceed without incremental execution, caching, and change detection.',
+        foregroundColor: ColorValue.Cyan
+      });
+      return;
     }
 
-    return this._projectBuildCache;
+    if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
+      // Disable legacy skip logic if the build cache is in play
+      this.isSkipAllowed = false;
+
+      const projectConfiguration: RushProjectConfiguration | undefined =
+        await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
+      if (projectConfiguration) {
+        projectConfiguration.validatePhaseConfiguration(this._selectedPhases, terminal);
+        if (projectConfiguration.disableBuildCacheForProject) {
+          terminal.writeVerboseLine('Caching has been disabled for this project.');
+        } else {
+          const operationSettings: IOperationSettings | undefined =
+            projectConfiguration.operationSettingsByOperationName.get(this._commandName);
+          if (!operationSettings) {
+            terminal.writeVerboseLine(
+              `This project does not define the caching behavior of the "${this._commandName}" command, so caching has been disabled.`
+            );
+          } else if (operationSettings.disableBuildCacheForOperation) {
+            terminal.writeVerboseLine(
+              `Caching has been disabled for this project's "${this._commandName}" command.`
+            );
+          } else {
+            const projectOutputFolderNames: ReadonlyArray<string> = operationSettings.outputFolderNames || [];
+            return await ProjectBuildCache.tryGetProjectBuildCache({
+              projectConfiguration,
+              projectOutputFolderNames,
+              buildCacheConfiguration: this._buildCacheConfiguration,
+              terminal,
+              command: this._commandToRun,
+              trackedProjectFiles,
+              hash: stateHash,
+              phaseName: this._phase.name
+            });
+          }
+        }
+      } else {
+        terminal.writeVerboseLine(
+          `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+            'or one provided by a rig, so it does not support caching.'
+        );
+      }
+    }
   }
 }
 

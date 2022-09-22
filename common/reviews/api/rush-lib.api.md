@@ -107,6 +107,9 @@ export class CommonVersionsConfiguration {
     save(): boolean;
 }
 
+// @alpha
+export function createPhasedCommandWorker(args: string[], onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void): Promise<IPhasedCommandWorkerController>;
+
 // @beta (undocumented)
 export class CredentialCache {
     // (undocumented)
@@ -402,7 +405,9 @@ export interface IOperationRunnerContext {
     debugMode: boolean;
     isCacheWriteAllowed: boolean;
     quietMode: boolean;
+    stateHash: string | undefined;
     stdioSummarizer: StdioSummarizer;
+    trackedFileHashes: ReadonlyMap<string, string> | undefined;
 }
 
 // @public
@@ -428,6 +433,16 @@ export interface IPhase {
 export interface IPhasedCommand extends IRushCommand {
     // @alpha
     readonly hooks: PhasedCommandHooks;
+}
+
+// @alpha
+export interface IPhasedCommandWorkerController {
+    abortAsync(): Promise<void>;
+    getGraphAsync(): Promise<ITransferableOperation[]>;
+    onStatusUpdate: (operationStatus: ITransferableOperationStatus) => void;
+    readyAsync(): Promise<void>;
+    shutdownAsync(): Promise<void>;
+    updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]>;
 }
 
 // @internal
@@ -504,6 +519,30 @@ export interface ITelemetryOperationResult {
     endTimestampMs?: number;
     result: string;
     startTimestampMs?: number;
+}
+
+// @alpha (undocumented)
+export interface ITransferableOperation {
+    // (undocumented)
+    logFilePath?: string;
+    // (undocumented)
+    name?: string;
+    // (undocumented)
+    phase?: string;
+    // (undocumented)
+    project?: string;
+}
+
+// @alpha (undocumented)
+export interface ITransferableOperationStatus {
+    // (undocumented)
+    duration: number;
+    // (undocumented)
+    hash: string | undefined;
+    // (undocumented)
+    operation: ITransferableOperation;
+    // (undocumented)
+    status: OperationStatus;
 }
 
 // @public
@@ -680,6 +719,10 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    // @internal (undocumented)
+    _getOperationStateHash(localHash: string, dependencyHashes: string[]): string;
+    // @internal (undocumented)
+    _hashProjectDependencies(packageDeps: Map<string, string>): string;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal

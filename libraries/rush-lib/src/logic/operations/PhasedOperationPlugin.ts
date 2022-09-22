@@ -111,6 +111,6 @@ function createOperations(
 }
 
 // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key
-function getOperationKey(phase: IPhase, project: RushConfigurationProject): string {
+export function getOperationKey(phase: IPhase, project: RushConfigurationProject): string {
   return `${project.packageName};${phase.name}`;
 }

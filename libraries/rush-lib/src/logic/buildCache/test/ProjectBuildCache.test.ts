@@ -4,7 +4,6 @@
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
-import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 import { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 
@@ -19,11 +18,7 @@ interface ITestOptions {
 describe(ProjectBuildCache.name, () => {
   async function prepareSubject(options: Partial<ITestOptions>): Promise<ProjectBuildCache | undefined> {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-    const projectChangeAnalyzer = {
-      [ProjectChangeAnalyzer.prototype._tryGetProjectStateHashAsync.name]: async () => {
-        return 'state_hash';
-      }
-    } as unknown as ProjectChangeAnalyzer;
+    const hash: string = 'state_hash';
 
     const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: {
@@ -45,7 +40,7 @@ describe(ProjectBuildCache.name, () => {
       } as unknown as RushProjectConfiguration,
       command: 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
-      projectChangeAnalyzer,
+      hash,
       terminal,
       phaseName: 'build'
     });
@@ -56,9 +51,7 @@ describe(ProjectBuildCache.name, () => {
   describe(ProjectBuildCache.tryGetProjectBuildCache.name, () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
       const subject: ProjectBuildCache = (await prepareSubject({}))!;
-      expect(subject['_cacheId']).toMatchInlineSnapshot(
-        `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
-      );
+      expect(subject['_cacheId']).toMatchSnapshot();
     });
 
     it('returns undefined if the tracked file list is undefined', async () => {

@@ -18,6 +18,7 @@ import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import {
+  IAbortSignal,
   IOperationExecutionManagerOptions,
   OperationExecutionManager
 } from '../../logic/operations/OperationExecutionManager';
@@ -66,13 +67,14 @@ interface IRunPhasesOptions {
   terminal: Terminal;
 }
 
-export interface IExecutionOperationsOptions {
+export interface IExecuteOperationsOptions {
   createOperationsContext: ICreateOperationsContext;
   executionManagerOptions: IOperationExecutionManagerOptions;
   ignoreHooks: boolean;
   operations: Set<Operation>;
   stopwatch: Stopwatch;
   terminal: Terminal;
+  abortSignal?: IAbortSignal;
 }
 
 interface IPhasedCommandTelemetry {
@@ -281,7 +283,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       initialCreateOperationsContext
     );
 
-    const initialOptions: IExecutionOperationsOptions = {
+    const initialOptions: IExecuteOperationsOptions = {
       createOperationsContext: initialCreateOperationsContext,
       ignoreHooks: false,
       operations,
@@ -365,7 +367,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         createOperationsContext
       );
 
-      const executeOptions: IExecutionOperationsOptions = {
+      const executeOptions: IExecuteOperationsOptions = {
         createOperationsContext,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
@@ -481,24 +483,32 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    * Runs a set of operations and reports the results.
    * @internal
    */
-  public async _executeOperations(options: IExecutionOperationsOptions): Promise<void> {
-    const { executionManagerOptions, ignoreHooks, operations, stopwatch, terminal } = options;
+  public async _executeOperations(options: IExecuteOperationsOptions): Promise<void> {
+    const {
+      createOperationsContext,
+      executionManagerOptions,
+      ignoreHooks,
+      operations,
+      stopwatch,
+      abortSignal,
+      terminal
+    } = options;
 
     const executionManager: OperationExecutionManager = new OperationExecutionManager(
       operations,
       executionManagerOptions
     );
 
-    const { isInitial, isWatch } = options.createOperationsContext;
+    const { isInitial, isWatch, projectChangeAnalyzer } = createOperationsContext;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
 
     try {
-      result = await executionManager.executeAsync();
+      result = await executionManager.executeAsync(projectChangeAnalyzer, abortSignal);
       success = result.status === OperationStatus.Success;
 
-      await this.hooks.afterExecuteOperations.promise(result, options.createOperationsContext);
+      await this.hooks.afterExecuteOperations.promise(result, createOperationsContext);
 
       stopwatch.stop();
 

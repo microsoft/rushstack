@@ -9,7 +9,6 @@ import * as tar from 'tar';
 import { FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
@@ -23,8 +22,8 @@ export interface IProjectBuildCacheOptions {
   projectConfiguration: RushProjectConfiguration;
   projectOutputFolderNames: ReadonlyArray<string>;
   command: string;
-  trackedProjectFiles: string[] | undefined;
-  projectChangeAnalyzer: ProjectChangeAnalyzer;
+  trackedProjectFiles: Iterable<string> | undefined;
+  hash: string;
   terminal: ITerminal;
   phaseName: string;
 }
@@ -71,8 +70,8 @@ export class ProjectBuildCache {
   public static async tryGetProjectBuildCache(
     options: IProjectBuildCacheOptions
   ): Promise<ProjectBuildCache | undefined> {
-    const { terminal, projectConfiguration, projectOutputFolderNames, trackedProjectFiles } = options;
-    if (!trackedProjectFiles) {
+    const { terminal, projectConfiguration, projectOutputFolderNames, trackedProjectFiles, hash } = options;
+    if (!trackedProjectFiles || !hash) {
       return undefined;
     }
 
@@ -95,7 +94,7 @@ export class ProjectBuildCache {
     terminal: ITerminal,
     projectConfiguration: RushProjectConfiguration,
     projectOutputFolderNames: ReadonlyArray<string>,
-    trackedProjectFiles: string[]
+    trackedProjectFiles: Iterable<string>
   ): boolean {
     const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
       projectConfiguration.project.projectRelativeFolder
@@ -172,6 +171,7 @@ export class ProjectBuildCache {
     }
 
     terminal.writeLine('Build cache hit.');
+    terminal.writeVerboseLine(cacheId);
 
     const projectFolderPath: string = this._project.projectFolder;
 
@@ -440,49 +440,12 @@ export class ProjectBuildCache {
 
   private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
     // The project state hash is calculated in the following method:
-    // - The current project's hash (see ProjectChangeAnalyzer.getProjectStateHash) is
-    //   calculated and appended to an array
-    // - The current project's recursive dependency projects' hashes are calculated
-    //   and appended to the array
     // - A SHA1 hash is created and the following data is fed into it, in order:
     //   1. The JSON-serialized list of output folder names for this
     //      project (see ProjectBuildCache._projectOutputFolderNames)
     //   2. The command that will be run in the project
-    //   3. Each dependency project hash (from the array constructed in previous steps),
-    //      in sorted alphanumerical-sorted order
+    //   3. The hash of the projet inputs
     // - A hex digest of the hash is returned
-    const projectChangeAnalyzer: ProjectChangeAnalyzer = options.projectChangeAnalyzer;
-    const projectStates: string[] = [];
-    const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-    let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-    projectsToProcess.add(options.projectConfiguration.project);
-
-    while (projectsToProcess.size > 0) {
-      const newProjectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-      for (const projectToProcess of projectsToProcess) {
-        projectsThatHaveBeenProcessed.add(projectToProcess);
-
-        const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
-          projectToProcess,
-          options.terminal
-        );
-        if (!projectState) {
-          // If we hit any projects with unknown state, return unknown cache ID
-          return undefined;
-        } else {
-          projectStates.push(projectState);
-          for (const dependency of projectToProcess.dependencyProjects) {
-            if (!projectsThatHaveBeenProcessed.has(dependency)) {
-              newProjectsToProcess.add(dependency);
-            }
-          }
-        }
-      }
-
-      projectsToProcess = newProjectsToProcess;
-    }
-
-    const sortedProjectStates: string[] = projectStates.sort();
     const hash: crypto.Hash = crypto.createHash('sha1');
     // This value is used to force cache bust when the build cache algorithm changes
     hash.update(`${RushConstants.buildCacheVersion}`);
@@ -492,10 +455,8 @@ export class ProjectBuildCache {
     hash.update(RushConstants.hashDelimiter);
     hash.update(options.command);
     hash.update(RushConstants.hashDelimiter);
-    for (const projectHash of sortedProjectStates) {
-      hash.update(projectHash);
-      hash.update(RushConstants.hashDelimiter);
-    }
+    hash.update(options.hash);
+    hash.update(RushConstants.hashDelimiter);
 
     const projectStateHash: string = hash.digest('hex');
 

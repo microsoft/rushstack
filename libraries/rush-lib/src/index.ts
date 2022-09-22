@@ -112,3 +112,10 @@ export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from 
 export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
 
 export { IStopwatchResult } from './utilities/Stopwatch';
+
+export {
+  ITransferableOperation,
+  ITransferableOperationStatus,
+  IPhasedCommandWorkerController
+} from './worker/RushWorker.types';
+export { createPhasedCommandWorker } from './worker/RushWorkerHost';

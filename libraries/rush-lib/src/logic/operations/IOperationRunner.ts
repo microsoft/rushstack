@@ -32,6 +32,17 @@ export interface IOperationRunnerContext {
    * Object used to report a summary at the end of the Rush invocation.
    */
   stdioSummarizer: StdioSummarizer;
+
+  // Temporary pending moving this to higher level
+  /**
+   * The hashes of all tracked files pertinent to the operation
+   */
+  trackedFileHashes: ReadonlyMap<string, string> | undefined;
+
+  /**
+   * The hash of all inputs to the operation
+   */
+  stateHash: string | undefined;
 }
 
 /**
