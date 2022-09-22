@@ -47,6 +47,8 @@ export { RushConfigurationProject } from './api/RushConfigurationProject';
 
 export { RushUserConfiguration } from './api/RushUserConfiguration';
 
+export { RushCommandLineParser } from './cli/RushCommandLineParser';
+
 export { RushGlobalFolder as _RushGlobalFolder } from './api/RushGlobalFolder';
 
 export { ApprovedPackagesItem, ApprovedPackagesConfiguration } from './api/ApprovedPackagesConfiguration';

@@ -11,11 +11,13 @@ import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import { CommandLineParser } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
+import { JsonSchema } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
@@ -745,6 +747,43 @@ export class Rush {
     static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static get version(): string;
+}
+
+// @public (undocumented)
+export class RushCommandLineParser extends CommandLineParser {
+    // Warning: (ae-forgotten-export) The symbol "IRushCommandLineParserOptions" needs to be exported by the entry point index.d.ts
+    constructor(options?: Partial<IRushCommandLineParserOptions>);
+    // (undocumented)
+    execute(args?: string[]): Promise<boolean>;
+    // (undocumented)
+    flushTelemetry(): void;
+    // (undocumented)
+    get isDebug(): boolean;
+    // (undocumented)
+    get isQuiet(): boolean;
+    // (undocumented)
+    protected onDefineParameters(): void;
+    // (undocumented)
+    protected onExecute(): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "PluginManager" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly pluginManager: PluginManager;
+    // (undocumented)
+    readonly rushConfiguration: RushConfiguration;
+    // Warning: (ae-incompatible-release-tags) The symbol "rushGlobalFolder" is marked as @public, but its signature references "_RushGlobalFolder" which is marked as @internal
+    //
+    // (undocumented)
+    rushGlobalFolder: _RushGlobalFolder;
+    // Warning: (ae-incompatible-release-tags) The symbol "rushSession" is marked as @public, but its signature references "RushSession" which is marked as @beta
+    //
+    // (undocumented)
+    readonly rushSession: RushSession;
+    static shouldRestrictConsoleOutput(): boolean;
+    // Warning: (ae-forgotten-export) The symbol "Telemetry" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    telemetry: Telemetry | undefined;
 }
 
 // @public

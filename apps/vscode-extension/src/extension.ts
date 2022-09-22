@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { RushConfigurationProject } from '@rushstack/rush-sdk';
+import * as Rush from '@rushstack/rush-sdk';
+import * as RushLib from '@microsoft/rush-lib';
 import * as vscode from 'vscode';
 import {
   ProjectDataProvider,
@@ -9,6 +10,15 @@ import {
   OperationPhase
 } from './dataProviders/projects/ProjectDataProvider';
 import * as path from 'path';
+import { CommandDataProvider } from './dataProviders/commands/CommandDataProvider';
+
+declare const global: NodeJS.Global &
+  typeof globalThis & {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    ___rush___workingDirectory?: string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    ___rush___rushLibModule?: typeof RushLib;
+  };
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -22,7 +32,20 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.executeCommand('setContext', 'rush.watching', isWatching);
 
-  const projectDataProvider = new ProjectDataProvider(workspaceRoot);
+  const useWorkspaceRushVersion =
+    vscode.workspace.getConfiguration().get<boolean>('rush.useWorkspaceRushVersion') ?? true;
+
+  const loadRush = async (): Promise<typeof Rush> => {
+    if (useWorkspaceRushVersion) {
+      global.___rush___workingDirectory = workspaceRoot;
+    } else {
+      global.___rush___rushLibModule = await import('@microsoft/rush-lib');
+    }
+
+    return await import('@rushstack/rush-sdk');
+  };
+
+  const projectDataProvider = new ProjectDataProvider(workspaceRoot, loadRush);
 
   const projectView = vscode.window.createTreeView('rushProjects', {
     treeDataProvider: projectDataProvider,
@@ -32,11 +55,20 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(projectView);
 
+  const commandProvider = new CommandDataProvider(workspaceRoot, loadRush);
+
+  const commandView = vscode.window.createTreeView('rushCommands', {
+    treeDataProvider: commandProvider,
+    canSelectMany: false,
+    showCollapseAll: false
+  });
+
   const openProjectCommand = vscode.commands.registerCommand(
-    'rush.openProject',
+    'rush.revealProjectInExplorer',
     (project: Project | StateGroup | OperationPhase) => {
       if (project instanceof Project) {
-        vscode.window.showTextDocument(
+        vscode.commands.executeCommand(
+          'revealInExplorer',
           vscode.Uri.file(path.join(project.rushProject.projectFolder, 'package.json'))
         );
       }
@@ -50,20 +82,6 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(refreshCommand);
-
-  const toggleActiveProjectCommand = vscode.commands.registerCommand(
-    'rush.toggleActiveProject',
-    async (
-      contextProject: Project | StateGroup | OperationPhase,
-      selectedProjects: (Project | StateGroup | OperationPhase)[] = [contextProject]
-    ) => {
-      if (contextProject instanceof Project) {
-        await projectDataProvider.toggleActiveProjects(selectedProjects as Project[]);
-      }
-    }
-  );
-
-  context.subscriptions.push(toggleActiveProjectCommand);
 
   const activateProjectCommand = vscode.commands.registerCommand(
     'rush.activateProject',
