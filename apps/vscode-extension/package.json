@@ -10,14 +10,35 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:rush.helloWorld"
+    "onView:rushProjects"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "rush.helloWorld",
-        "title": "Hello World"
+        "command": "rush.openProject",
+        "title": "Open",
+        "category": "Rush"
+      },
+      {
+        "command": "rush.toggleActiveProject",
+        "title": "Toggle active",
+        "category": "Rush"
+      },
+      {
+        "command": "rush.activateProject",
+        "title": "Activate",
+        "category": "Rush"
+      },
+      {
+        "command": "rush.deactivateProject",
+        "title": "Deactivate",
+        "category": "Rush"
+      },
+      {
+        "command": "rush.buildActiveProjects",
+        "title": "Build",
+        "category": "Rush"
       }
     ],
     "viewsContainers": {
@@ -32,8 +53,37 @@
     "views": {
       "rush": [
         {
-          "id": "rush",
-          "name": "Rush"
+          "id": "rushProjects",
+          "name": "Projects"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "rush.openProject",
+          "when": "view == rushProjects && viewItem"
+        },
+        {
+          "command": "rush.toggleActiveProject",
+          "when": "view == rushProjects && viewItem"
+        },
+        {
+          "command": "rush.activateProject",
+          "when": "view == rushProjects && viewItem && viewItem not in rush.activeProjects",
+          "group": "inline"
+        },
+        {
+          "command": "rush.deactivateProject",
+          "when": "view == rushProjects && viewItem && viewItem in rush.activeProjects",
+          "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "rush.buildActiveProjects",
+          "when": "view == rushProjects && rush.canBuild",
+          "group": "navigation"
         }
       ]
     }
@@ -50,7 +100,8 @@
     "test": "node ./out/test/runTest.js"
   },
   "dependencies": {
-    "@rushstack/rush-sdk": "workspace:*"
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*"
   },
   "devDependencies": {
     "@types/vscode": "^1.71.0",

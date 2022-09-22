@@ -3,6 +3,8 @@
 'use strict';
 
 const path = require('path');
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -43,6 +45,7 @@ const extensionConfig = {
   devtool: 'nosources-source-map',
   infrastructureLogging: {
     level: 'log' // enables logging required for problem matchers
-  }
+  },
+  plugins: [new PreserveDynamicRequireWebpackPlugin()]
 };
 module.exports = [extensionConfig];
