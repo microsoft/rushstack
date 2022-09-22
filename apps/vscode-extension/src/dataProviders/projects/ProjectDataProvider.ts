@@ -220,12 +220,6 @@ export class ProjectDataProvider
       }
 
       return [];
-    } else if (element instanceof Project) {
-      const projects = element.dependencies.map((rushProject: Rush.RushConfigurationProject) => {
-        return new Project(rushProject);
-      });
-
-      return projects;
     } else {
       return [];
     }
