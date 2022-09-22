@@ -295,9 +295,9 @@ export class ChangeAction extends BaseRushAction {
         });
       }
     }
-
+    let changefiles: string[];
     try {
-      await this._writeChangeFiles(
+      changefiles = await this._writeChangeFiles(
         promptModule,
         changeFileData,
         this._overwriteFlagParameter.value,
@@ -307,10 +307,14 @@ export class ChangeAction extends BaseRushAction {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
     if (this._commitChangesFlagParameter.value) {
-      this._stageAndCommitGitChanges(
-        '*',
-        this.rushConfiguration.gitChangefilesCommitMessage || 'Rush change'
-      );
+      if (changefiles && changefiles.length !== 0) {
+        this._stageAndCommitGitChanges(
+          changefiles,
+          this.rushConfiguration.gitChangefilesCommitMessage || 'Rush change'
+        );
+      } else {
+        this._terminal.writeWarningLine('No change files generated, nothing to commit.');
+      }
     }
   }
 
@@ -639,10 +643,18 @@ export class ChangeAction extends BaseRushAction {
     changeFileData: Map<string, IChangeFile>,
     overwrite: boolean,
     interactiveMode: boolean
-  ): Promise<void> {
+  ): Promise<string[]> {
+    const writtenFiles: string[] = [];
     await changeFileData.forEach(async (changeFile: IChangeFile) => {
-      await this._writeChangeFile(promptModule, changeFile, overwrite, interactiveMode);
+      const writtenFile: string | undefined = await this._writeChangeFile(
+        promptModule,
+        changeFile,
+        overwrite,
+        interactiveMode
+      );
+      if (writtenFile) writtenFiles.push(writtenFile);
     });
+    return writtenFiles;
   }
 
   private async _writeChangeFile(
@@ -650,7 +662,7 @@ export class ChangeAction extends BaseRushAction {
     changeFileData: IChangeFile,
     overwrite: boolean,
     interactiveMode: boolean
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     const output: string = JSON.stringify(changeFileData, undefined, 2);
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
@@ -667,6 +679,7 @@ export class ChangeAction extends BaseRushAction {
 
     if (shouldWrite) {
       this._writeFile(filePath, output, shouldWrite && fileExists);
+      return filePath;
     }
   }
 
@@ -706,16 +719,16 @@ export class ChangeAction extends BaseRushAction {
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 
-  private _stageAndCommitGitChanges(pattern: string, message: string): void {
+  private _stageAndCommitGitChanges(pattern: string[], message: string): void {
     try {
       Utilities.executeCommand({
         command: 'git',
-        args: ['add', pattern],
+        args: ['add', ...pattern],
         workingDirectory: this.rushConfiguration.changesFolder
       });
       Utilities.executeCommand({
         command: 'git',
-        args: ['commit', pattern, '-m', message],
+        args: ['commit', ...pattern, '-m', message],
         workingDirectory: this.rushConfiguration.changesFolder
       });
     } catch (error) {
