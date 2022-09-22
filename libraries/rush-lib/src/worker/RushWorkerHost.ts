@@ -22,10 +22,10 @@ import { once } from 'events';
  *
  * @alpha
  */
-export async function createPhasedCommandWorker(
+export function createPhasedCommandWorker(
   args: string[],
   onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void
-): Promise<IPhasedCommandWorkerController> {
+): IPhasedCommandWorkerController {
   const statusByOperation: Map<string, ITransferableOperationStatus> = new Map();
   let resolveGraph: (operations: ITransferableOperation[]) => void;
   const graphPromise: Promise<ITransferableOperation[]> = new Promise((resolve) => {
@@ -116,8 +116,6 @@ export async function createPhasedCommandWorker(
   }
 
   worker.on('message', handleMessage);
-
-  await controller.readyAsync();
 
   return controller;
 }
