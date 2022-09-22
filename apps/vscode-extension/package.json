@@ -28,17 +28,38 @@
       {
         "command": "rush.activateProject",
         "title": "Activate",
-        "category": "Rush"
+        "category": "Rush",
+        "icon": "$(add)"
       },
       {
         "command": "rush.deactivateProject",
         "title": "Deactivate",
-        "category": "Rush"
+        "category": "Rush",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "rush.enableWatch",
+        "title": "Enable watch mode",
+        "category": "Rush",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "rush.disableWatch",
+        "title": "Disable watch mode",
+        "category": "Rush",
+        "icon": "$(eye)"
       },
       {
         "command": "rush.buildActiveProjects",
         "title": "Build",
-        "category": "Rush"
+        "category": "Rush",
+        "icon": "$(run)"
+      },
+      {
+        "command": "rush.refreshProjects",
+        "title": "Refresh",
+        "category": "Rush",
+        "icon": "$(refresh)"
       }
     ],
     "viewsContainers": {
@@ -62,27 +83,65 @@
       "view/item/context": [
         {
           "command": "rush.openProject",
-          "when": "view == rushProjects && viewItem"
+          "when": "view == rushProjects && viewItem =~ /^project:/"
         },
         {
           "command": "rush.toggleActiveProject",
-          "when": "view == rushProjects && viewItem"
+          "when": "view == rushProjects && viewItem =~ /^project:/"
         },
         {
           "command": "rush.activateProject",
-          "when": "view == rushProjects && viewItem && viewItem not in rush.activeProjects",
+          "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem not in rush.activeProjects",
           "group": "inline"
         },
         {
           "command": "rush.deactivateProject",
-          "when": "view == rushProjects && viewItem && viewItem in rush.activeProjects",
+          "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem in rush.activeProjects",
           "group": "inline"
+        },
+        {
+          "command": "rush.activateProject",
+          "when": "view == rushProjects && viewItem == group:Included",
+          "group": "inline"
+        },
+        {
+          "command": "rush.activateProject",
+          "when": "view == rushProjects && viewItem == group:Excluded",
+          "group": "inline"
+        },
+        {
+          "command": "rush.deactivateProject",
+          "when": "view == rushProjects && viewItem == group:Active",
+          "group": "inline"
+        },
+        {
+          "command": "rush.activateProject",
+          "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem not in rush.activeProjects"
+        },
+        {
+          "command": "rush.deactivateProject",
+          "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem in rush.activeProjects"
         }
       ],
       "view/title": [
         {
+          "command": "rush.enableWatch",
+          "when": "view == rushProjects && rush.watching == false",
+          "group": "navigation"
+        },
+        {
+          "command": "rush.disableWatch",
+          "when": "view == rushProjects && rush.watching == true",
+          "group": "navigation"
+        },
+        {
           "command": "rush.buildActiveProjects",
-          "when": "view == rushProjects && rush.canBuild",
+          "when": "view == rushProjects && rush.canBuild == true && rush.watching == false",
+          "group": "navigation"
+        },
+        {
+          "command": "rush.refreshProjects",
+          "when": "view == rushProjects",
           "group": "navigation"
         }
       ]

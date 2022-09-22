@@ -8,6 +8,7 @@ import {
   StateGroup,
   OperationPhase
 } from './dataProviders/projects/ProjectDataProvider';
+import * as path from 'path';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -16,6 +17,10 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : undefined;
+
+  let isWatching = false;
+
+  vscode.commands.executeCommand('setContext', 'rush.watching', isWatching);
 
   const projectDataProvider = new ProjectDataProvider(workspaceRoot);
 
@@ -30,27 +35,21 @@ export function activate(context: vscode.ExtensionContext) {
   const openProjectCommand = vscode.commands.registerCommand(
     'rush.openProject',
     (project: Project | StateGroup | OperationPhase) => {
-      if (project.resourceUri) {
-        vscode.window.showTextDocument(project.resourceUri);
+      if (project instanceof Project) {
+        vscode.window.showTextDocument(
+          vscode.Uri.file(path.join(project.rushProject.projectFolder, 'package.json'))
+        );
       }
     }
   );
 
   context.subscriptions.push(openProjectCommand);
 
-  function updateContexts(): void {
-    const activeProjects = projectDataProvider.getActiveProjects();
+  const refreshCommand = vscode.commands.registerCommand('rush.refreshProjects', async () => {
+    await projectDataProvider.refresh();
+  });
 
-    const activeProjectsContext: { [key: string]: true } = {};
-
-    for (const activeProject of activeProjects) {
-      activeProjectsContext[activeProject.resourceUri?.toString() ?? ''] = true;
-    }
-
-    vscode.commands.executeCommand('setContext', 'rush.canBuild', activeProjects.length > 0);
-
-    vscode.commands.executeCommand('setContext', 'rush.activeProjects', activeProjectsContext);
-  }
+  context.subscriptions.push(refreshCommand);
 
   const toggleActiveProjectCommand = vscode.commands.registerCommand(
     'rush.toggleActiveProject',
@@ -60,8 +59,6 @@ export function activate(context: vscode.ExtensionContext) {
     ) => {
       if (contextProject instanceof Project) {
         await projectDataProvider.toggleActiveProjects(selectedProjects as Project[]);
-
-        updateContexts();
       }
     }
   );
@@ -76,8 +73,10 @@ export function activate(context: vscode.ExtensionContext) {
     ) => {
       if (contextProject instanceof Project) {
         await projectDataProvider.toggleActiveProjects(selectedProjects as Project[], true);
-
-        updateContexts();
+      } else if (contextProject instanceof StateGroup) {
+        if (contextProject.groupName === 'Included' || contextProject.groupName === 'Excluded') {
+          await projectDataProvider.toggleActiveProjects(Array.from(contextProject.projects), true);
+        }
       }
     }
   );
@@ -92,8 +91,10 @@ export function activate(context: vscode.ExtensionContext) {
     ) => {
       if (contextProject instanceof Project) {
         await projectDataProvider.toggleActiveProjects(selectedProjects as Project[], false);
-
-        updateContexts();
+      } else if (contextProject instanceof StateGroup) {
+        if (contextProject.groupName === 'Active') {
+          await projectDataProvider.toggleActiveProjects(Array.from(contextProject.projects), false);
+        }
       }
     }
   );
@@ -104,21 +105,46 @@ export function activate(context: vscode.ExtensionContext) {
     const projects = projectDataProvider.getActiveProjects();
 
     if (projects.length > 0) {
-      const commandText = ['rush build -t'];
+      let rushTerminal: vscode.Terminal | undefined;
 
-      for (const project of projects) {
-        commandText.push(` ${project.rushProject.packageName}`);
+      for (const terminal of vscode.window.terminals) {
+        if (terminal.name === 'Rush') {
+          rushTerminal = terminal;
+          break;
+        }
       }
 
-      vscode.commands.executeCommand('workbench.action.terminal.sendSequence', {
-        text: `${commandText.join('')}\n`
-      });
+      if (!rushTerminal) {
+        rushTerminal = vscode.window.createTerminal('Rush');
+      }
+
+      const commandText = ['rush build'];
+
+      for (const project of projects) {
+        commandText.push(` -t ${project.rushProject.packageName}`);
+      }
+
+      rushTerminal.sendText(commandText.join(''));
     }
   });
 
   context.subscriptions.push(buildActiveProjectsCommand);
 
-  updateContexts();
+  const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', () => {
+    isWatching = true;
+
+    vscode.commands.executeCommand('setContext', 'rush.watching', isWatching);
+  });
+
+  context.subscriptions.push(enableWatchCommand);
+
+  const disableWatchCommand = vscode.commands.registerCommand('rush.disableWatch', () => {
+    isWatching = false;
+
+    vscode.commands.executeCommand('setContext', 'rush.watching', isWatching);
+  });
+
+  context.subscriptions.push(disableWatchCommand);
 }
 
 // this method is called when your extension is deactivated
