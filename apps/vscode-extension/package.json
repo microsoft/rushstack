@@ -46,8 +46,8 @@
         "icon": "$(eye)"
       },
       {
-        "command": "rush.buildActiveProjects",
-        "title": "Build",
+        "command": "rush.runAction",
+        "title": "Run",
         "category": "Rush",
         "icon": "$(run)"
       },
@@ -111,22 +111,31 @@
         {
           "command": "rush.deactivateProject",
           "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem in rush.activeProjects"
+        },
+        {
+          "command": "rush.runAction",
+          "when": "view == rushCommands && viewItem =~ /^command:/ && rush.watcher == 'sleep'",
+          "group": "inline"
+        },
+        {
+          "command": "rush.runAction",
+          "when": "view == rushCommands && viewItem =~ /^command:/ && rush.watcher == 'sleep'"
         }
       ],
       "view/title": [
         {
           "command": "rush.enableWatch",
-          "when": "view == rushProjects && rush.watching == false",
+          "when": "view == rushProjects && rush.watcher == 'sleep'",
           "group": "navigation"
         },
         {
           "command": "rush.disableWatch",
-          "when": "view == rushProjects && rush.watching == true",
+          "when": "view == rushProjects && rush.watcher == 'starting'",
           "group": "navigation"
         },
         {
-          "command": "rush.buildActiveProjects",
-          "when": "view == rushProjects && rush.activeProjects.count > 0 && rush.watching == false",
+          "command": "rush.disableWatch",
+          "when": "view == rushProjects && rush.watcher == 'ready'",
           "group": "navigation"
         },
         {

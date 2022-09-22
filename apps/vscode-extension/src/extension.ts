@@ -10,7 +10,7 @@ import {
   OperationPhase
 } from './dataProviders/projects/ProjectDataProvider';
 import * as path from 'path';
-import { CommandDataProvider } from './dataProviders/commands/CommandDataProvider';
+import { Command, CommandDataProvider } from './dataProviders/commands/CommandDataProvider';
 
 declare const global: NodeJS.Global &
   typeof globalThis & {
@@ -29,8 +29,9 @@ export function activate(context: vscode.ExtensionContext) {
       : undefined;
 
   let isWatching = false;
+  let worker: Rush.IPhasedCommandWorkerController | undefined;
 
-  vscode.commands.executeCommand('setContext', 'rush.watching', isWatching);
+  vscode.commands.executeCommand('setContext', 'rush.watcher', 'sleep');
 
   const useWorkspaceRushVersion =
     vscode.workspace.getConfiguration().get<boolean>('rush.useWorkspaceRushVersion') ?? true;
@@ -62,6 +63,8 @@ export function activate(context: vscode.ExtensionContext) {
     canSelectMany: false,
     showCollapseAll: false
   });
+
+  context.subscriptions.push(commandView);
 
   const openProjectCommand = vscode.commands.registerCommand(
     'rush.revealProjectInExplorer',
@@ -119,10 +122,57 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(deactivateProjectCommand);
 
-  const buildActiveProjectsCommand = vscode.commands.registerCommand('rush.buildActiveProjects', () => {
-    const projects = projectDataProvider.getActiveProjects();
+  const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', async () => {
+    isWatching = true;
 
-    if (projects.length > 0) {
+    vscode.window.showInformationMessage('Initializing the Rush watcher.');
+    vscode.commands.executeCommand('setContext', 'rush.watcher', 'starting');
+
+    const rush = await loadRush();
+
+    worker = rush.createPhasedCommandWorker(['build']);
+
+    try {
+      await worker.readyAsync();
+
+      vscode.window.showInformationMessage('Initialized the Rush watcher.');
+      vscode.commands.executeCommand('setContext', 'rush.watcher', 'ready');
+    } catch {
+      vscode.window.showErrorMessage('Failed to initialize the Rush watcher.');
+      vscode.commands.executeCommand('setContext', 'rush.watcher', 'sleep');
+    }
+  });
+
+  context.subscriptions.push(enableWatchCommand);
+
+  const disableWatchCommand = vscode.commands.registerCommand('rush.disableWatch', async () => {
+    if (worker) {
+      vscode.window.showInformationMessage('Shutting down the Rush watcher.');
+      try {
+        await worker.shutdownAsync();
+        vscode.window.showInformationMessage('Shut down the Rush watcher.');
+      } catch {
+        vscode.window.showErrorMessage('Failed to shut down the Rush watcher.');
+        // Swallow error.
+      }
+    }
+
+    isWatching = false;
+
+    vscode.commands.executeCommand('setContext', 'rush.watcher', 'sleep');
+  });
+
+  context.subscriptions.push(disableWatchCommand);
+
+  const rushRushActionCommand = vscode.commands.registerCommand(
+    'rush.runAction',
+    async (commandContext: Command) => {
+      const projects = projectDataProvider.getActiveProjects();
+
+      if (!(commandContext instanceof Command)) {
+        return;
+      }
+
       let rushTerminal: vscode.Terminal | undefined;
 
       for (const terminal of vscode.window.terminals) {
@@ -136,33 +186,20 @@ export function activate(context: vscode.ExtensionContext) {
         rushTerminal = vscode.window.createTerminal('Rush');
       }
 
-      const commandText = ['rush build'];
+      const commandText = ['rush '];
+      commandText.push(commandContext.label);
 
-      for (const project of projects) {
-        commandText.push(` -t ${project.rushProject.packageName}`);
+      if (projects.length > 0) {
+        for (const project of projects) {
+          commandText.push(` -t ${project.rushProject.packageName}`);
+        }
       }
 
       rushTerminal.sendText(commandText.join(''));
     }
-  });
+  );
 
-  context.subscriptions.push(buildActiveProjectsCommand);
-
-  const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', () => {
-    isWatching = true;
-
-    vscode.commands.executeCommand('setContext', 'rush.watching', isWatching);
-  });
-
-  context.subscriptions.push(enableWatchCommand);
-
-  const disableWatchCommand = vscode.commands.registerCommand('rush.disableWatch', () => {
-    isWatching = false;
-
-    vscode.commands.executeCommand('setContext', 'rush.watching', isWatching);
-  });
-
-  context.subscriptions.push(disableWatchCommand);
+  context.subscriptions.push(rushRushActionCommand);
 }
 
 // this method is called when your extension is deactivated

@@ -30,7 +30,8 @@ export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
         }
 
         const commandLineParser = new rushSdk.RushCommandLineParser({
-          cwd: workspaceRoot
+          cwd: workspaceRoot,
+          excludeDefaultActions: true
         });
 
         return commandLineParser;
@@ -77,6 +78,10 @@ export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
   public getTreeItem(element: Command): vscode.TreeItem {
     if (element instanceof Command) {
       const treeItem = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.None);
+
+      treeItem.id = `command:${element.label}`;
+
+      treeItem.contextValue = `command:${element.label}`;
 
       return treeItem;
     }
