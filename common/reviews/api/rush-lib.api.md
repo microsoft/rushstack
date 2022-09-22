@@ -110,7 +110,7 @@ export class CommonVersionsConfiguration {
 }
 
 // @alpha
-export function createPhasedCommandWorker(args: string[], onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void): Promise<IPhasedCommandWorkerController>;
+export function createPhasedCommandWorker(args: string[], onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void): IPhasedCommandWorkerController;
 
 // @beta (undocumented)
 export class CredentialCache {
