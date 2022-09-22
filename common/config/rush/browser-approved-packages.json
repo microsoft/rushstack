@@ -3,6 +3,18 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@vscode/test-electron",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "tests" ]
     },

@@ -676,7 +676,7 @@
     },
     {
       "name": "ts-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "tslint",
@@ -704,7 +704,7 @@
     },
     {
       "name": "webpack-cli",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "webpack-dev-server",
