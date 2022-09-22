@@ -14,7 +14,13 @@ import { createPhasedCommandWorker } from './RushWorkerHost';
  */
 async function runAsCli(): Promise<void> {
   const workerInterface: IPhasedCommandWorkerController = await createPhasedCommandWorker(
-    process.argv.slice(2)
+    process.argv.slice(2),
+    {
+      cwd: process.cwd(),
+      onStatusUpdate: (status: ITransferableOperationStatus) => {
+        console.log(`[HOST]: Status change: ${status.operation.name!} => ${status.status} (${status.hash})`);
+      }
+    }
   );
 
   const operations: ITransferableOperation[] = await workerInterface.getGraphAsync();
@@ -29,14 +35,26 @@ async function runAsCli(): Promise<void> {
     console.log(` - ${operation}`);
   }
 
-  workerInterface.onStatusUpdate = (status: ITransferableOperationStatus) => {
-    console.log(`[HOST]: Status change: ${status.operation.name!} => ${status.status} (${status.hash})`);
-  };
-
   const rl: Interface = createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: `Build Targets >`
+    prompt: `> Select Build Targets> `
+  });
+
+  let aborting: boolean = false;
+  rl.on('SIGINT', () => {
+    if (aborting) {
+      rl.close();
+      return;
+    }
+
+    // Send abort
+    aborting = true;
+    console.log(`Aborting`);
+    workerInterface.abortAsync().then(() => {
+      console.log(`Aborted.`);
+      aborting = false;
+    }, console.error);
   });
 
   rl.prompt();

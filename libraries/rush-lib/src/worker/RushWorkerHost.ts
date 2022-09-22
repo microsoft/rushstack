@@ -15,17 +15,40 @@ import {
 import { once } from 'events';
 
 /**
+ * @alpha
+ */
+export interface IPhasedCommandWorkerOptions {
+  /**
+   * The working directory
+   */
+  cwd?: string;
+
+  /**
+   * Status update callback
+   */
+  onStatusUpdate?: IPhasedCommandWorkerController['onStatusUpdate'];
+}
+
+/**
  * Creates a Worker than runs the phased commands indicated by `args`, e.g. `build --production`.
  * Do not pass selection parameters (--to, --from, etc.), as scoping is handled later.
  *
  * @param args - The command line arguments for the worker, including the command name and any parameters.
+ * @param options - Configuration for the worker
  *
  * @alpha
  */
 export function createPhasedCommandWorker(
   args: string[],
-  onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void
+  options?: IPhasedCommandWorkerOptions
 ): IPhasedCommandWorkerController {
+  const {
+    cwd,
+    onStatusUpdate = () => {
+      // Noop
+    }
+  } = options ?? {};
+
   const statusByOperation: Map<string, ITransferableOperationStatus> = new Map();
   let resolveGraph: (operations: ITransferableOperation[]) => void;
   const graphPromise: Promise<ITransferableOperation[]> = new Promise((resolve) => {
@@ -49,15 +72,29 @@ export function createPhasedCommandWorker(
   const workerPath: string = path.resolve(__dirname, 'RushWorkerEntry.js');
   const worker: Worker = new Worker(workerPath, {
     workerData: {
-      argv: args
+      argv: args,
+      cwd
     },
-    stdout: true,
-    stderr: true
+    stdout: true
   });
 
+  let exited: boolean = false;
+  const exitPromise: Promise<void> = once(worker, 'exit').then(() => {
+    exited = true;
+  });
+
+  function checkExited(): void {
+    if (exited) {
+      throw new Error(`Worker has exited!`);
+    }
+  }
+
   const controller: IPhasedCommandWorkerController = {
+    onStatusUpdate,
+
     async updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]> {
       await this.readyAsync();
+      checkExited();
       const targets: string[] = [];
       for (const operation of operations) {
         const { project, phase } = operation;
@@ -79,24 +116,31 @@ export function createPhasedCommandWorker(
       await this.readyAsync();
       return Array.from(statusByOperation.values());
     },
-    getGraphAsync(): Promise<ITransferableOperation[]> {
-      return graphPromise;
+
+    async getGraphAsync(): Promise<ITransferableOperation[]> {
+      const results: void | ITransferableOperation[] = await Promise.race([exitPromise, graphPromise]);
+      if (!results) {
+        throw new Error(`Worker has exited!`);
+      }
+      return results;
     },
-    onStatusUpdate:
-      onStatusUpdate ??
-      ((operationStatus: ITransferableOperationStatus): void => {
-        // Default do nothing.
-      }),
-    async abortAsync(): Promise<void> {
-      worker.postMessage(abortMessage);
-      await readyPromise;
-    },
+
     async readyAsync(): Promise<void> {
-      await readyPromise;
+      await Promise.race([exitPromise, readyPromise]);
+    },
+    async abortAsync(): Promise<void> {
+      if (exited) {
+        return;
+      }
+      worker.postMessage(abortMessage);
+      await this.readyAsync();
     },
     async shutdownAsync(): Promise<void> {
+      if (exited) {
+        return;
+      }
       worker.postMessage(shutdownMessage);
-      await once(worker, 'exit');
+      await exitPromise;
     }
   };
 

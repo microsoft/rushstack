@@ -18,7 +18,6 @@ import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import {
-  IAbortSignal,
   IOperationExecutionManagerOptions,
   OperationExecutionManager
 } from '../../logic/operations/OperationExecutionManager';
@@ -41,6 +40,7 @@ import {
 } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryOperationResult } from '../../logic/Telemetry';
+import { IAbortSignal } from '../../logic/operations/AsyncOperationQueue';
 
 /**
  * Constructor parameters for PhasedScriptAction.

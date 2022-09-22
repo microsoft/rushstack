@@ -4,6 +4,10 @@
 import { OperationExecutionRecord } from './OperationExecutionRecord';
 import { OperationStatus } from './OperationStatus';
 
+export interface IAbortSignal {
+  aborted: boolean;
+}
+
 /**
  * Implmentation of the async iteration protocol for a collection of IOperation objects.
  * The async iterator will wait for an operation to be ready for execution, or terminate if there are no more operations.
@@ -18,6 +22,7 @@ export class AsyncOperationQueue
 {
   private readonly _queue: OperationExecutionRecord[];
   private readonly _pendingIterators: ((result: IteratorResult<OperationExecutionRecord>) => void)[];
+  private readonly _abortSignal: IAbortSignal | undefined;
 
   /**
    * @param operations - The set of operations to be executed
@@ -26,9 +31,14 @@ export class AsyncOperationQueue
    *   - Returning a negative value indicates that `b` should execute before `a`.
    *   - Returning 0 indicates no preference.
    */
-  public constructor(operations: Iterable<OperationExecutionRecord>, sortFn: IOperationSortFunction) {
+  public constructor(
+    operations: Iterable<OperationExecutionRecord>,
+    sortFn: IOperationSortFunction,
+    abortSignal?: IAbortSignal
+  ) {
     this._queue = computeTopologyAndSort(operations, sortFn);
     this._pendingIterators = [];
+    this._abortSignal = abortSignal;
   }
 
   /**
@@ -55,6 +65,11 @@ export class AsyncOperationQueue
    */
   public assignOperations(): void {
     const { _queue: queue, _pendingIterators: waitingIterators } = this;
+
+    if (this._abortSignal?.aborted) {
+      // Aborted. Delete queue.
+      queue.length = 0;
+    }
 
     // By iterating in reverse order we do less array shuffling when removing operations
     for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {

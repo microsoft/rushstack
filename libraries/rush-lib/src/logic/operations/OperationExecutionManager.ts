@@ -7,7 +7,7 @@ import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushsta
 import { StreamCollator, CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async, Terminal, ITerminal } from '@rushstack/node-core-library';
 
-import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
+import { AsyncOperationQueue, IOperationSortFunction, IAbortSignal } from './AsyncOperationQueue';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
@@ -25,10 +25,6 @@ export interface IOperationExecutionManagerOptions {
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
   beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => void;
   afterOperationHashes?: (records: Map<Operation, OperationExecutionRecord>) => void;
-}
-
-export interface IAbortSignal {
-  aborted: boolean;
 }
 
 export interface IFullExecutionResult {
@@ -297,7 +293,8 @@ export class OperationExecutionManager {
     };
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(
       this._executionRecords.values(),
-      prioritySort
+      prioritySort,
+      abortSignal
     );
 
     this._beforeExecuteOperations?.(this._executionRecords);

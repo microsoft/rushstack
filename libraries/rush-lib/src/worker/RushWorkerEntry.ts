@@ -15,10 +15,7 @@ import {
   IExecuteOperationsOptions as IExecuteOperationsOptions,
   PhasedScriptAction
 } from '../cli/scriptActions/PhasedScriptAction';
-import {
-  IAbortSignal,
-  IOperationExecutionManagerOptions
-} from '../logic/operations/OperationExecutionManager';
+import { IOperationExecutionManagerOptions } from '../logic/operations/OperationExecutionManager';
 import { getOperationKey } from '../logic/operations/PhasedOperationPlugin';
 import { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
 import { ICreateOperationsContext } from '../pluginFramework/PhasedCommandHooks';
@@ -33,6 +30,7 @@ import {
   IRushWorkerReadyMessage,
   IRushWorkerOperationMessage
 } from './RushWorker.types';
+import { IAbortSignal } from '../logic/operations/AsyncOperationQueue';
 
 const builtInPluginConfigurations: IBuiltInPluginConfiguration[] = [];
 
@@ -68,7 +66,8 @@ if (!workerData || !parentPort) {
 const parser: RushCommandLineParser = new RushCommandLineParser({
   alreadyReportedNodeTooNewError: true,
   builtInPluginConfigurations,
-  excludeDefaultActions: true
+  excludeDefaultActions: true,
+  cwd: workerData.cwd
 });
 
 parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
@@ -87,6 +86,14 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
     const operationByKey: Map<string, Operation> = new Map();
     const transferOperationForOperation: Map<Operation, ITransferableOperation> = new Map();
     const unassociatedOperations: Set<Operation> = new Set();
+
+    const { taps: afterExecuteOperationsTaps } = command.hooks.afterExecuteOperations;
+    for (let i: number = afterExecuteOperationsTaps.length - 1; i >= 0; i--) {
+      // Hack out the summary for now, since it doesn't handle aborting and is wasted work.
+      if (afterExecuteOperationsTaps[i].name === 'OperationResultSummarizerPlugin') {
+        afterExecuteOperationsTaps.splice(i, 1);
+      }
+    }
 
     async function interceptExecuteOperations(
       this: PhasedScriptAction,
@@ -152,9 +159,11 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
 
         switch (message.type) {
           case 'shutdown':
+            console.error(`Worker is shutting down.`);
             willShutdown = true;
             break;
           case 'abort':
+            console.error(`Worker is aborting.`);
             break;
           case 'build':
             ready = false;

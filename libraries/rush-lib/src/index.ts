@@ -118,4 +118,4 @@ export {
   ITransferableOperationStatus,
   IPhasedCommandWorkerController
 } from './worker/RushWorker.types';
-export { createPhasedCommandWorker } from './worker/RushWorkerHost';
+export { createPhasedCommandWorker, IPhasedCommandWorkerOptions } from './worker/RushWorkerHost';

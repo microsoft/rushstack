@@ -108,7 +108,7 @@ export class CommonVersionsConfiguration {
 }
 
 // @alpha
-export function createPhasedCommandWorker(args: string[], onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void): Promise<IPhasedCommandWorkerController>;
+export function createPhasedCommandWorker(args: string[], options?: IPhasedCommandWorkerOptions): IPhasedCommandWorkerController;
 
 // @beta (undocumented)
 export class CredentialCache {
@@ -443,6 +443,12 @@ export interface IPhasedCommandWorkerController {
     readyAsync(): Promise<void>;
     shutdownAsync(): Promise<void>;
     updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]>;
+}
+
+// @alpha (undocumented)
+export interface IPhasedCommandWorkerOptions {
+    cwd?: string;
+    onStatusUpdate?: IPhasedCommandWorkerController['onStatusUpdate'];
 }
 
 // @internal
