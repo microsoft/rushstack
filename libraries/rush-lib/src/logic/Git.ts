@@ -211,7 +211,7 @@ export class Git {
       let repoInfo: gitInfo.GitRepoInfo | undefined;
       try {
         // gitInfo() shouldn't usually throw, but wrapping in a try/catch just in case
-        repoInfo = gitInfo();
+        repoInfo = gitInfo(this._rushConfiguration.rushJsonFolder);
       } catch (ex) {
         // if there's an error, assume we're not in a Git working tree
       }

@@ -79,6 +79,7 @@ async function runAsCli(): Promise<void> {
         if (operation.status === OperationStatus.Ready) {
           toBeBuiltCount++;
         }
+        console.log(`${operation.operation.name} @ ${operation.status}`);
       }
       console.log(`Build graph contains ${activeGraph.length} operations, ${toBeBuiltCount} pending`);
 
