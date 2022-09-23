@@ -18,7 +18,7 @@ describe('InstallHelpers', () => {
     });
 
     it('generates correct package json with pnpm configurations', () => {
-      const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'pnpmConfig/rush.json');
+      const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
       InstallHelpers.generateCommonPackageJson(rushConfiguration);

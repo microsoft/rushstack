@@ -357,7 +357,7 @@ export class RushConfiguration {
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
     try {
       this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-        path.join(this._commonRushConfigFolder, RushConstants.pnpmConfigFilename),
+        `${this._commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`,
         this._commonTempFolder
       );
       if (rushConfigurationJson.pnpmOptions) {

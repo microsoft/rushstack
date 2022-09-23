@@ -249,7 +249,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     } else if (this.pnpmStore === 'global') {
       this.pnpmStorePath = '';
     } else {
-      this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
+      this.pnpmStorePath = `${commonTempFolder}/pnpm-store`;
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
@@ -276,7 +276,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   }
 
   /** @internal */
-  public static loadFromJson(json: IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration {
+  public static loadFromJsonObject(json: IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration {
     return new PnpmOptionsConfiguration(json, commonTempFolder);
   }
 }

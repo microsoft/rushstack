@@ -306,7 +306,7 @@ describe(RushConfiguration.name, () => {
   });
 
   it('reject "pnpmOptions" in rush.json if the file pnpm-config.json exists', () => {
-    const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'pnpmConfigThrow', 'rush.json');
+    const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigThrow/rush.json`;
     expect(() => {
       RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
     }).toThrow(

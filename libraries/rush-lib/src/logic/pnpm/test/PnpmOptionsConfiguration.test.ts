@@ -10,7 +10,7 @@ describe(PnpmOptionsConfiguration.name, () => {
   it('throw error if pnpm-config.json does not exist', () => {
     expect(() => {
       PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-        path.resolve(__dirname, 'pnpm-config-not-exist.json'),
+        `${__dirname}/pnpm-config-not-exist.json`,
         fakeCommonTempFolder
       );
     }).toThrow(/does not exist/);
@@ -19,7 +19,7 @@ describe(PnpmOptionsConfiguration.name, () => {
   it('validates unknown property', () => {
     expect(() =>
       PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-        path.join(__dirname, 'jsonFiles', 'pnpm-config-unknown.json'),
+        `${__dirname}/jsonFiles/pnpm-config-unknown.json`,
         fakeCommonTempFolder
       )
     ).toThrow(/Additional properties not allowed: unknownProperty/);
@@ -27,7 +27,7 @@ describe(PnpmOptionsConfiguration.name, () => {
 
   it('loads overrides', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-      path.join(__dirname, 'jsonFiles', 'pnpm-config-overrides.json'),
+      `${__dirname}/jsonFiles/pnpm-config-overrides.json`,
       fakeCommonTempFolder
     );
 
@@ -41,7 +41,7 @@ describe(PnpmOptionsConfiguration.name, () => {
 
   it('loads packageExtensions', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-      path.join(__dirname, 'jsonFiles', 'pnpm-config-packageExtensions.json'),
+      `${__dirname}/jsonFiles/pnpm-config-packageExtensions.json`,
       fakeCommonTempFolder
     );
 
@@ -56,7 +56,7 @@ describe(PnpmOptionsConfiguration.name, () => {
 
   it('loads neverBuiltDependencies', () => {
     const pnpmConfiguration: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-      path.join(__dirname, 'jsonFiles', 'pnpm-config-neverBuiltDependencies.json'),
+      `${__dirname}/jsonFiles/pnpm-config-neverBuiltDependencies.json`,
       fakeCommonTempFolder
     );
 
