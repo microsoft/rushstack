@@ -139,36 +139,39 @@ export class ProjectDataProvider
     return Array.from(this._includedGroup.projects);
   }
 
-  public async updateProjectPhase(
-    operationStatus: Rush.ITransferableOperationStatus
-  ): Promise<Project | undefined> {
+  public async updateProjectPhases(operationStatuses: Rush.ITransferableOperationStatus[]): Promise<void> {
     const { projectsByName } = await this._pendingAllProjects;
 
-    const {
-      operation: { project: projectName, phase },
-      status
-    } = operationStatus;
+    const projects: Project[] = [];
 
-    if (!projectName || !phase) {
-      return;
+    for (const operationStatus of operationStatuses) {
+      const {
+        operation: { project: projectName, phase }
+      } = operationStatus;
+
+      if (!projectName || !phase) {
+        continue;
+      }
+
+      const project = projectsByName.get(projectName);
+
+      if (!project) {
+        continue;
+      }
+
+      let operationPhase = project.phases.get(phase);
+
+      if (!operationPhase) {
+        operationPhase = new OperationPhase(project.rushProject, operationStatus);
+        project.phases.set(phase, operationPhase);
+      }
+
+      operationPhase.operationStatus = operationStatus;
+
+      projects.push(project);
     }
 
-    const project = projectsByName.get(projectName);
-
-    if (!project) {
-      return;
-    }
-
-    let operationPhase = project.phases.get(phase);
-
-    if (!operationPhase) {
-      operationPhase = new OperationPhase(project.rushProject, phase);
-      project.phases.set(phase, operationPhase);
-    }
-
-    operationPhase.status = status;
-
-    this._onDidChangeTreeData.fire(project);
+    this._onDidChangeTreeData.fire(projects);
   }
 
   public async toggleActiveProjects(toggleProjects: Project[], force?: boolean): Promise<void> {
@@ -344,14 +347,26 @@ export class ProjectDataProvider
 
       return treeItem;
     } else if (element instanceof OperationPhase) {
-      const treeItem = new vscode.TreeItem(element.phase, vscode.TreeItemCollapsibleState.None);
+      const treeItem = new vscode.TreeItem(
+        element.operationStatus.operation.phase!,
+        vscode.TreeItemCollapsibleState.None
+      );
 
-      treeItem.id = `phase:${element.rushProject.packageName};_${element.phase}`;
+      treeItem.id = `phase:${element.rushProject.packageName};_${element.operationStatus.operation.phase!}`;
 
-      const { icon, description } = getStatusIndicators(element.status);
+      const { icon, description } = getStatusIndicators(element.operationStatus.status);
 
       treeItem.iconPath = new vscode.ThemeIcon(icon);
-      treeItem.description = description;
+      treeItem.description = `${description} (${element.operationStatus.hash})`;
+      if (element.operationStatus.operation.logFilePath) {
+        const uri = vscode.Uri.file(element.operationStatus.operation.logFilePath);
+        treeItem.resourceUri = uri;
+        treeItem.command = {
+          command: 'vscode.open',
+          title: 'Open',
+          arguments: [uri]
+        };
+      }
 
       return treeItem;
     } else if (element instanceof StateGroup) {
@@ -385,15 +400,15 @@ export class Project {
 }
 
 export class OperationPhase {
-  public readonly phase: string;
   public readonly rushProject: Rush.RushConfigurationProject;
-  public status: Rush.OperationStatus;
+  public operationStatus: Rush.ITransferableOperationStatus;
 
-  constructor(rushProject: Rush.RushConfigurationProject, phase: string) {
-    this.phase = phase;
+  constructor(
+    rushProject: Rush.RushConfigurationProject,
+    operationStatus: Rush.ITransferableOperationStatus
+  ) {
+    this.operationStatus = operationStatus;
     this.rushProject = rushProject;
-
-    this.status = 'READY' as Rush.OperationStatus;
   }
 }
 
@@ -447,7 +462,7 @@ function getOverallStatus(statuses: Iterable<Rush.OperationStatus>): Rush.Operat
   } else if (histogram['SUCCESS WITH WARNINGS'] > 0) {
     return 'SUCCESS WITH WARNINGS' as Rush.OperationStatus;
   } else if (histogram.SUCCESS > 0) {
-    return 'BLOCKED' as Rush.OperationStatus;
+    return 'SUCCESS' as Rush.OperationStatus;
   } else if (histogram['FROM CACHE'] > 0) {
     return 'FROM CACHE' as Rush.OperationStatus;
   } else if (histogram.SKIPPED > 0) {
@@ -500,7 +515,7 @@ function getStatusIndicators(status: Rush.OperationStatus): {
     default:
     case 'READY':
       description = 'Ready';
-      icon = 'home';
+      icon = 'loading~spin';
       break;
   }
 
@@ -512,6 +527,6 @@ function getStatusIndicators(status: Rush.OperationStatus): {
 
 function* getStatuses(phases: Iterable<OperationPhase>): Iterable<Rush.OperationStatus> {
   for (const phase of phases) {
-    yield phase.status;
+    yield phase.operationStatus.status;
   }
 }

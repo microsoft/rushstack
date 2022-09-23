@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    await worker.readyAsync();
+    await worker.abortAsync();
 
     const activeProjects = projectDataProvider.getActiveProjects();
 
@@ -66,7 +66,23 @@ export function activate(context: vscode.ExtensionContext) {
         !!operation.project && activeProjectNames.has(operation.project)
     );
 
-    await worker.updateAsync(activeOperations);
+    let statuses: Rush.ITransferableOperationStatus[] = [];
+
+    if (activeOperations.length > 0) {
+      statuses = await worker.updateAsync(activeOperations);
+    }
+
+    await projectDataProvider.updateProjectPhases([
+      ...graph.map((operation: Rush.ITransferableOperation) => {
+        return {
+          operation,
+          status: 'NO OP' as Rush.OperationStatus,
+          duration: 0,
+          hash: ''
+        };
+      }),
+      ...statuses
+    ]);
   }
 
   const projectDataProvider = new ProjectDataProvider(workspaceRoot, loadRush);
@@ -160,22 +176,11 @@ export function activate(context: vscode.ExtensionContext) {
     worker = rush.createPhasedCommandWorker(['--debug', 'test'], {
       cwd: workspaceRoot,
       onStatusUpdate: (operationStatus: Rush.ITransferableOperationStatus) => {
-        projectDataProvider.updateProjectPhase(operationStatus);
+        projectDataProvider.updateProjectPhases([operationStatus]);
       }
     });
 
     try {
-      const graph = await worker.getGraphAsync();
-
-      for (const operation of graph) {
-        projectDataProvider.updateProjectPhase({
-          operation,
-          status: 'READY' as Rush.OperationStatus,
-          duration: 0,
-          hash: ''
-        });
-      }
-
       await updateWorker();
 
       vscode.window.showInformationMessage('Initialized the Rush watcher.');
