@@ -1003,6 +1003,270 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!Example1:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type Example1 = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    a: string;\n} | {\n    a: number;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Example1",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!Example1#a:member",
+              "docComment": "/**\n * Docs for string A\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "a: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "a",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!Example2:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type Example2 = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    a: string;\n} & ({\n    b: string;\n} | {\n    c: string;\n})"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Example2",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!Example2#a:member",
+              "docComment": "/**\n * Docs for A\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "a: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "a",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!Example2#b:member",
+              "docComment": "/**\n * Docs for B\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "b: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "b",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!Example2#c:member",
+              "docComment": "/**\n * Docs for C\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "c: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "c",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!Example3:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type Example3 = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    a: string;\n} | true | undefined"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Example3",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!Example3#a:member",
+              "docComment": "/**\n * Docs for A\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "a: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "a",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!Example4:type",
+          "docComment": "/**\n * @param a - Docs for A\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type Example4 = "
+            },
+            {
+              "kind": "Content",
+              "text": "(a: string) => {\n    b: string;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "Example4",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!Example4#b:member",
+              "docComment": "/**\n * Docs for B\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "b: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "b",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
           "canonicalReference": "api-documenter-test!ExampleDuplicateTypeAlias:type",
           "docComment": "/**\n * A type alias that has duplicate references.\n *\n * @public\n */\n",
           "excerptTokens": [

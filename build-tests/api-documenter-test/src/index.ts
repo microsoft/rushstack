@@ -12,6 +12,7 @@
 
 export * from './DocClass1';
 export * from './DocEnums';
+export * from './test';
 import { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
 
 export { DecoratorExample } from './DecoratorExample';

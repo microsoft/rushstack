@@ -72,6 +72,32 @@ export namespace EcmaSmbols {
     const example: unique symbol;
 }
 
+// @public (undocumented)
+export type Example1 = {
+    a: string;
+} | {
+    a: number;
+};
+
+// @public (undocumented)
+export type Example2 = {
+    a: string;
+} & ({
+    b: string;
+} | {
+    c: string;
+});
+
+// @public (undocumented)
+export type Example3 = {
+    a: string;
+} | true | undefined;
+
+// @public (undocumented)
+export type Example4 = (a: string) => {
+    b: string;
+};
+
 // @public
 export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
 
@@ -175,6 +201,5 @@ export type TypeAlias = number;
 
 // @public (undocumented)
 export function yamlReferenceUniquenessTest(): IDocInterface1;
-
 
 ```

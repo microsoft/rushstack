@@ -64,6 +64,10 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [Example1](./api-documenter-test.example1.md) |  |
+|  [Example2](./api-documenter-test.example2.md) |  |
+|  [Example3](./api-documenter-test.example3.md) |  |
+|  [Example4](./api-documenter-test.example4.md) |  |
 |  [ExampleDuplicateTypeAlias](./api-documenter-test.exampleduplicatetypealias.md) | A type alias that has duplicate references. |
 |  [ExampleTypeAlias](./api-documenter-test.exampletypealias.md) | A type alias |
 |  [ExampleUnionTypeAlias](./api-documenter-test.exampleuniontypealias.md) | A type alias that references multiple other types. |
