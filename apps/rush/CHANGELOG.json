@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.78.1",
+      "tag": "@microsoft/rush_v5.78.1",
+      "date": "Fri, 23 Sep 2022 02:54:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix Git detection when the current working directory is unrelated to the Rush workspace."
+          },
+          {
+            "comment": "Fix an error that ocurred if an autoinstaller's  \"node_modules\" folder was manually deleted (GitHub #2987)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.78.0",
       "tag": "@microsoft/rush_v5.78.0",
       "date": "Sat, 17 Sep 2022 00:56:37 GMT",

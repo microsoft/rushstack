@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 17 Sep 2022 00:56:37 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Sep 2022 02:54:44 GMT and should not be manually modified.
+
+## 5.78.1
+Fri, 23 Sep 2022 02:54:44 GMT
+
+### Updates
+
+- Fix Git detection when the current working directory is unrelated to the Rush workspace.
+- Fix an error that ocurred if an autoinstaller's  "node_modules" folder was manually deleted (GitHub #2987)
 
 ## 5.78.0
 Sat, 17 Sep 2022 00:56:37 GMT
