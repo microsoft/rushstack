@@ -8,21 +8,27 @@
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
+export { RushConfiguration, ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
+
 export {
-  RushConfiguration,
-  ITryFindRushJsonLocationOptions,
   IPackageManagerOptionsJsonBase,
   IConfigurationEnvironment,
   IConfigurationEnvironmentVariable,
+  PackageManagerOptionsConfigurationBase
+} from './logic/base/BasePackageManagerOptionsConfiguration';
+export {
   INpmOptionsJson as _INpmOptionsJson,
-  IPnpmOptionsJson as _IPnpmOptionsJson,
+  NpmOptionsConfiguration
+} from './logic/npm/NpmOptionsConfiguration';
+export {
   IYarnOptionsJson as _IYarnOptionsJson,
-  PnpmStoreOptions,
-  PackageManagerOptionsConfigurationBase,
-  PnpmOptionsConfiguration,
-  NpmOptionsConfiguration,
   YarnOptionsConfiguration
-} from './api/RushConfiguration';
+} from './logic/yarn/YarnOptionsConfiguration';
+export {
+  IPnpmOptionsJson as _IPnpmOptionsJson,
+  PnpmStoreOptions,
+  PnpmOptionsConfiguration
+} from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
 export { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from './logic/buildCache/CacheEntryId';

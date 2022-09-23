@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a `common/config/pnpm-config.json`, which is used to specify fields like `overrides`, `packageExtensions`, and `neverBuiltDependencies` that would otherwise be placed in a PNPM workspace repo's root-level `package.json`'s `pnpm` field.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

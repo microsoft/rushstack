@@ -10,11 +10,7 @@ import { FileSystem, AlreadyReportedError, Import, Path, IPackageJson } from '@r
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
-import {
-  PackageManagerOptionsConfigurationBase,
-  PnpmOptionsConfiguration,
-  RushConfiguration
-} from '../../api/RushConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
@@ -23,6 +19,8 @@ import { DependencyType, PackageJsonDependency, PackageJsonEditor } from '../../
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
+import { PackageManagerOptionsConfigurationBase } from '../base/BasePackageManagerOptionsConfiguration';
+import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 

@@ -304,4 +304,13 @@ describe(RushConfiguration.name, () => {
       }).toThrow();
     });
   });
+
+  it('reject "pnpmOptions" in rush.json if the file pnpm-config.json exists', () => {
+    const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigThrow/rush.json`;
+    expect(() => {
+      RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+    }).toThrow(
+      'Because the new config file "common/config/rush/pnpm-config.json" is being used, you must remove the old setting "pnpmOptions" from rush.json'
+    );
+  });
 });
