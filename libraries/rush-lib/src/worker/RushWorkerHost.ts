@@ -27,6 +27,11 @@ export interface IPhasedCommandWorkerOptions {
    * Status update callback
    */
   onStatusUpdate?: IPhasedCommandWorkerController['onStatusUpdate'];
+
+  /**
+   * Callback invoked when ready for more work
+   */
+  onReady?: () => void;
 }
 
 /**
@@ -45,6 +50,9 @@ export function createPhasedCommandWorker(
   const {
     cwd,
     onStatusUpdate = () => {
+      // Noop
+    },
+    onReady = () => {
       // Noop
     }
   } = options ?? {};
@@ -85,19 +93,25 @@ export function createPhasedCommandWorker(
     stdout: true
   });
 
-  let exited: boolean = false;
+  let state: IPhasedCommandWorkerController['state'] = 'initializing';
+
   const exitPromise: Promise<void> = once(worker, 'exit').then(() => {
-    exited = true;
+    state = 'terminated';
   });
 
   function checkExited(): void {
-    if (exited) {
+    if (state === 'terminated') {
       throw new Error(`Worker has exited!`);
     }
   }
 
   const controller: IPhasedCommandWorkerController = {
     onStatusUpdate,
+    onReady,
+
+    get state(): IPhasedCommandWorkerController['state'] {
+      return state;
+    },
 
     async updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]> {
       await this.readyAsync();
@@ -122,6 +136,7 @@ export function createPhasedCommandWorker(
       activeGraphPromise = new Promise<ITransferableOperationStatus[]>((resolve) => {
         resolveActiveGraph = resolve;
       });
+      state = 'executing';
       worker.postMessage(buildMessage);
       const statuses: ITransferableOperationStatus[] | void = await Promise.race([
         exitPromise,
@@ -145,18 +160,22 @@ export function createPhasedCommandWorker(
       await Promise.race([exitPromise, readyPromise]);
     },
     async abortAsync(): Promise<void> {
-      if (exited) {
-        return;
-      }
+      checkExited();
+      state = 'aborting';
       worker.postMessage(abortMessage);
       await this.readyAsync();
     },
-    async shutdownAsync(): Promise<void> {
-      if (exited) {
+    async shutdownAsync(force?: boolean): Promise<void> {
+      if (state === 'terminated') {
         return;
       }
+      state = 'shutting down';
       worker.postMessage(shutdownMessage);
-      await exitPromise;
+      if (force) {
+        await worker.terminate();
+      } else {
+        await exitPromise;
+      }
     }
   };
 
@@ -169,7 +188,10 @@ export function createPhasedCommandWorker(
         resolveActiveGraph(message.value.operations);
         break;
       case 'ready':
-        resolveReady();
+        if (state !== 'shutting down') {
+          resolveReady();
+          controller.onReady();
+        }
         break;
       case 'operation':
         statusByOperation.set(message.value.operation.name!, message.value);

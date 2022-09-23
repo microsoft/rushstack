@@ -441,15 +441,19 @@ export interface IPhasedCommand extends IRushCommand {
 export interface IPhasedCommandWorkerController {
     abortAsync(): Promise<void>;
     getGraphAsync(): Promise<ITransferableOperation[]>;
+    onReady: () => void;
     onStatusUpdate: (operationStatus: ITransferableOperationStatus) => void;
     readyAsync(): Promise<void>;
-    shutdownAsync(): Promise<void>;
+    shutdownAsync(force?: boolean): Promise<void>;
+    // (undocumented)
+    state: 'ready' | 'aborting' | 'executing' | 'shutting down' | 'terminated' | 'initializing';
     updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]>;
 }
 
 // @alpha (undocumented)
 export interface IPhasedCommandWorkerOptions {
     cwd?: string;
+    onReady?: () => void;
     onStatusUpdate?: IPhasedCommandWorkerController['onStatusUpdate'];
 }
 

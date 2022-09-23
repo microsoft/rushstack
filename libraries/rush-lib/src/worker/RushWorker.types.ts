@@ -81,6 +81,10 @@ export interface IPhasedCommandWorkerController {
    */
   getGraphAsync(): Promise<ITransferableOperation[]>;
   /**
+   * Overrideable, event handler for when the worker is ready for work.
+   */
+  onReady: () => void;
+  /**
    * Overrideable, event handler for operation status changes.
    */
   onStatusUpdate: (operationStatus: ITransferableOperationStatus) => void;
@@ -98,7 +102,11 @@ export interface IPhasedCommandWorkerController {
   /**
    * Aborts and shuts down the worker.
    *
+   * @param force - Force terminates all outstanding work.
+   *
    * @returns A promise that resolves when the worker has shut down.
    */
-  shutdownAsync(): Promise<void>;
+  shutdownAsync(force?: boolean): Promise<void>;
+
+  state: 'ready' | 'aborting' | 'executing' | 'shutting down' | 'terminated' | 'initializing';
 }
