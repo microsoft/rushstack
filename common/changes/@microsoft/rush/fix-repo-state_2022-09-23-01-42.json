@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix Git detection when the current working directory is unrelated to the Rush workspace.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
