@@ -670,9 +670,9 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
     // @internal (undocumented)
-    static loadFromJson(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
-    // @internal (undocumented)
     static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
+    // @internal (undocumented)
+    static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;

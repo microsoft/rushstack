@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { IPackageJson, JsonFile } from '@rushstack/node-core-library';

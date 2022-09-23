@@ -368,7 +368,7 @@ export class RushConfiguration {
       }
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
-        this._pnpmOptions = PnpmOptionsConfiguration.loadFromJson(
+        this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonObject(
           rushConfigurationJson.pnpmOptions || {},
           this._commonTempFolder
         );
