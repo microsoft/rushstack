@@ -144,6 +144,33 @@ importers:
       tslint: 5.20.1_typescript@4.8.4
       typescript: 4.8.4
 
+  ../../apps/lockfile-explorer:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-web-rig': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/react': 16.14.23
+      '@types/react-dom': 16.9.14
+      '@types/webpack-env': 1.13.0
+      react: ~16.13.1
+      react-dom: ~16.13.1
+      tslib: ~2.3.1
+      typescript: ~4.7.4
+    dependencies:
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+      tslib: 2.3.1
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../heft
+      '@rushstack/heft-web-rig': link:../../rigs/heft-web-rig
+      '@types/heft-jest': 1.0.1
+      '@types/react': 16.14.23
+      '@types/react-dom': 16.9.14
+      '@types/webpack-env': 1.13.0
+      typescript: 4.7.4
+
   ../../apps/rundown:
     specifiers:
       '@rushstack/eslint-config': workspace:*

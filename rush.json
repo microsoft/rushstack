@@ -420,6 +420,11 @@
       "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/lockfile-explorer",
+      "projectFolder": "apps/lockfile-explorer",
+      "reviewCategory": "libraries"
+    },
+    {
       "packageName": "@rushstack/rundown",
       "projectFolder": "apps/rundown",
       "reviewCategory": "libraries",
