@@ -357,7 +357,8 @@ export class ProjectDataProvider
       const { icon, description } = getStatusIndicators(element.operationStatus.status);
 
       treeItem.iconPath = new vscode.ThemeIcon(icon);
-      treeItem.description = `${description} (${element.operationStatus.hash})`;
+      treeItem.description = description;
+      treeItem.tooltip = `${element.operationStatus.hash}`;
       if (element.operationStatus.operation.logFilePath) {
         const uri = vscode.Uri.file(element.operationStatus.operation.logFilePath);
         treeItem.resourceUri = uri;
@@ -515,7 +516,7 @@ function getStatusIndicators(status: Rush.OperationStatus): {
     default:
     case 'READY':
       description = 'Ready';
-      icon = 'loading~spin';
+      icon = 'more';
       break;
   }
 

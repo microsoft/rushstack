@@ -212,6 +212,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disableWatchCommand);
 
+  context.subscriptions.push(
+    vscode.workspace.onDidSaveTextDocument(async (e: vscode.TextDocument) => {
+      await updateWorker();
+    })
+  );
+
   const rushRushActionCommand = vscode.commands.registerCommand(
     'rush.runAction',
     async (commandContext: Command) => {
