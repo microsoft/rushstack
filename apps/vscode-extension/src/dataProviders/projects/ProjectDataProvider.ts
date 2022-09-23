@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as Rush from '@rushstack/rush-sdk';
+import type * as Rush from '@rushstack/rush-sdk';
 import * as path from 'path';
 
 export type StateGroupName = 'Active' | 'Included' | 'Excluded';
@@ -15,7 +15,7 @@ export class ProjectDataProvider
   private _pendingRush!: Promise<Rush.RushConfiguration | undefined>;
   private _pendingAllProjects!: Promise<{
     projects: Project[];
-    projectsByRushProject: Map<string, Project>;
+    projectsByName: Map<string, Project>;
   }>;
 
   private _stateGroups: StateGroup[];
@@ -95,7 +95,7 @@ export class ProjectDataProvider
 
       return {
         projects,
-        projectsByRushProject
+        projectsByName: projectsByRushProject
       };
     })();
 
@@ -135,8 +135,44 @@ export class ProjectDataProvider
     return Array.from(this._activeGroup.projects);
   }
 
+  public getIncludedProjects(): Project[] {
+    return Array.from(this._includedGroup.projects);
+  }
+
+  public async updateProjectPhase(
+    operationStatus: Rush.ITransferableOperationStatus
+  ): Promise<Project | undefined> {
+    const { projectsByName } = await this._pendingAllProjects;
+
+    const {
+      operation: { project: projectName, phase },
+      status
+    } = operationStatus;
+
+    if (!projectName || !phase) {
+      return;
+    }
+
+    const project = projectsByName.get(projectName);
+
+    if (!project) {
+      return;
+    }
+
+    let operationPhase = project.phases.get(phase);
+
+    if (!operationPhase) {
+      operationPhase = new OperationPhase(project.rushProject, phase);
+      project.phases.set(phase, operationPhase);
+    }
+
+    operationPhase.status = status;
+
+    this._onDidChangeTreeData.fire(project);
+  }
+
   public async toggleActiveProjects(toggleProjects: Project[], force?: boolean): Promise<void> {
-    const { projects, projectsByRushProject } = await this._pendingAllProjects;
+    const { projects, projectsByName: projectsByRushProject } = await this._pendingAllProjects;
 
     if (toggleProjects.length === 0) {
       return;
@@ -251,11 +287,11 @@ export class ProjectDataProvider
 
         return Array.from(this._excludedGroup.projects);
       }
-
-      return [];
-    } else {
-      return [];
+    } else if (element instanceof Project) {
+      return Array.from(element.phases.values());
     }
+
+    return [];
   }
 
   public getParent(element: Project): vscode.ProviderResult<Project> {
@@ -274,7 +310,9 @@ export class ProjectDataProvider
     } else if (element instanceof Project) {
       const treeItem = new vscode.TreeItem(
         element.rushProject.packageName,
-        vscode.TreeItemCollapsibleState.None
+        element.phases.size > 0
+          ? vscode.TreeItemCollapsibleState.Expanded
+          : vscode.TreeItemCollapsibleState.None
       );
 
       treeItem.contextValue = `project:${element.rushProject.packageName}`;
@@ -303,6 +341,38 @@ export class ProjectDataProvider
 
       treeItem.id = `phase:${element.rushProject.packageName};_${element.phase}`;
 
+      treeItem.description = element.status;
+
+      let icon: string;
+
+      switch (element.status) {
+        case 'SUCCESS':
+        case 'FROM CACHE':
+        case 'NO OP':
+          icon = 'check';
+          break;
+        case 'EXECUTING':
+          icon = 'sync~spin';
+          break;
+        case 'SUCCESS WITH WARNINGS':
+          icon = 'warning';
+          break;
+        case 'SKIPPED':
+          icon = 'testing-skipped-icon';
+          break;
+        case 'FAILURE':
+          icon = 'error';
+          break;
+        case 'BLOCKED':
+          icon = 'stop';
+          break;
+        default:
+          icon = 'home';
+          break;
+      }
+
+      treeItem.iconPath = new vscode.ThemeIcon(icon);
+
       return treeItem;
     } else if (element instanceof StateGroup) {
       const treeItem = new vscode.TreeItem(element.groupName, vscode.TreeItemCollapsibleState.Expanded);
@@ -323,20 +393,27 @@ export class Project {
 
   public stateGroupName: StateGroupName;
 
+  public phases: Map<string, OperationPhase>;
+
   constructor(rushProject: Rush.RushConfigurationProject) {
     this.rushProject = rushProject;
 
     this.stateGroupName = 'Excluded';
+
+    this.phases = new Map<string, OperationPhase>();
   }
 }
 
 export class OperationPhase {
   public readonly phase: string;
   public readonly rushProject: Rush.RushConfigurationProject;
+  public status: Rush.OperationStatus;
 
   constructor(rushProject: Rush.RushConfigurationProject, phase: string) {
     this.phase = phase;
     this.rushProject = rushProject;
+
+    this.status = 'READY' as Rush.OperationStatus;
   }
 }
 

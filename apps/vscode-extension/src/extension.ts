@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as Rush from '@rushstack/rush-sdk';
-import * as RushLib from '@microsoft/rush-lib';
+import type * as Rush from '@rushstack/rush-sdk';
+import type * as RushLib from '@microsoft/rush-lib';
 import * as vscode from 'vscode';
 import {
   ProjectDataProvider,
@@ -45,6 +45,29 @@ export function activate(context: vscode.ExtensionContext) {
 
     return await import('@rushstack/rush-sdk');
   };
+
+  async function updateWorker(): Promise<void> {
+    if (!worker) {
+      return;
+    }
+
+    await worker.readyAsync();
+
+    const activeProjects = projectDataProvider.getActiveProjects();
+
+    const activeProjectNames = new Set(
+      activeProjects.map((project: Project) => project.rushProject.packageName)
+    );
+
+    const graph = await worker.getGraphAsync();
+
+    const activeOperations = graph.filter(
+      (operation: Rush.ITransferableOperation) =>
+        !!operation.project && activeProjectNames.has(operation.project)
+    );
+
+    await worker.updateAsync(activeOperations);
+  }
 
   const projectDataProvider = new ProjectDataProvider(workspaceRoot, loadRush);
 
@@ -99,6 +122,8 @@ export function activate(context: vscode.ExtensionContext) {
           await projectDataProvider.toggleActiveProjects(Array.from(contextProject.projects), true);
         }
       }
+
+      await updateWorker();
     }
   );
 
@@ -117,6 +142,8 @@ export function activate(context: vscode.ExtensionContext) {
           await projectDataProvider.toggleActiveProjects(Array.from(contextProject.projects), false);
         }
       }
+
+      await updateWorker();
     }
   );
 
@@ -130,12 +157,26 @@ export function activate(context: vscode.ExtensionContext) {
 
     const rush = await loadRush();
 
-    worker = rush.createPhasedCommandWorker(['build'], {
-      cwd: workspaceRoot
+    worker = rush.createPhasedCommandWorker(['--debug', 'test'], {
+      cwd: workspaceRoot,
+      onStatusUpdate: (operationStatus: Rush.ITransferableOperationStatus) => {
+        projectDataProvider.updateProjectPhase(operationStatus);
+      }
     });
 
     try {
-      await worker.readyAsync();
+      const graph = await worker.getGraphAsync();
+
+      for (const operation of graph) {
+        projectDataProvider.updateProjectPhase({
+          operation,
+          status: 'READY' as Rush.OperationStatus,
+          duration: 0,
+          hash: ''
+        });
+      }
+
+      await updateWorker();
 
       vscode.window.showInformationMessage('Initialized the Rush watcher.');
       vscode.commands.executeCommand('setContext', 'rush.watcher', 'ready');
