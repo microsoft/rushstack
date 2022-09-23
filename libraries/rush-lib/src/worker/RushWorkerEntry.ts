@@ -28,7 +28,9 @@ import {
   IRushWorkerGraphMessage,
   IRushWorkerRequest,
   IRushWorkerReadyMessage,
-  IRushWorkerOperationMessage
+  IRushWorkerOperationMessage,
+  ITransferableOperationStatus,
+  IRushWorkerActiveGraphMessage
 } from './RushWorker.types';
 import { IAbortSignal } from '../logic/operations/AsyncOperationQueue';
 
@@ -162,7 +164,7 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
           case 'shutdown':
             console.error(`Worker is shutting down.`);
             willShutdown = true;
-            break;
+            return resolveTargets([]);
           case 'abort':
             console.error(`Worker is aborting.`);
             break;
@@ -170,7 +172,6 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
             ready = false;
             return resolveTargets(message.value.targets);
         }
-        resolveTargets([]);
       };
 
       parentPort?.on('message', messageHandler);
@@ -227,10 +228,14 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
     }
 
     function afterOperationHashes(records: Map<Operation, OperationExecutionRecord>): void {
+      const activeOperations: ITransferableOperationStatus[] = [];
+
       // Filter out skippable operations
       for (const [operation, record] of records) {
         const oldRecord: OperationExecutionRecord | undefined = operationStates.get(operation);
         const oldHash: string | undefined = oldRecord?.stateHash;
+
+        const transferOperation: ITransferableOperation = transferOperationForOperation.get(operation)!;
 
         const status: OperationStatus | undefined = oldRecord?.status;
         const skip: boolean =
@@ -249,11 +254,28 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
             silent
           });
           record.silent = silent;
+          activeOperations.push({
+            operation: transferOperation,
+            status: status,
+            duration: oldRecord!.stopwatch.duration,
+            hash: oldHash
+          });
         } else {
           operationStates.set(operation, record);
-          onOperationStatusChanged(record);
+          activeOperations.push({
+            operation: transferOperation,
+            status: record.status,
+            duration: record.stopwatch.duration,
+            hash: oldHash
+          });
         }
       }
+
+      const activeGraphMessage: IRushWorkerActiveGraphMessage = {
+        type: 'activeGraph',
+        value: { operations: activeOperations }
+      };
+      parentPort?.postMessage(activeGraphMessage);
     }
 
     async function executeOperations(targets: string[]): Promise<void> {

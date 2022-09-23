@@ -60,6 +60,13 @@ export function createPhasedCommandWorker(
     resolveReady = resolve;
   });
 
+  let resolveActiveGraph: (graph: ITransferableOperationStatus[]) => void;
+  let activeGraphPromise: Promise<ITransferableOperationStatus[]> = new Promise<
+    ITransferableOperationStatus[]
+  >((resolve) => {
+    resolveActiveGraph = resolve;
+  });
+
   const abortMessage: IRushWorkerAbortMessage = {
     type: 'abort',
     value: {}
@@ -112,9 +119,18 @@ export function createPhasedCommandWorker(
       readyPromise = new Promise<void>((resolve) => {
         resolveReady = resolve;
       });
+      activeGraphPromise = new Promise<ITransferableOperationStatus[]>((resolve) => {
+        resolveActiveGraph = resolve;
+      });
       worker.postMessage(buildMessage);
-      await this.readyAsync();
-      return Array.from(statusByOperation.values());
+      const statuses: ITransferableOperationStatus[] | void = await Promise.race([
+        exitPromise,
+        activeGraphPromise
+      ]);
+      if (!statuses) {
+        throw new Error(`Worker has exited!`);
+      }
+      return statuses;
     },
 
     async getGraphAsync(): Promise<ITransferableOperation[]> {
@@ -148,6 +164,9 @@ export function createPhasedCommandWorker(
     switch (message.type) {
       case 'graph':
         resolveGraph(message.value.operations);
+        break;
+      case 'activeGraph':
+        resolveActiveGraph(message.value.operations);
         break;
       case 'ready':
         resolveReady();

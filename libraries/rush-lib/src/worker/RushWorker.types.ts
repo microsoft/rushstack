@@ -30,6 +30,10 @@ export interface IRushWorkerGraphMessage {
   type: 'graph';
   value: { operations: ITransferableOperation[] };
 }
+export interface IRushWorkerActiveGraphMessage {
+  type: 'activeGraph';
+  value: { operations: ITransferableOperationStatus[] };
+}
 export interface IRushWorkerReadyMessage {
   type: 'ready';
   value: {};
@@ -37,6 +41,7 @@ export interface IRushWorkerReadyMessage {
 export type IRushWorkerResponse =
   | IRushWorkerOperationMessage
   | IRushWorkerGraphMessage
+  | IRushWorkerActiveGraphMessage
   | IRushWorkerReadyMessage;
 
 export interface IRushWorkerBuildMessage {

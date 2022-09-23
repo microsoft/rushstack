@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { createInterface, Interface } from 'readline';
+import { OperationStatus } from '../logic/operations/OperationStatus';
 import {
   ITransferableOperation,
   ITransferableOperationStatus,
@@ -62,6 +63,8 @@ async function runAsCli(): Promise<void> {
     if (line === 'exit') {
       rl.close();
       await workerInterface.shutdownAsync();
+    } else if (line === 'abort') {
+      await workerInterface.abortAsync();
     } else {
       const targets: string[] = line.split(/[, ]/g);
       const operations: ITransferableOperation[] = [];
@@ -70,7 +73,14 @@ async function runAsCli(): Promise<void> {
         operations.push({ project, phase });
       }
 
-      await workerInterface.updateAsync(operations);
+      let toBeBuiltCount: number = 0;
+      const activeGraph: ITransferableOperationStatus[] = await workerInterface.updateAsync(operations);
+      for (const operation of activeGraph) {
+        if (operation.status === OperationStatus.Ready) {
+          toBeBuiltCount++;
+        }
+      }
+      console.log(`Build graph contains ${activeGraph.length} operations, ${toBeBuiltCount} pending`);
 
       rl.prompt();
     }
