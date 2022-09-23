@@ -15,9 +15,9 @@ import { createPhasedCommandWorker } from './RushWorkerHost';
  */
 async function runAsCli(): Promise<void> {
   const workerInterface: IPhasedCommandWorkerController = await createPhasedCommandWorker(
-    process.argv.slice(2),
+    process.argv.slice(3),
     {
-      cwd: process.cwd(),
+      cwd: process.argv[2],
       onStatusUpdate: (status: ITransferableOperationStatus) => {
         console.log(`[HOST]: Status change: ${status.operation.name!} => ${status.status} (${status.hash})`);
       }
