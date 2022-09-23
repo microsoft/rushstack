@@ -204,14 +204,14 @@ export class Git {
 
   /**
    * Get information about the current Git working tree.
-   * Returns undefined if the current path is not under a Git working tree.
+   * Returns undefined if rush.json is not under a Git working tree.
    */
   public getGitInfo(): Readonly<gitInfo.GitRepoInfo> | undefined {
     if (!this._checkedGitInfo) {
       let repoInfo: gitInfo.GitRepoInfo | undefined;
       try {
         // gitInfo() shouldn't usually throw, but wrapping in a try/catch just in case
-        repoInfo = gitInfo();
+        repoInfo = gitInfo(this._rushConfiguration.rushJsonFolder);
       } catch (ex) {
         // if there's an error, assume we're not in a Git working tree
       }
