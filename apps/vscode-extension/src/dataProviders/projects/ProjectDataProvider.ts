@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import type * as Rush from '@rushstack/rush-sdk';
 import * as path from 'path';
 
-export type StateGroupName = 'Active' | 'Included' | 'Excluded';
+export type StateGroupName = 'Active' | 'Included' | 'Available';
 
 export class ProjectDataProvider
   implements vscode.TreeDataProvider<StateGroup | Project | OperationPhase | Message>
@@ -12,18 +12,14 @@ export class ProjectDataProvider
     StateGroup | Project | OperationPhase | (StateGroup | Project | OperationPhase)[] | undefined
   >;
 
-  private _pendingRush!: Promise<Rush.RushConfiguration | undefined>;
-  private _pendingAllProjects!: Promise<{
-    projects: Project[];
-    projectsByName: Map<string, Project>;
-  }>;
-
   private _stateGroups: StateGroup[];
 
   private _activeGroup: StateGroup;
   private _includedGroup: StateGroup;
-  private _excludedGroup: StateGroup;
+  private _availableGroup: StateGroup;
   private _loadRush: () => Promise<typeof Rush>;
+
+  private _projectsByName: Map<string, Project>;
 
   constructor(workspaceRoot: string | undefined, loadRush: () => Promise<typeof Rush>) {
     this._workspaceRoot = workspaceRoot;
@@ -35,11 +31,13 @@ export class ProjectDataProvider
 
     this._activeGroup = new StateGroup('Active');
     this._includedGroup = new StateGroup('Included');
-    this._excludedGroup = new StateGroup('Excluded');
+    this._availableGroup = new StateGroup('Available');
+
+    this._projectsByName = new Map<string, Project>();
 
     this.refresh();
 
-    this._stateGroups = [this._activeGroup, this._includedGroup, this._excludedGroup];
+    this._stateGroups = [this._activeGroup, this._includedGroup, this._availableGroup];
   }
 
   public async refresh(): Promise<void> {
@@ -47,68 +45,46 @@ export class ProjectDataProvider
 
     this._activeGroup.projects.clear();
     this._includedGroup.projects.clear();
-    this._excludedGroup.projects.clear();
+    this._availableGroup.projects.clear();
+    this._projectsByName.clear();
 
     vscode.commands.executeCommand('setContext', 'rush.activeProjects.count', 0);
     vscode.commands.executeCommand('setContext', 'rush.includedProjects.count', 0);
-    vscode.commands.executeCommand('setContext', 'rush.excludedProjects.count', 0);
-    vscode.commands.executeCommand('setContext', 'rush.activeProjects', {});
+    vscode.commands.executeCommand('setContext', 'rush.availableProjects.count', 0);
 
-    this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._excludedGroup]);
+    console.log('Updating tree data', 3, Date.now());
+    this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._availableGroup]);
+    console.log('Updated tree data', 3, Date.now());
 
-    if (workspaceRoot) {
-      this._pendingRush = (async () => {
-        const rushSdk = await this._loadRush();
-
-        if (!rushSdk.RushConfiguration) {
-          return;
-        }
-
-        const rushConfigurationFile = rushSdk.RushConfiguration.tryFindRushJsonLocation({
-          startingFolder: this._workspaceRoot
-        });
-
-        if (!rushConfigurationFile) {
-          return;
-        }
-
-        const rushConfiguration = rushSdk.RushConfiguration.loadFromConfigurationFile(rushConfigurationFile);
-
-        return rushConfiguration;
-      })();
+    if (!workspaceRoot) {
+      return;
     }
 
-    this._pendingAllProjects = (async () => {
-      const rush = await this._pendingRush;
+    const rushSdk = await this._loadRush();
 
-      const projectsByRushProject = new Map<string, Project>();
-      const projects: Project[] = [];
-
-      if (rush) {
-        for (const rushProject of rush.projects) {
-          const project = new Project(rushProject);
-
-          projectsByRushProject.set(rushProject.packageName, project);
-          projects.push(project);
-        }
-      }
-
-      return {
-        projects,
-        projectsByName: projectsByRushProject
-      };
-    })();
-
-    const { projects } = await this._pendingAllProjects;
-
-    for (const project of projects) {
-      this._excludedGroup.projects.add(project);
+    if (!rushSdk.RushConfiguration) {
+      return;
     }
 
-    const activeProjectsContext: { [key: string]: true } = {};
+    const rushConfigurationFile = rushSdk.RushConfiguration.tryFindRushJsonLocation({
+      startingFolder: this._workspaceRoot
+    });
 
-    for (const activeProject of this._activeGroup.projects) {
-      activeProjectsContext[`project:${activeProject.rushProject.packageName}`] = true;
+    if (!rushConfigurationFile) {
+      return;
+    }
+
+    const rushConfiguration = rushSdk.RushConfiguration.loadFromConfigurationFile(rushConfigurationFile);
+
+    if (!rushConfiguration) {
+      return;
+    }
+
+    for (const rushProject of rushConfiguration.projects) {
+      const project = new Project(rushProject);
+
+      this._projectsByName.set(rushProject.packageName, project);
+      this._availableGroup.projects.add(project);
     }
 
     vscode.commands.executeCommand(
@@ -123,12 +99,13 @@ export class ProjectDataProvider
     );
     vscode.commands.executeCommand(
       'setContext',
-      'rush.excludedProjects.count',
-      this._excludedGroup.projects.size
+      'rush.availableProjects.count',
+      this._availableGroup.projects.size
     );
-    vscode.commands.executeCommand('setContext', 'rush.activeProjects', activeProjectsContext);
 
-    this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._excludedGroup]);
+    console.log('Updating tree data', 3, Date.now());
+    this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._availableGroup]);
+    console.log('Updated tree data', 3, Date.now());
   }
 
   public getActiveProjects(): Project[] {
@@ -139,10 +116,10 @@ export class ProjectDataProvider
     return Array.from(this._includedGroup.projects);
   }
 
-  public async updateProjectPhases(operationStatuses: Rush.ITransferableOperationStatus[]): Promise<void> {
-    const { projectsByName } = await this._pendingAllProjects;
+  public updateProjectPhases(operationStatuses: Rush.ITransferableOperationStatus[]): void {
+    console.log('Updating project phases', operationStatuses.length, Date.now());
 
-    const projects: Project[] = [];
+    const updatedProjects = new Set<Project>();
 
     for (const operationStatus of operationStatuses) {
       const {
@@ -153,7 +130,7 @@ export class ProjectDataProvider
         continue;
       }
 
-      const project = projectsByName.get(projectName);
+      const project = this._projectsByName.get(projectName);
 
       if (!project) {
         continue;
@@ -168,24 +145,32 @@ export class ProjectDataProvider
 
       operationPhase.operationStatus = operationStatus;
 
-      projects.push(project);
+      updatedProjects.add(project);
     }
 
-    this._onDidChangeTreeData.fire(projects);
+    console.log('Updating tree data', updatedProjects.size, Date.now());
+    if (updatedProjects.size > 10) {
+      this._onDidChangeTreeData.fire(undefined);
+    } else {
+      this._onDidChangeTreeData.fire(Array.from(updatedProjects));
+    }
+    console.log('Updated tree data', updatedProjects.size, Date.now());
+
+    console.log('Updated project phases', operationStatuses.length, Date.now());
   }
 
-  public async toggleActiveProjects(toggleProjects: Project[], force?: boolean): Promise<void> {
-    const { projects, projectsByName: projectsByRushProject } = await this._pendingAllProjects;
+  public toggleActiveProjects(toggleProjects: Project[], force?: boolean): void {
+    console.log('Toggling active projects', toggleProjects.length, Date.now());
 
     if (toggleProjects.length === 0) {
       return;
     }
 
-    this._excludedGroup.projects.clear();
+    this._availableGroup.projects.clear();
 
-    for (const project of projects) {
-      project.stateGroupName = 'Excluded';
-      this._excludedGroup.projects.add(project);
+    for (const project of this._projectsByName.values()) {
+      project.stateGroupName = 'Available';
+      this._availableGroup.projects.add(project);
     }
 
     const direction = force ?? !this._activeGroup.projects.has(toggleProjects[0]);
@@ -207,7 +192,7 @@ export class ProjectDataProvider
     for (const activeProject of this._activeGroup.projects) {
       activeProject.stateGroupName = 'Active';
       seenProjects.add(activeProject.rushProject.packageName);
-      this._excludedGroup.projects.delete(activeProject);
+      this._availableGroup.projects.delete(activeProject);
       queue.push(activeProject);
     }
 
@@ -218,24 +203,18 @@ export class ProjectDataProvider
     while ((included = queue.shift())) {
       for (const dependency of included.rushProject.dependencyProjects) {
         if (!seenProjects.has(dependency.packageName)) {
-          const dependencyProject = projectsByRushProject.get(dependency.packageName);
+          const dependencyProject = this._projectsByName.get(dependency.packageName);
 
           if (dependencyProject) {
             dependencyProject.stateGroupName = 'Included';
             this._includedGroup.projects.add(dependencyProject);
-            this._excludedGroup.projects.delete(dependencyProject);
+            this._availableGroup.projects.delete(dependencyProject);
             queue.push(dependencyProject);
           }
 
           seenProjects.add(dependency.packageName);
         }
       }
-    }
-
-    const activeProjectsContext: { [key: string]: true } = {};
-
-    for (const activeProject of this._activeGroup.projects) {
-      activeProjectsContext[`project:${activeProject.rushProject.packageName}`] = true;
     }
 
     vscode.commands.executeCommand(
@@ -250,12 +229,15 @@ export class ProjectDataProvider
     );
     vscode.commands.executeCommand(
       'setContext',
-      'rush.excludedProjects.count',
-      this._excludedGroup.projects.size
+      'rush.availableProjects.count',
+      this._availableGroup.projects.size
     );
-    vscode.commands.executeCommand('setContext', 'rush.activeProjects', activeProjectsContext);
 
-    this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._excludedGroup]);
+    console.log('Updating tree data', 3, Date.now());
+    this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._availableGroup]);
+    console.log('Updated tree data', 3, Date.now());
+
+    console.log('Toggled active projects', toggleProjects.length, Date.now());
   }
 
   public get onDidChangeTreeData(): vscode.Event<
@@ -264,11 +246,9 @@ export class ProjectDataProvider
     return this._onDidChangeTreeData.event;
   }
 
-  public async getChildren(
+  public getChildren(
     element?: StateGroup | Project | OperationPhase | undefined
-  ): Promise<(StateGroup | Project | OperationPhase | Message)[]> {
-    const { projects } = await this._pendingAllProjects;
-
+  ): (StateGroup | Project | OperationPhase | Message)[] {
     if (!element) {
       return this._stateGroups;
     } else if (element instanceof StateGroup) {
@@ -277,18 +257,20 @@ export class ProjectDataProvider
           return [new Message('To get started, activate projects from this repository.')];
         }
 
-        return Array.from(this._activeGroup.projects);
+        return Array.from(this._activeGroup.projects).sort((a: Project, b: Project) =>
+          a.rushProject.packageName.localeCompare(b.rushProject.packageName)
+        );
       } else if (element.groupName === 'Included') {
         if (this._includedGroup.projects.size === 0) {
           return [new Message('Dependencies of active projects will appear here.')];
         }
-        return Array.from(this._includedGroup.projects);
-      } else if (element.groupName === 'Excluded') {
-        if (!this._activeGroup.projects) {
-          return projects;
-        }
-
-        return Array.from(this._excludedGroup.projects);
+        return Array.from(this._includedGroup.projects).sort((a: Project, b: Project) =>
+          a.rushProject.packageName.localeCompare(b.rushProject.packageName)
+        );
+      } else if (element.groupName === 'Available') {
+        return Array.from(this._availableGroup.projects).sort((a: Project, b: Project) =>
+          a.rushProject.packageName.localeCompare(b.rushProject.packageName)
+        );
       }
     } else if (element instanceof Project) {
       return Array.from(element.phases.values());
@@ -305,8 +287,6 @@ export class ProjectDataProvider
     if (element instanceof Message) {
       const treeItem = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.None);
 
-      treeItem.iconPath = '$(sync)';
-
       treeItem.id = `message:${element.label}`;
 
       return treeItem;
@@ -318,7 +298,7 @@ export class ProjectDataProvider
           : vscode.TreeItemCollapsibleState.None
       );
 
-      treeItem.contextValue = `project:${element.rushProject.packageName}`;
+      treeItem.contextValue = `project:${element.stateGroupName}`;
       treeItem.resourceUri = vscode.Uri.file(path.join(element.rushProject.projectFolder, 'package.json'));
       treeItem.tooltip = element.rushProject.packageJson.description;
 
@@ -380,7 +360,7 @@ export class Project {
   constructor(rushProject: Rush.RushConfigurationProject) {
     this.rushProject = rushProject;
 
-    this.stateGroupName = 'Excluded';
+    this.stateGroupName = 'Available';
 
     this.phases = new Map<string, OperationPhase>();
   }
@@ -511,7 +491,7 @@ function getStatusIndicators(status: Rush.OperationStatus): {
       break;
     default:
     case 'READY':
-      description = 'Ready';
+      description = 'Pending';
       icon = 'clock';
       color = 'notebookStatusRunningIcon.foreground';
       break;

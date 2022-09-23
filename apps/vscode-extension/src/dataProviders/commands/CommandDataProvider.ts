@@ -5,9 +5,11 @@ export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
   private _workspaceRoot: string | undefined;
   private _onDidChangeTreeData: vscode.EventEmitter<Command | Command[] | undefined>;
 
-  private _pendingRush!: Promise<Rush.RushCommandLineParser | undefined>;
-  private _pendingCommands!: Promise<Command[]>;
   private _loadRush: () => Promise<typeof Rush>;
+
+  private _commands: Set<Command>;
+
+  private _activeCommand: Command | undefined;
 
   constructor(workspaceRoot: string | undefined, loadRush: () => Promise<typeof Rush>) {
     this._workspaceRoot = workspaceRoot;
@@ -15,48 +17,49 @@ export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
 
     this._onDidChangeTreeData = new vscode.EventEmitter<Command | Command[] | undefined>();
 
+    this._commands = new Set<Command>();
+
     this.refresh();
   }
 
   public async refresh(): Promise<void> {
+    this._commands.clear();
+    this._activeCommand = undefined;
+
+    this._onDidChangeTreeData.fire(undefined);
+
     const workspaceRoot = this._workspaceRoot;
 
-    if (workspaceRoot) {
-      this._pendingRush = (async () => {
-        const rushSdk = await this._loadRush();
-
-        if (!rushSdk.RushCommandLineParser) {
-          return;
-        }
-
-        const commandLineParser = new rushSdk.RushCommandLineParser({
-          cwd: workspaceRoot,
-          excludeDefaultActions: true
-        });
-
-        return commandLineParser;
-      })();
+    if (!workspaceRoot) {
+      return;
     }
 
-    this._pendingCommands = (async () => {
-      const commandLineParser = await this._pendingRush;
+    const rushSdk = await this._loadRush();
 
-      if (commandLineParser) {
-        const commands: Command[] = [];
+    if (!rushSdk.RushCommandLineParser) {
+      return;
+    }
 
-        for (const commandLineAction of commandLineParser.actions) {
-          const command = new Command(commandLineAction.actionName);
+    const commandLineParser = new rushSdk.RushCommandLineParser({
+      cwd: workspaceRoot,
+      excludeDefaultActions: true
+    });
 
-          commands.push(command);
-        }
+    let activeCommand: Command | undefined;
 
-        return commands;
+    for (const commandLineAction of commandLineParser.actions) {
+      const command = new Command(commandLineAction.actionName);
+
+      if (command.label === 'build') {
+        activeCommand = command;
       }
 
-      return [];
-    })();
+      this._commands.add(command);
+    }
 
-    await this._pendingCommands;
+    this._onDidChangeTreeData.fire(undefined);
+
+    await vscode.commands.executeCommand('rush.setWatchAction', activeCommand);
   }
 
   public get onDidChangeTreeData(): vscode.Event<Command | Command[] | undefined> {
@@ -65,7 +68,7 @@ export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
 
   public async getChildren(element?: Command | undefined): Promise<Command[]> {
     if (!element) {
-      return await this._pendingCommands;
+      return Array.from(this._commands).sort((a: Command, b: Command) => a.label.localeCompare(b.label));
     }
 
     return [];
@@ -75,13 +78,42 @@ export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
     return undefined;
   }
 
+  public getWatchAction(): Command | undefined {
+    return this._activeCommand;
+  }
+
+  public setWatchAction(command: Command | undefined): void {
+    this._activeCommand = command;
+
+    vscode.commands.executeCommand(
+      'setContext',
+      'rush.watchAction',
+      command ? `command:${command.label}` : ''
+    );
+
+    this._onDidChangeTreeData.fire(undefined);
+  }
+
   public getTreeItem(element: Command): vscode.TreeItem {
     if (element instanceof Command) {
       const treeItem = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.None);
 
       treeItem.id = `command:${element.label}`;
 
-      treeItem.contextValue = `command:${element.label}`;
+      treeItem.contextValue = `command:${element === this._activeCommand ? 'Watch' : ''}`;
+
+      treeItem.command = {
+        command: 'rush.setWatchAction',
+        arguments: [element],
+        title: 'Set as watch action'
+      };
+
+      if (element === this._activeCommand) {
+        treeItem.iconPath = new vscode.ThemeIcon(
+          'star-full',
+          new vscode.ThemeColor('gitDecoration.stageModifiedResourceForeground')
+        );
+      }
 
       return treeItem;
     }

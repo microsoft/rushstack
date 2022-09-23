@@ -52,6 +52,12 @@
         "icon": "$(run)"
       },
       {
+        "command": "rush.setWatchAction",
+        "title": "Set as watch command",
+        "category": "Rush",
+        "icon": "$(eye)"
+      },
+      {
         "command": "rush.refreshProjects",
         "title": "Refresh",
         "category": "Rush",
@@ -81,22 +87,22 @@
         },
         {
           "command": "rush.activateProject",
-          "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem not in rush.activeProjects",
+          "when": "view == rushProjects && viewItem =~ /^project:(Available|Included)/",
           "group": "inline"
         },
         {
           "command": "rush.deactivateProject",
-          "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem in rush.activeProjects",
+          "when": "view == rushProjects && viewItem =~ /^project:Active/",
           "group": "inline"
         },
         {
           "command": "rush.activateProject",
-          "when": "view == rushProjects && viewItem == group:Included && rush.includedProjects`.count > 0",
+          "when": "view == rushProjects && viewItem == group:Included && rush.includedProjects.count > 0",
           "group": "inline"
         },
         {
           "command": "rush.activateProject",
-          "when": "view == rushProjects && viewItem == group:Excluded && rush.excludedProjects.count > 0",
+          "when": "view == rushProjects && viewItem == group:Available && rush.availableProjects.count > 0",
           "group": "inline"
         },
         {
@@ -106,11 +112,11 @@
         },
         {
           "command": "rush.activateProject",
-          "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem not in rush.activeProjects"
+          "when": "view == rushProjects && viewItem =~ /^project:(Available|Included)/"
         },
         {
           "command": "rush.deactivateProject",
-          "when": "view == rushProjects && viewItem =~ /^project:/ && viewItem in rush.activeProjects"
+          "when": "view == rushProjects && viewItem =~ /^project:Active/"
         },
         {
           "command": "rush.runAction",
@@ -120,12 +126,16 @@
         {
           "command": "rush.runAction",
           "when": "view == rushCommands && viewItem =~ /^command:/ && rush.watcher == 'sleep'"
+        },
+        {
+          "command": "rush.setWatchAction",
+          "when": "view == rushCommands && viewItem =~ /^command:$/"
         }
       ],
       "view/title": [
         {
           "command": "rush.enableWatch",
-          "when": "view == rushProjects && rush.watcher == 'sleep'",
+          "when": "view == rushProjects && rush.watcher == 'sleep' && rush.watchAction != ''",
           "group": "navigation"
         },
         {
