@@ -3,6 +3,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "@fluentui/react",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests" ]
     },

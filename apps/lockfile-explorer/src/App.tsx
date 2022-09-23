@@ -1,3 +1,4 @@
+import { Calendar } from '@fluentui/react';
 import * as React from 'react';
 
 /**
@@ -16,6 +17,8 @@ export class App extends React.Component {
     return (
       <div style={appStyle}>
         <h2>Hello, world!</h2>
+
+        <Calendar />
 
         <p>Here is an example image:</p>
         <img src={require('./rushstack-icon.svg')} />

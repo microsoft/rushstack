@@ -11,6 +11,7 @@
     "_phase:test": "heft test --no-build"
   },
   "dependencies": {
+    "@fluentui/react": "^8.96.1",
     "react": "~16.13.1",
     "react-dom": "~16.13.1",
     "tslib": "~2.3.1"
