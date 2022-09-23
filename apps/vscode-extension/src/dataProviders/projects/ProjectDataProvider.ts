@@ -321,19 +321,26 @@ export class ProjectDataProvider
 
       switch (element.stateGroupName) {
         case 'Active':
-          treeItem.description = 'Active';
-          break;
         case 'Included':
-          treeItem.description = 'Ready';
+          if (element.phases.size > 0) {
+            const status = getOverallStatus(getStatuses(element.phases.values()));
+
+            const { icon, description } = getStatusIndicators(status);
+
+            treeItem.description = description;
+            treeItem.iconPath = new vscode.ThemeIcon(icon);
+          } else {
+            treeItem.description = 'Ready';
+            treeItem.iconPath = new vscode.ThemeIcon('package');
+          }
           break;
         case 'Excluded':
           treeItem.description = 'Out of scope';
+          treeItem.iconPath = new vscode.ThemeIcon('package');
           break;
       }
 
       treeItem.id = `project:${element.rushProject.packageName}`;
-
-      treeItem.iconPath = new vscode.ThemeIcon('package');
 
       return treeItem;
     } else if (element instanceof OperationPhase) {
@@ -341,37 +348,10 @@ export class ProjectDataProvider
 
       treeItem.id = `phase:${element.rushProject.packageName};_${element.phase}`;
 
-      treeItem.description = element.status;
-
-      let icon: string;
-
-      switch (element.status) {
-        case 'SUCCESS':
-        case 'FROM CACHE':
-        case 'NO OP':
-          icon = 'check';
-          break;
-        case 'EXECUTING':
-          icon = 'sync~spin';
-          break;
-        case 'SUCCESS WITH WARNINGS':
-          icon = 'warning';
-          break;
-        case 'SKIPPED':
-          icon = 'testing-skipped-icon';
-          break;
-        case 'FAILURE':
-          icon = 'error';
-          break;
-        case 'BLOCKED':
-          icon = 'stop';
-          break;
-        default:
-          icon = 'home';
-          break;
-      }
+      const { icon, description } = getStatusIndicators(element.status);
 
       treeItem.iconPath = new vscode.ThemeIcon(icon);
+      treeItem.description = description;
 
       return treeItem;
     } else if (element instanceof StateGroup) {
@@ -434,5 +414,104 @@ export class Message {
 
   constructor(label: string) {
     this.label = label;
+  }
+}
+
+function getOverallStatus(statuses: Iterable<Rush.OperationStatus>): Rush.OperationStatus {
+  const histogram: {
+    [P in Rush.OperationStatus]: number;
+  } = {
+    'FROM CACHE': 0,
+    'NO OP': 0,
+    'SUCCESS WITH WARNINGS': 0,
+    BLOCKED: 0,
+    EXECUTING: 0,
+    FAILURE: 0,
+    READY: 0,
+    SKIPPED: 0,
+    SUCCESS: 0
+  };
+
+  for (const status of statuses) {
+    histogram[status]++;
+  }
+
+  if (histogram.EXECUTING > 0) {
+    return 'EXECUTING' as Rush.OperationStatus;
+  } else if (histogram.READY > 0) {
+    return 'READY' as Rush.OperationStatus;
+  } else if (histogram.FAILURE > 0) {
+    return 'FAILURE' as Rush.OperationStatus;
+  } else if (histogram.BLOCKED > 0) {
+    return 'BLOCKED' as Rush.OperationStatus;
+  } else if (histogram['SUCCESS WITH WARNINGS'] > 0) {
+    return 'SUCCESS WITH WARNINGS' as Rush.OperationStatus;
+  } else if (histogram.SUCCESS > 0) {
+    return 'BLOCKED' as Rush.OperationStatus;
+  } else if (histogram['FROM CACHE'] > 0) {
+    return 'FROM CACHE' as Rush.OperationStatus;
+  } else if (histogram.SKIPPED > 0) {
+    return 'SKIPPED' as Rush.OperationStatus;
+  } else {
+    return 'NO OP' as Rush.OperationStatus;
+  }
+}
+
+function getStatusIndicators(status: Rush.OperationStatus): {
+  icon: string;
+  description: string;
+} {
+  let icon: string;
+  let description: string;
+
+  switch (status) {
+    case 'SUCCESS':
+      description = 'Succeeded';
+      icon = 'check';
+      break;
+    case 'FROM CACHE':
+      description = 'Succeeded (from cache)';
+      icon = 'check';
+      break;
+    case 'NO OP':
+      description = 'Bypassed';
+      icon = 'check';
+      break;
+    case 'EXECUTING':
+      description = 'Executing';
+      icon = 'sync~spin';
+      break;
+    case 'SUCCESS WITH WARNINGS':
+      description = 'Succeeded with warnings';
+      icon = 'warning';
+      break;
+    case 'SKIPPED':
+      description = 'Skipped';
+      icon = 'testing-skipped-icon';
+      break;
+    case 'FAILURE':
+      description = 'Failed';
+      icon = 'error';
+      break;
+    case 'BLOCKED':
+      description = 'Blocked';
+      icon = 'stop';
+      break;
+    default:
+    case 'READY':
+      description = 'Ready';
+      icon = 'home';
+      break;
+  }
+
+  return {
+    icon,
+    description
+  };
+}
+
+function* getStatuses(phases: Iterable<OperationPhase>): Iterable<Rush.OperationStatus> {
+  for (const phase of phases) {
+    yield phase.status;
   }
 }
