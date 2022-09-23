@@ -199,6 +199,15 @@ export class DtsRollupGenerator {
 
         const exportClauses: string[] = [];
         for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
+          const symbolMetadata: SymbolMetadata | undefined =
+            collector.tryFetchMetadataForAstEntity(exportedEntity);
+          if (
+            symbolMetadata &&
+            !this._shouldIncludeReleaseTag(symbolMetadata.maxEffectiveReleaseTag, dtsKind)
+          ) {
+            continue;
+          }
+
           const collectorEntity: CollectorEntity | undefined =
             collector.tryGetCollectorEntity(exportedEntity);
           if (collectorEntity === undefined) {
