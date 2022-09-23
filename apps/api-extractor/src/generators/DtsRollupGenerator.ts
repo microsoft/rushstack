@@ -194,8 +194,6 @@ export class DtsRollupGenerator {
 
         // all local exports of local imported module are just references to top-level declarations
         writer.increaseIndent();
-        writer.writeLine('export {');
-        writer.increaseIndent();
 
         const exportClauses: string[] = [];
         for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
@@ -224,10 +222,19 @@ export class DtsRollupGenerator {
             exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
           }
         }
-        writer.writeLine(exportClauses.join(',\n'));
 
-        writer.decreaseIndent();
-        writer.writeLine('}'); // end of "export { ... }"
+        if (exportClauses.length > 0) {
+          writer.writeLine('export {');
+          writer.increaseIndent();
+
+          writer.writeLine(exportClauses.join(',\n'));
+
+          writer.decreaseIndent();
+          writer.writeLine('}'); // end of "export { ... }"
+        } else {
+          writer.writeLine('export { }');
+        }
+
         writer.decreaseIndent();
         writer.writeLine('}'); // end of "declare namespace { ... }"
       }
