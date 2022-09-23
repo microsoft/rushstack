@@ -215,7 +215,7 @@ export function applyWorkingTreeState(
     const hashObjectResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
       gitPath || 'git',
       ['hash-object', '--stdin-paths'],
-      { input: filesToHash.join('\n') }
+      { input: filesToHash.join('\n'), currentWorkingDirectory: rootDirectory }
     );
 
     if (hashObjectResult.status !== 0) {
