@@ -20,6 +20,9 @@ async function runAsCli(): Promise<void> {
       cwd: process.argv[2],
       onStatusUpdate: (status: ITransferableOperationStatus) => {
         console.log(`[HOST]: Status change: ${status.operation.name!} => ${status.status} (${status.hash})`);
+      },
+      onReady: () => {
+        console.log(`Worker is ready for more work.`);
       }
     }
   );
