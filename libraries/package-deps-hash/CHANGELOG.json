@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "3.2.51",
+      "tag": "@rushstack/package-deps-hash_v3.2.51",
+      "date": "Fri, 23 Sep 2022 02:54:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix getRepoState when the current working directory is not in the Git repository."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.50",
       "tag": "@rushstack/package-deps-hash_v3.2.50",
       "date": "Wed, 21 Sep 2022 20:21:10 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Sep 2022 02:54:22 GMT and should not be manually modified.
+
+## 3.2.51
+Fri, 23 Sep 2022 02:54:22 GMT
+
+### Patches
+
+- Fix getRepoState when the current working directory is not in the Git repository.
 
 ## 3.2.50
 Wed, 21 Sep 2022 20:21:10 GMT
