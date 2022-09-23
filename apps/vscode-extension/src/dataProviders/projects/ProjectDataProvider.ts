@@ -314,7 +314,7 @@ export class ProjectDataProvider
       const treeItem = new vscode.TreeItem(
         element.rushProject.packageName,
         element.phases.size > 0
-          ? vscode.TreeItemCollapsibleState.Expanded
+          ? vscode.TreeItemCollapsibleState.Collapsed
           : vscode.TreeItemCollapsibleState.None
       );
 
@@ -322,26 +322,12 @@ export class ProjectDataProvider
       treeItem.resourceUri = vscode.Uri.file(path.join(element.rushProject.projectFolder, 'package.json'));
       treeItem.tooltip = element.rushProject.packageJson.description;
 
-      switch (element.stateGroupName) {
-        case 'Active':
-        case 'Included':
-          if (element.phases.size > 0) {
-            const status = getOverallStatus(getStatuses(element.phases.values()));
+      const status = getOverallStatus(getStatuses(element.phases.values()));
 
-            const { icon, description } = getStatusIndicators(status);
+      const { icon, description, color } = getStatusIndicators(status);
 
-            treeItem.description = description;
-            treeItem.iconPath = new vscode.ThemeIcon(icon);
-          } else {
-            treeItem.description = 'Ready';
-            treeItem.iconPath = new vscode.ThemeIcon('package');
-          }
-          break;
-        case 'Excluded':
-          treeItem.description = 'Out of scope';
-          treeItem.iconPath = new vscode.ThemeIcon('package');
-          break;
-      }
+      treeItem.description = description;
+      treeItem.iconPath = new vscode.ThemeIcon(icon, new vscode.ThemeColor(color));
 
       treeItem.id = `project:${element.rushProject.packageName}`;
 
@@ -354,9 +340,9 @@ export class ProjectDataProvider
 
       treeItem.id = `phase:${element.rushProject.packageName};_${element.operationStatus.operation.phase!}`;
 
-      const { icon, description } = getStatusIndicators(element.operationStatus.status);
+      const { icon, description, color } = getStatusIndicators(element.operationStatus.status);
 
-      treeItem.iconPath = new vscode.ThemeIcon(icon);
+      treeItem.iconPath = new vscode.ThemeIcon(icon, new vscode.ThemeColor(color));
       treeItem.description = description;
       treeItem.tooltip = `${element.operationStatus.hash}`;
       if (element.operationStatus.operation.logFilePath) {
@@ -476,53 +462,65 @@ function getOverallStatus(statuses: Iterable<Rush.OperationStatus>): Rush.Operat
 function getStatusIndicators(status: Rush.OperationStatus): {
   icon: string;
   description: string;
+  color: string;
 } {
   let icon: string;
   let description: string;
+  let color: string;
 
   switch (status) {
     case 'SUCCESS':
       description = 'Succeeded';
-      icon = 'check';
+      icon = 'pass';
+      color = 'testing.iconPassed';
       break;
     case 'FROM CACHE':
       description = 'Succeeded (from cache)';
-      icon = 'check';
+      icon = 'pass';
+      color = 'testing.iconPassed';
       break;
     case 'NO OP':
       description = 'Bypassed';
-      icon = 'check';
+      icon = 'circle-outline';
+      color = 'disabledForeground';
       break;
     case 'EXECUTING':
       description = 'Executing';
       icon = 'sync~spin';
+      color = 'notebookStatusRunningIcon.foreground';
       break;
     case 'SUCCESS WITH WARNINGS':
       description = 'Succeeded with warnings';
       icon = 'warning';
+      color = 'testing.iconFailed';
       break;
     case 'SKIPPED':
       description = 'Skipped';
       icon = 'testing-skipped-icon';
+      color = 'testing.iconSkipped';
       break;
     case 'FAILURE':
       description = 'Failed';
       icon = 'error';
+      color = 'testing.iconFailed';
       break;
     case 'BLOCKED':
       description = 'Blocked';
       icon = 'stop';
+      color = 'disabledForeground';
       break;
     default:
     case 'READY':
       description = 'Ready';
-      icon = 'more';
+      icon = 'clock';
+      color = 'notebookStatusRunningIcon.foreground';
       break;
   }
 
   return {
     icon,
-    description
+    description,
+    color
   };
 }
 
