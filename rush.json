@@ -273,7 +273,7 @@
      *
      * If no commit message is set it will default to 'Rush change'
      */
-    // "changefilesCommitMessage": "Added Rush changefiles"
+    // "changefilesCommitMessage": "Rush change"
   },
 
   "repository": {
