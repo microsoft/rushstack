@@ -7,7 +7,7 @@ Wed, 21 Sep 2022 20:46:06 GMT
 
 ### Minor changes
 
-- Initial relelease of resdesign.
+- Initial release of redesign.
 
 ## 1.10.12
 Wed, 21 Sep 2022 20:21:10 GMT
