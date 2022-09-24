@@ -21,7 +21,7 @@ import {
 
 export interface IHeftLifecycleContext {
   lifecycleSession?: HeftLifecycleSession;
-  pluginOptions?: object;
+  pluginOptions: object | undefined;
 }
 
 export class HeftLifecycle extends HeftPluginHost {
@@ -168,7 +168,7 @@ export class HeftLifecycle extends HeftPluginHost {
         pluginDefinition.validateOptions(pluginOptions);
 
         // Partially populate the context. The session will be populated while applying the plugins.
-        const lifecycleContext: IHeftLifecycleContext = { pluginOptions };
+        const lifecycleContext: IHeftLifecycleContext = { lifecycleSession: undefined, pluginOptions };
         this._lifecycleContextByDefinition.set(pluginDefinition, lifecycleContext);
       }
     }
