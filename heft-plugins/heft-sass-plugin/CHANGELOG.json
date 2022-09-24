@@ -2,15 +2,22 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.6.0-dev.1",
+      "tag": "@rushstack/heft-sass-plugin_v0.6.0-dev.1",
+      "date": "Fri, 13 Sep 2022 18:22:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix loading of lifecycle plugins."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0-dev.0",
       "tag": "@rushstack/heft-sass-plugin_v0.6.0-dev.0",
       "date": "Wed, 21 Sep 2022 20:46:06 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Initial release of redesign."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0-dev.0`"
@@ -20,6 +27,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.10` to `^0.48.0-dev.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Initial release of redesign."
           }
         ]
       }
@@ -419,6 +431,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.5.1",
       "date": "Thu, 21 Jul 2022 00:16:14 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.7.9`"
@@ -443,11 +456,6 @@
       "tag": "@rushstack/heft-sass-plugin_v0.5.0",
       "date": "Wed, 13 Jul 2022 21:31:13 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Fix an issue where cssOutputFolders specified in sass.json in a rig did not correctly resolve relative to the root of the project being built."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.9.0`"
@@ -463,6 +471,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.46.3` to `^0.46.4`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Fix an issue where cssOutputFolders specified in sass.json in a rig did not correctly resolve relative to the root of the project being built."
           }
         ]
       }
@@ -637,6 +650,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.4.1",
       "date": "Sat, 25 Jun 2022 21:00:40 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.7.1`"
@@ -661,11 +675,6 @@
       "tag": "@rushstack/heft-sass-plugin_v0.4.0",
       "date": "Sat, 25 Jun 2022 01:54:29 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Add an option to output typings to additional output folders."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.7`"
@@ -687,6 +696,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.45.10` to `^0.45.11`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add an option to output typings to additional output folders."
           }
         ]
       }
@@ -1110,6 +1124,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.3.14",
       "date": "Sat, 09 Apr 2022 19:07:48 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.14`"
@@ -1134,11 +1149,6 @@
       "tag": "@rushstack/heft-sass-plugin_v0.3.13",
       "date": "Sat, 09 Apr 2022 02:24:26 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Rename the \"master\" branch to \"main\"."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.1`"
@@ -1163,6 +1173,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.44.7` to `^0.44.8`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
           }
         ]
       }
@@ -1268,6 +1283,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.3.8",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.12`"
@@ -1301,20 +1317,20 @@
       "tag": "@rushstack/heft-sass-plugin_v0.3.7",
       "date": "Fri, 11 Feb 2022 10:30:25 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Upgrade postcss"
-          },
-          {
-            "comment": "Update JSON schema documentation"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.7`"
           },
           {
             "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Upgrade postcss"
+          },
+          {
+            "comment": "Update JSON schema documentation"
           }
         ]
       }
@@ -1432,6 +1448,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.3.1",
       "date": "Tue, 14 Dec 2021 19:27:51 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.1`"
@@ -1453,14 +1470,14 @@
       "tag": "@rushstack/heft-sass-plugin_v0.3.0",
       "date": "Fri, 10 Dec 2021 01:09:33 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Add a \"cssOuputFolders\" option to \"config/sass.json\" to emit compiled CSS."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add a \"cssOuputFolders\" option to \"config/sass.json\" to emit compiled CSS."
           }
         ]
       }
@@ -1698,6 +1715,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.2.1",
       "date": "Fri, 05 Nov 2021 15:09:18 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.5`"
@@ -1731,6 +1749,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.2.0",
       "date": "Thu, 28 Oct 2021 23:48:23 GMT",
       "comments": {
+        
         "minor": [
           {
             "comment": "Update node-sass to version 6 to support Node 16."
@@ -1743,6 +1762,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.1.30",
       "date": "Thu, 28 Oct 2021 00:08:22 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.42.0`"
@@ -1761,11 +1781,6 @@
       "tag": "@rushstack/heft-sass-plugin_v0.1.29",
       "date": "Wed, 27 Oct 2021 00:08:15 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Update the package.json repository field to include the directory property."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.4`"
@@ -1790,6 +1805,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.7` to `^0.41.8`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
           }
         ]
       }
@@ -2018,6 +2038,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.1.19",
       "date": "Fri, 24 Sep 2021 00:09:29 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.8`"
@@ -2048,11 +2069,6 @@
       "tag": "@rushstack/heft-sass-plugin_v0.1.18",
       "date": "Thu, 23 Sep 2021 00:10:40 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Upgrade the `@types/node` dependency to version to version 12."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.7`"
@@ -2077,6 +2093,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.39.0` to `^0.39.1`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
           }
         ]
       }
@@ -2398,6 +2419,7 @@
       "tag": "@rushstack/heft-sass-plugin_v0.1.1",
       "date": "Wed, 11 Aug 2021 00:07:21 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.2`"

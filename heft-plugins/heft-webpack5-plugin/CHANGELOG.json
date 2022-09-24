@@ -2,15 +2,22 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.6.0-dev.1",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.0-dev.1",
+      "date": "Fri, 13 Sep 2022 18:22:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix loading of lifecycle plugins."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0-dev.0",
       "tag": "@rushstack/heft-webpack5-plugin_v0.6.0-dev.0",
       "date": "Wed, 21 Sep 2022 20:46:06 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Initial release of redesign."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0-dev.0`"
@@ -20,6 +27,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.10` to `^0.48.0-dev.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Initial release of redesign."
           }
         ]
       }
@@ -314,6 +326,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.35",
       "date": "Thu, 21 Jul 2022 00:16:14 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.46.5`"
@@ -332,11 +345,6 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.34",
       "date": "Wed, 13 Jul 2022 21:31:13 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Upgrade webpack-dev-server"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.46.4`"
@@ -346,6 +354,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.46.3` to `^0.46.4`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Upgrade webpack-dev-server"
           }
         ]
       }
@@ -631,6 +644,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.19",
       "date": "Thu, 19 May 2022 15:13:20 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.45.4`"
@@ -649,6 +663,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.18",
       "date": "Wed, 18 May 2022 15:10:55 GMT",
       "comments": {
+        
         "patch": [
           {
             "comment": "fix: removed deprecation warning for webpack-dev-server"
@@ -679,6 +694,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.16",
       "date": "Tue, 10 May 2022 01:20:43 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.5`"
@@ -700,6 +716,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.15",
       "date": "Fri, 06 May 2022 18:54:42 GMT",
       "comments": {
+        
         "patch": [
           {
             "comment": "Fix an issue where Heft will crash if the Webpack configuration is an empty array."
@@ -844,6 +861,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.7",
       "date": "Sat, 09 Apr 2022 19:07:48 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.44.9`"
@@ -862,11 +880,6 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.6",
       "date": "Sat, 09 Apr 2022 02:24:26 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Rename the \"master\" branch to \"main\"."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.2`"
@@ -882,6 +895,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.44.7` to `^0.44.8`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
           }
         ]
       }
@@ -963,6 +981,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.1",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.1`"
@@ -987,17 +1006,17 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.0",
       "date": "Fri, 11 Feb 2022 10:30:25 GMT",
       "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
+          }
+        ],
         "minor": [
           {
             "comment": "Upgrade to Webpack ~5.68.0"
           },
           {
             "comment": "Change \"webpack\" to be a peer dependency instead of a regular dependency; this avoids a situation where Heft might import a different version of Webpack from the consuming project or its rig"
-          }
-        ],
-        "dependency": [
-          {
-            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
           }
         ]
       }
@@ -1301,6 +1320,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.4.16",
       "date": "Thu, 28 Oct 2021 00:08:22 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.42.0`"
@@ -1319,11 +1339,6 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.4.15",
       "date": "Wed, 27 Oct 2021 00:08:15 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Update the package.json repository field to include the directory property."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.0`"
@@ -1339,6 +1354,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.7` to `^0.41.8`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
           }
         ]
       }
@@ -1528,6 +1548,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.4.5",
       "date": "Fri, 24 Sep 2021 00:09:29 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.41.0`"
@@ -1549,11 +1570,6 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.4.4",
       "date": "Thu, 23 Sep 2021 00:10:40 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Upgrade the `@types/node` dependency to version to version 12."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.3`"
@@ -1569,6 +1585,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.39.0` to `^0.39.1`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
           }
         ]
       }
@@ -1614,6 +1635,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.4.1",
       "date": "Sat, 18 Sep 2021 03:05:57 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.38.1`"
@@ -1632,11 +1654,6 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.4.0",
       "date": "Tue, 14 Sep 2021 01:17:04 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Improve the type declaration for IWebpackBundleSubstageProperties.webpackConfiguration"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.2`"
@@ -1649,6 +1666,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.37.4` to `^0.38.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Improve the type declaration for IWebpackBundleSubstageProperties.webpackConfiguration"
           }
         ]
       }
@@ -1745,6 +1767,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.3.1",
       "date": "Tue, 31 Aug 2021 00:07:11 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.37.0`"
@@ -1763,6 +1786,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.3.0",
       "date": "Mon, 30 Aug 2021 15:08:25 GMT",
       "comments": {
+        
         "minor": [
           {
             "comment": "Migrate to webpack-dev-server 4.x"
@@ -1898,6 +1922,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.2.1",
       "date": "Sat, 31 Jul 2021 00:52:11 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.35.0`"
@@ -1916,6 +1941,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.2.0",
       "date": "Tue, 27 Jul 2021 22:31:02 GMT",
       "comments": {
+        
         "minor": [
           {
             "comment": "Update webpack to be lazy-loaded."
@@ -2441,6 +2467,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.9",
       "date": "Thu, 29 Apr 2021 01:07:29 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.30.0`"
@@ -2459,6 +2486,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.8",
       "date": "Tue, 27 Apr 2021 00:11:19 GMT",
       "comments": {
+        
         "patch": [
           {
             "comment": "Upgrades webpack 5 to get a bug fix when resolving modules with a # in the path"
@@ -2525,6 +2553,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.4",
       "date": "Tue, 20 Apr 2021 04:59:51 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.28.4`"
@@ -2543,6 +2572,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.3",
       "date": "Thu, 15 Apr 2021 15:09:34 GMT",
       "comments": {
+        
         "patch": [
           {
             "comment": "Fix webpack5 persistent cache in production mode"
@@ -2573,6 +2603,7 @@
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.1",
       "date": "Mon, 12 Apr 2021 15:10:29 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.36.2`"

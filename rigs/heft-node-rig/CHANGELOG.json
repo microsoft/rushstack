@@ -2,15 +2,22 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.11.0-dev.1",
+      "tag": "@rushstack/heft-node-rig_v1.11.0-dev.1",
+      "date": "Fri, 13 Sep 2022 18:22:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix loading of lifecycle plugins."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.11.0-dev.0",
       "tag": "@rushstack/heft-node-rig_v1.11.0-dev.0",
       "date": "Wed, 21 Sep 2022 20:46:06 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Initial release of redesign."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.1.0-dev.0`"
@@ -29,6 +36,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.10` to `^0.48.0-dev.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Initial release of redesign."
           }
         ]
       }
@@ -251,6 +263,7 @@
       "tag": "@rushstack/heft-node-rig_v1.10.1",
       "date": "Wed, 10 Aug 2022 08:12:16 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.29.1`"
@@ -272,11 +285,6 @@
       "tag": "@rushstack/heft-node-rig_v1.10.0",
       "date": "Wed, 03 Aug 2022 18:40:35 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Upgrade TypeScript to 4.7"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.29.0`"
@@ -289,6 +297,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.46.7` to `^0.47.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Upgrade TypeScript to 4.7"
           }
         ]
       }
@@ -757,6 +770,7 @@
       "tag": "@rushstack/heft-node-rig_v1.9.1",
       "date": "Tue, 26 Apr 2022 00:10:15 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.3.0`"
@@ -769,11 +783,6 @@
       "tag": "@rushstack/heft-node-rig_v1.9.0",
       "date": "Sat, 23 Apr 2022 02:13:06 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Update to TypeScript 4.6"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.23.0`"
@@ -786,6 +795,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.44.13` to `^0.45.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Update to TypeScript 4.6"
           }
         ]
       }
@@ -879,6 +893,7 @@
       "tag": "@rushstack/heft-node-rig_v1.8.7",
       "date": "Sat, 09 Apr 2022 19:07:48 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.21.2`"
@@ -900,11 +915,6 @@
       "tag": "@rushstack/heft-node-rig_v1.8.6",
       "date": "Sat, 09 Apr 2022 02:24:26 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Rename the \"master\" branch to \"main\"."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.21.1`"
@@ -917,6 +927,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.44.7` to `^0.44.8`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
           }
         ]
       }
@@ -1007,6 +1022,7 @@
       "tag": "@rushstack/heft-node-rig_v1.8.1",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.5`"
@@ -1028,6 +1044,7 @@
       "tag": "@rushstack/heft-node-rig_v1.8.0",
       "date": "Fri, 11 Feb 2022 10:30:25 GMT",
       "comments": {
+        
         "minor": [
           {
             "comment": "Set useUnknownInCatchVariables=false in tsconfig.json, to work around https://github.com/microsoft/TypeScript/issues/42596"
@@ -1045,6 +1062,7 @@
       "tag": "@rushstack/heft-node-rig_v1.7.1",
       "date": "Tue, 25 Jan 2022 01:11:07 GMT",
       "comments": {
+        
         "patch": [
           {
             "comment": "Upgrade ESLint to ~8.7.0"
@@ -1069,6 +1087,7 @@
       "tag": "@rushstack/heft-node-rig_v1.6.0",
       "date": "Thu, 20 Jan 2022 02:43:46 GMT",
       "comments": {
+        
         "minor": [
           {
             "comment": "Update the `rush-project.json` file to follow the new schema and configure the \"build\" command output folders for the \"_phase:build\" phase."
@@ -1102,6 +1121,7 @@
       "tag": "@rushstack/heft-node-rig_v1.5.1",
       "date": "Mon, 27 Dec 2021 16:10:40 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.3`"
@@ -1123,11 +1143,6 @@
       "tag": "@rushstack/heft-node-rig_v1.5.0",
       "date": "Tue, 14 Dec 2021 19:27:51 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Upgrade Jest to v27"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.2.0`"
@@ -1137,6 +1152,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.43.2` to `^0.44.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Upgrade Jest to v27"
           }
         ]
       }
@@ -1188,6 +1208,7 @@
       "tag": "@rushstack/heft-node-rig_v1.4.1",
       "date": "Wed, 08 Dec 2021 19:05:08 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.51`"
@@ -1232,11 +1253,6 @@
       "tag": "@rushstack/heft-node-rig_v1.3.0",
       "date": "Mon, 06 Dec 2021 16:08:32 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Bump ESLint to v8"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.21`"
@@ -1250,6 +1266,11 @@
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.42.4` to `^0.42.5`"
           }
+        ],
+        "minor": [
+          {
+            "comment": "Bump ESLint to v8"
+          }
         ]
       }
     },
@@ -1258,6 +1279,7 @@
       "tag": "@rushstack/heft-node-rig_v1.2.33",
       "date": "Fri, 03 Dec 2021 03:05:22 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.20`"
@@ -1279,6 +1301,7 @@
       "tag": "@rushstack/heft-node-rig_v1.2.32",
       "date": "Tue, 30 Nov 2021 20:18:41 GMT",
       "comments": {
+        
         "patch": [
           {
             "comment": "Set default Jest environment in Jest configuration to \"jest-environment-node\""
@@ -1351,6 +1374,7 @@
       "tag": "@rushstack/heft-node-rig_v1.2.28",
       "date": "Thu, 28 Oct 2021 00:08:22 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.44`"
@@ -1369,11 +1393,6 @@
       "tag": "@rushstack/heft-node-rig_v1.2.27",
       "date": "Wed, 27 Oct 2021 00:08:15 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Update the package.json repository field to include the directory property."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.17`"
@@ -1386,6 +1405,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.7` to `^0.41.8`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
           }
         ]
       }
@@ -1815,6 +1839,7 @@
       "tag": "@rushstack/heft-node-rig_v1.2.4",
       "date": "Fri, 20 Aug 2021 15:08:10 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.6`"
@@ -1836,6 +1861,7 @@
       "tag": "@rushstack/heft-node-rig_v1.2.3",
       "date": "Fri, 13 Aug 2021 00:09:14 GMT",
       "comments": {
+        
         "patch": [
           {
             "comment": "Remove default use of incremental: true in tsconfig-base.json"
@@ -1848,6 +1874,7 @@
       "tag": "@rushstack/heft-node-rig_v1.2.2",
       "date": "Thu, 12 Aug 2021 18:11:18 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.19`"
@@ -1866,11 +1893,7 @@
       "tag": "@rushstack/heft-node-rig_v1.2.1",
       "date": "Thu, 12 Aug 2021 01:28:38 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Restore automatic generation of tsBuildInfo.json file path to work around odd path resolution behavior."
-          }
-        ],
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.18`"
@@ -1881,6 +1904,11 @@
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.36.0` to `^0.36.1`"
           }
+        ],
+        "patch": [
+          {
+            "comment": "Restore automatic generation of tsBuildInfo.json file path to work around odd path resolution behavior."
+          }
         ]
       }
     },
@@ -1889,11 +1917,6 @@
       "tag": "@rushstack/heft-node-rig_v1.2.0",
       "date": "Wed, 11 Aug 2021 23:14:17 GMT",
       "comments": {
-        "minor": [
-          {
-            "comment": "Enable \"incremental: true\" by default in tsconfig-base.json"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.17`"
@@ -1903,6 +1926,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.35.1` to `^0.36.0`"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Enable \"incremental: true\" by default in tsconfig-base.json"
           }
         ]
       }
@@ -2176,6 +2204,7 @@
       "tag": "@rushstack/heft-node-rig_v1.1.1",
       "date": "Wed, 16 Jun 2021 15:07:24 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.33.0`"
@@ -2191,6 +2220,7 @@
       "tag": "@rushstack/heft-node-rig_v1.1.0",
       "date": "Tue, 15 Jun 2021 20:38:35 GMT",
       "comments": {
+        
         "minor": [
           {
             "comment": "Disable the allowUnreachableCode TypeScript compiler option."
@@ -2203,6 +2233,7 @@
       "tag": "@rushstack/heft-node-rig_v1.0.31",
       "date": "Fri, 11 Jun 2021 23:26:16 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.2`"
@@ -2215,11 +2246,6 @@
       "tag": "@rushstack/heft-node-rig_v1.0.30",
       "date": "Fri, 11 Jun 2021 00:34:02 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Add @rushstack/heft-jest-plugin to run during tests"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.1`"
@@ -2229,6 +2255,11 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.31.5` to `^0.32.0`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add @rushstack/heft-jest-plugin to run during tests"
           }
         ]
       }
@@ -2508,6 +2539,7 @@
       "tag": "@rushstack/heft-node-rig_v1.0.12",
       "date": "Tue, 20 Apr 2021 04:59:51 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.14.0`"
@@ -2526,17 +2558,17 @@
       "tag": "@rushstack/heft-node-rig_v1.0.11",
       "date": "Thu, 15 Apr 2021 02:59:25 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Explicitly set the noEmitOnError TypeScript compiler option to false in the base tsconfig."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.28.3`"
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.28.2` to `^0.28.3`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Explicitly set the noEmitOnError TypeScript compiler option to false in the base tsconfig."
           }
         ]
       }
@@ -2690,6 +2722,7 @@
       "tag": "@rushstack/heft-node-rig_v1.0.1",
       "date": "Fri, 12 Mar 2021 01:13:27 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.25.1`"
@@ -2705,6 +2738,7 @@
       "tag": "@rushstack/heft-node-rig_v1.0.0",
       "date": "Wed, 10 Mar 2021 06:23:29 GMT",
       "comments": {
+        
         "major": [
           {
             "comment": "Update to TypeScript 4"
@@ -2813,6 +2847,7 @@
       "tag": "@rushstack/heft-node-rig_v0.2.1",
       "date": "Wed, 13 Jan 2021 01:11:06 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.13.0`"
@@ -2831,6 +2866,7 @@
       "tag": "@rushstack/heft-node-rig_v0.2.0",
       "date": "Fri, 08 Jan 2021 07:28:50 GMT",
       "comments": {
+        
         "minor": [
           {
             "comment": "Add a Rush build cache configuration."
@@ -2873,6 +2909,7 @@
       "tag": "@rushstack/heft-node-rig_v0.1.32",
       "date": "Thu, 10 Dec 2020 23:25:50 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.12.1`"
@@ -2891,17 +2928,17 @@
       "tag": "@rushstack/heft-node-rig_v0.1.31",
       "date": "Sat, 05 Dec 2020 01:11:23 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Ensure rootDir is consistently specified."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.22.6`"
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.22.5` to `^0.22.6`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Ensure rootDir is consistently specified."
           }
         ]
       }
@@ -3268,6 +3305,7 @@
       "tag": "@rushstack/heft-node-rig_v0.1.8",
       "date": "Wed, 21 Oct 2020 05:09:44 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.17.1`"
@@ -3295,14 +3333,14 @@
       "tag": "@rushstack/heft-node-rig_v0.1.6",
       "date": "Thu, 15 Oct 2020 00:59:08 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Update Heft dependency"
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.15.5` to `^0.16.1`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update Heft dependency"
           }
         ]
       }
@@ -3342,6 +3380,7 @@
       "tag": "@rushstack/heft-node-rig_v0.1.3",
       "date": "Mon, 05 Oct 2020 15:10:43 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.10.2`"
@@ -3357,14 +3396,14 @@
       "tag": "@rushstack/heft-node-rig_v0.1.2",
       "date": "Thu, 01 Oct 2020 20:27:16 GMT",
       "comments": {
-        "patch": [
-          {
-            "comment": "Update @rushstack/heft peerDependency."
-          }
-        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.15.0` to `^0.15.1`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update @rushstack/heft peerDependency."
           }
         ]
       }
@@ -3374,6 +3413,7 @@
       "tag": "@rushstack/heft-node-rig_v0.1.1",
       "date": "Wed, 30 Sep 2020 18:39:17 GMT",
       "comments": {
+        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.10.1`"
