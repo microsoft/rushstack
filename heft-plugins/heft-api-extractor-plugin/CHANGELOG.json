@@ -2,13 +2,25 @@
   "name": "@rushstack/heft-api-extractor-plugin",
   "entries": [
     {
+      "version": "0.1.0-dev.1",
+      "tag": "@rushstack/heft-api-extractor-plugin_v0.1.0-dev.1",
+      "date": "Fri, 13 Sep 2022 18:22:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix loading of lifecycle plugins."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0-dev.0",
       "tag": "@rushstack/heft-api-extractor-plugin_v0.1.0-dev.0",
       "date": "Wed, 21 Sep 2022 20:46:06 GMT",
       "comments": {
         "minor": [
           {
-            "comment": "Initial relelease of resdesign."
+            "comment": "Initial release of redesign."
           }
         ],
         "dependency": [
