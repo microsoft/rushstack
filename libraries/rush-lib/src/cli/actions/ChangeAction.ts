@@ -52,6 +52,7 @@ export class ChangeAction extends BaseRushAction {
   private _bulkChangeBumpTypeParameter!: CommandLineChoiceParameter;
   private _overwriteFlagParameter!: CommandLineFlagParameter;
   private _commitChangesFlagParameter!: CommandLineFlagParameter;
+  private _commitChangesMessageStringParameter!: CommandLineStringParameter;
 
   private _targetBranchName: string | undefined;
 
@@ -136,6 +137,12 @@ export class ChangeAction extends BaseRushAction {
       parameterLongName: '--commit',
       parameterShortName: '-c',
       description: `If this flag is specified generated changefiles will be commited automatically.`
+    });
+
+    this._commitChangesMessageStringParameter = this.defineStringParameter({
+      parameterLongName: '--commit-message',
+      argumentName: 'COMMIT_MESSAGE',
+      description: `If this parameter is specified generated changefiles will be commited automatically with the specified commit message.`
     });
 
     this._changeEmailParameter = this.defineStringParameter({
@@ -306,11 +313,13 @@ export class ChangeAction extends BaseRushAction {
     } catch (error) {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
-    if (this._commitChangesFlagParameter.value) {
+    if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
       if (changefiles && changefiles.length !== 0) {
         this._stageAndCommitGitChanges(
           changefiles,
-          this.rushConfiguration.gitChangefilesCommitMessage || 'Rush change'
+          this._commitChangesMessageStringParameter.value ||
+            this.rushConfiguration.gitChangefilesCommitMessage ||
+            'Rush change'
         );
       } else {
         this._terminal.writeWarningLine('Warning: No change files generated, nothing to commit.');

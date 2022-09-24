@@ -251,8 +251,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: change 1`] = `
 "usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--overwrite] [-c]
-                   [--email EMAIL] [--bulk] [--message MESSAGE]
-                   [--bump-type {major,minor,patch,none}]
+                   [--commit-message COMMIT_MESSAGE] [--email EMAIL] [--bulk]
+                   [--message MESSAGE] [--bump-type {major,minor,patch,none}]
                    
 
 Asks a series of questions and then generates a <branchname>-<timestamp>.json 
@@ -290,6 +290,10 @@ Optional arguments:
                         prompting (or erroring in --bulk mode).
   -c, --commit          If this flag is specified generated changefiles will 
                         be commited automatically.
+  --commit-message COMMIT_MESSAGE
+                        If this parameter is specified generated changefiles 
+                        will be commited automatically with the specified 
+                        commit message.
   --email EMAIL         The email address to use in changefiles. If this 
                         parameter is not provided, the email address will be 
                         detected or prompted for in interactive mode.
