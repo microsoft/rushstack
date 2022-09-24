@@ -63,7 +63,7 @@ export class HeftPhaseSession extends HeftPluginHost {
   /**
    * Apply all task plugins specified by the phase.
    */
-  public async applyPluginsInternalAsync(): Promise<void> {
+  protected async applyPluginsInternalAsync(): Promise<void> {
     const {
       heftConfiguration,
       phase: { tasks }
