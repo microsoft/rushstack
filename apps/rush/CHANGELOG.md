@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 23 Sep 2022 02:54:44 GMT and should not be manually modified.
+This log was last generated on Sat, 24 Sep 2022 17:37:03 GMT and should not be manually modified.
+
+## 5.79.0
+Sat, 24 Sep 2022 17:37:03 GMT
+
+### Minor changes
+
+- Add a `common/config/pnpm-config.json`, which is used to specify fields like `overrides`, `packageExtensions`, and `neverBuiltDependencies` that would otherwise be placed in a PNPM workspace repo's root-level `package.json`'s `pnpm` field.
+
+### Updates
+
+- Add a `--commit` and `--commit-message` flag to `rush change` that commits the change files automatically.
 
 ## 5.78.1
 Fri, 23 Sep 2022 02:54:44 GMT
