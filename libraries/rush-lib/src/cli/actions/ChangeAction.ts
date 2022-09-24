@@ -652,7 +652,9 @@ export class ChangeAction extends BaseRushAction {
         overwrite,
         interactiveMode
       );
-      if (writtenFile) writtenFiles.push(writtenFile);
+      if (writtenFile) {
+        writtenFiles.push(writtenFile);
+      }
     });
     return writtenFiles;
   }
