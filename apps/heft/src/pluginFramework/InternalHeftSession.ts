@@ -63,8 +63,11 @@ export class InternalHeftSession {
       );
 
     const internalHeftSession: InternalHeftSession = new InternalHeftSession(heftConfigurationJson, options);
-    await internalHeftSession.lifecycle.ensureInitializedAsync();
 
+    // Initialize the lifecycle and the tasks. This will ensure that we throw an error if a plugin is improperly
+    // specified, or if the options provided to a plugin are invalid. We will avoid loading the actual plugins
+    // until they are needed.
+    await internalHeftSession.lifecycle.ensureInitializedAsync();
     const tasks: Iterable<HeftTask> = getAllTasks(internalHeftSession.phases);
     await Async.forEachAsync(
       tasks,

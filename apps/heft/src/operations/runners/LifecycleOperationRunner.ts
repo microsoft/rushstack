@@ -14,7 +14,8 @@ import type { IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type {
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
-  IHeftLifecycleToolFinishHookOptions
+  IHeftLifecycleToolFinishHookOptions,
+  IHeftLifecycleSession
 } from '../../pluginFramework/HeftLifecycleSession';
 
 export type LifecycleOperationRunnerType = 'start' | 'finish';
@@ -69,7 +70,8 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
           // Delete all temp folders for tasks by default
           for (const pluginDefinition of lifecycle.pluginDefinitions) {
-            const { lifecycleSession } = await lifecycle.getContextForPluginDefinitionAsync(pluginDefinition);
+            const lifecycleSession: IHeftLifecycleSession =
+              await lifecycle.getSessionForPluginDefinitionAsync(pluginDefinition);
             deleteOperations.push({ sourcePath: lifecycleSession.tempFolderPath });
 
             // Also delete the cache folder if requested
