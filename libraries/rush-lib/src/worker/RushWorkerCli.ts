@@ -6,23 +6,23 @@ import { OperationStatus } from '../logic/operations/OperationStatus';
 import {
   ITransferableOperation,
   ITransferableOperationStatus,
-  IPhasedCommandWorkerController
+  PhasedCommandWorkerState
 } from './RushWorker.types';
-import { createPhasedCommandWorker } from './RushWorkerHost';
+import { PhasedCommandWorkerController } from './RushWorkerHost';
 
 /**
  * Demo for orchestrating the worker from a CLI process.
  */
 async function runAsCli(): Promise<void> {
-  const workerInterface: IPhasedCommandWorkerController = await createPhasedCommandWorker(
+  const workerInterface: PhasedCommandWorkerController = new PhasedCommandWorkerController(
     process.argv.slice(3),
     {
       cwd: process.argv[2],
       onStatusUpdate: (status: ITransferableOperationStatus) => {
         console.log(`[HOST]: Status change: ${status.operation.name!} => ${status.status} (${status.hash})`);
       },
-      onReady: () => {
-        console.log(`Worker is ready for more work.`);
+      onStateChanged: (state: PhasedCommandWorkerState) => {
+        console.log(`Worker state: ${state}`);
       }
     }
   );

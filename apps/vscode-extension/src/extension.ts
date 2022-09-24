@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : undefined;
 
-  let worker: Rush.IPhasedCommandWorkerController | undefined;
+  let worker: Rush.PhasedCommandWorkerController | undefined;
 
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
   statusBarItem.command = {
@@ -200,7 +200,7 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.text = `$(sync~spin) Rush: initializing watcher`;
     statusBarItem.show();
 
-    worker = rush.createPhasedCommandWorker(['--debug', command.label], {
+    worker = new rush.PhasedCommandWorkerController(['--debug', command.label], {
       cwd: workspaceRoot,
       onStatusUpdate: (operationStatus: Rush.ITransferableOperationStatus) => {
         projectDataProvider.updateProjectPhases([operationStatus]);

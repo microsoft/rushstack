@@ -203,6 +203,9 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
 
       parentPort?.off('message', messageHandler);
       parentPort?.close();
+
+      // Terminate
+      process.exit(0);
     }
 
     function onOperationStatusChanged(record: OperationExecutionRecord): void {

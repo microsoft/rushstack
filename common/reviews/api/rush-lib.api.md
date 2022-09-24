@@ -109,9 +109,6 @@ export class CommonVersionsConfiguration {
     save(): boolean;
 }
 
-// @alpha
-export function createPhasedCommandWorker(args: string[], options?: IPhasedCommandWorkerOptions): IPhasedCommandWorkerController;
-
 // @beta (undocumented)
 export class CredentialCache {
     // (undocumented)
@@ -437,24 +434,12 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
 }
 
-// @alpha
-export interface IPhasedCommandWorkerController {
-    abortAsync(): Promise<void>;
-    getGraphAsync(): Promise<ITransferableOperation[]>;
-    onReady: () => void;
-    onStatusUpdate: (operationStatus: ITransferableOperationStatus) => void;
-    readyAsync(): Promise<void>;
-    shutdownAsync(force?: boolean): Promise<void>;
-    // (undocumented)
-    state: 'ready' | 'aborting' | 'executing' | 'shutting down' | 'terminated' | 'initializing';
-    updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]>;
-}
-
 // @alpha (undocumented)
 export interface IPhasedCommandWorkerOptions {
     cwd?: string;
-    onReady?: () => void;
-    onStatusUpdate?: IPhasedCommandWorkerController['onStatusUpdate'];
+    // Warning: (ae-forgotten-export) The symbol "PhasedCommandWorkerState" needs to be exported by the entry point index.d.ts
+    onStateChanged?: (state: PhasedCommandWorkerState) => void;
+    onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void;
 }
 
 // @internal
@@ -705,6 +690,20 @@ export class PhasedCommandHooks {
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly waitingForChanges: SyncHook<void>;
+}
+
+// @alpha
+export class PhasedCommandWorkerController {
+    constructor(args: string[], options?: IPhasedCommandWorkerOptions);
+    abortAsync(): Promise<void>;
+    getGraphAsync(): Promise<ITransferableOperation[]>;
+    onStateChanged: (state: PhasedCommandWorkerState) => void;
+    onStatusUpdate: (operationStatus: ITransferableOperationStatus) => void;
+    readyAsync(): Promise<void>;
+    shutdownAsync(force?: boolean): Promise<void>;
+    // (undocumented)
+    get state(): PhasedCommandWorkerState;
+    updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]>;
 }
 
 // @public
