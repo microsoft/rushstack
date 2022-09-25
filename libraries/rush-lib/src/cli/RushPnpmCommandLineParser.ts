@@ -11,17 +11,30 @@ import {
   ConsoleTerminalProvider,
   EnvironmentMap,
   Executable,
+  FileConstants,
   FileSystem,
+  Import,
   ITerminal,
   ITerminalProvider,
+  JsonFile,
+  JsonObject,
   Terminal
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 import { RushConstants } from '../logic/RushConstants';
-import { Utilities } from '../utilities/Utilities';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { PurgeManager } from '../logic/PurgeManager';
 
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import type { SpawnSyncReturns } from 'child_process';
+import type { BaseInstallManager, IInstallManagerOptions } from '../logic/base/BaseInstallManager';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+const semver: typeof import('semver') = Import.lazy('semver', require);
+const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = Import.lazy(
+  '../logic/InstallManagerFactory',
+  require
+);
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -39,14 +52,18 @@ export class RushPnpmCommandLineParser {
   private _rushConfiguration!: RushConfiguration;
   private _pnpmArgs!: string[];
   private _commandName: string | undefined;
+  private _debugEnabled: boolean;
+  private _verboseEnabled: boolean;
 
   public constructor(options: IRushPnpmCommandLineParserOptions) {
     const { terminalProvider } = options;
+    this._debugEnabled = process.argv.indexOf('--debug') >= 0;
+    this._verboseEnabled = process.argv.indexOf('--verbose') >= 0;
     const localTerminalProvider: ITerminalProvider =
       terminalProvider ??
       new ConsoleTerminalProvider({
-        debugEnabled: process.argv.indexOf('--debug') >= 0,
-        verboseEnabled: process.argv.indexOf('--verbose') >= 0
+        debugEnabled: this._debugEnabled,
+        verboseEnabled: this._verboseEnabled
       });
     this._terminal = new Terminal(localTerminalProvider);
 
@@ -78,8 +95,9 @@ export class RushPnpmCommandLineParser {
       }
 
       if (!rushConfiguration.pnpmOptions.useWorkspaces) {
+        const pnpmConfigFilename: string = rushConfiguration.pnpmOptions.jsonFilename || 'rush.json';
         throw new Error(
-          'The "rush-pnpm" command requires the "useWorkspaces" setting to be enabled in rush.json'
+          `The "rush-pnpm" command requires the "useWorkspaces" setting to be enabled in ${pnpmConfigFilename}`
         );
       }
 
@@ -107,14 +125,11 @@ export class RushPnpmCommandLineParser {
 
       this._pnpmArgs = pnpmArgs;
     } catch (error) {
-      if (!(error instanceof AlreadyReportedError)) {
-        const prefix: string = 'ERROR: ';
-        this._terminal.writeErrorLine('\n' + PrintUtilities.wrapWords(prefix + error.message));
-      }
+      this._reportErrorAndSetExitCode(error as Error);
     }
   }
 
-  public execute(): void {
+  public async executeAsync(): Promise<void> {
     // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
     // and set it to 0 only on success.
@@ -122,7 +137,7 @@ export class RushPnpmCommandLineParser {
     this._execute();
 
     if (process.exitCode === 0) {
-      this._postExecute();
+      await this._postExecuteAsync();
     }
   }
 
@@ -234,6 +249,41 @@ export class RushPnpmCommandLineParser {
           break;
         }
 
+        // Know safe after validation
+        case 'patch': {
+          /**
+           * If you were to accidentally attempt to use rush-pnpm patch with a pnpmVersion < 7.4.0, pnpm patch may fallback to the system patch command.
+           * For instance, /usr/bin/patch which may just hangs forever
+           * So, erroring out the command if the pnpm version is < 7.4.0
+           */
+          if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '7.4.0')) {
+            this._terminal.writeErrorLine(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm patch" command is added after pnpm@7.4.0.` +
+                  ` Please update "pnpmVersion" >= 7.4.0 in rush.json file and run "rush update" to use this command.`
+              ) + '\n'
+            );
+            throw new AlreadyReportedError();
+          }
+          break;
+        }
+        case 'patch-commit': {
+          const pnpmOptionsJsonFilename: string = path.join(
+            this._rushConfiguration.commonRushConfigFolder,
+            RushConstants.pnpmConfigFilename
+          );
+          if (this._rushConfiguration.rushConfigurationJson.pnpmOptions) {
+            this._terminal.writeErrorLine(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm patch-commit" command is incompatible with specifying "pnpmOptions" in rush.json file.` +
+                  ` Please move the content of "pnpmOptions" in rush.json file to ${pnpmOptionsJsonFilename}`
+              ) + '\n'
+            );
+            throw new AlreadyReportedError();
+          }
+          break;
+        }
+
         // Known safe
         case 'audit':
         case 'exec':
@@ -242,8 +292,6 @@ export class RushPnpmCommandLineParser {
         case 'ls':
         case 'outdated':
         case 'pack':
-        case 'patch':
-        case 'patch-commit':
         case 'prune':
         case 'publish':
         case 'rebuild':
@@ -268,7 +316,6 @@ export class RushPnpmCommandLineParser {
             ) + '\n'
           );
           this._terminal.writeLine(Colors.cyan(BYPASS_NOTICE));
-          throw new AlreadyReportedError();
         }
       }
       /* eslint-enable no-fallthrough */
@@ -316,7 +363,7 @@ export class RushPnpmCommandLineParser {
     process.exitCode = result.status;
   }
 
-  private _postExecute(): void {
+  private async _postExecuteAsync(): Promise<void> {
     const commandName: string | undefined = this._commandName;
     if (!commandName) {
       return;
@@ -324,36 +371,102 @@ export class RushPnpmCommandLineParser {
 
     switch (commandName) {
       case 'patch-commit': {
-        const commonTempPnpmPatchesFolder: string = path.join(
-          this._rushConfiguration.commonTempFolder,
-          RushConstants.pnpmPatchesFolderName
-        );
-        const rushPnpmPatchesFolder: string = path.join(
-          this._rushConfiguration.commonFolder,
-          'pnpm',
-          RushConstants.pnpmPatchesFolderName
-        );
-        if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
-          // Copy common\temp\patches\ to common\pnpm\patches\
-          FileSystem.copyFiles({
-            sourcePath: commonTempPnpmPatchesFolder,
-            destinationPath: rushPnpmPatchesFolder
-          });
+        // Example: "C:\MyRepo\common\temp\package.json"
+        const commonPackageJsonFilename: string = `${this._rushConfiguration.commonTempFolder}/${FileConstants.PackageJson}`;
+        const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
+        const newGlobalPatchedDependencies: Record<string, string> | undefined =
+          commonPackageJson?.pnpm?.patchedDependencies;
+        const currentGlobalPatchedDependencies: Record<string, string> | undefined =
+          this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
 
-          // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-          Utilities.syncFile(
-            this._rushConfiguration.tempShrinkwrapFilename,
-            this._rushConfiguration.getCommittedShrinkwrapFilename()
-          );
+        if (!lodash.isEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
+          const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+          const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm/${RushConstants.pnpmPatchesFolderName}`;
+          // Copy (or delete) common\temp\patches\ --> common\pnpm\patches\
+          if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
+            FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
+            console.log(`Copying ${commonTempPnpmPatchesFolder}`);
+            console.log(`  --> ${rushPnpmPatchesFolder}`);
+            FileSystem.copyFiles({
+              sourcePath: commonTempPnpmPatchesFolder,
+              destinationPath: rushPnpmPatchesFolder
+            });
+          } else {
+            if (FileSystem.exists(rushPnpmPatchesFolder)) {
+              console.log(`Deleting ${rushPnpmPatchesFolder}`);
+              FileSystem.deleteFolder(rushPnpmPatchesFolder);
+            }
+          }
+
+          // Update patchedDependencies to pnpm configuration file
+          this._rushConfiguration.pnpmOptions.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
+
+          // Rerun installation to update
+          await this._doRushUpdateAsync();
 
           this._terminal.writeWarningLine(
-            'Rush refreshed the pnpm patch files in the "common/pnpm/patches" folder and shrinkwrap file.' +
+            `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the "common/pnpm/patches" folder.` +
               os.EOL +
               '  Please commit this change to Git.'
           );
         }
         break;
       }
+    }
+  }
+
+  private async _doRushUpdateAsync(): Promise<void> {
+    this._terminal.writeLine();
+    this._terminal.writeLine(Colors.green('Running "rush update"'));
+    this._terminal.writeLine();
+
+    const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
+    const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, rushGlobalFolder);
+    const installManagerOptions: IInstallManagerOptions = {
+      debug: this._debugEnabled,
+      allowShrinkwrapUpdates: true,
+      bypassPolicy: false,
+      noLink: false,
+      fullUpgrade: false,
+      recheckShrinkwrap: true,
+      networkConcurrency: undefined,
+      collectLogFile: false,
+      variant: undefined,
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      pnpmFilterArguments: [],
+      checkOnly: false
+    };
+
+    const installManager: BaseInstallManager =
+      installManagerFactoryModule.InstallManagerFactory.getInstallManager(
+        this._rushConfiguration,
+        rushGlobalFolder,
+        purgeManager,
+        installManagerOptions
+      );
+    try {
+      await installManager.doInstallAsync();
+    } finally {
+      purgeManager.deleteAll();
+    }
+  }
+
+  private _reportErrorAndSetExitCode(error: Error): void {
+    if (!(error instanceof AlreadyReportedError)) {
+      const prefix: string = 'ERROR: ';
+      this._terminal.writeErrorLine('\n' + PrintUtilities.wrapWords(prefix + error.message));
+    }
+
+    if (this._debugEnabled) {
+      // If catchSyncErrors() called this, then show a call stack similar to what Node.js
+      // would show for an uncaught error
+      this._terminal.writeErrorLine('\n' + error.stack);
+    }
+
+    if (process.exitCode !== undefined) {
+      process.exit(process.exitCode);
+    } else {
+      process.exit(1);
     }
   }
 }

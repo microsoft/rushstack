@@ -9,6 +9,8 @@ export interface ILaunchRushPnpmInternalOptions extends ILaunchOptions {}
 export class RushPnpmCommandLine {
   public static launch(launcherVersion: string, options: ILaunchRushPnpmInternalOptions): void {
     const rushPnpmCommandLineParser: RushPnpmCommandLineParser = new RushPnpmCommandLineParser(options);
-    rushPnpmCommandLineParser.execute();
+
+    // RushPnpmCommandLineParser.executeAsync should never reject the promise
+    rushPnpmCommandLineParser.executeAsync().catch(console.error);
   }
 }

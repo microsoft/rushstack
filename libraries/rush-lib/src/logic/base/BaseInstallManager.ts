@@ -437,15 +437,8 @@ export abstract class BaseInstallManager {
 
     // Copy the committed patches folder if using pnpm
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      const commonTempPnpmPatchesFolder: string = path.join(
-        this._rushConfiguration.commonTempFolder,
-        RushConstants.pnpmPatchesFolderName
-      );
-      const rushPnpmPatchesFolder: string = path.join(
-        this._rushConfiguration.commonFolder,
-        'pnpm',
-        RushConstants.pnpmPatchesFolderName
-      );
+      const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+      const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm/${RushConstants.pnpmPatchesFolderName}`;
       if (FileSystem.exists(rushPnpmPatchesFolder)) {
         FileSystem.copyFiles({
           sourcePath: rushPnpmPatchesFolder,
