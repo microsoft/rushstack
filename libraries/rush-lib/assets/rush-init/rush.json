@@ -175,7 +175,7 @@
      * of a recommended email.  Make sure it conforms to one of the allowedEmailRegExps
      * expressions.
      */
-    /*[LINE "DEMO"]*/ "sampleEmail": "mrexample@users.noreply.github.com",
+    /*[LINE "DEMO"]*/ "sampleEmail": "example@users.noreply.github.com",
 
     /**
      * The commit message to use when committing changes during 'rush publish'.

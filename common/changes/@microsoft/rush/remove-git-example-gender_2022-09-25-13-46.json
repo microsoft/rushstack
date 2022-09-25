@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove gender from the git config example in rush.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
