@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "restore the duration of the same operation without cache hit as telemetry data",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
