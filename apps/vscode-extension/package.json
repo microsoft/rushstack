@@ -22,6 +22,12 @@
         "icon": "$(folder)"
       },
       {
+        "command": "rush.activateProjectForResource",
+        "title": "Activate project in Rush",
+        "category": "Rush",
+        "icon": "$(add)"
+      },
+      {
         "command": "rush.activateProject",
         "title": "Activate",
         "category": "Rush",
@@ -37,13 +43,13 @@
         "command": "rush.enableWatch",
         "title": "Enable watch mode",
         "category": "Rush",
-        "icon": "$(eye-closed)"
+        "icon": "$(eye)"
       },
       {
         "command": "rush.disableWatch",
         "title": "Disable watch mode",
         "category": "Rush",
-        "icon": "$(eye)"
+        "icon": "$(eye-closed)"
       },
       {
         "command": "rush.runAction",
@@ -75,6 +81,12 @@
       }
     },
     "menus": {
+      "editor/title": [
+        {
+          "command": "rush.activateProjectForResource",
+          "when": "rush.enabled"
+        }
+      ],
       "view/item/context": [
         {
           "command": "rush.revealProjectInExplorer",

@@ -4,6 +4,12 @@ import * as path from 'path';
 
 export type StateGroupName = 'Active' | 'Included' | 'Available';
 
+export interface IProjectDataProviderParams {
+  workspaceRoot: string | undefined;
+  extensionContext: vscode.ExtensionContext;
+  loadRush: () => Promise<typeof Rush>;
+}
+
 export class ProjectDataProvider
   implements vscode.TreeDataProvider<StateGroup | Project | OperationPhase | Message>
 {
@@ -20,10 +26,14 @@ export class ProjectDataProvider
   private _loadRush: () => Promise<typeof Rush>;
 
   private _projectsByName: Map<string, Project>;
+  private _extensionContext: vscode.ExtensionContext;
 
-  constructor(workspaceRoot: string | undefined, loadRush: () => Promise<typeof Rush>) {
+  constructor(params: IProjectDataProviderParams) {
+    const { workspaceRoot, loadRush, extensionContext } = params;
+
     this._workspaceRoot = workspaceRoot;
     this._loadRush = loadRush;
+    this._extensionContext = extensionContext;
 
     this._onDidChangeTreeData = new vscode.EventEmitter<
       StateGroup | Project | OperationPhase | (StateGroup | Project | OperationPhase)[] | undefined
@@ -80,6 +90,8 @@ export class ProjectDataProvider
       return;
     }
 
+    vscode.commands.executeCommand('setContext', 'rush.enabled', true);
+
     for (const rushProject of rushConfiguration.projects) {
       const project = new Project(rushProject);
 
@@ -106,6 +118,23 @@ export class ProjectDataProvider
     console.log('Updating tree data', 3, Date.now());
     this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._availableGroup]);
     console.log('Updated tree data', 3, Date.now());
+
+    const activeProjectsState =
+      this._extensionContext.workspaceState.get<{ [key: string]: true }>('rush.activeProjects');
+
+    if (activeProjectsState) {
+      const activeProjects: Project[] = [];
+
+      for (const projectName of Object.keys(activeProjectsState)) {
+        const project = this._projectsByName.get(projectName);
+
+        if (project) {
+          activeProjects.push(project);
+        }
+      }
+
+      this.toggleActiveProjects(activeProjects, true);
+    }
   }
 
   public getActiveProjects(): Project[] {
@@ -159,6 +188,10 @@ export class ProjectDataProvider
     console.log('Updated project phases', operationStatuses.length, Date.now());
   }
 
+  public getProjectForResource(resource: vscode.Uri): Project | undefined {
+    return undefined;
+  }
+
   public toggleActiveProjects(toggleProjects: Project[], force?: boolean): void {
     console.log('Toggling active projects', toggleProjects.length, Date.now());
 
@@ -189,12 +222,19 @@ export class ProjectDataProvider
 
     const queue: Project[] = [];
 
+    const activeProjectsState: {
+      [key: string]: true;
+    } = {};
+
     for (const activeProject of this._activeGroup.projects) {
       activeProject.stateGroupName = 'Active';
       seenProjects.add(activeProject.rushProject.packageName);
       this._availableGroup.projects.delete(activeProject);
       queue.push(activeProject);
+      activeProjectsState[activeProject.rushProject.packageName] = true;
     }
+
+    this._extensionContext.workspaceState.update('rush.activeProjects', activeProjectsState);
 
     this._includedGroup.projects.clear();
 
@@ -460,7 +500,7 @@ function getStatusIndicators(status: Rush.OperationStatus): {
       color = 'testing.iconPassed';
       break;
     case 'NO OP':
-      description = 'Bypassed';
+      description = 'Not configured';
       icon = 'circle-outline';
       color = 'disabledForeground';
       break;
