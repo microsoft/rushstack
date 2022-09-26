@@ -151,7 +151,7 @@ export class OperationExecutionManager {
     this._completedOperations = 0;
 
     if (projectChangeAnalyzer) {
-      await this._updateHashesAsync(projectChangeAnalyzer);
+      await this._updateStateAsync(projectChangeAnalyzer);
     }
 
     const nonSilentOperations: string[] = [];
@@ -215,22 +215,19 @@ export class OperationExecutionManager {
     };
   }
 
-  private async _updateHashesAsync(state: ProjectChangeAnalyzer): Promise<void> {
+  private async _updateStateAsync(state: ProjectChangeAnalyzer): Promise<void> {
     this._terminal.writeLine(`Updating state hashes`);
-    const trackedFilesByProject: Map<RushConfigurationProject, Map<string, string> | undefined> = new Map();
+    const trackedFilesByProject: Map<RushConfigurationProject, ReadonlyMap<string, string> | undefined> =
+      new Map();
     for (const { associatedProject } of this._executionRecords.keys()) {
-      if (associatedProject) {
-        trackedFilesByProject.set(associatedProject, undefined);
+      if (associatedProject && !trackedFilesByProject.has(associatedProject)) {
+        const trackedFiles: ReadonlyMap<string, string> | undefined = state._tryGetProjectDependencies(
+          associatedProject,
+          this._terminal
+        );
+        trackedFilesByProject.set(associatedProject, trackedFiles);
       }
     }
-
-    await Async.forEachAsync(trackedFilesByProject.keys(), async (project) => {
-      const trackedFiles: Map<string, string> | undefined = await state._tryGetProjectDependenciesAsync(
-        project,
-        this._terminal
-      );
-      trackedFilesByProject.set(project, trackedFiles);
-    });
 
     function getOperationHash(record: OperationExecutionRecord): string {
       let { stateHash } = record;
@@ -239,7 +236,8 @@ export class OperationExecutionManager {
         const { associatedProject } = operation;
         stateHash = '';
         if (associatedProject) {
-          const trackedFiles: Map<string, string> | undefined = trackedFilesByProject.get(associatedProject);
+          const trackedFiles: ReadonlyMap<string, string> | undefined =
+            trackedFilesByProject.get(associatedProject);
           record.trackedFileHashes = trackedFiles;
           const localHash: string = trackedFiles ? state._hashProjectDependencies(trackedFiles) : '';
           if (localHash) {

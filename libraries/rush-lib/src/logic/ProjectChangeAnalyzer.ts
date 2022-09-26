@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
-import ignore, { Ignore } from 'ignore';
 
 import {
   getRepoChanges,
@@ -12,17 +11,24 @@ import {
   getGitHashForFiles,
   IFileDiffStatus
 } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem, ITerminal, Async } from '@rushstack/node-core-library';
+import { Path, InternalError, FileSystem, ITerminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
-import { LookupByPath } from './LookupByPath';
+import { IPrefixMatch, LookupByPath } from './LookupByPath';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
-import { UNINITIALIZED } from '../utilities/Utilities';
+
+/**
+ * @beta
+ */
+export type IProjectFileFilter = (projectRelativePath: string) => boolean;
+/**
+ * @beta
+ */
+export type IProjectFileFilterMap = Map<RushConfigurationProject, IProjectFileFilter>;
 
 /**
  * @beta
@@ -39,10 +45,9 @@ export interface IGetChangedProjectsOptions {
   includeExternalDependencies: boolean;
 
   /**
-   * If set to `true` apply the `incrementalBuildIgnoredGlobs` property in a project's `rush-project.json`
-   * and exclude matched files from change detection.
+   * If specified, the filter will be applied to project inputs during comparison
    */
-  enableFiltering: boolean;
+  filters?: IProjectFileFilterMap;
 }
 
 interface IGitState {
@@ -56,23 +61,33 @@ interface IRawRepoState {
   rootDir: string;
 }
 
+type IFilterCacheMap = Map<RushConfigurationProject, ReadonlyMap<string, string>>;
+
 /**
  * @beta
  */
 export class ProjectChangeAnalyzer {
-  /**
-   * UNINITIALIZED === we haven't looked
-   * undefined === data isn't available (i.e. - git isn't present)
-   */
-  private _data: IRawRepoState | UNINITIALIZED | undefined = UNINITIALIZED;
-  private readonly _filteredData: Map<RushConfigurationProject, Map<string, string>> = new Map();
-  private readonly _projectStateCache: Map<Map<string, string>, string> = new Map();
+  private _data: IRawRepoState | undefined;
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _cacheByFilter: WeakMap<IProjectFileFilter, IFilterCacheMap> = new WeakMap();
+  private readonly _hashCache: Map<ReadonlyMap<string, string>, string> = new Map();
   private readonly _git: Git;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
     this._git = new Git(this._rushConfiguration);
+    this._data = undefined;
+  }
+
+  /**
+   * @internal
+   */
+  public _ensureInitialized(terminal: ITerminal): IRawRepoState {
+    if (!this._data) {
+      this._data = this._getData(terminal);
+    }
+
+    return this._data;
   }
 
   /**
@@ -83,23 +98,12 @@ export class ProjectChangeAnalyzer {
    *
    * @internal
    */
-  public async _tryGetProjectDependenciesAsync(
+  public _tryGetProjectDependencies(
     project: RushConfigurationProject,
-    terminal: ITerminal
-  ): Promise<Map<string, string> | undefined> {
-    // Check the cache for any existing data
-    let filteredProjectData: Map<string, string> | undefined = this._filteredData.get(project);
-    if (filteredProjectData) {
-      return filteredProjectData;
-    }
-
-    const data: IRawRepoState | undefined = this._ensureInitialized(terminal);
-
-    if (!data) {
-      return undefined;
-    }
-
-    const { projectState, rootDir } = data;
+    terminal: ITerminal,
+    fileFilter?: IProjectFileFilter
+  ): ReadonlyMap<string, string> | undefined {
+    const { projectState, rootDir } = this._ensureInitialized(terminal);
 
     if (projectState === undefined) {
       return undefined;
@@ -110,26 +114,23 @@ export class ProjectChangeAnalyzer {
       throw new Error(`Project "${project.packageName}" does not exist in the current Rush configuration.`);
     }
 
-    filteredProjectData = await this._filterProjectDataAsync(
-      project,
-      unfilteredProjectData,
-      rootDir,
-      terminal
-    );
-
-    this._filteredData.set(project, filteredProjectData);
-    return filteredProjectData;
-  }
-
-  /**
-   * @internal
-   */
-  public _ensureInitialized(terminal: ITerminal): IRawRepoState | undefined {
-    if (this._data === UNINITIALIZED) {
-      this._data = this._getData(terminal);
+    if (!fileFilter) {
+      return unfilteredProjectData;
     }
 
-    return this._data;
+    let cacheForFilter: IFilterCacheMap | undefined = this._cacheByFilter.get(fileFilter);
+    if (!cacheForFilter) {
+      cacheForFilter = new Map();
+      this._cacheByFilter.set(fileFilter, cacheForFilter);
+    }
+
+    let cacheEntry: ReadonlyMap<string, string> | undefined = cacheForFilter.get(project);
+    if (!cacheEntry) {
+      cacheEntry = this._filterProjectData(project, unfilteredProjectData, rootDir, fileFilter);
+      cacheForFilter.set(project, cacheEntry);
+    }
+
+    return cacheEntry;
   }
 
   /**
@@ -144,22 +145,25 @@ export class ProjectChangeAnalyzer {
    *
    * @internal
    */
-  public async _tryGetProjectStateHashAsync(
+  public _tryGetProjectStateHash(
     project: RushConfigurationProject,
-    terminal: ITerminal
-  ): Promise<string | undefined> {
-    const packageDeps: Map<string, string> | undefined = await this._tryGetProjectDependenciesAsync(
+    terminal: ITerminal,
+    fileFilter?: IProjectFileFilter
+  ): string | undefined {
+    const packageDeps: ReadonlyMap<string, string> | undefined = this._tryGetProjectDependencies(
       project,
-      terminal
+      terminal,
+      fileFilter
     );
+
     return packageDeps ? this._hashProjectDependencies(packageDeps) : undefined;
   }
 
   /**
    * @internal
    */
-  public _hashProjectDependencies(packageDeps: Map<string, string>): string {
-    let projectState: string | undefined = this._projectStateCache.get(packageDeps);
+  public _hashProjectDependencies(packageDeps: ReadonlyMap<string, string>): string {
+    let projectState: string | undefined = this._hashCache.get(packageDeps);
     if (!projectState) {
       const sortedPackageDepsFiles: string[] = Array.from(packageDeps.keys()).sort();
       const hash: crypto.Hash = crypto.createHash('sha1');
@@ -171,19 +175,18 @@ export class ProjectChangeAnalyzer {
       }
 
       projectState = hash.digest('hex');
-      this._projectStateCache.set(packageDeps, projectState);
+      this._hashCache.set(packageDeps, projectState);
     }
     return projectState;
   }
 
-  public async _filterProjectDataAsync<T>(
+  public _filterProjectData<T>(
     project: RushConfigurationProject,
     unfilteredProjectData: Map<string, T>,
     rootDir: string,
-    terminal: ITerminal
-  ): Promise<Map<string, T>> {
-    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
-    if (!ignoreMatcher) {
+    fileFilter?: IProjectFileFilter
+  ): Map<string, T> {
+    if (!fileFilter) {
       return unfilteredProjectData;
     }
 
@@ -196,7 +199,7 @@ export class ProjectChangeAnalyzer {
     const filteredProjectData: Map<string, T> = new Map<string, T>();
     for (const [filePath, value] of unfilteredProjectData) {
       const relativePath: string = filePath.slice(projectKeyLength);
-      if (!ignoreMatcher.ignores(relativePath)) {
+      if (fileFilter(relativePath)) {
         // Add the file path to the filtered data if it is not ignored
         filteredProjectData.set(filePath, value);
       }
@@ -212,9 +215,18 @@ export class ProjectChangeAnalyzer {
   public async getChangedProjectsAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
+    return this.getChangedProjects(options);
+  }
+
+  /**
+   * Gets a list of projects that have changed in the current state of the repo
+   * when compared to the specified branch, optionally taking the shrinkwrap and settings in
+   * the rush-project.json file into consideration.
+   */
+  public getChangedProjects(options: IGetChangedProjectsOptions): Set<RushConfigurationProject> {
     const { _rushConfiguration: rushConfiguration } = this;
 
-    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch } = options;
+    const { targetBranchName, terminal, includeExternalDependencies, filters, shouldFetch } = options;
 
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
@@ -278,49 +290,20 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
     const lookup: LookupByPath<RushConfigurationProject> =
       rushConfiguration.getProjectLookupForRoot(repoRoot);
 
-    for (const [file, diffStatus] of repoChanges) {
-      const project: RushConfigurationProject | undefined = lookup.findChildPath(file);
-      if (project) {
-        if (changedProjects.has(project)) {
-          // Lockfile changes cannot be ignored via rush-project.json
-          continue;
-        }
-
-        if (enableFiltering) {
-          let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
-          if (!projectChanges) {
-            projectChanges = new Map();
-            changesByProject.set(project, projectChanges);
-          }
-          projectChanges.set(file, diffStatus);
-        } else {
-          changedProjects.add(project);
-        }
-      }
-    }
-
-    if (enableFiltering) {
-      // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
-      await Async.forEachAsync(
-        changesByProject,
-        async ([project, projectChanges]) => {
-          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
-            project,
-            projectChanges,
-            repoRoot,
-            terminal
-          );
-
-          if (filteredChanges.size > 0) {
+    for (const file of repoChanges.keys()) {
+      const match: IPrefixMatch<RushConfigurationProject> | undefined = lookup.findChildPathAndIndex(file);
+      if (match) {
+        const project: RushConfigurationProject = match.value;
+        if (!changedProjects.has(project)) {
+          const projectFilter: IProjectFileFilter | undefined = filters?.get(project);
+          if (!projectFilter || projectFilter(file.slice(match.index + 1))) {
             changedProjects.add(project);
           }
-        },
-        { concurrency: 10 }
-      );
+        }
+      }
     }
 
     return changedProjects;
@@ -419,20 +402,6 @@ export class ProjectChangeAnalyzer {
       projectState: projectHashDeps,
       rootDir
     };
-  }
-
-  private async _getIgnoreMatcherForProjectAsync(
-    project: RushConfigurationProject,
-    terminal: ITerminal
-  ): Promise<Ignore | undefined> {
-    const incrementalBuildIgnoredGlobs: ReadonlyArray<string> | undefined =
-      await RushProjectConfiguration.tryLoadIgnoreGlobsForProjectAsync(project, terminal);
-
-    if (incrementalBuildIgnoredGlobs && incrementalBuildIgnoredGlobs.length) {
-      const ignoreMatcher: Ignore = ignore();
-      ignoreMatcher.add(incrementalBuildIgnoredGlobs as string[]);
-      return ignoreMatcher;
-    }
   }
 
   private _getRepoDeps(terminal: ITerminal): IGitState | undefined {

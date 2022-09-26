@@ -71,7 +71,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public isCacheWriteAllowed: boolean = false;
 
-  public trackedFileHashes: Map<string, string> | undefined = undefined;
+  public trackedFileHashes: ReadonlyMap<string, string> | undefined = undefined;
 
   public stateHash: string | undefined = undefined;
 

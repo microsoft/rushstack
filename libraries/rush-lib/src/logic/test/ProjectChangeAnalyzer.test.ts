@@ -3,13 +3,12 @@
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
-import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import { IProjectFileFilter, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LookupByPath } from '../LookupByPath';
-import { UNINITIALIZED } from '../../utilities/Utilities';
 
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
@@ -57,7 +56,7 @@ describe(ProjectChangeAnalyzer.name, () => {
     return subject;
   }
 
-  describe(ProjectChangeAnalyzer.prototype._tryGetProjectDependenciesAsync.name, () => {
+  describe(ProjectChangeAnalyzer.prototype._tryGetProjectDependencies.name, () => {
     it('returns the files for the specified project', async () => {
       const projects: RushConfigurationProject[] = [
         {
@@ -78,23 +77,19 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
+      expect(subject._tryGetProjectDependencies(projects[0], terminal)).toEqual(
         new Map([['apps/apple/core.js', 'a101']])
       );
-      expect(await subject._tryGetProjectDependenciesAsync(projects[1], terminal)).toEqual(
+      expect(subject._tryGetProjectDependencies(projects[1], terminal)).toEqual(
         new Map([['apps/banana/peel.js', 'b201']])
       );
     });
 
-    it('ignores files specified by project configuration files, relative to project folder', async () => {
-      // rush-project.json configuration for 'apple'
-      jest
-        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
-        .mockResolvedValueOnce(['assets/*.png', '*.js.map']);
-      // rush-project.json configuration for 'banana' does not exist
-      jest
-        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
-        .mockResolvedValueOnce(undefined);
+    it('ignores files based on filter, relative to project folder', async () => {
+      const appleRegex: RegExp = /^assets\/[^\/]+\.png$|(?:^|\/)[^\/]+\.js\.map$/;
+      const appleFilter: IProjectFileFilter = (projectRelativePath: string) => {
+        return !appleRegex.test(projectRelativePath);
+      };
 
       const projects: RushConfigurationProject[] = [
         {
@@ -119,13 +114,13 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
+      expect(subject._tryGetProjectDependencies(projects[0], terminal, appleFilter)).toEqual(
         new Map([
           ['apps/apple/core.js', 'a101'],
           ['apps/apple/assets/one.jpg', 'a103']
         ])
       );
-      expect(await subject._tryGetProjectDependenciesAsync(projects[1], terminal)).toEqual(
+      expect(subject._tryGetProjectDependencies(projects[1], terminal)).toEqual(
         new Map([
           ['apps/banana/peel.js', 'b201'],
           ['apps/banana/peel.js.map', 'b202']
@@ -133,11 +128,11 @@ describe(ProjectChangeAnalyzer.name, () => {
       );
     });
 
-    it('interprets ignored globs as a dot-ignore file (not as individually handled globs)', async () => {
-      // rush-project.json configuration for 'apple'
-      jest
-        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
-        .mockResolvedValue(['*.png', 'assets/*.psd', '!assets/important/**']);
+    it('works with more complex filters', async () => {
+      const appleRegex: RegExp = /^assets\/[^\/]+\.psd$|(?:^|\/)[^\/]+\.png$/;
+      const appleFilter: IProjectFileFilter = (projectRelativePath: string) => {
+        return projectRelativePath.startsWith('assets/important/') || !appleRegex.test(projectRelativePath);
+      };
 
       const projects: RushConfigurationProject[] = [
         {
@@ -160,7 +155,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       // In a dot-ignore file, the later rule '!assets/important/**' should override the previous
       // rule of '*.png'. This unit test verifies that this behavior doesn't change later if
       // we modify the implementation.
-      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
+      expect(subject._tryGetProjectDependencies(projects[0], terminal, appleFilter)).toEqual(
         new Map([
           ['apps/apple/assets/important/four.png', 'a104'],
           ['apps/apple/assets/important/five.psd', 'a105'],
@@ -191,13 +186,13 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
+      expect(subject._tryGetProjectDependencies(projects[0], terminal)).toEqual(
         new Map([
           ['apps/apple/core.js', 'a101'],
           ['common/config/rush/pnpm-lock.yaml', 'ffff']
         ])
       );
-      expect(await subject._tryGetProjectDependenciesAsync(projects[1], terminal)).toEqual(
+      expect(subject._tryGetProjectDependencies(projects[1], terminal)).toEqual(
         new Map([
           ['apps/banana/peel.js', 'b201'],
           ['common/config/rush/pnpm-lock.yaml', 'ffff']
@@ -218,7 +213,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       try {
-        await subject._tryGetProjectDependenciesAsync(
+        subject._tryGetProjectDependencies(
           {
             packageName: 'carrot'
           } as RushConfigurationProject,
@@ -246,20 +241,19 @@ describe(ProjectChangeAnalyzer.name, () => {
       // ProjectChangeAnalyzer is inert until someone actually requests project data,
       // this test makes that expectation explicit.
 
-      expect(subject['_data']).toEqual(UNINITIALIZED);
-      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
-        new Map([['apps/apple/core.js', 'a101']])
+      expect(subject['_data']).toEqual(undefined);
+      const originalResult: ReadonlyMap<string, string> | undefined = subject._tryGetProjectDependencies(
+        projects[0],
+        terminal
       );
+      expect(originalResult).toEqual(new Map([['apps/apple/core.js', 'a101']]));
       expect(subject['_data']).toBeDefined();
-      expect(subject['_data']).not.toEqual(UNINITIALIZED);
-      expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
-        new Map([['apps/apple/core.js', 'a101']])
-      );
+      expect(subject._tryGetProjectDependencies(projects[0], terminal)).toBe(originalResult);
       expect(subject['_getRepoDeps']).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe(ProjectChangeAnalyzer.prototype._tryGetProjectStateHashAsync.name, () => {
+  describe(ProjectChangeAnalyzer.prototype._tryGetProjectStateHash.name, () => {
     it('returns a fixed hash snapshot for a set of project deps', async () => {
       const projects: RushConfigurationProject[] = [
         {
@@ -276,7 +270,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectStateHashAsync(projects[0], terminal)).toMatchInlineSnapshot(
+      expect(subject._tryGetProjectStateHash(projects[0], terminal)).toMatchInlineSnapshot(
         `"265536e325cdfac3fa806a51873d927a712fc6c9"`
       );
     });
@@ -311,8 +305,8 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subjectB: ProjectChangeAnalyzer = createTestSubject(projectsB, filesB);
 
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-      expect(await subjectA._tryGetProjectStateHashAsync(projectsA[0], terminal)).toEqual(
-        await subjectB._tryGetProjectStateHashAsync(projectsB[0], terminal)
+      expect(subjectA._tryGetProjectStateHash(projectsA[0], terminal)).toEqual(
+        subjectB._tryGetProjectStateHash(projectsB[0], terminal)
       );
     });
   });

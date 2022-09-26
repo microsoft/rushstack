@@ -93,7 +93,7 @@ export class ProjectWatcher {
       pathsToWatch.add(this._repoRoot);
     } else {
       for (const project of this._projectsToWatch) {
-        const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
+        const projectState: ReadonlyMap<string, string> = (await previousState._tryGetProjectDependencies(
           project,
           this._terminal
         ))!;
@@ -258,8 +258,8 @@ export class ProjectWatcher {
     const changedProjects: Set<RushConfigurationProject> = new Set();
     for (const project of this._projectsToWatch) {
       const [previous, current] = await Promise.all([
-        previousState._tryGetProjectDependenciesAsync(project, this._terminal),
-        state._tryGetProjectDependenciesAsync(project, this._terminal)
+        previousState._tryGetProjectDependencies(project, this._terminal),
+        state._tryGetProjectDependencies(project, this._terminal)
       ]);
 
       if (ProjectWatcher._haveProjectDepsChanged(previous, current)) {
@@ -287,8 +287,8 @@ export class ProjectWatcher {
    * @returns `true` if the maps are different, `false` otherwise
    */
   private static _haveProjectDepsChanged(
-    prev: Map<string, string> | undefined,
-    next: Map<string, string> | undefined
+    prev: ReadonlyMap<string, string> | undefined,
+    next: ReadonlyMap<string, string> | undefined
   ): boolean {
     if (!prev && !next) {
       return false;

@@ -15,6 +15,16 @@ interface IPathTreeNode<TItem> {
   children: Map<string, IPathTreeNode<TItem>> | undefined;
 }
 
+interface IPrefixEntry {
+  prefix: string;
+  index: number;
+}
+
+export interface IPrefixMatch<TItem> {
+  value: TItem;
+  index: number;
+}
+
 /**
  * This class is used to associate POSIX relative paths, such as those returned by `git` commands,
  * with entities that correspond with ancestor folders, such as Rush Projects.
@@ -72,21 +82,35 @@ export class LookupByPath<TItem> {
    * `LookupByPath.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
    */
   public static *iteratePathSegments(serializedPath: string, delimiter: string = '/'): Iterable<string> {
-    if (!serializedPath) {
+    for (const prefixMatch of this._iteratePrefixes(serializedPath, delimiter)) {
+      yield prefixMatch.prefix;
+    }
+  }
+
+  private static *_iteratePrefixes(input: string, delimiter: string = '/'): Iterable<IPrefixEntry> {
+    if (!input) {
       return;
     }
 
-    let nextIndex: number = serializedPath.indexOf(delimiter);
     let previousIndex: number = 0;
-    while (nextIndex >= 0) {
-      yield serializedPath.slice(previousIndex, nextIndex);
+    let nextIndex: number = input.indexOf(delimiter);
 
+    // Leading segments
+    while (nextIndex >= 0) {
+      yield {
+        prefix: input.slice(previousIndex, nextIndex),
+        index: nextIndex
+      };
       previousIndex = nextIndex + 1;
-      nextIndex = serializedPath.indexOf(delimiter, previousIndex);
+      nextIndex = input.indexOf(delimiter, previousIndex);
     }
 
-    if (previousIndex + 1 < serializedPath.length) {
-      yield serializedPath.slice(previousIndex);
+    // Last segment
+    if (previousIndex + 1 < input.length) {
+      yield {
+        prefix: input.slice(previousIndex, input.length),
+        index: input.length
+      };
     }
   }
 
@@ -147,6 +171,23 @@ export class LookupByPath<TItem> {
   }
 
   /**
+   * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
+   * has an associated item.
+   *
+   * @returns the found item, or `undefined` if no item was found
+   *
+   * @example
+   * ```ts
+   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * tree.findChildPathAndIndex('foo/baz'); // returns { item: 1, index: 4 }
+   * tree.findChildPathAndIndex('foo/bar/baz'); // returns { item: 2, index: 8 }
+   * ```
+   */
+  public findChildPathAndIndex(childPath: string): IPrefixMatch<TItem> | undefined {
+    return this._findChildPathFromPrefixes(LookupByPath._iteratePrefixes(childPath, this.delimiter));
+  }
+
+  /**
    * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
    * has an associated item.
    *
@@ -171,6 +212,43 @@ export class LookupByPath<TItem> {
         }
         node = child;
         best = node.value ?? best;
+        if (!node.children) {
+          break;
+        }
+      }
+    }
+
+    return best;
+  }
+
+  /**
+   * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
+   * has an associated item.
+   *
+   * @returns the found item, or `undefined` if no item was found
+   */
+  private _findChildPathFromPrefixes(prefixes: Iterable<IPrefixEntry>): IPrefixMatch<TItem> | undefined {
+    let node: IPathTreeNode<TItem> = this._root;
+    let best: IPrefixMatch<TItem> | undefined = node.value
+      ? {
+          value: node.value,
+          index: 0
+        }
+      : undefined;
+    // Trivial cases
+    if (node.children) {
+      for (const { prefix: hash, index } of prefixes) {
+        const child: IPathTreeNode<TItem> | undefined = node.children.get(hash);
+        if (!child) {
+          break;
+        }
+        node = child;
+        if (node.value !== undefined) {
+          best = {
+            value: node.value,
+            index
+          };
+        }
         if (!node.children) {
           break;
         }
