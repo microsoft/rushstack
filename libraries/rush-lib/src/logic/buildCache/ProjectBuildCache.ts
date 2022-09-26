@@ -44,6 +44,7 @@ export class ProjectBuildCache {
   private readonly _buildCacheEnabled: boolean;
   private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
+  private _additionalOutputFilePaths: string[];
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
@@ -54,6 +55,7 @@ export class ProjectBuildCache {
     this._buildCacheEnabled = buildCacheConfiguration.buildCacheEnabled;
     this._cacheWriteEnabled = buildCacheConfiguration.cacheWriteEnabled;
     this._projectOutputFolderNames = projectOutputFolderNames || [];
+    this._additionalOutputFilePaths = [];
     this._cacheId = cacheId;
   }
 
@@ -122,6 +124,14 @@ export class ProjectBuildCache {
     } else {
       return true;
     }
+  }
+
+  public get additionalOutputFilePaths(): string[] {
+    return this._additionalOutputFilePaths;
+  }
+
+  public addAdditionalOutputFilePaths(outputFilePath: string): void {
+    this._additionalOutputFilePaths.push(outputFilePath);
   }
 
   public async tryRestoreFromCacheAsync(terminal: ITerminal): Promise<boolean> {
@@ -357,6 +367,14 @@ export class ProjectBuildCache {
     if (hasSymbolicLinks) {
       // Symbolic links do not round-trip safely.
       return undefined;
+    }
+
+    // Add additional output file paths
+    for (const addAdditionalOutputFilePath of this._additionalOutputFilePaths) {
+      const fullPath: string = `${projectFolderPath}/${addAdditionalOutputFilePath}`;
+      if (FileSystem.exists(fullPath)) {
+        outputFilePaths.push(addAdditionalOutputFilePath);
+      }
     }
 
     // Ensure stable output path order.

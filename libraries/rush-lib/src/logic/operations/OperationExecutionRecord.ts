@@ -9,6 +9,7 @@ import { OperationStatus } from './OperationStatus';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
+import { OperationStateFile } from './OperationStateFile';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -80,10 +81,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public readonly runner: IOperationRunner;
   public readonly weight: number;
+  public readonly operationStateFile: OperationStateFile | undefined;
 
   private readonly _context: IOperationExecutionRecordContext;
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
+
+  private _durationInSecondsWithoutCache: number | undefined = undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner } = operation;
@@ -96,6 +100,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
     this.runner = runner;
     this.weight = operation.weight;
+    if (operation.associatedPhase && operation.associatedProject) {
+      this.operationStateFile = new OperationStateFile({
+        phase: operation.associatedPhase,
+        rushProject: operation.associatedProject
+      });
+    }
     this._context = context;
   }
 
@@ -117,6 +127,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       this._collatedWriter = this._context.streamCollator.registerTask(this.name);
     }
     return this._collatedWriter;
+  }
+
+  public get durationInSecondsWithoutCache(): number | undefined {
+    return this._durationInSecondsWithoutCache;
+  }
+
+  public set durationInSecondsWithoutCache(value: number | undefined) {
+    this._durationInSecondsWithoutCache = value;
   }
 
   public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {

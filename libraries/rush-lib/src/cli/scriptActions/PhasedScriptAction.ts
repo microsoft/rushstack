@@ -578,6 +578,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           operationResults[operation.name!] = {
             startTimestampMs: startTime,
             endTimestampMs: endTime,
+            durationInSecondsWithoutCache: operationResult.durationInSecondsWithoutCache,
             result: operationResult.status,
             dependencies: Array.from(getNonSilentDependencies(operation)).sort()
           };
