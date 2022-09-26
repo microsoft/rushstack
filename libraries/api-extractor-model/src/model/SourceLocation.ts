@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import { URL } from 'url';
 
 /**
  * Constructor options for `SourceLocation`.
@@ -49,6 +49,12 @@ export class SourceLocation {
       return undefined;
     }
 
-    return path.join(this._projectFolderUrl, this._fileUrlPath);
+    let projectFolderUrl: string = this._projectFolderUrl;
+    if (!projectFolderUrl.endsWith('/')) {
+      projectFolderUrl += '/';
+    }
+
+    const url: URL = new URL(this._fileUrlPath, projectFolderUrl);
+    return url.href;
   }
 }
