@@ -371,6 +371,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @alpha
 export interface IOperationExecutionResult {
+    readonly durationInSecondsWithoutCache: number | undefined;
     readonly error: Error | undefined;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
@@ -507,6 +508,7 @@ export interface ITelemetryMachineInfo {
 // @beta (undocumented)
 export interface ITelemetryOperationResult {
     dependencies: string[];
+    durationInSecondsWithoutCache?: number;
     endTimestampMs?: number;
     result: string;
     startTimestampMs?: number;
