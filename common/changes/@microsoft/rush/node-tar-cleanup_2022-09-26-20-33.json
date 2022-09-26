@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove fallback from tar binary to npm 'tar' package. The npm 'tar' package would sometimes produce invalid output if the cache entry was corrupt.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
