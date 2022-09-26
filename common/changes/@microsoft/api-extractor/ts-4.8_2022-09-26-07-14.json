@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Update parser to TypeScript 4.8.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}

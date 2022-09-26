@@ -7,6 +7,7 @@ type MessageIds = 'error-usage-of-null';
 type Options = [];
 
 const noNullRule: TSESLint.RuleModule<MessageIds, Options> = {
+  defaultOptions: [],
   meta: {
     type: 'problem',
     messages: {
