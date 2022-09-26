@@ -124,7 +124,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0 || >=18.7.0 <19.0.0",
+  "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0 || >=18.9.1 <19.0.0",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
@@ -137,7 +137,7 @@
    * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
    * to disable Rush's warning.
    */
-  // "suppressNodeLtsWarning": false,
+  "suppressNodeLtsWarning": true, // This repo intentionally tests newer-than-LTS Node versions
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
