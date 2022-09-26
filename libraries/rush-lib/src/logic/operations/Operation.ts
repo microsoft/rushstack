@@ -1,9 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as crypto from 'crypto';
+
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IPhase } from '../../api/CommandLineConfiguration';
 import { IOperationRunner } from './IOperationRunner';
+import { RushConstants } from '../RushConstants';
 
 /**
  * Options for constructing a new Operation.
@@ -85,6 +88,42 @@ export class Operation {
    */
   public get name(): string | undefined {
     return this.runner?.name;
+  }
+
+  /**
+   * Computes this operation's input state hash, for use by the caching layer.
+   * @param localHash - The hash of the local file inputs for this operation
+   * @param dependencyHashes - The state hashes of this operation's dependencies
+   */
+  public getHash(localHash: string, dependencyHashes: string[]): string {
+    if (!localHash) {
+      return '';
+    }
+
+    for (const dependencyHash of dependencyHashes) {
+      if (!dependencyHash) {
+        return '';
+      }
+    }
+
+    const sortedHashes: string[] = dependencyHashes.sort();
+    const hash: crypto.Hash = crypto.createHash('sha1');
+    hash.update(localHash);
+    for (const dependencyHash of sortedHashes) {
+      hash.update(dependencyHash);
+      hash.update(RushConstants.hashDelimiter);
+    }
+
+    // CLI parameters that apply to the phase affect the result
+    const { associatedPhase } = this;
+    if (associatedPhase) {
+      const params: string[] = [];
+      for (const tsCommandLineParameter of associatedPhase.associatedParameters) {
+        tsCommandLineParameter.appendToArgList(params);
+      }
+      hash.update(params.join(' '));
+    }
+    return hash.digest('hex');
   }
 
   /**

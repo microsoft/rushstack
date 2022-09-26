@@ -66,7 +66,7 @@ export class ProjectChangeAnalyzer {
    */
   private _data: IRawRepoState | UNINITIALIZED | undefined = UNINITIALIZED;
   private readonly _filteredData: Map<RushConfigurationProject, Map<string, string>> = new Map();
-  private readonly _projectStateCache: Map<RushConfigurationProject, string> = new Map();
+  private readonly _projectStateCache: Map<Map<string, string>, string> = new Map();
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
 
@@ -148,30 +148,31 @@ export class ProjectChangeAnalyzer {
     project: RushConfigurationProject,
     terminal: ITerminal
   ): Promise<string | undefined> {
-    let projectState: string | undefined = this._projectStateCache.get(project);
+    const packageDeps: Map<string, string> | undefined = await this._tryGetProjectDependenciesAsync(
+      project,
+      terminal
+    );
+    return packageDeps ? this._hashProjectDependencies(packageDeps) : undefined;
+  }
+
+  /**
+   * @internal
+   */
+  public _hashProjectDependencies(packageDeps: Map<string, string>): string {
+    let projectState: string | undefined = this._projectStateCache.get(packageDeps);
     if (!projectState) {
-      const packageDeps: Map<string, string> | undefined = await this._tryGetProjectDependenciesAsync(
-        project,
-        terminal
-      );
-
-      if (!packageDeps) {
-        return undefined;
-      } else {
-        const sortedPackageDepsFiles: string[] = Array.from(packageDeps.keys()).sort();
-        const hash: crypto.Hash = crypto.createHash('sha1');
-        for (const packageDepsFile of sortedPackageDepsFiles) {
-          hash.update(packageDepsFile);
-          hash.update(RushConstants.hashDelimiter);
-          hash.update(packageDeps.get(packageDepsFile)!);
-          hash.update(RushConstants.hashDelimiter);
-        }
-
-        projectState = hash.digest('hex');
-        this._projectStateCache.set(project, projectState);
+      const sortedPackageDepsFiles: string[] = Array.from(packageDeps.keys()).sort();
+      const hash: crypto.Hash = crypto.createHash('sha1');
+      for (const packageDepsFile of sortedPackageDepsFiles) {
+        hash.update(packageDepsFile);
+        hash.update(RushConstants.hashDelimiter);
+        hash.update(packageDeps.get(packageDepsFile)!);
+        hash.update(RushConstants.hashDelimiter);
       }
-    }
 
+      projectState = hash.digest('hex');
+      this._projectStateCache.set(packageDeps, projectState);
+    }
     return projectState;
   }
 

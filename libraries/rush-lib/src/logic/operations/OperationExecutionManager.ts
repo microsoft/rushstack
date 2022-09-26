@@ -3,14 +3,17 @@
 
 import colors from 'colors/safe';
 import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
-import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { NewlineKind, Async } from '@rushstack/node-core-library';
+import { StreamCollator, CollatedWriter } from '@rushstack/stream-collator';
+import { NewlineKind, Async, Terminal, ITerminal } from '@rushstack/node-core-library';
 
 import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import { IExecutionResult } from './IOperationExecutionResult';
+import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -36,22 +39,23 @@ export class OperationExecutionManager {
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
-  private readonly _totalOperations: number;
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
   private readonly _streamCollator: StreamCollator;
 
-  private readonly _terminal: CollatedTerminal;
+  private readonly _terminal: ITerminal;
 
   // Variables for current status
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
   private _completedOperations: number;
+  private _totalOperations: number;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
     const { quietMode, debugMode, parallelism, changedProjectsOnly } = options;
     this._completedOperations = 0;
+    this._totalOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
@@ -72,7 +76,7 @@ export class OperationExecutionManager {
       destination: this._colorsNewlinesTransform,
       onWriterActive: this._streamCollator_onWriterActive
     });
-    this._terminal = this._streamCollator.terminal;
+    this._terminal = new Terminal(new CollatedTerminalProvider(this._streamCollator.terminal));
 
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
@@ -81,7 +85,6 @@ export class OperationExecutionManager {
       quietMode
     };
 
-    let totalOperations: number = 0;
     const executionRecords: Map<Operation, OperationExecutionRecord> = (this._executionRecords = new Map());
     for (const operation of operations) {
       const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
@@ -90,12 +93,7 @@ export class OperationExecutionManager {
       );
 
       executionRecords.set(operation, executionRecord);
-      if (!executionRecord.runner.silent) {
-        // Only count non-silent operations
-        totalOperations++;
-      }
     }
-    this._totalOperations = totalOperations;
 
     for (const [operation, consumer] of executionRecords) {
       for (const dependency of operation.dependencies) {
@@ -137,10 +135,10 @@ export class OperationExecutionManager {
 
       const middlePart: string = colors.gray(']' + '='.repeat(middlePartLengthMinusTwoBrackets) + '[');
 
-      this._terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart);
+      this._terminal.writeLine('\n' + leftPart + middlePart + rightPart);
 
       if (!this._quietMode) {
-        this._terminal.writeStdoutLine('');
+        this._terminal.writeLine('');
       }
     }
   };
@@ -149,27 +147,31 @@ export class OperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all the
    * operations are completed successfully, or rejects when any operation fails.
    */
-  public async executeAsync(): Promise<IExecutionResult> {
+  public async executeAsync(projectChangeAnalyzer?: ProjectChangeAnalyzer): Promise<IExecutionResult> {
     this._completedOperations = 0;
-    const totalOperations: number = this._totalOperations;
 
-    if (!this._quietMode) {
-      const plural: string = totalOperations === 1 ? '' : 's';
-      this._terminal.writeStdoutLine(`Selected ${totalOperations} operation${plural}:`);
-      const nonSilentOperations: string[] = [];
-      for (const record of this._executionRecords.values()) {
-        if (!record.runner.silent) {
-          nonSilentOperations.push(record.name);
-        }
-      }
-      nonSilentOperations.sort();
-      for (const name of nonSilentOperations) {
-        this._terminal.writeStdoutLine(`  ${name}`);
-      }
-      this._terminal.writeStdoutLine('');
+    if (projectChangeAnalyzer) {
+      await this._updateHashesAsync(projectChangeAnalyzer);
     }
 
-    this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
+    const nonSilentOperations: string[] = [];
+    for (const record of this._executionRecords.values()) {
+      if (!record.silent) {
+        nonSilentOperations.push(record.name);
+      }
+    }
+    const totalOperations: number = (this._totalOperations = nonSilentOperations.length);
+    if (!this._quietMode) {
+      const plural: string = totalOperations === 1 ? '' : 's';
+      this._terminal.writeLine(`Selected ${totalOperations} operation${plural}:`);
+      nonSilentOperations.sort();
+      for (const name of nonSilentOperations) {
+        this._terminal.writeLine(`  ${name}`);
+      }
+      this._terminal.writeLine('');
+    }
+
+    this._terminal.writeLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     const maxParallelism: number = Math.min(totalOperations, this._parallelism);
     const prioritySort: IOperationSortFunction = (
@@ -213,6 +215,47 @@ export class OperationExecutionManager {
     };
   }
 
+  private async _updateHashesAsync(state: ProjectChangeAnalyzer): Promise<void> {
+    this._terminal.writeLine(`Updating state hashes`);
+    const trackedFilesByProject: Map<RushConfigurationProject, Map<string, string> | undefined> = new Map();
+    for (const { associatedProject } of this._executionRecords.keys()) {
+      if (associatedProject) {
+        trackedFilesByProject.set(associatedProject, undefined);
+      }
+    }
+
+    await Async.forEachAsync(trackedFilesByProject.keys(), async (project) => {
+      const trackedFiles: Map<string, string> | undefined = await state._tryGetProjectDependenciesAsync(
+        project,
+        this._terminal
+      );
+      trackedFilesByProject.set(project, trackedFiles);
+    });
+
+    function getOperationHash(record: OperationExecutionRecord): string {
+      let { stateHash } = record;
+      if (stateHash === undefined) {
+        const { operation } = record;
+        const { associatedProject } = operation;
+        stateHash = '';
+        if (associatedProject) {
+          const trackedFiles: Map<string, string> | undefined = trackedFilesByProject.get(associatedProject);
+          record.trackedFileHashes = trackedFiles;
+          const localHash: string = trackedFiles ? state._hashProjectDependencies(trackedFiles) : '';
+          if (localHash) {
+            stateHash = operation.getHash(localHash, Array.from(record.dependencies, getOperationHash));
+          }
+        }
+        record.stateHash = stateHash;
+      }
+      return stateHash;
+    }
+
+    for (const record of this._executionRecords.values()) {
+      getOperationHash(record);
+    }
+  }
+
   /**
    * Handles the result of the operation and propagates any relevant effects.
    */
@@ -246,7 +289,7 @@ export class OperationExecutionManager {
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
             // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
             // operations. However, the existing behavior is a bit simpler, so keeping that for now.
-            if (!blockedRecord.runner.silent) {
+            if (!blockedRecord.silent) {
               terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
@@ -321,10 +364,11 @@ export class OperationExecutionManager {
     // Apply status changes to direct dependents
     for (const item of record.consumers) {
       if (blockCacheWrite) {
-        item.runner.isCacheWriteAllowed = false;
+        item.isCacheWriteAllowed = false;
       }
 
       if (blockSkip) {
+        // Only relevant in legacy non-build cache flow
         item.runner.isSkipAllowed = false;
       }
 

@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProjectBuildCache tryGetProjectBuildCache returns a ProjectBuildCache with a calculated cacheId value 1`] = `"acme-wizard/bb7633fef1e8a70f64714aabfeda78b5cd803e3c"`;

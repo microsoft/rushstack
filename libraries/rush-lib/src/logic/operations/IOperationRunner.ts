@@ -27,6 +27,10 @@ export interface IOperationRunnerContext {
    */
   quietMode: boolean;
   /**
+   * Defaults to `true`. Will be `false` if a dependency is in an unknown state.
+   */
+  isCacheWriteAllowed: boolean;
+  /**
    * Object used to report a summary at the end of the Rush invocation.
    */
   stdioSummarizer: StdioSummarizer;
@@ -40,6 +44,16 @@ export interface IOperationRunnerContext {
    * Object used to track elapsed time.
    */
   stopwatch: IStopwatchResult;
+
+  /**
+   * The hashes of all tracked files pertinent to the operation
+   */
+  trackedFileHashes: ReadonlyMap<string, string> | undefined;
+
+  /**
+   * The hash of all inputs to the operation
+   */
+  stateHash: string | undefined;
 }
 
 /**
