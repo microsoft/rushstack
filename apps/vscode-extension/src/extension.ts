@@ -177,7 +177,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   extensionContext.subscriptions.push(deactivateProjectCommand);
 
-  const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', () => {
+  const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', async () => {
     const command = commandProvider.getWatchAction();
 
     if (!command) {
@@ -220,7 +220,10 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
       }
     });
 
-    worker.getGraphAsync().then((graph: Rush.ITransferableOperation[]) => {
+    try {
+      const graph: Rush.ITransferableOperation[] = await worker.getGraphAsync();
+
+      console.log(`Graph: `, graph);
       projectDataProvider.updateProjectPhases(
         graph.map((operation: Rush.ITransferableOperation) => {
           return {
@@ -232,9 +235,6 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
           };
         })
       );
-    });
-
-    try {
       updateWorker();
 
       vscode.window.showInformationMessage('Initialized the Rush watcher.');
@@ -242,6 +242,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
     } catch {
       vscode.window.showErrorMessage('Failed to initialize the Rush watcher.');
       vscode.commands.executeCommand('setContext', 'rush.watcher', 'sleep');
+      worker.shutdownAsync(true);
     }
   });
 
