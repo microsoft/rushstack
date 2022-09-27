@@ -33,7 +33,6 @@ export interface IOperationExecutionResult {
   readonly stdioSummarizer: StdioSummarizer;
   /**
    * The value indicates the duration of the same operation without cache hit.
-   * It is specified if current operation hits cache
    */
   readonly nonCachedDurationMs: number | undefined;
 }

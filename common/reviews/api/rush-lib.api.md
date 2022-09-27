@@ -371,8 +371,8 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @alpha
 export interface IOperationExecutionResult {
-    readonly durationInSecondsWithoutCache: number | undefined;
     readonly error: Error | undefined;
+    readonly nonCachedDurationMs: number | undefined;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
@@ -400,8 +400,12 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
+    // Warning: (ae-forgotten-export) The symbol "OperationStateFile" needs to be exported by the entry point index.d.ts
+    operationStateFile?: OperationStateFile;
     quietMode: boolean;
     stdioSummarizer: StdioSummarizer;
+    // Warning: (ae-forgotten-export) The symbol "Stopwatch" needs to be exported by the entry point index.d.ts
+    stopwatch: Stopwatch;
 }
 
 // @public
@@ -508,8 +512,8 @@ export interface ITelemetryMachineInfo {
 // @beta (undocumented)
 export interface ITelemetryOperationResult {
     dependencies: string[];
-    durationInSecondsWithoutCache?: number;
     endTimestampMs?: number;
+    nonCachedDurationMs?: number;
     result: string;
     startTimestampMs?: number;
 }

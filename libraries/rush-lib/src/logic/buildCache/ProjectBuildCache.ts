@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { FileSystem, Path, ITerminal, FolderItem, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, Path, ITerminal, FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -19,6 +19,7 @@ export interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
   projectOutputFolderNames: ReadonlyArray<string>;
+  additionalProjectOutputFilePaths?: ReadonlyArray<string>;
   command: string;
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
@@ -44,18 +45,23 @@ export class ProjectBuildCache {
   private readonly _buildCacheEnabled: boolean;
   private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
-  private readonly _additionalOutputFilePaths: string[];
+  private readonly _additionalProjectOutputFilePaths: ReadonlyArray<string>;
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
-    const { buildCacheConfiguration, projectConfiguration, projectOutputFolderNames } = options;
+    const {
+      buildCacheConfiguration,
+      projectConfiguration,
+      projectOutputFolderNames,
+      additionalProjectOutputFilePaths
+    } = options;
     this._project = projectConfiguration.project;
     this._localBuildCacheProvider = buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = buildCacheConfiguration.cloudCacheProvider;
     this._buildCacheEnabled = buildCacheConfiguration.buildCacheEnabled;
     this._cacheWriteEnabled = buildCacheConfiguration.cacheWriteEnabled;
     this._projectOutputFolderNames = projectOutputFolderNames || [];
-    this._additionalOutputFilePaths = [];
+    this._additionalProjectOutputFilePaths = additionalProjectOutputFilePaths || [];
     this._cacheId = cacheId;
   }
 
@@ -118,20 +124,12 @@ export class ProjectBuildCache {
     if (inputOutputFiles.length > 0) {
       terminal.writeWarningLine(
         'Unable to use build cache. The following files are used to calculate project state ' +
-          `and are considered project output: ${inputOutputFiles.join(', ')}`
+        `and are considered project output: ${inputOutputFiles.join(', ')}`
       );
       return false;
     } else {
       return true;
     }
-  }
-
-  public get additionalOutputFilePaths(): string[] {
-    return this._additionalOutputFilePaths;
-  }
-
-  public addAdditionalOutputFilePaths(outputFilePath: string): void {
-    this._additionalOutputFilePaths.push(outputFilePath);
   }
 
   public async tryRestoreFromCacheAsync(terminal: ITerminal): Promise<boolean> {
@@ -261,14 +259,14 @@ export class ProjectBuildCache {
       } else {
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
-            `See "${logFilePath}" for logs from the tar process.`
+          `See "${logFilePath}" for logs from the tar process.`
         );
         return false;
       }
     } else {
       terminal.writeWarningLine(
         `Unable to locate "tar". Please ensure that "tar" is on your PATH environment variable, or set the ` +
-          `${EnvironmentVariableNames.RUSH_TAR_BINARY_PATH} environment variable to the full path to the "tar" binary.`
+        `${EnvironmentVariableNames.RUSH_TAR_BINARY_PATH} environment variable to the full path to the "tar" binary.`
       );
       return false;
     }
@@ -370,13 +368,17 @@ export class ProjectBuildCache {
     }
 
     // Add additional output file paths
-    await Async.foreEachAsync(this._additionalOutputFilePaths, async (additionalOutputFilePath) => {
-      const fullPath: string = `${projectFolderPath}/${addAdditionalOutputFilePath}`;
-      const pathExists: boolean = await FileSystem.existsAsync(fullPath);
-      if (pathExists) {
-        outputFilePaths.push(addAdditionalOutputFilePath);
-      }
-    }, { concurrency: 10 });
+    await Async.forEachAsync(
+      this._additionalProjectOutputFilePaths,
+      async (additionalProjectOutputFilePath) => {
+        const fullPath: string = `${projectFolderPath}/${additionalProjectOutputFilePath}`;
+        const pathExists: boolean = await FileSystem.existsAsync(fullPath);
+        if (pathExists) {
+          outputFilePaths.push(additionalProjectOutputFilePath);
+        }
+      },
+      { concurrency: 10 }
+    );
 
     // Ensure stable output path order.
     outputFilePaths.sort();

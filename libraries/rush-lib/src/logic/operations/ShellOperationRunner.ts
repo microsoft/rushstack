@@ -34,7 +34,6 @@ import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvid
 import { RushConstants } from '../RushConstants';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { OperationStateFile } from './OperationStateFile';
-import { OperationExecutionRecord } from './OperationExecutionRecord';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -275,11 +274,8 @@ export class ShellOperationRunner implements IOperationRunner {
           await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
 
         if (restoreFromCacheSuccess) {
-          // Restore the original state of the operation without cache if hit cache
-          if (context instanceof OperationExecutionRecord) {
-            context.durationInSecondsWithoutCache =
-              context.operationStateFile?.tryRead()?.durationInSecondsWithoutCache;
-          }
+          // Restore the original state of the operation without cache
+          await context.operationStateFile?.tryRestoreAsync();
           return OperationStatus.FromCache;
         }
       }
@@ -378,16 +374,10 @@ export class ShellOperationRunner implements IOperationRunner {
         });
 
         // If the operation without cache was successful, we can save the state to disk
-        if (context instanceof OperationExecutionRecord) {
-          if (context.operationStateFile) {
-            const { duration } = context.stopwatch;
-            if (duration) {
-              context.operationStateFile.write({
-                durationInSecondsWithoutCache: duration
-              });
-            }
-          }
-        }
+        const { duration: durationInSeconds } = context.stopwatch;
+        await context.operationStateFile?.writeAsync({
+          nonCachedDurationMs: durationInSeconds * 1000
+        });
 
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
@@ -451,9 +441,13 @@ export class ShellOperationRunner implements IOperationRunner {
             } else {
               const projectOutputFolderNames: ReadonlyArray<string> =
                 operationSettings.outputFolderNames || [];
+              const additionalProjectOutputFilePaths: ReadonlyArray<string> = [
+                OperationStateFile.getFilenameRelativeToProjectRoot(this._phase)
+              ];
               this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
                 projectConfiguration,
                 projectOutputFolderNames,
+                additionalProjectOutputFilePaths,
                 buildCacheConfiguration: this._buildCacheConfiguration,
                 terminal,
                 command: this._commandToRun,
@@ -461,9 +455,6 @@ export class ShellOperationRunner implements IOperationRunner {
                 projectChangeAnalyzer: this._projectChangeAnalyzer,
                 phaseName: this._phase.name
               });
-              this._projectBuildCache?.addAdditionalOutputFilePaths(
-                OperationStateFile.getFilenameRelativeToProjectRoot(this._phase)
-              );
             }
           }
         } else {

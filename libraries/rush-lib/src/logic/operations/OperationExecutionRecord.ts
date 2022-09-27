@@ -87,8 +87,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
 
-  public nonCachedDurationMs: number | undefined = undefined;
-
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner } = operation;
 
@@ -127,6 +125,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       this._collatedWriter = this._context.streamCollator.registerTask(this.name);
     }
     return this._collatedWriter;
+  }
+
+  public get nonCachedDurationMs(): number | undefined {
+    // Lazy calculated because the state file is created/restored later on
+    return this.operationStateFile?.state?.nonCachedDurationMs;
   }
 
   public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {

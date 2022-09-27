@@ -68,7 +68,7 @@ export interface ITelemetryOperationResult {
   endTimestampMs?: number;
 
   /**
-   * Duration in seconds when the operation does not hit cache
+   * Duration in milliseconds when the operation does not hit cache
    */
   nonCachedDurationMs?: number;
 }
