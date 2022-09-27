@@ -437,7 +437,6 @@ export interface IPhasedCommand extends IRushCommand {
 // @alpha (undocumented)
 export interface IPhasedCommandWorkerOptions {
     cwd?: string;
-    // Warning: (ae-forgotten-export) The symbol "PhasedCommandWorkerState" needs to be exported by the entry point index.d.ts
     onStateChanged?: (state: PhasedCommandWorkerState) => void;
     onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void;
 }
@@ -705,6 +704,9 @@ export class PhasedCommandWorkerController {
     get state(): PhasedCommandWorkerState;
     updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]>;
 }
+
+// @public (undocumented)
+export type PhasedCommandWorkerState = 'initializing' | 'waiting' | 'updating' | 'executing' | 'aborting' | 'exiting' | 'exited';
 
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

@@ -2,16 +2,16 @@ import * as vscode from 'vscode';
 import * as Rush from '@rushstack/rush-sdk';
 
 export interface ICommandDataProviderParams {
-  workspaceRoot: string | undefined;
-  loadRush: () => Promise<typeof Rush>;
+  workspaceRoot: string;
+  rush: typeof Rush;
   extensionContext: vscode.ExtensionContext;
 }
 
 export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
-  private _workspaceRoot: string | undefined;
+  private _workspaceRoot: string;
   private _onDidChangeTreeData: vscode.EventEmitter<Command | Command[] | undefined>;
 
-  private _loadRush: () => Promise<typeof Rush>;
+  private _rush: typeof Rush;
   private _extensionContext: vscode.ExtensionContext;
 
   private _commandsByName: Map<string, Command>;
@@ -19,17 +19,15 @@ export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
   private _activeCommand: Command | undefined;
 
   constructor(params: ICommandDataProviderParams) {
-    const { workspaceRoot, loadRush, extensionContext } = params;
+    const { workspaceRoot, rush, extensionContext } = params;
 
     this._workspaceRoot = workspaceRoot;
-    this._loadRush = loadRush;
+    this._rush = rush;
     this._extensionContext = extensionContext;
 
     this._onDidChangeTreeData = new vscode.EventEmitter<Command | Command[] | undefined>();
 
     this._commandsByName = new Map<string, Command>();
-
-    this.refresh();
   }
 
   public async refresh(): Promise<void> {
@@ -40,17 +38,11 @@ export class CommandDataProvider implements vscode.TreeDataProvider<Command> {
 
     const workspaceRoot = this._workspaceRoot;
 
-    if (!workspaceRoot) {
+    if (!this._rush.RushCommandLineParser) {
       return;
     }
 
-    const rushSdk = await this._loadRush();
-
-    if (!rushSdk.RushCommandLineParser) {
-      return;
-    }
-
-    const commandLineParser = new rushSdk.RushCommandLineParser({
+    const commandLineParser = new this._rush.RushCommandLineParser({
       cwd: workspaceRoot,
       excludeDefaultActions: true
     });

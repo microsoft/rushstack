@@ -115,5 +115,9 @@ export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult }
 
 export { IStopwatchResult } from './utilities/Stopwatch';
 
-export { ITransferableOperation, ITransferableOperationStatus } from './worker/RushWorker.types';
+export {
+  ITransferableOperation,
+  ITransferableOperationStatus,
+  PhasedCommandWorkerState
+} from './worker/RushWorker.types';
 export { PhasedCommandWorkerController, IPhasedCommandWorkerOptions } from './worker/RushWorkerHost';

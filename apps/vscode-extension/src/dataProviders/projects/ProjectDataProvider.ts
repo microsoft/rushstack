@@ -5,15 +5,15 @@ import * as path from 'path';
 export type StateGroupName = 'Active' | 'Included' | 'Available';
 
 export interface IProjectDataProviderParams {
-  workspaceRoot: string | undefined;
+  workspaceRoot: string;
   extensionContext: vscode.ExtensionContext;
-  loadRush: () => Promise<typeof Rush>;
+  rush: typeof Rush;
 }
 
 export class ProjectDataProvider
   implements vscode.TreeDataProvider<StateGroup | Project | OperationPhase | Message>
 {
-  private _workspaceRoot: string | undefined;
+  private _workspaceRoot: string;
   private _onDidChangeTreeData: vscode.EventEmitter<
     StateGroup | Project | OperationPhase | (StateGroup | Project | OperationPhase)[] | undefined
   >;
@@ -23,16 +23,16 @@ export class ProjectDataProvider
   private _activeGroup: StateGroup;
   private _includedGroup: StateGroup;
   private _availableGroup: StateGroup;
-  private _loadRush: () => Promise<typeof Rush>;
+  private _rush: typeof Rush;
 
   private _projectsByName: Map<string, Project>;
   private _extensionContext: vscode.ExtensionContext;
 
   constructor(params: IProjectDataProviderParams) {
-    const { workspaceRoot, loadRush, extensionContext } = params;
+    const { workspaceRoot, rush, extensionContext } = params;
 
     this._workspaceRoot = workspaceRoot;
-    this._loadRush = loadRush;
+    this._rush = rush;
     this._extensionContext = extensionContext;
 
     this._onDidChangeTreeData = new vscode.EventEmitter<
@@ -45,38 +45,30 @@ export class ProjectDataProvider
 
     this._projectsByName = new Map<string, Project>();
 
-    this.refresh();
-
     this._stateGroups = [this._activeGroup, this._includedGroup, this._availableGroup];
   }
 
   public async refresh(): Promise<void> {
-    const workspaceRoot = this._workspaceRoot;
-
     this._activeGroup.projects.clear();
     this._includedGroup.projects.clear();
     this._availableGroup.projects.clear();
     this._projectsByName.clear();
 
-    vscode.commands.executeCommand('setContext', 'rush.activeProjects.count', 0);
-    vscode.commands.executeCommand('setContext', 'rush.includedProjects.count', 0);
-    vscode.commands.executeCommand('setContext', 'rush.availableProjects.count', 0);
+    await Promise.all([
+      vscode.commands.executeCommand('setContext', 'rush.activeProjects.count', 0),
+      vscode.commands.executeCommand('setContext', 'rush.includedProjects.count', 0),
+      vscode.commands.executeCommand('setContext', 'rush.availableProjects.count', 0)
+    ]);
 
     console.log('Updating tree data', 3, Date.now());
     this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._availableGroup]);
     console.log('Updated tree data', 3, Date.now());
 
-    if (!workspaceRoot) {
+    if (!this._rush.RushConfiguration) {
       return;
     }
 
-    const rushSdk = await this._loadRush();
-
-    if (!rushSdk.RushConfiguration) {
-      return;
-    }
-
-    const rushConfigurationFile = rushSdk.RushConfiguration.tryFindRushJsonLocation({
+    const rushConfigurationFile = this._rush.RushConfiguration.tryFindRushJsonLocation({
       startingFolder: this._workspaceRoot
     });
 
@@ -84,7 +76,7 @@ export class ProjectDataProvider
       return;
     }
 
-    const rushConfiguration = rushSdk.RushConfiguration.loadFromConfigurationFile(rushConfigurationFile);
+    const rushConfiguration = this._rush.RushConfiguration.loadFromConfigurationFile(rushConfigurationFile);
 
     if (!rushConfiguration) {
       return;
@@ -99,21 +91,23 @@ export class ProjectDataProvider
       this._availableGroup.projects.add(project);
     }
 
-    vscode.commands.executeCommand(
-      'setContext',
-      'rush.activeProjects.count',
-      this._activeGroup.projects.size
-    );
-    vscode.commands.executeCommand(
-      'setContext',
-      'rush.includedProjects.count',
-      this._includedGroup.projects.size
-    );
-    vscode.commands.executeCommand(
-      'setContext',
-      'rush.availableProjects.count',
-      this._availableGroup.projects.size
-    );
+    await Promise.all([
+      vscode.commands.executeCommand(
+        'setContext',
+        'rush.activeProjects.count',
+        this._activeGroup.projects.size
+      ),
+      vscode.commands.executeCommand(
+        'setContext',
+        'rush.includedProjects.count',
+        this._includedGroup.projects.size
+      ),
+      vscode.commands.executeCommand(
+        'setContext',
+        'rush.availableProjects.count',
+        this._availableGroup.projects.size
+      )
+    ]);
 
     console.log('Updating tree data', 3, Date.now());
     this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._availableGroup]);
@@ -192,7 +186,7 @@ export class ProjectDataProvider
     return undefined;
   }
 
-  public toggleActiveProjects(toggleProjects: Project[], force?: boolean): void {
+  public async toggleActiveProjects(toggleProjects: Project[], force?: boolean): Promise<void> {
     console.log('Toggling active projects', toggleProjects.length, Date.now());
 
     if (toggleProjects.length === 0) {
@@ -257,21 +251,23 @@ export class ProjectDataProvider
       }
     }
 
-    vscode.commands.executeCommand(
-      'setContext',
-      'rush.activeProjects.count',
-      this._activeGroup.projects.size
-    );
-    vscode.commands.executeCommand(
-      'setContext',
-      'rush.includedProjects.count',
-      this._includedGroup.projects.size
-    );
-    vscode.commands.executeCommand(
-      'setContext',
-      'rush.availableProjects.count',
-      this._availableGroup.projects.size
-    );
+    await Promise.all([
+      vscode.commands.executeCommand(
+        'setContext',
+        'rush.activeProjects.count',
+        this._activeGroup.projects.size
+      ),
+      vscode.commands.executeCommand(
+        'setContext',
+        'rush.includedProjects.count',
+        this._includedGroup.projects.size
+      ),
+      vscode.commands.executeCommand(
+        'setContext',
+        'rush.availableProjects.count',
+        this._availableGroup.projects.size
+      )
+    ]);
 
     console.log('Updating tree data', 3, Date.now());
     this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._availableGroup]);

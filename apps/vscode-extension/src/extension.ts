@@ -20,13 +20,28 @@ declare const global: NodeJS.Global &
     ___rush___rushLibModule?: typeof RushLib;
   };
 
-export function activate(extensionContext: vscode.ExtensionContext) {
+export async function activate(extensionContext: vscode.ExtensionContext) {
   const workspaceRoot =
     vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : undefined;
 
   vscode.commands.executeCommand('setContext', 'rush.enabled', false);
+
+  if (!workspaceRoot) {
+    return;
+  }
+
+  const useWorkspaceRushVersion =
+    vscode.workspace.getConfiguration().get<boolean>('rush.useWorkspaceRushVersion') ?? true;
+
+  if (useWorkspaceRushVersion) {
+    global.___rush___workingDirectory = workspaceRoot;
+  } else {
+    global.___rush___rushLibModule = await import('@microsoft/rush-lib');
+  }
+
+  const rush = await import('@rushstack/rush-sdk');
 
   let worker: Rush.PhasedCommandWorkerController | undefined;
 
@@ -40,25 +55,10 @@ export function activate(extensionContext: vscode.ExtensionContext) {
 
   vscode.commands.executeCommand('setContext', 'rush.watcher', 'sleep');
 
-  const useWorkspaceRushVersion =
-    vscode.workspace.getConfiguration().get<boolean>('rush.useWorkspaceRushVersion') ?? true;
-
-  const loadRush = async (): Promise<typeof Rush> => {
-    if (useWorkspaceRushVersion) {
-      global.___rush___workingDirectory = workspaceRoot;
-    } else {
-      global.___rush___rushLibModule = await import('@microsoft/rush-lib');
-    }
-
-    return await import('@rushstack/rush-sdk');
-  };
-
   async function updateWorker(): Promise<void> {
     if (!worker) {
       return;
     }
-
-    statusBarItem.text = `$(sync~spin) Rush: detecting changes`;
 
     await worker.abortAsync();
 
@@ -81,8 +81,6 @@ export function activate(extensionContext: vscode.ExtensionContext) {
 
     statuses = await worker.updateAsync(activeOperations);
 
-    statusBarItem.text = `$(sync~spin) Rush: running ${command?.label}`;
-
     projectDataProvider.updateProjectPhases([
       ...graph.map((operation: Rush.ITransferableOperation) => {
         return {
@@ -98,7 +96,7 @@ export function activate(extensionContext: vscode.ExtensionContext) {
 
   const projectDataProvider = new ProjectDataProvider({
     workspaceRoot,
-    loadRush,
+    rush,
     extensionContext: extensionContext
   });
 
@@ -112,7 +110,7 @@ export function activate(extensionContext: vscode.ExtensionContext) {
 
   const commandProvider = new CommandDataProvider({
     workspaceRoot,
-    loadRush,
+    rush,
     extensionContext: extensionContext
   });
 
@@ -198,8 +196,6 @@ export function activate(extensionContext: vscode.ExtensionContext) {
   extensionContext.subscriptions.push(deactivateProjectCommand);
 
   const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', async () => {
-    const rush = await loadRush();
-
     const command = commandProvider.getWatchAction();
 
     if (!command) {
@@ -217,8 +213,31 @@ export function activate(extensionContext: vscode.ExtensionContext) {
       onStatusUpdate: (operationStatus: Rush.ITransferableOperationStatus) => {
         projectDataProvider.updateProjectPhases([operationStatus]);
       },
-      onReady: () => {
-        statusBarItem.text = `$(eye) Rush: watching ${command.label}`;
+      onStateChanged: (state: Rush.PhasedCommandWorkerState) => {
+        switch (state) {
+          case 'initializing':
+            statusBarItem.text = `$(sync~spin) Rush: initializing watcher`;
+            statusBarItem.show();
+            break;
+          case 'updating':
+            statusBarItem.text = `$(sync~spin) Rush: detecting changes`;
+            break;
+          case 'waiting':
+            statusBarItem.text = `$(eye) Rush: watching ${command.label}`;
+            break;
+          case 'executing':
+            statusBarItem.text = `$(sync~spin) Rush: running ${command.label}`;
+            break;
+          case 'aborting':
+            statusBarItem.text = `$(sync~spin) Rush: restarting ${command.label}`;
+            break;
+          case 'exiting':
+            statusBarItem.text = `$(sync~spin) Rush: shutting down watcher`;
+            break;
+          case 'exited':
+            statusBarItem.hide();
+            break;
+        }
       }
     });
 
@@ -237,8 +256,6 @@ export function activate(extensionContext: vscode.ExtensionContext) {
 
   const disableWatchCommand = vscode.commands.registerCommand('rush.disableWatch', async () => {
     if (worker) {
-      statusBarItem.text = `$(sync~spin) Rush: shutting down watcher`;
-
       vscode.window.showInformationMessage('Shutting down the Rush watcher.');
       try {
         await worker.shutdownAsync();
@@ -255,12 +272,6 @@ export function activate(extensionContext: vscode.ExtensionContext) {
   });
 
   extensionContext.subscriptions.push(disableWatchCommand);
-
-  extensionContext.subscriptions.push(
-    vscode.workspace.onDidSaveTextDocument(async (e: vscode.TextDocument) => {
-      await updateWorker();
-    })
-  );
 
   const rushRushActionCommand = vscode.commands.registerCommand(
     'rush.runAction',
@@ -312,6 +323,14 @@ export function activate(extensionContext: vscode.ExtensionContext) {
   );
 
   extensionContext.subscriptions.push(setAsWatchActionCommand);
+
+  extensionContext.subscriptions.push(
+    vscode.workspace.onDidSaveTextDocument(async (e: vscode.TextDocument) => {
+      await updateWorker();
+    })
+  );
+
+  await Promise.all([projectDataProvider.refresh(), commandProvider.refresh()]);
 }
 
 // this method is called when your extension is deactivated
