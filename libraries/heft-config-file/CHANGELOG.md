@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Sep 2022 22:17:20 GMT and should not be manually modified.
+
+## 0.11.0
+Tue, 27 Sep 2022 22:17:20 GMT
+
+### Minor changes
+
+- Allow a schema object to be passed to the ConfigurationFile constructor instead of the path to a schema file.
 
 ## 0.10.0
 Wed, 21 Sep 2022 20:21:10 GMT
