@@ -25,18 +25,13 @@ export interface IPhasedCommandWorkerOptions {
   /**
    * Status update callback
    */
-  onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void;
+  onStatusUpdates?: (operationStatus: ITransferableOperationStatus[]) => void;
 
   /**
    * Callback invoked when worker state changes
    */
   onStateChanged?: (state: PhasedCommandWorkerState) => void;
 }
-
-const abortMessage: IRushWorkerBuildMessage = {
-  type: 'build',
-  value: { targets: [] }
-};
 
 const shutdownMessage: IRushWorkerShutdownMessage = {
   type: 'shutdown',
@@ -72,7 +67,7 @@ export class PhasedCommandWorkerController {
   /**
    * Overrideable, event handler for operation status changes.
    */
-  public onStatusUpdate: (operationStatus: ITransferableOperationStatus) => void;
+  public onStatusUpdates: (statuses: ITransferableOperationStatus[]) => void;
 
   private readonly _worker: Worker;
   private _state: PhasedCommandWorkerState;
@@ -82,9 +77,7 @@ export class PhasedCommandWorkerController {
   private readonly _exitSignal: ISignal<void>;
   private readonly _graphSignal: ISignal<ITransferableOperation[]>;
 
-  private _readySignal: ISignal<void>;
-
-  private _activeGraphSignal: ISignal<ITransferableOperationStatus[]>;
+  private _graph: ITransferableOperation[] | undefined = undefined;
 
   /**
    * Creates a Worker than runs the phased commands indicated by `args`, e.g. `build --production`.
@@ -98,7 +91,7 @@ export class PhasedCommandWorkerController {
   public constructor(args: string[], options?: IPhasedCommandWorkerOptions) {
     const {
       cwd,
-      onStatusUpdate = () => {
+      onStatusUpdates = () => {
         // Noop
       },
       onStateChanged = () => {
@@ -115,13 +108,7 @@ export class PhasedCommandWorkerController {
       this._updateState('exited');
     });
 
-    this._readySignal = createSignal(() => {
-      this._updateState('waiting');
-    });
-
-    this._activeGraphSignal = createSignal();
-
-    this.onStatusUpdate = onStatusUpdate;
+    this.onStatusUpdates = onStatusUpdates;
     this.onStateChanged = onStateChanged;
 
     const workerPath: string = path.resolve(__dirname, 'RushWorkerEntry.js');
@@ -147,11 +134,8 @@ export class PhasedCommandWorkerController {
    * @param operations - The operations to build.
    * @returns The results of all operations that were built in the process.
    */
-  public async updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]> {
-    await this.readyAsync();
-
-    // Define a new ready signal
-    this._readySignal = createSignal(() => this._updateState('waiting'));
+  public update(operations: ITransferableOperation[]): void {
+    this._checkExited();
 
     const targets: string[] = [];
     for (const operation of operations) {
@@ -168,25 +152,8 @@ export class PhasedCommandWorkerController {
       }
     };
 
-    this._activeGraphSignal = createSignal();
-
     this._updateState('updating');
     this._worker.postMessage(buildMessage);
-
-    const statuses: ITransferableOperationStatus[] | void = await Promise.race([
-      this._exitSignal.promise,
-      this._activeGraphSignal.promise
-    ]);
-
-    if (!statuses) {
-      throw new Error(`Worker has exited!`);
-    }
-
-    if (statuses.some((status) => status.status === OperationStatus.Ready)) {
-      this._updateState('executing');
-    }
-
-    return statuses;
   }
 
   /**
@@ -195,6 +162,19 @@ export class PhasedCommandWorkerController {
    *
    * @returns The list of known operations in the command for which this worker was initialized.
    */
+  public getGraph(): ITransferableOperation[] {
+    if (!this._graph) {
+      throw new Error(`Worker is still initializing!`);
+    }
+    this._checkExited();
+    return this._graph;
+  }
+
+  public getStatuses(): ITransferableOperationStatus[] {
+    this._checkExited();
+    return Array.from(this._statusByOperation.values());
+  }
+
   public async getGraphAsync(): Promise<ITransferableOperation[]> {
     const results: void | ITransferableOperation[] = await Promise.race([
       this._exitSignal.promise,
@@ -207,24 +187,11 @@ export class PhasedCommandWorkerController {
   }
 
   /**
-   * Waits for the worker to be ready to receive input.
-   *
-   * @returns A promise that resolves when the worker is ready for more input.
-   */
-  public async readyAsync(): Promise<void> {
-    await Promise.race([this._exitSignal.promise.then(() => this._checkExited()), this._readySignal.promise]);
-  }
-
-  /**
    * Aborts the current execution.
    * @returns A promise that resolves when the worker has aborted.
    */
-  public async abortAsync(): Promise<void> {
-    this._checkExited();
-    this._updateState('updating');
-
-    this._worker.postMessage(abortMessage);
-    await this.readyAsync();
+  public abort(): void {
+    return this.update([]);
   }
 
   /**
@@ -264,22 +231,36 @@ export class PhasedCommandWorkerController {
     }
   }
 
+  private _setExecuting(): void {
+    for (const operation of this._statusByOperation.values()) {
+      if (
+        operation.active &&
+        (operation.status === OperationStatus.Ready || operation.status === OperationStatus.Executing)
+      ) {
+        this._updateState('executing');
+        return;
+      }
+    }
+  }
+
   private _handleMessage = (message: IRushWorkerResponse): void => {
     switch (message.type) {
       case 'graph':
+        this._graph = message.value.operations;
         this._graphSignal.resolve(message.value.operations);
-        break;
-      case 'activeGraph':
-        this._activeGraphSignal.resolve(message.value.operations);
         break;
       case 'ready':
         if (this._state !== 'exiting') {
-          this._readySignal.resolve();
+          this._updateState('waiting');
         }
         break;
-      case 'operation':
-        this._statusByOperation.set(message.value.operation.name!, message.value);
-        this.onStatusUpdate(message.value);
+      case 'operations':
+        for (const operation of message.value.operations) {
+          const name: string = operation.operation.name!;
+          this._statusByOperation.set(name, operation);
+        }
+        this._setExecuting();
+        this.onStatusUpdates(message.value.operations);
         break;
     }
   };

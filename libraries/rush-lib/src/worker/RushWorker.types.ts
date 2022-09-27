@@ -20,28 +20,26 @@ export interface ITransferableOperationStatus {
   status: OperationStatus;
   hash: string | undefined;
   duration: number;
+  active: boolean;
 }
 
-export interface IRushWorkerOperationMessage {
-  type: 'operation';
-  value: ITransferableOperationStatus;
+export interface IRushWorkerOperationsMessage {
+  type: 'operations';
+  value: {
+    operations: ITransferableOperationStatus[];
+  };
 }
 export interface IRushWorkerGraphMessage {
   type: 'graph';
   value: { operations: ITransferableOperation[] };
-}
-export interface IRushWorkerActiveGraphMessage {
-  type: 'activeGraph';
-  value: { operations: ITransferableOperationStatus[] };
 }
 export interface IRushWorkerReadyMessage {
   type: 'ready';
   value: {};
 }
 export type IRushWorkerResponse =
-  | IRushWorkerOperationMessage
+  | IRushWorkerOperationsMessage
   | IRushWorkerGraphMessage
-  | IRushWorkerActiveGraphMessage
   | IRushWorkerReadyMessage;
 
 export interface IRushWorkerBuildMessage {

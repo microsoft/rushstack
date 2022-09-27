@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { createInterface, Interface } from 'readline';
-import { OperationStatus } from '../logic/operations/OperationStatus';
 import {
   ITransferableOperation,
   ITransferableOperationStatus,
@@ -18,8 +17,14 @@ async function runAsCli(): Promise<void> {
     process.argv.slice(3),
     {
       cwd: process.argv[2],
-      onStatusUpdate: (status: ITransferableOperationStatus) => {
-        console.log(`[HOST]: Status change: ${status.operation.name!} => ${status.status} (${status.hash})`);
+      onStatusUpdates: (statuses: ITransferableOperationStatus[]) => {
+        for (const status of statuses) {
+          console.log(
+            `[HOST]: Status change: ${status.operation.name!} (${status.active ? 'active' : 'inactive'}) => ${
+              status.status
+            } (${status.hash})`
+          );
+        }
       },
       onStateChanged: (state: PhasedCommandWorkerState) => {
         console.log(`Worker state: ${state}`);
@@ -45,20 +50,15 @@ async function runAsCli(): Promise<void> {
     prompt: `> Select Build Targets> `
   });
 
-  let aborting: boolean = false;
   rl.on('SIGINT', () => {
-    if (aborting) {
+    if (workerInterface.state === 'updating') {
       rl.close();
       return;
     }
 
     // Send abort
-    aborting = true;
     console.log(`Aborting`);
-    workerInterface.abortAsync().then(() => {
-      console.log(`Aborted.`);
-      aborting = false;
-    }, console.error);
+    workerInterface.abort();
   });
 
   rl.prompt();
@@ -67,7 +67,7 @@ async function runAsCli(): Promise<void> {
       rl.close();
       await workerInterface.shutdownAsync();
     } else if (line === 'abort') {
-      await workerInterface.abortAsync();
+      workerInterface.abort();
     } else {
       const targets: string[] = line.split(/[, ]/g);
       const operations: ITransferableOperation[] = [];
@@ -76,15 +76,7 @@ async function runAsCli(): Promise<void> {
         operations.push({ project, phase });
       }
 
-      let toBeBuiltCount: number = 0;
-      const activeGraph: ITransferableOperationStatus[] = await workerInterface.updateAsync(operations);
-      for (const operation of activeGraph) {
-        if (operation.status === OperationStatus.Ready) {
-          toBeBuiltCount++;
-        }
-        console.log(`${operation.operation.name} @ ${operation.status}`);
-      }
-      console.log(`Build graph contains ${activeGraph.length} operations, ${toBeBuiltCount} pending`);
+      workerInterface.update(operations);
 
       rl.prompt();
     }

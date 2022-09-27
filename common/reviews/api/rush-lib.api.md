@@ -438,7 +438,7 @@ export interface IPhasedCommand extends IRushCommand {
 export interface IPhasedCommandWorkerOptions {
     cwd?: string;
     onStateChanged?: (state: PhasedCommandWorkerState) => void;
-    onStatusUpdate?: (operationStatus: ITransferableOperationStatus) => void;
+    onStatusUpdates?: (operationStatus: ITransferableOperationStatus[]) => void;
 }
 
 // @internal
@@ -531,6 +531,8 @@ export interface ITransferableOperation {
 
 // @alpha (undocumented)
 export interface ITransferableOperationStatus {
+    // (undocumented)
+    active: boolean;
     // (undocumented)
     duration: number;
     // (undocumented)
@@ -694,19 +696,22 @@ export class PhasedCommandHooks {
 // @alpha
 export class PhasedCommandWorkerController {
     constructor(args: string[], options?: IPhasedCommandWorkerOptions);
-    abortAsync(): Promise<void>;
+    abort(): void;
+    getGraph(): ITransferableOperation[];
+    // (undocumented)
     getGraphAsync(): Promise<ITransferableOperation[]>;
+    // (undocumented)
+    getStatuses(): ITransferableOperationStatus[];
     onStateChanged: (state: PhasedCommandWorkerState) => void;
-    onStatusUpdate: (operationStatus: ITransferableOperationStatus) => void;
-    readyAsync(): Promise<void>;
+    onStatusUpdates: (statuses: ITransferableOperationStatus[]) => void;
     shutdownAsync(force?: boolean): Promise<void>;
     // (undocumented)
     get state(): PhasedCommandWorkerState;
-    updateAsync(operations: ITransferableOperation[]): Promise<ITransferableOperationStatus[]>;
+    update(operations: ITransferableOperation[]): void;
 }
 
 // @public (undocumented)
-export type PhasedCommandWorkerState = 'initializing' | 'waiting' | 'updating' | 'executing' | 'aborting' | 'exiting' | 'exited';
+export type PhasedCommandWorkerState = 'initializing' | 'waiting' | 'updating' | 'executing' | 'exiting' | 'exited';
 
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

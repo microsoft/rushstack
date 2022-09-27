@@ -28,9 +28,8 @@ import {
   IRushWorkerGraphMessage,
   IRushWorkerRequest,
   IRushWorkerReadyMessage,
-  IRushWorkerOperationMessage,
-  ITransferableOperationStatus,
-  IRushWorkerActiveGraphMessage
+  IRushWorkerOperationsMessage,
+  ITransferableOperationStatus
 } from './RushWorker.types';
 import { IAbortSignal } from '../logic/operations/AsyncOperationQueue';
 
@@ -77,6 +76,7 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
   'RushWorkerPlugin',
   async (command: IPhasedCommand) => {
     const operationStates: Map<Operation, OperationExecutionRecord> = new Map();
+    const includedOperations: Set<Operation> = new Set();
 
     const rawCommand: PhasedScriptAction = command as PhasedScriptAction;
 
@@ -210,16 +210,23 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
         const transferOperation: ITransferableOperation = transferOperationForOperation.get(
           record.operation
         )!;
-        console.log(`Status update: ${record.operation.name} -> ${record.status} (${record.stateHash})`);
+        console.log(
+          `Status update: ${record.operation.name} (active) -> ${record.status} (${record.stateHash})`
+        );
 
-        const operationMessage: IRushWorkerOperationMessage = {
-          type: 'operation',
+        const operationMessage: IRushWorkerOperationsMessage = {
+          type: 'operations',
           value: {
-            operation: transferOperation,
+            operations: [
+              {
+                operation: transferOperation,
 
-            status: record.status,
-            hash: record.stateHash,
-            duration: record.stopwatch.duration
+                status: record.status,
+                hash: record.stateHash,
+                duration: record.stopwatch.duration,
+                active: true
+              }
+            ]
           }
         };
 
@@ -254,25 +261,29 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
             silent
           });
           record.silent = silent;
+
           activeOperations.push({
             operation: transferOperation,
             status: status,
             duration: oldRecord!.stopwatch.duration,
-            hash: oldHash
+            hash: oldHash,
+            active: true
           });
         } else {
           operationStates.set(operation, record);
+
           activeOperations.push({
             operation: transferOperation,
             status: record.status,
             duration: record.stopwatch.duration,
-            hash: oldHash
+            hash: oldHash,
+            active: true
           });
         }
       }
 
-      const activeGraphMessage: IRushWorkerActiveGraphMessage = {
-        type: 'activeGraph',
+      const activeGraphMessage: IRushWorkerOperationsMessage = {
+        type: 'operations',
         value: { operations: activeOperations }
       };
       parentPort?.postMessage(activeGraphMessage);
@@ -287,10 +298,11 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
 
       const { executionManagerOptions: originalExecutionManagerOptions } = originalOptions;
 
-      const operations: Set<Operation> = new Set();
+      const previousOperations: Set<Operation> = new Set(includedOperations);
+      includedOperations.clear();
 
       for (const operation of unassociatedOperations) {
-        operations.add(operation);
+        includedOperations.add(operation);
       }
 
       for (const target of targets) {
@@ -298,13 +310,13 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
         if (!operation) {
           console.error(`No such operation ${target}`);
         } else {
-          operations.add(operation);
+          includedOperations.add(operation);
         }
       }
 
-      for (const operation of operations) {
+      for (const operation of includedOperations) {
         for (const dependency of operation.dependencies) {
-          operations.add(dependency);
+          includedOperations.add(dependency);
         }
       }
 
@@ -325,13 +337,39 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
       const newExecuteOperationOptions: IExecuteOperationsOptions = {
         ...originalOptions,
         executionManagerOptions,
-        operations,
+        operations: includedOperations,
         createOperationsContext,
         abortSignal
       };
 
       newExecuteOperationOptions.stopwatch.reset();
       newExecuteOperationOptions.stopwatch.start();
+
+      const removedOperations: ITransferableOperationStatus[] = [];
+      for (const operation of previousOperations) {
+        if (!includedOperations.has(operation)) {
+          const record: OperationExecutionRecord | undefined = operationStates.get(operation);
+          const transferOperation: ITransferableOperation = transferOperationForOperation.get(operation)!;
+
+          removedOperations.push({
+            operation: transferOperation,
+            status: record?.status || OperationStatus.Ready,
+            duration: record?.stopwatch.duration ?? 0,
+            hash: record?.stateHash ?? '',
+            active: false
+          });
+        }
+      }
+
+      if (removedOperations.length > 0) {
+        const removedMessage: IRushWorkerOperationsMessage = {
+          type: 'operations',
+          value: {
+            operations: removedOperations
+          }
+        };
+        parentPort?.postMessage(removedMessage);
+      }
 
       try {
         await originalExecuteOperations.call(rawCommand, newExecuteOperationOptions);
