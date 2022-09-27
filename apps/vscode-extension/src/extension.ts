@@ -90,14 +90,14 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   extensionContext.subscriptions.push(projectView);
 
-  const commandProvider = new CommandDataProvider({
+  const commandDataProvider = new CommandDataProvider({
     workspaceRoot,
     rush,
     extensionContext: extensionContext
   });
 
   const commandView = vscode.window.createTreeView('rushCommands', {
-    treeDataProvider: commandProvider,
+    treeDataProvider: commandDataProvider,
     canSelectMany: false,
     showCollapseAll: false
   });
@@ -131,11 +131,17 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   extensionContext.subscriptions.push(activeProjectForResourceCommand);
 
-  const refreshCommand = vscode.commands.registerCommand('rush.refreshProjects', async () => {
+  const refreshProjectsCommand = vscode.commands.registerCommand('rush.refreshProjects', async () => {
     await projectDataProvider.refresh();
   });
 
-  extensionContext.subscriptions.push(refreshCommand);
+  extensionContext.subscriptions.push(refreshProjectsCommand);
+
+  const refreshActionsCommand = vscode.commands.registerCommand('rush.refreshActions', async () => {
+    await commandDataProvider.refresh();
+  });
+
+  extensionContext.subscriptions.push(refreshActionsCommand);
 
   const activateProjectCommand = vscode.commands.registerCommand(
     'rush.activateProject',
@@ -178,7 +184,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   extensionContext.subscriptions.push(deactivateProjectCommand);
 
   const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', async () => {
-    const command = commandProvider.getWatchAction();
+    const command = commandDataProvider.getWatchAction();
 
     if (!command) {
       return;
@@ -307,7 +313,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   const setAsWatchActionCommand = vscode.commands.registerCommand(
     'rush.setWatchAction',
     async (commandContext: Command | undefined) => {
-      commandProvider.setWatchAction(commandContext);
+      commandDataProvider.setWatchAction(commandContext);
 
       if (worker) {
         await vscode.commands.executeCommand('rush.disableWatch');
@@ -324,7 +330,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
     })
   );
 
-  await Promise.all([projectDataProvider.refresh(), commandProvider.refresh()]);
+  await Promise.all([projectDataProvider.refresh(), commandDataProvider.refresh()]);
 }
 
 // this method is called when your extension is deactivated

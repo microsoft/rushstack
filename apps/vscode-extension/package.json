@@ -164,6 +164,11 @@
           "command": "rush.refreshProjects",
           "when": "view == rushProjects",
           "group": "navigation"
+        },
+        {
+          "command": "rush.refreshActions",
+          "when": "view == rushCommands",
+          "group": "navigation"
         }
       ]
     },
