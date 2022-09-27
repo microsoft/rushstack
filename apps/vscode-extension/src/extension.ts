@@ -43,6 +43,11 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   const rush = await import('@rushstack/rush-sdk');
 
+  if (!rush.RushCommandLineParser || !rush.PhasedCommandWorkerController) {
+    // This version of Rush is not supported by VS Code.
+    return;
+  }
+
   let worker: Rush.PhasedCommandWorkerController | undefined;
 
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);

@@ -190,6 +190,16 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "rushProjects",
+        "contents": "Welcome to Rush!\n\nIf this view does not load, make sure that this workspace is using Rush and that Rush has been installed by entering `rush install`. Then reload this window."
+      },
+      {
+        "view": "rushCommands",
+        "contents": "Commands configured for your workspace will appear here."
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
