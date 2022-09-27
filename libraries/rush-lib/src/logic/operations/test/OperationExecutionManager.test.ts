@@ -8,7 +8,7 @@ import { EOL } from 'os';
 
 import colors from 'colors/safe';
 
-import { Terminal } from '@rushstack/node-core-library';
+import { ITerminal, Terminal } from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable } from '@rushstack/terminal';
 
@@ -22,6 +22,7 @@ import type { IOperationRunner } from '../IOperationRunner';
 import { MockOperationRunner } from './MockOperationRunner';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import { CollatedTerminalProvider } from '../../../utilities/CollatedTerminalProvider';
+import { IPhase } from '../../../api/CommandLineConfiguration';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
@@ -36,11 +37,26 @@ mockGetTimeInMs.mockImplementation(() => {
 const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
 
+const defaultPhase: IPhase = {
+  name: '_phase:foo',
+  isSynthetic: false,
+  ignoreMissingScript: true,
+  logFilenameIdentifier: 'foo',
+  allowWarningsOnSuccess: false,
+  associatedParameters: new Set(),
+  dependencies: {
+    self: new Set(),
+    upstream: new Set()
+  }
+};
+
 function createExecutionManager(
   executionManagerOptions: IOperationExecutionManagerOptions,
   operationRunner: IOperationRunner
 ): OperationExecutionManager {
   const operation: Operation = new Operation({
+    phase: defaultPhase,
+    project: undefined!,
     runner: operationRunner
   });
 
@@ -82,15 +98,15 @@ describe(OperationExecutionManager.name, () => {
     it('printedStderrAfterError', async () => {
       executionManager = createExecutionManager(
         executionManagerOptions,
-        new MockOperationRunner('stdout+stderr', async (terminal: CollatedTerminal) => {
-          terminal.writeStdoutLine('Build step 1' + EOL);
-          terminal.writeStderrLine('Error: step 1 failed' + EOL);
+        new MockOperationRunner('stdout+stderr', async (terminal: ITerminal) => {
+          terminal.writeLine('Build step 1' + EOL);
+          terminal.writeErrorLine('Error: step 1 failed' + EOL);
           return OperationStatus.Failure;
         })
       );
 
       const result: IExecutionResult = await executionManager.executeAsync();
-      _printOperationStatus(mockTerminal, result);
+      await _printOperationStatus(mockTerminal, result);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(result.operationResults.size).toEqual(1);
       const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
@@ -104,15 +120,15 @@ describe(OperationExecutionManager.name, () => {
     it('printedStdoutAfterErrorWithEmptyStderr', async () => {
       executionManager = createExecutionManager(
         executionManagerOptions,
-        new MockOperationRunner('stdout only', async (terminal: CollatedTerminal) => {
-          terminal.writeStdoutLine('Build step 1' + EOL);
-          terminal.writeStdoutLine('Error: step 1 failed' + EOL);
+        new MockOperationRunner('stdout only', async (terminal: ITerminal) => {
+          terminal.writeLine('Build step 1' + EOL);
+          terminal.writeLine('Error: step 1 failed' + EOL);
           return OperationStatus.Failure;
         })
       );
 
       const result: IExecutionResult = await executionManager.executeAsync();
-      _printOperationStatus(mockTerminal, result);
+      await _printOperationStatus(mockTerminal, result);
       expect(result.status).toEqual(OperationStatus.Failure);
       expect(result.operationResults.size).toEqual(1);
       const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
@@ -140,15 +156,15 @@ describe(OperationExecutionManager.name, () => {
       it('Logs warnings correctly', async () => {
         executionManager = createExecutionManager(
           executionManagerOptions,
-          new MockOperationRunner('success with warnings (failure)', async (terminal: CollatedTerminal) => {
-            terminal.writeStdoutLine('Build step 1' + EOL);
-            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+          new MockOperationRunner('success with warnings (failure)', async (terminal: ITerminal) => {
+            terminal.writeLine('Build step 1' + EOL);
+            terminal.writeWarningLine('Warning: step 1 succeeded with warnings' + EOL);
             return OperationStatus.SuccessWithWarning;
           })
         );
 
         const result: IExecutionResult = await executionManager.executeAsync();
-        _printOperationStatus(mockTerminal, result);
+        await _printOperationStatus(mockTerminal, result);
         expect(result.status).toEqual(OperationStatus.SuccessWithWarning);
         expect(result.operationResults.size).toEqual(1);
         const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
@@ -177,9 +193,9 @@ describe(OperationExecutionManager.name, () => {
           executionManagerOptions,
           new MockOperationRunner(
             'success with warnings (success)',
-            async (terminal: CollatedTerminal) => {
-              terminal.writeStdoutLine('Build step 1' + EOL);
-              terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+            async (terminal: ITerminal) => {
+              terminal.writeLine('Build step 1' + EOL);
+              terminal.writeWarningLine('Warning: step 1 succeeded with warnings' + EOL);
               return OperationStatus.SuccessWithWarning;
             },
             /* warningsAreAllowed */ true
@@ -187,7 +203,7 @@ describe(OperationExecutionManager.name, () => {
         );
 
         const result: IExecutionResult = await executionManager.executeAsync();
-        _printOperationStatus(mockTerminal, result);
+        await _printOperationStatus(mockTerminal, result);
         expect(result.status).toEqual(OperationStatus.Success);
         expect(result.operationResults.size).toEqual(1);
         const firstResult: IOperationExecutionResult = result.operationResults.values().next().value;
@@ -203,9 +219,9 @@ describe(OperationExecutionManager.name, () => {
           executionManagerOptions,
           new MockOperationRunner(
             'success with warnings (success)',
-            async (terminal: CollatedTerminal) => {
-              terminal.writeStdoutLine('Build step 1' + EOL);
-              terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+            async (terminal: ITerminal) => {
+              terminal.writeLine('Build step 1' + EOL);
+              terminal.writeWarningLine('Warning: step 1 succeeded with warnings' + EOL);
               return OperationStatus.SuccessWithWarning;
             },
             /* warningsAreAllowed */ true
@@ -214,7 +230,7 @@ describe(OperationExecutionManager.name, () => {
 
         const result: IExecutionResult = await executionManager.executeAsync();
         _printTimeline(mockTerminal, result);
-        _printOperationStatus(mockTerminal, result);
+        await _printOperationStatus(mockTerminal, result);
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Build step 1');
         expect(allMessages).toContain('Warning: step 1 succeeded with warnings');

@@ -80,12 +80,10 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       const app: express.Express = express();
 
-      const selectedProjects: ReadonlySet<RushConfigurationProject> = context.projectSelection;
-
       const serveConfig: RushServeConfiguration = new RushServeConfiguration();
 
       const routingRules: Iterable<IRoutingRule> = await serveConfig.loadProjectConfigsAsync(
-        selectedProjects,
+        context.projectSelection.keys(),
         logger.terminal
       );
 

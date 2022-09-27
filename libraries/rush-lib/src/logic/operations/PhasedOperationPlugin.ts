@@ -12,6 +12,10 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { IProjectFileFilter } from '../ProjectChangeAnalyzer';
+import ignore, { Ignore } from 'ignore';
+import { BuildCacheOperationProcessor } from '../buildCache/BuildCacheOperationProcessor';
 
 const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 
@@ -29,15 +33,24 @@ function createOperations(
   existingOperations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const { projectsInUnknownState: changedProjects, phaseSelection, projectSelection } = context;
+  const {
+    projectsInUnknownState: changedProjects,
+    phaseSelection,
+    projectSelection,
+    buildCacheConfiguration
+  } = context;
   const operationsWithWork: Set<Operation> = new Set();
 
   const operations: Map<string, Operation> = new Map();
 
+  const fileFilterCache: WeakMap<object, IProjectFileFilter> = new WeakMap();
+
+  const buildCacheEnabled: boolean = !!context.buildCacheConfiguration?.buildCacheEnabled;
+
   // Create tasks for selected phases and projects
   for (const phase of phaseSelection) {
-    for (const project of projectSelection) {
-      getOrCreateOperation(phase, project);
+    for (const [project, projectConfiguration] of projectSelection) {
+      getOrCreateOperation(phase, project, projectConfiguration);
     }
   }
 
@@ -61,15 +74,60 @@ function createOperations(
   }
 
   return existingOperations;
+  function getFileFilter(ignoreGlobs: ReadonlyArray<string> | undefined): IProjectFileFilter | undefined {
+    if (!ignoreGlobs || ignoreGlobs.length === 0) {
+      return;
+    }
+
+    let filter: IProjectFileFilter | undefined = fileFilterCache.get(ignoreGlobs);
+    if (!filter) {
+      const ignoreMatcher: Ignore = ignore();
+      for (const ignoreGlob of ignoreGlobs) {
+        ignoreMatcher.add(ignoreGlob);
+      }
+      filter = ignoreMatcher.createFilter();
+      fileFilterCache.set(ignoreGlobs, filter);
+    }
+
+    return filter;
+  }
 
   // Binds phaseSelection, projectSelection, operations via closure
-  function getOrCreateOperation(phase: IPhase, project: RushConfigurationProject): Operation {
+  function getOrCreateOperation(
+    phase: IPhase,
+    project: RushConfigurationProject,
+    projectConfiguration: RushProjectConfiguration | undefined
+  ): Operation {
     const key: string = getOperationKey(phase, project);
     let operation: Operation | undefined = operations.get(key);
     if (!operation) {
+      const optionsForPhase: IOperationSettings | undefined =
+        projectConfiguration?.operationSettingsByOperationName.get(phase.name);
+      const outputFolderNames: ReadonlyArray<string> = optionsForPhase?.outputFolderNames || [];
+      const projectFileFilter: IProjectFileFilter | undefined = getFileFilter(
+        projectConfiguration?.incrementalBuildIgnoredGlobs
+      );
+
+      const enableCache: boolean =
+        buildCacheEnabled &&
+        !!optionsForPhase &&
+        !projectConfiguration?.disableBuildCacheForProject &&
+        !optionsForPhase?.disableBuildCacheForOperation;
+
       operation = new Operation({
         project,
-        phase
+        phase,
+        outputFolderNames,
+        projectFileFilter,
+        processor:
+          enableCache && buildCacheConfiguration
+            ? new BuildCacheOperationProcessor({
+                project,
+                phaseName: phase.name,
+                outputFolderNames,
+                buildCacheConfiguration
+              })
+            : undefined
       });
 
       if (!phaseSelection.has(phase) || !projectSelection.has(project)) {
@@ -79,6 +137,7 @@ function createOperations(
           result: OperationStatus.Skipped,
           silent: true
         });
+        operation.processor = undefined;
       } else if (changedProjects.has(project)) {
         operationsWithWork.add(operation);
       }
@@ -91,7 +150,7 @@ function createOperations(
       } = phase;
 
       for (const depPhase of self) {
-        operation.addDependency(getOrCreateOperation(depPhase, project));
+        operation.addDependency(getOrCreateOperation(depPhase, project, projectConfiguration));
       }
 
       if (upstream.size) {
@@ -99,7 +158,9 @@ function createOperations(
         if (dependencyProjects.size) {
           for (const depPhase of upstream) {
             for (const dependencyProject of dependencyProjects) {
-              operation.addDependency(getOrCreateOperation(depPhase, dependencyProject));
+              operation.addDependency(
+                getOrCreateOperation(depPhase, dependencyProject, projectSelection.get(dependencyProject))
+              );
             }
           }
         }

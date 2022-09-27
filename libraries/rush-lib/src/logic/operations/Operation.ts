@@ -5,7 +5,9 @@ import * as crypto from 'crypto';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IPhase } from '../../api/CommandLineConfiguration';
+import { IOperationProcessor } from './IOperationProcessor';
 import { IOperationRunner } from './IOperationRunner';
+import { IProjectFileFilter } from '../ProjectChangeAnalyzer';
 import { RushConstants } from '../RushConstants';
 
 /**
@@ -16,16 +18,28 @@ export interface IOperationOptions {
   /**
    * The Rush phase associated with this Operation, if any
    */
-  phase?: IPhase | undefined;
+  phase: IPhase;
   /**
    * The Rush project associated with this Operation, if any
    */
-  project?: RushConfigurationProject | undefined;
+  project: RushConfigurationProject;
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
    * running the operation.
    */
   runner?: IOperationRunner | undefined;
+  /**
+   * For use by incremental skip and the build cache, the list of output folders
+   */
+  outputFolderNames?: ReadonlyArray<string> | undefined;
+  /**
+   * For use by incremental skip and the build cache, a function to filter tracked files
+   */
+  projectFileFilter?: IProjectFileFilter | undefined;
+  /**
+   * Operator to do pre/post build operations
+   */
+  processor?: IOperationProcessor | undefined;
 }
 
 /**
@@ -41,12 +55,12 @@ export class Operation {
   /**
    * The Rush phase associated with this Operation, if any
    */
-  public readonly associatedPhase: IPhase | undefined;
+  public readonly associatedPhase: IPhase;
 
   /**
    * The Rush project associated with this Operation, if any
    */
-  public readonly associatedProject: RushConfigurationProject | undefined;
+  public readonly associatedProject: RushConfigurationProject;
 
   /**
    * A set of all operations which depend on this operation.
@@ -62,7 +76,7 @@ export class Operation {
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
    * running the operation.
    */
-  public runner: IOperationRunner | undefined = undefined;
+  public runner: IOperationRunner | undefined;
 
   /**
    * The weight for this operation. This scalar is the contribution of this operation to the
@@ -77,10 +91,33 @@ export class Operation {
    */
   public weight: number = 1;
 
-  public constructor(options?: IOperationOptions) {
-    this.associatedPhase = options?.phase;
-    this.associatedProject = options?.project;
-    this.runner = options?.runner;
+  public readonly outputFolderNames: ReadonlyArray<string>;
+
+  public readonly projectFileFilter: IProjectFileFilter | undefined;
+
+  public processor: IOperationProcessor | undefined;
+
+  public logFilePath: string | undefined = undefined;
+
+  public constructor(options: IOperationOptions) {
+    const {
+      phase,
+      outputFolderNames = []
+    } = options;
+
+    this.associatedPhase = phase;
+    this.associatedProject = options.project;
+
+    const uniqueOutputFolderNames: Set<string> = new Set(outputFolderNames);
+    uniqueOutputFolderNames.add(
+      `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${phase.logFilenameIdentifier}`);
+    const sortedOutputFolderNames: string[] = Array.from(uniqueOutputFolderNames).sort();
+    this.outputFolderNames = sortedOutputFolderNames;
+
+    this.projectFileFilter = options.projectFileFilter;
+
+    this.runner = options.runner;
+    this.processor = options.processor;
   }
 
   /**
@@ -106,22 +143,29 @@ export class Operation {
       }
     }
 
-    const sortedHashes: string[] = dependencyHashes.sort();
     const hash: crypto.Hash = crypto.createHash('sha1');
-    hash.update(localHash);
-    for (const dependencyHash of sortedHashes) {
-      hash.update(dependencyHash);
+    hash.update(`${RushConstants.buildCacheVersion}`);
+    hash.update(RushConstants.hashDelimiter);
+
+    // Output folder names are part of the configuration, so include in hash
+    for (const outputFolder of this.outputFolderNames) {
+      hash.update(outputFolder);
       hash.update(RushConstants.hashDelimiter);
     }
 
     // CLI parameters that apply to the phase affect the result
-    const { associatedPhase } = this;
-    if (associatedPhase) {
-      const params: string[] = [];
-      for (const tsCommandLineParameter of associatedPhase.associatedParameters) {
-        tsCommandLineParameter.appendToArgList(params);
-      }
-      hash.update(params.join(' '));
+    const params: string[] = [];
+    for (const tsCommandLineParameter of this.associatedPhase.associatedParameters) {
+      tsCommandLineParameter.appendToArgList(params);
+    }
+    hash.update(params.join(' '));
+
+    hash.update(localHash);
+
+    const sortedHashes: string[] = dependencyHashes.sort();
+    for (const dependencyHash of sortedHashes) {
+      hash.update(dependencyHash);
+      hash.update(RushConstants.hashDelimiter);
     }
     return hash.digest('hex');
   }

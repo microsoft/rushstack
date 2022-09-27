@@ -45,8 +45,8 @@ Array [
   },
   Object {
     "kind": "E",
-    "text": "Error: step 1 failed
-
+    "text": "[red]Error: step 1 failed
+[default]
 ",
   },
   Object {
@@ -69,7 +69,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default] [red]FAILURE: stdout+stderr[default] [gray]]---------------------------------[[default] [white]0.10 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default] [red]FAILURE: stdout+stderr[default] [gray]]---------------------------------[[default] [white]0.20 seconds[default] [gray]]--[default]
 
 ",
   },
@@ -157,7 +157,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[gray]--[[default] [red]FAILURE: stdout only[default] [gray]]-----------------------------------[[default] [white]0.10 seconds[default] [gray]]--[default]
+    "text": "[gray]--[[default] [red]FAILURE: stdout only[default] [gray]]-----------------------------------[[default] [white]0.20 seconds[default] [gray]]--[default]
 
 ",
   },
@@ -220,9 +220,9 @@ Array [
 ",
   },
   Object {
-    "kind": "O",
-    "text": "Warning: step 1 succeeded with warnings
-
+    "kind": "E",
+    "text": "[yellow]Warning: step 1 succeeded with warnings
+[default]
 ",
   },
   Object {
@@ -308,9 +308,9 @@ Array [
 ",
   },
   Object {
-    "kind": "O",
-    "text": "Warning: step 1 succeeded with warnings
-
+    "kind": "E",
+    "text": "[yellow]Warning: step 1 succeeded with warnings
+[default]
 ",
   },
   Object {
@@ -390,9 +390,9 @@ Array [
 ",
   },
   Object {
-    "kind": "O",
-    "text": "Warning: step 1 succeeded with warnings
-
+    "kind": "E",
+    "text": "[yellow]Warning: step 1 succeeded with warnings
+[default]
 ",
   },
   Object {
@@ -438,6 +438,16 @@ Array [
   Object {
     "kind": "O",
     "text": "                                                                                    Avg Parallelism Used: 1.0
+",
+  },
+  Object {
+    "kind": "O",
+    "text": "BY PHASE:
+",
+  },
+  Object {
+    "kind": "O",
+    "text": "  [cyan]      _phase:foo[default] 0.2s
 ",
   },
   Object {

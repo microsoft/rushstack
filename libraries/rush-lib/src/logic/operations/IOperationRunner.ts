@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { StdioSummarizer } from '@rushstack/terminal';
-import type { CollatedWriter } from '@rushstack/stream-collator';
+import { ITerminal } from '@rushstack/node-core-library';
+import type { TerminalWritable } from '@rushstack/terminal';
 
 import type { OperationStatus } from './OperationStatus';
-import type { OperationStateFile } from './OperationStateFile';
-import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -15,35 +13,39 @@ import type { IStopwatchResult } from '../../utilities/Stopwatch';
  */
 export interface IOperationRunnerContext {
   /**
-   * The writer into which this `IOperationRunner` should write its logs.
-   */
-  collatedWriter: CollatedWriter;
-  /**
    * If Rush was invoked with `--debug`
    */
   debugMode: boolean;
+
   /**
    * Defaults to `true`. Will be `false` if Rush was invoked with `--verbose`.
    */
   quietMode: boolean;
+
+  /**
+   * Defaults to `true`. Will be `false` if a dependency is in an unknown state.
+   */
+  isSkipAllowed: boolean;
+
+  /**
+   * Defaults to `true`. Will be `false` if a dependency is in an unknown state.
+   */
+  isCacheReadAllowed: boolean;
+
   /**
    * Defaults to `true`. Will be `false` if a dependency is in an unknown state.
    */
   isCacheWriteAllowed: boolean;
+
   /**
-   * Object used to report a summary at the end of the Rush invocation.
+   * Terminal instance for logging messages.
    */
-  stdioSummarizer: StdioSummarizer;
+  terminal: ITerminal;
+
   /**
-   * Object used to record state of the operation.
-   *
-   * @internal
+   * Raw terminal for forwarding stdout/stderr
    */
-  _operationStateFile?: OperationStateFile;
-  /**
-   * Object used to track elapsed time.
-   */
-  stopwatch: IStopwatchResult;
+  terminalWritable: TerminalWritable;
 
   /**
    * The hashes of all tracked files pertinent to the operation
@@ -70,11 +72,6 @@ export interface IOperationRunner {
   readonly name: string;
 
   /**
-   * This flag determines if the operation is allowed to be skipped if up to date.
-   */
-  isSkipAllowed: boolean;
-
-  /**
    * Indicates that this runner's duration has meaning.
    */
   reportTiming: boolean;
@@ -89,11 +86,6 @@ export interface IOperationRunner {
    * exit code
    */
   warningsAreAllowed: boolean;
-
-  /**
-   * Indicates if the output of this operation may be written to the cache
-   */
-  isCacheWriteAllowed: boolean;
 
   /**
    * Method to be executed for the operation.

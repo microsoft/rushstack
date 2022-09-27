@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, FileWriter, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, FileWriter, InternalError, ITerminal } from '@rushstack/node-core-library';
 import { TerminalChunkKind, TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
-import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
@@ -11,7 +10,7 @@ import { RushConstants } from '../RushConstants';
 
 export class ProjectLogWritable extends TerminalWritable {
   private readonly _project: RushConfigurationProject;
-  private readonly _terminal: CollatedTerminal;
+  private readonly _terminal: ITerminal;
 
   private _logPath: string;
   private _errorLogPath: string;
@@ -21,7 +20,7 @@ export class ProjectLogWritable extends TerminalWritable {
 
   public constructor(
     project: RushConfigurationProject,
-    terminal: CollatedTerminal,
+    terminal: ITerminal,
     logFilenameIdentifier: string
   ) {
     super();
@@ -89,7 +88,7 @@ export class ProjectLogWritable extends TerminalWritable {
       try {
         this._logWriter.close();
       } catch (error) {
-        this._terminal.writeStderrLine('Failed to close file handle for ' + this._logWriter.filePath);
+        this._terminal.writeErrorLine('Failed to close file handle for ' + this._logWriter.filePath);
       }
       this._logWriter = undefined;
     }
@@ -98,7 +97,7 @@ export class ProjectLogWritable extends TerminalWritable {
       try {
         this._errorLogWriter.close();
       } catch (error) {
-        this._terminal.writeStderrLine('Failed to close file handle for ' + this._errorLogWriter.filePath);
+        this._terminal.writeErrorLine('Failed to close file handle for ' + this._errorLogWriter.filePath);
       }
       this._errorLogWriter = undefined;
     }

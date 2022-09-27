@@ -14,7 +14,7 @@ describe(CacheEntryId.name, () => {
       expect(
         getCacheEntryId({
           projectName,
-          projectStateHash: '09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3',
+          stateHash: '09d1ecee6d5f888fa6c35ca804b5dac7c3735ce3',
           phaseName: '_phase:compile',
           ...generateCacheEntryIdOptions
         })

@@ -4,7 +4,7 @@
 import colors from 'colors/safe';
 import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
 import { StreamCollator, CollatedWriter } from '@rushstack/stream-collator';
-import { NewlineKind, Async, Terminal, ITerminal } from '@rushstack/node-core-library';
+import { NewlineKind, Async, Terminal, ITerminal, AlreadyReportedError, Colors } from '@rushstack/node-core-library';
 
 import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
 import { Operation } from './Operation';
@@ -12,8 +12,8 @@ import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import { IExecutionResult } from './IOperationExecutionResult';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
+import { LookupByPath } from '../LookupByPath';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -216,33 +216,42 @@ export class OperationExecutionManager {
   }
 
   private async _updateStateAsync(state: ProjectChangeAnalyzer): Promise<void> {
-    this._terminal.writeLine(`Updating state hashes`);
-    const trackedFilesByProject: Map<RushConfigurationProject, ReadonlyMap<string, string> | undefined> =
-      new Map();
-    for (const { associatedProject } of this._executionRecords.keys()) {
-      if (associatedProject && !trackedFilesByProject.has(associatedProject)) {
-        const trackedFiles: ReadonlyMap<string, string> | undefined = state._tryGetProjectDependencies(
-          associatedProject,
-          this._terminal
-        );
-        trackedFilesByProject.set(associatedProject, trackedFiles);
-      }
-    }
+    const { _terminal: terminal } = this;
+    terminal.writeLine(`Updating operation states...`);
+    let hasIssues: boolean = false;
 
     function getOperationHash(record: OperationExecutionRecord): string {
       let { stateHash } = record;
       if (stateHash === undefined) {
         const { operation } = record;
-        const { associatedProject } = operation;
+        const { associatedProject, projectFileFilter, outputFolderNames, processor } = operation;
         stateHash = '';
-        if (associatedProject) {
-          const trackedFiles: ReadonlyMap<string, string> | undefined =
-            trackedFilesByProject.get(associatedProject);
-          record.trackedFileHashes = trackedFiles;
-          const localHash: string = trackedFiles ? state._hashProjectDependencies(trackedFiles) : '';
-          if (localHash) {
-            stateHash = operation.getHash(localHash, Array.from(record.dependencies, getOperationHash));
+        const trackedFiles: ReadonlyMap<string, string> | undefined = state._tryGetProjectDependencies(
+          associatedProject,
+          terminal,
+          projectFileFilter
+        );
+
+        if (trackedFiles && outputFolderNames?.length && processor) {
+          const projectOutputLookup: LookupByPath<string> = new LookupByPath(
+            outputFolderNames.map((relativePath) => [relativePath, relativePath])
+          );
+          for (const trackedFilePath of trackedFiles.keys()) {
+            const match: string | undefined = projectOutputLookup.findChildPath(trackedFilePath);
+            if (match) {
+              hasIssues = true;
+              terminal.writeErrorLine(
+                `Project "${associatedProject.packageName}" contains Git tracked file "${trackedFilePath}" in configured ` +
+                  `output folder "${match}". This is invalid. Either remove the file from Git or change the configuration to make it not an output.`
+              );
+            }
           }
+        }
+
+        record.trackedFileHashes = trackedFiles;
+        const localHash: string = trackedFiles ? state._hashProjectDependencies(trackedFiles) : '';
+        if (localHash) {
+          stateHash = operation.getHash(localHash, Array.from(record.dependencies, getOperationHash));
         }
         record.stateHash = stateHash;
       }
@@ -252,6 +261,12 @@ export class OperationExecutionManager {
     for (const record of this._executionRecords.values()) {
       getOperationHash(record);
     }
+
+    if (hasIssues) {
+      throw new AlreadyReportedError();
+    }
+
+    this._terminal.writeLine(`Finished updating operation states.`);
   }
 
   /**
@@ -260,8 +275,8 @@ export class OperationExecutionManager {
   private _onOperationComplete(record: OperationExecutionRecord): void {
     const { runner, name, status } = record;
 
-    let blockCacheWrite: boolean = !runner.isCacheWriteAllowed;
-    let blockSkip: boolean = !runner.isSkipAllowed;
+    let blockCacheWrite: boolean = !record.isCacheWriteAllowed;
+    let blockSkip: boolean = !record.isSkipAllowed;
 
     const silent: boolean = runner.silent;
 
@@ -274,11 +289,11 @@ export class OperationExecutionManager {
         // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
         const message: string | undefined = record.error?.message;
         // This creates the writer, so don't do this globally
-        const { terminal } = record.collatedWriter;
+        const { terminal } = record;
         if (message) {
-          terminal.writeStderrLine(message);
+          terminal.writeErrorLine(message);
         }
-        terminal.writeStderrLine(colors.red(`"${name}" failed to build.`));
+        terminal.writeErrorLine(`"${name}" failed to build.`);
         const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
         for (const blockedRecord of blockedQueue) {
           if (blockedRecord.status === OperationStatus.Ready) {
@@ -288,7 +303,7 @@ export class OperationExecutionManager {
             // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
             // operations. However, the existing behavior is a bit simpler, so keeping that for now.
             if (!blockedRecord.silent) {
-              terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
+              terminal.writeErrorLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
 
@@ -306,8 +321,8 @@ export class OperationExecutionManager {
        */
       case OperationStatus.FromCache: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(
-            colors.green(`"${name}" was restored from the build cache.`)
+          record.terminal.writeLine(
+            Colors.green(`"${name}" was restored from the build cache.`)
           );
         }
         break;
@@ -318,7 +333,7 @@ export class OperationExecutionManager {
        */
       case OperationStatus.Skipped: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(colors.green(`"${name}" was skipped.`));
+          record.terminal.writeLine(Colors.green(`"${name}" was skipped.`));
         }
         // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
         blockCacheWrite = true;
@@ -330,15 +345,15 @@ export class OperationExecutionManager {
        */
       case OperationStatus.NoOp: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(colors.gray(`"${name}" did not define any work.`));
+          record.terminal.writeLine(Colors.gray(`"${name}" did not define any work.`));
         }
         break;
       }
 
       case OperationStatus.Success: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(
-            colors.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
+          record.terminal.writeLine(
+            Colors.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
           );
         }
         // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
@@ -348,8 +363,8 @@ export class OperationExecutionManager {
 
       case OperationStatus.SuccessWithWarning: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStderrLine(
-            colors.yellow(`"${name}" completed with warnings in ${record.stopwatch.toString()}.`)
+          record.terminal.writeWarningLine(
+            `"${name}" completed with warnings in ${record.stopwatch.toString()}.`
           );
         }
         // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
@@ -367,7 +382,7 @@ export class OperationExecutionManager {
 
       if (blockSkip) {
         // Only relevant in legacy non-build cache flow
-        item.runner.isSkipAllowed = false;
+        item.isSkipAllowed = false;
       }
 
       // Remove this operation from the dependencies, to unblock the scheduler

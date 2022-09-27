@@ -9,7 +9,6 @@
 import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
-import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
@@ -17,9 +16,9 @@ import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
-import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
+import type { TerminalWritable } from '@rushstack/terminal';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -264,7 +263,8 @@ export interface ICreateOperationsContext {
     readonly isWatch: boolean;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
-    readonly projectSelection: ReadonlySet<RushConfigurationProject>;
+    // Warning: (ae-forgotten-export) The symbol "RushProjectConfiguration" needs to be exported by the entry point index.d.ts
+    readonly projectSelection: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration | undefined>;
     readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
 }
@@ -315,12 +315,13 @@ export interface IFileSystemBuildCacheProviderOptions {
 export interface IGenerateCacheEntryIdOptions {
     phaseName: string;
     projectName: string;
-    projectStateHash: string;
+    stateHash: string;
 }
 
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
-    enableFiltering: boolean;
+    // Warning: (ae-forgotten-export) The symbol "IProjectFileFilterMap" needs to be exported by the entry point index.d.ts
+    filters?: IProjectFileFilterMap;
     includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
@@ -374,22 +375,24 @@ export interface IOperationExecutionResult {
     readonly error: Error | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly status: OperationStatus;
-    readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
 }
 
 // @alpha
 export interface IOperationOptions {
-    phase?: IPhase | undefined;
-    project?: RushConfigurationProject | undefined;
+    outputFolderNames?: ReadonlyArray<string> | undefined;
+    phase: IPhase;
+    // Warning: (ae-forgotten-export) The symbol "IOperationProcessor" needs to be exported by the entry point index.d.ts
+    processor?: IOperationProcessor | undefined;
+    project: RushConfigurationProject;
+    // Warning: (ae-forgotten-export) The symbol "IProjectFileFilter" needs to be exported by the entry point index.d.ts
+    projectFileFilter?: IProjectFileFilter | undefined;
     runner?: IOperationRunner | undefined;
 }
 
 // @beta
 export interface IOperationRunner {
     executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
-    isCacheWriteAllowed: boolean;
-    isSkipAllowed: boolean;
     readonly name: string;
     reportTiming: boolean;
     silent: boolean;
@@ -398,13 +401,15 @@ export interface IOperationRunner {
 
 // @beta
 export interface IOperationRunnerContext {
-    collatedWriter: CollatedWriter;
     debugMode: boolean;
-    // @internal
-    _operationStateFile?: _OperationStateFile;
+    isCacheReadAllowed: boolean;
+    isCacheWriteAllowed: boolean;
+    isSkipAllowed: boolean;
     quietMode: boolean;
-    stdioSummarizer: StdioSummarizer;
-    stopwatch: IStopwatchResult;
+    stateHash: string | undefined;
+    terminal: ITerminal;
+    terminalWritable: TerminalWritable;
+    trackedFileHashes: ReadonlyMap<string, string> | undefined;
 }
 
 // @internal (undocumented)
@@ -575,6 +580,8 @@ export class LookupByPath<TItem> {
     constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
     readonly delimiter: string;
     findChildPath(childPath: string): TItem | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IPrefixMatch" needs to be exported by the entry point index.d.ts
+    findChildPathAndIndex(childPath: string): IPrefixMatch<TItem> | undefined;
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
     static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
     setItem(serializedPath: string, value: TItem): this;
@@ -589,14 +596,23 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
 
 // @alpha
 export class Operation {
-    constructor(options?: IOperationOptions);
+    constructor(options: IOperationOptions);
     addDependency(dependency: Operation): void;
-    readonly associatedPhase: IPhase | undefined;
-    readonly associatedProject: RushConfigurationProject | undefined;
+    readonly associatedPhase: IPhase;
+    readonly associatedProject: RushConfigurationProject;
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
+    getHash(localHash: string, dependencyHashes: string[]): string;
+    // (undocumented)
+    logFilePath: string | undefined;
     get name(): string | undefined;
+    // (undocumented)
+    readonly outputFolderNames: ReadonlyArray<string>;
+    // (undocumented)
+    processor: IOperationProcessor | undefined;
+    // (undocumented)
+    readonly projectFileFilter: IProjectFileFilter | undefined;
     runner: IOperationRunner | undefined;
     weight: number;
 }
@@ -724,14 +740,17 @@ export class ProjectChangeAnalyzer {
     // Warning: (ae-forgotten-export) The symbol "IRawRepoState" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
-    _ensureInitialized(terminal: ITerminal): IRawRepoState | undefined;
+    _ensureInitialized(terminal: ITerminal): IRawRepoState;
     // (undocumented)
-    _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
+    _filterProjectData<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, fileFilter?: IProjectFileFilter): Map<string, T>;
+    getChangedProjects(options: IGetChangedProjectsOptions): Set<RushConfigurationProject>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    // @internal (undocumented)
+    _hashProjectDependencies(packageDeps: ReadonlyMap<string, string>): string;
     // @internal
-    _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
+    _tryGetProjectDependencies(project: RushConfigurationProject, terminal: ITerminal, fileFilter?: IProjectFileFilter): ReadonlyMap<string, string> | undefined;
     // @internal
-    _tryGetProjectStateHashAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<string | undefined>;
+    _tryGetProjectStateHash(project: RushConfigurationProject, terminal: ITerminal, fileFilter?: IProjectFileFilter): string | undefined;
 }
 
 // @public

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { InternalError, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, InternalError, ITerminal } from '@rushstack/node-core-library';
 import {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
@@ -33,10 +33,10 @@ export class OperationResultSummarizerPlugin implements IPhasedCommandPlugin {
   }
 
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.afterExecuteOperations.tap(
+    hooks.afterExecuteOperations.tapPromise(
       PLUGIN_NAME,
-      (result: IExecutionResult, context: ICreateOperationsContext): void => {
-        _printOperationStatus(this._terminal, result);
+      async (result: IExecutionResult, context: ICreateOperationsContext): Promise<void> => {
+        await _printOperationStatus(this._terminal, result);
       }
     );
   }
@@ -46,7 +46,7 @@ export class OperationResultSummarizerPlugin implements IPhasedCommandPlugin {
  * Prints out a report of the status of each project
  * @internal
  */
-export function _printOperationStatus(terminal: ITerminal, result: IExecutionResult): void {
+export async function _printOperationStatus(terminal: ITerminal, result: IExecutionResult): Promise<void> {
   const { operationResults } = result;
 
   const operationsByStatus: IOperationsByStatus = new Map();
@@ -116,7 +116,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     'These operations completed successfully:'
   );
 
-  writeDetailedSummary(
+  await writeDetailedSummary(
     terminal,
     OperationStatus.SuccessWithWarning,
     operationsByStatus,
@@ -132,7 +132,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     'These operations were blocked by dependencies that failed:'
   );
 
-  writeDetailedSummary(terminal, OperationStatus.Failure, operationsByStatus, colors.red);
+  await writeDetailedSummary(terminal, OperationStatus.Failure, operationsByStatus, colors.red);
 
   terminal.writeLine('');
 
@@ -193,13 +193,13 @@ function writeCondensedSummary(
   terminal.writeLine('');
 }
 
-function writeDetailedSummary(
+async function writeDetailedSummary(
   terminal: ITerminal,
   status: OperationStatus,
   operationsByStatus: IOperationsByStatus,
   headingColor: (text: string) => string,
   shortStatusName?: string
-): void {
+): Promise<void> {
   // Example:
   //
   // ==[ SUCCESS WITH WARNINGS: 2 projects ]================================
@@ -246,10 +246,16 @@ function writeDetailedSummary(
       )} ${colors.white(time)} ${colors.gray(']--')}\n`
     );
 
-    const details: string = operationResult.stdioSummarizer.getReport();
-    if (details) {
-      // Don't write a newline, because the report will always end with a newline
-      terminal.write(details);
+    if (operation.logFilePath) {
+      try {
+        const details: string = await FileSystem.readFileAsync(operation.logFilePath);
+        if (details) {
+          // Don't write a newline, because the report will always end with a newline
+          terminal.write(details);
+        }
+      } catch (err) {
+        // Do nothing
+      }
     }
 
     terminal.writeLine('');

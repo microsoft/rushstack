@@ -5,6 +5,7 @@ import { Operation } from '../Operation';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
 import { MockOperationRunner } from './MockOperationRunner';
 import { AsyncOperationQueue, IOperationSortFunction } from '../AsyncOperationQueue';
+import { IPhase } from '../../../api/CommandLineConfiguration';
 
 function addDependency(consumer: OperationExecutionRecord, dependency: OperationExecutionRecord): void {
   consumer.dependencies.add(dependency);
@@ -15,9 +16,24 @@ function nullSort(a: OperationExecutionRecord, b: OperationExecutionRecord): num
   return 0;
 }
 
+const defaultPhase: IPhase = {
+  name: '_phase:foo',
+  isSynthetic: false,
+  ignoreMissingScript: true,
+  logFilenameIdentifier: 'foo',
+  allowWarningsOnSuccess: false,
+  associatedParameters: new Set(),
+  dependencies: {
+    self: new Set(),
+    upstream: new Set()
+  }
+};
+
 function createRecord(name: string): OperationExecutionRecord {
   return new OperationExecutionRecord(
     new Operation({
+      phase: defaultPhase,
+      project: undefined!,
       runner: new MockOperationRunner(name)
     }),
     {} as unknown as IOperationExecutionRecordContext

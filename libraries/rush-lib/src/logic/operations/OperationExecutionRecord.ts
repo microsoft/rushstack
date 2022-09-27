@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StdioSummarizer } from '@rushstack/terminal';
-import { InternalError } from '@rushstack/node-core-library';
-import { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
+import { DiscardStdoutTransform, SplitterTransform, StderrLineTransform, StdioSummarizer, TerminalWritable, TextRewriterTransform } from '@rushstack/terminal';
+import { InternalError, ITerminal, NewlineKind, Terminal } from '@rushstack/node-core-library';
+import { CollatedTerminal, CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus } from './OperationStatus';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { OperationStateFile } from './OperationStateFile';
+import { IOperationProcessor } from './IOperationProcessor';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -69,7 +71,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public silent: boolean = false;
 
-  public isCacheWriteAllowed: boolean = false;
+  public isSkipAllowed: boolean = true;
+  public isCacheReadAllowed: boolean = true;
+  public isCacheWriteAllowed: boolean = true;
 
   public trackedFileHashes: ReadonlyMap<string, string> | undefined = undefined;
 
@@ -95,7 +99,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   private readonly _context: IOperationExecutionRecordContext;
 
-  private _collatedWriter: CollatedWriter | undefined = undefined;
+  private _writer: CollatedWriter | undefined = undefined;
+  private _terminalWritable: TerminalWritable | undefined = undefined;
+  private _terminal: ITerminal | undefined = undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     this.operation = operation;
@@ -103,20 +109,20 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
     if (!runner) {
       throw new InternalError(
-        `Operation for phase '${operation.associatedPhase?.name}' and project '${operation.associatedProject?.packageName}' has no runner.`
+        `Operation for phase '${operation.associatedPhase.name}' and project '${operation.associatedProject.packageName}' has no runner.`
       );
     }
     this.silent = runner.silent;
-    this.isCacheWriteAllowed = runner.isCacheWriteAllowed;
 
     this.runner = runner;
     this.weight = operation.weight;
-    if (operation.associatedPhase && operation.associatedProject) {
-      this._operationStateFile = new OperationStateFile({
-        phase: operation.associatedPhase,
-        rushProject: operation.associatedProject
-      });
-    }
+
+    const { associatedPhase, associatedProject } = operation;
+
+    this._operationStateFile = associatedPhase && associatedProject ? new OperationStateFile({
+      phase: associatedPhase,
+      rushProject: associatedProject
+    }) : undefined;
     this._context = context;
   }
 
@@ -132,25 +138,83 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._context.quietMode;
   }
 
-  public get collatedWriter(): CollatedWriter {
-    // Lazy instantiate because the registerTask() call affects display ordering
-    if (!this._collatedWriter) {
-      this._collatedWriter = this._context.streamCollator.registerTask(this.name);
-    }
-    return this._collatedWriter;
-  }
-
   public get nonCachedDurationMs(): number | undefined {
     // Lazy calculated because the state file is created/restored later on
     return this._operationStateFile?.state?.nonCachedDurationMs;
   }
 
+  public get terminalWritable(): TerminalWritable {
+    if (!this._terminalWritable) {
+      const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
+        destination: this.stdioSummarizer,
+        newlineKind: NewlineKind.Lf // for StdioSummarizer
+      });
+
+      const discardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
+        destination: this._collatedWriter
+      });
+
+      const splitterTransform: SplitterTransform = new SplitterTransform({
+        destinations: [this.quietMode ? discardTransform : this._collatedWriter, stderrLineTransform]
+      });
+
+      const normalizeNewlineTransform: TextRewriterTransform = new TextRewriterTransform({
+        destination: splitterTransform,
+        normalizeNewlines: NewlineKind.Lf,
+        ensureNewlineAtEnd: true
+      });
+
+      this._terminalWritable = normalizeNewlineTransform;
+    }
+    return this._terminalWritable;
+  }
+
+  public get terminal(): ITerminal {
+    if (!this._terminal) {
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(this.terminalWritable);
+      this._terminal = new Terminal(new CollatedTerminalProvider(collatedTerminal));
+    }
+    return this._terminal;
+  }
+
+  private get _collatedWriter(): CollatedWriter {
+    // Lazy instantiate because the registerTask() call affects display ordering
+    if (!this._writer) {
+      this._writer = this._context.streamCollator.registerTask(this.name);
+    }
+    return this._writer;
+  }
+
   public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {
     this.status = OperationStatus.Executing;
-    this.stopwatch.start();
 
     try {
-      this.status = await this.runner.executeAsync(this);
+      let status: OperationStatus = this.status;
+      const processor: IOperationProcessor | undefined = this.operation.processor;
+      if (processor) {
+        // Handle, e.g. build cache read
+        status = await processor.beforeBuildAsync(this);
+        if (status !== OperationStatus.Ready) {
+          this.status = status;
+          await this._operationStateFile?.tryRestoreAsync();
+          return onResult(this);
+        }
+      }
+
+      this.stopwatch.start();
+      status = await this.runner.executeAsync(this);
+      this.stopwatch.stop();
+
+      await this._operationStateFile?.writeAsync({
+        nonCachedDurationMs: this.stopwatch.duration * 1000
+      });
+
+      if (processor) {
+        // Handle, e.g. build cache write
+        status = await processor.afterBuildAsync(this, status);
+      }
+
+      this.status = status;
       // Delegate global state reporting
       onResult(this);
     } catch (error) {
@@ -160,8 +224,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       onResult(this);
     } finally {
       this.silent = this.runner.silent;
-      this._collatedWriter?.close();
-      this.stdioSummarizer.close();
+      this._terminalWritable?.close();
+      this._writer?.close();
       this.stopwatch.stop();
     }
   }

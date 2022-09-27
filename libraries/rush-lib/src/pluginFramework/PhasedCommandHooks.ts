@@ -12,6 +12,7 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
 import { IExecutionResult } from '../logic/operations/IOperationExecutionResult';
+import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -61,9 +62,10 @@ export interface ICreateOperationsContext {
    */
   readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
   /**
-   * The set of Rush projects selected for the current command execution.
+   * The set of Rush projects selected for the current command execution, mapped to their resolved
+   * rush-project.json configurations (or undefined if no configuration provided).
    */
-  readonly projectSelection: ReadonlySet<RushConfigurationProject>;
+  readonly projectSelection: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration | undefined>;
   /**
    * The set of Rush projects that have not been built in the current process since they were last modified.
    * When `isInitial` is true, this will be an exact match of `projectSelection`.

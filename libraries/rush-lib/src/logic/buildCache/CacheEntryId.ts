@@ -19,7 +19,7 @@ export interface IGenerateCacheEntryIdOptions {
   /**
    * A hash of the input files
    */
-  projectStateHash: string;
+  stateHash: string;
 }
 
 /**
@@ -40,7 +40,7 @@ export class CacheEntryId {
 
   public static parsePattern(pattern?: string): GetCacheEntryIdFunction {
     if (!pattern) {
-      return ({ projectStateHash }) => projectStateHash;
+      return ({ stateHash }) => stateHash;
     } else {
       pattern = pattern.trim();
 
@@ -84,7 +84,7 @@ export class CacheEntryId {
             }
 
             foundHashToken = true;
-            return `\${${OPTIONS_ARGUMENT_NAME}.projectStateHash}`;
+            return `\${${OPTIONS_ARGUMENT_NAME}.stateHash}`;
           }
 
           case PROJECT_NAME_TOKEN_NAME: {

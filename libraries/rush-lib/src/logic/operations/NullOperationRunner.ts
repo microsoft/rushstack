@@ -31,10 +31,6 @@ export class NullOperationRunner implements IOperationRunner {
   // This operation does nothing, so timing is meaningless
   public readonly reportTiming: boolean = false;
   public readonly silent: boolean;
-  // The operation may be skipped; it doesn't do anything anyway
-  public isSkipAllowed: boolean = true;
-  // The operation is a no-op, so is cacheable.
-  public isCacheWriteAllowed: boolean = true;
   // Nothing will get logged, no point allowing warnings
   public readonly warningsAreAllowed: boolean = false;
 

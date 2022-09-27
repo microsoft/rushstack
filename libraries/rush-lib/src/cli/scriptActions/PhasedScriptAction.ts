@@ -5,7 +5,7 @@ import * as os from 'os';
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, InternalError, ITerminal, Terminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Async, InternalError, ITerminal, Terminal } from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineParameter,
@@ -38,6 +38,7 @@ import { IExecutionResult } from '../../logic/operations/IOperationExecutionResu
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -293,6 +294,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const changedProjectsOnly: boolean = !!this._changedProjectsOnly?.value;
 
+    const selectedProjects: Set<RushConfigurationProject> =
+      await this._selectionParameters.getSelectedProjectsAsync(terminal);
+
+    if (!selectedProjects.size) {
+      terminal.writeLine(colors.yellow(`The command line selection parameters did not match any projects.`));
+      return;
+    }
+
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
     if (!this._disableBuildCache) {
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
@@ -302,13 +311,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
     }
 
-    const projectSelection: Set<RushConfigurationProject> =
-      await this._selectionParameters.getSelectedProjectsAsync(terminal);
-
-    if (!projectSelection.size) {
-      terminal.writeLine(colors.yellow(`The command line selection parameters did not match any projects.`));
-      return;
-    }
+    terminal.writeVerbose(`Loading rush-project.json files...`);
+    const projectSelection: Map<RushConfigurationProject, RushProjectConfiguration | undefined> = new Map();
+    await Async.forEachAsync(selectedProjects, async (project: RushConfigurationProject) => {
+      const projectConfiguration: RushProjectConfiguration | undefined =
+        await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
+      projectSelection.set(project, projectConfiguration);
+      projectConfiguration?.validatePhaseConfiguration(this._initialPhases, terminal);
+    });
+    terminal.writeVerboseLine(`Loaded.`);
 
     const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
 
@@ -328,7 +339,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       phaseSelection: new Set(this._initialPhases),
       projectChangeAnalyzer,
       projectSelection,
-      projectsInUnknownState: projectSelection
+      projectsInUnknownState: selectedProjects
     };
 
     const executionManagerOptions: IOperationExecutionManagerOptions = {
@@ -397,7 +408,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
-    const { projectChangeAnalyzer: initialState, projectSelection: projectsToWatch } =
+    const { projectChangeAnalyzer: initialState, projectsInUnknownState: projectsToWatch } =
       initialCreateOperationsContext;
 
     // Use async import so that we don't pay the cost for sync builds
@@ -494,13 +505,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       executionManagerOptions
     );
 
-    const { isInitial, isWatch } = options.createOperationsContext;
+    const { isInitial, isWatch, projectChangeAnalyzer } = options.createOperationsContext;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
 
     try {
-      result = await executionManager.executeAsync();
+      result = await executionManager.executeAsync(projectChangeAnalyzer);
       success = result.status === OperationStatus.Success;
 
       await this.hooks.afterExecuteOperations.promise(result, options.createOperationsContext);
