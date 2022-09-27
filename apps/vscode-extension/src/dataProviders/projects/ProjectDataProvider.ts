@@ -28,6 +28,8 @@ export class ProjectDataProvider
   private _projectsByName: Map<string, Project>;
   private _extensionContext: vscode.ExtensionContext;
 
+  private _lookup: Rush.LookupByPath<Project>;
+
   constructor(params: IProjectDataProviderParams) {
     const { workspaceRoot, rush, extensionContext } = params;
 
@@ -44,6 +46,7 @@ export class ProjectDataProvider
     this._availableGroup = new StateGroup('Available');
 
     this._projectsByName = new Map<string, Project>();
+    this._lookup = new rush.LookupByPath();
 
     this._stateGroups = [this._activeGroup, this._includedGroup, this._availableGroup];
   }
@@ -82,6 +85,8 @@ export class ProjectDataProvider
       return;
     }
 
+    this._lookup = new this._rush.LookupByPath(undefined, path.sep);
+
     vscode.commands.executeCommand('setContext', 'rush.enabled', true);
 
     for (const rushProject of rushConfiguration.projects) {
@@ -89,6 +94,8 @@ export class ProjectDataProvider
 
       this._projectsByName.set(rushProject.packageName, project);
       this._availableGroup.projects.add(project);
+
+      this._lookup.setItem(vscode.Uri.file(rushProject.projectFolder).fsPath, project);
     }
 
     await Promise.all([
@@ -183,7 +190,7 @@ export class ProjectDataProvider
   }
 
   public getProjectForResource(resource: vscode.Uri): Project | undefined {
-    return undefined;
+    return this._lookup.findChildPath(resource.fsPath);
   }
 
   public async toggleActiveProjects(toggleProjects: Project[], force?: boolean): Promise<void> {
