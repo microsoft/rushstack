@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import { Worker } from 'worker_threads';
+import { OperationStatus } from '../logic/operations/OperationStatus';
 import {
   IRushWorkerBuildMessage,
   IRushWorkerResponse,
@@ -179,6 +180,10 @@ export class PhasedCommandWorkerController {
 
     if (!statuses) {
       throw new Error(`Worker has exited!`);
+    }
+
+    if (statuses.some((status) => status.status === OperationStatus.Ready)) {
+      this._updateState('executing');
     }
 
     return statuses;
