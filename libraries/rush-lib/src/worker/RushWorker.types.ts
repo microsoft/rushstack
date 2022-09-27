@@ -48,24 +48,16 @@ export interface IRushWorkerBuildMessage {
   type: 'build';
   value: { targets: string[] };
 }
-export interface IRushWorkerAbortMessage {
-  type: 'abort';
-  value: {};
-}
 export interface IRushWorkerShutdownMessage {
   type: 'shutdown';
   value: {};
 }
-export type IRushWorkerRequest =
-  | IRushWorkerBuildMessage
-  | IRushWorkerAbortMessage
-  | IRushWorkerShutdownMessage;
+export type IRushWorkerRequest = IRushWorkerBuildMessage | IRushWorkerShutdownMessage;
 
 export type PhasedCommandWorkerState =
   | 'initializing'
   | 'waiting'
   | 'updating'
   | 'executing'
-  | 'aborting'
   | 'exiting'
   | 'exited';

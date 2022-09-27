@@ -4,7 +4,6 @@
 import * as path from 'path';
 import { Worker } from 'worker_threads';
 import {
-  IRushWorkerAbortMessage,
   IRushWorkerBuildMessage,
   IRushWorkerResponse,
   IRushWorkerShutdownMessage,
@@ -33,9 +32,9 @@ export interface IPhasedCommandWorkerOptions {
   onStateChanged?: (state: PhasedCommandWorkerState) => void;
 }
 
-const abortMessage: IRushWorkerAbortMessage = {
-  type: 'abort',
-  value: {}
+const abortMessage: IRushWorkerBuildMessage = {
+  type: 'build',
+  value: { targets: [] }
 };
 
 const shutdownMessage: IRushWorkerShutdownMessage = {
@@ -217,7 +216,7 @@ export class PhasedCommandWorkerController {
    */
   public async abortAsync(): Promise<void> {
     this._checkExited();
-    this._updateState('aborting');
+    this._updateState('updating');
 
     this._worker.postMessage(abortMessage);
     await this.readyAsync();

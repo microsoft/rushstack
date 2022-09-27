@@ -165,9 +165,6 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
             console.error(`Worker is shutting down.`);
             willShutdown = true;
             return resolveTargets([]);
-          case 'abort':
-            console.error(`Worker is aborting.`);
-            break;
           case 'build':
             ready = false;
             return resolveTargets(message.value.targets);
