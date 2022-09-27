@@ -65,7 +65,13 @@
       },
       {
         "command": "rush.refreshProjects",
-        "title": "Refresh",
+        "title": "Refresh projects",
+        "category": "Rush",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "rush.refreshActions",
+        "title": "Refresh actions",
         "category": "Rush",
         "icon": "$(refresh)"
       }
