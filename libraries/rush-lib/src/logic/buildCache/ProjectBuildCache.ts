@@ -44,7 +44,7 @@ export class ProjectBuildCache {
   private readonly _buildCacheEnabled: boolean;
   private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
-  private _additionalOutputFilePaths: string[];
+  private readonly _additionalOutputFilePaths: string[];
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
@@ -370,12 +370,13 @@ export class ProjectBuildCache {
     }
 
     // Add additional output file paths
-    for (const addAdditionalOutputFilePath of this._additionalOutputFilePaths) {
+    await Async.foreEachAsync(this._additionalOutputFilePaths, async (additionalOutputFilePath) => {
       const fullPath: string = `${projectFolderPath}/${addAdditionalOutputFilePath}`;
-      if (FileSystem.exists(fullPath)) {
+      const pathExists: boolean = await FileSystem.existsAsync(fullPath);
+      if (pathExists) {
         outputFilePaths.push(addAdditionalOutputFilePath);
       }
-    }
+    }, { concurrency: 10 });
 
     // Ensure stable output path order.
     outputFilePaths.sort();

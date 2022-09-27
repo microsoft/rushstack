@@ -35,7 +35,7 @@ export interface IOperationExecutionResult {
    * The value indicates the duration of the same operation without cache hit.
    * It is specified if current operation hits cache
    */
-  readonly durationInSecondsWithoutCache: number | undefined;
+  readonly nonCachedDurationMs: number | undefined;
 }
 
 /**

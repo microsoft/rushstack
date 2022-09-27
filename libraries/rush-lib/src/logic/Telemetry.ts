@@ -70,7 +70,7 @@ export interface ITelemetryOperationResult {
   /**
    * Duration in seconds when the operation does not hit cache
    */
-  durationInSecondsWithoutCache?: number;
+  nonCachedDurationMs?: number;
 }
 
 /**

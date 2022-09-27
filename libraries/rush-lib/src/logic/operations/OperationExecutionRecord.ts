@@ -87,7 +87,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
 
-  private _durationInSecondsWithoutCache: number | undefined = undefined;
+  public nonCachedDurationMs: number | undefined = undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner } = operation;
@@ -127,14 +127,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       this._collatedWriter = this._context.streamCollator.registerTask(this.name);
     }
     return this._collatedWriter;
-  }
-
-  public get durationInSecondsWithoutCache(): number | undefined {
-    return this._durationInSecondsWithoutCache;
-  }
-
-  public set durationInSecondsWithoutCache(value: number | undefined) {
-    this._durationInSecondsWithoutCache = value;
   }
 
   public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {

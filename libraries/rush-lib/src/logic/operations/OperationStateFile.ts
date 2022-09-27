@@ -14,12 +14,12 @@ export interface IOperationStateFileOptions {
 }
 
 export interface IOperationStateJson {
-  durationInSecondsWithoutCache: number;
+  nonCachedDurationMs: number;
 }
 
 export class OperationStateFile {
   private readonly _rushProject: RushConfigurationProject;
-  private _filename: string;
+  private readonly _filename: string;
 
   public constructor(options: IOperationStateFileOptions) {
     const { rushProject, phase } = options;
@@ -29,18 +29,12 @@ export class OperationStateFile {
 
   public static getFilename(phase: IPhase, project: RushConfigurationProject): string {
     const relativeFilename: string = OperationStateFile.getFilenameRelativeToProjectRoot(phase);
-    return path.join(project.projectFolder, relativeFilename);
+    return `${project.projectFolder}/${relativeFilename}`;
   }
 
   public static getFilenameRelativeToProjectRoot(phase: IPhase): string {
     const identifier: string = `${phase.logFilenameIdentifier}`;
-    return path.join(
-      RushConstants.projectRushFolderName,
-      RushConstants.rushTempFolderName,
-      'operation',
-      identifier,
-      'state.json'
-    );
+    return `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${identifier}/state.json`;
   }
 
   /**
@@ -50,22 +44,20 @@ export class OperationStateFile {
     return this._filename;
   }
 
-  public write(json: IOperationStateJson): void {
-    JsonFile.save(json, this._filename, { ensureFolderExists: true, updateExistingFile: true });
+  public async writeAsync(json: IOperationStateJson): Promise<void> {
+    await JsonFile.saveAsync(json, this._filename, { ensureFolderExists: true, updateExistingFile: true });
   }
 
-  public tryRead(): IOperationStateJson | undefined {
-    let json: IOperationStateJson | undefined;
+  public async tryReadAsync(): Promise<IOperationStateJson | undefined> {
     try {
-      json = JsonFile.load(this._filename);
+      return await JsonFile.loadAsync(this._filename);
     } catch (error) {
-      if (FileSystem.isFileDoesNotExistError(error as Error)) {
-        json = undefined;
+      if (FileSystem.isNotExistError(error as Error)) {
+        return undefined;
       } else {
         // This should not happen
         throw new InternalError(error);
       }
     }
-    return json;
   }
 }
