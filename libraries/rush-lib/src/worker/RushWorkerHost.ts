@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Worker } from 'worker_threads';
+import { Worker, SHARE_ENV } from 'worker_threads';
 import { OperationStatus } from '../logic/operations/OperationStatus';
 import {
   IRushWorkerBuildMessage,
@@ -117,6 +117,7 @@ export class PhasedCommandWorkerController {
         argv: args,
         cwd
       },
+      env: SHARE_ENV,
       stdout: true
     });
     worker.on('exit', this._exitSignal.resolve);
