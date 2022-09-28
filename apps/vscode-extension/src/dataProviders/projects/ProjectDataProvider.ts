@@ -190,8 +190,18 @@ export class ProjectDataProvider
 
       const resourceUris: vscode.Uri[] = [];
 
+      for (const operationStatus of operationStatuses) {
+        resourceUris.push(
+          vscode.Uri.parse(
+            `rush://${operationStatus.operation.project!}?${operationStatus.operation.phase!}`,
+            true
+          )
+        );
+      }
+
       for (const project of updatedProjects) {
         resourceUris.push(vscode.Uri.parse(`rush://${project.rushProject.packageName}`, true));
+        resourceUris.push(vscode.Uri.file(project.rushProject.projectFolder));
       }
 
       this._onDidChangeFileDecorations.fire(resourceUris);
@@ -314,11 +324,13 @@ export class ProjectDataProvider
     }
 
     const projectName = `${uri.authority}${uri.path}`;
+    const phaseName = uri.query;
 
     const project = this._projectsByName.get(projectName);
 
     if (project) {
-      const { status, active } = getOverallStatus(project.phases.values());
+      const phase = phaseName ? project.phases.get(phaseName) : undefined;
+      const { status, active } = phase?.operationStatus ?? getOverallStatus(project.phases.values());
 
       const { badge, color } = getStatusIndicators(status, active);
 
@@ -381,7 +393,8 @@ export class ProjectDataProvider
       );
 
       treeItem.contextValue = `project:${element.stateGroupName}`;
-      treeItem.resourceUri = vscode.Uri.parse(`rush://${element.rushProject.packageName}`, true);
+      const packageName: string = element.rushProject.packageName;
+      treeItem.resourceUri = vscode.Uri.parse(`rush://${packageName}`, true);
       treeItem.tooltip = element.rushProject.packageJson.description;
 
       const status = getOverallStatus(element.phases.values());
@@ -395,12 +408,12 @@ export class ProjectDataProvider
 
       return treeItem;
     } else if (element instanceof OperationPhase) {
-      const treeItem = new vscode.TreeItem(
-        element.operationStatus.operation.phase!,
-        vscode.TreeItemCollapsibleState.None
-      );
+      const packageName: string = element.rushProject.packageName;
+      const phaseName: string = element.operationStatus.operation.phase!;
 
-      treeItem.id = `phase:${element.rushProject.packageName};_${element.operationStatus.operation.phase!}`;
+      const treeItem = new vscode.TreeItem(phaseName, vscode.TreeItemCollapsibleState.None);
+
+      treeItem.id = `phase:${packageName}/${phaseName}`;
 
       const { icon, description, color } = getStatusIndicators(
         element.operationStatus.status,
@@ -412,7 +425,7 @@ export class ProjectDataProvider
       treeItem.tooltip = `${element.operationStatus.hash}`;
       if (element.operationStatus.operation.logFilePath) {
         const uri = vscode.Uri.file(element.operationStatus.operation.logFilePath);
-        treeItem.resourceUri = uri;
+        treeItem.resourceUri = vscode.Uri.parse(`rush://${packageName}?${phaseName}`, true);
         treeItem.command = {
           command: 'vscode.open',
           title: 'Open',
