@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Make @microsoft/load-themed-styles a peer dependency.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles"
+}

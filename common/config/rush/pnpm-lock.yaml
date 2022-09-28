@@ -2303,9 +2303,9 @@ importers:
       '@types/webpack': 4.41.32
       loader-utils: ~1.1.0
     dependencies:
-      '@microsoft/load-themed-styles': link:../../libraries/load-themed-styles
       loader-utils: 1.1.0
     devDependencies:
+      '@microsoft/load-themed-styles': link:../../libraries/load-themed-styles
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
