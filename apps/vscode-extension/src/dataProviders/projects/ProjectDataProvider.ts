@@ -10,6 +10,11 @@ export interface IProjectDataProviderParams {
   rush: typeof Rush;
 }
 
+interface IStatusAndActive {
+  status: Rush.OperationStatus;
+  active: boolean;
+}
+
 export class ProjectDataProvider
   implements vscode.TreeDataProvider<StateGroup | Project | OperationPhase | Message>
 {
@@ -345,9 +350,9 @@ export class ProjectDataProvider
       treeItem.resourceUri = vscode.Uri.file(path.join(element.rushProject.projectFolder, 'package.json'));
       treeItem.tooltip = element.rushProject.packageJson.description;
 
-      const status = getOverallStatus(getStatuses(element.phases.values()));
+      const status = getOverallStatus(element.phases.values());
 
-      const { icon, description, color } = getStatusIndicators(status);
+      const { icon, description, color } = getStatusIndicators(status.status, status.active);
 
       treeItem.description = description;
       treeItem.iconPath = new vscode.ThemeIcon(icon, new vscode.ThemeColor(color));
@@ -445,7 +450,7 @@ export class Message {
   }
 }
 
-function getOverallStatus(statuses: Iterable<Rush.OperationStatus>): Rush.OperationStatus {
+function getOverallStatus(statuses: Iterable<OperationPhase>): IStatusAndActive {
   const histogram: {
     [P in Rush.OperationStatus]: number;
   } = {
@@ -460,10 +465,24 @@ function getOverallStatus(statuses: Iterable<Rush.OperationStatus>): Rush.Operat
     SUCCESS: 0
   };
 
-  for (const status of statuses) {
+  let isActive: boolean = false;
+
+  for (const {
+    operationStatus: { status, active }
+  } of statuses) {
     histogram[status]++;
+    if (active) {
+      isActive = true;
+    }
   }
 
+  return {
+    status: mergeStatus(histogram),
+    active: isActive
+  };
+}
+
+function mergeStatus(histogram: { [P in Rush.OperationStatus]: number }): Rush.OperationStatus {
   if (histogram.EXECUTING > 0) {
     return 'EXECUTING' as Rush.OperationStatus;
   } else if (histogram.READY > 0) {
@@ -487,7 +506,7 @@ function getOverallStatus(statuses: Iterable<Rush.OperationStatus>): Rush.Operat
 
 function getStatusIndicators(
   status: Rush.OperationStatus,
-  active?: boolean
+  active: boolean
 ): {
   icon: string;
   description: string;
@@ -496,6 +515,14 @@ function getStatusIndicators(
   let icon: string;
   let description: string;
   let color: string;
+
+  if (!active) {
+    return {
+      description: 'Paused',
+      icon: 'debug-pause',
+      color: 'notebookStatusRunningIcon.foreground'
+    };
+  }
 
   switch (status) {
     case 'SUCCESS':
@@ -540,8 +567,8 @@ function getStatusIndicators(
       break;
     default:
     case 'READY':
-      description = active !== false ? 'Pending' : 'Paused';
-      icon = active !== false ? 'clock' : 'debug-pause';
+      description = 'Pending';
+      icon = 'clock';
       color = 'notebookStatusRunningIcon.foreground';
       break;
   }
@@ -551,10 +578,4 @@ function getStatusIndicators(
     description,
     color
   };
-}
-
-function* getStatuses(phases: Iterable<OperationPhase>): Iterable<Rush.OperationStatus> {
-  for (const phase of phases) {
-    yield phase.operationStatus.status;
-  }
 }

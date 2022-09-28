@@ -58,12 +58,17 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   extensionContext.subscriptions.push(statusBarItem);
 
+  const rushDiagnostics = vscode.languages.createDiagnosticCollection('rush');
+  extensionContext.subscriptions.push(rushDiagnostics);
+
   vscode.commands.executeCommand('setContext', 'rush.watcher', 'sleep');
 
   function updateWorker(): void {
     if (!worker) {
       return;
     }
+
+    rushDiagnostics.clear();
 
     const activeProjects = projectDataProvider.getActiveProjects();
 
@@ -187,9 +192,6 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   );
 
   extensionContext.subscriptions.push(deactivateProjectCommand);
-
-  const rushDiagnostics = vscode.languages.createDiagnosticCollection('rush');
-  extensionContext.subscriptions.push(rushDiagnostics);
 
   const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', async () => {
     const command = commandDataProvider.getWatchAction();
