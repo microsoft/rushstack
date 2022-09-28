@@ -134,11 +134,12 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   const activeProjectForResourceCommand = vscode.commands.registerCommand(
     'rush.activateProjectForResource',
-    (resource: vscode.Uri) => {
+    async (resource: vscode.Uri) => {
       const project = projectDataProvider.getProjectForResource(resource);
 
       if (project) {
-        projectDataProvider.toggleActiveProjects([project], true);
+        await projectDataProvider.toggleActiveProjects([project], true);
+        updateWorker();
       }
     }
   );
