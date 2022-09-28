@@ -118,6 +118,7 @@ export { IStopwatchResult } from './utilities/Stopwatch';
 export {
   ITransferableOperation,
   ITransferableOperationStatus,
+  IDiagnostic,
   PhasedCommandWorkerState
 } from './worker/RushWorker.types';
 export { PhasedCommandWorkerController, IPhasedCommandWorkerOptions } from './worker/RushWorkerHost';

@@ -13,6 +13,7 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParser } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
+import { IDiagnostic } from '@rushstack/terminal';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
@@ -285,6 +286,8 @@ export interface ICredentialCacheOptions {
     supportEditing: boolean;
 }
 
+export { IDiagnostic }
+
 // @beta (undocumented)
 export interface IEnvironmentConfigurationInitializeOptions {
     // (undocumented)
@@ -533,6 +536,8 @@ export interface ITransferableOperation {
 export interface ITransferableOperationStatus {
     // (undocumented)
     active: boolean;
+    // (undocumented)
+    diagnostics?: IDiagnostic[];
     // (undocumented)
     duration: number;
     // (undocumented)

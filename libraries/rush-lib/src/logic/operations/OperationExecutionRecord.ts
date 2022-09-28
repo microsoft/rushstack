@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StdioSummarizer } from '@rushstack/terminal';
-import { InternalError } from '@rushstack/node-core-library';
+import { StdioSummarizer, IDiagnostic, IDiagnosticMatcher } from '@rushstack/terminal';
+import { InternalError, AnsiEscape } from '@rushstack/node-core-library';
 import { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus } from './OperationStatus';
@@ -16,6 +16,23 @@ export interface IOperationExecutionRecordContext {
 
   debugMode: boolean;
   quietMode: boolean;
+}
+
+const heftDiagnosticRegexp: RegExp =
+  /^\s*(\[[^\]]+\])?\s*(warning|error):\s+([^:]+):(\d+):(\d+)\s+-\s+(.+)\n/i;
+function heftDiagnosticMatcher(line: string): IDiagnostic | undefined {
+  const stripped: string = AnsiEscape.removeCodes(line);
+  const match: RegExpMatchArray | null = stripped.match(heftDiagnosticRegexp);
+  if (match) {
+    return {
+      file: match[3],
+      line: parseInt(match[4]),
+      column: parseInt(match[5]),
+      severity: match[2].toLowerCase() as 'warning' | 'error',
+      message: match[6],
+      tag: match[1]
+    };
+  }
 }
 
 /**
@@ -87,7 +104,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public readonly operation: Operation;
 
   public readonly stopwatch: Stopwatch = new Stopwatch();
-  public readonly stdioSummarizer: StdioSummarizer = new StdioSummarizer();
+  public readonly stdioSummarizer: StdioSummarizer;
 
   public runner: IOperationRunner;
   public readonly weight: number;
@@ -107,6 +124,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     }
     this.silent = runner.silent;
     this.isCacheWriteAllowed = runner.isCacheWriteAllowed;
+
+    this.stdioSummarizer = new StdioSummarizer({
+      diagnosticMatcher: heftDiagnosticMatcher
+    });
 
     this.runner = runner;
     this.weight = operation.weight;

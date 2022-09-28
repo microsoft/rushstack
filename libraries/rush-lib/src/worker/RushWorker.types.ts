@@ -1,3 +1,7 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import { IDiagnostic } from '@rushstack/terminal';
 import { OperationStatus } from '../logic/operations/OperationStatus';
 
 /**
@@ -11,6 +15,8 @@ export interface ITransferableOperation {
   logFilePath?: string;
 }
 
+export type { IDiagnostic };
+
 /**
  * @alpha
  */
@@ -21,6 +27,7 @@ export interface ITransferableOperationStatus {
   hash: string | undefined;
   duration: number;
   active: boolean;
+  diagnostics?: IDiagnostic[];
 }
 
 export interface IRushWorkerOperationsMessage {

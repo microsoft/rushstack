@@ -20,6 +20,30 @@ export interface IStdioSummarizerOptions {
    * @defaultValue `10`
    */
   trailingLines?: number;
+
+  /**
+   * Matcher for extracting errors and warnings out of stderr.
+   */
+  diagnosticMatcher?: IDiagnosticMatcher;
+}
+
+/**
+ * @alpha
+ */
+export interface IDiagnosticMatcher {
+  (line: string): IDiagnostic | undefined;
+}
+
+/**
+ * @alpha
+ */
+export interface IDiagnostic {
+  file: string;
+  line: number;
+  column: number;
+  severity: 'error' | 'warning';
+  message: string;
+  tag?: string;
 }
 
 /**
@@ -61,6 +85,9 @@ export class StdioSummarizer extends TerminalWritable {
   private _abridgedOmittedLines: number = 0;
   private _abridgedStderr: boolean;
 
+  private readonly _diagnosticMatcher: IDiagnosticMatcher | undefined;
+  private readonly _diagnostics: IDiagnostic[] = [];
+
   public constructor(options?: IStdioSummarizerOptions) {
     super();
 
@@ -70,10 +97,15 @@ export class StdioSummarizer extends TerminalWritable {
 
     this._leadingLines = options.leadingLines !== undefined ? options.leadingLines : 10;
     this._trailingLines = options.trailingLines !== undefined ? options.trailingLines : 10;
+    this._diagnosticMatcher = options.diagnosticMatcher;
 
     this._abridgedLeading = [];
     this._abridgedTrailing = [];
     this._abridgedStderr = false;
+  }
+
+  public get diagnostics(): ReadonlyArray<IDiagnostic> {
+    return this._diagnostics;
   }
 
   /**
@@ -115,6 +147,13 @@ export class StdioSummarizer extends TerminalWritable {
     } else if (this._abridgedStderr && chunk.kind !== TerminalChunkKind.Stderr) {
       // If we're capturing stderr, then ignore non-stderr input
       return;
+    }
+
+    if (chunk.kind === TerminalChunkKind.Stderr) {
+      const diagnostic: IDiagnostic | undefined = this._diagnosticMatcher?.(chunk.text);
+      if (diagnostic) {
+        this._diagnostics.push(diagnostic);
+      }
     }
 
     // Did we capture enough leading lines?

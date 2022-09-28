@@ -29,7 +29,8 @@ import {
   IRushWorkerRequest,
   IRushWorkerReadyMessage,
   IRushWorkerOperationsMessage,
-  ITransferableOperationStatus
+  ITransferableOperationStatus,
+  IDiagnostic
 } from './RushWorker.types';
 import { IAbortSignal } from '../logic/operations/AsyncOperationQueue';
 
@@ -75,7 +76,7 @@ const parser: RushCommandLineParser = new RushCommandLineParser({
 interface IStateRecord {
   status: OperationStatus;
   stateHash: string | undefined;
-  mtimes: Record<string, string>;
+  diagnostics: IDiagnostic[] | undefined;
   duration: number;
 }
 
@@ -95,7 +96,7 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
     }
     const includedOperations: Set<Operation> = new Set();
 
-    const rawCommand: PhasedScriptAction = command as PhasedScriptAction;
+    const rawCommand: PhasedScriptAction = command as unknown as PhasedScriptAction;
 
     const abortSignal: IAbortSignal = { aborted: false };
 
@@ -240,20 +241,23 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
     }
 
     function onOperationStatusChanged(record: OperationExecutionRecord): void {
-      operationStates.set(record.operation, {
+      const diagnostics: IDiagnostic[] = [];
+      const state: IStateRecord = {
         stateHash: record.stateHash,
         status: record.status,
         duration: record.stopwatch.duration,
-        mtimes: {}
-      });
+        diagnostics
+      };
+      operationStates.set(record.operation, state);
 
       if (!record.silent) {
         const transferOperation: ITransferableOperation = transferOperationForOperation.get(
           record.operation
         )!;
-        console.log(
-          `Status update: ${record.operation.name} (active) -> ${record.status} (${record.stateHash})`
-        );
+
+        for (const diagnostic of record.stdioSummarizer.diagnostics) {
+          diagnostics.push(diagnostic);
+        }
 
         const operationMessage: IRushWorkerOperationsMessage = {
           type: 'operations',
@@ -265,7 +269,8 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
                 status: record.status,
                 hash: record.stateHash,
                 duration: record.stopwatch.duration,
-                active: true
+                active: true,
+                diagnostics
               }
             ]
           }
@@ -308,6 +313,7 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
             status: status,
             duration: oldRecord!.duration,
             hash: oldHash,
+            diagnostics: oldRecord!.diagnostics,
             active: true
           });
         } else {
@@ -315,7 +321,7 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
             stateHash: record.stateHash,
             status: record.status,
             duration: record.stopwatch.duration,
-            mtimes: {}
+            diagnostics: []
           });
 
           activeOperations.push({

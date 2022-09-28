@@ -31,6 +31,28 @@ export interface ICallbackWritableOptions {
     onWriteChunk: (chunk: ITerminalChunk) => void;
 }
 
+// @alpha (undocumented)
+export interface IDiagnostic {
+    // (undocumented)
+    column: number;
+    // (undocumented)
+    file: string;
+    // (undocumented)
+    line: number;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    severity: 'error' | 'warning';
+    // (undocumented)
+    tag?: string;
+}
+
+// @alpha (undocumented)
+export interface IDiagnosticMatcher {
+    // (undocumented)
+    (line: string): IDiagnostic | undefined;
+}
+
 // @beta
 export interface IDiscardStdoutTransformOptions extends ITerminalTransformOptions {
 }
@@ -53,6 +75,8 @@ export interface IStdioLineTransformOptions extends ITerminalTransformOptions {
 
 // @beta
 export interface IStdioSummarizerOptions {
+    // Warning: (ae-incompatible-release-tags) The symbol "diagnosticMatcher" is marked as @beta, but its signature references "IDiagnosticMatcher" which is marked as @alpha
+    diagnosticMatcher?: IDiagnosticMatcher;
     leadingLines?: number;
     trailingLines?: number;
 }
@@ -152,6 +176,10 @@ export class StderrLineTransform extends TerminalTransform {
 // @beta
 export class StdioSummarizer extends TerminalWritable {
     constructor(options?: IStdioSummarizerOptions);
+    // Warning: (ae-incompatible-release-tags) The symbol "diagnostics" is marked as @beta, but its signature references "IDiagnostic" which is marked as @alpha
+    //
+    // (undocumented)
+    get diagnostics(): ReadonlyArray<IDiagnostic>;
     getReport(): string;
     // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;

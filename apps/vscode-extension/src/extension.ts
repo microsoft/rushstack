@@ -188,6 +188,9 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   extensionContext.subscriptions.push(deactivateProjectCommand);
 
+  const rushDiagnostics = vscode.languages.createDiagnosticCollection('rush');
+  extensionContext.subscriptions.push(rushDiagnostics);
+
   const enableWatchCommand = vscode.commands.registerCommand('rush.enableWatch', async () => {
     const command = commandDataProvider.getWatchAction();
 
@@ -211,14 +214,38 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
             activeOperationCount - pendingOperationCount
           }/${activeOperationCount})`;
         }
+
+        const diagnosticsByPath: Map<string, vscode.Diagnostic[]> = new Map();
+        for (const { diagnostics } of statuses) {
+          if (diagnostics?.length) {
+            for (const { file, line, column, message, severity, tag } of diagnostics) {
+              let collection = diagnosticsByPath.get(file);
+              if (!collection) {
+                diagnosticsByPath.set(file, (collection = []));
+              }
+              const diagnostic = new vscode.Diagnostic(
+                new vscode.Range(line - 1, column - 1, line - 1, column),
+                `${tag} ${message}`,
+                severity === 'warning' ? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error
+              );
+              collection.push(diagnostic);
+            }
+          }
+        }
+
+        for (const [file, diagnostics] of diagnosticsByPath) {
+          rushDiagnostics.set(vscode.Uri.file(`${workspaceRoot}/${file}`), diagnostics);
+        }
       },
       onStateChanged: (state: Rush.PhasedCommandWorkerState) => {
         switch (state) {
           case 'initializing':
+            rushDiagnostics.clear();
             statusBarItem.text = `$(sync~spin) Rush: initializing watcher`;
             statusBarItem.show();
             break;
           case 'updating':
+            rushDiagnostics.clear();
             statusBarItem.text = `$(sync~spin) Rush: detecting changes`;
             break;
           case 'waiting':
