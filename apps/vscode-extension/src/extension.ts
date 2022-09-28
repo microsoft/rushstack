@@ -155,15 +155,15 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   const activateProjectCommand = vscode.commands.registerCommand(
     'rush.activateProject',
-    (
+    async (
       contextProject: Project | StateGroup | OperationPhase,
       selectedProjects: (Project | StateGroup | OperationPhase)[] = [contextProject]
     ) => {
       if (contextProject instanceof Project) {
-        projectDataProvider.toggleActiveProjects(selectedProjects as Project[], true);
+        await projectDataProvider.toggleActiveProjects(selectedProjects as Project[], true);
       } else if (contextProject instanceof StateGroup) {
         if (contextProject.groupName === 'Included' || contextProject.groupName === 'Available') {
-          projectDataProvider.toggleActiveProjects(Array.from(contextProject.projects), true);
+          await projectDataProvider.toggleActiveProjects(Array.from(contextProject.projects), true);
         }
       }
 
@@ -175,15 +175,15 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   const deactivateProjectCommand = vscode.commands.registerCommand(
     'rush.deactivateProject',
-    (
+    async (
       contextProject: Project | StateGroup | OperationPhase,
       selectedProjects: (Project | StateGroup | OperationPhase)[] = [contextProject]
     ) => {
       if (contextProject instanceof Project) {
-        projectDataProvider.toggleActiveProjects(selectedProjects as Project[], false);
+        await projectDataProvider.toggleActiveProjects(selectedProjects as Project[], false);
       } else if (contextProject instanceof StateGroup) {
         if (contextProject.groupName === 'Active') {
-          projectDataProvider.toggleActiveProjects(Array.from(contextProject.projects), false);
+          await projectDataProvider.toggleActiveProjects(Array.from(contextProject.projects), false);
         }
       }
 
