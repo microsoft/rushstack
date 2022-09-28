@@ -11,9 +11,9 @@ module.exports = function createConfig(env, argv) {
     configOverride: {
       resolve: {
         alias: {
-          // Use the bundled library
-          'heft-web-rig-library-tutorial':
-            'heft-web-rig-library-tutorial/dist/heft-web-rig-library-tutorial.js'
+          // // Use the bundled library
+          // 'heft-web-rig-library-tutorial':
+          //   'heft-web-rig-library-tutorial/dist/heft-web-rig-library-tutorial.js'
         }
       },
       performance: {
@@ -22,6 +22,9 @@ module.exports = function createConfig(env, argv) {
         // "The following entrypoint(s) combined asset size exceeds the recommended limit."
         // maxEntrypointSize: 500000,
         // maxAssetSize: 500000
+      },
+      devServer: {
+        port: 8096
       }
     }
   });

@@ -1,0 +1,27 @@
+{
+  "name": "@rushstack/lockfile-explorer-server",
+  "description": "(Copy of sample project) Building this project is a regression test for Heft",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build",
+    "start": "ts-node-dev --respawn --transpile-only --files ./src/index.ts"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24",
+    "ts-node-dev": "~2.0.0",
+    "typescript": "~4.8.4"
+  },
+  "dependencies": {
+    "express": "4.18.1",
+    "cors": "~2.8.5"
+  }
+}

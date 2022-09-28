@@ -1,11 +1,13 @@
 import { Calendar } from '@fluentui/react';
 import * as React from 'react';
+import { readLockfile } from './parsing/readLockfile';
 
 /**
  * This React component renders the application page.
  */
 export class App extends React.Component {
   public render(): React.ReactNode {
+    readLockfile('');
     const appStyle: React.CSSProperties = {
       backgroundColor: '#ffffff',
       padding: '20px',

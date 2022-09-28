@@ -425,6 +425,11 @@
       "reviewCategory": "libraries"
     },
     {
+      "packageName": "@rushstack/lockfile-explorer-server",
+      "projectFolder": "apps/lockfile-explorer-server",
+      "reviewCategory": "libraries"
+    },
+    {
       "packageName": "@rushstack/rundown",
       "projectFolder": "apps/rundown",
       "reviewCategory": "libraries",
