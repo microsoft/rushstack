@@ -59,6 +59,9 @@ export interface IRushWorkerShutdownMessage {
 }
 export type IRushWorkerRequest = IRushWorkerBuildMessage | IRushWorkerShutdownMessage;
 
+/**
+ * @alpha
+ */
 export type PhasedCommandWorkerState =
   | 'initializing'
   | 'waiting'

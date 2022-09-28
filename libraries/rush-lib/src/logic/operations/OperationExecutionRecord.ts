@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StdioSummarizer, IDiagnostic, IDiagnosticMatcher } from '@rushstack/terminal';
+import { StdioSummarizer, IDiagnostic } from '@rushstack/terminal';
 import { InternalError, AnsiEscape } from '@rushstack/node-core-library';
 import { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
