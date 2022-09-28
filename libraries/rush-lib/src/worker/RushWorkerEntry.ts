@@ -218,9 +218,8 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
 
         abortSignal.aborted = false;
 
-        if (targets.length) {
-          await executeOperations(targets);
-        }
+        // Run even with empty to ensure the out of scope message gets sent.
+        await executeOperations(targets);
 
         const statesByName: [string, IStateRecord][] = [];
         for (const [operation, record] of operationStates) {
