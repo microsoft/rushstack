@@ -317,7 +317,7 @@ export class ProjectDataProvider
       return undefined;
     }
 
-    const projectName = uri.authority;
+    const projectName = `${uri.authority}${uri.path}`;
 
     const project = this._projectsByName.get(projectName);
 
@@ -385,7 +385,7 @@ export class ProjectDataProvider
       );
 
       treeItem.contextValue = `project:${element.stateGroupName}`;
-      treeItem.resourceUri = vscode.Uri.parse(`rush://${element.rushProject.projectFolder}`, true);
+      treeItem.resourceUri = vscode.Uri.parse(`rush://${element.rushProject.packageName}`, true);
       treeItem.tooltip = element.rushProject.packageJson.description;
 
       const status = getOverallStatus(element.phases.values());
