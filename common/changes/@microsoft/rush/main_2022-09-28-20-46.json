@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where a \"Current PNPM store path does not match the last one used.\" error will erroneously get thrown on Windows with an unchanged path, but with a forward slash instead of a backslash.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

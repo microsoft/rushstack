@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an error message that always says to run \"rush update --purge\" even if the user only needs to run \"rush install --purge.\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
