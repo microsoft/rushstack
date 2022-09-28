@@ -123,16 +123,12 @@ export class ProjectDataProvider
       )
     ]);
 
-    console.log('Updating tree data', 3, Date.now());
-    this._onDidChangeTreeData.fire([this._activeGroup, this._includedGroup, this._availableGroup]);
-    console.log('Updated tree data', 3, Date.now());
+    const activeProjects: Project[] = [];
 
     const activeProjectsState =
       this._extensionContext.workspaceState.get<{ [key: string]: true }>('rush.activeProjects');
 
     if (activeProjectsState) {
-      const activeProjects: Project[] = [];
-
       for (const projectName of Object.keys(activeProjectsState)) {
         const project = this._projectsByName.get(projectName);
 
@@ -140,9 +136,9 @@ export class ProjectDataProvider
           activeProjects.push(project);
         }
       }
-
-      this.toggleActiveProjects(activeProjects, true);
     }
+
+    await this.toggleActiveProjects(activeProjects, true);
   }
 
   public getActiveProjects(): Project[] {
