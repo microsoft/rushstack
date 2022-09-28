@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { workerData, parentPort } from 'worker_threads';
 
-import { AlreadyReportedError, Import, Path } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Import, JsonFile, Path } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
@@ -72,10 +72,27 @@ const parser: RushCommandLineParser = new RushCommandLineParser({
   cwd: workerData.cwd
 });
 
+interface IStateRecord {
+  status: OperationStatus;
+  stateHash: string | undefined;
+  mtimes: Record<string, string>;
+  duration: number;
+}
+
 parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
   'RushWorkerPlugin',
   async (command: IPhasedCommand) => {
-    const operationStates: Map<Operation, OperationExecutionRecord> = new Map();
+    const stateFilePath: string = `${parser.rushConfiguration.commonTempFolder}/operation-states.json`;
+    const operationStates: Map<Operation, IStateRecord> = new Map();
+    const oldOperationStates: Map<string, IStateRecord> = new Map();
+    try {
+      const statesFromFile: [string, IStateRecord][] = await JsonFile.loadAsync(stateFilePath);
+      for (const [key, record] of statesFromFile) {
+        oldOperationStates.set(key, record);
+      }
+    } catch (err) {
+      console.log(`Failed to load state file: ${err}`);
+    }
     const includedOperations: Set<Operation> = new Set();
 
     const rawCommand: PhasedScriptAction = command as PhasedScriptAction;
@@ -112,7 +129,14 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
         const { associatedPhase, associatedProject } = operation;
         let logFilePath: string | undefined;
         if (associatedPhase && associatedProject) {
-          operationByKey.set(getOperationKey(associatedPhase, associatedProject), operation);
+          const operationKey: string = getOperationKey(associatedPhase, associatedProject);
+
+          operationByKey.set(operationKey, operation);
+
+          const oldState: IStateRecord | undefined = oldOperationStates.get(operationKey);
+          if (oldState) {
+            operationStates.set(operation, oldState);
+          }
 
           const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(
             associatedProject.packageName
@@ -196,6 +220,16 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
         if (targets.length) {
           await executeOperations(targets);
         }
+
+        const statesByName: [string, IStateRecord][] = [];
+        for (const [operation, record] of operationStates) {
+          const { associatedPhase, associatedProject } = operation;
+          if (associatedPhase && associatedProject) {
+            const operationKey: string = getOperationKey(associatedPhase, associatedProject);
+            statesByName.push([operationKey, record]);
+          }
+        }
+        await JsonFile.saveAsync(statesByName, stateFilePath);
       }
 
       parentPort?.off('message', messageHandler);
@@ -206,6 +240,13 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
     }
 
     function onOperationStatusChanged(record: OperationExecutionRecord): void {
+      operationStates.set(record.operation, {
+        stateHash: record.stateHash,
+        status: record.status,
+        duration: record.stopwatch.duration,
+        mtimes: {}
+      });
+
       if (!record.silent) {
         const transferOperation: ITransferableOperation = transferOperationForOperation.get(
           record.operation
@@ -239,7 +280,7 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
 
       // Filter out skippable operations
       for (const [operation, record] of records) {
-        const oldRecord: OperationExecutionRecord | undefined = operationStates.get(operation);
+        const oldRecord: IStateRecord | undefined = operationStates.get(operation);
         const oldHash: string | undefined = oldRecord?.stateHash;
 
         const transferOperation: ITransferableOperation = transferOperationForOperation.get(operation)!;
@@ -265,12 +306,17 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
           activeOperations.push({
             operation: transferOperation,
             status: status,
-            duration: oldRecord!.stopwatch.duration,
+            duration: oldRecord!.duration,
             hash: oldHash,
             active: true
           });
         } else {
-          operationStates.set(operation, record);
+          operationStates.set(operation, {
+            stateHash: record.stateHash,
+            status: record.status,
+            duration: record.stopwatch.duration,
+            mtimes: {}
+          });
 
           activeOperations.push({
             operation: transferOperation,
@@ -348,13 +394,13 @@ parser.rushSession.hooks.runAnyPhasedCommand.tapPromise(
       const removedOperations: ITransferableOperationStatus[] = [];
       for (const operation of previousOperations) {
         if (!includedOperations.has(operation)) {
-          const record: OperationExecutionRecord | undefined = operationStates.get(operation);
+          const record: IStateRecord | undefined = operationStates.get(operation);
           const transferOperation: ITransferableOperation = transferOperationForOperation.get(operation)!;
 
           removedOperations.push({
             operation: transferOperation,
             status: record?.status || OperationStatus.Ready,
-            duration: record?.stopwatch.duration ?? 0,
+            duration: record?.duration ?? 0,
             hash: record?.stateHash ?? '',
             active: false
           });

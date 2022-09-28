@@ -697,13 +697,17 @@ export class PhasedCommandHooks {
 export class PhasedCommandWorkerController {
     constructor(args: string[], options?: IPhasedCommandWorkerOptions);
     abort(): void;
+    // (undocumented)
+    get activeOperationCount(): number;
     getGraph(): ITransferableOperation[];
     // (undocumented)
     getGraphAsync(): Promise<ITransferableOperation[]>;
     // (undocumented)
-    getStatuses(): ITransferableOperationStatus[];
+    getStatuses(): Iterable<ITransferableOperationStatus>;
     onStateChanged: (state: PhasedCommandWorkerState) => void;
     onStatusUpdates: (statuses: ITransferableOperationStatus[]) => void;
+    // (undocumented)
+    get pendingOperationCount(): number;
     shutdownAsync(force?: boolean): Promise<void>;
     // (undocumented)
     get state(): PhasedCommandWorkerState;

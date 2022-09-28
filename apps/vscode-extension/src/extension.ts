@@ -205,6 +205,12 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
       cwd: workspaceRoot,
       onStatusUpdates: (statuses: Rush.ITransferableOperationStatus[]) => {
         projectDataProvider.updateProjectPhases(statuses);
+        if (worker?.state === 'executing') {
+          const { activeOperationCount, pendingOperationCount } = worker;
+          statusBarItem.text = `$(sync~spin) Rush: running ${command.label} (${
+            activeOperationCount - pendingOperationCount
+          }/${activeOperationCount})`;
+        }
       },
       onStateChanged: (state: Rush.PhasedCommandWorkerState) => {
         switch (state) {
@@ -219,7 +225,10 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
             statusBarItem.text = `$(eye) Rush: watching ${command.label}`;
             break;
           case 'executing':
-            statusBarItem.text = `$(sync~spin) Rush: running ${command.label}`;
+            const { activeOperationCount, pendingOperationCount } = worker!;
+            statusBarItem.text = `$(sync~spin) Rush: running ${command.label} (${
+              activeOperationCount - pendingOperationCount
+            }/${activeOperationCount})`;
             break;
           case 'exiting':
             statusBarItem.text = `$(sync~spin) Rush: shutting down watcher`;

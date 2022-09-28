@@ -363,7 +363,10 @@ export class ProjectDataProvider
 
       treeItem.id = `phase:${element.rushProject.packageName};_${element.operationStatus.operation.phase!}`;
 
-      const { icon, description, color } = getStatusIndicators(element.operationStatus.status);
+      const { icon, description, color } = getStatusIndicators(
+        element.operationStatus.status,
+        element.operationStatus.active
+      );
 
       treeItem.iconPath = new vscode.ThemeIcon(icon, new vscode.ThemeColor(color));
       treeItem.description = description;
@@ -482,7 +485,10 @@ function getOverallStatus(statuses: Iterable<Rush.OperationStatus>): Rush.Operat
   }
 }
 
-function getStatusIndicators(status: Rush.OperationStatus): {
+function getStatusIndicators(
+  status: Rush.OperationStatus,
+  active?: boolean
+): {
   icon: string;
   description: string;
   color: string;
@@ -534,8 +540,8 @@ function getStatusIndicators(status: Rush.OperationStatus): {
       break;
     default:
     case 'READY':
-      description = 'Pending';
-      icon = 'clock';
+      description = active !== false ? 'Pending' : 'Paused';
+      icon = active !== false ? 'clock' : 'debug-pause';
       color = 'notebookStatusRunningIcon.foreground';
       break;
   }

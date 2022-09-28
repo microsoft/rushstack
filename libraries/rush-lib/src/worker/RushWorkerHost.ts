@@ -73,6 +73,8 @@ export class PhasedCommandWorkerController {
   private _state: PhasedCommandWorkerState;
 
   private readonly _statusByOperation: Map<string, ITransferableOperationStatus>;
+  private readonly _activeOperations: Set<string>;
+  private readonly _pendingOperations: Set<string>;
 
   private readonly _exitSignal: ISignal<void>;
   private readonly _graphSignal: ISignal<ITransferableOperation[]>;
@@ -101,6 +103,8 @@ export class PhasedCommandWorkerController {
 
     this._state = 'initializing';
     this._statusByOperation = new Map();
+    this._activeOperations = new Set();
+    this._pendingOperations = new Set();
 
     this._graphSignal = createSignal();
 
@@ -171,9 +175,15 @@ export class PhasedCommandWorkerController {
     return this._graph;
   }
 
-  public getStatuses(): ITransferableOperationStatus[] {
-    this._checkExited();
-    return Array.from(this._statusByOperation.values());
+  public getStatuses(): Iterable<ITransferableOperationStatus> {
+    return this._statusByOperation.values();
+  }
+
+  public get activeOperationCount(): number {
+    return this._activeOperations.size;
+  }
+  public get pendingOperationCount(): number {
+    return this._pendingOperations.size;
   }
 
   public async getGraphAsync(): Promise<ITransferableOperation[]> {
@@ -232,18 +242,6 @@ export class PhasedCommandWorkerController {
     }
   }
 
-  private _setExecuting(): void {
-    for (const operation of this._statusByOperation.values()) {
-      if (
-        operation.active &&
-        (operation.status === OperationStatus.Ready || operation.status === OperationStatus.Executing)
-      ) {
-        this._updateState('executing');
-        return;
-      }
-    }
-  }
-
   private _handleMessage = (message: IRushWorkerResponse): void => {
     switch (message.type) {
       case 'graph':
@@ -259,8 +257,25 @@ export class PhasedCommandWorkerController {
         for (const operation of message.value.operations) {
           const name: string = operation.operation.name!;
           this._statusByOperation.set(name, operation);
+
+          if (operation.active) {
+            this._activeOperations.add(name);
+            if (
+              operation.status === OperationStatus.Ready ||
+              operation.status === OperationStatus.Executing
+            ) {
+              this._pendingOperations.add(name);
+            } else {
+              this._pendingOperations.delete(name);
+            }
+          } else {
+            this._activeOperations.delete(name);
+            this._pendingOperations.delete(name);
+          }
         }
-        this._setExecuting();
+        if (this._state !== 'exiting' && this._pendingOperations.size > 0) {
+          this._updateState('executing');
+        }
         this.onStatusUpdates(message.value.operations);
         break;
     }
