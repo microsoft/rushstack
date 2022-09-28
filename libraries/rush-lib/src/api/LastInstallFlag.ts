@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { FileSystem, JsonFile, JsonObject, Import } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonObject, Import, Path } from '@rushstack/node-core-library';
 
 import { PackageManagerName } from './packageManager/PackageManager';
 import { RushConfiguration } from './RushConfiguration';
@@ -66,19 +66,25 @@ export class LastInstallFlag {
         if (pkgManager === 'pnpm') {
           if (
             // Only throw an error if the package manager hasn't changed from PNPM
-            oldState.packageManager === pkgManager &&
-            // Throw if the store path changed
-            oldState.storePath !== newState.storePath
+            oldState.packageManager === pkgManager
           ) {
-            const oldStorePath: string = oldState.storePath || '<global>';
-            const newStorePath: string = newState.storePath || '<global>';
-
-            throw new Error(
-              'Current PNPM store path does not match the last one used. This may cause inconsistency in your builds.\n\n' +
-                'If you wish to install with the new store path, please run "rush update --purge"\n\n' +
-                `Old Path: ${oldStorePath}\n` +
-                `New Path: ${newStorePath}`
-            );
+            const normalizedOldStorePath: string = oldState.storePath
+              ? Path.convertToPlatformDefault(oldState.storePath)
+              : '<global>';
+            const normalizedNewStorePath: string = newState.storePath
+              ? Path.convertToPlatformDefault(newState.storePath)
+              : '<global>';
+            if (
+              // Throw if the store path changed
+              normalizedOldStorePath !== normalizedNewStorePath
+            ) {
+              throw new Error(
+                'Current PNPM store path does not match the last one used. This may cause inconsistency in your builds.\n\n' +
+                  'If you wish to install with the new store path, please run "rush update --purge"\n\n' +
+                  `Old Path: ${normalizedOldStorePath}\n` +
+                  `New Path: ${normalizedNewStorePath}`
+              );
+            }
           }
         }
       }
