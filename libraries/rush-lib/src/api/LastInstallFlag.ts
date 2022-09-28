@@ -46,11 +46,13 @@ export class LastInstallFlag {
    *
    * @internal
    */
-  public checkValidAndReportStoreIssues(): boolean {
-    return this._isValid(true);
+  public checkValidAndReportStoreIssues(rushVerb: string): boolean {
+    return this._isValid(true, rushVerb);
   }
 
-  private _isValid(checkValidAndReportStoreIssues: boolean): boolean {
+  private _isValid(checkValidAndReportStoreIssues: false, rushVerb?: string): boolean;
+  private _isValid(checkValidAndReportStoreIssues: true, rushVerb: string): boolean;
+  private _isValid(checkValidAndReportStoreIssues: boolean, rushVerb: string = 'update'): boolean {
     let oldState: JsonObject;
     try {
       oldState = JsonFile.load(this._path);
@@ -80,7 +82,7 @@ export class LastInstallFlag {
             ) {
               throw new Error(
                 'Current PNPM store path does not match the last one used. This may cause inconsistency in your builds.\n\n' +
-                  'If you wish to install with the new store path, please run "rush update --purge"\n\n' +
+                  `If you wish to install with the new store path, please run "rush ${rushVerb} --purge"\n\n` +
                   `Old Path: ${normalizedOldStorePath}\n` +
                   `New Path: ${normalizedNewStorePath}`
               );

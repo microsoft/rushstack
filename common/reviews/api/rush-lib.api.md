@@ -526,7 +526,7 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 // @internal
 export class _LastInstallFlag {
     constructor(folderPath: string, state?: JsonObject);
-    checkValidAndReportStoreIssues(): boolean;
+    checkValidAndReportStoreIssues(rushVerb: string): boolean;
     clear(): void;
     create(): void;
     protected get flagName(): string;
