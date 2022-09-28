@@ -90,28 +90,6 @@ describe(LoadThemedStylesLoader.name, () => {
     expect(returnedModule.exports).toEqual({});
   });
 
-  it('correctly handles the namedExport option', () => {
-    LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
-
-    const query: {} = { namedExport: 'default' };
-    let loaderResult: string = LoadThemedStylesLoader.pitch.call(
-      { query } as webpack.loader.LoaderContext,
-      './testData/MockStyle1'
-    );
-    loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
-    loaderResult = wrapResult(loaderResult);
-
-    const returnedModule: { exports: string } = eval(loaderResult); // eslint-disable-line no-eval
-
-    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 1') !== -1).toEqual(true);
-    expect(LoadThemedStylesMock.loadedData.indexOf('STYLE 2') !== -1).toEqual(true);
-    expect(LoadThemedStylesMock.loadedData).toHaveLength(2);
-    expect(LoadThemedStylesMock.calledWithAsync[0]).toEqual(false);
-    expect(LoadThemedStylesMock.calledWithAsync[1]).toEqual(false);
-    expect(LoadThemedStylesMock.calledWithAsync).toHaveLength(2);
-    expect(returnedModule.exports).toEqual({ default: 'locals' });
-  });
-
   it('correctly handles the async option set to "true"', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
