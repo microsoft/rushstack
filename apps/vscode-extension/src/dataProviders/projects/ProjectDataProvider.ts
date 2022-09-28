@@ -195,7 +195,7 @@ export class ProjectDataProvider
       const resourceUris: vscode.Uri[] = [];
 
       for (const project of updatedProjects) {
-        resourceUris.push(vscode.Uri.file(path.join(project.rushProject.projectFolder, 'package.json')));
+        resourceUris.push(vscode.Uri.parse(`rush://${project.rushProject.packageName}`, true));
       }
 
       this._onDidChangeFileDecorations.fire(resourceUris);
