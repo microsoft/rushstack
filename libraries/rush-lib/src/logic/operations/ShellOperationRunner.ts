@@ -96,16 +96,9 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _commandName: string;
   private readonly _commandToRun: string;
   private readonly _isCacheReadAllowed: boolean;
-  private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
   private readonly _logFilenameIdentifier: string;
   private readonly _selectedPhases: Iterable<IPhase>;
-
-  /**
-   * UNINITIALIZED === we haven't tried to initialize yet
-   * undefined === we didn't create one because the feature is not enabled
-   */
-  private _projectBuildCache: ProjectBuildCache | undefined | UNINITIALIZED = UNINITIALIZED;
 
   public constructor(options: IOperationRunnerOptions) {
     const { phase } = options;
@@ -119,7 +112,6 @@ export class ShellOperationRunner implements IOperationRunner {
     this._commandToRun = options.commandToRun;
     this._isCacheReadAllowed = options.isIncrementalBuildAllowed;
     this.isSkipAllowed = options.isIncrementalBuildAllowed;
-    this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = `package-deps_${phase.logFilenameIdentifier}.json`;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
