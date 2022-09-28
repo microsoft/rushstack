@@ -114,6 +114,10 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   extensionContext.subscriptions.push(commandView);
 
+  const decorationProvider = vscode.window.registerFileDecorationProvider(projectDataProvider);
+
+  extensionContext.subscriptions.push(decorationProvider);
+
   const openProjectCommand = vscode.commands.registerCommand(
     'rush.revealProjectInExplorer',
     (project: Project | StateGroup | OperationPhase) => {

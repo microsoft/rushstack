@@ -16,12 +16,15 @@ interface IStatusAndActive {
 }
 
 export class ProjectDataProvider
-  implements vscode.TreeDataProvider<StateGroup | Project | OperationPhase | Message>
+  implements
+    vscode.TreeDataProvider<StateGroup | Project | OperationPhase | Message>,
+    vscode.FileDecorationProvider
 {
   private _workspaceRoot: string;
   private _onDidChangeTreeData: vscode.EventEmitter<
     StateGroup | Project | OperationPhase | (StateGroup | Project | OperationPhase)[] | undefined
   >;
+  private _onDidChangeFileDecorations: vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined>;
 
   private _stateGroups: StateGroup[];
 
@@ -42,9 +45,8 @@ export class ProjectDataProvider
     this._rush = rush;
     this._extensionContext = extensionContext;
 
-    this._onDidChangeTreeData = new vscode.EventEmitter<
-      StateGroup | Project | OperationPhase | (StateGroup | Project | OperationPhase)[] | undefined
-    >();
+    this._onDidChangeTreeData = new vscode.EventEmitter();
+    this._onDidChangeFileDecorations = new vscode.EventEmitter();
 
     this._activeGroup = new StateGroup('Active');
     this._includedGroup = new StateGroup('Included');
@@ -186,8 +188,17 @@ export class ProjectDataProvider
     console.log('Updating tree data', updatedProjects.size, Date.now());
     if (updatedProjects.size > 10) {
       this._onDidChangeTreeData.fire(undefined);
+      this._onDidChangeFileDecorations.fire(undefined);
     } else {
       this._onDidChangeTreeData.fire(Array.from(updatedProjects));
+
+      const resourceUris: vscode.Uri[] = [];
+
+      for (const project of updatedProjects) {
+        resourceUris.push(vscode.Uri.file(path.join(project.rushProject.projectFolder, 'package.json')));
+      }
+
+      this._onDidChangeFileDecorations.fire(resourceUris);
     }
     console.log('Updated tree data', updatedProjects.size, Date.now());
 
@@ -294,6 +305,33 @@ export class ProjectDataProvider
     return this._onDidChangeTreeData.event;
   }
 
+  public get onDidChangeFileDecorations(): vscode.Event<vscode.Uri | vscode.Uri[] | undefined> {
+    return this._onDidChangeFileDecorations.event;
+  }
+
+  public provideFileDecoration(
+    uri: vscode.Uri,
+    token: vscode.CancellationToken
+  ): vscode.ProviderResult<vscode.FileDecoration> {
+    if (uri.scheme !== 'rush') {
+      return undefined;
+    }
+
+    const projectName = uri.authority;
+
+    const project = this._projectsByName.get(projectName);
+
+    if (project) {
+      const { status, active } = getOverallStatus(project.phases.values());
+
+      const { badge, color } = getStatusIndicators(status, active);
+
+      return new vscode.FileDecoration(badge, undefined, new vscode.ThemeColor(color));
+    }
+
+    return undefined;
+  }
+
   public getChildren(
     element?: StateGroup | Project | OperationPhase | undefined
   ): (StateGroup | Project | OperationPhase | Message)[] {
@@ -347,7 +385,7 @@ export class ProjectDataProvider
       );
 
       treeItem.contextValue = `project:${element.stateGroupName}`;
-      treeItem.resourceUri = vscode.Uri.file(path.join(element.rushProject.projectFolder, 'package.json'));
+      treeItem.resourceUri = vscode.Uri.parse(`rush://${element.rushProject.projectFolder}`, true);
       treeItem.tooltip = element.rushProject.packageJson.description;
 
       const status = getOverallStatus(element.phases.values());
@@ -511,16 +549,19 @@ function getStatusIndicators(
   icon: string;
   description: string;
   color: string;
+  badge: string | undefined;
 } {
   let icon: string;
   let description: string;
   let color: string;
+  let badge: string | undefined;
 
   if (!active) {
     return {
-      description: 'Paused',
-      icon: 'debug-pause',
-      color: 'notebookStatusRunningIcon.foreground'
+      description: 'Out of scope',
+      icon: 'circle-outline',
+      color: 'disabledForeground',
+      badge: undefined
     };
   }
 
@@ -529,11 +570,13 @@ function getStatusIndicators(
       description = 'Succeeded';
       icon = 'pass';
       color = 'testing.iconPassed';
+      badge = 'S';
       break;
     case 'FROM CACHE':
       description = 'Succeeded (from cache)';
       icon = 'pass';
       color = 'testing.iconPassed';
+      badge = 'SC';
       break;
     case 'NO OP':
       description = 'Not configured';
@@ -544,11 +587,13 @@ function getStatusIndicators(
       description = 'Executing';
       icon = 'sync~spin';
       color = 'notebookStatusRunningIcon.foreground';
+      badge = 'E';
       break;
     case 'SUCCESS WITH WARNINGS':
       description = 'Succeeded with warnings';
       icon = 'warning';
       color = 'testing.iconFailed';
+      badge = 'SW';
       break;
     case 'SKIPPED':
       description = 'Skipped';
@@ -559,23 +604,27 @@ function getStatusIndicators(
       description = 'Failed';
       icon = 'error';
       color = 'testing.iconFailed';
+      badge = 'F';
       break;
     case 'BLOCKED':
       description = 'Blocked';
       icon = 'stop';
-      color = 'disabledForeground';
+      color = 'testing.iconQueued';
+      badge = 'B';
       break;
     default:
     case 'READY':
       description = 'Pending';
       icon = 'clock';
       color = 'notebookStatusRunningIcon.foreground';
+      badge = 'P';
       break;
   }
 
   return {
     icon,
     description,
-    color
+    color,
+    badge
   };
 }
