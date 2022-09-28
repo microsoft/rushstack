@@ -240,12 +240,10 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
       onStateChanged: (state: Rush.PhasedCommandWorkerState) => {
         switch (state) {
           case 'initializing':
-            rushDiagnostics.clear();
             statusBarItem.text = `$(sync~spin) Rush: initializing watcher`;
             statusBarItem.show();
             break;
           case 'updating':
-            rushDiagnostics.clear();
             statusBarItem.text = `$(sync~spin) Rush: detecting changes`;
             break;
           case 'waiting':
