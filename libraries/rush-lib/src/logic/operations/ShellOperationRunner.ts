@@ -26,7 +26,7 @@ import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
+import { Utilities } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
 import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
