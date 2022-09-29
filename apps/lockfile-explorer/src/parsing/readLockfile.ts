@@ -1,17 +1,17 @@
 import axios from 'axios';
-import { LockfileDependency, LockfileEntry, LockfileEntryKind } from './LockfileNode';
+import { LockfileEntry, LockfileEntryKind } from './LockfileNode';
 
-type LockfilePackageType = {
+export interface ILockfilePackageType {
   lockfileVersion: number;
   importers?: {
     [key in string]: {
-      specifiers: {
+      specifiers?: {
         [key in string]: string;
       };
-      dependencies: {
+      dependencies?: {
         [key in string]: string;
       };
-      devDependencies: {
+      devDependencies?: {
         [key in string]: string;
       };
     };
@@ -21,31 +21,31 @@ type LockfilePackageType = {
       resolution: {
         integrity: string;
       };
-      dependencies: {
+      dependencies?: {
         [key in string]: string;
       };
-      peerDependencies: {
+      peerDependencies?: {
         [key in string]: string;
       };
       dev: boolean;
     };
   };
-};
+}
 
-export const readLockfile = async (lockfilePath: string) => {
-  const lockfile: LockfilePackageType = (await axios.get('http://localhost:8091')).data;
-  console.log(lockfile);
-
+export const generateLockfileGraph = (lockfile: ILockfilePackageType) => {
   const allEntries: LockfileEntry[] = [];
   const allEntriesById: { [key in string]: LockfileEntry } = {};
 
   const allImporters = [];
   if (lockfile.importers) {
     for (const [importerKey, importerValue] of Object.entries(lockfile.importers)) {
+      // console.log('normalized importer key: ', new Path(importerKey).makeAbsolute('/').toString());
+
+      // const normalizedPath = new Path(importerKey).makeAbsolute('/').toString();
       const importer = new LockfileEntry({
+        // entryId: normalizedPath,
         rawEntryId: importerKey,
         kind: LockfileEntryKind.Project,
-        rootPackageJsonPath: lockfilePath,
         rawYamlData: importerValue
       });
       allImporters.push(importer);
@@ -57,19 +57,14 @@ export const readLockfile = async (lockfilePath: string) => {
   const allPackages = [];
   if (lockfile.packages) {
     for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages)) {
+      // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
+
       const currEntry = new LockfileEntry({
+        // entryId: normalizedPath,
         rawEntryId: dependencyKey,
         kind: LockfileEntryKind.Package,
-        rootPackageJsonPath: lockfilePath,
         rawYamlData: dependencyValue
       });
-      if (dependencyValue.dependencies) {
-        for (const [dependencyName, version] of Object.entries(dependencyValue.dependencies)) {
-          currEntry.dependencies.push(
-            new LockfileDependency(dependencyName, version, dependencyValue.dev, currEntry, dependencyName)
-          );
-        }
-      }
 
       allPackages.push(currEntry);
       allEntries.push(currEntry);
@@ -87,10 +82,16 @@ export const readLockfile = async (lockfilePath: string) => {
         dependency.resolvedEntry = matchedEntry;
         matchedEntry.referencers.push(dependency);
       } else {
-        console.error('Could not resolved dependency entryId: ', dependency.entryId);
+        // console.error('Could not resolved dependency entryId: ', dependency.entryId);
       }
     }
   }
 
-  console.log('all entries: ', allEntries[0]);
+  return allEntries;
+};
+
+export const readLockfile = async () => {
+  const lockfile: ILockfilePackageType = (await axios.get('http://localhost:8091')).data;
+
+  return generateLockfileGraph(lockfile);
 };

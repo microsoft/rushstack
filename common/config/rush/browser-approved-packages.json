@@ -7,11 +7,19 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@lifaon/path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "cors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "nodemon",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -21,6 +29,18 @@
     {
       "name": "react-dom",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "react-is",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "styled-components",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ts-node",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "ts-node-dev",

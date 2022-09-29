@@ -15,10 +15,9 @@
     "react": "~16.13.1",
     "react-dom": "~16.13.1",
     "tslib": "~2.3.1",
-    "yamljs": "~0.3.0",
-    "js-yaml": "~3.13.1",
-    "yaml": "~2.1.1",
-    "axios": "~0.27.2"
+    "axios": "~0.27.2",
+    "react-is": "~18.2.0",
+    "@lifaon/path": "~2.1.0"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
