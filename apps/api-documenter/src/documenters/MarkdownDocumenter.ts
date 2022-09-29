@@ -503,6 +503,11 @@ export class MarkdownDocumenter {
   private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
+    const abstractClassesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Abstract Class', 'Description']
+    });
+
     const classesTable: DocTable = new DocTable({
       configuration,
       headerTitles: ['Class', 'Description']
@@ -551,7 +556,11 @@ export class MarkdownDocumenter {
 
       switch (apiMember.kind) {
         case ApiItemKind.Class:
-          classesTable.addRow(row);
+          if (ApiAbstractMixin.isBaseClassOf(apiMember) && apiMember.isAbstract) {
+            abstractClassesTable.addRow(row);
+          } else {
+            classesTable.addRow(row);
+          }
           this._writeApiItemPage(apiMember);
           break;
 
@@ -590,6 +599,11 @@ export class MarkdownDocumenter {
     if (classesTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration, title: 'Classes' }));
       output.appendNode(classesTable);
+    }
+
+    if (abstractClassesTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration, title: 'Abstract Classes' }));
+      output.appendNode(abstractClassesTable);
     }
 
     if (enumerationsTable.rows.length > 0) {
