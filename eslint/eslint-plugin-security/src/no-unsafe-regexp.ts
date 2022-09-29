@@ -41,6 +41,7 @@ type MessageIds = 'error-unsafe-regexp';
 type Options = [];
 
 const noUnsafeRegExp: TSESLint.RuleModule<MessageIds, Options> = {
+  defaultOptions: [],
   meta: {
     type: 'problem',
     messages: {

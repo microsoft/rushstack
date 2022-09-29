@@ -248,6 +248,7 @@ export class FileSystem {
     static isExistError(error: Error): boolean;
     static isFileDoesNotExistError(error: Error): boolean;
     static isFolderDoesNotExistError(error: Error): boolean;
+    static isNotDirectoryError(error: Error): boolean;
     static isNotExistError(error: Error): boolean;
     static isUnlinkNotPermittedError(error: Error): boolean;
     static move(options: IFileSystemMoveOptions): void;
@@ -721,7 +722,7 @@ export class LockFile {
     get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
     get isReleased(): boolean;
-    release(): void;
+    release(deleteFile?: boolean): void;
     static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
 }
 
@@ -780,6 +781,7 @@ export class PackageNameParser {
 // @public
 export class Path {
     static convertToBackslashes(inputPath: string): string;
+    static convertToPlatformDefault(inputPath: string): string;
     static convertToSlashes(inputPath: string): string;
     static formatConcisely(options: IPathFormatConciselyOptions): string;
     static formatFileLocation(options: IPathFormatFileLocationOptions): string;

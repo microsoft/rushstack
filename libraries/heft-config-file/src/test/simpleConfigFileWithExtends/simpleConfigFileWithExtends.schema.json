@@ -21,6 +21,11 @@
       }
     },
 
+    "thingsObj": {
+      "type": "object",
+      "additionalProperties": true
+    },
+
     "booleanProp": {
       "type": "boolean"
     }

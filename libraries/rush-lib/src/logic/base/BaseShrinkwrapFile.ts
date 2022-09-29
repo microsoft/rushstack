@@ -7,11 +7,12 @@ import * as semver from 'semver';
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { PackageManagerOptionsConfigurationBase, RushConfiguration } from '../../api/RushConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
+import { PackageManagerOptionsConfigurationBase } from './BasePackageManagerOptionsConfiguration';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.

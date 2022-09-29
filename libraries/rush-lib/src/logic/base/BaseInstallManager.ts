@@ -311,10 +311,14 @@ export abstract class BaseInstallManager {
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
     const cleanInstall: boolean =
-      !this._commonTempInstallFlag.checkValidAndReportStoreIssues() ||
+      !this._commonTempInstallFlag.checkValidAndReportStoreIssues(
+        this.options.allowShrinkwrapUpdates ? 'update' : 'install'
+      ) ||
       (this.options.includeSplitWorkspace &&
         !!this._commonTempSplitInstallFlag &&
-        !this._commonTempSplitInstallFlag.checkValidAndReportStoreIssues());
+        !this._commonTempSplitInstallFlag.checkValidAndReportStoreIssues(
+          this.options.allowShrinkwrapUpdates ? 'update' : 'install'
+        ));
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {

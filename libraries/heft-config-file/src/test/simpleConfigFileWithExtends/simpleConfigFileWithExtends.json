@@ -1,6 +1,17 @@
 {
   "$schema": "http://schema.net/",
   "extends": "../simpleConfigFile/simpleConfigFile.json",
+
   "things": ["D", "E"],
+
+  "thingsObj": {
+    "A": {
+      "D": "E"
+    },
+    "F": {
+      "G": "H"
+    }
+  },
+
   "booleanProp": false
 }

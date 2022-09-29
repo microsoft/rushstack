@@ -35,7 +35,12 @@ import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { RushPluginsConfiguration } from './RushPluginsConfiguration';
+import { IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { INpmOptionsJson, NpmOptionsConfiguration } from '../logic/npm/NpmOptionsConfiguration';
+import { IYarnOptionsJson, YarnOptionsConfiguration } from '../logic/yarn/YarnOptionsConfiguration';
+
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
+import { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
 
 const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = Import.lazy(
   '../logic/DependencyAnalyzer',
@@ -64,7 +69,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.pinnedVersionsFilename,
   RushConstants.repoStateFilename,
   RushConstants.versionPoliciesFilename,
-  RushConstants.rushPluginsConfigFilename
+  RushConstants.rushPluginsConfigFilename,
+  RushConstants.pnpmConfigFilename
 ];
 
 /**
@@ -83,6 +89,7 @@ export interface IRushGitPolicyJson {
   sampleEmail?: string;
   versionBumpCommitMessage?: string;
   changeLogUpdateCommitMessage?: string;
+  changefilesCommitMessage?: string;
   tagSeparator?: string;
 }
 
@@ -134,96 +141,6 @@ export interface IRushRepositoryJsonMultipleUrls extends IRushRepositoryJsonBase
 }
 
 export type IRushRepositoryJson = IRushRepositoryJsonSingleUrl | IRushRepositoryJsonMultipleUrls;
-
-/**
- * This represents the available PNPM store options
- * @public
- */
-export type PnpmStoreOptions = 'local' | 'global';
-
-/**
- * Options for the package manager.
- * @public
- */
-export interface IPackageManagerOptionsJsonBase {
-  /**
-   * Environment variables for the package manager
-   */
-  environmentVariables?: IConfigurationEnvironment;
-}
-
-/**
- * A collection of environment variables
- * @public
- */
-export interface IConfigurationEnvironment {
-  /**
-   * Environment variables
-   */
-  [environmentVariableName: string]: IConfigurationEnvironmentVariable;
-}
-
-/**
- * Represents the value of an environment variable, and if the value should be overridden if the variable is set
- * in the parent environment.
- * @public
- */
-export interface IConfigurationEnvironmentVariable {
-  /**
-   * Value of the environment variable
-   */
-  value: string;
-
-  /**
-   * Set to true to override the environment variable even if it is set in the parent environment.
-   * The default value is false.
-   */
-  override?: boolean;
-}
-
-/**
- * Part of IRushConfigurationJson.
- * @internal
- */
-export interface INpmOptionsJson extends IPackageManagerOptionsJsonBase {}
-
-/**
- * Part of IRushConfigurationJson.
- * @internal
- */
-export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
-  /**
-   * The store resolution method for PNPM to use
-   */
-  pnpmStore?: PnpmStoreOptions;
-  /**
-   * Should PNPM fail if peer dependencies aren't installed?
-   */
-  strictPeerDependencies?: boolean;
-  /**
-   * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
-   */
-  preventManualShrinkwrapChanges?: boolean;
-  /**
-   * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
-   */
-  useWorkspaces?: boolean;
-}
-
-/**
- * Part of IRushConfigurationJson.
- * @internal
- */
-export interface IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
-  /**
-   * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
-   * This allows "rush install" to succeed if there are dependencies with engines defined in
-   * package.json which do not match the current environment.
-   *
-   * The default value is false.
-   */
-  ignoreEngines?: boolean;
-}
 
 /**
  * Options defining an allowed variant as part of IRushConfigurationJson.
@@ -278,149 +195,6 @@ export interface IRushConfigurationProjectsFilter {
    * If true, filter out projects that specify splitWorkspace as true.
    */
   splitWorkspace: boolean;
-}
-
-/**
- * Options that all package managers share.
- *
- * @public
- */
-export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
-  /**
-   * Environment variables for the package manager
-   */
-  public readonly environmentVariables?: IConfigurationEnvironment;
-
-  /** @internal */
-  protected constructor(json: IPackageManagerOptionsJsonBase) {
-    this.environmentVariables = json.environmentVariables;
-  }
-}
-
-/**
- * Options that are only used when the NPM package manager is selected.
- *
- * @remarks
- * It is valid to define these options in rush.json even if the NPM package manager
- * is not being used.
- *
- * @public
- */
-export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
-  /** @internal */
-  public constructor(json: INpmOptionsJson) {
-    super(json);
-  }
-}
-
-/**
- * Options that are only used when the PNPM package manager is selected.
- *
- * @remarks
- * It is valid to define these options in rush.json even if the PNPM package manager
- * is not being used.
- *
- * @public
- */
-export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
-  /**
-   * The method used to resolve the store used by PNPM.
-   *
-   * @remarks
-   * Available options:
-   *  - local: Use the standard Rush store path: common/temp/pnpm-store
-   *  - global: Use PNPM's global store path
-   */
-  public readonly pnpmStore: PnpmStoreOptions;
-
-  /**
-   * The path for PNPM to use as the store directory.
-   *
-   * Will be overridden by environment variable RUSH_PNPM_STORE_PATH
-   */
-  public readonly pnpmStorePath: string;
-
-  /**
-   * If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM.
-   *
-   * @remarks
-   * This causes "rush install" to fail if there are unsatisfied peer dependencies, which is
-   * an invalid state that can cause build failures or incompatible dependency versions.
-   * (For historical reasons, JavaScript package managers generally do not treat this invalid state
-   * as an error.)
-   *
-   * The default value is false.  (For now.)
-   */
-  public readonly strictPeerDependencies: boolean;
-
-  /**
-   * If true, then `rush install` will report an error if manual modifications
-   * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
-   *
-   * @remarks
-   * This feature protects against accidental inconsistencies that may be introduced
-   * if the PNPM shrinkwrap file (`pnpm-lock.yaml`) is manually edited.  When this
-   * feature is enabled, `rush update` will write a hash of the shrinkwrap contents to repo-state.json,
-   * and then `rush update` and `rush install` will validate the hash.  Note that this does not prohibit
-   * manual modifications, but merely requires `rush update` be run
-   * afterwards, ensuring that PNPM can report or repair any potential inconsistencies.
-   *
-   * To temporarily disable this validation when invoking `rush install`, use the
-   * `--bypass-policy` command-line parameter.
-   *
-   * The default value is false.
-   */
-  public readonly preventManualShrinkwrapChanges: boolean;
-
-  /**
-   * If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM.
-   *
-   * @remarks
-   * The default value is false.  (For now.)
-   */
-  public readonly useWorkspaces: boolean;
-
-  /** @internal */
-  public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
-    super(json);
-    this.pnpmStore = json.pnpmStore || 'local';
-    if (EnvironmentConfiguration.pnpmStorePathOverride) {
-      this.pnpmStorePath = EnvironmentConfiguration.pnpmStorePathOverride;
-    } else if (this.pnpmStore === 'global') {
-      this.pnpmStorePath = '';
-    } else {
-      this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
-    }
-    this.strictPeerDependencies = !!json.strictPeerDependencies;
-    this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
-    this.useWorkspaces = !!json.useWorkspaces;
-  }
-}
-
-/**
- * Options that are only used when the yarn package manager is selected.
- *
- * @remarks
- * It is valid to define these options in rush.json even if the yarn package manager
- * is not being used.
- *
- * @public
- */
-export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
-  /**
-   * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
-   * This allows "rush install" to succeed if there are dependencies with engines defined in
-   * package.json which do not match the current environment.
-   *
-   * The default value is false.
-   */
-  public readonly ignoreEngines: boolean;
-
-  /** @internal */
-  public constructor(json: IYarnOptionsJson) {
-    super(json);
-    this.ignoreEngines = !!json.ignoreEngines;
-  }
 }
 
 /**
@@ -486,6 +260,7 @@ export class RushConfiguration {
   private _gitSampleEmail: string;
   private _gitVersionBumpCommitMessage: string | undefined;
   private _gitChangeLogUpdateCommitMessage: string | undefined;
+  private _gitChangefilesCommitMessage: string | undefined;
   private _gitTagSeparator: string | undefined;
 
   // "hotfixChangeEnabled" feature
@@ -603,11 +378,28 @@ export class RushConfiguration {
     this.__rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
-    this._pnpmOptions = new PnpmOptionsConfiguration(
-      rushConfigurationJson.pnpmOptions || {},
-      this._commonTempFolder
-    );
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
+    try {
+      this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        `${this._commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`,
+        this._commonTempFolder
+      );
+      if (rushConfigurationJson.pnpmOptions) {
+        throw new Error(
+          'Because the new config file "common/config/rush/pnpm-config.json" is being used, ' +
+            'you must remove the old setting "pnpmOptions" from rush.json'
+        );
+      }
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
+        this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonObject(
+          rushConfigurationJson.pnpmOptions || {},
+          this._commonTempFolder
+        );
+      } else {
+        throw error;
+      }
+    }
 
     // TODO: Add an actual "packageManager" field in rush.json
     const packageManagerFields: string[] = [];
@@ -736,6 +528,10 @@ export class RushConfiguration {
 
       if (rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage) {
         this._gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
+      }
+
+      if (rushConfigurationJson.gitPolicy.changefilesCommitMessage) {
+        this._gitChangefilesCommitMessage = rushConfigurationJson.gitPolicy.changefilesCommitMessage;
       }
 
       if (rushConfigurationJson.gitPolicy.tagSeparator) {
@@ -1420,6 +1216,14 @@ export class RushConfiguration {
    */
   public get gitChangeLogUpdateCommitMessage(): string | undefined {
     return this._gitChangeLogUpdateCommitMessage;
+  }
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * The commit message to use when committing change log files 'rush version'
+   */
+  public get gitChangefilesCommitMessage(): string | undefined {
+    return this._gitChangefilesCommitMessage;
   }
 
   /**

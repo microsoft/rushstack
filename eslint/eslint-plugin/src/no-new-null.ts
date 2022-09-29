@@ -12,6 +12,7 @@ type Accessible = {
 };
 
 const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
+  defaultOptions: [],
   meta: {
     type: 'problem',
     messages: {

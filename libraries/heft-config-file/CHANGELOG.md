@@ -1,6 +1,25 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Thu, 15 Sep 2022 00:18:52 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+
+## 0.11.1
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 0.11.0
+Tue, 27 Sep 2022 22:17:20 GMT
+
+### Minor changes
+
+- Allow a schema object to be passed to the ConfigurationFile constructor instead of the path to a schema file.
+
+## 0.10.0
+Wed, 21 Sep 2022 20:21:10 GMT
+
+### Minor changes
+
+- Add a "propertyInheritanceDefaults" option that allows the default property inheritance type to be configured.
 
 ## 0.9.6
 Thu, 15 Sep 2022 00:18:52 GMT
