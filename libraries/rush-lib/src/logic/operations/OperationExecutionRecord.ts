@@ -81,7 +81,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public readonly runner: IOperationRunner;
   public readonly weight: number;
-  public readonly operationStateFile: OperationStateFile | undefined;
+  public readonly _operationStateFile: OperationStateFile | undefined;
 
   private readonly _context: IOperationExecutionRecordContext;
 
@@ -99,7 +99,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     this.runner = runner;
     this.weight = operation.weight;
     if (operation.associatedPhase && operation.associatedProject) {
-      this.operationStateFile = new OperationStateFile({
+      this._operationStateFile = new OperationStateFile({
         phase: operation.associatedPhase,
         rushProject: operation.associatedProject
       });
@@ -129,7 +129,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public get nonCachedDurationMs(): number | undefined {
     // Lazy calculated because the state file is created/restored later on
-    return this.operationStateFile?.state?.nonCachedDurationMs;
+    return this._operationStateFile?.state?.nonCachedDurationMs;
   }
 
   public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {

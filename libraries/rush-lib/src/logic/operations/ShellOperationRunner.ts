@@ -275,7 +275,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
         if (restoreFromCacheSuccess) {
           // Restore the original state of the operation without cache
-          await context.operationStateFile?.tryRestoreAsync();
+          await context._operationStateFile?.tryRestoreAsync();
           return OperationStatus.FromCache;
         }
       }
@@ -375,7 +375,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
         // If the operation without cache was successful, we can save the state to disk
         const { duration: durationInSeconds } = context.stopwatch;
-        await context.operationStateFile?.writeAsync({
+        await context._operationStateFile?.writeAsync({
           nonCachedDurationMs: durationInSeconds * 1000
         });
 

@@ -6,7 +6,7 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
 import type { OperationStateFile } from './OperationStateFile';
-import type { Stopwatch } from '../../utilities/Stopwatch';
+import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -32,12 +32,14 @@ export interface IOperationRunnerContext {
   stdioSummarizer: StdioSummarizer;
   /**
    * Object used to record state of the operation.
+   *
+   * @internal
    */
-  operationStateFile?: OperationStateFile;
+  _operationStateFile?: OperationStateFile;
   /**
    * Object used to track elapsed time.
    */
-  stopwatch: Stopwatch;
+  stopwatch: IStopwatchResult;
 }
 
 /**

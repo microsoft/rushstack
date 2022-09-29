@@ -400,12 +400,25 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
-    // Warning: (ae-forgotten-export) The symbol "OperationStateFile" needs to be exported by the entry point index.d.ts
-    operationStateFile?: OperationStateFile;
+    // @internal
+    _operationStateFile?: _OperationStateFile;
     quietMode: boolean;
     stdioSummarizer: StdioSummarizer;
-    // Warning: (ae-forgotten-export) The symbol "Stopwatch" needs to be exported by the entry point index.d.ts
-    stopwatch: Stopwatch;
+    stopwatch: IStopwatchResult;
+}
+
+// @internal (undocumented)
+export interface _IOperationStateFileOptions {
+    // (undocumented)
+    phase: IPhase;
+    // (undocumented)
+    rushProject: RushConfigurationProject;
+}
+
+// @internal (undocumented)
+export interface _IOperationStateJson {
+    // (undocumented)
+    nonCachedDurationMs: number;
 }
 
 // @public
@@ -476,7 +489,7 @@ export interface IRushSessionOptions {
     terminalProvider: ITerminalProvider;
 }
 
-// @alpha
+// @beta
 export interface IStopwatchResult {
     get duration(): number;
     get endTime(): number | undefined;
@@ -586,6 +599,19 @@ export class Operation {
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
     weight: number;
+}
+
+// @internal
+export class _OperationStateFile {
+    constructor(options: _IOperationStateFileOptions);
+    get filename(): string;
+    static getFilenameRelativeToProjectRoot(phase: IPhase): string;
+    // (undocumented)
+    get state(): _IOperationStateJson | undefined;
+    // (undocumented)
+    tryRestoreAsync(): Promise<_IOperationStateJson | undefined>;
+    // (undocumented)
+    writeAsync(json: _IOperationStateJson): Promise<void>;
 }
 
 // @beta

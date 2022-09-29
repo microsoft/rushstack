@@ -7,11 +7,17 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
+/**
+ * @internal
+ */
 export interface IOperationStateFileOptions {
   rushProject: RushConfigurationProject;
   phase: IPhase;
 }
 
+/**
+ * @internal
+ */
 export interface IOperationStateJson {
   nonCachedDurationMs: number;
 }
