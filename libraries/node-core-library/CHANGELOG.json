@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.53.0",
+      "tag": "@rushstack/node-core-library_v3.53.0",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a Path.convertToPlatformDefault API to convert a path to use the platform-default slashes."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.52.0",
       "tag": "@rushstack/node-core-library_v3.52.0",
       "date": "Wed, 21 Sep 2022 20:21:10 GMT",

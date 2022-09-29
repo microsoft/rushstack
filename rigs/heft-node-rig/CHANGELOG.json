@@ -2,6 +2,32 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.11.0",
+      "tag": "@rushstack/heft-node-rig_v1.11.0",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to TypeScript 4.8."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.32.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.3.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.11` to `^0.48.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.13",
       "tag": "@rushstack/heft-node-rig_v1.10.13",
       "date": "Tue, 27 Sep 2022 22:17:20 GMT",

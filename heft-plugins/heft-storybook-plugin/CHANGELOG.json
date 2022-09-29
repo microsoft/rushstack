@@ -2,6 +2,30 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.1.83",
+      "tag": "@rushstack/heft-storybook-plugin_v0.1.83",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.11` to `^0.48.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.82",
       "tag": "@rushstack/heft-storybook-plugin_v0.1.82",
       "date": "Tue, 27 Sep 2022 22:17:20 GMT",

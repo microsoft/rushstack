@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+
+## 3.53.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Add a Path.convertToPlatformDefault API to convert a path to use the platform-default slashes.
 
 ## 3.52.0
 Wed, 21 Sep 2022 20:21:10 GMT

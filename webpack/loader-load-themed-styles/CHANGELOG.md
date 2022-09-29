@@ -1,6 +1,14 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Tue, 27 Sep 2022 22:17:20 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+
+## 2.0.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Breaking changes
+
+- Make @microsoft/load-themed-styles a peer dependency.
+- Remove the namedExport option.
 
 ## 1.9.180
 Tue, 27 Sep 2022 22:17:20 GMT

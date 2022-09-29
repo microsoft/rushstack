@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+
+## 7.32.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Update parser to TypeScript 4.8.
 
 ## 7.31.2
 Wed, 21 Sep 2022 20:21:10 GMT
