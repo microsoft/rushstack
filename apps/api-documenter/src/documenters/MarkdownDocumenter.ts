@@ -32,6 +32,7 @@ import {
   ApiPropertyItem,
   ApiInterface,
   Excerpt,
+  ApiAbstractMixin,
   ApiParameterListMixin,
   ApiReturnTypeMixin,
   ApiDeclaredItem,
@@ -1053,6 +1054,14 @@ export class MarkdownDocumenter {
       if (apiItem.isStatic) {
         section.appendNode(
           new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'static' })])
+        );
+      }
+    }
+
+    if (ApiAbstractMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isAbstract) {
+        section.appendNode(
+          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'abstract' })])
         );
       }
     }
