@@ -719,7 +719,7 @@ export class PhasedCommandWorkerController {
     update(operations: ITransferableOperation[]): void;
 }
 
-// @public (undocumented)
+// @alpha (undocumented)
 export type PhasedCommandWorkerState = 'initializing' | 'waiting' | 'updating' | 'executing' | 'exiting' | 'exited';
 
 // @public
