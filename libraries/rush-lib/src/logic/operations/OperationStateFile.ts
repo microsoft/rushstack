@@ -49,7 +49,7 @@ export class OperationStateFile {
    * @internal
    */
   public static getFilenameRelativeToProjectRoot(phase: IPhase): string {
-    const identifier: string = `${phase.logFilenameIdentifier}`;
+    const identifier: string = phase.logFilenameIdentifier;
     return `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${identifier}/state.json`;
   }
 
