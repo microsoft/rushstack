@@ -231,6 +231,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "DecoratorExample",
           "preserveMemberOrder": false,
           "members": [
@@ -294,6 +295,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "DocBaseClass",
           "preserveMemberOrder": false,
           "members": [
@@ -385,6 +387,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "DocClass1",
           "preserveMemberOrder": false,
           "members": [
@@ -416,6 +419,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "deprecatedExample"
             },
             {
@@ -479,6 +483,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "exampleFunction"
             },
             {
@@ -526,6 +531,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "exampleFunction"
             },
             {
@@ -604,6 +610,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "genericWithConstraintAndDefault"
             },
             {
@@ -634,6 +641,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "interestingEdgeCases"
             },
             {
@@ -770,6 +778,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "optionalParamFunction"
             },
             {
@@ -921,6 +930,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "sumWithExample"
             },
             {
@@ -951,6 +961,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "tableExample"
             },
             {
@@ -1038,6 +1049,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "DocClassInterfaceMerge",
           "preserveMemberOrder": false,
           "members": [],
@@ -1463,6 +1475,7 @@
               }
             }
           ],
+          "isAbstract": false,
           "name": "Generic",
           "preserveMemberOrder": false,
           "members": [],
@@ -2534,6 +2547,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SystemEvent",
           "preserveMemberOrder": false,
           "members": [
@@ -2582,6 +2596,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "addHandler"
             }
           ],

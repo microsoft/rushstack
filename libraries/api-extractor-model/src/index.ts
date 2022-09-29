@@ -30,6 +30,7 @@ export {
   IApiTypeParameterListMixinOptions,
   ApiTypeParameterListMixin
 } from './mixins/ApiTypeParameterListMixin';
+export { IApiAbstractMixinOptions, ApiAbstractMixin } from './mixins/ApiAbstractMixin';
 export { IApiItemContainerMixinOptions, ApiItemContainerMixin } from './mixins/ApiItemContainerMixin';
 export { IApiProtectedMixinOptions, ApiProtectedMixin } from './mixins/ApiProtectedMixin';
 export { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from './mixins/ApiReleaseTagMixin';

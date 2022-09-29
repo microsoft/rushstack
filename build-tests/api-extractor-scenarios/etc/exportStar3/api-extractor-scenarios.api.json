@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "A",
           "preserveMemberOrder": false,
           "members": [],

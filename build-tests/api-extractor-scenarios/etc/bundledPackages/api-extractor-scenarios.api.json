@@ -254,6 +254,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "Lib1Class",
           "preserveMemberOrder": false,
           "members": [

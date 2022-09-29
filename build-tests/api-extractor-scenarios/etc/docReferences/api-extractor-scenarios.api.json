@@ -251,6 +251,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "MyClass",
               "preserveMemberOrder": false,
               "members": [
@@ -299,6 +300,7 @@
                     }
                   ],
                   "isOptional": false,
+                  "isAbstract": false,
                   "name": "myMethod"
                 }
               ],

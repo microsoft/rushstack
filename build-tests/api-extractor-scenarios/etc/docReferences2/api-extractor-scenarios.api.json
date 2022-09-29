@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "CyclicA",
           "preserveMemberOrder": false,
           "members": [
@@ -214,6 +215,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "methodA1"
             },
             {
@@ -244,6 +246,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "methodA3"
             }
           ],
@@ -260,6 +263,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "CyclicB",
           "preserveMemberOrder": false,
           "members": [
@@ -291,6 +295,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "methodB2"
             },
             {
@@ -321,6 +326,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "methodB4"
             }
           ],
@@ -337,6 +343,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "FailWithSelfReference",
           "preserveMemberOrder": false,
           "members": [
@@ -368,6 +375,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "method1"
             },
             {
@@ -398,6 +406,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "method2"
             }
           ],

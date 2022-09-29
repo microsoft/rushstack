@@ -192,6 +192,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "SomeClass",
               "preserveMemberOrder": false,
               "members": [],
@@ -210,6 +211,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SomeClass",
           "preserveMemberOrder": false,
           "members": [],

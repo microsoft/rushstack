@@ -192,6 +192,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "Child",
           "preserveMemberOrder": false,
           "members": [],

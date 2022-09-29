@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ClassWithTypeLiterals",
           "preserveMemberOrder": false,
           "members": [
@@ -231,6 +232,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "method1"
             },
             {
@@ -270,6 +272,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "method2"
             }
           ],

@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": true,
           "name": "AbstractClass",
           "preserveMemberOrder": false,
           "members": [
@@ -214,6 +215,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": true,
               "name": "member"
             }
           ],
@@ -243,6 +245,7 @@
               }
             }
           ],
+          "isAbstract": false,
           "name": "ClassWithTypeParameter",
           "preserveMemberOrder": false,
           "members": [],
@@ -382,6 +385,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsClassWithTypeParameter",
           "preserveMemberOrder": false,
           "members": [],
@@ -474,6 +478,7 @@
                     }
                   ],
                   "releaseTag": "Public",
+                  "isAbstract": false,
                   "name": "SomeClass3",
                   "preserveMemberOrder": false,
                   "members": [],
@@ -492,6 +497,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "SomeClass1",
               "preserveMemberOrder": false,
               "members": [],
@@ -517,6 +523,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "SomeClass2",
               "preserveMemberOrder": false,
               "members": [],
@@ -537,6 +544,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "SomeClass4",
               "preserveMemberOrder": false,
               "members": [],
@@ -656,6 +664,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SimpleClass",
           "preserveMemberOrder": false,
           "members": [
@@ -687,6 +696,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "member"
             },
             {
@@ -734,6 +744,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "optionalParamMethod"
             },
             {

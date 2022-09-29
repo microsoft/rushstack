@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ClassWithGenericMethod",
           "preserveMemberOrder": false,
           "members": [
@@ -227,6 +228,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "method"
             }
           ],
@@ -256,6 +258,7 @@
               }
             }
           ],
+          "isAbstract": false,
           "name": "GenericClass",
           "preserveMemberOrder": false,
           "members": [],
@@ -293,6 +296,7 @@
               }
             }
           ],
+          "isAbstract": false,
           "name": "GenericClassWithConstraint",
           "preserveMemberOrder": false,
           "members": [],
@@ -330,6 +334,7 @@
               }
             }
           ],
+          "isAbstract": false,
           "name": "GenericClassWithDefault",
           "preserveMemberOrder": false,
           "members": [],

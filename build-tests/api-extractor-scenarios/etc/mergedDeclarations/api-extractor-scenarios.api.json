@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "MergedClassAndInterface",
           "preserveMemberOrder": false,
           "members": [
@@ -318,6 +319,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "MergedClassAndNamespace",
           "preserveMemberOrder": false,
           "members": [

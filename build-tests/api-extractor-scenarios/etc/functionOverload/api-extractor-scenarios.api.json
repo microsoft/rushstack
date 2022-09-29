@@ -363,6 +363,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "Combiner",
           "preserveMemberOrder": false,
           "members": [
@@ -427,6 +428,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "combine"
             },
             {
@@ -490,6 +492,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "combine"
             }
           ],

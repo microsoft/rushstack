@@ -241,6 +241,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "B",
               "preserveMemberOrder": false,
               "members": [
@@ -272,6 +273,7 @@
                   "overloadIndex": 1,
                   "parameters": [],
                   "isOptional": false,
+                  "isAbstract": false,
                   "name": "myMethod"
                 }
               ],

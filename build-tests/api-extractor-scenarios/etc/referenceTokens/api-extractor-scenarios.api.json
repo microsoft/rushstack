@@ -390,6 +390,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SomeClass1",
           "preserveMemberOrder": false,
           "members": [
@@ -445,6 +446,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SomeClass3",
           "preserveMemberOrder": false,
           "members": [],
@@ -474,6 +476,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SomeClass4",
           "preserveMemberOrder": false,
           "members": [],

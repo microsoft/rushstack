@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExampleA",
           "preserveMemberOrder": false,
           "members": [
@@ -248,6 +249,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "member2"
             }
           ],
@@ -264,6 +266,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExampleB",
           "preserveMemberOrder": false,
           "members": [
@@ -312,6 +315,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "tryLoadFromFile"
             }
           ],
@@ -328,6 +332,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExampleC",
           "preserveMemberOrder": false,
           "members": [
@@ -359,6 +364,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "member1"
             }
           ],

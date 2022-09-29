@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ClassΞ",
           "preserveMemberOrder": false,
           "members": [
@@ -236,6 +237,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "\"invalid chars\""
             },
             {
@@ -284,6 +286,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "memberΔ"
             },
             {
@@ -314,6 +317,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "validChars"
             }
           ],

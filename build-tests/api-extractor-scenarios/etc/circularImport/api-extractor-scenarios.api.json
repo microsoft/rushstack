@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "IFile",
           "preserveMemberOrder": false,
           "members": [
@@ -230,6 +231,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "IFolder",
           "preserveMemberOrder": false,
           "members": [

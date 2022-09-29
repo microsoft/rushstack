@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "A",
           "preserveMemberOrder": false,
           "members": [],
@@ -199,6 +200,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "B",
           "preserveMemberOrder": false,
           "members": [],
@@ -215,6 +217,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "C",
           "preserveMemberOrder": false,
           "members": [],

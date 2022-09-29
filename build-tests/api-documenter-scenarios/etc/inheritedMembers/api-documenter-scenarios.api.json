@@ -196,6 +196,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "Class1",
           "preserveMemberOrder": false,
           "members": [
@@ -302,6 +303,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "someOverload"
             }
           ],
@@ -344,6 +346,7 @@
               }
             }
           ],
+          "isAbstract": false,
           "name": "Class2",
           "preserveMemberOrder": false,
           "members": [
@@ -421,6 +424,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "someMethod"
             },
             {
@@ -501,6 +505,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsAnonymousClass",
           "preserveMemberOrder": false,
           "members": [],
@@ -530,6 +535,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsClassFromAnotherPackage",
           "preserveMemberOrder": false,
           "members": [],
@@ -559,6 +565,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsClassLikeVariable",
           "preserveMemberOrder": false,
           "members": [],
@@ -588,6 +595,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsUnexportedClass",
           "preserveMemberOrder": false,
           "members": [],
@@ -903,6 +911,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "Class3",
               "preserveMemberOrder": false,
               "members": [
@@ -951,6 +960,7 @@
                     }
                   ],
                   "isOptional": false,
+                  "isAbstract": false,
                   "name": "someMethod"
                 },
                 {
@@ -998,6 +1008,7 @@
                     }
                   ],
                   "isOptional": false,
+                  "isAbstract": false,
                   "name": "someOverload"
                 },
                 {
@@ -1045,6 +1056,7 @@
                     }
                   ],
                   "isOptional": false,
+                  "isAbstract": false,
                   "name": "someOverload"
                 },
                 {

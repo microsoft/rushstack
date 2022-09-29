@@ -183,6 +183,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "AnotherDuplicateName_2",
           "preserveMemberOrder": false,
           "members": [],
@@ -199,6 +200,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "AnotherDuplicateName",
           "preserveMemberOrder": false,
           "members": [],
@@ -265,6 +267,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ForgottenExport1",
           "preserveMemberOrder": false,
           "members": [
@@ -366,6 +369,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "ForgottenExport5",
               "preserveMemberOrder": false,
               "members": [],
@@ -384,6 +388,7 @@
             }
           ],
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ForgottenExport6",
           "preserveMemberOrder": false,
           "members": [],
@@ -409,6 +414,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "ForgottenExport6",
               "preserveMemberOrder": false,
               "members": [],
@@ -609,6 +615,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "ForgottenExport3",
               "preserveMemberOrder": false,
               "members": [],
