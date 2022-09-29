@@ -265,11 +265,10 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     const schemaPath: string = `${__dirname}/schemas/anything.schema.json`;
 
     // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
-    const shallowObjectInheritanceFunc: <T>(
+    const shallowObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
       currentObject: T,
       parentObject: T
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) => T = <T extends { [key: string]: any }>(currentObject: T, parentObject: T): T => {
+    ) => T = <T>(currentObject: T, parentObject?: T): T => {
       // Merged in this order to ensure that the currentObject properties take priority in order-of-definition,
       // since Jest executes them in this order. For example, if the extended Jest configuration contains a
       // "\\.(css|sass|scss)$" transform but the extending Jest configuration contains a "\\.(css)$" transform,
@@ -280,20 +279,18 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       //   "\\.(css|sass|scss)$": "..."
       // }
       // https://github.com/facebook/jest/blob/0a902e10e0a5550b114340b87bd31764a7638729/packages/jest-config/src/normalize.ts#L102
-      return { ...(currentObject || {}), ...(parentObject || {}), ...(currentObject || {}) };
+      return { ...(currentObject || {}), ...(parentObject || {}), ...(currentObject || {}) } as T;
     };
-    const deepObjectInheritanceFunc: <T>(
+    const deepObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
       currentObject: T,
       parentObject: T
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) => T = <T extends { [key: string]: any }>(currentObject: T, parentObject: T): T => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return mergeWith(parentObject || {}, currentObject || {}, (value: any, source: any) => {
+    ) => T = <T>(currentObject: T, parentObject: T): T => {
+      return mergeWith(parentObject || {}, currentObject || {}, (value: T, source: T) => {
         if (!isObject(source)) {
           return source;
         }
-        return Array.isArray(value) ? [...value, ...source] : { ...value, ...source };
-      });
+        return Array.isArray(value) ? [...value, ...(source as Array<unknown>)] : { ...value, ...source };
+      }) as T;
     };
 
     const tokenResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({

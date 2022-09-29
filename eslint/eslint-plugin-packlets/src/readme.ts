@@ -16,6 +16,7 @@ type Options = [
 ];
 
 const readme: TSESLint.RuleModule<MessageIds, Options> = {
+  defaultOptions: [{}],
   meta: {
     type: 'problem',
     messages: {
