@@ -7,7 +7,7 @@ import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library'
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { SelectionParameterSet } from '../SelectionParameterSet';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
   private _checkOnlyParameter!: CommandLineFlagParameter;

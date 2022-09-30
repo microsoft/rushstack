@@ -68,53 +68,12 @@ describe(OperationExecutionManager.name, () => {
     mockWritable.reset();
   });
 
-  describe('Constructor', () => {
-    it('throwsErrorOnInvalidParallelism', () => {
-      expect(
-        () =>
-          new OperationExecutionManager(new Set(), {
-            quietMode: false,
-            debugMode: false,
-            parallelism: 'tequila',
-            changedProjectsOnly: false,
-            destination: mockWritable
-          })
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('createsWithPercentageBasedParallelism', () => {
-      expect(
-        () =>
-          new OperationExecutionManager(new Set(), {
-            quietMode: false,
-            debugMode: false,
-            parallelism: '50%',
-            changedProjectsOnly: false,
-            destination: mockWritable
-          })
-      ).toBeInstanceOf(Function);
-    });
-
-    it('throwsErrorOnInvalidParallelismPercentage', () => {
-      expect(
-        () =>
-          new OperationExecutionManager(new Set(), {
-            quietMode: false,
-            debugMode: false,
-            parallelism: '200%',
-            changedProjectsOnly: false,
-            destination: mockWritable
-          })
-      ).toThrowErrorMatchingSnapshot();
-    });
-  });
-
   describe('Error logging', () => {
     beforeEach(() => {
       executionManagerOptions = {
         quietMode: false,
         debugMode: false,
-        parallelism: '1',
+        parallelism: 1,
         changedProjectsOnly: false,
         destination: mockWritable
       };
@@ -172,7 +131,7 @@ describe(OperationExecutionManager.name, () => {
         executionManagerOptions = {
           quietMode: false,
           debugMode: false,
-          parallelism: '1',
+          parallelism: 1,
           changedProjectsOnly: false,
           destination: mockWritable
         };
@@ -207,7 +166,7 @@ describe(OperationExecutionManager.name, () => {
         executionManagerOptions = {
           quietMode: false,
           debugMode: false,
-          parallelism: '1',
+          parallelism: 1,
           changedProjectsOnly: false,
           destination: mockWritable
         };

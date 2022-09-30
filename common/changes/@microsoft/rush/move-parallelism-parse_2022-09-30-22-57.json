@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Move parsing of \"--parallelism\" out of execution logic.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
