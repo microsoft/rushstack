@@ -17,20 +17,18 @@ import {
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
-import {
-  PackageManagerOptionsConfigurationBase,
-  PnpmOptionsConfiguration,
-  RushConfiguration
-} from '../../api/RushConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import { DependencyType, PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { SplitWorkspacePnpmfileConfiguration } from './SplitWorkspacePnpmfileConfiguration';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
-import { SplitWorkspacePnpmfileConfiguration } from './SplitWorkspacePnpmfileConfiguration';
+import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import { PackageManagerOptionsConfigurationBase } from '../base/BasePackageManagerOptionsConfiguration';
 
 import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
 

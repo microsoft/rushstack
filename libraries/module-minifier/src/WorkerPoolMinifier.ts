@@ -167,6 +167,8 @@ export class WorkerPoolMinifier implements IModuleMinifier {
             console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
           }
         }
+        this._deduped = 0;
+        this._minified = 0;
       }
     };
   }

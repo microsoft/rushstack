@@ -2,6 +2,78 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "0.1.39",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.39",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.1.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.52`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.38",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.38",
+      "date": "Tue, 27 Sep 2022 22:17:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.1.36`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.51`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.37",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.37",
+      "date": "Wed, 21 Sep 2022 20:21:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.1.35`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.50`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.36",
       "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.36",
       "date": "Thu, 15 Sep 2022 00:18:51 GMT",

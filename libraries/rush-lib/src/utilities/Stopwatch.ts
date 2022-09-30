@@ -13,7 +13,7 @@ export enum StopwatchState {
 
 /**
  * Represents a readonly view of a `Stopwatch`.
- * @alpha
+ * @beta
  */
 export interface IStopwatchResult {
   /**

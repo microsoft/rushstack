@@ -1,6 +1,36 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 17 Sep 2022 00:56:37 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Sep 2022 07:13:24 GMT and should not be manually modified.
+
+## 5.80.0
+Thu, 29 Sep 2022 07:13:24 GMT
+
+### Updates
+
+- Include the operation duration in the telemetry data that was recorded during the non-cached run when a cache hit occurs.
+- Fix an error message that always says to run "rush update --purge" even if the user only needs to run "rush install --purge."
+- Fix an issue where a "Current PNPM store path does not match the last one used." error will erroneously get thrown on Windows with an unchanged path, but with a forward slash instead of a backslash.
+- Remove fallback from tar binary to npm 'tar' package. The npm 'tar' package would sometimes produce invalid output if the cache entry was corrupt.
+- Remove gender from the git config example in rush.json
+
+## 5.79.0
+Sat, 24 Sep 2022 17:37:03 GMT
+
+### Minor changes
+
+- Add a `common/config/pnpm-config.json`, which is used to specify fields like `overrides`, `packageExtensions`, and `neverBuiltDependencies` that would otherwise be placed in a PNPM workspace repo's root-level `package.json`'s `pnpm` field.
+
+### Updates
+
+- Add a `--commit` and `--commit-message` flag to `rush change` that commits the change files automatically.
+
+## 5.78.1
+Fri, 23 Sep 2022 02:54:44 GMT
+
+### Updates
+
+- Fix Git detection when the current working directory is unrelated to the Rush workspace.
+- Fix an error that ocurred if an autoinstaller's  "node_modules" folder was manually deleted (GitHub #2987)
 
 ## 5.78.0
 Sat, 17 Sep 2022 00:56:37 GMT
