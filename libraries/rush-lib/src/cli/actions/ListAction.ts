@@ -8,7 +8,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
-import { SelectionParameterSet } from '../SelectionParameterSet';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 /**
  * Shape of "rush list --json" output.

@@ -21,7 +21,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
-import { SelectionParameterSet } from '../SelectionParameterSet';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = Import.lazy(
   '../../logic/InstallManagerFactory',

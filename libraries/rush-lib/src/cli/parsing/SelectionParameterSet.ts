@@ -9,17 +9,17 @@ import {
 } from '@rushstack/node-core-library';
 import { CommandLineParameterProvider, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { Selection } from '../logic/Selection';
-import type { ISelectorParser as ISelectorParser } from '../logic/selectors/ISelectorParser';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { Selection } from '../../logic/Selection';
+import type { ISelectorParser as ISelectorParser } from '../../logic/selectors/ISelectorParser';
 import {
   GitChangedProjectSelectorParser,
   IGitSelectorParserOptions
-} from '../logic/selectors/GitChangedProjectSelectorParser';
-import { NamedProjectSelectorParser } from '../logic/selectors/NamedProjectSelectorParser';
-import { TagProjectSelectorParser } from '../logic/selectors/TagProjectSelectorParser';
-import { VersionPolicyProjectSelectorParser } from '../logic/selectors/VersionPolicyProjectSelectorParser';
+} from '../../logic/selectors/GitChangedProjectSelectorParser';
+import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser';
+import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
+import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 
 /**
  * This class is provides the set of command line parameters used to select projects
