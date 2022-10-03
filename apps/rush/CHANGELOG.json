@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.80.1",
+      "tag": "@microsoft/rush_v5.80.1",
+      "date": "Mon, 03 Oct 2022 23:11:35 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a more useful error message in cases when a merge base for `rush change` cannot be determined."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.80.0",
       "tag": "@microsoft/rush_v5.80.0",
       "date": "Thu, 29 Sep 2022 07:13:24 GMT",
