@@ -12,13 +12,24 @@ export interface IRushProjectServeJson {
   routing: IRoutingRuleJson[];
 }
 
-export interface IRoutingRuleJson {
+export interface IRoutingFolderRuleJson {
+  projectRelativeFile: undefined;
   projectRelativeFolder: string;
   servePath: string;
   immutable?: boolean;
 }
 
+export interface IRoutingFileRuleJson {
+  projectRelativeFile: string;
+  projectRelativeFolder: undefined;
+  servePath: string;
+  immutable?: boolean;
+}
+
+export type IRoutingRuleJson = IRoutingFileRuleJson | IRoutingFolderRuleJson;
+
 export interface IRoutingRule {
+  type: 'file' | 'folder';
   diskPath: string;
   servePath: string;
   immutable: boolean;
@@ -61,8 +72,11 @@ export class RushServeConfiguration {
           );
         if (serveJson) {
           for (const rule of serveJson.routing) {
+            const { projectRelativeFile, projectRelativeFolder } = rule;
+            const diskPath: string = projectRelativeFolder ?? projectRelativeFile;
             rules.push({
-              diskPath: path.resolve(project.projectFolder, rule.projectRelativeFolder),
+              type: projectRelativeFile ? 'file' : 'folder',
+              diskPath: path.resolve(project.projectFolder, diskPath),
               servePath: rule.servePath,
               immutable: !!rule.immutable
             });

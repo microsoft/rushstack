@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-serve-plugin",
+      "comment": "Allow serving of single files, e.g. to serve a specific file at \"/\" (the root).",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-serve-plugin"
+}
