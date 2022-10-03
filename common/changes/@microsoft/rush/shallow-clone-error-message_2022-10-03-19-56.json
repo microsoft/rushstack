@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a more useful error message in cases when a merge base for `rush change` cannot be determined.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -230,16 +230,26 @@ export class Git {
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
-      '--no-optional-locks',
-      'merge-base',
-      '--',
-      'HEAD',
-      targetBranch
-    ]);
-    const result: string = output.trim();
+    try {
+      const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+        '--no-optional-locks',
+        'merge-base',
+        '--',
+        'HEAD',
+        targetBranch
+      ]);
+      const result: string = output.trim();
 
-    return result;
+      return result;
+    } catch (e) {
+      terminal.writeErrorLine(
+        `Unable to determine merge base for branch "${targetBranch}". ` +
+          'This can occur if the current clone is a shallow clone. If this clone is running in a CI ' +
+          'pipeline, check your pipeline settings to ensure that the clone depth includes ' +
+          'the expected merge base. If this clone is running locally, consider running "git fetch --deepen".'
+      );
+      throw new AlreadyReportedError();
+    }
   }
 
   public getBlobContent({ blobSpec, repositoryRoot }: IGetBlobOptions): string {
