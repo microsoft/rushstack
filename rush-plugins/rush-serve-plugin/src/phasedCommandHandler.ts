@@ -89,22 +89,44 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
         logger.terminal
       );
 
-      function setHeaders(response: express.Response, path: string, stat: unknown): void {
+      const fileRoutingRules: Map<string, IRoutingRule> = new Map();
+
+      function setHeaders(response: express.Response, path?: string, stat?: unknown): void {
         response.set('Access-Control-Allow-Origin', '*');
-        response.set('Access-Control-Allow-Methods', 'GET');
+        response.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
       }
 
       for (const rule of routingRules) {
-        app.use(
-          rule.servePath,
-          express.static(rule.diskPath, {
-            dotfiles: 'ignore',
-            immutable: rule.immutable,
-            index: false,
-            redirect: false,
-            setHeaders
-          })
-        );
+        const { diskPath, servePath } = rule;
+        if (rule.type === 'file') {
+          const existingRule: IRoutingRule | undefined = fileRoutingRules.get(servePath);
+          if (existingRule) {
+            throw new Error(
+              `Request to serve "${diskPath}" at "${servePath}" conflicts with existing rule to serve "${existingRule.diskPath}" from this location.`
+            );
+          } else {
+            fileRoutingRules.set(diskPath, rule);
+            app.get(servePath, (request: express.Request, response: express.Response) => {
+              response.sendFile(diskPath, {
+                headers: {
+                  'Access-Control-Allow-Origin': '*',
+                  'Access-Control-Allow-Methods': 'GET, OPTIONS'
+                }
+              });
+            });
+          }
+        } else {
+          app.use(
+            servePath,
+            express.static(diskPath, {
+              dotfiles: 'ignore',
+              immutable: rule.immutable,
+              index: false,
+              redirect: false,
+              setHeaders
+            })
+          );
+        }
       }
 
       const server: https.Server = https.createServer(
