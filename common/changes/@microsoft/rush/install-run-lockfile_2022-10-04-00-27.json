@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support passing a lockfile to \"install-run.js\" and \"install-run-rush.js\" to ensure stable installation on CI.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
