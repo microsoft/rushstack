@@ -25,6 +25,8 @@ import {
 
 const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
+const INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_RUSH_LOCKFILE_PATH' =
+  'INSTALL_RUN_RUSH_LOCKFILE_PATH';
 
 function _getRushVersion(logger: ILogger): string {
   const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION];
@@ -103,7 +105,14 @@ function _run(): void {
     const version: string = _getRushVersion(logger);
     logger.info(`The rush.json configuration requests Rush version ${version}`);
 
-    return installAndRun(logger, PACKAGE_NAME, version, bin, packageBinArgs);
+    const lockFilePath: string | undefined = process.env[INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE];
+    if (lockFilePath) {
+      logger.info(
+        `Found ${INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE}="${lockFilePath}", installing with lockfile.`
+      );
+    }
+
+    return installAndRun(logger, PACKAGE_NAME, version, bin, packageBinArgs, lockFilePath);
   });
 }
 
