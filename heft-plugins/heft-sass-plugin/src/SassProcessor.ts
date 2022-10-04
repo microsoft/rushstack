@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { render, Result, SassError } from 'node-sass';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
@@ -168,8 +169,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
    * Partial filenames always begin with a leading underscore and do not produce a CSS output file.
    */
   private _isSassPartial(filePath: string): boolean {
-    const lastSlashIndex: number = filePath.lastIndexOf('/');
-    return filePath.charAt(lastSlashIndex + 1) === '_';
+    return path.basename(filePath)[0] === '_';
   }
 
   private async _transpileSassAsync(
