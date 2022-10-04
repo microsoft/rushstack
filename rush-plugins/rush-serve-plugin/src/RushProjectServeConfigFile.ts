@@ -12,18 +12,19 @@ export interface IRushProjectServeJson {
   routing: IRoutingRuleJson[];
 }
 
-export interface IRoutingFolderRuleJson {
-  projectRelativeFile: undefined;
-  projectRelativeFolder: string;
+export interface IBaseRoutingRuleJson {
   servePath: string;
   immutable?: boolean;
 }
 
-export interface IRoutingFileRuleJson {
+export interface IRoutingFolderRuleJson extends IBaseRoutingRuleJson {
+  projectRelativeFile: undefined;
+  projectRelativeFolder: string;
+}
+
+export interface IRoutingFileRuleJson extends IBaseRoutingRuleJson {
   projectRelativeFile: string;
   projectRelativeFolder: undefined;
-  servePath: string;
-  immutable?: boolean;
 }
 
 export type IRoutingRuleJson = IRoutingFileRuleJson | IRoutingFolderRuleJson;
