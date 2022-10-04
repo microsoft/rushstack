@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a `rush remove` command that removes one or more dependencies from a project.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
