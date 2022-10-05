@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Reverted reverted _isSassPartial checker to previous version",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
