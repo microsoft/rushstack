@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-sass-plugin",
-      "comment": "Reverted reverted _isSassPartial checker to previous version",
+      "comment": "Fix an issue with identifying partial sass files on Windows.",
       "type": "patch"
     }
   ],
