@@ -1,30 +1,32 @@
-const express = require('express');
-const cors = require('cors');
-const yaml = require('js-yaml');
-const app = express();
-const fs = require('fs');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
+import yaml from 'js-yaml';
+const app: express.Application = express();
+import fs from 'fs';
+import path from 'path';
 // const exampleData = require('./exampleData/pnpm-lock.yaml');
-const port = 8091;
+const port: number = 8091;
 
 app.use(cors());
 
-app.get('/', (req: any, res: any) => {
-  const doc = yaml.load(fs.readFileSync(path.resolve(__dirname, './exampleData/monorepo.pnpm-lock.yaml')));
+app.get('/', (req: express.Request, res: express.Response) => {
+  const doc = yaml.load(
+    fs.readFileSync(path.resolve(__dirname, './exampleData/monorepo.pnpm-lock.yaml')).toString()
+  );
   res.send(doc);
 });
 
-app.get('/loadPackageJSON', (req: any, res: any) => {
+app.get('/loadPackageJSON', (req: express.Request, res: express.Response) => {
   const packageJson = fs.readFileSync(path.resolve(__dirname, './exampleData/package.json'));
   res.send(packageJson);
 });
 
-app.get('/loadCJS', (req: any, res: any) => {
+app.get('/loadCJS', (req: express.Request, res: express.Response) => {
   const cjsFile = fs.readFileSync(path.resolve(__dirname, './exampleData/.pnpmfile.cjs'));
   res.send(cjsFile);
 });
 
-app.get('/parsedCJS', (req: any, res: any) => {
+app.get('/parsedCJS', (req: express.Request, res: express.Response) => {
   const packageJson = fs.readFileSync(path.resolve(__dirname, './exampleData/package.json'));
   const {
     hooks: { readPackage }

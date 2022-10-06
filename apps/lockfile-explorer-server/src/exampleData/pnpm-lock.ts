@@ -1,4 +1,4 @@
-export const tempLockfile = `
+export const tempLockfile: string = `
 lockfileVersion: 5.3
 
 importers:
