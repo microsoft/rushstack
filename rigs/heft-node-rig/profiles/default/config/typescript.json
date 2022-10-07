@@ -65,7 +65,7 @@
     /**
      * File extensions that should be copied from the src folder to the destination folder(s).
      */
-    "fileExtensions": [".json"]
+    "fileExtensions": [".json", ".yaml"]
 
     /**
      * Glob patterns that should be explicitly included.
