@@ -1,8 +1,6 @@
-# heft-node-rig-tutorial
+# @rushstack/lockfile-explorer
 
-This is a copy of the
-[heft-node-rig-tutorial](https://github.com/microsoft/rushstack-samples/tree/main/heft/heft-node-rig-tutorial)
-tutorial project from the [rushstack-samples](https://github.com/microsoft/rushstack-samples) repo.
+> STILL UNDER DEVELOPMENT
 
-The copy here serves as a regression test, by using `"workspace:*"` references to the local projects in this repo.
-Please update the copy from time to time to keep it in sync with the official tutorial.
+This is the server side component for an experimental app that helps users to inspect `pnpm-lock.yaml` relationships
+and solve version conflicts. Works in conjunction with the @rushstack/lockfile-explorer application
