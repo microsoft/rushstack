@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Added .yaml to the set of statically copied assets",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}
