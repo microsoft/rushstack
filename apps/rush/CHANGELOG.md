@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 03 Oct 2022 23:11:35 GMT and should not be manually modified.
+This log was last generated on Sat, 08 Oct 2022 02:30:30 GMT and should not be manually modified.
+
+## 5.81.0
+Sat, 08 Oct 2022 02:30:30 GMT
+
+### Updates
+
+- Add a `rush remove` command that removes one or more dependencies from a project.
+- Support passing a lockfile to "install-run.js" and "install-run-rush.js" to ensure stable installation on CI.
+- Add missing "environmentVariables" property to "pnpm-config.json" schema to restore feature parity with "rush.json" "pnpmOptions" field.
 
 ## 5.80.1
 Mon, 03 Oct 2022 23:11:35 GMT
@@ -1262,8 +1271,9 @@ Tue, 26 Nov 2019 00:53:52 GMT
 ## 5.17.1
 Thu, 21 Nov 2019 00:50:15 GMT
 
-### Updates
+### Patches
 
+- Remove an error thrown when the --registry and --pack arguments are used on rush publish, because --registry might be required to check if a package has already been published against a custom registry.
 - Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies.
 
 ## 5.17.0

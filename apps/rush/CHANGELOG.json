@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.81.0",
+      "tag": "@microsoft/rush_v5.81.0",
+      "date": "Sat, 08 Oct 2022 02:30:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a `rush remove` command that removes one or more dependencies from a project."
+          },
+          {
+            "comment": "Support passing a lockfile to \"install-run.js\" and \"install-run-rush.js\" to ensure stable installation on CI."
+          },
+          {
+            "comment": "Add missing \"environmentVariables\" property to \"pnpm-config.json\" schema to restore feature parity with \"rush.json\" \"pnpmOptions\" field."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.80.1",
       "tag": "@microsoft/rush_v5.80.1",
       "date": "Mon, 03 Oct 2022 23:11:35 GMT",
