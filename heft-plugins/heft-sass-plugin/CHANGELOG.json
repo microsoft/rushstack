@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.5.19",
+      "tag": "@rushstack/heft-sass-plugin_v0.5.19",
+      "date": "Sat, 08 Oct 2022 02:30:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with identifying partial sass files on Windows."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.18",
       "tag": "@rushstack/heft-sass-plugin_v0.5.18",
       "date": "Thu, 29 Sep 2022 07:13:06 GMT",

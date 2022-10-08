@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+This log was last generated on Sat, 08 Oct 2022 02:30:08 GMT and should not be manually modified.
+
+## 0.5.19
+Sat, 08 Oct 2022 02:30:08 GMT
+
+### Patches
+
+- Fix an issue with identifying partial sass files on Windows.
 
 ## 0.5.18
 Thu, 29 Sep 2022 07:13:06 GMT

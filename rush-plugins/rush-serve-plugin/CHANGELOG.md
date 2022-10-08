@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-serve-plugin
 
-This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+This log was last generated on Sat, 08 Oct 2022 02:30:08 GMT and should not be manually modified.
+
+## 0.2.0
+Sat, 08 Oct 2022 02:30:08 GMT
+
+### Minor changes
+
+- Allow serving of single files, e.g. to serve a specific file at "/" (the root).
 
 ## 0.1.47
 Thu, 29 Sep 2022 07:13:06 GMT
