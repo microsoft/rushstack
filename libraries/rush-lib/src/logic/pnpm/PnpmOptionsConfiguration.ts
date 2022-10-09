@@ -276,7 +276,10 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   }
 
   /** @internal */
-  public static loadFromJsonObject(json: IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration {
+  public static loadFromJsonObject(
+    json: IPnpmOptionsJson,
+    commonTempFolder: string
+  ): PnpmOptionsConfiguration {
     return new PnpmOptionsConfiguration(json, commonTempFolder);
   }
 }

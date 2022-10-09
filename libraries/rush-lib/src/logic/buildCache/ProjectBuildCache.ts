@@ -124,7 +124,7 @@ export class ProjectBuildCache {
     if (inputOutputFiles.length > 0) {
       terminal.writeWarningLine(
         'Unable to use build cache. The following files are used to calculate project state ' +
-        `and are considered project output: ${inputOutputFiles.join(', ')}`
+          `and are considered project output: ${inputOutputFiles.join(', ')}`
       );
       return false;
     } else {
@@ -259,14 +259,14 @@ export class ProjectBuildCache {
       } else {
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
-          `See "${logFilePath}" for logs from the tar process.`
+            `See "${logFilePath}" for logs from the tar process.`
         );
         return false;
       }
     } else {
       terminal.writeWarningLine(
         `Unable to locate "tar". Please ensure that "tar" is on your PATH environment variable, or set the ` +
-        `${EnvironmentVariableNames.RUSH_TAR_BINARY_PATH} environment variable to the full path to the "tar" binary.`
+          `${EnvironmentVariableNames.RUSH_TAR_BINARY_PATH} environment variable to the full path to the "tar" binary.`
       );
       return false;
     }
