@@ -10,21 +10,38 @@ import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { execSync } from 'child_process';
-import { IPackageJson, JsonFile, FileConstants, Text, Enum } from '@rushstack/node-core-library';
+import {
+  type IPackageJson,
+  JsonFile,
+  FileConstants,
+  Text,
+  Enum,
+  InternalError
+} from '@rushstack/node-core-library';
 
-import { IChangeInfo, ChangeType, IVersionPolicyChangeInfo } from '../api/ChangeManagement';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { Utilities, IEnvironment } from '../utilities/Utilities';
-import { PrereleaseToken } from './PrereleaseToken';
-import { ChangeFiles } from './ChangeFiles';
-import { RushConfiguration } from '../api/RushConfiguration';
+import { type IChangeInfo, ChangeType, type IVersionPolicyChangeInfo } from '../api/ChangeManagement';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { Utilities, type IEnvironment } from '../utilities/Utilities';
+import type { PrereleaseToken } from './PrereleaseToken';
+import type { ChangeFiles } from './ChangeFiles';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
-import { LockStepVersionPolicy } from '../api/VersionPolicy';
+import type { LockStepVersionPolicy } from '../api/VersionPolicy';
 
 export interface IChangeRequests {
   packageChanges: Map<string, IChangeInfo>;
   versionPolicyChanges: Map<string, IVersionPolicyChangeInfo>;
+}
+
+interface IAddChangeOptions {
+  change: IChangeInfo;
+  changeFilePath?: string;
+  allChanges: IChangeRequests;
+  allPackages: Map<string, RushConfigurationProject>;
+  rushConfiguration: RushConfiguration;
+  prereleaseToken?: PrereleaseToken;
+  projectsToExclude?: Set<string>;
 }
 
 export class PublishUtilities {
@@ -51,25 +68,26 @@ export class PublishUtilities {
     const files: string[] = changeFiles.getFiles();
 
     // Add the minimum changes defined by the change descriptions.
-    files.forEach((fullPath: string) => {
-      const changeRequest: IChangeInfo = JsonFile.load(fullPath);
+    for (const changeFilePath of files) {
+      const changeRequest: IChangeInfo = JsonFile.load(changeFilePath);
 
       if (includeCommitDetails) {
         const git: Git = new Git(rushConfiguration);
-        PublishUtilities._updateCommitDetails(git, fullPath, changeRequest.changes);
+        PublishUtilities._updateCommitDetails(git, changeFilePath, changeRequest.changes);
       }
 
       for (const change of changeRequest.changes!) {
-        PublishUtilities._addChange(
+        PublishUtilities._addChange({
           change,
+          changeFilePath,
           allChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
           projectsToExclude
-        );
+        });
       }
-    });
+    }
 
     // keep resolving downstream dependency changes and version policy changes
     // until no more changes are detected
@@ -101,8 +119,8 @@ export class PublishUtilities {
           return;
         }
 
-        const projectHasChanged: boolean = this._addChange(
-          {
+        const projectHasChanged: boolean = this._addChange({
+          change: {
             packageName: project.packageName,
             changeType: versionPolicyChange.changeType,
             newVersion: versionPolicyChange.newVersion // enforce the specific policy version
@@ -112,7 +130,7 @@ export class PublishUtilities {
           rushConfiguration,
           prereleaseToken,
           projectsToExclude
-        );
+        });
 
         if (projectHasChanged) {
           console.log(
@@ -548,14 +566,15 @@ export class PublishUtilities {
    *
    * @returns true if the change caused the dependency change type to increase.
    */
-  private static _addChange(
-    change: IChangeInfo,
-    allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
-    rushConfiguration: RushConfiguration,
-    prereleaseToken?: PrereleaseToken,
-    projectsToExclude?: Set<string>
-  ): boolean {
+  private static _addChange({
+    change,
+    changeFilePath,
+    allChanges,
+    allPackages,
+    rushConfiguration,
+    prereleaseToken,
+    projectsToExclude
+  }: IAddChangeOptions): boolean {
     let hasChanged: boolean = false;
     const packageName: string = change.packageName;
     const project: RushConfigurationProject | undefined = allPackages.get(packageName);
@@ -572,6 +591,14 @@ export class PublishUtilities {
     // If the given change does not have a changeType, derive it from the "type" string.
     if (change.changeType === undefined) {
       change.changeType = Enum.tryGetValueByKey(ChangeType, change.type!);
+
+      if (change.changeType === undefined) {
+        if (changeFilePath) {
+          throw new Error(`Invalid change type ${JSON.stringify(change.type)} in ${changeFilePath}`);
+        } else {
+          throw new InternalError(`Invalid change type ${JSON.stringify(change.type)}`);
+        }
+      }
     }
 
     let currentChange: IChangeInfo | undefined = allChanges.packageChanges.get(packageName);
@@ -779,8 +806,8 @@ export class PublishUtilities {
           }
         }
 
-        hasChanges = PublishUtilities._addChange(
-          {
+        hasChanges = PublishUtilities._addChange({
+          change: {
             packageName: parentPackageName,
             changeType
           },
@@ -789,7 +816,7 @@ export class PublishUtilities {
           rushConfiguration,
           prereleaseToken,
           projectsToExclude
-        );
+        });
 
         if (hasChanges || alwaysUpdate) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
@@ -851,8 +878,8 @@ export class PublishUtilities {
         : newDependencySpecifier.versionSpecifier;
 
     // Add dependency version update comment.
-    PublishUtilities._addChange(
-      {
+    PublishUtilities._addChange({
+      change: {
         packageName: packageName,
         changeType: ChangeType.dependency,
         comment:
@@ -863,6 +890,6 @@ export class PublishUtilities {
       allChanges,
       allPackages,
       rushConfiguration
-    );
+    });
   }
 }
