@@ -1,4 +1,4 @@
-# @rushstack/lockfile-explorer
+# @rushstack/lockfile-explorer-server
 
 > STILL UNDER DEVELOPMENT
 

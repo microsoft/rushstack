@@ -15,14 +15,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "cors",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "nodemon",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -35,28 +27,8 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "styled-components",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "ts-node",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "ts-node-dev",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "yaml",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "yamljs",
-      "allowedCategories": [ "libraries" ]
     }
   ]
 }

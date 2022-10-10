@@ -158,8 +158,6 @@ importers:
       axios: ~0.27.2
       react: ~16.13.1
       react-dom: ~16.13.1
-      react-is: ~18.2.0
-      tslib: ~2.3.1
       typescript: ~4.8.4
     dependencies:
       '@fluentui/react': 8.96.1_tlqvpdqnq63ssdllbmshthdmo4
@@ -167,8 +165,6 @@ importers:
       axios: 0.27.2
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
-      react-is: 18.2.0
-      tslib: 2.3.1
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../heft
@@ -192,7 +188,6 @@ importers:
       cors: ~2.8.5
       express: 4.18.1
       js-yaml: ~3.13.1
-      typescript: ~4.8.4
     dependencies:
       '@types/express': 4.17.13
       cors: 2.8.5
@@ -206,7 +201,6 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/js-yaml': 3.12.1
       '@types/node': 12.20.24
-      typescript: 4.8.4
 
   ../../apps/rundown:
     specifiers:
@@ -17159,10 +17153,6 @@ packages:
 
   /react-is/17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
-
-  /react-is/18.2.0:
-    resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
-    dev: false
 
   /react-popper-tooltip/3.1.1_5owmthsvj5ictknaj3ev736ofq:
     resolution: {integrity: sha512-EnERAnnKRptQBJyaee5GJScWNUKQPDD2ywvzZyUjst/wj5U64C8/CnSYLNEmP2hG0IJ3ZhtDxE8oDN+KOyavXQ==}
