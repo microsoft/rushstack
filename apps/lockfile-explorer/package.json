@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
+  "bin": {
+    "lockfile-explorer": "./bin/lockfile-explorer"
+  },
   "scripts": {
     "build": "heft build --clean",
     "start": "heft start --clean",
