@@ -146,6 +146,37 @@ importers:
 
   ../../apps/lockfile-explorer:
     specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/lockfile-explorer-web': workspace:*
+      '@types/cors': ~2.8.12
+      '@types/express': 4.17.13
+      '@types/heft-jest': 1.0.1
+      '@types/js-yaml': 3.12.1
+      '@types/node': 12.20.24
+      cors: ~2.8.5
+      express: 4.18.1
+      js-yaml: ~3.13.1
+      open: ~8.4.0
+    dependencies:
+      '@types/express': 4.17.13
+      cors: 2.8.5
+      express: 4.18.1
+      js-yaml: 3.13.1
+      open: 8.4.0
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/lockfile-explorer-web': link:../lockfile-explorer-web
+      '@types/cors': 2.8.12
+      '@types/heft-jest': 1.0.1
+      '@types/js-yaml': 3.12.1
+      '@types/node': 12.20.24
+
+  ../../apps/lockfile-explorer-web:
+    specifiers:
       '@fluentui/react': ^8.96.1
       '@lifaon/path': ~2.1.0
       '@rushstack/eslint-config': workspace:*
@@ -170,33 +201,6 @@ importers:
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
       '@types/webpack-env': 1.13.0
-
-  ../../apps/lockfile-explorer-server:
-    specifiers:
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
-      '@types/cors': ~2.8.12
-      '@types/express': 4.17.13
-      '@types/heft-jest': 1.0.1
-      '@types/js-yaml': 3.12.1
-      '@types/node': 12.20.24
-      cors: ~2.8.5
-      express: 4.18.1
-      js-yaml: ~3.13.1
-    dependencies:
-      '@types/express': 4.17.13
-      cors: 2.8.5
-      express: 4.18.1
-      js-yaml: 3.13.1
-    devDependencies:
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@types/cors': 2.8.12
-      '@types/heft-jest': 1.0.1
-      '@types/js-yaml': 3.12.1
-      '@types/node': 12.20.24
 
   ../../apps/rundown:
     specifiers:
@@ -9808,7 +9812,7 @@ packages:
       safe-buffer: 5.1.2
 
   /cookie-signature/1.0.6:
-    resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
+    resolution: {integrity: sha1-4wOogrNCzD7oylE6eZmXNNqzriw=}
 
   /cookie/0.5.0:
     resolution: {integrity: sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==}
@@ -10655,7 +10659,7 @@ packages:
     dev: false
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
 
   /electron-to-chromium/1.4.157:
     resolution: {integrity: sha512-gteFnXPKsDAdm1U5vVuyrLnKOaR/x/SY+HjUQoHypLUYWJt4RaWU3PaiTBEkRDJh8/Zd8KC/EFjV+uPaHsjKFA==}
@@ -12095,7 +12099,7 @@ packages:
       map-cache: 0.2.2
 
   /fresh/0.5.2:
-    resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
+    resolution: {integrity: sha1-PYyt2Q2XZWn6g1qx+OSyOhBWBac=}
     engines: {node: '>= 0.6'}
 
   /from2/2.3.0:
@@ -15029,7 +15033,7 @@ packages:
     dev: true
 
   /media-typer/0.3.0:
-    resolution: {integrity: sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==}
+    resolution: {integrity: sha1-hxDXrwqmJvj/+hzgAWhUUmMlV0g=}
     engines: {node: '>= 0.6'}
 
   /memfs/3.4.3:
@@ -15089,7 +15093,7 @@ packages:
     dev: false
 
   /merge-descriptors/1.0.1:
-    resolution: {integrity: sha512-cCi6g3/Zr1iqQi6ySbseM1Xvooa98N0w31jzUYrXPX2xqObmFGHJ0tQ5u74H3mVh7wLouTseZyYIq39g8cNp1w==}
+    resolution: {integrity: sha1-sAqqVW3YtEVoFQ7J0blT8/kMu2E=}
 
   /merge-stream/2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
@@ -19655,7 +19659,7 @@ packages:
     resolution: {integrity: sha512-Z0DbgELS9/L/75wZbro8xAnT50pBVFQZ+hUEueGDU5FN51YSCYM+jdxsfCiHjwNP/4LCDD0i/graKpeBnOXKRA==}
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
+    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
     engines: {node: '>= 0.4.0'}
 
   /uuid-browser/3.1.0:
