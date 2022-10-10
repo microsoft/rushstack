@@ -4,9 +4,14 @@ import yaml from 'js-yaml';
 const app: express.Application = express();
 import fs from 'fs';
 import path from 'path';
+import open from 'open';
+
 const port: number = 8091;
+const appUrl: string = `http://localhost:${port}/app/`;
 
 app.use(cors());
+
+app.use('/app', express.static('dist'));
 
 app.get('/', (req: express.Request, res: express.Response) => {
   const doc = yaml.load(
@@ -35,5 +40,10 @@ app.get('/parsedCJS', (req: express.Request, res: express.Response) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Rush Lockfile Explorer running at ${appUrl}`);
+
+  if (process.argv.indexOf('--debug') < 0) {
+    // Launch the web browser
+    open(appUrl);
+  }
 });
