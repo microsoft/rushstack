@@ -2,6 +2,33 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.19.17",
+      "tag": "@microsoft/api-documenter_v7.19.17",
+      "date": "Mon, 10 Oct 2022 15:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.12.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.19.16",
       "tag": "@microsoft/api-documenter_v7.19.16",
       "date": "Thu, 29 Sep 2022 07:13:06 GMT",
