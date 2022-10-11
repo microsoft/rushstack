@@ -15,12 +15,12 @@ jobs:
       matrix:
         NodeVersion: [14, 16]
     steps:
+      - uses: actions/checkout@v3
       - name: Git config user
         uses: snow-actions/git-config-user@v1.0.0
         with:
           name: Rushbot
           email: rushbot@users.noreply.github.com
-      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.version }}
