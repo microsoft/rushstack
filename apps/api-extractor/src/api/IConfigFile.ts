@@ -144,8 +144,8 @@ export interface IConfigDocModel {
   includeForgottenExports?: boolean;
 
   /**
-   * The URL to the `<projectFolder>` token where the project's source code can be viewed on a website like GitHub or
-   * Azure DevOps.
+   * The base URL where the project's source code can be viewed on a website such as GitHub or
+   * Azure DevOps. This URL path corresponds to the `<projectFolder>` path on disk.
    *
    * @remarks
    * This URL is concatenated with the file paths serialized to the doc model to produce URL file paths to individual API items.

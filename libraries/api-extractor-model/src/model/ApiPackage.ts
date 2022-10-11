@@ -84,8 +84,9 @@ export interface IApiPackageJson extends IApiItemJson {
   metadata: IApiPackageMetadataJson;
 
   /**
-   * The URL to the `<projectFolder>` token where the project's source code can be viewed on a website like GitHub or
-   * Azure DevOps. Provided via the `api-extractor.json` config.
+   * The base URL where the project's source code can be viewed on a website such as GitHub or
+   * Azure DevOps. This URL path corresponds to the `<projectFolder>` path on disk. Provided via the
+   * `api-extractor.json` config.
    */
   projectFolderUrl?: string;
 }

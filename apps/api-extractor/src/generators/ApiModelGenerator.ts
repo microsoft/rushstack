@@ -1138,6 +1138,6 @@ export class ApiModelGenerator {
       pos: declaration.pos
     });
 
-    return path.relative(this._collector.extractorConfig.projectFolder, sourceLocation.sourceFilePath);
+    return path.posix.relative(this._collector.extractorConfig.projectFolder, sourceLocation.sourceFilePath);
   }
 }
