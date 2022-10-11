@@ -7,7 +7,7 @@
   "scripts": {
     "build": "heft build --clean",
     "start": "heft start --clean",
-    "serve": "node ./lib/index.js",
+    "serve": "node ./lib/start.js",
     "test": "heft test",
     "_phase:build": "heft build --clean",
     "_phase:test": "heft test --no-build"
