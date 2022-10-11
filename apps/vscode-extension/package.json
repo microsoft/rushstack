@@ -70,8 +70,8 @@
         "icon": "$(refresh)"
       },
       {
-        "command": "rush.refreshActions",
-        "title": "Refresh actions",
+        "command": "rush.refreshPhases",
+        "title": "Refresh phases",
         "category": "Rush",
         "icon": "$(refresh)"
       }
@@ -137,17 +137,29 @@
           "when": "view == rushProjects && viewItem =~ /^project:Active/"
         },
         {
-          "command": "rush.runAction",
-          "when": "view == rushCommands && viewItem =~ /^command:/ && rush.watcher == 'sleep'",
+          "command": "rush.activatePhase",
+          "when": "view == rushPhases && viewItem =~ /^phase:(Available|Included)/",
           "group": "inline"
         },
         {
-          "command": "rush.runAction",
-          "when": "view == rushCommands && viewItem =~ /^command:/ && rush.watcher == 'sleep'"
+          "command": "rush.deactivatePhase",
+          "when": "view == rushPhases && viewItem =~ /^phase:Active/",
+          "group": "inline"
         },
         {
-          "command": "rush.setWatchAction",
-          "when": "view == rushCommands && viewItem =~ /^command:$/"
+          "command": "rush.activatePhase",
+          "when": "view == rushPhases && viewItem == group:Included && rush.includedPhases.count > 0",
+          "group": "inline"
+        },
+        {
+          "command": "rush.activatePhase",
+          "when": "view == rushPhases && viewItem == group:Available && rush.availablePhases.count > 0",
+          "group": "inline"
+        },
+        {
+          "command": "rush.deactivatePhase",
+          "when": "view == rushPhases && viewItem == group:Active && rush.activePhases.count > 0",
+          "group": "inline"
         }
       ],
       "view/title": [
@@ -172,8 +184,8 @@
           "group": "navigation"
         },
         {
-          "command": "rush.refreshActions",
-          "when": "view == rushCommands",
+          "command": "rush.refreshPhases",
+          "when": "view == rushPhases",
           "group": "navigation"
         }
       ]
@@ -185,8 +197,8 @@
           "name": "Projects"
         },
         {
-          "id": "rushCommands",
-          "name": "Commands"
+          "id": "rushPhases",
+          "name": "Phases"
         }
       ]
     },
@@ -196,8 +208,8 @@
         "contents": "Welcome to Rush!\n\nIf this view does not load, make sure that this workspace is using Rush and that Rush has been installed by entering `rush install`. Then reload this window."
       },
       {
-        "view": "rushCommands",
-        "contents": "Commands configured for your workspace will appear here."
+        "view": "rushPhases",
+        "contents": "Available phases for your workspace's interactive build command will appear here."
       }
     ],
     "viewsContainers": {
