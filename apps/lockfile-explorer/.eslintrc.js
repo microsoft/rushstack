@@ -8,7 +8,6 @@ module.exports = {
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/no-floating-promises': 'off',
-    'react/jsx-no-bind': 'off'
+    '@typescript-eslint/no-floating-promises': 'off'
   }
 };

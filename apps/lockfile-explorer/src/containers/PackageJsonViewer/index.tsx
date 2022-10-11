@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { readCJS, readParsedCJS, readPackageJSON } from '../../parsing/readCJS';
 import styles from './styles.scss';
 
@@ -14,6 +14,8 @@ export const PackageJsonViewer = () => {
   const [cjs, setCjs] = useState('');
 
   const [selection, setSelection] = useState<PackageView>(PackageView.PACKAGE_JSON);
+
+  const cb = useCallback((s: PackageView) => () => setSelection(s), []);
 
   useEffect(() => {
     async function loadPackageDetails() {
@@ -42,9 +44,9 @@ export const PackageJsonViewer = () => {
 
   return (
     <div className={styles.PackageJsonViewerWrapper}>
-      <button onClick={() => setSelection(PackageView.PACKAGE_JSON)}>package.json</button>
-      <button onClick={() => setSelection(PackageView.CJS)}>.pnpmfile.cjs</button>
-      <button onClick={() => setSelection(PackageView.PARSED_PACKAGE_JSON)}>Parsed package.json</button>
+      <button onClick={cb(PackageView.PACKAGE_JSON)}>package.json</button>
+      <button onClick={cb(PackageView.CJS)}>.pnpmfile.cjs</button>
+      <button onClick={cb(PackageView.PARSED_PACKAGE_JSON)}>Parsed package.json</button>
 
       <div className={styles.fileContents}>{renderFile()}</div>
     </div>

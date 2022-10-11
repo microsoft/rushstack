@@ -1,4 +1,4 @@
-import React, { Dispatch, useState } from 'react';
+import React, { Dispatch, useCallback, useState } from 'react';
 import styles from './styles.scss';
 import LockfileStyles from '../styles.scss';
 import { LockfileEntry, LockfileEntryKind } from '../../../parsing/LockfileNode';
@@ -8,10 +8,11 @@ const LockfileEntryLi = ({
   selectEntry
 }: {
   entry: LockfileEntry;
-  selectEntry: (entry: LockfileEntry) => void;
+  selectEntry(entry: LockfileEntry): void;
 }) => {
+  const selectCurrentEntry = useCallback(() => selectEntry(entry), [entry]);
   return (
-    <div className={styles.LockfileEntryListViewWrapper} onClick={() => selectEntry(entry)}>
+    <div className={styles.LockfileEntryListViewWrapper} onClick={selectCurrentEntry}>
       <h5>{entry.displayText}</h5>
     </div>
   );
@@ -27,6 +28,8 @@ export const LockfileEntryListView = ({
   setSelection: Dispatch<LockfileEntryKind>;
 }) => {
   const [filter, setFilter] = useState('');
+  const selectPackage = useCallback((type: LockfileEntryKind) => () => setSelection(type), []);
+  const updateFilter = useCallback((e) => setFilter(e.target.value), []);
   if (!entries) return null;
 
   const getEntriesToShow = () => {
@@ -39,11 +42,11 @@ export const LockfileEntryListView = ({
 
   return (
     <div className={LockfileStyles.LockfileEntryListWrapper}>
-      <button onClick={() => setSelection(LockfileEntryKind.Project)}>View Projects</button>
-      <button onClick={() => setSelection(LockfileEntryKind.Package)}>View Packages</button>
+      <button onClick={selectPackage(LockfileEntryKind.Project)}>View Projects</button>
+      <button onClick={selectPackage(LockfileEntryKind.Package)}>View Packages</button>
       <div className={styles.LockfileFilterBar}>
         <h5>filter:</h5>
-        <input type="text" value={filter} onChange={(e) => setFilter(e.target.value)} />
+        <input type="text" value={filter} onChange={updateFilter} />
       </div>
       <div className="lockfileEntries">
         {getEntriesToShow().map((lockfileEntry) => (

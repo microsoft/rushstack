@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { LockfileEntry, LockfileEntryKind } from './LockfileNode';
 
 export interface ILockfilePackageType {
@@ -91,7 +90,8 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType) => {
 };
 
 export const readLockfile = async () => {
-  const lockfile: ILockfilePackageType = (await axios.get('http://localhost:8091')).data;
+  const response = await fetch('http://localhost:8091');
+  const lockfile: ILockfilePackageType = await response.json();
 
   return generateLockfileGraph(lockfile);
 };

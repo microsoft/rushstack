@@ -1,4 +1,4 @@
-import React, { Dispatch } from 'react';
+import React, { Dispatch, useCallback } from 'react';
 import { LockfileDependency, LockfileEntry } from '../../../parsing/LockfileNode';
 import styles from './styles.scss';
 
@@ -9,7 +9,11 @@ export const LockfileEntryDetailsView = ({
   entry: LockfileEntry;
   selectEntry: Dispatch<LockfileEntry>;
 }) => {
-  console.log('entry: ', entry);
+  const selectResolvedEntry = useCallback(
+    (dependency) => () => dependency.resolvedEntry && selectEntry(dependency.resolvedEntry),
+    []
+  );
+
   return (
     <div className={styles.LockfileEntryListView}>
       <h4>{entry.entryId}</h4>
@@ -18,7 +22,7 @@ export const LockfileEntryDetailsView = ({
         <div
           className={styles.DependencyItem}
           key={dependency.entryId}
-          onClick={() => dependency.resolvedEntry && selectEntry(dependency.resolvedEntry)}
+          onClick={selectResolvedEntry(dependency)}
         >
           <h5>Name: {dependency.name}</h5>
           <p>Version: {dependency.version}</p>

@@ -1,4 +1,4 @@
-import React, { Dispatch, useState } from 'react';
+import React, { Dispatch, useCallback, useState } from 'react';
 import { LockfileEntry, LockfileEntryKind } from '../../parsing/LockfileNode';
 import { LockfileEntryListView } from './LockfileEntryListView';
 import styles from './styles.scss';
@@ -15,24 +15,24 @@ export const LockfileViewer = ({
 
   const [entryStack, setEntryStack] = useState<LockfileEntry[]>([]);
 
-  const clearStackAndPush = (entry: LockfileEntry) => {
+  const clearStackAndPush = useCallback((entry: LockfileEntry) => {
     setEntryStack([entry]);
     setSelectedEntry(entry);
-  };
+  }, []);
 
-  const pushToStack = (entry: LockfileEntry) => {
+  const pushToStack = useCallback((entry: LockfileEntry) => {
     if (!entry) return;
     const newStack = [...entryStack, entry];
     setEntryStack(newStack);
     setSelectedEntry(entry);
-  };
+  }, []);
 
-  const popStack = () => {
+  const popStack = useCallback(() => {
     if (entryStack.length > 1) {
       entryStack.pop();
       setSelectedEntry(entryStack[entryStack.length - 1]);
     }
-  };
+  }, []);
 
   return (
     <div className={styles.LockfileViewerWrapper}>
