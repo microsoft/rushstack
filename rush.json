@@ -425,8 +425,8 @@
       "reviewCategory": "libraries"
     },
     {
-      "packageName": "@rushstack/lockfile-explorer-server",
-      "projectFolder": "apps/lockfile-explorer-server",
+      "packageName": "@rushstack/lockfile-explorer-web",
+      "projectFolder": "apps/lockfile-explorer-web",
       "reviewCategory": "libraries"
     },
     {

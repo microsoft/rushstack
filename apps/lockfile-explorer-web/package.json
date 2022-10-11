@@ -1,8 +1,9 @@
 {
-  "name": "@rushstack/lockfile-explorer",
-  "description": "Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo",
+  "name": "@rushstack/lockfile-explorer-web",
+  "description": "Rush Lockfile Explorer: helper project for building the React web application component",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "build": "heft test --clean",
     "start": "heft start",

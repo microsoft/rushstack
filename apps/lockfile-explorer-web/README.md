@@ -1,6 +1,4 @@
-# @rushstack/lockfile-explorer
+# @rushstack/lockfile-explorer-web
 
-> STILL UNDER DEVELOPMENT
-
-This is an experimental app that helps users to inspect `pnpm-lock.yaml` relationships
-and solve version conflicts.
+This is the React web application component of Rush Lockfile Explorer project.
+This package is not published; the output bundle is copied and published with the `@rushstack/lockfile-explorer` package.
