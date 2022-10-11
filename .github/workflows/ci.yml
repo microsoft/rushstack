@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: Node.js v${{ matrix.NodeVersion }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -23,9 +24,9 @@ jobs:
           email: rushbot@users.noreply.github.com
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.version }}
+          node-version: ${{ matrix.NodeVersion }}
       - name: Verify Change Logs
-        run: node common/scripts/install-run-rush.js change --verify
+        run: node common/scripts/install-run-rush.js --debug change --verify
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
       - name: Rush retest (install-run-rush)
