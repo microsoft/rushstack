@@ -1,4 +1,4 @@
-import { LockfileEntry, LockfileEntryKind } from './LockfileNode';
+import { LockfileEntry, LockfileEntryKind } from './LockfileEntry';
 
 export interface ILockfilePackageType {
   lockfileVersion: number;

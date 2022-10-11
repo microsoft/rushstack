@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { readLockfile } from './parsing/readLockfile';
-import { LockfileEntry, LockfileEntryKind } from './parsing/LockfileNode';
+import { LockfileEntry, LockfileEntryKind } from './parsing/LockfileEntry';
 import { LockfileViewer } from './containers/LockfileViewer';
 import { PackageJsonViewer } from './containers/PackageJsonViewer';
 import styles from './styles.scss';

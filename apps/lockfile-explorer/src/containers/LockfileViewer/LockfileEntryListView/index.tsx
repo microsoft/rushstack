@@ -1,7 +1,7 @@
 import React, { Dispatch, useCallback, useState } from 'react';
 import styles from './styles.scss';
 import LockfileStyles from '../styles.scss';
-import { LockfileEntry, LockfileEntryKind } from '../../../parsing/LockfileNode';
+import { LockfileEntry, LockfileEntryKind } from '../../../parsing/LockfileEntry';
 
 const LockfileEntryLi = ({
   entry,

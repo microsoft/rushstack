@@ -1,6 +1,6 @@
 import { TEST_LOCKFILE } from './testLockfile';
 import { generateLockfileGraph } from '../readLockfile';
-import { LockfileEntry } from '../LockfileNode';
+import { LockfileEntry } from '../LockfileEntry';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {

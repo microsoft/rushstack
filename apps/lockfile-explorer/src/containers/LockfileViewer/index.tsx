@@ -1,5 +1,5 @@
 import React, { Dispatch, useCallback, useState } from 'react';
-import { LockfileEntry, LockfileEntryKind } from '../../parsing/LockfileNode';
+import { LockfileEntry, LockfileEntryKind } from '../../parsing/LockfileEntry';
 import { LockfileEntryListView } from './LockfileEntryListView';
 import styles from './styles.scss';
 import { LockfileEntryDetailsView } from './LockfileEntryDetailsView';

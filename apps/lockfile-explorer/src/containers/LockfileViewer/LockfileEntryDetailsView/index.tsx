@@ -1,6 +1,7 @@
 import React, { Dispatch, useCallback } from 'react';
-import { LockfileDependency, LockfileEntry } from '../../../parsing/LockfileNode';
+import { LockfileEntry } from '../../../parsing/LockfileEntry';
 import styles from './styles.scss';
+import { LockfileDependency } from '../../../parsing/LockfileDependency';
 
 export const LockfileEntryDetailsView = ({
   entry,
