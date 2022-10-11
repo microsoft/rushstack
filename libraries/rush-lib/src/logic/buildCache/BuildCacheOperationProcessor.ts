@@ -57,9 +57,10 @@ export class BuildCacheOperationProcessor implements IOperationProcessor {
   }
 
   public async beforeBuildAsync(
-    context: Pick<IOperationRunnerContext, 'stateHash' | 'terminal' | 'isCacheReadAllowed'>
+    context: Pick<IOperationRunnerContext, 'hashes' | 'terminal' | 'isCacheReadAllowed'>
   ): Promise<OperationStatus> {
-    const { stateHash, terminal, isCacheReadAllowed } = context;
+    const { hashes, terminal, isCacheReadAllowed } = context;
+    const stateHash: string | undefined = hashes?.fullHash;
     if (!stateHash || !isCacheReadAllowed) {
       return OperationStatus.Ready;
     }

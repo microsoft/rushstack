@@ -1,7 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DiscardStdoutTransform, SplitterTransform, StderrLineTransform, StdioSummarizer, TerminalWritable, TextRewriterTransform } from '@rushstack/terminal';
+import {
+  DiscardStdoutTransform,
+  SplitterTransform,
+  StderrLineTransform,
+  StdioSummarizer,
+  TerminalWritable,
+  TextRewriterTransform
+} from '@rushstack/terminal';
 import { InternalError, ITerminal, NewlineKind, Terminal } from '@rushstack/node-core-library';
 import { CollatedTerminal, CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
@@ -12,6 +19,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { OperationStateFile } from './OperationStateFile';
 import { IOperationProcessor } from './IOperationProcessor';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
+import { IOperationHashes } from './OperationHash';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -75,9 +83,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public isCacheReadAllowed: boolean = true;
   public isCacheWriteAllowed: boolean = true;
 
-  public trackedFileHashes: ReadonlyMap<string, string> | undefined = undefined;
-
-  public stateHash: string | undefined = undefined;
+  public hashes: IOperationHashes | undefined = undefined;
 
   /**
    * The set of operations that must complete before this operation executes.
@@ -117,12 +123,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     this.runner = runner;
     this.weight = operation.weight;
 
-    const { associatedPhase, associatedProject } = operation;
+    const { associatedProject } = operation;
 
-    this._operationStateFile = associatedPhase && associatedProject ? new OperationStateFile({
-      phase: associatedPhase,
-      rushProject: associatedProject
-    }) : undefined;
+    this._operationStateFile = associatedProject
+      ? new OperationStateFile({
+          filename: `${associatedProject.projectFolder}/${operation.metadataFolderRelativePath}/state.json`
+        })
+      : undefined;
     this._context = context;
   }
 
@@ -206,7 +213,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       this.stopwatch.stop();
 
       await this._operationStateFile?.writeAsync({
-        nonCachedDurationMs: this.stopwatch.duration * 1000
+        nonCachedDurationMs: this.stopwatch.duration * 1000,
+        hashes: this.hashes,
+        status
       });
 
       if (processor) {

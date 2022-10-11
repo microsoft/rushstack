@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as crypto from 'crypto';
-
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IPhase } from '../../api/CommandLineConfiguration';
 import { IOperationProcessor } from './IOperationProcessor';
@@ -91,26 +89,40 @@ export class Operation {
    */
   public weight: number = 1;
 
+  /**
+   * Names of folders (may use '/' to delineate subfolders) into which outputs are written.
+   * Folders are specified relative to `associatedProject.projectFolder`.
+   * Implicitly includes `metadataFolderRelativePath`.
+   */
   public readonly outputFolderNames: ReadonlyArray<string>;
 
+  /**
+   * Filter that will be applied to input file list when computing the local input hash for this project.
+   */
   public readonly projectFileFilter: IProjectFileFilter | undefined;
 
+  /**
+   * Pre/post processor for this operation, to handle cache interactions.
+   */
   public processor: IOperationProcessor | undefined;
+
+  /**
+   * Folder into which operation metadata should be written.
+   */
+  public readonly metadataFolderRelativePath: string;
 
   public logFilePath: string | undefined = undefined;
 
   public constructor(options: IOperationOptions) {
-    const {
-      phase,
-      outputFolderNames = []
-    } = options;
+    const { phase, outputFolderNames = [] } = options;
 
     this.associatedPhase = phase;
     this.associatedProject = options.project;
 
     const uniqueOutputFolderNames: Set<string> = new Set(outputFolderNames);
-    uniqueOutputFolderNames.add(
-      `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${phase.logFilenameIdentifier}`);
+    const metadataRelativePath: string = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${phase.logFilenameIdentifier}`;
+    this.metadataFolderRelativePath = metadataRelativePath;
+    uniqueOutputFolderNames.add(metadataRelativePath);
     const sortedOutputFolderNames: string[] = Array.from(uniqueOutputFolderNames).sort();
     this.outputFolderNames = sortedOutputFolderNames;
 
@@ -125,49 +137,6 @@ export class Operation {
    */
   public get name(): string | undefined {
     return this.runner?.name;
-  }
-
-  /**
-   * Computes this operation's input state hash, for use by the caching layer.
-   * @param localHash - The hash of the local file inputs for this operation
-   * @param dependencyHashes - The state hashes of this operation's dependencies
-   */
-  public getHash(localHash: string, dependencyHashes: string[]): string {
-    if (!localHash) {
-      return '';
-    }
-
-    for (const dependencyHash of dependencyHashes) {
-      if (!dependencyHash) {
-        return '';
-      }
-    }
-
-    const hash: crypto.Hash = crypto.createHash('sha1');
-    hash.update(`${RushConstants.buildCacheVersion}`);
-    hash.update(RushConstants.hashDelimiter);
-
-    // Output folder names are part of the configuration, so include in hash
-    for (const outputFolder of this.outputFolderNames) {
-      hash.update(outputFolder);
-      hash.update(RushConstants.hashDelimiter);
-    }
-
-    // CLI parameters that apply to the phase affect the result
-    const params: string[] = [];
-    for (const tsCommandLineParameter of this.associatedPhase.associatedParameters) {
-      tsCommandLineParameter.appendToArgList(params);
-    }
-    hash.update(params.join(' '));
-
-    hash.update(localHash);
-
-    const sortedHashes: string[] = dependencyHashes.sort();
-    for (const dependencyHash of sortedHashes) {
-      hash.update(dependencyHash);
-      hash.update(RushConstants.hashDelimiter);
-    }
-    return hash.digest('hex');
   }
 
   /**

@@ -3,6 +3,7 @@
 
 import { ITerminal } from '@rushstack/node-core-library';
 import type { TerminalWritable } from '@rushstack/terminal';
+import { IOperationHashes } from './OperationHash';
 
 import type { OperationStatus } from './OperationStatus';
 
@@ -48,14 +49,9 @@ export interface IOperationRunnerContext {
   terminalWritable: TerminalWritable;
 
   /**
-   * The hashes of all tracked files pertinent to the operation
+   * The hashes of the operation state.
    */
-  trackedFileHashes: ReadonlyMap<string, string> | undefined;
-
-  /**
-   * The hash of all inputs to the operation
-   */
-  stateHash: string | undefined;
+  hashes: IOperationHashes | undefined;
 }
 
 /**

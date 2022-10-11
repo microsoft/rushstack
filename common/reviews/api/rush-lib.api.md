@@ -402,28 +402,30 @@ export interface IOperationRunner {
 // @beta
 export interface IOperationRunnerContext {
     debugMode: boolean;
+    // Warning: (ae-forgotten-export) The symbol "IOperationHashes" needs to be exported by the entry point index.d.ts
+    hashes: IOperationHashes | undefined;
     isCacheReadAllowed: boolean;
     isCacheWriteAllowed: boolean;
     isSkipAllowed: boolean;
     quietMode: boolean;
-    stateHash: string | undefined;
     terminal: ITerminal;
     terminalWritable: TerminalWritable;
-    trackedFileHashes: ReadonlyMap<string, string> | undefined;
 }
 
 // @internal (undocumented)
 export interface _IOperationStateFileOptions {
     // (undocumented)
-    phase: IPhase;
-    // (undocumented)
-    rushProject: RushConfigurationProject;
+    filename: string;
 }
 
 // @internal (undocumented)
 export interface _IOperationStateJson {
     // (undocumented)
+    hashes: IOperationHashes | undefined;
+    // (undocumented)
     nonCachedDurationMs: number;
+    // (undocumented)
+    status: OperationStatus;
 }
 
 // @public
@@ -603,15 +605,12 @@ export class Operation {
     readonly consumers: ReadonlySet<Operation>;
     deleteDependency(dependency: Operation): void;
     readonly dependencies: ReadonlySet<Operation>;
-    getHash(localHash: string, dependencyHashes: string[]): string;
     // (undocumented)
     logFilePath: string | undefined;
+    readonly metadataFolderRelativePath: string;
     get name(): string | undefined;
-    // (undocumented)
     readonly outputFolderNames: ReadonlyArray<string>;
-    // (undocumented)
     processor: IOperationProcessor | undefined;
-    // (undocumented)
     readonly projectFileFilter: IProjectFileFilter | undefined;
     runner: IOperationRunner | undefined;
     weight: number;
@@ -621,7 +620,6 @@ export class Operation {
 export class _OperationStateFile {
     constructor(options: _IOperationStateFileOptions);
     get filename(): string;
-    static getFilenameRelativeToProjectRoot(phase: IPhase): string;
     // (undocumented)
     get state(): _IOperationStateJson | undefined;
     // (undocumented)

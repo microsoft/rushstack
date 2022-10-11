@@ -2,17 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, InternalError, JsonFile } from '@rushstack/node-core-library';
-import { RushConstants } from '../RushConstants';
+import { IOperationHashes } from './OperationHash';
 
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { OperationStatus } from './OperationStatus';
 
 /**
  * @internal
  */
 export interface IOperationStateFileOptions {
-  rushProject: RushConfigurationProject;
-  phase: IPhase;
+  filename: string;
 }
 
 /**
@@ -20,6 +18,10 @@ export interface IOperationStateFileOptions {
  */
 export interface IOperationStateJson {
   nonCachedDurationMs: number;
+
+  hashes: IOperationHashes | undefined;
+
+  status: OperationStatus;
 }
 
 /**
@@ -28,29 +30,12 @@ export interface IOperationStateJson {
  * @internal
  */
 export class OperationStateFile {
-  private readonly _rushProject: RushConfigurationProject;
   private readonly _filename: string;
   private _state: IOperationStateJson | undefined;
 
   public constructor(options: IOperationStateFileOptions) {
-    const { rushProject, phase } = options;
-    this._rushProject = rushProject;
-    this._filename = OperationStateFile._getFilename(phase, rushProject);
-  }
-
-  private static _getFilename(phase: IPhase, project: RushConfigurationProject): string {
-    const relativeFilename: string = OperationStateFile.getFilenameRelativeToProjectRoot(phase);
-    return `${project.projectFolder}/${relativeFilename}`;
-  }
-
-  /**
-   * ProjectBuildCache expects the relative path for better logging
-   *
-   * @internal
-   */
-  public static getFilenameRelativeToProjectRoot(phase: IPhase): string {
-    const identifier: string = phase.logFilenameIdentifier;
-    return `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${identifier}/state.json`;
+    const { filename } = options;
+    this._filename = filename;
   }
 
   /**

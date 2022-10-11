@@ -4,7 +4,14 @@
 import colors from 'colors/safe';
 import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
 import { StreamCollator, CollatedWriter } from '@rushstack/stream-collator';
-import { NewlineKind, Async, Terminal, ITerminal, AlreadyReportedError, Colors } from '@rushstack/node-core-library';
+import {
+  NewlineKind,
+  Async,
+  Terminal,
+  ITerminal,
+  AlreadyReportedError,
+  Colors
+} from '@rushstack/node-core-library';
 
 import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
 import { Operation } from './Operation';
@@ -14,6 +21,7 @@ import { IExecutionResult } from './IOperationExecutionResult';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { LookupByPath } from '../LookupByPath';
+import { getOperationHashes } from './OperationHash';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -221,11 +229,11 @@ export class OperationExecutionManager {
     let hasIssues: boolean = false;
 
     function getOperationHash(record: OperationExecutionRecord): string {
-      let { stateHash } = record;
-      if (stateHash === undefined) {
+      let { hashes } = record;
+      if (hashes === undefined) {
         const { operation } = record;
         const { associatedProject, projectFileFilter, outputFolderNames, processor } = operation;
-        stateHash = '';
+
         const trackedFiles: ReadonlyMap<string, string> | undefined = state._tryGetProjectDependencies(
           associatedProject,
           terminal,
@@ -236,6 +244,8 @@ export class OperationExecutionManager {
           const projectOutputLookup: LookupByPath<string> = new LookupByPath(
             outputFolderNames.map((relativePath) => [relativePath, relativePath])
           );
+
+          // Validate no input/output files
           for (const trackedFilePath of trackedFiles.keys()) {
             const match: string | undefined = projectOutputLookup.findChildPath(trackedFilePath);
             if (match) {
@@ -248,14 +258,14 @@ export class OperationExecutionManager {
           }
         }
 
-        record.trackedFileHashes = trackedFiles;
         const localHash: string = trackedFiles ? state._hashProjectDependencies(trackedFiles) : '';
-        if (localHash) {
-          stateHash = operation.getHash(localHash, Array.from(record.dependencies, getOperationHash));
-        }
-        record.stateHash = stateHash;
+        record.hashes = hashes = getOperationHashes(
+          operation,
+          localHash,
+          Array.from(record.dependencies, getOperationHash)
+        );
       }
-      return stateHash;
+      return hashes.fullHash;
     }
 
     for (const record of this._executionRecords.values()) {
@@ -321,9 +331,7 @@ export class OperationExecutionManager {
        */
       case OperationStatus.FromCache: {
         if (!silent) {
-          record.terminal.writeLine(
-            Colors.green(`"${name}" was restored from the build cache.`)
-          );
+          record.terminal.writeLine(Colors.green(`"${name}" was restored from the build cache.`));
         }
         break;
       }
