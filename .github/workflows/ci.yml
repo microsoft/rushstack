@@ -1,0 +1,44 @@
+name: CI
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        NodeVersion: [14, 16]
+    steps:
+      - name: Git config user
+        uses: snow-actions/git-config-user@v1.0.0
+        with:
+          name: Rushbot
+          email: rushbot@users.noreply.github.com
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.version }}
+      - name: Verify Change Logs
+        run: node common/scripts/install-run-rush.js change --verify
+      - name: Rush Install
+        run: node common/scripts/install-run-rush.js install
+      - name: Rush retest (install-run-rush)
+        run: node common/scripts/install-run-rush.js retest --verbose --production
+        env:
+          # Prevent time-based browserslist update warning
+          # See https://github.com/microsoft/rushstack/issues/2981
+          BROWSERSLIST_IGNORE_OLD_DATA: 1
+      - name: Rush test (rush-lib)
+        run: node apps/rush/lib/start-dev.js test --verbose --production --timeline
+        env:
+          # Prevent time-based browserslist update warning
+          # See https://github.com/microsoft/rushstack/issues/2981
+          BROWSERSLIST_IGNORE_OLD_DATA: 1
+      - name: Ensure repo README is up-to-date
+        run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
