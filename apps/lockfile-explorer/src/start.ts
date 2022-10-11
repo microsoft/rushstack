@@ -3,11 +3,14 @@ import cors from 'cors';
 import yaml from 'js-yaml';
 const app: express.Application = express();
 import fs from 'fs';
+import * as process from 'process';
 import path from 'path';
 import open from 'open';
 
 const port: number = 8091;
 const appUrl: string = `http://localhost:${port}/app/`;
+
+process.chdir(path.join(__dirname, '..'));
 
 app.use(cors());
 
@@ -44,6 +47,8 @@ app.listen(port, () => {
 
   if (process.argv.indexOf('--debug') < 0) {
     // Launch the web browser
-    open(appUrl);
+    open(appUrl).catch((e) => {
+      console.error('Error launching browser: ' + e.toString());
+    });
   }
 });
