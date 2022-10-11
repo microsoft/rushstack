@@ -166,7 +166,7 @@
     /*[BEGIN "DEMO"]*/
     "allowedEmailRegExps": [
       "[^@]+@users\\.noreply\\.github\\.com",
-      "travis@example\\.org"
+      "rushUser@example\\.org"
     ],
     /*[END "DEMO"]*/
 
