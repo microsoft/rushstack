@@ -1,0 +1,29 @@
+{
+  "name": "@rushstack/lockfile-explorer-web",
+  "description": "Rush Lockfile Explorer: helper project for building the React web application component",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft start",
+    "test": "heft test",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "dependencies": {
+    "@fluentui/react": "^8.96.1",
+    "react": "~16.13.1",
+    "react-dom": "~16.13.1",
+    "@lifaon/path": "~2.1.0"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-web-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/react-dom": "16.9.14",
+    "@types/react": "16.14.23",
+    "@types/webpack-env": "1.13.0"
+  }
+}

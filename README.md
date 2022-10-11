@@ -98,6 +98,8 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 
 | Folder | Description |
 | ------ | -----------|
+| [/apps/lockfile-explorer](./apps/lockfile-explorer/) | Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo |
+| [/apps/lockfile-explorer-web](./apps/lockfile-explorer-web/) | Rush Lockfile Explorer: helper project for building the React web application component |
 | [/build-tests-samples/heft-node-basic-tutorial](./build-tests-samples/heft-node-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-jest-tutorial](./build-tests-samples/heft-node-jest-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-rig-tutorial](./build-tests-samples/heft-node-rig-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |

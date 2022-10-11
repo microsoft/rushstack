@@ -151,6 +151,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/lockfile-explorer-web",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -353,6 +357,10 @@
     {
       "name": "constructs",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "cors",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "css-loader",
@@ -572,6 +580,10 @@
     },
     {
       "name": "npm-packlist",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "open",
       "allowedCategories": [ "libraries" ]
     },
     {
