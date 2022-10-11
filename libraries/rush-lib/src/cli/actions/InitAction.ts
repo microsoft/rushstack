@@ -160,8 +160,8 @@ export class InitAction extends BaseConfiglessRushAction {
     const templateFilePaths: string[] = [
       'rush.json',
       '[dot]gitattributes',
+      '[dot]github/workflows/ci.yml',
       '[dot]gitignore',
-      '[dot]travis.yml',
       'common/config/rush/[dot]npmrc',
       'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/artifactory.json',
