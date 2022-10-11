@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.33.0",
+      "tag": "@microsoft/api-extractor_v7.33.0",
+      "date": "Tue, 11 Oct 2022 23:49:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extract the original source file path for relevant API items and add a new projectFolderUrl setting to the api-extractor.json config that allows one to specify what URL their project folder can be found at."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.25.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.32.1",
       "tag": "@microsoft/api-extractor_v7.32.1",
       "date": "Mon, 10 Oct 2022 15:23:44 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Mon, 10 Oct 2022 15:23:44 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Oct 2022 23:49:12 GMT and should not be manually modified.
+
+## 7.25.0
+Tue, 11 Oct 2022 23:49:12 GMT
+
+### Minor changes
+
+- Add a new fileUrlPath property to relevant API items and serialize this to the .api.json. Additionally, add a SourceFile helper class for constructing file URLs from these paths and the projectFolderUrl.
 
 ## 7.24.4
 Mon, 10 Oct 2022 15:23:44 GMT

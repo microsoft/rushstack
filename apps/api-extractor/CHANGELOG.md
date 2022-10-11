@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 10 Oct 2022 15:23:44 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Oct 2022 23:49:12 GMT and should not be manually modified.
+
+## 7.33.0
+Tue, 11 Oct 2022 23:49:12 GMT
+
+### Minor changes
+
+- Extract the original source file path for relevant API items and add a new projectFolderUrl setting to the api-extractor.json config that allows one to specify what URL their project folder can be found at.
 
 ## 7.32.1
 Mon, 10 Oct 2022 15:23:44 GMT
