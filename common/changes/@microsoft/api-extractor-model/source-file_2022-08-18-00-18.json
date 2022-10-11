@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Add a new fileUrlPath property to relevant API items and serialize this to the .api.json. Additionally, add a SourceFile helper class for constructing file URLs from these paths and the projectFolderUrl.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}
