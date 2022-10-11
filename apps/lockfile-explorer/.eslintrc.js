@@ -5,7 +5,7 @@ module.exports = {
   extends: ['@rushstack/eslint-config/profile/web-app', '@rushstack/eslint-config/mixins/react'],
   parserOptions: { tsconfigRootDir: __dirname },
   rules: {
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/no-floating-promises': 'off'
+    '@typescript-eslint/no-floating-promises': 'off',
+    '@rushstack/no-new-null': 'off'
   }
 };

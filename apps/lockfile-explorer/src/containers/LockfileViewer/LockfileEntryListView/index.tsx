@@ -9,7 +9,7 @@ const LockfileEntryLi = ({
 }: {
   entry: LockfileEntry;
   selectEntry(entry: LockfileEntry): void;
-}) => {
+}): JSX.Element => {
   const selectCurrentEntry = useCallback(() => selectEntry(entry), [entry]);
   return (
     <div className={styles.LockfileEntryListViewWrapper} onClick={selectCurrentEntry}>
@@ -26,13 +26,13 @@ export const LockfileEntryListView = ({
   entries: LockfileEntry[];
   selectEntry: (entry: LockfileEntry) => void;
   setSelection: Dispatch<LockfileEntryKind>;
-}) => {
+}): JSX.Element | null => {
   const [filter, setFilter] = useState('');
   const selectPackage = useCallback((type: LockfileEntryKind) => () => setSelection(type), []);
   const updateFilter = useCallback((e) => setFilter(e.target.value), []);
   if (!entries) return null;
 
-  const getEntriesToShow = () => {
+  const getEntriesToShow = (): LockfileEntry[] => {
     if (filter) {
       return entries.filter((entry) => entry.entryId.indexOf(filter) !== -1);
     } else {

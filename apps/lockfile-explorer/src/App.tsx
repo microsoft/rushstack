@@ -9,12 +9,13 @@ import styles from './styles.scss';
 /**
  * This React component renders the application page.
  */
-export const App = () => {
+export const App = (): JSX.Element => {
   const [selection, setSelection] = useState(LockfileEntryKind.Project);
   const [projectEntries, setProjectEntries] = useState<LockfileEntry[]>([]);
   const [packageEntries, setPackageEntries] = useState<LockfileEntry[]>([]);
+
   useEffect(() => {
-    async function loadLockfile() {
+    async function loadLockfile(): Promise<void> {
       const lockfile = await readLockfile();
       setProjectEntries(lockfile.filter((l) => l.kind === LockfileEntryKind.Project));
       setPackageEntries(lockfile.filter((l) => l.kind === LockfileEntryKind.Package));

@@ -10,7 +10,7 @@ export const LockfileViewer = ({
 }: {
   lockfile: LockfileEntry[];
   setSelection: Dispatch<LockfileEntryKind>;
-}) => {
+}): JSX.Element => {
   const [selectedEntry, setSelectedEntry] = useState<LockfileEntry | undefined>();
 
   const [entryStack, setEntryStack] = useState<LockfileEntry[]>([]);

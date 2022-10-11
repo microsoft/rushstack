@@ -8,7 +8,7 @@ enum PackageView {
   PARSED_PACKAGE_JSON
 }
 
-export const PackageJsonViewer = () => {
+export const PackageJsonViewer = (): JSX.Element => {
   const [packageJSON, setPackageJSON] = useState('');
   const [parsedPackageJSON, setParsedPackageJSON] = useState('');
   const [cjs, setCjs] = useState('');
@@ -18,7 +18,7 @@ export const PackageJsonViewer = () => {
   const cb = useCallback((s: PackageView) => () => setSelection(s), []);
 
   useEffect(() => {
-    async function loadPackageDetails() {
+    async function loadPackageDetails(): Promise<void> {
       const cjsFile = await readCJS();
       setCjs(cjsFile);
       const packageJSONFile = await readPackageJSON();
@@ -29,7 +29,7 @@ export const PackageJsonViewer = () => {
     loadPackageDetails();
   }, []);
 
-  const renderFile = () => {
+  const renderFile = (): JSX.Element | null => {
     switch (selection) {
       case PackageView.PACKAGE_JSON:
         return <pre>{packageJSON}</pre>;

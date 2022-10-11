@@ -46,7 +46,7 @@ export class LockfileDependency {
     dependencies: LockfileDependency[],
     lockfileEntry: LockfileEntry,
     node: ILockfileNode
-  ) {
+  ): void {
     if (node.dependencies) {
       for (const [pkgName, pkgVersion] of Object.entries(node.dependencies)) {
         dependencies.push(new LockfileDependency(pkgName, pkgVersion, false, lockfileEntry));

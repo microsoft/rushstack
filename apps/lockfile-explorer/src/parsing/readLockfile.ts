@@ -1,5 +1,15 @@
 import { LockfileEntry, LockfileEntryKind } from './LockfileEntry';
 
+export interface IPackageJsonType {
+  name: string;
+  dependencies: {
+    [key in string]: string;
+  };
+  devDependencies: {
+    [key in string]: string;
+  };
+}
+
 export interface ILockfilePackageType {
   lockfileVersion: number;
   importers?: {
@@ -31,7 +41,7 @@ export interface ILockfilePackageType {
   };
 }
 
-export const generateLockfileGraph = (lockfile: ILockfilePackageType) => {
+export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileEntry[] => {
   const allEntries: LockfileEntry[] = [];
   const allEntriesById: { [key in string]: LockfileEntry } = {};
 
@@ -89,7 +99,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType) => {
   return allEntries;
 };
 
-export const readLockfile = async () => {
+export const readLockfile = async (): Promise<LockfileEntry[]> => {
   const response = await fetch('http://localhost:8091');
   const lockfile: ILockfilePackageType = await response.json();
 

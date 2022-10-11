@@ -9,7 +9,7 @@ export const LockfileEntryDetailsView = ({
 }: {
   entry: LockfileEntry;
   selectEntry: Dispatch<LockfileEntry>;
-}) => {
+}): JSX.Element => {
   const selectResolvedEntry = useCallback(
     (dependency) => () => dependency.resolvedEntry && selectEntry(dependency.resolvedEntry),
     []
