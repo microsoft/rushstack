@@ -26,6 +26,7 @@ export const PackageJsonViewer = (): JSX.Element => {
       const parsedJSON = await readParsedCJS();
       setParsedPackageJSON(parsedJSON as string);
     }
+    /* eslint @typescript-eslint/no-floating-promises: off */
     loadPackageDetails();
   }, []);
 

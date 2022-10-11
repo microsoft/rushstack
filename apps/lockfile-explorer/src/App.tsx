@@ -19,6 +19,7 @@ export const App = (): JSX.Element => {
       setProjectEntries(lockfile.filter((l) => l.kind === LockfileEntryKind.Project));
       setPackageEntries(lockfile.filter((l) => l.kind === LockfileEntryKind.Package));
     }
+    /* eslint @typescript-eslint/no-floating-promises: off */
     loadLockfile();
   }, []);
 

@@ -2,6 +2,7 @@ import React, { Dispatch, useCallback, useState } from 'react';
 import styles from './styles.scss';
 import LockfileStyles from '../styles.scss';
 import { LockfileEntry, LockfileEntryKind } from '../../../parsing/LockfileEntry';
+import { ReactNull } from '../../../types/ReactNull';
 
 const LockfileEntryLi = ({
   entry,
@@ -26,11 +27,11 @@ export const LockfileEntryListView = ({
   entries: LockfileEntry[];
   selectEntry: (entry: LockfileEntry) => void;
   setSelection: Dispatch<LockfileEntryKind>;
-}): JSX.Element | null => {
+}): JSX.Element | ReactNull => {
   const [filter, setFilter] = useState('');
   const selectPackage = useCallback((type: LockfileEntryKind) => () => setSelection(type), []);
   const updateFilter = useCallback((e) => setFilter(e.target.value), []);
-  if (!entries) return null;
+  if (!entries) return ReactNull;
 
   const getEntriesToShow = (): LockfileEntry[] => {
     if (filter) {
