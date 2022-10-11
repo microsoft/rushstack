@@ -11,8 +11,14 @@ export const LockfileEntryDetailsView = ({
   selectEntry: Dispatch<LockfileEntry>;
 }): JSX.Element => {
   const selectResolvedEntry = useCallback(
-    (dependency) => () => dependency.resolvedEntry && selectEntry(dependency.resolvedEntry),
-    []
+    (dependency) => () => {
+      if (dependency.resolvedEntry) {
+        selectEntry(dependency.resolvedEntry);
+      } else {
+        console.error('No resolved entry for dependency: ', dependency);
+      }
+    },
+    [entry]
   );
 
   return (

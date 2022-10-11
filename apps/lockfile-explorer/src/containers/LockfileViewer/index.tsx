@@ -20,19 +20,23 @@ export const LockfileViewer = ({
     setSelectedEntry(entry);
   }, []);
 
-  const pushToStack = useCallback((entry: LockfileEntry) => {
-    if (!entry) return;
-    const newStack = [...entryStack, entry];
-    setEntryStack(newStack);
-    setSelectedEntry(entry);
-  }, []);
+  const pushToStack = useCallback(
+    (entry: LockfileEntry) => {
+      if (!entry) return;
+      console.log('pushing to stack: ', entry);
+      const newStack = [...entryStack, entry];
+      setEntryStack(newStack);
+      setSelectedEntry(entry);
+    },
+    [entryStack]
+  );
 
   const popStack = useCallback(() => {
     if (entryStack.length > 1) {
       entryStack.pop();
       setSelectedEntry(entryStack[entryStack.length - 1]);
     }
-  }, []);
+  }, [entryStack]);
 
   return (
     <div className={styles.LockfileViewerWrapper}>
