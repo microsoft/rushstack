@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import { entryReducer } from './slices/entrySlice';
 
+/* eslint @rushstack/typedef-var: off */
 export const store = configureStore({
   reducer: {
     entry: entryReducer

@@ -1,4 +1,4 @@
-import React, { Dispatch, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styles from './styles.scss';
 import LockfileStyles from '../styles.scss';
 import { LockfileEntry, LockfileEntryKind } from '../../../parsing/LockfileEntry';

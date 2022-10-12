@@ -1,7 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
 import { LockfileEntry, LockfileEntryKind } from '../../parsing/LockfileEntry';
 import { RootState } from '../index';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type EntryState = {
   projectEntries: LockfileEntry[];
   packageEntries: LockfileEntry[];
@@ -16,6 +17,7 @@ const initialState: EntryState = {
   selectedEntryStack: []
 };
 
+/* eslint @rushstack/typedef-var: off */
 const entrySlice = createSlice({
   name: 'entry',
   initialState,
@@ -51,4 +53,4 @@ export const selectCurrentEntry = (state: RootState): LockfileEntry | undefined 
 
 export const { loadEntries, setSelection, clearStackAndPush, pushToStack, popStack } = entrySlice.actions;
 
-export const entryReducer = entrySlice.reducer;
+export const entryReducer: Reducer<EntryState> = entrySlice.reducer;

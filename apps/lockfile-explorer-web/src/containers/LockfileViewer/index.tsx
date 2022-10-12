@@ -1,10 +1,10 @@
-import React, { Dispatch, useCallback, useState } from 'react';
-import { LockfileEntry, LockfileEntryKind } from '../../parsing/LockfileEntry';
+import React, { useCallback } from 'react';
+import { LockfileEntryKind } from '../../parsing/LockfileEntry';
 import { LockfileEntryListView } from './LockfileEntryListView';
 import styles from './styles.scss';
 import { LockfileEntryDetailsView } from './LockfileEntryDetailsView';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { clearStackAndPush, popStack, selectCurrentEntry } from '../../store/slices/entrySlice';
+import { popStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 
 export const LockfileViewer = (): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
