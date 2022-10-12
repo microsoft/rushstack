@@ -1,4 +1,7 @@
+@use '../../appstyles' as m;
+
 .LockfileEntryListView {
+  @include m.card;
   overflow: scroll;
   & > * + * {
     margin-top: 24px;

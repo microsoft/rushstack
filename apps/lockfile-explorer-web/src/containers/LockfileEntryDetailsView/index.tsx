@@ -1,9 +1,10 @@
 import React, { useCallback } from 'react';
 import styles from './styles.scss';
-import { LockfileDependency } from '../../../parsing/LockfileDependency';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { pushToStack, selectCurrentEntry } from '../../../store/slices/entrySlice';
-import { ReactNull } from '../../../types/ReactNull';
+import appStyles from '../../appstyles.scss';
+import { LockfileDependency } from '../../parsing/LockfileDependency';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
+import { ReactNull } from '../../types/ReactNull';
 
 export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
@@ -21,7 +22,11 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   );
 
   if (!selectedEntry) {
-    return ReactNull;
+    return (
+      <div className={appStyles.containerCard}>
+        <h5>Please select an entry to view details</h5>
+      </div>
+    );
   }
 
   return (

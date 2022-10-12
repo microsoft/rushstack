@@ -35,6 +35,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "redux",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests" ]
     }

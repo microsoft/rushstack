@@ -1,29 +1,34 @@
-.LockfileViewerWrapper {
-  margin: 24px;
-  display: flex;
-  height: calc(100% - 48px);
+.LockfileEntryListViewWrapper {
+  cursor: pointer;
+  border: 1px solid #fff;
+  padding: 4px 8px;
 
-  & > * + * {
-    margin-left: 24px;
+  &:hover {
+    border: 1px solid black;
+  }
+
+  h5 {
+    margin: 0;
   }
 }
 
-.LockfileEntryListWrapper {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 24px;
-
-  min-width: 300px;
-  max-width: 400px;
-
-  overflow: scroll;
+.LockfileFilterBar {
+  display: flex;
+  align-items: center;
 
   & > * + * {
-    margin-top: 12px;
+    margin-left: 12px;
   }
+}
 
-  .lockfileEntries {
-    height: calc(100% - 40px);
-    overflow: scroll;
+.lockfileEntries {
+  border: 1px solid white;
+  cursor: pointer;
+  padding: 4px 8px;
+  &:hover {
+    border: 1px solid black;
+  }
+  h5 {
+    margin: 0;
   }
 }

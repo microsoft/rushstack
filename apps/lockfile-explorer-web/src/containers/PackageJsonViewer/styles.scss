@@ -1,12 +1,11 @@
+@use '../../appstyles' as m;
+
 .PackageJsonViewerWrapper {
-  background-color: white;
-  border-radius: 10px;
-  margin: 24px 12px;
-  padding: 12px 24px;
-  width: 400px;
+  @include m.card;
+  margin-bottom: 24px;
 }
 
 .fileContents {
-  height: calc(100% - 48px);
+  height: 300px;
   overflow: scroll;
 }
