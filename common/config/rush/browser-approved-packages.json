@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@reduxjs/toolkit",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },
@@ -24,6 +28,10 @@
     },
     {
       "name": "react-is",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "react-redux",
       "allowedCategories": [ "libraries" ]
     },
     {

@@ -1,31 +1,34 @@
-import React, { Dispatch, useCallback } from 'react';
-import { LockfileEntry } from '../../../parsing/LockfileEntry';
+import React, { useCallback } from 'react';
 import styles from './styles.scss';
 import { LockfileDependency } from '../../../parsing/LockfileDependency';
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { pushToStack, selectCurrentEntry } from '../../../store/slices/entrySlice';
+import { ReactNull } from '../../../types/ReactNull';
 
-export const LockfileEntryDetailsView = ({
-  entry,
-  selectEntry
-}: {
-  entry: LockfileEntry;
-  selectEntry: Dispatch<LockfileEntry>;
-}): JSX.Element => {
+export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
+  const selectedEntry = useAppSelector(selectCurrentEntry);
+  const dispatch = useAppDispatch();
+
   const selectResolvedEntry = useCallback(
     (dependency) => () => {
       if (dependency.resolvedEntry) {
-        selectEntry(dependency.resolvedEntry);
+        dispatch(pushToStack(dependency.resolvedEntry));
       } else {
         console.error('No resolved entry for dependency: ', dependency);
       }
     },
-    [entry]
+    [selectedEntry]
   );
+
+  if (!selectedEntry) {
+    return ReactNull;
+  }
 
   return (
     <div className={styles.LockfileEntryListView}>
-      <h4>{entry.entryId}</h4>
+      <h4>{selectedEntry.entryId}</h4>
       <h5>Dependencies</h5>
-      {entry.dependencies?.map((dependency: LockfileDependency) => (
+      {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
         <div
           className={styles.DependencyItem}
           key={dependency.entryId}

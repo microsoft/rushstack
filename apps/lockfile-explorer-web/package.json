@@ -15,7 +15,10 @@
     "@fluentui/react": "^8.96.1",
     "react": "~16.13.1",
     "react-dom": "~16.13.1",
-    "@lifaon/path": "~2.1.0"
+    "@lifaon/path": "~2.1.0",
+    "@reduxjs/toolkit": "~1.8.6",
+    "react-redux": "~8.0.4",
+    "redux": "~4.2.0"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

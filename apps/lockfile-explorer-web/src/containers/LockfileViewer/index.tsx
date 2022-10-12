@@ -3,49 +3,30 @@ import { LockfileEntry, LockfileEntryKind } from '../../parsing/LockfileEntry';
 import { LockfileEntryListView } from './LockfileEntryListView';
 import styles from './styles.scss';
 import { LockfileEntryDetailsView } from './LockfileEntryDetailsView';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { clearStackAndPush, popStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 
-export const LockfileViewer = ({
-  lockfile,
-  setSelection
-}: {
-  lockfile: LockfileEntry[];
-  setSelection: Dispatch<LockfileEntryKind>;
-}): JSX.Element => {
-  const [selectedEntry, setSelectedEntry] = useState<LockfileEntry | undefined>();
-
-  const [entryStack, setEntryStack] = useState<LockfileEntry[]>([]);
-
-  const clearStackAndPush = useCallback((entry: LockfileEntry) => {
-    console.log('selecting entry: ', entry);
-    setEntryStack([entry]);
-    setSelectedEntry(entry);
-  }, []);
-
-  const pushToStack = useCallback(
-    (entry: LockfileEntry) => {
-      if (!entry) return;
-      console.log('pushing to stack: ', entry);
-      const newStack = [...entryStack, entry];
-      setEntryStack(newStack);
-      setSelectedEntry(entry);
-    },
-    [entryStack]
+export const LockfileViewer = (): JSX.Element => {
+  const selectedEntry = useAppSelector(selectCurrentEntry);
+  const entryStack = useAppSelector((state) => state.entry.selectedEntryStack);
+  const entries = useAppSelector((state) =>
+    state.entry.selection === LockfileEntryKind.Package
+      ? state.entry.packageEntries
+      : state.entry.projectEntries
   );
+  const dispatch = useAppDispatch();
 
-  const popStack = useCallback(() => {
-    if (entryStack.length > 1) {
-      entryStack.pop();
-      setSelectedEntry(entryStack[entryStack.length - 1]);
-    }
-  }, [entryStack]);
+  const pop = useCallback(() => {
+    dispatch(popStack());
+  }, []);
 
   return (
     <div className={styles.LockfileViewerWrapper}>
-      <LockfileEntryListView entries={lockfile} selectEntry={clearStackAndPush} setSelection={setSelection} />
+      <LockfileEntryListView entries={entries} />
       {selectedEntry ? (
         <div className={styles.LockfileEntryListWrapper}>
-          {entryStack.length > 1 ? <button onClick={popStack}>back</button> : null}
-          <LockfileEntryDetailsView entry={selectedEntry} selectEntry={pushToStack} />
+          {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
+          <LockfileEntryDetailsView />
         </div>
       ) : (
         <div className={styles.LockfileEntryListWrapper}>Select an entry to view details</div>

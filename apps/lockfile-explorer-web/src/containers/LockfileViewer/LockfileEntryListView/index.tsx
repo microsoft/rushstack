@@ -3,34 +3,31 @@ import styles from './styles.scss';
 import LockfileStyles from '../styles.scss';
 import { LockfileEntry, LockfileEntryKind } from '../../../parsing/LockfileEntry';
 import { ReactNull } from '../../../types/ReactNull';
+import { useAppDispatch } from '../../../store/hooks';
+import { clearStackAndPush, setSelection } from '../../../store/slices/entrySlice';
 
-const LockfileEntryLi = ({
-  entry,
-  selectEntry
-}: {
-  entry: LockfileEntry;
-  selectEntry(entry: LockfileEntry): void;
-}): JSX.Element => {
-  const selectCurrentEntry = useCallback(() => selectEntry(entry), [entry]);
+const LockfileEntryLi = ({ entry }: { entry: LockfileEntry }): JSX.Element => {
+  const dispatch = useAppDispatch();
+  const clear = useCallback(
+    (entry: LockfileEntry) => () => {
+      dispatch(clearStackAndPush(entry));
+    },
+    []
+  );
   return (
-    <div className={styles.LockfileEntryListViewWrapper} onClick={selectCurrentEntry}>
+    <div className={styles.LockfileEntryListViewWrapper} onClick={clear(entry)}>
       <h5>{entry.displayText}</h5>
     </div>
   );
 };
 
-export const LockfileEntryListView = ({
-  entries,
-  selectEntry,
-  setSelection
-}: {
-  entries: LockfileEntry[];
-  selectEntry: (entry: LockfileEntry) => void;
-  setSelection: Dispatch<LockfileEntryKind>;
-}): JSX.Element | ReactNull => {
+export const LockfileEntryListView = ({ entries }: { entries: LockfileEntry[] }): JSX.Element | ReactNull => {
   const [filter, setFilter] = useState('');
-  const selectPackage = useCallback((type: LockfileEntryKind) => () => setSelection(type), []);
   const updateFilter = useCallback((e) => setFilter(e.target.value), []);
+
+  const dispatch = useAppDispatch();
+  const selectPackage = useCallback((type: LockfileEntryKind) => () => dispatch(setSelection(type)), []);
+
   if (!entries) return ReactNull;
 
   const getEntriesToShow = (): LockfileEntry[] => {
@@ -51,7 +48,7 @@ export const LockfileEntryListView = ({
       </div>
       <div className="lockfileEntries">
         {getEntriesToShow().map((lockfileEntry) => (
-          <LockfileEntryLi selectEntry={selectEntry} entry={lockfileEntry} key={lockfileEntry.displayText} />
+          <LockfileEntryLi entry={lockfileEntry} key={lockfileEntry.displayText} />
         ))}
       </div>
     </div>
