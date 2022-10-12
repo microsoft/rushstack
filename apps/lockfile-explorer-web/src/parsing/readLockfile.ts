@@ -59,7 +59,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
       });
       allImporters.push(importer);
       allEntries.push(importer);
-      allEntriesById[importerKey] = importer;
+      allEntriesById[importer.entryId] = importer;
     }
   }
 
@@ -86,12 +86,12 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
     for (const dependency of entry.dependencies) {
       const matchedEntry = allEntriesById[dependency.entryId];
       if (matchedEntry) {
-        // Create a two way link between the dependency and the entry
-
+        // Create a two-way link between the dependency and the entry
         dependency.resolvedEntry = matchedEntry;
         matchedEntry.referencers.push(dependency);
       } else {
-        // console.error('Could not resolved dependency entryId: ', dependency.entryId);
+        // Local package
+        console.error('Could not resolved dependency entryId: ', dependency.entryId);
       }
     }
   }

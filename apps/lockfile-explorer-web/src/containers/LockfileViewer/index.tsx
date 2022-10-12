@@ -16,6 +16,7 @@ export const LockfileViewer = ({
   const [entryStack, setEntryStack] = useState<LockfileEntry[]>([]);
 
   const clearStackAndPush = useCallback((entry: LockfileEntry) => {
+    console.log('selecting entry: ', entry);
     setEntryStack([entry]);
     setSelectedEntry(entry);
   }, []);

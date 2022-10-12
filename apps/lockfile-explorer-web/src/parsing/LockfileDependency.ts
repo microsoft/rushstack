@@ -33,7 +33,7 @@ export class LockfileDependency {
         console.error('No root relative path for dependency!', name);
         return;
       }
-      this.entryId = 'package:' + rootRelativePath.toString();
+      this.entryId = 'project:' + rootRelativePath.toString();
     } else if (this.version.startsWith('/')) {
       this.entryId = this.version;
     } else {
