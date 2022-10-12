@@ -11,20 +11,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "axios",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "react-dom",
       "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "react-is",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tslib",
