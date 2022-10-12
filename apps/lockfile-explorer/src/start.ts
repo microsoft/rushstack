@@ -1,20 +1,15 @@
 import express from 'express';
-import cors from 'cors';
 import yaml from 'js-yaml';
-const app: express.Application = express();
 import fs from 'fs';
-import * as process from 'process';
 import path from 'path';
 import open from 'open';
 
-const port: number = 8091;
-const appUrl: string = `http://localhost:${port}/app/`;
+const PORT: number = 8091;
+const APP_URL: string = `http://localhost:${PORT}/app/`;
 
-process.chdir(path.join(__dirname, '..'));
+const app: express.Application = express();
 
-app.use(cors());
-
-app.use('/app', express.static('dist'));
+app.use('/app', express.static(path.resolve(__dirname, '../dist')));
 
 app.get('/', (req: express.Request, res: express.Response) => {
   const doc = yaml.load(
@@ -42,13 +37,15 @@ app.get('/parsedCJS', (req: express.Request, res: express.Response) => {
   res.send(parsedPackage);
 });
 
-app.listen(port, () => {
-  console.log(`Rush Lockfile Explorer running at ${appUrl}`);
+app.listen(PORT, async () => {
+  console.log(`Rush Lockfile Explorer running at ${APP_URL}`);
 
-  if (process.argv.indexOf('--debug') < 0) {
-    // Launch the web browser
-    open(appUrl).catch((e) => {
+  if (!process.argv.includes('--debug')) {
+    try {
+      // Launch the web browser
+      await open(APP_URL);
+    } catch (e) {
       console.error('Error launching browser: ' + e.toString());
-    });
+    }
   }
 });
