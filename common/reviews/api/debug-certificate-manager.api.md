@@ -9,7 +9,7 @@ import { ITerminal } from '@rushstack/node-core-library';
 // @public
 export class CertificateManager {
     constructor();
-    ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal): Promise<ICertificate>;
+    ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: ITerminal, generationOptions?: ICertificateGenerationOptions): Promise<ICertificate>;
     untrustCertificateAsync(terminal: ITerminal): Promise<boolean>;
 }
 
@@ -24,9 +24,19 @@ export class CertificateStore {
 }
 
 // @public
+export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string>;
+
+// @public
 export interface ICertificate {
     pemCertificate: string | undefined;
     pemKey: string | undefined;
+    subjectAltNames: readonly string[] | undefined;
+}
+
+// @public
+export interface ICertificateGenerationOptions {
+    subjectAltNames?: ReadonlyArray<string>;
+    validityInDays?: number;
 }
 
 ```

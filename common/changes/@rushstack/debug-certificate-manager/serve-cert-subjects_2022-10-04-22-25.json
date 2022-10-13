@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Support custom certificate subjects and validity period.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager"
+}
