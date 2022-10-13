@@ -10,6 +10,8 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const dispatch = useAppDispatch();
 
+  console.log('selected entry: ', selectedEntry);
+
   const selectResolvedEntry = useCallback(
     (dependency) => () => {
       if (dependency.resolvedEntry) {
@@ -31,19 +33,38 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   return (
     <div className={styles.LockfileEntryListView}>
-      <h4>{selectedEntry.entryId}</h4>
-      <h5>Dependencies</h5>
-      {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
-        <div
-          className={styles.DependencyItem}
-          key={dependency.entryId}
-          onClick={selectResolvedEntry(dependency)}
-        >
-          <h5>Name: {dependency.name}</h5>
-          <p>Version: {dependency.version}</p>
-          <p>Entry ID: {dependency.entryId}</p>
-        </div>
-      ))}
+      <div className={appStyles.containerCard}>
+        <h5>Direct Referrers</h5>
+        {selectedEntry.referencers?.map((referencer: LockfileDependency) => (
+          <div
+            className={styles.DependencyItem}
+            key={referencer.entryId}
+            onClick={selectResolvedEntry(referencer)}
+          >
+            <h5>Name: {referencer.name}</h5>
+            <div>
+              <p>Version: {referencer.version}</p>
+              <p>Entry ID: {referencer.entryId}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className={appStyles.containerCard}>
+        <h5>Direct Dependencies</h5>
+        {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
+          <div
+            className={styles.DependencyItem}
+            key={dependency.entryId}
+            onClick={selectResolvedEntry(dependency)}
+          >
+            <h5>Name: {dependency.name}</h5>
+            <div>
+              <p>Version: {dependency.version}</p>
+              <p>Entry ID: {dependency.entryId}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

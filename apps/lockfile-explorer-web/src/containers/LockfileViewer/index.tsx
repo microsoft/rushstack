@@ -26,7 +26,7 @@ const LockfileEntryLi = ({ entry }: { entry: LockfileEntry }): JSX.Element => {
     <div
       onClick={clear(entry)}
       className={`${styles.lockfileEntries} ${
-        selectedEntry?.entryId === entry.entryId ? styles.lockfileSelectedEntry : ''
+        selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
       }`}
     >
       <h5>{entry.displayText}</h5>
@@ -70,10 +70,10 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   return (
     <div className={appStyles.containerCard}>
       <div className={styles.LockfileFilterBar}>
+        {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
         <h5>filter:</h5>
         <input type="text" value={filter} onChange={updateFilter} />
       </div>
-      {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
       <div className={styles.lockfileEntriesWrapper}>
         {getEntriesToShow().map((lockfileEntry) => (
           <LockfileEntryLi entry={lockfileEntry} key={lockfileEntry.displayText} />

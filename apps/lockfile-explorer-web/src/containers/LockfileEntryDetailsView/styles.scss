@@ -1,15 +1,11 @@
 @import 'office-ui-fabric-core/dist/sass/References';
 
 .LockfileEntryListView {
-  box-shadow: $ms-depth-shadow-8;
-  background-color: $ms-color-gray10;
-  padding: 24px;
-  width: calc(100% - 48px);
-  overflow: scroll;
-  & > * + * {
-    margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  & > * {
+    width: calc(50% - 48px - 12px);
   }
-  p,
   h5 {
     margin: 0;
   }
@@ -18,7 +14,14 @@
 .DependencyItem {
   border: 1px solid white;
   cursor: pointer;
+  margin-top: 12px;
   &:hover {
-    border: 1px solid black;
+    border: 1px solid #107c10;
+  }
+  p {
+    margin: 0;
+  }
+  & > * + * {
+    margin-top: 8px;
   }
 }
