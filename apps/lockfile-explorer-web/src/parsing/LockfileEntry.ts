@@ -3,20 +3,22 @@ import { ILockfileNode, LockfileDependency } from './LockfileDependency';
 
 const ROOT_PACKAGE_PATH: string = 'common/temp/package.json';
 
-export enum LockfileEntryKind {
+export enum LockfileEntryFilter {
   Project,
-  Package
+  Package,
+  SideBySide,
+  Doppelganger
 }
 
 interface IProps {
   // entryId: string;
   rawEntryId: string;
-  kind: LockfileEntryKind;
+  kind: LockfileEntryFilter;
   rawYamlData: ILockfileNode;
 }
 export class LockfileEntry {
   public entryId: string = '';
-  public kind: LockfileEntryKind;
+  public kind: LockfileEntryFilter;
   public rawEntryId: string;
   public packageJsonFolderPath: string = '';
 
@@ -41,7 +43,7 @@ export class LockfileEntry {
       return;
     }
 
-    if (kind === LockfileEntryKind.Project) {
+    if (kind === LockfileEntryFilter.Project) {
       const rootPackageJsonFolderPath = new Path(ROOT_PACKAGE_PATH).dirname() || '';
       const packageJsonFolderPath = new Path('.').relative(
         new Path(rootPackageJsonFolderPath).concat(rawEntryId)

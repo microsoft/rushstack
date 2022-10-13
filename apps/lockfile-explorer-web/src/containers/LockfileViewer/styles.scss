@@ -32,3 +32,15 @@
     margin: 0;
   }
 }
+
+.lockfileEntriesWrapper {
+  height: calc(100vh - 300px);
+  overflow: scroll;
+}
+
+.filterSection {
+  margin-top: 24px;
+  & > * + * {
+    margin-top: 4px;
+  }
+}

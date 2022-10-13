@@ -1,19 +1,24 @@
 import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
-import { LockfileEntry, LockfileEntryKind } from '../../parsing/LockfileEntry';
+import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { RootState } from '../index';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type EntryState = {
-  projectEntries: LockfileEntry[];
-  packageEntries: LockfileEntry[];
-  selection: LockfileEntryKind;
+  allEntries: LockfileEntry[];
+  filters: {
+    [key in LockfileEntryFilter]: boolean;
+  };
   selectedEntryStack: LockfileEntry[];
 };
 
 const initialState: EntryState = {
-  projectEntries: [],
-  packageEntries: [],
-  selection: LockfileEntryKind.Project,
+  allEntries: [],
+  filters: {
+    [LockfileEntryFilter.Project]: true,
+    [LockfileEntryFilter.Package]: false,
+    [LockfileEntryFilter.SideBySide]: false,
+    [LockfileEntryFilter.Doppelganger]: false
+  },
   selectedEntryStack: []
 };
 
@@ -23,11 +28,10 @@ const entrySlice = createSlice({
   initialState,
   reducers: {
     loadEntries: (state, payload: PayloadAction<LockfileEntry[]>) => {
-      state.projectEntries = payload.payload.filter((l) => l.kind === LockfileEntryKind.Project);
-      state.packageEntries = payload.payload.filter((l) => l.kind === LockfileEntryKind.Package);
+      state.allEntries = payload.payload;
     },
-    setSelection: (state, payload: PayloadAction<LockfileEntryKind>) => {
-      state.selection = payload.payload;
+    setFilter: (state, payload: PayloadAction<{ filter: LockfileEntryFilter; state: boolean }>) => {
+      state.filters[payload.payload.filter] = payload.payload.state;
     },
     clearStackAndPush: (state, payload: PayloadAction<LockfileEntry>) => {
       state.selectedEntryStack = [payload.payload];
@@ -51,6 +55,20 @@ export const selectCurrentEntry = (state: RootState): LockfileEntry | undefined 
   }
 };
 
-export const { loadEntries, setSelection, clearStackAndPush, pushToStack, popStack } = entrySlice.actions;
+export const selectFilteredEntries = (state: RootState): LockfileEntry[] => {
+  const filteredEntries: LockfileEntry[] = [];
+  if (state.entry.filters[LockfileEntryFilter.Package]) {
+    filteredEntries.push(
+      ...state.entry.allEntries.filter((entry) => entry.kind === LockfileEntryFilter.Package)
+    );
+  } else if (state.entry.filters[LockfileEntryFilter.Project]) {
+    filteredEntries.push(
+      ...state.entry.allEntries.filter((entry) => entry.kind === LockfileEntryFilter.Project)
+    );
+  }
+  return filteredEntries;
+};
+
+export const { loadEntries, setFilter, clearStackAndPush, pushToStack, popStack } = entrySlice.actions;
 
 export const entryReducer: Reducer<EntryState> = entrySlice.reducer;

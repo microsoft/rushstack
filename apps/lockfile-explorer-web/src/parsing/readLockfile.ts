@@ -1,4 +1,4 @@
-import { LockfileEntry, LockfileEntryKind } from './LockfileEntry';
+import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
 
 export interface IPackageJsonType {
   name: string;
@@ -54,7 +54,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
       const importer = new LockfileEntry({
         // entryId: normalizedPath,
         rawEntryId: importerKey,
-        kind: LockfileEntryKind.Project,
+        kind: LockfileEntryFilter.Project,
         rawYamlData: importerValue
       });
       allImporters.push(importer);
@@ -71,7 +71,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
       const currEntry = new LockfileEntry({
         // entryId: normalizedPath,
         rawEntryId: dependencyKey,
-        kind: LockfileEntryKind.Package,
+        kind: LockfileEntryFilter.Package,
         rawYamlData: dependencyValue
       });
 
