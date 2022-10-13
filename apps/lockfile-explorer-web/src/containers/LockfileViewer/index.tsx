@@ -7,12 +7,14 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   clearStackAndPush,
   popStack,
+  selectCurrentEntry,
   selectFilteredEntries,
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
 import { Checkbox } from '@fluentui/react';
 
 const LockfileEntryLi = ({ entry }: { entry: LockfileEntry }): JSX.Element => {
+  const selectedEntry = useAppSelector(selectCurrentEntry);
   const dispatch = useAppDispatch();
   const clear = useCallback(
     (entry: LockfileEntry) => () => {
@@ -21,7 +23,12 @@ const LockfileEntryLi = ({ entry }: { entry: LockfileEntry }): JSX.Element => {
     []
   );
   return (
-    <div onClick={clear(entry)} className={styles.lockfileEntries}>
+    <div
+      onClick={clear(entry)}
+      className={`${styles.lockfileEntries} ${
+        selectedEntry?.entryId === entry.entryId ? styles.lockfileSelectedEntry : ''
+      }`}
+    >
       <h5>{entry.displayText}</h5>
     </div>
   );
@@ -30,6 +37,7 @@ const LockfileEntryLi = ({ entry }: { entry: LockfileEntry }): JSX.Element => {
 export const LockfileViewer = (): JSX.Element | ReactNull => {
   const [filter, setFilter] = useState('');
   const entries = useAppSelector(selectFilteredEntries);
+  const activeFilters = useAppSelector((state) => state.entry.filters);
   const updateFilter = useCallback((e) => setFilter(e.target.value), []);
 
   // const selectedEntry = useAppSelector(selectCurrentEntry);
@@ -73,13 +81,26 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       </div>
       <div className={styles.filterSection}>
         <h5>Filter</h5>
-        <Checkbox label="Show Workspace Projects" onChange={changeFilter(LockfileEntryFilter.Project)} />
-        <Checkbox label="Show Workspace Packages" onChange={changeFilter(LockfileEntryFilter.Package)} />
+        <Checkbox
+          label="Show Workspace Projects"
+          checked={activeFilters[LockfileEntryFilter.Project]}
+          onChange={changeFilter(LockfileEntryFilter.Project)}
+        />
+        <Checkbox
+          label="Show Workspace Packages"
+          checked={activeFilters[LockfileEntryFilter.Package]}
+          onChange={changeFilter(LockfileEntryFilter.Package)}
+        />
         <Checkbox
           label="Must have side-by-side versions"
+          checked={activeFilters[LockfileEntryFilter.SideBySide]}
           onChange={changeFilter(LockfileEntryFilter.SideBySide)}
         />
-        <Checkbox label="Must have doppelgangers" onChange={changeFilter(LockfileEntryFilter.Doppelganger)} />
+        <Checkbox
+          label="Must have doppelgangers"
+          checked={activeFilters[LockfileEntryFilter.Doppelganger]}
+          onChange={changeFilter(LockfileEntryFilter.Doppelganger)}
+        />
       </div>
     </div>
   );

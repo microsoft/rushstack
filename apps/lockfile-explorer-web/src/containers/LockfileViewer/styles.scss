@@ -26,11 +26,15 @@
   cursor: pointer;
   padding: 4px 8px;
   &:hover {
-    border: 1px solid black;
+    border: 1px solid #107c10;
   }
   h5 {
     margin: 0;
   }
+}
+
+.lockfileSelectedEntry {
+  background-color: #dff6dd;
 }
 
 .lockfileEntriesWrapper {

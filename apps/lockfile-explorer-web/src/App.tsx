@@ -7,6 +7,7 @@ import { useAppDispatch } from './store/hooks';
 import { loadEntries } from './store/slices/entrySlice';
 import { LockfileEntryDetailsView } from './containers/LockfileEntryDetailsView';
 import { BookmarksSidebar } from './containers/BookmarksSidebar';
+import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
 
 /**
  * This React component renders the application page.
@@ -30,7 +31,8 @@ export const App = (): JSX.Element => {
           <div className="ms-Grid-col ms-sm3">
             <LockfileViewer />
           </div>
-          <div className="ms-Grid-col ms-sm7">
+          <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
+            <SelectedEntryPreview />
             <PackageJsonViewer />
             <LockfileEntryDetailsView />
           </div>

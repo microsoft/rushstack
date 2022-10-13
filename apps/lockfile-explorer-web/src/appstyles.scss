@@ -14,3 +14,9 @@
 .AppContainer {
   padding: 24px;
 }
+
+.BodyContainer {
+  & > * + * {
+    margin-top: 24px;
+  }
+}

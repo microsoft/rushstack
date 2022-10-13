@@ -1,0 +1,10 @@
+.selectedEntryCard {
+}
+
+.selectedEntryHeader {
+  display: flex;
+  align-items: center;
+  & > * + * {
+    margin-left: 8px;
+  }
+}
