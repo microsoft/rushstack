@@ -11,7 +11,6 @@ import {
   selectFilteredEntries,
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
-import { Checkbox } from '@fluentui/react';
 
 const LockfileEntryLi = ({ entry }: { entry: LockfileEntry }): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
@@ -81,26 +80,30 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       </div>
       <div className={styles.filterSection}>
         <h5>Filter</h5>
-        <Checkbox
-          label="Show Workspace Projects"
+        <input
+          type="checkbox"
           checked={activeFilters[LockfileEntryFilter.Project]}
           onChange={changeFilter(LockfileEntryFilter.Project)}
         />
-        <Checkbox
-          label="Show Workspace Packages"
+        <h5>Show Workspace Projects</h5>
+        <input
+          type="checkbox"
           checked={activeFilters[LockfileEntryFilter.Package]}
           onChange={changeFilter(LockfileEntryFilter.Package)}
         />
-        <Checkbox
-          label="Must have side-by-side versions"
+        <h5>Show Workspace Packages</h5>
+        <input
+          type="checkbox"
           checked={activeFilters[LockfileEntryFilter.SideBySide]}
           onChange={changeFilter(LockfileEntryFilter.SideBySide)}
         />
-        <Checkbox
-          label="Must have doppelgangers"
+        <h5>Must have side-by-side versions</h5>
+        <input
+          type="checkbox"
           checked={activeFilters[LockfileEntryFilter.Doppelganger]}
           onChange={changeFilter(LockfileEntryFilter.Doppelganger)}
         />
+        <h5>Must have doppelgangers</h5>
       </div>
     </div>
   );

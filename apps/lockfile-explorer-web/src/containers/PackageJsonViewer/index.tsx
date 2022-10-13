@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { readCJS, readParsedCJS, readPackageJSON } from '../../parsing/readCJS';
 import styles from './styles.scss';
+import appStyles from '../../appstyles.scss';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -44,12 +45,36 @@ export const PackageJsonViewer = (): JSX.Element => {
   };
 
   return (
-    <div className={styles.PackageJsonViewerWrapper}>
-      <button onClick={cb(PackageView.PACKAGE_JSON)}>package.json</button>
-      <button onClick={cb(PackageView.CJS)}>.pnpmfile.cjs</button>
-      <button onClick={cb(PackageView.PARSED_PACKAGE_JSON)}>Parsed package.json</button>
-
-      <div className={styles.fileContents}>{renderFile()}</div>
+    <div>
+      <div className={styles.headerFilterBar}>
+        <div
+          className={`${styles.headerFilterItem} ${
+            selection === PackageView.PACKAGE_JSON ? styles.headerFilterItemActive : ''
+          }`}
+          onClick={cb(PackageView.PACKAGE_JSON)}
+        >
+          package.json
+        </div>
+        <div
+          className={`${styles.headerFilterItem} ${
+            selection === PackageView.CJS ? styles.headerFilterItemActive : ''
+          }`}
+          onClick={cb(PackageView.CJS)}
+        >
+          .pnpmfile.cjs
+        </div>
+        <div
+          className={`${styles.headerFilterItem} ${
+            selection === PackageView.PARSED_PACKAGE_JSON ? styles.headerFilterItemActive : ''
+          }`}
+          onClick={cb(PackageView.PARSED_PACKAGE_JSON)}
+        >
+          Parsed package.json
+        </div>
+      </div>
+      <div className={appStyles.containerCard}>
+        <div className={styles.fileContents}>{renderFile()}</div>
+      </div>
     </div>
   );
 };

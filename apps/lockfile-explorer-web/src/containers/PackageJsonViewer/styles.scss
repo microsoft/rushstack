@@ -1,10 +1,22 @@
 @import 'office-ui-fabric-core/dist/sass/References';
 
-.PackageJsonViewerWrapper {
+.headerFilterBar {
+  display: flex;
   box-shadow: $ms-depth-shadow-8;
+  width: fit-content;
+  & > * + * {
+    border-left: 1px solid $ms-color-gray20;
+  }
+}
+
+.headerFilterItem {
   background-color: $ms-color-gray10;
-  padding: 24px;
-  width: calc(100% - 48px);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.headerFilterItemActive {
+  border-bottom: 3px solid #107c10;
 }
 
 .fileContents {

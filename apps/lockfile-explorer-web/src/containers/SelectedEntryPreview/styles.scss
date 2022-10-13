@@ -1,4 +1,13 @@
+@import 'office-ui-fabric-core/dist/sass/References';
+
 .selectedEntryCard {
+  box-shadow: $ms-depth-shadow-8;
+  background-color: $ms-color-gray10;
+  padding: 24px;
+  width: calc(100% - 48px);
+  h5 {
+    margin: 0;
+  }
 }
 
 .selectedEntryHeader {
