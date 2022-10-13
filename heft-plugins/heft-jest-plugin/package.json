@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-jest-plugin",
-  "version": "0.3.39",
+  "version": "0.3.40",
   "description": "Heft plugin for Jest",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
     "postinstall": "node ./includes/jestScriptTransformerPatch.js"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.48.2"
+    "@rushstack/heft": "^0.48.3"
   },
   "dependencies": {
     "@jest/core": "~27.4.2",
