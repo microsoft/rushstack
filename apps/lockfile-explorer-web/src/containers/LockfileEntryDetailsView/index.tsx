@@ -5,6 +5,7 @@ import { LockfileDependency } from '../../parsing/LockfileDependency';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
+import { LockfileEntry } from '../../parsing/LockfileEntry';
 
 export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
@@ -23,6 +24,13 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     [selectedEntry]
   );
 
+  const selectResolvedReferencer = useCallback(
+    (referencer) => () => {
+      dispatch(pushToStack(referencer));
+    },
+    [selectedEntry]
+  );
+
   if (!selectedEntry) {
     return (
       <div className={appStyles.containerCard}>
@@ -35,16 +43,15 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     <div className={styles.LockfileEntryListView}>
       <div className={appStyles.containerCard}>
         <h5>Direct Referrers</h5>
-        {selectedEntry.referencers?.map((referencer: LockfileDependency) => (
+        {selectedEntry.referencers?.map((referencer: LockfileEntry) => (
           <div
             className={styles.DependencyItem}
-            key={referencer.entryId}
-            onClick={selectResolvedEntry(referencer)}
+            key={referencer.rawEntryId}
+            onClick={selectResolvedReferencer(referencer)}
           >
-            <h5>Name: {referencer.name}</h5>
+            <h5>Name: {referencer.displayText}</h5>
             <div>
-              <p>Version: {referencer.version}</p>
-              <p>Entry ID: {referencer.entryId}</p>
+              <p>Entry ID: {referencer.rawEntryId}</p>
             </div>
           </div>
         ))}

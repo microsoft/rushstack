@@ -88,7 +88,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
       if (matchedEntry) {
         // Create a two-way link between the dependency and the entry
         dependency.resolvedEntry = matchedEntry;
-        matchedEntry.referencers.push(dependency);
+        matchedEntry.referencers.push(entry);
       } else {
         // Local package
         console.error('Could not resolved dependency entryId: ', dependency.entryId);
