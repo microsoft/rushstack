@@ -22,7 +22,7 @@ export interface IWebpackBuildStageProperties extends IBuildStageProperties {
 
 // @public (undocumented)
 export interface IWebpackBundleSubstageProperties extends IBundleSubstageProperties {
-    webpackConfiguration?: webpack.Configuration | webpack.Configuration[] | null;
+    webpackConfiguration?: null | webpack.Configuration | webpack.Configuration[];
 }
 
 // @public (undocumented)

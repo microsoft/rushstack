@@ -13,7 +13,7 @@ export class Item {
 // @public (undocumented)
 interface Options {
     // (undocumented)
-    color: 'red' | 'blue';
+    color: 'blue' | 'red';
     // (undocumented)
     name: string;
     // (undocumented)

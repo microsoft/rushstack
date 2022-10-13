@@ -30,7 +30,7 @@ export interface ILocaleElementMap {
 }
 
 // @public
-export type ILocaleFileData = string | ILocaleFileObject | ReadonlyMap<string, string>;
+export type ILocaleFileData = ILocaleFileObject | ReadonlyMap<string, string> | string;
 
 // @public (undocumented)
 export interface ILocaleFileObject {
@@ -82,7 +82,7 @@ export interface ILocalizedData {
     defaultLocale: IDefaultLocaleOptions;
     passthroughLocale?: IPassthroughLocaleOptions;
     pseudolocales?: IPseudolocalesOptions;
-    resolveMissingTranslatedStrings?: (locales: string[], localizedFileKey: string, loaderContext: LoaderContext<{}>) => Promise<IResolvedMissingTranslations> | IResolvedMissingTranslations;
+    resolveMissingTranslatedStrings?: (locales: string[], localizedFileKey: string, loaderContext: LoaderContext<{}>) => IResolvedMissingTranslations | Promise<IResolvedMissingTranslations>;
     translatedStrings: ILocalizedStrings;
 }
 

@@ -502,13 +502,13 @@ export interface ITelemetryData {
     readonly durationInSeconds: number;
     // (undocumented)
     readonly extraData?: {
-        [key: string]: string | number | boolean;
+        [key: string]: boolean | number | string;
     };
     readonly machineInfo?: ITelemetryMachineInfo;
     readonly name: string;
     readonly operationResults?: Record<string, ITelemetryOperationResult>;
     readonly platform?: string;
-    readonly result: 'Succeeded' | 'Failed';
+    readonly result: 'Failed' | 'Succeeded';
     readonly rushVersion?: string;
     readonly timestampMs?: number;
 }
@@ -680,7 +680,7 @@ export abstract class PackageManager {
 }
 
 // @public
-export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
+export type PackageManagerName = 'npm' | 'pnpm' | 'yarn';
 
 // @public
 export abstract class PackageManagerOptionsConfigurationBase implements IPackageManagerOptionsJsonBase {
@@ -711,12 +711,12 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
     readonly strictPeerDependencies: boolean;
-    readonly unsupportedPackageJsonSettings: unknown | undefined;
+    readonly unsupportedPackageJsonSettings: undefined | unknown;
     readonly useWorkspaces: boolean;
 }
 
 // @public
-export type PnpmStoreOptions = 'local' | 'global';
+export type PnpmStoreOptions = 'global' | 'local';
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {

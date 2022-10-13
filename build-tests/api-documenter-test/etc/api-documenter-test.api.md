@@ -131,8 +131,8 @@ export interface IDocInterface4 {
         children: string;
     }) => boolean;
     generic: Generic<number>;
-    numberOrFunction: number | (() => number);
-    stringOrNumber: string | number;
+    numberOrFunction: (() => number) | number;
+    stringOrNumber: number | string;
 }
 
 // @public

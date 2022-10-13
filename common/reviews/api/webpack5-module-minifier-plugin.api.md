@@ -56,7 +56,7 @@ export interface IModuleInfo {
 }
 
 // @public
-export type IModuleMap = Map<string | number, IModuleInfo>;
+export type IModuleMap = Map<number | string, IModuleInfo>;
 
 // @public
 export interface IModuleMinifierPluginHooks {

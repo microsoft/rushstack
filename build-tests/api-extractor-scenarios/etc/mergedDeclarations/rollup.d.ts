@@ -6,7 +6,7 @@ export declare class MergedClassAndInterface {
 /** @public */
 export declare interface MergedClassAndInterface {
     anotherProp: boolean;
-    someMethod(x: string | boolean): void;
+    someMethod(x: boolean | string): void;
 }
 
 /** @public */
