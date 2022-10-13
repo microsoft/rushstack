@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Tue, 11 Oct 2022 23:49:12 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Oct 2022 00:20:15 GMT and should not be manually modified.
+
+## 0.6.0
+Thu, 13 Oct 2022 00:20:15 GMT
+
+### Minor changes
+
+- Add `nonModuleFileExtensions` property to support generating typings for non-module CSS files.
 
 ## 0.5.21
 Tue, 11 Oct 2022 23:49:12 GMT
