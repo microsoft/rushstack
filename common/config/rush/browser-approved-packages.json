@@ -19,6 +19,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "office-ui-fabric-core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests" ]
     },
