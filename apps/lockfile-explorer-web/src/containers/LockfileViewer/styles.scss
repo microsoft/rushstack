@@ -11,6 +11,7 @@
 .LockfileFilterBar {
   display: flex;
   align-items: center;
+  margin-bottom: 12px;
 
   & > * + * {
     margin-left: 12px;

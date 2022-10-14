@@ -12,12 +12,12 @@ import {
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
 
-type LockfileEntryGroup = {
+interface ILockfileEntryGroup {
   entryName: string;
   versions: LockfileEntry[];
-};
+}
 
-const LockfileEntryLi = ({ group }: { group: LockfileEntryGroup }): JSX.Element => {
+const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const dispatch = useAppDispatch();
   const clear = useCallback(
@@ -31,6 +31,7 @@ const LockfileEntryLi = ({ group }: { group: LockfileEntryGroup }): JSX.Element 
       <h5>{group.entryName}</h5>
       {group.versions.map((entry) => (
         <div
+          key={entry.rawEntryId}
           onClick={clear(entry)}
           className={`${styles.lockfileEntries} ${
             selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
@@ -60,7 +61,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
     dispatch(popStack());
   }, []);
 
-  const getEntriesToShow = (): LockfileEntryGroup[] => {
+  const getEntriesToShow = (): ILockfileEntryGroup[] => {
     let filteredEntries: LockfileEntry[] = [];
     if (filter) {
       filteredEntries = entries.filter((entry) => entry.entryId.indexOf(filter) !== -1);
@@ -73,7 +74,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       groups[item.entryPackageName] = group;
       return groups;
     }, {});
-    const groupedEntries: LockfileEntryGroup[] = [];
+    const groupedEntries: ILockfileEntryGroup[] = [];
     for (const [packageName, entries] of Object.entries(reducedEntries)) {
       groupedEntries.push({
         entryName: packageName,
@@ -104,32 +105,39 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
         ))}
       </div>
       <div className={styles.filterSection}>
-        <div className={styles.filterOption}></div>
-        <h5>Filter</h5>
-        <input
-          type="checkbox"
-          checked={activeFilters[LockfileEntryFilter.Project]}
-          onChange={changeFilter(LockfileEntryFilter.Project)}
-        />
-        <h5>Show Workspace Projects</h5>
-        <input
-          type="checkbox"
-          checked={activeFilters[LockfileEntryFilter.Package]}
-          onChange={changeFilter(LockfileEntryFilter.Package)}
-        />
-        <h5>Show Workspace Packages</h5>
-        <input
-          type="checkbox"
-          checked={activeFilters[LockfileEntryFilter.SideBySide]}
-          onChange={changeFilter(LockfileEntryFilter.SideBySide)}
-        />
-        <h5>Must have side-by-side versions</h5>
-        <input
-          type="checkbox"
-          checked={activeFilters[LockfileEntryFilter.Doppelganger]}
-          onChange={changeFilter(LockfileEntryFilter.Doppelganger)}
-        />
-        <h5>Must have doppelgangers</h5>
+        <h5>Filters</h5>
+        <div className={styles.filterOption}>
+          <input
+            type="checkbox"
+            checked={activeFilters[LockfileEntryFilter.Project]}
+            onChange={changeFilter(LockfileEntryFilter.Project)}
+          />
+          <h5>Show Workspace Projects</h5>
+        </div>
+        <div className={styles.filterOption}>
+          <input
+            type="checkbox"
+            checked={activeFilters[LockfileEntryFilter.Package]}
+            onChange={changeFilter(LockfileEntryFilter.Package)}
+          />
+          <h5>Show Workspace Packages</h5>
+        </div>
+        <div className={styles.filterOption}>
+          <input
+            type="checkbox"
+            checked={activeFilters[LockfileEntryFilter.SideBySide]}
+            onChange={changeFilter(LockfileEntryFilter.SideBySide)}
+          />
+          <h5>Must have side-by-side versions</h5>
+        </div>
+        <div className={styles.filterOption}>
+          <input
+            type="checkbox"
+            checked={activeFilters[LockfileEntryFilter.Doppelganger]}
+            onChange={changeFilter(LockfileEntryFilter.Doppelganger)}
+          />
+          <h5>Must have doppelgangers</h5>
+        </div>
       </div>
     </div>
   );
