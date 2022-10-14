@@ -12,7 +12,12 @@ import {
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
 
-const LockfileEntryLi = ({ entry }: { entry: LockfileEntry }): JSX.Element => {
+type LockfileEntryGroup = {
+  entryName: string;
+  versions: LockfileEntry[];
+};
+
+const LockfileEntryLi = ({ group }: { group: LockfileEntryGroup }): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const dispatch = useAppDispatch();
   const clear = useCallback(
@@ -22,13 +27,18 @@ const LockfileEntryLi = ({ entry }: { entry: LockfileEntry }): JSX.Element => {
     []
   );
   return (
-    <div
-      onClick={clear(entry)}
-      className={`${styles.lockfileEntries} ${
-        selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
-      }`}
-    >
-      <h5>{entry.displayText}</h5>
+    <div className={styles.packageGroup}>
+      <h5>{group.entryName}</h5>
+      {group.versions.map((entry) => (
+        <div
+          onClick={clear(entry)}
+          className={`${styles.lockfileEntries} ${
+            selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
+          }`}
+        >
+          <p>{entry.entryPackageVersion}</p>
+        </div>
+      ))}
     </div>
   );
 };
@@ -50,12 +60,27 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
     dispatch(popStack());
   }, []);
 
-  const getEntriesToShow = (): LockfileEntry[] => {
+  const getEntriesToShow = (): LockfileEntryGroup[] => {
+    let filteredEntries: LockfileEntry[] = [];
     if (filter) {
-      return entries.filter((entry) => entry.entryId.indexOf(filter) !== -1);
+      filteredEntries = entries.filter((entry) => entry.entryId.indexOf(filter) !== -1);
     } else {
-      return entries;
+      filteredEntries = entries;
     }
+    const reducedEntries = filteredEntries.reduce((groups: { [key in string]: LockfileEntry[] }, item) => {
+      const group = groups[item.entryPackageName] || [];
+      group.push(item);
+      groups[item.entryPackageName] = group;
+      return groups;
+    }, {});
+    const groupedEntries: LockfileEntryGroup[] = [];
+    for (const [packageName, entries] of Object.entries(reducedEntries)) {
+      groupedEntries.push({
+        entryName: packageName,
+        versions: entries
+      });
+    }
+    return groupedEntries;
   };
 
   const changeFilter = useCallback(
@@ -74,11 +99,12 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
         <input type="text" value={filter} onChange={updateFilter} />
       </div>
       <div className={styles.lockfileEntriesWrapper}>
-        {getEntriesToShow().map((lockfileEntry) => (
-          <LockfileEntryLi entry={lockfileEntry} key={lockfileEntry.displayText} />
+        {getEntriesToShow().map((lockfileEntryGroup) => (
+          <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
         ))}
       </div>
       <div className={styles.filterSection}>
+        <div className={styles.filterOption}></div>
         <h5>Filter</h5>
         <input
           type="checkbox"

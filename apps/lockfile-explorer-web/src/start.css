@@ -9,3 +9,8 @@ body {
   background-color: #f3f2f1;
   font-family: Tahoma, sans-serif;
 }
+
+h5,
+p {
+  margin: 0;
+}

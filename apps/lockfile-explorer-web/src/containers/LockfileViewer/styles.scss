@@ -6,10 +6,6 @@
   &:hover {
     border: 1px solid black;
   }
-
-  h5 {
-    margin: 0;
-  }
 }
 
 .LockfileFilterBar {
@@ -21,15 +17,20 @@
   }
 }
 
+.packageGroup {
+  h5 {
+    margin: 0;
+  }
+  & > * + * {
+    margin-top: 4px;
+  }
+}
+
 .lockfileEntries {
-  border: 1px solid white;
   cursor: pointer;
   padding: 4px 8px;
   &:hover {
-    border: 1px solid #107c10;
-  }
-  h5 {
-    margin: 0;
+    background: #dff6dd;
   }
 }
 
@@ -40,11 +41,22 @@
 .lockfileEntriesWrapper {
   height: calc(100vh - 300px);
   overflow: scroll;
+  & > * + * {
+    margin-top: 12px;
+  }
 }
 
 .filterSection {
   margin-top: 24px;
   & > * + * {
     margin-top: 4px;
+  }
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  & > * + * {
+    margin-left: 4px;
   }
 }

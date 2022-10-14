@@ -14,8 +14,8 @@ type EntryState = {
 const initialState: EntryState = {
   allEntries: [],
   filters: {
-    [LockfileEntryFilter.Project]: true,
-    [LockfileEntryFilter.Package]: false,
+    [LockfileEntryFilter.Project]: false,
+    [LockfileEntryFilter.Package]: true,
     [LockfileEntryFilter.SideBySide]: false,
     [LockfileEntryFilter.Doppelganger]: false
   },
