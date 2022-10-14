@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.33.2",
+      "tag": "@microsoft/api-extractor_v7.33.2",
+      "date": "Fri, 14 Oct 2022 15:26:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix references from computed properties #3629"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.33.1",
       "tag": "@microsoft/api-extractor_v7.33.1",
       "date": "Thu, 13 Oct 2022 00:20:15 GMT",

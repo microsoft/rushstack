@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 13 Oct 2022 00:20:15 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Oct 2022 15:26:31 GMT and should not be manually modified.
+
+## 7.33.2
+Fri, 14 Oct 2022 15:26:31 GMT
+
+### Patches
+
+- Fix references from computed properties #3629
 
 ## 7.33.1
 Thu, 13 Oct 2022 00:20:15 GMT
