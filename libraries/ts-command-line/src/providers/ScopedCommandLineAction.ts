@@ -20,7 +20,7 @@ interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOpti
  */
 class InternalScopedCommandLineParser extends CommandLineParser {
   private _canExecute: boolean;
-  private _internalOptions: IInternalScopedCommandLineParserOptions;
+  private readonly _internalOptions: IInternalScopedCommandLineParserOptions;
 
   public get canExecute(): boolean {
     return this._canExecute;
@@ -45,10 +45,6 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     this._canExecute = false;
     this._internalOptions = options;
     this._internalOptions.onDefineScopedParameters(this);
-  }
-
-  protected onDefineParameters(): void {
-    // No-op. Parameters are manually defined in the constructor.
   }
 
   protected async onExecute(): Promise<void> {

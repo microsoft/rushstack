@@ -17,7 +17,6 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     _execute(): Promise<void>;
     // @internal
     protected _getArgumentParser(): argparse.ArgumentParser;
-    protected abstract onDefineParameters(): void;
     protected abstract onExecute(): Promise<void>;
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
@@ -165,7 +164,7 @@ export abstract class CommandLineParameterProvider {
     getParameterStringMap(): Record<string, string>;
     getStringListParameter(parameterLongName: string, parameterScope?: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string, parameterScope?: string): CommandLineStringParameter;
-    protected abstract onDefineParameters(): void;
+    protected onDefineParameters?(): void;
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
     parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
@@ -247,15 +246,11 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
 // @public (undocumented)
 export class DynamicCommandLineAction extends CommandLineAction {
     // (undocumented)
-    protected onDefineParameters(): void;
-    // (undocumented)
     protected onExecute(): Promise<void>;
 }
 
 // @public (undocumented)
 export class DynamicCommandLineParser extends CommandLineParser {
-    // (undocumented)
-    protected onDefineParameters(): void;
 }
 
 // @public

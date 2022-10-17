@@ -31,6 +31,11 @@ export interface ICommandLineActionOptions {
 }
 
 /**
+ * Example: "do-something"
+ */
+const ACTION_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*([-:][a-z0-9]+)*$/;
+
+/**
  * Represents a sub-command that is part of the CommandLineParser command line.
  * Applications should create subclasses of CommandLineAction corresponding to
  * each action that they want to expose.
@@ -44,9 +49,6 @@ export interface ICommandLineActionOptions {
  * @public
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
-  // Example: "do-something"
-  private static _actionNameRegExp: RegExp = /^[a-z][a-z0-9]*([-:][a-z0-9]+)*$/;
-
   /** {@inheritDoc ICommandLineActionOptions.actionName} */
   public readonly actionName: string;
 
@@ -61,7 +63,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   public constructor(options: ICommandLineActionOptions) {
     super();
 
-    if (!CommandLineAction._actionNameRegExp.test(options.actionName)) {
+    if (!ACTION_NAME_REGEXP.test(options.actionName)) {
       throw new Error(
         `Invalid action name "${options.actionName}". ` +
           `The name must be comprised of lower-case words optionally separated by hyphens or colons.`
@@ -85,7 +87,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
       description: this.documentation
     });
 
-    this.onDefineParameters();
+    this.onDefineParameters?.();
   }
 
   /**
@@ -117,11 +119,6 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 
     return this._argumentParser;
   }
-
-  /**
-   * {@inheritDoc CommandLineParameterProvider.onDefineParameters}
-   */
-  protected abstract onDefineParameters(): void;
 
   /**
    * Your subclass should implement this hook to perform the operation.
