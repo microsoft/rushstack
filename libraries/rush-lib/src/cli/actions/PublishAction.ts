@@ -27,6 +27,9 @@ import { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';
+import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
+import { BaseInstallManager } from '../../logic/base/BaseInstallManager';
+import { PurgeManager } from '../../logic/PurgeManager';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails!: CommandLineFlagParameter;
@@ -49,6 +52,7 @@ export class PublishAction extends BaseRushAction {
   private _releaseFolder!: CommandLineStringParameter;
   private _pack!: CommandLineFlagParameter;
   private _ignoreGitHooksParameter!: CommandLineFlagParameter;
+  private _update!: CommandLineFlagParameter;
 
   private _prereleaseToken!: PrereleaseToken;
   private _hotfixTagOverride!: string;
@@ -208,12 +212,18 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--ignore-git-hooks',
       description: `Skips execution of all git hooks. Make sure you know what you are skipping.`
     });
+    this._update = this.defineFlagParameter({
+      parameterLongName: '--update',
+      parameterShortName: '-u',
+      description: 'If this flag is specified, a rush update will be run before the packages are published.'
+    });
   }
 
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected async runAsync(): Promise<void> {
+    await this._updateBeforePublish();
     PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
     // Example: "common\temp\publish-home"
@@ -415,6 +425,37 @@ export class PublishAction extends BaseRushAction {
           this._prereleaseName.value
         );
       }
+    }
+  }
+
+  private async _updateBeforePublish(): Promise<void> {
+    if (!this._update.value) return;
+
+    const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
+
+    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+      this.rushConfiguration,
+      this.rushGlobalFolder,
+      purgeManager,
+      {
+        debug: false,
+        allowShrinkwrapUpdates: true,
+        checkOnly: false,
+        bypassPolicy: false,
+        noLink: false,
+        fullUpgrade: false,
+        recheckShrinkwrap: true,
+        collectLogFile: false,
+        pnpmFilterArguments: [],
+        maxInstallAttempts: 1,
+        networkConcurrency: undefined
+      }
+    );
+
+    try {
+      await installManager.doInstallAsync();
+    } catch (error) {
+      throw new Error(`"update" failed to run before "publish" was run. Failed with: ${error}`);
     }
   }
 
