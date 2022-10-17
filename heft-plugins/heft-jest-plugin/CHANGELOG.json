@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.3.43",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.43",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.5` to `^0.48.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.42",
       "tag": "@rushstack/heft-jest-plugin_v0.3.42",
       "date": "Mon, 17 Oct 2022 15:16:00 GMT",

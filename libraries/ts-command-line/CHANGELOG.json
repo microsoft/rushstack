@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.13.0",
+      "tag": "@rushstack/ts-command-line_v4.13.0",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Make the onDefineParameters function optional for `CommandLineAction`s and `CommandLineParser`s that either don't have parameters or that define their parameters in their constructor."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.12.5",
       "tag": "@rushstack/ts-command-line_v4.12.5",
       "date": "Mon, 10 Oct 2022 15:23:44 GMT",

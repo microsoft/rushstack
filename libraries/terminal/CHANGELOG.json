@@ -2,6 +2,21 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.3.82",
+      "tag": "@rushstack/terminal_v0.3.82",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.81",
       "tag": "@rushstack/terminal_v0.3.81",
       "date": "Mon, 17 Oct 2022 15:16:00 GMT",

@@ -2,6 +2,24 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.229",
+      "tag": "@rushstack/rundown_v1.0.229",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.228",
       "tag": "@rushstack/rundown_v1.0.228",
       "date": "Mon, 17 Oct 2022 15:16:00 GMT",
