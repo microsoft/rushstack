@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styles from './appstyles.scss';
 import { readLockfile } from './parsing/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';

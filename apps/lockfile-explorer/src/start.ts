@@ -7,6 +7,7 @@ import * as process from 'process';
 import path from 'path';
 import open from 'open';
 import { init } from './init';
+import { IAppState } from './state';
 
 const port: number = 8091;
 const appUrl: string = `http://localhost:${port}/app/`;
@@ -15,7 +16,7 @@ process.chdir(path.join(__dirname, '..'));
 app.use(express.json());
 app.use(cors());
 
-const appState = init();
+const appState: IAppState = init();
 
 app.use('/app', express.static('dist'));
 

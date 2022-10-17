@@ -13,6 +13,7 @@ export interface IAppState {
   projectRoot: string;
   projectType: ProjectType;
   pnpmLockfileLocation: string;
+  pnpmfileLocation: string;
   rush: {
     projects: {
       [key in string]: IRushProjectDetails;
@@ -20,16 +21,16 @@ export interface IAppState {
   };
 }
 
-interface Props {
+interface IProps {
   currDir: string;
 }
 export class AppState implements IAppState {
-  currDir: string;
-  projectRoot: string = '';
-  projectType: ProjectType = ProjectType.RUSH_PROJECT;
-  pnpmLockfileLocation: string = '';
-  pnpmfileLocation: string = '';
-  rush: {
+  public currDir: string;
+  public projectRoot: string = '';
+  public projectType: ProjectType = ProjectType.RUSH_PROJECT;
+  public pnpmLockfileLocation: string = '';
+  public pnpmfileLocation: string = '';
+  public rush: {
     projects: {
       [key in string]: IRushProjectDetails;
     };
@@ -37,7 +38,7 @@ export class AppState implements IAppState {
     projects: {}
   };
 
-  constructor(props: Props) {
+  public constructor(props: IProps) {
     this.currDir = props.currDir;
   }
 }

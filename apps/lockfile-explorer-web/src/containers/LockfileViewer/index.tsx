@@ -88,7 +88,6 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   const changeFilter = useCallback(
     (filter: LockfileEntryFilter) =>
       (ev: React.ChangeEvent<HTMLInputElement>): void => {
-        console.log('is checked: ', ev.target.checked);
         dispatch(selectFilter({ filter, state: ev.target.checked }));
       },
     []
