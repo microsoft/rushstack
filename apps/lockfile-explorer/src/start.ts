@@ -12,7 +12,7 @@ const port: number = 8091;
 const appUrl: string = `http://localhost:${port}/app/`;
 
 process.chdir(path.join(__dirname, '..'));
-
+app.use(express.json());
 app.use(cors());
 
 const appState = init();
@@ -24,30 +24,44 @@ app.get('/', (req: express.Request, res: express.Response) => {
   res.send(doc);
 });
 
-app.get('/loadPackageJSON', (req: express.Request, res: express.Response) => {
-  const packageJson = fs.readFileSync(path.resolve(__dirname, './exampleData/package.json'));
-  res.send(packageJson);
-});
+app.post(
+  '/api/package-json',
+  (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
+    const { projectPath } = req.body;
+    const fileLocation = path.resolve(appState.projectRoot, projectPath, 'package.json');
+    if (!fs.existsSync(fileLocation)) {
+      return res.status(400).send({
+        message: `Could not load package.json file in location: ${projectPath}`
+      });
+    }
+    const packageJson = fs.readFileSync(fileLocation);
+    res.send(packageJson);
+  }
+);
 
-app.get('/loadCJS', (req: express.Request, res: express.Response) => {
-  const cjsFile = fs.readFileSync(path.resolve(__dirname, './exampleData/.pnpmfile.cjs'));
+app.get('/api/pnpmfile', (req: express.Request, res: express.Response) => {
+  const cjsFile = fs.readFileSync(path.resolve(appState.pnpmfileLocation));
   res.send(cjsFile);
 });
 
-app.get('/parsedCJS', (req: express.Request, res: express.Response) => {
-  const packageJson = fs.readFileSync(path.resolve(__dirname, './exampleData/package.json'));
-  const {
-    hooks: { readPackage }
-  } = require(path.resolve(__dirname, './exampleData/.pnpmfile.cjs'));
-  const parsedPackage = readPackage(packageJson);
-  res.send(parsedPackage);
-});
-
-app.post('/uploadLockfile', (req: express.Request, res: express.Response) => {
-  console.log('req body: ', req.body);
-  const doc = yaml.load(req.body);
-  res.send(doc);
-});
+app.post(
+  '/api/package-spec',
+  (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
+    const { projectPath } = req.body;
+    const fileLocation = path.resolve(appState.projectRoot, projectPath, 'package.json');
+    if (!fs.existsSync(fileLocation)) {
+      return res.status(400).send({
+        message: `Could not load package.json file in location: ${projectPath}`
+      });
+    }
+    const packageJson = fs.readFileSync(fileLocation);
+    const {
+      hooks: { readPackage }
+    } = require(path.resolve(appState.pnpmfileLocation));
+    const parsedPackage = readPackage(packageJson);
+    res.send(parsedPackage);
+  }
+);
 
 app.listen(port, () => {
   console.log(`Rush Lockfile Explorer running at ${appUrl}`);

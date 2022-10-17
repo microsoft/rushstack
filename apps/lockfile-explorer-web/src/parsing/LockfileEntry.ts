@@ -97,6 +97,7 @@ export class LockfileEntry {
         this.entryPackageName.replace('/', '+') +
         '@' +
         this.entryPackageVersion +
+        (this.entrySuffix ? `_${this.entrySuffix}` : '') +
         '/node_modules/' +
         this.entryPackageName;
     }

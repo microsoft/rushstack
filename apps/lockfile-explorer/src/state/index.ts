@@ -4,6 +4,7 @@ export enum ProjectType {
 }
 
 export interface IRushProjectDetails {
+  projectName: string;
   projectFolder: string;
 }
 
@@ -28,7 +29,11 @@ export class AppState implements IAppState {
   projectType: ProjectType = ProjectType.RUSH_PROJECT;
   pnpmLockfileLocation: string = '';
   pnpmfileLocation: string = '';
-  rush = {
+  rush: {
+    projects: {
+      [key in string]: IRushProjectDetails;
+    };
+  } = {
     projects: {}
   };
 

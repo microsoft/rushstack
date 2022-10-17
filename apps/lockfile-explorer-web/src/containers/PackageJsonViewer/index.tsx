@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { readCJS, readParsedCJS, readPackageJSON } from '../../parsing/readCJS';
 import styles from './styles.scss';
 import appStyles from '../../appstyles.scss';
+import { useAppSelector } from '../../store/hooks';
+import { selectCurrentEntry } from '../../store/slices/entrySlice';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -13,23 +15,30 @@ export const PackageJsonViewer = (): JSX.Element => {
   const [packageJSON, setPackageJSON] = useState('');
   const [parsedPackageJSON, setParsedPackageJSON] = useState('');
   const [cjs, setCjs] = useState('');
+  const selectedEntry = useAppSelector(selectCurrentEntry);
 
   const [selection, setSelection] = useState<PackageView>(PackageView.PACKAGE_JSON);
 
   const cb = useCallback((s: PackageView) => () => setSelection(s), []);
 
   useEffect(() => {
-    async function loadPackageDetails(): Promise<void> {
+    async function loadPackageDetails(packageName: string): Promise<void> {
       const cjsFile = await readCJS();
       setCjs(cjsFile);
-      const packageJSONFile = await readPackageJSON();
+      const packageJSONFile = await readPackageJSON(packageName);
       setPackageJSON(packageJSONFile as string);
-      const parsedJSON = await readParsedCJS();
+      const parsedJSON = await readParsedCJS(packageName);
       setParsedPackageJSON(parsedJSON as string);
     }
-    /* eslint @typescript-eslint/no-floating-promises: off */
-    loadPackageDetails();
-  }, []);
+    if (selectedEntry) {
+      if (selectedEntry.entryPackageName) {
+        /* eslint @typescript-eslint/no-floating-promises: off */
+        loadPackageDetails(selectedEntry.packageJsonFolderPath);
+      } else {
+        console.log('selected entyr has no entry name: ', selectedEntry.entryPackageName);
+      }
+    }
+  }, [selectedEntry]);
 
   const renderFile = (): JSX.Element | null => {
     switch (selection) {

@@ -11,8 +11,6 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const dispatch = useAppDispatch();
 
-  console.log('selected entry: ', selectedEntry);
-
   const selectResolvedEntry = useCallback(
     (dependency) => () => {
       if (dependency.resolvedEntry) {

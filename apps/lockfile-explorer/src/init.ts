@@ -10,22 +10,18 @@ export const init = (): AppState => {
     currDir
   });
 
-  console.log('current directory2: ', currDir);
   let currExploredDir = currDir;
   while (path.resolve(currExploredDir) !== '/') {
     currExploredDir += '/..';
-    console.log('pathing up...', path.resolve(currExploredDir));
 
     // Look for a rush.json [rush project] or pnpm-lock.yaml file [regular pnpm workspace]
     if (fs.existsSync(path.join(currExploredDir, 'rush.json'))) {
-      console.log('rush json found in dir');
       appState.projectType = ProjectType.RUSH_PROJECT;
       appState.pnpmLockfileLocation = path.join(currExploredDir, '/common/config/rush/pnpm-lock.yaml');
       appState.pnpmfileLocation = path.join(currExploredDir, '/common/config/rush/.pnpmfile.cjs');
       appState.projectRoot = path.resolve(currExploredDir);
       break;
     } else if (fs.existsSync(path.join(currExploredDir, 'pnpm-lock.yaml'))) {
-      console.log('pnpm lock file found in dir');
       appState.projectType = ProjectType.PNPM_WORKSPACE;
       appState.pnpmLockfileLocation = path.join(currExploredDir, '/pnpm-lock.yaml');
       appState.pnpmfileLocation = path.join(currExploredDir, '/.pnpmfile.cjs');
@@ -43,11 +39,11 @@ export const init = (): AppState => {
       (m, g) => (g ? '' : m)
     );
     const rushJson = JSON.parse(parsedRushJsonString);
-    console.log('rush json: ', rushJson.projects);
 
     const projects: { [key in string]: IRushProjectDetails } = {};
     for (const project of rushJson.projects) {
-      projects[project.packageName] = {
+      projects[project.projectFolder] = {
+        projectName: project.packageName,
         projectFolder: project.projectFolder
       };
     }

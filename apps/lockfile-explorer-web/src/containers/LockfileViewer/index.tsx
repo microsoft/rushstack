@@ -26,6 +26,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
     },
     []
   );
+
   return (
     <div className={styles.packageGroup}>
       <h5>{group.entryName}</h5>
@@ -37,7 +38,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
             selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
           }`}
         >
-          <p>{entry.entryPackageVersion}</p>
+          <p>{entry.entryPackageVersion || entry.entryPackageName}</p>
         </div>
       ))}
     </div>
@@ -86,8 +87,9 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
 
   const changeFilter = useCallback(
     (filter: LockfileEntryFilter) =>
-      (ev?: React.FormEvent<HTMLElement | HTMLInputElement>, isChecked?: boolean): void => {
-        dispatch(selectFilter({ filter, state: !!isChecked }));
+      (ev: React.ChangeEvent<HTMLInputElement>): void => {
+        console.log('is checked: ', ev.target.checked);
+        dispatch(selectFilter({ filter, state: ev.target.checked }));
       },
     []
   );
