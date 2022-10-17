@@ -20,10 +20,6 @@ export class UnlinkAction extends BaseRushAction {
     });
   }
 
-  protected onDefineParameters(): void {
-    // No parameters
-  }
-
   protected async runAsync(): Promise<void> {
     const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
 

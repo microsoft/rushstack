@@ -9,11 +9,11 @@ import { Logging } from '../../utilities/Logging';
 import { BuildStage, IBuildStageOptions, IBuildStageStandardParameters } from '../../stages/BuildStage';
 
 export class BuildAction extends HeftActionBase {
-  protected _watchFlag!: CommandLineFlagParameter;
-  protected _productionFlag!: CommandLineFlagParameter;
-  protected _liteFlag!: CommandLineFlagParameter;
-  private _buildStandardParameters!: IBuildStageStandardParameters;
-  private _cleanFlag!: CommandLineFlagParameter;
+  protected readonly _watchFlag: CommandLineFlagParameter;
+  protected readonly _productionFlag: CommandLineFlagParameter;
+  protected readonly _liteFlag: CommandLineFlagParameter;
+  private readonly _buildStandardParameters: IBuildStageStandardParameters;
+  private readonly _cleanFlag: CommandLineFlagParameter;
 
   public constructor(
     heftActionOptions: IHeftActionBaseOptions,
@@ -24,10 +24,6 @@ export class BuildAction extends HeftActionBase {
     }
   ) {
     super(commandLineActionOptions, heftActionOptions);
-  }
-
-  public onDefineParameters(): void {
-    super.onDefineParameters();
 
     this._buildStandardParameters = BuildStage.defineStageStandardParameters(this);
     this._productionFlag = this._buildStandardParameters.productionFlag;

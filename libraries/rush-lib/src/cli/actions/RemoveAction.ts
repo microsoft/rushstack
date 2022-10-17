@@ -3,6 +3,7 @@
 
 import * as os from 'os';
 import { ConsoleTerminalProvider, Terminal, ITerminal } from '@rushstack/node-core-library';
+import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -11,6 +12,8 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 
 export class RemoveAction extends BaseAddAndRemoveAction {
+  protected readonly _allFlag: CommandLineFlagParameter;
+  protected readonly _packageNameList: CommandLineStringListParameter;
   private _terminalProvider: ConsoleTerminalProvider;
   private _terminal: ITerminal;
 
@@ -28,9 +31,7 @@ export class RemoveAction extends BaseAddAndRemoveAction {
     });
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
-  }
 
-  public onDefineParameters(): void {
     this._packageNameList = this.defineStringListParameter({
       parameterLongName: '--package',
       parameterShortName: '-p',
@@ -44,7 +45,6 @@ export class RemoveAction extends BaseAddAndRemoveAction {
       parameterLongName: '--all',
       description: 'If specified, the dependency will be removed from all projects that declare it.'
     });
-    super.onDefineParameters();
   }
 
   public getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushRemoveOptions {

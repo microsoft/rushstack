@@ -18,13 +18,4 @@ export class ToolboxCommandLine extends CommandLineParser {
     this.addAction(new RecordVersionsAction());
     this.addAction(new BumpCyclicsAction());
   }
-
-  protected onDefineParameters(): void {
-    // abstract
-  }
-
-  protected onExecute(): Promise<void> {
-    // override
-    return super.onExecute();
-  }
 }

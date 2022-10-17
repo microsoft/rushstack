@@ -22,15 +22,15 @@ export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Bump versions [skip ci]';
 export const DEFAULT_CHANGELOG_UPDATE_MESSAGE: string = 'Update changelogs [skip ci]';
 
 export class VersionAction extends BaseRushAction {
-  private _ensureVersionPolicy!: CommandLineFlagParameter;
-  private _overrideVersion!: CommandLineStringParameter;
-  private _bumpVersion!: CommandLineFlagParameter;
-  private _versionPolicy!: CommandLineStringParameter;
-  private _bypassPolicy!: CommandLineFlagParameter;
-  private _targetBranch!: CommandLineStringParameter;
-  private _overwriteBump!: CommandLineStringParameter;
-  private _prereleaseIdentifier!: CommandLineStringParameter;
-  private _ignoreGitHooksParameter!: CommandLineFlagParameter;
+  private readonly _ensureVersionPolicy: CommandLineFlagParameter;
+  private readonly _overrideVersion: CommandLineStringParameter;
+  private readonly _bumpVersion: CommandLineFlagParameter;
+  private readonly _versionPolicy: CommandLineStringParameter;
+  private readonly _bypassPolicy: CommandLineFlagParameter;
+  private readonly _targetBranch: CommandLineStringParameter;
+  private readonly _overwriteBump: CommandLineStringParameter;
+  private readonly _prereleaseIdentifier: CommandLineStringParameter;
+  private readonly _ignoreGitHooksParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -39,9 +39,7 @@ export class VersionAction extends BaseRushAction {
       documentation: 'use this "rush version" command to ensure version policies and bump versions.',
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
     this._targetBranch = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',

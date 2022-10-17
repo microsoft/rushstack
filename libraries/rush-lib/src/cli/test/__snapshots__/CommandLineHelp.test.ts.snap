@@ -74,7 +74,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
-"usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [--all] [-s]
+"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [-m] [--all]
 
 Adds specified package(s) to the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -88,6 +88,8 @@ packages with the dependency.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
+  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
+                        run after updating the package.json files.
   -p PACKAGE, --package PACKAGE
                         The name of the package which should be added as a 
                         dependency. A SemVer version specifier can be 
@@ -112,8 +114,6 @@ Optional arguments:
                         same version of the dependency.
   --all                 If specified, the dependency will be added to all 
                         projects.
-  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
-                        run after updating the package.json files.
 "
 `;
 
@@ -1044,21 +1044,21 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: remove 1`] = `
-"usage: rush remove [-h] -p PACKAGE [--all] [-s]
+"usage: rush remove [-h] [-s] -p PACKAGE [--all]
 
 Removes specified package(s) from the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\".
 
 Optional arguments:
   -h, --help            Show this help message and exit.
+  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
+                        run after updating the package.json files.
   -p PACKAGE, --package PACKAGE
                         The name of the package which should be removed. To 
                         remove multiple packages, run \\"rush remove --package 
                         foo --package bar\\".
   --all                 If specified, the dependency will be removed from all 
                         projects that declare it.
-  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
-                        run after updating the package.json files.
 "
 `;
 

@@ -51,12 +51,12 @@ export interface IJsonOutput {
 }
 
 export class ListAction extends BaseRushAction {
-  private _version!: CommandLineFlagParameter;
-  private _path!: CommandLineFlagParameter;
-  private _fullPath!: CommandLineFlagParameter;
-  private _jsonFlag!: CommandLineFlagParameter;
-  private _detailedFlag!: CommandLineFlagParameter;
-  private _selectionParameters!: SelectionParameterSet;
+  private readonly _version: CommandLineFlagParameter;
+  private readonly _path: CommandLineFlagParameter;
+  private readonly _fullPath: CommandLineFlagParameter;
+  private readonly _jsonFlag: CommandLineFlagParameter;
+  private readonly _detailedFlag: CommandLineFlagParameter;
+  private readonly _selectionParameters: SelectionParameterSet;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -69,9 +69,7 @@ export class ListAction extends BaseRushAction {
       parser,
       safeForSimultaneousRushProcesses: true
     });
-  }
 
-  protected onDefineParameters(): void {
     this._version = this.defineFlagParameter({
       parameterLongName: '--version',
       parameterShortName: '-v',
