@@ -5,13 +5,13 @@ import colors from 'colors/safe';
 import * as os from 'os';
 
 import { Import } from '@rushstack/node-core-library';
-import {
+import type {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
-import { BaseRushAction } from './BaseRushAction';
+import { BaseRushAction, IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
 import { BaseInstallManager, IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { PurgeManager } from '../../logic/PurgeManager';
@@ -32,21 +32,23 @@ const installManagerFactoryModule: typeof import('../../logic/InstallManagerFact
  * This is the common base class for InstallAction and UpdateAction.
  */
 export abstract class BaseInstallAction extends BaseRushAction {
-  protected _variant!: CommandLineStringParameter;
-  protected _purgeParameter!: CommandLineFlagParameter;
-  protected _bypassPolicyParameter!: CommandLineFlagParameter;
-  protected _noLinkParameter!: CommandLineFlagParameter;
-  protected _networkConcurrencyParameter!: CommandLineIntegerParameter;
-  protected _debugPackageManagerParameter!: CommandLineFlagParameter;
-  protected _maxInstallAttempts!: CommandLineIntegerParameter;
-  protected _ignoreHooksParameter!: CommandLineFlagParameter;
+  protected readonly _variant: CommandLineStringParameter;
+  protected readonly _purgeParameter: CommandLineFlagParameter;
+  protected readonly _bypassPolicyParameter: CommandLineFlagParameter;
+  protected readonly _noLinkParameter: CommandLineFlagParameter;
+  protected readonly _networkConcurrencyParameter: CommandLineIntegerParameter;
+  protected readonly _debugPackageManagerParameter: CommandLineFlagParameter;
+  protected readonly _maxInstallAttempts: CommandLineIntegerParameter;
+  protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
    */
   protected _selectionParameters?: SelectionParameterSet;
 
-  protected onDefineParameters(): void {
+  public constructor(options: IBaseRushActionOptions) {
+    super(options);
+
     this._purgeParameter = this.defineFlagParameter({
       parameterLongName: '--purge',
       parameterShortName: '-p',

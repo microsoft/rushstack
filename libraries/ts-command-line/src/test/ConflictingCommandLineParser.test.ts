@@ -107,10 +107,6 @@ class BrokenTestCommandLine extends CommandLineParser {
 
     this.addAction(new BrokenTestAction());
   }
-
-  protected onDefineParameters(): void {
-    // no parameters
-  }
 }
 
 describe(`Conflicting ${CommandLineParser.name}`, () => {

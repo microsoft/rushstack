@@ -479,10 +479,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
   }
 
-  protected onDefineParameters(): void {
-    // Handled in constructor
-  }
-
   /**
    * Runs a set of operations and reports the results.
    */

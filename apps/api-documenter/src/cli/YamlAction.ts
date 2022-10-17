@@ -10,9 +10,9 @@ import { YamlDocumenter } from '../documenters/YamlDocumenter';
 import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
 
 export class YamlAction extends BaseAction {
-  private _officeParameter!: CommandLineFlagParameter;
-  private _newDocfxNamespacesParameter!: CommandLineFlagParameter;
-  private _yamlFormatParameter!: CommandLineChoiceParameter;
+  private readonly _officeParameter: CommandLineFlagParameter;
+  private readonly _newDocfxNamespacesParameter: CommandLineFlagParameter;
+  private readonly _yamlFormatParameter: CommandLineChoiceParameter;
 
   public constructor(parser: ApiDocumenterCommandLine) {
     super({
@@ -23,11 +23,6 @@ export class YamlAction extends BaseAction {
         ' to the universal reference YAML format, which is used by the docs.microsoft.com' +
         ' pipeline.'
     });
-  }
-
-  protected onDefineParameters(): void {
-    // override
-    super.onDefineParameters();
 
     this._officeParameter = this.defineFlagParameter({
       parameterLongName: '--office',

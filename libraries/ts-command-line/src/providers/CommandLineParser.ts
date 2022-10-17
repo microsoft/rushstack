@@ -54,11 +54,11 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    */
   public selectedAction: CommandLineAction | undefined;
 
-  private _argumentParser: argparse.ArgumentParser;
+  private readonly _argumentParser: argparse.ArgumentParser;
   private _actionsSubParser: argparse.SubParser | undefined;
-  private _options: ICommandLineParserOptions;
-  private _actions: CommandLineAction[];
-  private _actionsByName: Map<string, CommandLineAction>;
+  private readonly _options: ICommandLineParserOptions;
+  private readonly _actions: CommandLineAction[];
+  private readonly _actionsByName: Map<string, CommandLineAction>;
   private _executed: boolean = false;
   private _tabCompleteActionWasAdded: boolean = false;
 
@@ -79,7 +79,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       )
     });
 
-    this.onDefineParameters();
+    this.onDefineParameters?.();
   }
 
   /**
