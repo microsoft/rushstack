@@ -34,6 +34,7 @@ import {
   IApiTypeParameterOptions,
   EnumMemberOrder
 } from '@microsoft/api-extractor-model';
+import { Path } from '@rushstack/node-core-library';
 
 import { Collector } from '../collector/Collector';
 import { ISourceLocation } from '../collector/SourceMapper';
@@ -1138,6 +1139,11 @@ export class ApiModelGenerator {
       pos: declaration.pos
     });
 
-    return path.posix.relative(this._collector.extractorConfig.projectFolder, sourceLocation.sourceFilePath);
+    let result: string = path.relative(
+      this._collector.extractorConfig.projectFolder,
+      sourceLocation.sourceFilePath
+    );
+    result = Path.convertToSlashes(result);
+    return result;
   }
 }

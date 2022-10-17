@@ -907,6 +907,7 @@
               "text": "unique symbol"
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "SomeSymbol1",
@@ -929,6 +930,7 @@
               "text": "\"ThisIsSomeVar1\""
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "initializerTokenRange": {
             "startIndex": 1,
             "endIndex": 2
