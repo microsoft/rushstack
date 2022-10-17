@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 14 Oct 2022 15:26:31 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Oct 2022 15:16:00 GMT and should not be manually modified.
+
+## 7.33.3
+Mon, 17 Oct 2022 15:16:00 GMT
+
+### Patches
+
+- Fix a regression where the "fileUrlPath" property would contain a malformed path when API Extractor is run on Windows.
 
 ## 7.33.2
 Fri, 14 Oct 2022 15:26:31 GMT
