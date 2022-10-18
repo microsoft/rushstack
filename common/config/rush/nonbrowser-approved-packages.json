@@ -151,6 +151,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/lockfile-explorer-web",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -572,6 +576,10 @@
     },
     {
       "name": "npm-packlist",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "open",
       "allowedCategories": [ "libraries" ]
     },
     {

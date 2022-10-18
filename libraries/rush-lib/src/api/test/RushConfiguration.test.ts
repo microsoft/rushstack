@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { Text } from '@rushstack/node-core-library';
+import { Path, Text } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
 import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
@@ -250,7 +250,9 @@ describe(RushConfiguration.name, () => {
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
-        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+        expect(Path.convertToSlashes(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(
+          Path.convertToSlashes(EXPECT_STORE_PATH)
+        );
         expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
       });
 

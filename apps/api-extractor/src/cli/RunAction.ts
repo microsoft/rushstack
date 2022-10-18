@@ -18,11 +18,11 @@ import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig, IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
 
 export class RunAction extends CommandLineAction {
-  private _configFileParameter!: CommandLineStringParameter;
-  private _localParameter!: CommandLineFlagParameter;
-  private _verboseParameter!: CommandLineFlagParameter;
-  private _diagnosticsParameter!: CommandLineFlagParameter;
-  private _typescriptCompilerFolder!: CommandLineStringParameter;
+  private readonly _configFileParameter: CommandLineStringParameter;
+  private readonly _localParameter: CommandLineFlagParameter;
+  private readonly _verboseParameter: CommandLineFlagParameter;
+  private readonly _diagnosticsParameter: CommandLineFlagParameter;
+  private readonly _typescriptCompilerFolder: CommandLineStringParameter;
 
   public constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -30,10 +30,7 @@ export class RunAction extends CommandLineAction {
       summary: 'Invoke API Extractor on a project',
       documentation: 'Invoke API Extractor on a project'
     });
-  }
 
-  protected onDefineParameters(): void {
-    // override
     this._configFileParameter = this.defineStringParameter({
       parameterLongName: '--config',
       parameterShortName: '-c',

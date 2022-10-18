@@ -1,0 +1,22 @@
+.LockfileEntryListViewWrapper {
+  cursor: pointer;
+  border: 1px solid #fff;
+  padding: 4px 8px;
+
+  &:hover {
+    border: 1px solid black;
+  }
+
+  h5 {
+    margin: 0;
+  }
+}
+
+.LockfileFilterBar {
+  display: flex;
+  align-items: center;
+
+  & > * + * {
+    margin-left: 12px;
+  }
+}

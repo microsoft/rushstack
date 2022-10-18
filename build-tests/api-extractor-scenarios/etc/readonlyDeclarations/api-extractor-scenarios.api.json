@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -182,6 +182,7 @@
               "text": "export declare class MyClass "
             }
           ],
+          "fileUrlPath": "src/readonlyDeclarations/index.ts",
           "releaseTag": "Public",
           "isAbstract": false,
           "name": "MyClass",
@@ -290,6 +291,7 @@
               "text": "export interface MyInterface "
             }
           ],
+          "fileUrlPath": "src/readonlyDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MyInterface",
           "preserveMemberOrder": false,
@@ -442,6 +444,7 @@
               "text": "\"Hello world!\""
             }
           ],
+          "fileUrlPath": "src/readonlyDeclarations/index.ts",
           "initializerTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -468,6 +471,7 @@
               "text": "string"
             }
           ],
+          "fileUrlPath": "src/readonlyDeclarations/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "TSDOC_READONLY_VARIABLE",

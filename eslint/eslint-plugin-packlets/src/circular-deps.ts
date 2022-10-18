@@ -15,6 +15,7 @@ export type MessageIds = 'circular-import';
 type Options = [];
 
 const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
+  defaultOptions: [],
   meta: {
     type: 'problem',
     messages: { 'circular-import': 'Packlet imports create a circular reference:\n{{report}}' },

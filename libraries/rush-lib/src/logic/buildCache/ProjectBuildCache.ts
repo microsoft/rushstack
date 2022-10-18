@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { FileSystem, Path, ITerminal, FolderItem, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, Path, ITerminal, FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -19,6 +19,7 @@ export interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
   projectOutputFolderNames: ReadonlyArray<string>;
+  additionalProjectOutputFilePaths?: ReadonlyArray<string>;
   command: string;
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
@@ -44,16 +45,23 @@ export class ProjectBuildCache {
   private readonly _buildCacheEnabled: boolean;
   private readonly _cacheWriteEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
+  private readonly _additionalProjectOutputFilePaths: ReadonlyArray<string>;
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
-    const { buildCacheConfiguration, projectConfiguration, projectOutputFolderNames } = options;
+    const {
+      buildCacheConfiguration,
+      projectConfiguration,
+      projectOutputFolderNames,
+      additionalProjectOutputFilePaths
+    } = options;
     this._project = projectConfiguration.project;
     this._localBuildCacheProvider = buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = buildCacheConfiguration.cloudCacheProvider;
     this._buildCacheEnabled = buildCacheConfiguration.buildCacheEnabled;
     this._cacheWriteEnabled = buildCacheConfiguration.cacheWriteEnabled;
     this._projectOutputFolderNames = projectOutputFolderNames || [];
+    this._additionalProjectOutputFilePaths = additionalProjectOutputFilePaths || [];
     this._cacheId = cacheId;
   }
 
@@ -358,6 +366,19 @@ export class ProjectBuildCache {
       // Symbolic links do not round-trip safely.
       return undefined;
     }
+
+    // Add additional output file paths
+    await Async.forEachAsync(
+      this._additionalProjectOutputFilePaths,
+      async (additionalProjectOutputFilePath) => {
+        const fullPath: string = `${projectFolderPath}/${additionalProjectOutputFilePath}`;
+        const pathExists: boolean = await FileSystem.existsAsync(fullPath);
+        if (pathExists) {
+          outputFilePaths.push(additionalProjectOutputFilePath);
+        }
+      },
+      { concurrency: 10 }
+    );
 
     // Ensure stable output path order.
     outputFilePaths.sort();

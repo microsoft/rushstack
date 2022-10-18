@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -182,6 +182,7 @@
               "text": "export interface A "
             }
           ],
+          "fileUrlPath": "src/docReferences3/index.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -226,6 +227,7 @@
               "text": "export declare namespace A "
             }
           ],
+          "fileUrlPath": "src/docReferences3/index.ts",
           "releaseTag": "Public",
           "name": "A",
           "preserveMemberOrder": false,
@@ -299,6 +301,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/docReferences3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -326,6 +329,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/docReferences3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -353,6 +357,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/docReferences3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

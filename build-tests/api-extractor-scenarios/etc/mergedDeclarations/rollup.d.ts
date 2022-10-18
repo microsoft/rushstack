@@ -29,4 +29,16 @@ export declare interface MergedInterfaces {
     someProp: number;
 }
 
+/** @public */
+export declare namespace MergedNamespaces {
+    export class SomeClass {
+    }
+}
+
+/** @public */
+export declare namespace MergedNamespaces {
+    export class AnotherClass {
+    }
+}
+
 export { }

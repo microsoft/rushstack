@@ -9,6 +9,7 @@ import { OperationStatus } from './OperationStatus';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
+import { OperationStateFile } from './OperationStateFile';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -80,6 +81,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public readonly runner: IOperationRunner;
   public readonly weight: number;
+  public readonly _operationStateFile: OperationStateFile | undefined;
 
   private readonly _context: IOperationExecutionRecordContext;
 
@@ -96,6 +98,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
     this.runner = runner;
     this.weight = operation.weight;
+    if (operation.associatedPhase && operation.associatedProject) {
+      this._operationStateFile = new OperationStateFile({
+        phase: operation.associatedPhase,
+        rushProject: operation.associatedProject
+      });
+    }
     this._context = context;
   }
 
@@ -117,6 +125,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       this._collatedWriter = this._context.streamCollator.registerTask(this.name);
     }
     return this._collatedWriter;
+  }
+
+  public get nonCachedDurationMs(): number | undefined {
+    // Lazy calculated because the state file is created/restored later on
+    return this._operationStateFile?.state?.nonCachedDurationMs;
   }
 
   public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {

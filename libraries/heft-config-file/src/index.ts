@@ -3,6 +3,9 @@
 
 export {
   ConfigurationFile,
+  IConfigurationFileOptionsBase,
+  IConfigurationFileOptionsWithJsonSchemaFilePath,
+  IConfigurationFileOptionsWithJsonSchemaObject,
   IConfigurationFileOptions,
   ICustomJsonPathMetadata,
   ICustomPropertyInheritance,

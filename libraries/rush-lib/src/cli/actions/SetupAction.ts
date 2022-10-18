@@ -20,10 +20,6 @@ export class SetupAction extends BaseRushAction {
     });
   }
 
-  protected onDefineParameters(): void {
-    // abstract
-  }
-
   protected async runAsync(): Promise<void> {
     const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry({
       rushConfiguration: this.rushConfiguration,

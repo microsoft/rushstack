@@ -15,7 +15,7 @@ describe(AddAction.name, () => {
 
     beforeEach(() => {
       doRushAddMock = jest
-        .spyOn(PackageJsonUpdater.prototype, 'doRushAddAsync')
+        .spyOn(PackageJsonUpdater.prototype, 'doRushUpdateAsync')
         .mockImplementation(() => Promise.resolve());
       jest.spyOn(process, 'exit').mockImplementation();
       oldExitCode = process.exitCode;
@@ -50,7 +50,7 @@ describe(AddAction.name, () => {
         const doRushAddOptions: IPackageJsonUpdaterRushAddOptions = doRushAddMock.mock.calls[0][0];
         expect(doRushAddOptions.projects).toHaveLength(1);
         expect(doRushAddOptions.projects[0].packageName).toEqual('a');
-        expect(doRushAddOptions.packagesToAdd).toMatchInlineSnapshot(`
+        expect(doRushAddOptions.packagesToUpdate).toMatchInlineSnapshot(`
           Array [
             Object {
               "packageName": "assert",
@@ -85,7 +85,7 @@ describe(AddAction.name, () => {
         expect(doRushAddOptions.projects).toHaveLength(2);
         expect(doRushAddOptions.projects[0].packageName).toEqual('a');
         expect(doRushAddOptions.projects[1].packageName).toEqual('b');
-        expect(doRushAddOptions.packagesToAdd).toMatchInlineSnapshot(`
+        expect(doRushAddOptions.packagesToUpdate).toMatchInlineSnapshot(`
           Array [
             Object {
               "packageName": "assert",

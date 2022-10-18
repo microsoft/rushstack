@@ -2,6 +2,127 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.33.4",
+      "tag": "@microsoft/api-extractor_v7.33.4",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.13.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.3",
+      "tag": "@microsoft/api-extractor_v7.33.3",
+      "date": "Mon, 17 Oct 2022 15:16:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where the \"fileUrlPath\" property would contain a malformed path when API Extractor is run on Windows."
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.2",
+      "tag": "@microsoft/api-extractor_v7.33.2",
+      "date": "Fri, 14 Oct 2022 15:26:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix references from computed properties #3629"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.1",
+      "tag": "@microsoft/api-extractor_v7.33.1",
+      "date": "Thu, 13 Oct 2022 00:20:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.0",
+      "tag": "@microsoft/api-extractor_v7.33.0",
+      "date": "Tue, 11 Oct 2022 23:49:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extract the original source file path for relevant API items and add a new projectFolderUrl setting to the api-extractor.json config that allows one to specify what URL their project folder can be found at."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.25.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.32.1",
+      "tag": "@microsoft/api-extractor_v7.32.1",
+      "date": "Mon, 10 Oct 2022 15:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.12.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.32.0",
+      "tag": "@microsoft/api-extractor_v7.32.0",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update parser to TypeScript 4.8."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.12.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.31.2",
       "tag": "@microsoft/api-extractor_v7.31.2",
       "date": "Wed, 21 Sep 2022 20:21:10 GMT",

@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -182,6 +182,7 @@
               "text": "export declare class MergedClassAndInterface "
             }
           ],
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "isAbstract": false,
           "name": "MergedClassAndInterface",
@@ -230,6 +231,7 @@
               "text": "export interface MergedClassAndInterface "
             }
           ],
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedClassAndInterface",
           "preserveMemberOrder": false,
@@ -319,6 +321,7 @@
               "text": "export declare class MergedClassAndNamespace "
             }
           ],
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "isAbstract": false,
           "name": "MergedClassAndNamespace",
@@ -367,6 +370,7 @@
               "text": "export declare namespace MergedClassAndNamespace "
             }
           ],
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedClassAndNamespace",
           "preserveMemberOrder": false,
@@ -405,6 +409,7 @@
               "text": "export interface MergedInterfaces "
             }
           ],
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
           "name": "MergedInterfaces",
           "preserveMemberOrder": false,
@@ -438,6 +443,57 @@
             }
           ],
           "extendsTokenRanges": []
+        },
+        {
+          "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!MergedNamespaces:namespace",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace MergedNamespaces "
+            }
+          ],
+          "fileUrlPath": "src/mergedDeclarations/index.ts",
+          "releaseTag": "Public",
+          "name": "MergedNamespaces",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!MergedNamespaces.AnotherClass:class",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "class AnotherClass "
+                }
+              ],
+              "releaseTag": "Public",
+              "isAbstract": false,
+              "name": "AnotherClass",
+              "preserveMemberOrder": false,
+              "members": [],
+              "implementsTokenRanges": []
+            },
+            {
+              "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!MergedNamespaces.SomeClass:class",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "class SomeClass "
+                }
+              ],
+              "releaseTag": "Public",
+              "isAbstract": false,
+              "name": "SomeClass",
+              "preserveMemberOrder": false,
+              "members": [],
+              "implementsTokenRanges": []
+            }
+          ]
         }
       ]
     }

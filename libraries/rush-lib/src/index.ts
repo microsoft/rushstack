@@ -118,3 +118,8 @@ export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from 
 export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
 
 export { IStopwatchResult } from './utilities/Stopwatch';
+export {
+  OperationStateFile as _OperationStateFile,
+  IOperationStateFileOptions as _IOperationStateFileOptions,
+  IOperationStateJson as _IOperationStateJson
+} from './logic/operations/OperationStateFile';
