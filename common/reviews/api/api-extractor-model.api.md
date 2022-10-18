@@ -887,7 +887,7 @@ export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiRelea
 }
 
 // @public
-export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiProtectedMixinOptions, IApiStaticMixinOptions, IApiInitializerMixinOptions {
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiAbstractMixinOptions, IApiProtectedMixinOptions, IApiStaticMixinOptions, IApiInitializerMixinOptions {
 }
 
 // @public

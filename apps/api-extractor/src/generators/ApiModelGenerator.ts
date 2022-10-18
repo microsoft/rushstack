@@ -844,12 +844,14 @@ export class ApiModelGenerator {
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
+      const isAbstract: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Abstract) !== 0;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
 
       apiProperty = new ApiProperty({
         name,
         docComment,
         releaseTag,
+        isAbstract,
         isProtected,
         isStatic,
         isOptional,
