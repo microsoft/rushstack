@@ -35,7 +35,7 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [multipleModifiersProperty](./api-documenter-test.docclass1.multiplemodifiersproperty.md) | <p><code>protected</code></p><p><code>readonly</code></p><p><code>static</code></p> | boolean | Some property with multiple modifiers. |
+|  [multipleModifiersProperty](./api-documenter-test.docclass1.multiplemodifiersproperty.md) | <p><code>protected</code></p><p><code>static</code></p><p><code>readonly</code></p> | boolean | Some property with multiple modifiers. |
 |  [protectedProperty](./api-documenter-test.docclass1.protectedproperty.md) | <code>protected</code> | string | Some protected property. |
 |  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) | <code>readonly</code> | string |  |
 |  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |
