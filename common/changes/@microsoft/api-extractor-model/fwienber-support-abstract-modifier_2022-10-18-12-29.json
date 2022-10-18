@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Fix #3661: New field 'isAbstract' to track 'abstract' modifier in 'ApiClass', 'ApiMethod', and 'ApiProperty' via 'ApiAbstractMixin'",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}

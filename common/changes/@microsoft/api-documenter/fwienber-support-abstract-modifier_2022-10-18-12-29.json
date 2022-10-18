@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Fix #3661: Render 'abstract' modifier for classes and members",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}
