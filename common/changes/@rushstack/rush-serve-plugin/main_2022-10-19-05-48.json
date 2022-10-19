@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-serve-plugin",
+      "comment": "Add web bundle specific headers",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-serve-plugin"
+}
