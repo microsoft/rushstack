@@ -19,6 +19,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "cors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "office-ui-fabric-core",
       "allowedCategories": [ "libraries" ]
     },

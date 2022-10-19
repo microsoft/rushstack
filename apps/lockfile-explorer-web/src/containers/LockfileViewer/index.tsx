@@ -47,11 +47,23 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
             selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
           }`}
         >
-          <p>{entry.entryPackageVersion || entry.entryPackageName}</p>
+          <p>
+            {entry.entryPackageVersion || entry.entryPackageName}{' '}
+            {entry.entrySuffix && `[${entry.entrySuffix}]`}
+          </p>
         </div>
       ))}
     </div>
   );
+};
+
+const multipleVersions = (entries: LockfileEntry[]): boolean => {
+  const set = new Set();
+  for (const entry of entries) {
+    if (set.has(entry.entryPackageVersion)) return true;
+    set.add(entry.entryPackageVersion);
+  }
+  return false;
 };
 
 export const LockfileViewer = (): JSX.Element | ReactNull => {
@@ -84,13 +96,21 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       groups[item.entryPackageName] = group;
       return groups;
     }, {});
-    const groupedEntries: ILockfileEntryGroup[] = [];
+    let groupedEntries: ILockfileEntryGroup[] = [];
     for (const [packageName, entries] of Object.entries(reducedEntries)) {
       groupedEntries.push({
         entryName: packageName,
         versions: entries
       });
     }
+
+    if (activeFilters[LockfileEntryFilter.SideBySide]) {
+      groupedEntries = groupedEntries.filter((entry) => entry.versions.length > 1);
+    }
+    if (activeFilters[LockfileEntryFilter.Doppelganger]) {
+      groupedEntries = groupedEntries.filter((entry) => multipleVersions(entry.versions));
+    }
+
     return groupedEntries;
   };
 

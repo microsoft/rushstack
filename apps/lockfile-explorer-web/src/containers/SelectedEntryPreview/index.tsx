@@ -22,6 +22,8 @@ export const SelectedEntryPreview = (): JSX.Element => {
       </div>
 
       <p>{selectedEntry.packageJsonFolderPath}</p>
+
+      <button>Add Bookmark</button>
     </div>
   );
 };

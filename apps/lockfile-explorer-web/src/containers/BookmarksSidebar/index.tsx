@@ -1,6 +1,11 @@
 import React from 'react';
-import styles from '../../appstyles.scss';
+import appStyles from '../../appstyles.scss';
+import styles from './styles.scss';
 
 export const BookmarksSidebar = (): JSX.Element => {
-  return <div className={styles.containerCard}>Bookmarks sidebar</div>;
+  return (
+    <div className={`${appStyles.containerCard} ${styles.BookmarksWrapper}`}>
+      <h5>Bookmarks</h5>
+    </div>
+  );
 };
