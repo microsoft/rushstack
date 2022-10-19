@@ -19,10 +19,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "run-async",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests" ]
     }
