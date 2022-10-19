@@ -74,7 +74,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   const getEntriesToShow = (): ILockfileEntryGroup[] => {
     let filteredEntries: LockfileEntry[] = [];
     if (filter) {
-      filteredEntries = entries.filter((entry) => entry.entryId.indexOf(filter) !== -1);
+      filteredEntries = entries.filter((entry) => entry.entryPackageName.indexOf(filter) !== -1);
     } else {
       filteredEntries = entries;
     }
