@@ -6,11 +6,11 @@
   padding: 24px;
   width: calc(100% - 48px);
   height: calc(10vh - 48px);
-  h5 {
-    margin: 0;
-  }
   p {
     font-size: 12px;
+  }
+  & > * + * {
+    margin-top: 8px;
   }
 }
 

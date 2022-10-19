@@ -9,6 +9,7 @@ type EntryState = {
     [key in LockfileEntryFilter]: boolean;
   };
   selectedEntryStack: LockfileEntry[];
+  bookmarkedEntries: LockfileEntry[];
 };
 
 const initialState: EntryState = {
@@ -19,7 +20,8 @@ const initialState: EntryState = {
     [LockfileEntryFilter.SideBySide]: false,
     [LockfileEntryFilter.Doppelganger]: false
   },
-  selectedEntryStack: []
+  selectedEntryStack: [],
+  bookmarkedEntries: []
 };
 
 /* eslint @rushstack/typedef-var: off */
@@ -43,6 +45,16 @@ const entrySlice = createSlice({
       if (state.selectedEntryStack.length > 1) {
         state.selectedEntryStack.pop();
       }
+    },
+    addBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
+      if (!state.bookmarkedEntries.includes(payload.payload)) {
+        state.bookmarkedEntries.push(payload.payload);
+      }
+    },
+    removeBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
+      state.bookmarkedEntries = state.bookmarkedEntries.filter(
+        (entry: LockfileEntry) => entry.rawEntryId !== payload.payload.rawEntryId
+      );
     }
   }
 });
@@ -69,6 +81,14 @@ export const selectFilteredEntries = (state: RootState): LockfileEntry[] => {
   return filteredEntries;
 };
 
-export const { loadEntries, setFilter, clearStackAndPush, pushToStack, popStack } = entrySlice.actions;
+export const {
+  loadEntries,
+  setFilter,
+  clearStackAndPush,
+  pushToStack,
+  popStack,
+  addBookmark,
+  removeBookmark
+} = entrySlice.actions;
 
 export const entryReducer: Reducer<EntryState> = entrySlice.reducer;
