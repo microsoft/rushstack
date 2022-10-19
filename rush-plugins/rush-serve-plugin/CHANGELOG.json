@@ -2,6 +2,18 @@
   "name": "@rushstack/rush-serve-plugin",
   "entries": [
     {
+      "version": "0.2.7",
+      "tag": "@rushstack/rush-serve-plugin_v0.2.7",
+      "date": "Wed, 19 Oct 2022 23:43:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add web bundle specific headers to @rushstack/rush-serve-plugin."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.6",
       "tag": "@rushstack/rush-serve-plugin_v0.2.6",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",

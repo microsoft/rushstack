@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-serve-plugin
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Oct 2022 23:43:41 GMT and should not be manually modified.
+
+## 0.2.7
+Wed, 19 Oct 2022 23:43:41 GMT
+
+### Patches
+
+- Add web bundle specific headers to @rushstack/rush-serve-plugin.
 
 ## 0.2.6
 Mon, 17 Oct 2022 22:14:21 GMT
