@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "dependency bump",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}

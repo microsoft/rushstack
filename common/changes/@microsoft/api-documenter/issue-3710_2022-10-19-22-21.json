@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "dependency bump",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}
