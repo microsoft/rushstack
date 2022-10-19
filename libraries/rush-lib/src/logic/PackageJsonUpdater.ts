@@ -247,91 +247,52 @@ export class PackageJsonUpdater {
       }
     }
 
-    const allPackageUpdates: IUpdateProjectOptions[] = [];
+    const allPackageUpdates: Map<string, VersionMismatchFinderEntity> = new Map();
+    const allDependenciesToUpdate: [string, string][] = [
+      ...Object.entries(dependenciesToUpdate),
+      ...Object.entries(devDependenciesToUpdate)
+    ];
 
     for (const project of projects) {
+      const mismatchFinderProject: VersionMismatchFinderProject = new VersionMismatchFinderProject(project);
+
       const currentProjectDepUpdate: IUpdateProjectOptions = {
-        project: new VersionMismatchFinderProject(project),
+        project: mismatchFinderProject,
         dependenciesToAddOrUpdateOrRemove: dependenciesToUpdate,
         dependencyType: DependencyType.Regular
       };
 
       const currentProjectDevDepUpdate: IUpdateProjectOptions = {
-        project: new VersionMismatchFinderProject(project),
+        project: mismatchFinderProject,
         dependenciesToAddOrUpdateOrRemove: devDependenciesToUpdate,
         dependencyType: DependencyType.Dev
       };
 
+      allPackageUpdates.set(mismatchFinderProject.filePath, mismatchFinderProject);
+
       this.updateProject(currentProjectDepUpdate);
       this.updateProject(currentProjectDevDepUpdate);
-
-      const otherPackageUpdates: IUpdateProjectOptions[] = [];
-
-      if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
-        // TODO: Reenable to support mismatch checks for both devDeps and regularDeps
-        // we need to do a mismatch check
-        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-          this._rushConfiguration,
-          {
-            variant: variant
-          }
-        );
-        const mismatches: string[] = mismatchFinder.getMismatches().filter((mismatch) => {
-          return !projects.find((proj) => proj.packageName === mismatch);
-        });
-        if (mismatches.length && updateOtherPackages) {
-          for (const [packageName, version] of Object.entries(dependenciesToUpdate)) {
-            const mismatchedVersions: string[] | undefined =
-              mismatchFinder.getVersionsOfMismatch(packageName);
-            if (mismatchedVersions) {
-              for (const mismatchedVersion of mismatchedVersions) {
-                for (const consumer of mismatchFinder.getConsumersOfMismatch(
-                  packageName,
-                  mismatchedVersion
-                )!) {
-                  if (consumer instanceof VersionMismatchFinderEntity) {
-                    otherPackageUpdates.push({
-                      project: consumer,
-                      dependenciesToAddOrUpdateOrRemove: {
-                        [packageName]: version
-                      }
-                    });
-                  }
-                }
-              }
-            }
-          }
-
-          for (const [packageName, version] of Object.entries(devDependenciesToUpdate)) {
-            const mismatchedVersions: string[] | undefined =
-              mismatchFinder.getVersionsOfMismatch(packageName);
-            if (mismatchedVersions) {
-              for (const mismatchedVersion of mismatchedVersions) {
-                for (const consumer of mismatchFinder.getConsumersOfMismatch(
-                  packageName,
-                  mismatchedVersion
-                )!) {
-                  if (consumer instanceof VersionMismatchFinderProject) {
-                    otherPackageUpdates.push({
-                      project: consumer,
-                      dependenciesToAddOrUpdateOrRemove: {
-                        [packageName]: version
-                      }
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      this.updateProjects(otherPackageUpdates);
-
-      allPackageUpdates.push(currentProjectDepUpdate, currentProjectDevDepUpdate, ...otherPackageUpdates);
     }
 
-    for (const { project } of allPackageUpdates) {
+    if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
+      // TODO: Reenable to support mismatch checks for both devDeps and regularDeps
+      // we need to do a mismatch check
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+        this._rushConfiguration,
+        {
+          variant: variant
+        }
+      );
+
+      if (updateOtherPackages) {
+        for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
+          this.updateProject(update);
+          allPackageUpdates.set(update.project.filePath, update.project);
+        }
+      }
+    }
+
+    for (const project of allPackageUpdates.values()) {
       if (project.saveIfModified()) {
         this._terminal.writeLine(colors.green('Wrote ') + project.filePath);
       }
@@ -496,7 +457,7 @@ export class PackageJsonUpdater {
       };
       this.updateProject(currentProjectUpdate);
 
-      const otherPackageUpdates: IUpdateProjectOptions[] = [];
+      let otherPackageUpdates: IUpdateProjectOptions[] = [];
 
       if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
         // we need to do a mismatch check
@@ -507,31 +468,8 @@ export class PackageJsonUpdater {
           }
         );
 
-        const mismatches: string[] = mismatchFinder.getMismatches().filter((mismatch) => {
-          return !projects.find((proj) => proj.packageName === mismatch);
-        });
-        if (mismatches.length && updateOtherPackages) {
-          for (const [packageName, version] of Object.entries(dependenciesToAddOrUpdate)) {
-            const mismatchedVersions: string[] | undefined =
-              mismatchFinder.getVersionsOfMismatch(packageName);
-            if (mismatchedVersions) {
-              for (const mismatchedVersion of mismatchedVersions) {
-                for (const consumer of mismatchFinder.getConsumersOfMismatch(
-                  packageName,
-                  mismatchedVersion
-                )!) {
-                  if (consumer instanceof VersionMismatchFinderEntity) {
-                    otherPackageUpdates.push({
-                      project: consumer,
-                      dependenciesToAddOrUpdateOrRemove: {
-                        [packageName]: version
-                      }
-                    });
-                  }
-                }
-              }
-            }
-          }
+        if (updateOtherPackages) {
+          otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
         }
       }
 
@@ -541,6 +479,34 @@ export class PackageJsonUpdater {
     }
 
     return allPackageUpdates;
+  }
+
+  private _getUpdates(
+    mismatchFinder: VersionMismatchFinder,
+    dependenciesToUpdate: Iterable<[string, string]>
+  ): IUpdateProjectOptions[] {
+    const result: IUpdateProjectOptions[] = [];
+
+    const { mismatches } = mismatchFinder;
+
+    for (const [packageName, version] of dependenciesToUpdate) {
+      const projectsByVersion: ReadonlyMap<string, Iterable<VersionMismatchFinderEntity>> | undefined =
+        mismatches.get(packageName);
+      if (projectsByVersion) {
+        for (const consumers of projectsByVersion.values()) {
+          for (const consumer of consumers) {
+            result.push({
+              project: consumer,
+              dependenciesToAddOrUpdateOrRemove: {
+                [packageName]: version
+              }
+            });
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   /**
