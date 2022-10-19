@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "depednency bump",
+      "comment": "dependency bump",
       "type": "none"
     }
   ],
