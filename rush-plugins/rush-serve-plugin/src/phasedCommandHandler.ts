@@ -91,7 +91,7 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       const fileRoutingRules: Map<string, IRoutingRule> = new Map();
 
-      const wbnRegex = /\.wbn$/i;
+      const wbnRegex: RegExp = /\.wbn$/i;
       function setHeaders(response: express.Response, path?: string, stat?: unknown): void {
         response.set('Access-Control-Allow-Origin', '*');
         response.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
