@@ -41,34 +41,38 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     <div className={styles.LockfileEntryListView}>
       <div className={appStyles.containerCard}>
         <h5>Direct Referrers</h5>
-        {selectedEntry.referencers?.map((referencer: LockfileEntry) => (
-          <div
-            className={styles.DependencyItem}
-            key={referencer.rawEntryId}
-            onClick={selectResolvedReferencer(referencer)}
-          >
-            <h5>Name: {referencer.displayText}</h5>
-            <div>
-              <p>Entry ID: {referencer.rawEntryId}</p>
+        <div className={styles.DependencyListWrapper}>
+          {selectedEntry.referencers?.map((referencer: LockfileEntry) => (
+            <div
+              className={styles.DependencyItem}
+              key={referencer.rawEntryId}
+              onClick={selectResolvedReferencer(referencer)}
+            >
+              <h5>Name: {referencer.displayText}</h5>
+              <div>
+                <p>Entry ID: {referencer.rawEntryId}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       <div className={appStyles.containerCard}>
         <h5>Direct Dependencies</h5>
-        {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
-          <div
-            className={styles.DependencyItem}
-            key={dependency.entryId}
-            onClick={selectResolvedEntry(dependency)}
-          >
-            <h5>Name: {dependency.name}</h5>
-            <div>
-              <p>Version: {dependency.version}</p>
-              <p>Entry ID: {dependency.entryId}</p>
+        <div className={styles.DependencyListWrapper}>
+          {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
+            <div
+              className={styles.DependencyItem}
+              key={dependency.entryId}
+              onClick={selectResolvedEntry(dependency)}
+            >
+              <h5>Name: {dependency.name}</h5>
+              <div>
+                <p>Version: {dependency.version}</p>
+                <p>Entry ID: {dependency.entryId}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

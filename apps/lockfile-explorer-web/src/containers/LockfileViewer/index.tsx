@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import appStyles from '../../appstyles.scss';
 import styles from './styles.scss';
 import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
@@ -20,6 +20,7 @@ interface ILockfileEntryGroup {
 const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const dispatch = useAppDispatch();
+  const fieldRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const clear = useCallback(
     (entry: LockfileEntry) => () => {
       dispatch(clearStackAndPush(entry));
@@ -27,8 +28,16 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
     []
   );
 
+  useEffect(() => {
+    if (selectedEntry && selectedEntry.entryPackageName === group.entryName) {
+      fieldRef.current.scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+  }, [selectedEntry, group]);
+
   return (
-    <div className={styles.packageGroup}>
+    <div className={styles.packageGroup} ref={fieldRef}>
       <h5>{group.entryName}</h5>
       {group.versions.map((entry) => (
         <div
@@ -94,7 +103,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   );
 
   return (
-    <div className={appStyles.containerCard}>
+    <div className={`${appStyles.containerCard} ${styles.ViewWrapper}`}>
       <div className={styles.LockfileFilterBar}>
         {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
         <h5>filter:</h5>

@@ -11,6 +11,12 @@
   }
 }
 
+.DependencyListWrapper {
+  margin-top: 8px;
+  height: calc(35vh - 24px);
+  overflow: scroll;
+}
+
 .DependencyItem {
   border: 1px solid white;
   cursor: pointer;

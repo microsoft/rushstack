@@ -20,6 +20,6 @@
 }
 
 .fileContents {
-  height: 300px;
+  height: calc(35vh - 35px);
   overflow: scroll;
 }
