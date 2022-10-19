@@ -8,7 +8,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export class UpdateAutoinstallerAction extends BaseRushAction {
-  private _name!: CommandLineStringParameter;
+  private readonly _name: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -17,9 +17,7 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
       documentation: 'Use this command to regenerate the shrinkwrap file for an autoinstaller folder.',
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
     this._name = this.defineStringParameter({
       parameterLongName: '--name',
       argumentName: 'AUTOINSTALLER_NAME',

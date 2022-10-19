@@ -6,6 +6,7 @@ import * as React from 'react';
 import styles from './styles.sass';
 import oldStyles from './stylesCSS.css';
 import altSyntaxStyles from './stylesAltSyntax.scss';
+import './stylesAltSyntax.global.scss';
 
 /**
  * This React component renders the application page.

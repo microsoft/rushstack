@@ -11,7 +11,7 @@ import { RunAction } from './RunAction';
 import { InitAction } from './InitAction';
 
 export class ApiExtractorCommandLine extends CommandLineParser {
-  private _debugParameter!: CommandLineFlagParameter;
+  private readonly _debugParameter: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -24,10 +24,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
         ' tool such as api-documenter.  For details, please visit the web site.'
     });
     this._populateActions();
-  }
 
-  protected onDefineParameters(): void {
-    // override
     this._debugParameter = this.defineFlagParameter({
       parameterLongName: '--debug',
       parameterShortName: '-d',

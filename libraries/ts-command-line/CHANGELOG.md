@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Mon, 10 Oct 2022 15:23:44 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+
+## 4.13.0
+Mon, 17 Oct 2022 22:14:21 GMT
+
+### Minor changes
+
+- Make the onDefineParameters function optional for `CommandLineAction`s and `CommandLineParser`s that either don't have parameters or that define their parameters in their constructor.
 
 ## 4.12.5
 Mon, 10 Oct 2022 15:23:44 GMT

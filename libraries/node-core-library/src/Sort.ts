@@ -87,9 +87,13 @@ export class Sort {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer: (x: any, y: any) => number = Sort.compareByValue
   ): boolean {
+    let isFirst: boolean = true;
     let previous: T | undefined = undefined;
     for (const element of collection) {
-      if (comparer(previous, element) > 0) {
+      if (isFirst) {
+        // Don't start by comparing against undefined.
+        isFirst = false;
+      } else if (comparer(previous, element) > 0) {
         return false;
       }
       previous = element;
@@ -114,10 +118,14 @@ export class Sort {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer: (x: any, y: any) => number = Sort.compareByValue
   ): boolean {
+    let isFirst: boolean = true;
     let previousKey: T | undefined = undefined;
     for (const element of collection) {
       const key: T = keySelector(element);
-      if (comparer(previousKey, key) > 0) {
+      if (isFirst) {
+        // Don't start by comparing against undefined.
+        isFirst = false;
+      } else if (comparer(previousKey, key) > 0) {
         return false;
       }
       previousKey = key;
@@ -145,12 +153,12 @@ export class Sort {
     map: Map<K, V>,
     keyComparer: (x: K, y: K) => number = Sort.compareByValue
   ): void {
-    const pairs: [K, V][] = Array.from(map.entries());
-
     // Sorting a map is expensive, so first check whether it's already sorted.
-    if (Sort.isSortedBy(pairs, (x) => x[0], keyComparer)) {
+    if (Sort.isSorted(map.keys(), keyComparer)) {
       return;
     }
+
+    const pairs: [K, V][] = Array.from(map.entries());
 
     Sort.sortBy(pairs, (x) => x[0], keyComparer);
     map.clear();

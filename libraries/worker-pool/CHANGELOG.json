@@ -2,6 +2,66 @@
   "name": "@rushstack/worker-pool",
   "entries": [
     {
+      "version": "0.1.39",
+      "tag": "@rushstack/worker-pool_v0.1.39",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.38",
+      "tag": "@rushstack/worker-pool_v0.1.38",
+      "date": "Mon, 17 Oct 2022 15:16:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.37",
+      "tag": "@rushstack/worker-pool_v0.1.37",
+      "date": "Fri, 14 Oct 2022 15:26:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.36",
+      "tag": "@rushstack/worker-pool_v0.1.36",
+      "date": "Thu, 13 Oct 2022 00:20:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.35",
       "tag": "@rushstack/worker-pool_v0.1.35",
       "date": "Tue, 11 Oct 2022 23:49:12 GMT",

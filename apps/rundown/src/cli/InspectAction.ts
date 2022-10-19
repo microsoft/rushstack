@@ -7,7 +7,7 @@ import { BaseReportAction } from './BaseReportAction';
 import { Rundown } from '../Rundown';
 
 export class InspectAction extends BaseReportAction {
-  private _traceParameter!: CommandLineFlagParameter;
+  private readonly _traceParameter: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -17,10 +17,6 @@ export class InspectAction extends BaseReportAction {
         'Invoke a Node.js script and generate detailed diagnostic output.  This command is used' +
         ' to inspect performance regressions.'
     });
-  }
-
-  protected onDefineParameters(): void {
-    super.onDefineParameters();
 
     this._traceParameter = this.defineFlagParameter({
       parameterLongName: '--trace-imports',

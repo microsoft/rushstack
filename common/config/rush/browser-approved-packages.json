@@ -31,10 +31,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "react-is",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "react-redux",
       "allowedCategories": [ "libraries" ]
     },

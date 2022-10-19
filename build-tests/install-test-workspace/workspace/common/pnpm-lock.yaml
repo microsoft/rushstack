@@ -5,13 +5,13 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-3.1.1.tgz
-      '@rushstack/heft': file:rushstack-heft-0.48.1.tgz
+      '@rushstack/heft': file:rushstack-heft-0.48.5.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.8.4
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-3.1.1.tgz_esueefhpt5ql6xiqdj4wcgwfzi
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.48.1.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.48.5.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.8.4
       typescript: 4.8.4
@@ -19,13 +19,13 @@ importers:
   typescript-v3-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-3.1.1.tgz
-      '@rushstack/heft': file:rushstack-heft-0.48.1.tgz
+      '@rushstack/heft': file:rushstack-heft-0.48.5.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.8.4
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-3.1.1.tgz_esueefhpt5ql6xiqdj4wcgwfzi
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.48.1.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.48.5.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.8.4
       typescript: 4.8.4
@@ -460,7 +460,7 @@ packages:
     dev: true
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
     dev: true
 
   /cross-spawn/7.0.3:
@@ -1799,15 +1799,15 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.48.1.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.48.1.tgz}
+  file:../temp/tarballs/rushstack-heft-0.48.5.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.48.5.tgz}
     name: '@rushstack/heft'
-    version: 0.48.1
+    version: 0.48.5
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
-      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.2.tgz
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.53.1.tgz
+      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.3.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.53.2.tgz
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.17.tgz
       '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.12.5.tgz
       '@types/tapable': 1.0.6
@@ -1822,21 +1822,21 @@ packages:
       true-case-path: 2.2.1
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-config-file-0.11.2.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.11.2.tgz}
+  file:../temp/tarballs/rushstack-heft-config-file-0.11.3.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.11.3.tgz}
     name: '@rushstack/heft-config-file'
-    version: 0.11.2
+    version: 0.11.3
     engines: {node: '>=10.13.0'}
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.53.1.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.53.2.tgz
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.17.tgz
       jsonpath-plus: 4.0.0
     dev: true
 
-  file:../temp/tarballs/rushstack-node-core-library-3.53.1.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.53.1.tgz}
+  file:../temp/tarballs/rushstack-node-core-library-3.53.2.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.53.2.tgz}
     name: '@rushstack/node-core-library'
-    version: 3.53.1
+    version: 3.53.2
     dependencies:
       '@types/node': 12.20.24
       colors: 1.2.5

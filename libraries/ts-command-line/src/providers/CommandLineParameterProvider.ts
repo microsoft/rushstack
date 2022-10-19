@@ -57,6 +57,11 @@ export interface ICommandLineParserData {
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
+const SCOPE_GROUP_NAME: string = 'scope';
+const LONG_NAME_GROUP_NAME: string = 'longName';
+const POSSIBLY_SCOPED_LONG_NAME_REGEXP: RegExp =
+  /^--((?<scope>[a-z0-9]+(-[a-z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
+
 /**
  * This is the common base class for CommandLineAction and CommandLineParser
  * that provides functionality for defining command-line parameters.
@@ -64,15 +69,14 @@ export interface ICommandLineParserData {
  * @public
  */
 export abstract class CommandLineParameterProvider {
-  private static readonly _scopeGroupName: string = 'scope';
-  private static readonly _longNameGroupName: string = 'longName';
-  private static readonly _possiblyScopedLongNameRegex: RegExp =
-    /^--((?<scope>[a-z0-9]+(-[a-z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
   private static _keyCounter: number = 0;
 
-  private _parameters: CommandLineParameter[];
-  private _parametersByLongName: Map<string, CommandLineParameter[]>;
-  private _parameterGroupsByName: Map<string | typeof SCOPING_PARAMETER_GROUP, argparse.ArgumentGroup>;
+  private readonly _parameters: CommandLineParameter[];
+  private readonly _parametersByLongName: Map<string, CommandLineParameter[]>;
+  private readonly _parameterGroupsByName: Map<
+    string | typeof SCOPING_PARAMETER_GROUP,
+    argparse.ArgumentGroup
+  >;
   private _parametersRegistered: boolean;
   private _parametersProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
@@ -384,14 +388,13 @@ export abstract class CommandLineParameterProvider {
    * Returns an object with the parsed scope (if present) and the long name of the parameter.
    */
   public parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult {
-    const result: RegExpExecArray | null =
-      CommandLineParameterProvider._possiblyScopedLongNameRegex.exec(scopedLongName);
+    const result: RegExpExecArray | null = POSSIBLY_SCOPED_LONG_NAME_REGEXP.exec(scopedLongName);
     if (!result || !result.groups) {
       throw new Error(`The parameter long name "${scopedLongName}" is not valid.`);
     }
     return {
-      longName: `--${result.groups[CommandLineParameterProvider._longNameGroupName]}`,
-      scope: result.groups[CommandLineParameterProvider._scopeGroupName]
+      longName: `--${result.groups[LONG_NAME_GROUP_NAME]}`,
+      scope: result.groups[SCOPE_GROUP_NAME]
     };
   }
 
@@ -433,7 +436,7 @@ export abstract class CommandLineParameterProvider {
    * The child class should implement this hook to define its command-line parameters,
    * e.g. by calling defineFlagParameter().
    */
-  protected abstract onDefineParameters(): void;
+  protected onDefineParameters?(): void;
 
   /**
    * Retrieves the argparse object.

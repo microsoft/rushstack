@@ -53,7 +53,7 @@ export abstract class HeftActionBase extends CommandLineAction {
   protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
   protected readonly stages: IStages;
-  protected verboseFlag!: CommandLineFlagParameter;
+  protected readonly verboseFlag: CommandLineFlagParameter;
 
   public constructor(
     commandLineOptions: ICommandLineActionOptions,
@@ -66,9 +66,7 @@ export abstract class HeftActionBase extends CommandLineAction {
     this.heftConfiguration = heftActionOptions.heftConfiguration;
     this.stages = heftActionOptions.stages;
     this.setStartTime();
-  }
 
-  public onDefineParameters(): void {
     this.verboseFlag = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',

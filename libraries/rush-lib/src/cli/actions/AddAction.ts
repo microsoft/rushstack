@@ -3,7 +3,7 @@
 
 import * as os from 'os';
 import * as semver from 'semver';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -14,10 +14,12 @@ import { SemVerStyle } from '../../logic/PackageJsonUpdater';
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 
 export class AddAction extends BaseAddAndRemoveAction {
-  private _exactFlag!: CommandLineFlagParameter;
-  private _caretFlag!: CommandLineFlagParameter;
-  private _devDependencyFlag!: CommandLineFlagParameter;
-  private _makeConsistentFlag!: CommandLineFlagParameter;
+  protected readonly _allFlag: CommandLineFlagParameter;
+  protected readonly _packageNameList: CommandLineStringListParameter;
+  private readonly _exactFlag: CommandLineFlagParameter;
+  private readonly _caretFlag: CommandLineFlagParameter;
+  private readonly _devDependencyFlag: CommandLineFlagParameter;
+  private readonly _makeConsistentFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -35,9 +37,7 @@ export class AddAction extends BaseAddAndRemoveAction {
       safeForSimultaneousRushProcesses: false,
       parser
     });
-  }
 
-  public onDefineParameters(): void {
     this._packageNameList = this.defineStringListParameter({
       parameterLongName: '--package',
       parameterShortName: '-p',
@@ -78,7 +78,6 @@ export class AddAction extends BaseAddAndRemoveAction {
       parameterLongName: '--all',
       description: 'If specified, the dependency will be added to all projects.'
     });
-    super.onDefineParameters();
   }
 
   public getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushAddOptions {

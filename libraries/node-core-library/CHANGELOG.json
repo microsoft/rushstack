@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.53.2",
+      "tag": "@rushstack/node-core-library_v3.53.2",
+      "date": "Thu, 13 Oct 2022 00:20:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug where `Sort.isSorted` and `Sort.isSortedBy` unexpectedly compared the first element against `undefined`. Optimize `Sort.sortMapKeys` to run the check for already being sorted against the original Map instead of a derived array."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.53.1",
       "tag": "@rushstack/node-core-library_v3.53.1",
       "date": "Mon, 10 Oct 2022 15:23:44 GMT",

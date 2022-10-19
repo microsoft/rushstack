@@ -359,10 +359,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "cors",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "css-loader",
       "allowedCategories": [ "libraries", "tests" ]
     },

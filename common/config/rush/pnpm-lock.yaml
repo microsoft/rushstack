@@ -150,18 +150,15 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/lockfile-explorer-web': workspace:*
-      '@types/cors': ~2.8.12
       '@types/express': 4.17.13
       '@types/heft-jest': 1.0.1
       '@types/js-yaml': 3.12.1
       '@types/node': 12.20.24
-      cors: ~2.8.5
       express: 4.18.1
       js-yaml: ~3.13.1
       open: ~8.4.0
     dependencies:
       '@types/express': 4.17.13
-      cors: 2.8.5
       express: 4.18.1
       js-yaml: 3.13.1
       open: 8.4.0
@@ -170,7 +167,6 @@ importers:
       '@rushstack/heft': link:../heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@rushstack/lockfile-explorer-web': link:../lockfile-explorer-web
-      '@types/cors': 2.8.12
       '@types/heft-jest': 1.0.1
       '@types/js-yaml': 3.12.1
       '@types/node': 12.20.24
@@ -7150,10 +7146,6 @@ packages:
     dependencies:
       '@types/node': 12.20.24
 
-  /@types/cors/2.8.12:
-    resolution: {integrity: sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==}
-    dev: true
-
   /@types/diff/5.0.1:
     resolution: {integrity: sha512-XIpxU6Qdvp1ZE6Kr3yrkv1qgUab0fyf4mHYvW8N3Bx3PCsbN6or1q9/q72cv5jIFWolaGH08U9XyYoLLIykyKQ==}
     dev: true
@@ -9898,14 +9890,6 @@ packages:
 
   /core-util-is/1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
-
-  /cors/2.8.5:
-    resolution: {integrity: sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==}
-    engines: {node: '>= 0.10'}
-    dependencies:
-      object-assign: 4.1.1
-      vary: 1.1.2
-    dev: false
 
   /cosmiconfig/6.0.0:
     resolution: {integrity: sha512-xb3ZL6+L8b9JLLCx3ZdoZy4+2ECphCMo2PwqgP1tlfVq6M6YReyzBJtvWWtbDSpNr9hn96pkCiZqUcFEc+54Qg==}

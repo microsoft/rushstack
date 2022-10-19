@@ -100,7 +100,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
 };
 
 export const readLockfile = async (): Promise<LockfileEntry[]> => {
-  const response = await fetch('http://localhost:8091');
+  const response = await fetch('http://localhost:8091/');
   const lockfile: ILockfilePackageType = await response.json();
 
   return generateLockfileGraph(lockfile);

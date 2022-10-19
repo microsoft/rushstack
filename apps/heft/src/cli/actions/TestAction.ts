@@ -9,11 +9,11 @@ import { TestStage, ITestStageOptions } from '../../stages/TestStage';
 import { Logging } from '../../utilities/Logging';
 
 export class TestAction extends BuildAction {
-  private _noTestFlag!: CommandLineFlagParameter;
-  private _noBuildFlag!: CommandLineFlagParameter;
+  private readonly _noTestFlag: CommandLineFlagParameter;
+  private readonly _noBuildFlag: CommandLineFlagParameter;
   /*
   // Temporary workaround for https://github.com/microsoft/rushstack/issues/2759
-  private _passWithNoTests!: CommandLineFlagParameter;
+  private readonly _passWithNoTests: CommandLineFlagParameter;
   */
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
@@ -22,10 +22,6 @@ export class TestAction extends BuildAction {
       summary: 'Build the project and run tests.',
       documentation: ''
     });
-  }
-
-  public onDefineParameters(): void {
-    super.onDefineParameters();
 
     this._noTestFlag = this.defineFlagParameter({
       parameterLongName: '--no-test',

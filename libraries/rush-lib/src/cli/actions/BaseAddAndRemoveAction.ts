@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
-import { BaseRushAction } from './BaseRushAction';
+import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 
@@ -30,17 +30,17 @@ export interface IBasePackageJsonUpdaterRushOptions {
  * This is the common base class for AddAction and RemoveAction.
  */
 export abstract class BaseAddAndRemoveAction extends BaseRushAction {
-  protected _allFlag!: CommandLineFlagParameter;
-  protected _skipUpdateFlag!: CommandLineFlagParameter;
-  protected _packageNameList!: CommandLineStringListParameter;
+  protected abstract readonly _allFlag: CommandLineFlagParameter;
+  protected readonly _skipUpdateFlag!: CommandLineFlagParameter;
+  protected abstract readonly _packageNameList: CommandLineStringListParameter;
 
   protected get specifiedPackageNameList(): readonly string[] {
     return this._packageNameList.values!;
   }
 
-  protected abstract getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushBaseUpdateOptions;
+  public constructor(options: IBaseRushActionOptions) {
+    super(options);
 
-  protected onDefineParameters(): void {
     this._skipUpdateFlag = this.defineFlagParameter({
       parameterLongName: '--skip-update',
       parameterShortName: '-s',
@@ -48,6 +48,8 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
         'If specified, the "rush update" command will not be run after updating the package.json files.'
     });
   }
+
+  protected abstract getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushBaseUpdateOptions;
 
   protected getProjects(): RushConfigurationProject[] {
     if (this._allFlag.value) {

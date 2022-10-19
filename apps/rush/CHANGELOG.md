@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 08 Oct 2022 02:30:30 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Oct 2022 22:14:39 GMT and should not be manually modified.
+
+## 5.82.0
+Mon, 17 Oct 2022 22:14:39 GMT
+
+### Updates
+
+- Replace Travis with GitHub Actions in the `rush init` template."
+- Handle case in ProjectWatcher where a project contains no git tracked files or status information is or was unavailable.
+- Refactor @rushstack/rush-azure-storage-build-cache-plugin to expose an API for generating and caching Azure credentials for other workloads, in addition to Storage.
+- Validate the change type in changefiles during publishing.
 
 ## 5.81.0
 Sat, 08 Oct 2022 02:30:30 GMT

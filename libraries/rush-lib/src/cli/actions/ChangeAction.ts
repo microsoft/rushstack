@@ -40,19 +40,23 @@ import type * as inquirerTypes from 'inquirer';
 import { Utilities } from '../../utilities/Utilities';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
+const BULK_LONG_NAME: string = '--bulk';
+const BULK_MESSAGE_LONG_NAME: string = '--message';
+const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
+
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
   private readonly _terminal: ITerminal;
-  private _verifyParameter!: CommandLineFlagParameter;
-  private _noFetchParameter!: CommandLineFlagParameter;
-  private _targetBranchParameter!: CommandLineStringParameter;
-  private _changeEmailParameter!: CommandLineStringParameter;
-  private _bulkChangeParameter!: CommandLineFlagParameter;
-  private _bulkChangeMessageParameter!: CommandLineStringParameter;
-  private _bulkChangeBumpTypeParameter!: CommandLineChoiceParameter;
-  private _overwriteFlagParameter!: CommandLineFlagParameter;
-  private _commitChangesFlagParameter!: CommandLineFlagParameter;
-  private _commitChangesMessageStringParameter!: CommandLineStringParameter;
+  private readonly _verifyParameter: CommandLineFlagParameter;
+  private readonly _noFetchParameter: CommandLineFlagParameter;
+  private readonly _targetBranchParameter: CommandLineStringParameter;
+  private readonly _changeEmailParameter: CommandLineStringParameter;
+  private readonly _bulkChangeParameter: CommandLineFlagParameter;
+  private readonly _bulkChangeMessageParameter: CommandLineStringParameter;
+  private readonly _bulkChangeBumpTypeParameter: CommandLineChoiceParameter;
+  private readonly _overwriteFlagParameter: CommandLineFlagParameter;
+  private readonly _commitChangesFlagParameter: CommandLineFlagParameter;
+  private readonly _commitChangesMessageStringParameter: CommandLineStringParameter;
 
   private _targetBranchName: string | undefined;
 
@@ -98,12 +102,6 @@ export class ChangeAction extends BaseRushAction {
 
     this._git = new Git(this.rushConfiguration);
     this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
-  }
-
-  public onDefineParameters(): void {
-    const BULK_LONG_NAME: string = '--bulk';
-    const BULK_MESSAGE_LONG_NAME: string = '--message';
-    const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
 
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
