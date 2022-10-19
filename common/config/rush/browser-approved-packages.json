@@ -11,10 +11,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "npm-check",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests" ]
     },
