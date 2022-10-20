@@ -19,6 +19,7 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@types/node-fetch": "1.6.9",
+    "@types/inquirer": "7.3.1",
     "tapable": "2.2.1"
   },
   "devDependencies": {

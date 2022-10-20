@@ -978,6 +978,12 @@
 
     // "rush-plugins" folder (alphabetical order)
     {
+      "packageName": "example-change-plugin",
+      "projectFolder": "rush-plugins/example-change-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
       "reviewCategory": "libraries",

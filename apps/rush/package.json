@@ -39,7 +39,8 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "colors": "~1.2.1",
-    "semver": "~7.3.0"
+    "semver": "~7.3.0",
+    "example-change-plugin": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

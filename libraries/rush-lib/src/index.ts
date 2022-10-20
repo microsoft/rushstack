@@ -94,7 +94,8 @@ export { OperationStatus } from './logic/operations/OperationStatus';
 export {
   RushSession,
   IRushSessionOptions,
-  CloudBuildCacheProviderFactory
+  CloudBuildCacheProviderFactory,
+  ChangeExperienceProviderFactory
 } from './pluginFramework/RushSession';
 
 export {
@@ -112,6 +113,7 @@ export { IRushPluginConfigurationBase as _IRushPluginConfigurationBase } from '.
 export { ILogger } from './pluginFramework/logging/Logger';
 
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
+export { IChangeExperienceProvider, ChangeExperiencePromptModule } from './api/IChangeExperienceProvider';
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 

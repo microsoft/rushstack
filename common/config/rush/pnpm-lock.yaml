@@ -232,11 +232,13 @@ importers:
       '@types/node': 12.20.24
       '@types/semver': 7.3.5
       colors: ~1.2.1
+      example-change-plugin: workspace:*
       semver: ~7.3.0
     dependencies:
       '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       colors: 1.2.5
+      example-change-plugin: link:../../rush-plugins/example-change-plugin
       semver: 7.3.7
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -1928,12 +1930,14 @@ importers:
       '@rushstack/terminal': workspace:*
       '@rushstack/ts-command-line': workspace:*
       '@types/heft-jest': 1.0.1
+      '@types/inquirer': 7.3.1
       '@types/node-fetch': 1.6.9
       '@types/semver': 7.3.5
       '@types/webpack-env': 1.13.0
       tapable: 2.2.1
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
+      '@types/inquirer': 7.3.1
       '@types/node-fetch': 1.6.9
       tapable: 2.2.1
     devDependencies:
@@ -2211,6 +2215,33 @@ importers:
       webpack-merge: 5.8.0
     devDependencies:
       '@rushstack/heft': link:../../apps/heft
+
+  ../../rush-plugins/example-change-plugin:
+    specifiers:
+      '@azure/identity': ~2.1.0
+      '@azure/storage-blob': ~12.11.0
+      '@microsoft/rush-lib': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/rush-sdk': workspace:*
+      '@rushstack/terminal': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+    dependencies:
+      '@azure/identity': 2.1.0
+      '@azure/storage-blob': 12.11.0
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/rush-sdk': link:../../libraries/rush-sdk
+      '@rushstack/terminal': link:../../libraries/terminal
+    devDependencies:
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
 
   ../../rush-plugins/rush-amazon-s3-build-cache-plugin:
     specifiers:
@@ -2674,14 +2705,6 @@ packages:
       tslib: 2.3.1
     dev: false
 
-  /@azure/core-auth/1.3.2:
-    resolution: {integrity: sha512-7CU6DmCHIZp5ZPiZ9r3J17lTKMmYsm/zGvNkjArQwPkrLlZ1TZ+EUYfGgh2X31OLMVAQCTJZW4cXHJi02EbJnA==}
-    engines: {node: '>=12.0.0'}
-    dependencies:
-      '@azure/abort-controller': 1.1.0
-      tslib: 2.3.1
-    dev: false
-
   /@azure/core-auth/1.4.0:
     resolution: {integrity: sha512-HFrcTgmuSuukRf/EdPmqBrc5l6Q5Uu+2TbuhaKbgaCpP2TfAeiNaQPAadxO+CYBRHGUzIDteMAjFspFLDLnKVQ==}
     engines: {node: '>=12.0.0'}
@@ -2710,7 +2733,7 @@ packages:
     engines: {node: '>=12.0.0'}
     dependencies:
       '@azure/abort-controller': 1.1.0
-      '@azure/core-auth': 1.3.2
+      '@azure/core-auth': 1.4.0
       '@azure/core-tracing': 1.0.0-preview.13
       '@azure/core-util': 1.1.0
       '@azure/logger': 1.0.3
@@ -2789,7 +2812,7 @@ packages:
     engines: {node: '>=12.0.0'}
     dependencies:
       '@azure/abort-controller': 1.1.0
-      '@azure/core-auth': 1.3.2
+      '@azure/core-auth': 1.4.0
       '@azure/core-client': 1.6.1
       '@azure/core-rest-pipeline': 1.9.2
       '@azure/core-tracing': 1.0.1
@@ -7212,7 +7235,6 @@ packages:
     dependencies:
       '@types/through': 0.0.30
       rxjs: 6.6.7
-    dev: true
 
   /@types/is-function/1.0.1:
     resolution: {integrity: sha512-A79HEEiwXTFtfY+Bcbo58M2GRYzCr9itHWzbzHVFNEYCcoU/MMGwYYf721gBrnhpj1s6RGVVha/IgNFnR0Iw/Q==}
@@ -7456,7 +7478,6 @@ packages:
     resolution: {integrity: sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==}
     dependencies:
       '@types/node': 12.20.24
-    dev: true
 
   /@types/tunnel/0.0.3:
     resolution: {integrity: sha512-sOUTGn6h1SfQ+gbgqC364jLFBw2lnFqkgF3q0WovEHRLMrVD1sd5aufqi/aJObLekJO+Aq5z646U4Oxy6shXMA==}
@@ -9100,7 +9121,7 @@ packages:
     dev: true
 
   /buffer-equal-constant-time/1.0.1:
-    resolution: {integrity: sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==}
+    resolution: {integrity: sha1-+OcRMvf/5uAaXJaXpMbz5I1cyBk=}
     dev: false
 
   /buffer-from/1.1.2:
@@ -17885,7 +17906,6 @@ packages:
 
   /sax/1.2.4:
     resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
-    dev: false
 
   /saxes/5.0.1:
     resolution: {integrity: sha512-5LBh1Tls8c9xgGjw3QrMwETmTMVk0oFgvrFSvWx62llR2hcEInrKNZ2GZCCuuy2lvWrdl5jhbpeqc5hRYKFOcw==}
@@ -20314,7 +20334,7 @@ packages:
   /wide-align/1.1.5:
     resolution: {integrity: sha512-eDMORYaPNZ4sQIuuYPDHdQvf4gyCF9rEEV/yPxGfwPkRodwEgiMUUXTx/dex+Me0wxx53S+NgUHaP7y3MGlDmg==}
     dependencies:
-      string-width: 1.0.2
+      string-width: 4.2.3
 
   /widest-line/3.1.0:
     resolution: {integrity: sha512-NsmoXalsWVDMGupxZ5R08ka9flZjjiLvHVAWYOKtiKM8ujtZWr9cRffak+uSE48+Ob8ObalXpwyeUiyDD6QFgg==}
@@ -20440,7 +20460,7 @@ packages:
   /xml2js/0.4.19:
     resolution: {integrity: sha512-esZnJZJOiJR9wWKMyuvSE1y6Dq5LCuJanqhxslH2bxM6duahNZ+HMpCLhBQGZkbX6xRf8x1Y2eJlgt2q3qo49Q==}
     dependencies:
-      sax: 1.2.1
+      sax: 1.2.4
       xmlbuilder: 9.0.7
     dev: true
 

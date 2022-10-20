@@ -36,6 +36,9 @@ import {
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Git } from '../../logic/Git';
 
+import type { IChangeExperienceProvider } from '../../api/IChangeExperienceProvider';
+import type { ChangeExperienceProviderFactory } from '../../pluginFramework/RushSession';
+
 import type * as inquirerTypes from 'inquirer';
 import { Utilities } from '../../utilities/Utilities';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
@@ -481,12 +484,22 @@ export class ChangeAction extends BaseRushAction {
     promptModule: inquirerTypes.PromptModule,
     packageName: string
   ): Promise<IChangeInfo | undefined> {
+    const factories: ChangeExperienceProviderFactory[] =
+      this.rushSession.getChangeExperienceProviderFactories();
+    const providers: IChangeExperienceProvider[] = factories.map((factory) => factory());
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
-    const { comment }: { comment: string } = await promptModule({
-      name: 'comment',
-      type: 'input',
-      message: `Describe changes, or ENTER if no changes:`
-    });
+
+    let comment: string | undefined = undefined;
+    for (const provider of providers) {
+      if (provider.promptForComment) {
+        comment = await provider.promptForComment(promptModule, packageName);
+        break;
+      }
+    }
+
+    if (comment === undefined) {
+      comment = await this._defaultPromptForComment(promptModule);
+    }
 
     if (Object.keys(bumpOptions).length === 0 || !comment) {
       return {
@@ -494,26 +507,64 @@ export class ChangeAction extends BaseRushAction {
         comment: comment || '',
         type: ChangeType[ChangeType.none]
       } as IChangeInfo;
-    } else {
-      const { bumpType }: { bumpType: string } = await promptModule({
-        choices: Object.keys(bumpOptions).map((option) => {
-          return {
-            value: option,
-            name: bumpOptions[option]
-          };
-        }),
-        default: 'patch',
-        message: 'Select the type of change:',
-        name: 'bumpType',
-        type: 'list'
-      });
-
-      return {
-        packageName: packageName,
-        comment: comment,
-        type: bumpType
-      } as IChangeInfo;
     }
+    let bumpType: string | undefined = undefined;
+
+    for (const provider of providers) {
+      if (provider.promptForBumpType) {
+        comment = await provider.promptForBumpType(promptModule, packageName, bumpOptions);
+        break;
+      }
+    }
+
+    if (comment === undefined) {
+      bumpType = await this._defaultPromptForBumpType(promptModule, bumpOptions);
+    }
+
+    const customFields: Record<string, string | undefined> = {};
+
+    for (const provider of providers) {
+      if (provider.promptForCustomFields) {
+        Object.assign(customFields, await provider.promptForCustomFields(promptModule, packageName));
+      }
+    }
+
+    return {
+      packageName: packageName,
+      comment: comment,
+      type: bumpType,
+      customFields: customFields
+    } as IChangeInfo;
+  }
+
+  private async _defaultPromptForComment(promptModule: inquirerTypes.PromptModule): Promise<string> {
+    const { comment }: { comment: string } = await promptModule({
+      name: 'comment',
+      type: 'input',
+      message: `Describe changes, or ENTER if no changes:`
+    });
+
+    return comment;
+  }
+
+  private async _defaultPromptForBumpType(
+    promptModule: inquirerTypes.PromptModule,
+    bumpOptions: Record<string, string>
+  ): Promise<string> {
+    const { bumpType }: { bumpType: string } = await promptModule({
+      choices: Object.keys(bumpOptions).map((option) => {
+        return {
+          value: option,
+          name: bumpOptions[option]
+        };
+      }),
+      default: 'patch',
+      message: 'Select the type of change:',
+      name: 'bumpType',
+      type: 'list'
+    });
+
+    return bumpType;
   }
 
   private _getBumpOptions(packageName?: string): { [type: string]: string } {
