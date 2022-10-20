@@ -17,7 +17,7 @@ export const PackageJsonViewer = (): JSX.Element => {
   const [cjs, setCjs] = useState('');
   const selectedEntry = useAppSelector(selectCurrentEntry);
 
-  const [selection, setSelection] = useState<PackageView>(PackageView.PACKAGE_JSON);
+  const [selection, setSelection] = useState<PackageView>(PackageView.PARSED_PACKAGE_JSON);
 
   const cb = useCallback((s: PackageView) => () => setSelection(s), []);
 
@@ -58,6 +58,14 @@ export const PackageJsonViewer = (): JSX.Element => {
       <div className={styles.headerFilterBar}>
         <div
           className={`${styles.headerFilterItem} ${
+            selection === PackageView.PARSED_PACKAGE_JSON ? styles.headerFilterItemActive : ''
+          }`}
+          onClick={cb(PackageView.PARSED_PACKAGE_JSON)}
+        >
+          package spec
+        </div>
+        <div
+          className={`${styles.headerFilterItem} ${
             selection === PackageView.PACKAGE_JSON ? styles.headerFilterItemActive : ''
           }`}
           onClick={cb(PackageView.PACKAGE_JSON)}
@@ -71,14 +79,6 @@ export const PackageJsonViewer = (): JSX.Element => {
           onClick={cb(PackageView.CJS)}
         >
           .pnpmfile.cjs
-        </div>
-        <div
-          className={`${styles.headerFilterItem} ${
-            selection === PackageView.PARSED_PACKAGE_JSON ? styles.headerFilterItemActive : ''
-          }`}
-          onClick={cb(PackageView.PARSED_PACKAGE_JSON)}
-        >
-          Parsed package.json
         </div>
       </div>
       <div className={appStyles.containerCard}>

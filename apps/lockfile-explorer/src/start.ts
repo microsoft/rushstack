@@ -54,11 +54,12 @@ app.post(
         message: `Could not load package.json file in location: ${projectPath}`
       });
     }
-    const packageJson = fs.readFileSync(fileLocation);
+    const packageJson = fs.readFileSync(fileLocation).toString();
+
     const {
       hooks: { readPackage }
     } = require(path.resolve(appState.pnpmfileLocation));
-    const parsedPackage = readPackage(packageJson);
+    const parsedPackage = readPackage(JSON.parse(packageJson));
     res.send(parsedPackage);
   }
 );
