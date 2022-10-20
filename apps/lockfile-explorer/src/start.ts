@@ -10,12 +10,12 @@ import { IAppState } from './state';
 const PORT: number = 8091;
 const APP_URL: string = `http://localhost:${PORT}/app/`;
 
+const appState: IAppState = init();
+
 process.chdir(path.join(__dirname, '..'));
 const app: express.Application = express();
 app.use(express.json());
 app.use(cors());
-
-const appState: IAppState = init();
 
 app.use('/app', express.static(path.resolve(__dirname, '../dist')));
 

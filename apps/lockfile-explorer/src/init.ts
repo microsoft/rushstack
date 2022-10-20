@@ -12,10 +12,10 @@ export const init = (): AppState => {
 
   let currExploredDir = currDir;
   while (path.resolve(currExploredDir) !== '/') {
-    currExploredDir += '/..';
-
     // Look for a rush.json [rush project] or pnpm-lock.yaml file [regular pnpm workspace]
     if (fs.existsSync(path.join(currExploredDir, 'rush.json'))) {
+      console.log('found rush project: ', path.join(currExploredDir, 'rush.json'));
+
       appState.projectType = ProjectType.RUSH_PROJECT;
       appState.pnpmLockfileLocation = path.join(currExploredDir, '/common/config/rush/pnpm-lock.yaml');
       appState.pnpmfileLocation = path.join(currExploredDir, '/common/config/rush/.pnpmfile.cjs');
@@ -28,6 +28,11 @@ export const init = (): AppState => {
       appState.projectRoot = path.resolve(currExploredDir);
       break;
     }
+    currExploredDir += '/..';
+  }
+
+  if (!appState.projectRoot) {
+    throw new Error('Could not find a rush or pnpm project!');
   }
 
   if (appState.projectType === ProjectType.RUSH_PROJECT) {
