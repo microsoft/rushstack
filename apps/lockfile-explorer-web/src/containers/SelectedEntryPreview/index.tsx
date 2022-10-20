@@ -32,6 +32,7 @@ export const SelectedEntryPreview = (): JSX.Element => {
         <span>{selectedEntry.displayText}</span>
       </div>
 
+      <p>Package Entry: {selectedEntry.rawEntryId}</p>
       <p>Package JSON path: {selectedEntry.packageJsonFolderPath}</p>
 
       {isBookmarked ? (
