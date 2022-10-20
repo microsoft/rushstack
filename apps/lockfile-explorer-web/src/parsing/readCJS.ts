@@ -1,3 +1,5 @@
+import { IPackageJson } from '../types/IPackageJson';
+
 export const readCJS = async (): Promise<string> => {
   try {
     const response = await fetch(`http://localhost:8091/api/pnpmfile`);
@@ -8,7 +10,7 @@ export const readCJS = async (): Promise<string> => {
   }
 };
 
-export const readPackageJSON = async (projectPath: string): Promise<string> => {
+export const readPackageJSON = async (projectPath: string): Promise<IPackageJson | null> => {
   try {
     const response = await fetch(`http://localhost:8091/api/package-json`, {
       method: 'POST',
@@ -19,15 +21,15 @@ export const readPackageJSON = async (projectPath: string): Promise<string> => {
         projectPath
       })
     });
-    const cjsFile = await response.json();
-    return JSON.stringify(cjsFile, null, 2);
+    return await response.json();
+    // return JSON.stringify(cjsFile, null, 2);
   } catch (e) {
     console.error('Could not load package json file: ', e);
-    return '';
+    return null;
   }
 };
 
-export const readParsedCJS = async (projectPath: string): Promise<string> => {
+export const readParsedCJS = async (projectPath: string): Promise<IPackageJson | null> => {
   try {
     const response = await fetch(`http://localhost:8091/api/package-spec`, {
       method: 'POST',
@@ -38,11 +40,11 @@ export const readParsedCJS = async (projectPath: string): Promise<string> => {
         projectPath
       })
     });
-    const parsedPackageJSON = await response.json();
+    return await response.json();
 
-    return JSON.stringify(parsedPackageJSON, null, 2);
+    // return JSON.stringify(parsedPackageJSON, null, 2);
   } catch (e) {
     console.error('Could not load cjs file: ', e);
-    return '';
+    return null;
   }
 };

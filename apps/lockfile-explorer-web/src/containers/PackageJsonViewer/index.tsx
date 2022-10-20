@@ -4,6 +4,7 @@ import styles from './styles.scss';
 import appStyles from '../../appstyles.scss';
 import { useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
+import { IPackageJson } from '../../types/IPackageJson';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -12,8 +13,8 @@ enum PackageView {
 }
 
 export const PackageJsonViewer = (): JSX.Element => {
-  const [packageJSON, setPackageJSON] = useState('');
-  const [parsedPackageJSON, setParsedPackageJSON] = useState('');
+  const [packageJSON, setPackageJSON] = useState<IPackageJson | null>(null);
+  const [parsedPackageJSON, setParsedPackageJSON] = useState<IPackageJson | null>(null);
   const [cjs, setCjs] = useState('');
   const selectedEntry = useAppSelector(selectCurrentEntry);
 
@@ -26,9 +27,9 @@ export const PackageJsonViewer = (): JSX.Element => {
       const cjsFile = await readCJS();
       setCjs(cjsFile);
       const packageJSONFile = await readPackageJSON(packageName);
-      setPackageJSON(packageJSONFile as string);
+      setPackageJSON(packageJSONFile);
       const parsedJSON = await readParsedCJS(packageName);
-      setParsedPackageJSON(parsedJSON as string);
+      setParsedPackageJSON(parsedJSON);
     }
     if (selectedEntry) {
       if (selectedEntry.entryPackageName) {
@@ -40,14 +41,21 @@ export const PackageJsonViewer = (): JSX.Element => {
     }
   }, [selectedEntry]);
 
+  useEffect(() => {
+    if (packageJSON && parsedPackageJSON) {
+    }
+  }, [packageJSON, parsedPackageJSON]);
+
   const renderFile = (): JSX.Element | null => {
     switch (selection) {
       case PackageView.PACKAGE_JSON:
-        return <pre>{packageJSON}</pre>;
+        if (!packageJSON) return null;
+        return <pre>{JSON.stringify(packageJSON, null, 2)}</pre>;
       case PackageView.CJS:
         return <pre>{cjs}</pre>;
       case PackageView.PARSED_PACKAGE_JSON:
-        return <pre>{parsedPackageJSON}</pre>;
+        if (!parsedPackageJSON) return null;
+        return <pre>{JSON.stringify(parsedPackageJSON, null, 2)}</pre>;
       default:
         return null;
     }
