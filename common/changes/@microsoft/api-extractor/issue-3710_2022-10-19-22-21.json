@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "dependency bump",
+      "comment": "Update the @microsoft/tsdoc dependency version to 0.14.2.",
       "type": "none"
     }
   ],
