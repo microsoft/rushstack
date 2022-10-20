@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-extractor",
       "comment": "Update the @microsoft/tsdoc dependency version to 0.14.2.",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-extractor"
