@@ -501,24 +501,21 @@ export class ChangeAction extends BaseRushAction {
       comment = await this._defaultPromptForComment(promptModule);
     }
 
-    if (Object.keys(bumpOptions).length === 0 || !comment) {
-      return {
-        packageName: packageName,
-        comment: comment || '',
-        type: ChangeType[ChangeType.none]
-      } as IChangeInfo;
-    }
     let bumpType: string | undefined = undefined;
 
-    for (const provider of providers) {
-      if (provider.promptForBumpType) {
-        comment = await provider.promptForBumpType(promptModule, packageName, bumpOptions);
-        break;
+    if (Object.keys(bumpOptions).length === 0 || !comment) {
+      bumpType = 'none';
+    } else {
+      for (const provider of providers) {
+        if (provider.promptForBumpType) {
+          bumpType = await provider.promptForBumpType(promptModule, packageName, bumpOptions);
+          break;
+        }
       }
-    }
 
-    if (comment === undefined) {
-      bumpType = await this._defaultPromptForBumpType(promptModule, bumpOptions);
+      if (bumpType === undefined) {
+        bumpType = await this._defaultPromptForBumpType(promptModule, bumpOptions);
+      }
     }
 
     const customFields: Record<string, string | undefined> = {};
