@@ -23,3 +23,19 @@
   height: calc(35vh - 35px);
   overflow: scroll;
 }
+
+.addedSpec {
+  background-color: #107c10;
+  color: white;
+  width: fit-content;
+}
+
+.deletedSpec {
+  background-color: red;
+  color: white;
+}
+
+.changedSpec {
+  background-color: darkgoldenrod;
+  color: white;
+}

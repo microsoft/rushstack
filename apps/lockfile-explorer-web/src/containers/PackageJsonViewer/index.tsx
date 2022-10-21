@@ -5,6 +5,7 @@ import appStyles from '../../appstyles.scss';
 import { useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
 import { IPackageJson } from '../../types/IPackageJson';
+import { compareSpec, ISpecChange } from '../../parsing/compareSpec';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -15,6 +16,7 @@ enum PackageView {
 export const PackageJsonViewer = (): JSX.Element => {
   const [packageJSON, setPackageJSON] = useState<IPackageJson | null>(null);
   const [parsedPackageJSON, setParsedPackageJSON] = useState<IPackageJson | null>(null);
+  const [specChanges, setSpecChanges] = useState<Map<string, ISpecChange>>(new Map());
   const [cjs, setCjs] = useState('');
   const selectedEntry = useAppSelector(selectCurrentEntry);
 
@@ -30,6 +32,12 @@ export const PackageJsonViewer = (): JSX.Element => {
       setPackageJSON(packageJSONFile);
       const parsedJSON = await readParsedCJS(packageName);
       setParsedPackageJSON(parsedJSON);
+
+      if (packageJSONFile && parsedJSON) {
+        const diffDeps = compareSpec(packageJSONFile, parsedJSON);
+        console.log('diff deps: ', diffDeps);
+        setSpecChanges(diffDeps);
+      }
     }
     if (selectedEntry) {
       if (selectedEntry.entryPackageName) {
@@ -46,6 +54,44 @@ export const PackageJsonViewer = (): JSX.Element => {
     }
   }, [packageJSON, parsedPackageJSON]);
 
+  const renderDep = (dependencyDetails: [string, string]) => {
+    const [dep, version] = dependencyDetails;
+    if (specChanges.has(dep)) {
+      switch (specChanges.get(dep)?.type) {
+        case 'ADDED_DEP':
+          return (
+            <p key={dep} className={styles.addedSpec}>
+              {dep}: {version}
+            </p>
+          );
+        case 'DIFF_DEP':
+          return (
+            <p key={dep} className={styles.changedSpec}>
+              {dep}: {version}
+            </p>
+          );
+        case 'DELETED_DEP':
+          return (
+            <p key={dep} className={styles.deletedSpec}>
+              {dep}: {version}
+            </p>
+          );
+        default:
+          return (
+            <p key={dep}>
+              {dep}: {version}
+            </p>
+          );
+      }
+    } else {
+      return (
+        <p key={dep}>
+          {dep}: {version}
+        </p>
+      );
+    }
+  };
+
   const renderFile = (): JSX.Element | null => {
     switch (selection) {
       case PackageView.PACKAGE_JSON:
@@ -55,7 +101,15 @@ export const PackageJsonViewer = (): JSX.Element => {
         return <pre>{cjs}</pre>;
       case PackageView.PARSED_PACKAGE_JSON:
         if (!parsedPackageJSON) return null;
-        return <pre>{JSON.stringify(parsedPackageJSON, null, 2)}</pre>;
+        return (
+          <pre>
+            <p>Dependencies</p>
+            {parsedPackageJSON.dependencies && Object.entries(parsedPackageJSON.dependencies).map(renderDep)}
+            <p>Dev Dependencies</p>
+            {parsedPackageJSON.devDependencies &&
+              Object.entries(parsedPackageJSON.devDependencies).map(renderDep)}
+          </pre>
+        );
       default:
         return null;
     }
