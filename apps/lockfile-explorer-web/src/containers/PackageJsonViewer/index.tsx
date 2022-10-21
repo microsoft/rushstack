@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { readCJS, readParsedCJS, readPackageJSON } from '../../parsing/readCJS';
+import { readPnpmfile, readParsedCJS, readPackageJSON } from '../../parsing/getPackageFiles';
 import styles from './styles.scss';
 import appStyles from '../../appstyles.scss';
 import { useAppSelector } from '../../store/hooks';
@@ -14,8 +14,8 @@ enum PackageView {
 }
 
 export const PackageJsonViewer = (): JSX.Element => {
-  const [packageJSON, setPackageJSON] = useState<IPackageJson | null>(null);
-  const [parsedPackageJSON, setParsedPackageJSON] = useState<IPackageJson | null>(null);
+  const [packageJSON, setPackageJSON] = useState<IPackageJson | undefined>(undefined);
+  const [parsedPackageJSON, setParsedPackageJSON] = useState<IPackageJson | undefined>(undefined);
   const [specChanges, setSpecChanges] = useState<Map<string, ISpecChange>>(new Map());
   const [cjs, setCjs] = useState('');
   const selectedEntry = useAppSelector(selectCurrentEntry);
@@ -26,7 +26,7 @@ export const PackageJsonViewer = (): JSX.Element => {
 
   useEffect(() => {
     async function loadPackageDetails(packageName: string): Promise<void> {
-      const cjsFile = await readCJS();
+      const cjsFile = await readPnpmfile();
       setCjs(cjsFile);
       const packageJSONFile = await readPackageJSON(packageName);
       setPackageJSON(packageJSONFile);
@@ -44,17 +44,12 @@ export const PackageJsonViewer = (): JSX.Element => {
         /* eslint @typescript-eslint/no-floating-promises: off */
         loadPackageDetails(selectedEntry.packageJsonFolderPath);
       } else {
-        console.log('selected entyr has no entry name: ', selectedEntry.entryPackageName);
+        console.log('selected entry has no entry name: ', selectedEntry.entryPackageName);
       }
     }
   }, [selectedEntry]);
 
-  useEffect(() => {
-    if (packageJSON && parsedPackageJSON) {
-    }
-  }, [packageJSON, parsedPackageJSON]);
-
-  const renderDep = (dependencyDetails: [string, string]) => {
+  const renderDep = (dependencyDetails: [string, string]): JSX.Element => {
     const [dep, version] = dependencyDetails;
     if (specChanges.has(dep)) {
       switch (specChanges.get(dep)?.type) {

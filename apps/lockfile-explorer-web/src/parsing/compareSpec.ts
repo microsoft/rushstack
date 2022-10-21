@@ -33,7 +33,7 @@ export const compareSpec = (
         type: 'DELETED_DEP',
         pkg: dep
       });
-    } else if (pkgSpecMap.get(dep) != pkgJsonMap.get(dep)) {
+    } else if (pkgSpecMap.get(dep) !== pkgJsonMap.get(dep)) {
       diffDeps.set(dep, {
         type: 'DIFF_DEP',
         pkg: dep,
