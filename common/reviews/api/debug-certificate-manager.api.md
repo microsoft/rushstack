@@ -16,6 +16,9 @@ export class CertificateManager {
 // @public
 export class CertificateStore {
     constructor();
+    get caCertificateData(): string | undefined;
+    set caCertificateData(certificate: string | undefined);
+    get caCertificatePath(): string;
     get certificateData(): string | undefined;
     set certificateData(certificate: string | undefined);
     get certificatePath(): string;
@@ -28,6 +31,7 @@ export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string>;
 
 // @public
 export interface ICertificate {
+    pemCaCertificate: string | undefined;
     pemCertificate: string | undefined;
     pemKey: string | undefined;
     subjectAltNames: readonly string[] | undefined;
