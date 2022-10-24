@@ -91,9 +91,15 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       const fileRoutingRules: Map<string, IRoutingRule> = new Map();
 
+      const wbnRegex: RegExp = /\.wbn$/i;
       function setHeaders(response: express.Response, path?: string, stat?: unknown): void {
         response.set('Access-Control-Allow-Origin', '*');
         response.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        // TODO: Generalize headers and MIME types with an external database or JSON file.
+        if (path && wbnRegex.test(path)) {
+          response.set('X-Content-Type-Options', 'nosniff');
+          response.set('Content-Type', 'application/webbundle');
+        }
       }
 
       for (const rule of routingRules) {
