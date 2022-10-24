@@ -24,18 +24,32 @@
   overflow: scroll;
 }
 
+@mixin specWrapper {
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: white;
+}
+
 .addedSpec {
   background-color: #107c10;
-  color: white;
-  width: fit-content;
+  @include specWrapper;
 }
 
 .deletedSpec {
   background-color: red;
-  color: white;
+  @include specWrapper;
 }
 
 .changedSpec {
   background-color: darkgoldenrod;
-  color: white;
+  @include specWrapper;
+}
+
+.packageSpecWrapper {
+  h5 {
+    margin-bottom: 12px;
+  }
+  & > * + * {
+    margin-top: 8px;
+  }
 }

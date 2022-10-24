@@ -6,4 +6,7 @@ export interface IPackageJson {
   devDependencies: {
     [key in string]: string;
   };
+  peerDependencies: {
+    [key in string]: string;
+  };
 }

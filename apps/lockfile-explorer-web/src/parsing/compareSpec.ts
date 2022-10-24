@@ -15,13 +15,15 @@ export const compareSpec = (
   const pkgSpecMap = new Map();
   for (const [entry, version] of Object.entries({
     ...packageJson.dependencies,
-    ...packageJson.devDependencies
+    ...packageJson.devDependencies,
+    ...packageJson.peerDependencies
   })) {
     pkgJsonMap.set(entry, version);
   }
   for (const [entry, version] of Object.entries({
     ...packageSpec.dependencies,
-    ...packageSpec.devDependencies
+    ...packageSpec.devDependencies,
+    ...packageSpec.peerDependencies
   })) {
     pkgSpecMap.set(entry, version);
   }

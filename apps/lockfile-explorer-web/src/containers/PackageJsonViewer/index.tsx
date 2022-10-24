@@ -55,20 +55,29 @@ export const PackageJsonViewer = (): JSX.Element => {
       switch (specChanges.get(dep)?.type) {
         case 'ADDED_DEP':
           return (
-            <p key={dep} className={styles.addedSpec}>
-              {dep}: {version}
+            <p key={dep}>
+              <span className={styles.addedSpec}>
+                {dep}: {version}
+              </span>{' '}
+              [Added by .pnpmfile.cjs]
             </p>
           );
         case 'DIFF_DEP':
           return (
-            <p key={dep} className={styles.changedSpec}>
-              {dep}: {version}
+            <p key={dep}>
+              <span className={styles.changedSpec}>
+                {dep}: {version}
+              </span>{' '}
+              [Changed from {specChanges.get(dep)?.from}]
             </p>
           );
         case 'DELETED_DEP':
           return (
-            <p key={dep} className={styles.deletedSpec}>
-              {dep}: {version}
+            <p key={dep}>
+              <span className={styles.deletedSpec}>
+                {dep}: {version}
+              </span>{' '}
+              [Deleted by .pnpmfile.cjs]
             </p>
           );
         default:
@@ -97,13 +106,16 @@ export const PackageJsonViewer = (): JSX.Element => {
       case PackageView.PARSED_PACKAGE_JSON:
         if (!parsedPackageJSON) return null;
         return (
-          <pre>
-            <p>Dependencies</p>
+          <div className={styles.packageSpecWrapper}>
+            <h5>Dependencies</h5>
             {parsedPackageJSON.dependencies && Object.entries(parsedPackageJSON.dependencies).map(renderDep)}
-            <p>Dev Dependencies</p>
+            <h5>Dev Dependencies</h5>
             {parsedPackageJSON.devDependencies &&
               Object.entries(parsedPackageJSON.devDependencies).map(renderDep)}
-          </pre>
+            <h5>Peer Dependencies</h5>
+            {parsedPackageJSON.peerDependencies &&
+              Object.entries(parsedPackageJSON.peerDependencies).map(renderDep)}
+          </div>
         );
       default:
         return null;
