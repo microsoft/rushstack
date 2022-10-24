@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "comment": "Set WebSocket port to match http port.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin"
+}
