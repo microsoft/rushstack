@@ -32,10 +32,10 @@ export class LockfileDependency {
   public containingEntry: LockfileEntry;
   public resolvedEntry: LockfileEntry | undefined;
 
-  public peerDependencies?: {
-    name: string;
-    version: string;
-    optional: boolean;
+  public peerDependencyMeta: {
+    name?: string;
+    version?: string;
+    optional?: boolean;
   };
 
   public constructor(
@@ -49,6 +49,7 @@ export class LockfileDependency {
     this.version = version;
     this.dependencyType = dependencyType;
     this.containingEntry = containingEntry;
+    this.peerDependencyMeta = {};
 
     if (this.version.startsWith('link:')) {
       const relativePath = this.version.substring('link:'.length);
@@ -64,7 +65,7 @@ export class LockfileDependency {
       this.entryId = this.version;
     } else if (this.dependencyType === IDependencyType.PEER_DEPENDENCY) {
       if (node?.peerDependencies) {
-        this.peerDependencies = {
+        this.peerDependencyMeta = {
           name: this.name,
           version: node.peerDependencies[this.name],
           optional:

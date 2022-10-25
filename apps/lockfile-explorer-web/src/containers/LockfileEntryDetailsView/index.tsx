@@ -93,10 +93,10 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           .filter((d) => d.dependencyType === IDependencyType.PEER_DEPENDENCY)
           .map((dep) => (
             <div className={styles.DependencyItem} key={dep.name} onClick={selectResolvedEntry(dep)}>
-              <h5>Name: {dep.name}</h5>
+              <h5>Name: {dep.peerDependencyMeta.name}</h5>
               <div>
-                <p>Version: {dep.version}</p>
-                <p>optional: {`${dep.peerDependencies?.optional}`}</p>
+                <p>Version: {dep.peerDependencyMeta.version}</p>
+                <p>optional: {`${dep.peerDependencyMeta.optional}`}</p>
               </div>
             </div>
           ))}
