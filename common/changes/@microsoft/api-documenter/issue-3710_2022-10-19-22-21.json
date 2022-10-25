@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Update the @microsoft/tsdoc dependency version to 0.14.2.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}
