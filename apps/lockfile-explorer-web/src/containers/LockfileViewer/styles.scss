@@ -1,5 +1,5 @@
 .ViewWrapper {
-  height: calc(100vh - 96px);
+  height: calc(95vh - 96px);
 }
 
 .LockfileEntryListViewWrapper {
@@ -44,7 +44,7 @@
 }
 
 .lockfileEntriesWrapper {
-  height: calc(100vh - 300px);
+  height: calc(95vh - 220px);
   overflow: scroll;
   & > * + * {
     margin-top: 12px;
