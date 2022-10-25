@@ -6,6 +6,7 @@ import { useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
 import { IPackageJson } from '../../types/IPackageJson';
 import { compareSpec, ISpecChange } from '../../parsing/compareSpec';
+import { FilterBar } from '../../components/FilterBar';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -124,32 +125,21 @@ export const PackageJsonViewer = (): JSX.Element => {
 
   return (
     <div>
-      <div className={styles.headerFilterBar}>
-        <div
-          className={`${styles.headerFilterItem} ${
-            selection === PackageView.PARSED_PACKAGE_JSON ? styles.headerFilterItemActive : ''
-          }`}
-          onClick={cb(PackageView.PARSED_PACKAGE_JSON)}
-        >
-          package spec
-        </div>
-        <div
-          className={`${styles.headerFilterItem} ${
-            selection === PackageView.PACKAGE_JSON ? styles.headerFilterItemActive : ''
-          }`}
-          onClick={cb(PackageView.PACKAGE_JSON)}
-        >
-          package.json
-        </div>
-        <div
-          className={`${styles.headerFilterItem} ${
-            selection === PackageView.CJS ? styles.headerFilterItemActive : ''
-          }`}
-          onClick={cb(PackageView.CJS)}
-        >
-          .pnpmfile.cjs
-        </div>
-      </div>
+      <FilterBar
+        options={[
+          {
+            text: 'package spec',
+            active: selection === PackageView.PARSED_PACKAGE_JSON,
+            onClick: cb(PackageView.PARSED_PACKAGE_JSON)
+          },
+          {
+            text: 'package.json',
+            active: selection === PackageView.PACKAGE_JSON,
+            onClick: cb(PackageView.PACKAGE_JSON)
+          },
+          { text: '.pnpmfile.cjs', active: selection === PackageView.CJS, onClick: cb(PackageView.CJS) }
+        ]}
+      />
       <div className={appStyles.containerCard}>
         <div className={styles.fileContents}>{renderFile()}</div>
       </div>

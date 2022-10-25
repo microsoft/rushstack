@@ -1,0 +1,20 @@
+@import 'office-ui-fabric-core/dist/sass/References';
+
+.FilterBar {
+  display: flex;
+  box-shadow: $ms-depth-shadow-8;
+  width: fit-content;
+  & > * + * {
+    border-left: 1px solid $ms-color-gray20;
+  }
+}
+
+.FilterItem {
+  background-color: $ms-color-gray10;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.FilterItemActive {
+  border-bottom: 3px solid #107c10;
+}

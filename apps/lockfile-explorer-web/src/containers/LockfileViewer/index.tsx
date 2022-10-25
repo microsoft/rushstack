@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import appStyles from '../../appstyles.scss';
-import filterStyles from '../PackageJsonViewer/styles.scss';
 import styles from './styles.scss';
 import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { ReactNull } from '../../types/ReactNull';
@@ -12,6 +11,7 @@ import {
   selectFilteredEntries,
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
+import { FilterBar } from '../../components/FilterBar';
 
 interface ILockfileEntryGroup {
   entryName: string;
@@ -138,24 +138,20 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
 
   return (
     <>
-      <div className={filterStyles.headerFilterBar}>
-        <div
-          className={`${filterStyles.headerFilterItem} ${
-            activeFilters[LockfileEntryFilter.Project] ? filterStyles.headerFilterItemActive : ''
-          }`}
-          onClick={togglePackageView(LockfileEntryFilter.Project)}
-        >
-          Projects
-        </div>
-        <div
-          className={`${filterStyles.headerFilterItem} ${
-            activeFilters[LockfileEntryFilter.Package] ? filterStyles.headerFilterItemActive : ''
-          }`}
-          onClick={togglePackageView(LockfileEntryFilter.Package)}
-        >
-          Packages
-        </div>
-      </div>
+      <FilterBar
+        options={[
+          {
+            text: 'Projects',
+            active: activeFilters[LockfileEntryFilter.Project],
+            onClick: togglePackageView(LockfileEntryFilter.Project)
+          },
+          {
+            text: 'Packages',
+            active: activeFilters[LockfileEntryFilter.Package],
+            onClick: togglePackageView(LockfileEntryFilter.Package)
+          }
+        ]}
+      />
       <div className={`${appStyles.containerCard} ${styles.ViewWrapper}`}>
         <div className={styles.LockfileFilterBar}>
           {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
