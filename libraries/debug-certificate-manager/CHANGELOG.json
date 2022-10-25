@@ -2,6 +2,21 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.0",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.0",
+      "date": "Tue, 25 Oct 2022 00:20:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support custom certificate subjects and validity period."
+          },
+          {
+            "comment": "Generate and trust a separate CA certificate, use that to generate the TLS certificate, then destroy the private key for the CA certificate."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.84",
       "tag": "@rushstack/debug-certificate-manager_v1.1.84",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",

@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.0",
+      "date": "Tue, 25 Oct 2022 00:20:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Set allowedHosts from the subjectAltNames of the TLS certificate."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.73",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.1.73",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",
