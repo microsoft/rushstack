@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import appStyles from '../../appstyles.scss';
+import filterStyles from '../PackageJsonViewer/styles.scss';
 import styles from './styles.scss';
 import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { ReactNull } from '../../types/ReactNull';
@@ -67,7 +68,7 @@ const multipleVersions = (entries: LockfileEntry[]): boolean => {
 };
 
 export const LockfileViewer = (): JSX.Element | ReactNull => {
-  const [filter, setFilter] = useState('test');
+  const [filter, setFilter] = useState('');
   const entries = useAppSelector(selectFilteredEntries);
   const activeFilters = useAppSelector((state) => state.entry.filters);
   const updateFilter = useCallback((e) => setFilter(e.target.value), []);
@@ -122,53 +123,70 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
     []
   );
 
+  const togglePackageView = useCallback(
+    (selected: LockfileEntryFilter) => () => {
+      if (selected === LockfileEntryFilter.Project) {
+        dispatch(selectFilter({ filter: selected, state: !activeFilters[selected] }));
+        dispatch(selectFilter({ filter: LockfileEntryFilter.Package, state: false }));
+      } else {
+        dispatch(selectFilter({ filter: selected, state: !activeFilters[selected] }));
+        dispatch(selectFilter({ filter: LockfileEntryFilter.Project, state: false }));
+      }
+    },
+    [activeFilters]
+  );
+
   return (
-    <div className={`${appStyles.containerCard} ${styles.ViewWrapper}`}>
-      <div className={styles.LockfileFilterBar}>
-        {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
-        <h5>filter:</h5>
-        <input type="text" value={filter} onChange={updateFilter} />
-      </div>
-      <div className={styles.lockfileEntriesWrapper}>
-        {getEntriesToShow().map((lockfileEntryGroup) => (
-          <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
-        ))}
-      </div>
-      <div className={styles.filterSection}>
-        <h5>Filters</h5>
-        <div className={styles.filterOption}>
-          <input
-            type="checkbox"
-            checked={activeFilters[LockfileEntryFilter.Project]}
-            onChange={changeFilter(LockfileEntryFilter.Project)}
-          />
-          <h5>Show Workspace Projects</h5>
+    <>
+      <div className={filterStyles.headerFilterBar}>
+        <div
+          className={`${filterStyles.headerFilterItem} ${
+            activeFilters[LockfileEntryFilter.Project] ? filterStyles.headerFilterItemActive : ''
+          }`}
+          onClick={togglePackageView(LockfileEntryFilter.Project)}
+        >
+          Projects
         </div>
-        <div className={styles.filterOption}>
-          <input
-            type="checkbox"
-            checked={activeFilters[LockfileEntryFilter.Package]}
-            onChange={changeFilter(LockfileEntryFilter.Package)}
-          />
-          <h5>Show Workspace Packages</h5>
-        </div>
-        <div className={styles.filterOption}>
-          <input
-            type="checkbox"
-            checked={activeFilters[LockfileEntryFilter.SideBySide]}
-            onChange={changeFilter(LockfileEntryFilter.SideBySide)}
-          />
-          <h5>Must have side-by-side versions</h5>
-        </div>
-        <div className={styles.filterOption}>
-          <input
-            type="checkbox"
-            checked={activeFilters[LockfileEntryFilter.Doppelganger]}
-            onChange={changeFilter(LockfileEntryFilter.Doppelganger)}
-          />
-          <h5>Must have doppelgangers</h5>
+        <div
+          className={`${filterStyles.headerFilterItem} ${
+            activeFilters[LockfileEntryFilter.Package] ? filterStyles.headerFilterItemActive : ''
+          }`}
+          onClick={togglePackageView(LockfileEntryFilter.Package)}
+        >
+          Packages
         </div>
       </div>
-    </div>
+      <div className={`${appStyles.containerCard} ${styles.ViewWrapper}`}>
+        <div className={styles.LockfileFilterBar}>
+          {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
+          <h5>filter:</h5>
+          <input type="text" value={filter} onChange={updateFilter} />
+        </div>
+        <div className={styles.lockfileEntriesWrapper}>
+          {getEntriesToShow().map((lockfileEntryGroup) => (
+            <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
+          ))}
+        </div>
+        <div className={styles.filterSection}>
+          <h5>Filters</h5>
+          <div className={styles.filterOption}>
+            <input
+              type="checkbox"
+              checked={activeFilters[LockfileEntryFilter.SideBySide]}
+              onChange={changeFilter(LockfileEntryFilter.SideBySide)}
+            />
+            <h5>Must have side-by-side versions</h5>
+          </div>
+          <div className={styles.filterOption}>
+            <input
+              type="checkbox"
+              checked={activeFilters[LockfileEntryFilter.Doppelganger]}
+              onChange={changeFilter(LockfileEntryFilter.Doppelganger)}
+            />
+            <h5>Must have doppelgangers</h5>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
