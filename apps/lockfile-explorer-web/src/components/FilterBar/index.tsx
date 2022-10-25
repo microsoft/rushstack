@@ -7,7 +7,7 @@ interface IFilterBarOption {
   onClick: () => void;
 }
 
-export const FilterBar = ({ options }: { options: IFilterBarOption[] }) => {
+export const FilterBar = ({ options }: { options: IFilterBarOption[] }): JSX.Element => {
   return (
     <div className={styles.FilterBar}>
       {options.map((opt: IFilterBarOption) => (
