@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './styles.scss';
 import appStyles from '../../appstyles.scss';
 import { IDependencyType, LockfileDependency } from '../../parsing/LockfileDependency';
@@ -12,6 +12,8 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const dispatch = useAppDispatch();
 
+  const [inspectDep, setInspectDep] = useState<LockfileDependency | null>(null);
+
   useEffect(() => {
     if (selectedEntry) {
       findPeerDependencies(selectedEntry);
@@ -24,13 +26,17 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   const selectResolvedEntry = useCallback(
     (dependency) => () => {
-      if (dependency.resolvedEntry) {
-        dispatch(pushToStack(dependency.resolvedEntry));
+      if (inspectDep && inspectDep.name === dependency.name) {
+        if (dependency.resolvedEntry) {
+          dispatch(pushToStack(dependency.resolvedEntry));
+        } else {
+          console.error('No resolved entry for dependency: ', dependency);
+        }
       } else {
-        console.error('No resolved entry for dependency: ', dependency);
+        setInspectDep(dependency);
       }
     },
-    [selectedEntry]
+    [selectedEntry, inspectDep]
   );
 
   const selectResolvedReferencer = useCallback(
@@ -73,11 +79,20 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           <div className={styles.DependencyListWrapper}>
             {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
               <div
-                className={styles.DependencyItem}
+                className={`${styles.DependencyItem} ${
+                  inspectDep?.name === dependency.name && styles.SelectedDependencyItem
+                }`}
                 key={dependency.entryId}
                 onClick={selectResolvedEntry(dependency)}
               >
-                <h5>Name: {dependency.name}</h5>
+                <h5>
+                  Name: {dependency.name}{' '}
+                  {dependency.dependencyType === IDependencyType.PEER_DEPENDENCY
+                    ? `${
+                        dependency.peerDependencyMeta.optional ? '(Optional)' : '(Non-Optional)'
+                      } Peer Dependency`
+                    : ''}
+                </h5>
                 <div>
                   <p>Version: {dependency.version}</p>
                   <p>Entry ID: {dependency.entryId}</p>
