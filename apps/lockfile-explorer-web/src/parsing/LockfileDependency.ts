@@ -8,20 +8,46 @@ export interface ILockfileNode {
   devDependencies?: {
     [key in string]: string;
   };
+  peerDependencies?: {
+    [key in string]: string;
+  };
+  peerDependenciesMeta?: {
+    [key in string]: {
+      optional: boolean;
+    };
+  };
+}
+
+export enum IDependencyType {
+  DEPENDENCY,
+  DEV_DEPENDENCY,
+  PEER_DEPENDENCY
 }
 
 export class LockfileDependency {
   public name: string;
   public version: string;
   public entryId: string = '';
-  public devDependency: boolean;
+  public dependencyType: IDependencyType;
   public containingEntry: LockfileEntry;
   public resolvedEntry: LockfileEntry | undefined;
 
-  public constructor(name: string, version: string, devDependency: boolean, containingEntry: LockfileEntry) {
+  public peerDependencies?: {
+    name: string;
+    version: string;
+    optional: boolean;
+  };
+
+  public constructor(
+    name: string,
+    version: string,
+    dependencyType: IDependencyType,
+    containingEntry: LockfileEntry,
+    node?: ILockfileNode
+  ) {
     this.name = name;
     this.version = version;
-    this.devDependency = devDependency;
+    this.dependencyType = dependencyType;
     this.containingEntry = containingEntry;
 
     if (this.version.startsWith('link:')) {
@@ -36,6 +62,19 @@ export class LockfileDependency {
       this.entryId = 'project:' + rootRelativePath.toString();
     } else if (this.version.startsWith('/')) {
       this.entryId = this.version;
+    } else if (this.dependencyType === IDependencyType.PEER_DEPENDENCY) {
+      if (node?.peerDependencies) {
+        this.peerDependencies = {
+          name: this.name,
+          version: node.peerDependencies[this.name],
+          optional:
+            node.peerDependenciesMeta && node.peerDependenciesMeta[this.name]
+              ? node.peerDependenciesMeta[this.name].optional
+              : false
+        };
+      } else {
+        console.error('Peer dependencies info missing!', node);
+      }
     } else {
       this.entryId = '/' + this.name + '/' + this.version;
     }
@@ -49,12 +88,23 @@ export class LockfileDependency {
   ): void {
     if (node.dependencies) {
       for (const [pkgName, pkgVersion] of Object.entries(node.dependencies)) {
-        dependencies.push(new LockfileDependency(pkgName, pkgVersion, false, lockfileEntry));
+        dependencies.push(
+          new LockfileDependency(pkgName, pkgVersion, IDependencyType.DEPENDENCY, lockfileEntry)
+        );
       }
     }
     if (node.devDependencies) {
       for (const [pkgName, pkgVersion] of Object.entries(node.devDependencies)) {
-        dependencies.push(new LockfileDependency(pkgName, pkgVersion, true, lockfileEntry));
+        dependencies.push(
+          new LockfileDependency(pkgName, pkgVersion, IDependencyType.DEV_DEPENDENCY, lockfileEntry)
+        );
+      }
+    }
+    if (node.peerDependencies) {
+      for (const [pkgName, pkgVersion] of Object.entries(node.peerDependencies)) {
+        dependencies.push(
+          new LockfileDependency(pkgName, pkgVersion, IDependencyType.PEER_DEPENDENCY, lockfileEntry, node)
+        );
       }
     }
   }

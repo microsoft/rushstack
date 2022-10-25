@@ -36,7 +36,6 @@ export const PackageJsonViewer = (): JSX.Element => {
 
       if (packageJSONFile && parsedJSON) {
         const diffDeps = compareSpec(packageJSONFile, parsedJSON);
-        console.log('diff deps: ', diffDeps);
         setSpecChanges(diffDeps);
       }
     }
