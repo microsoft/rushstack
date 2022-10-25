@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Oct 2022 00:20:44 GMT and should not be manually modified.
+
+## 0.5.25
+Tue, 25 Oct 2022 00:20:44 GMT
+
+### Patches
+
+- Set WebSocket port to match http port.
 
 ## 0.5.24
 Mon, 17 Oct 2022 22:14:21 GMT

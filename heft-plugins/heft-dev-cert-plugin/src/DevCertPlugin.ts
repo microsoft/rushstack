@@ -98,12 +98,31 @@ export class DevCertPlugin implements IHeftPlugin {
     if (!webpackConfiguration) {
       logger.terminal.writeVerboseLine('No webpack configuration available to configure devServer.');
     } else {
+      const { devServer: originalDevServer } = webpackConfiguration;
+      const hostname: string | undefined = certificate.subjectAltNames?.[0];
       if (webpackDevServerMajorVersion && webpackDevServerMajorVersion === 4) {
+        let client: WebpackDevServerConfig['client'] = originalDevServer?.client;
+        if (hostname) {
+          if (typeof client === 'object') {
+            const { webSocketURL } = client;
+            if (typeof webSocketURL === 'object') {
+              client = {
+                ...client,
+                webSocketURL: {
+                  ...webSocketURL,
+                  hostname
+                }
+              };
+            }
+          }
+        }
         webpackConfiguration.devServer = {
-          ...webpackConfiguration.devServer,
+          ...originalDevServer,
+          allowedHosts: certificate.subjectAltNames as string[],
           server: {
             type: 'https',
             options: {
+              minVersion: 'TLSv1.3',
               key: certificate.pemKey,
               cert: certificate.pemCertificate
             }
@@ -111,7 +130,7 @@ export class DevCertPlugin implements IHeftPlugin {
         };
       } else {
         webpackConfiguration.devServer = {
-          ...webpackConfiguration.devServer,
+          ...originalDevServer,
           https: {
             key: certificate.pemKey,
             cert: certificate.pemCertificate
