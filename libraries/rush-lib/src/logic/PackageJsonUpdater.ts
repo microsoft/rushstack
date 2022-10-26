@@ -275,8 +275,6 @@ export class PackageJsonUpdater {
     }
 
     if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
-      // TODO: Reenable to support mismatch checks for both devDeps and regularDeps
-      // we need to do a mismatch check
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         this._rushConfiguration,
         {
@@ -284,17 +282,15 @@ export class PackageJsonUpdater {
         }
       );
 
-      if (updateOtherPackages) {
-        for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
-          this.updateProject(update);
-          allPackageUpdates.set(update.project.filePath, update.project);
-        }
+      for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
+        this.updateProject(update);
+        allPackageUpdates.set(update.project.filePath, update.project);
       }
     }
 
-    for (const project of allPackageUpdates.values()) {
+    for (const [filePath, project] of allPackageUpdates) {
       if (project.saveIfModified()) {
-        this._terminal.writeLine(colors.green('Wrote ') + project.filePath);
+        this._terminal.writeLine(colors.green('Wrote ') + filePath);
       }
     }
 
@@ -468,9 +464,7 @@ export class PackageJsonUpdater {
           }
         );
 
-        if (updateOtherPackages) {
-          otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
-        }
+        otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
       }
 
       this.updateProjects(otherPackageUpdates);

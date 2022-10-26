@@ -31,7 +31,6 @@
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@types/node-fetch": "1.6.9",
-    "@types/text-table": "~0.2.2",
     "@yarnpkg/lockfile": "~1.0.2",
     "builtin-modules": "~3.1.0",
     "cli-table": "~0.3.1",
@@ -78,7 +77,8 @@
     "@types/semver": "7.3.5",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
-    "@types/tar": "6.1.1"
+    "@types/tar": "6.1.1",
+    "@types/text-table": "~0.2.2"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

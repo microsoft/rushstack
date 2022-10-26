@@ -1,5 +1,3 @@
-import * as os from 'os';
-
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
@@ -25,7 +23,7 @@ export class UpgradeInteractiveAction extends BaseRushAction {
       actionName: 'upgrade-interactive',
       summary: 'Provides interactive prompt for upgrading package dependencies per project',
       safeForSimultaneousRushProcesses: false,
-      documentation: documentation.join(os.EOL),
+      documentation: documentation.join(''),
       parser
     });
 
@@ -43,28 +41,26 @@ export class UpgradeInteractiveAction extends BaseRushAction {
     });
   }
 
-  // TODO: Remove this after rebasing main as it is not required anymore
-  protected onDefineParameters(): void {}
-
   public async runAsync(): Promise<void> {
-    const packageJsonUpdater: typeof PackageJsonUpdaterType = await import('../../logic/PackageJsonUpdater');
-    const interactiveUpgrader: typeof InteractiveUpgraderType = await import(
-      '../../logic/InteractiveUpgrader'
-    );
-    const updater: PackageJsonUpdaterType.PackageJsonUpdater = new packageJsonUpdater.PackageJsonUpdater(
+    const [{ PackageJsonUpdater }, { InteractiveUpgrader }] = await Promise.all([
+      import('../../logic/PackageJsonUpdater'),
+      import('../../logic/InteractiveUpgrader')
+    ]);
+
+    const packageJsonUpdater: PackageJsonUpdaterType.PackageJsonUpdater = new PackageJsonUpdater(
       this.rushConfiguration,
       this.rushGlobalFolder
     );
-    const upgrader: InteractiveUpgraderType.InteractiveUpgrader = new interactiveUpgrader.InteractiveUpgrader(
+    const interactiveUpgrader: InteractiveUpgraderType.InteractiveUpgrader = new InteractiveUpgrader(
       this.rushConfiguration
     );
 
     const shouldMakeConsistent: boolean =
       this.rushConfiguration.ensureConsistentVersions || this._makeConsistentFlag.value;
 
-    const { projects, depsToUpgrade } = await upgrader.upgrade();
+    const { projects, depsToUpgrade } = await interactiveUpgrader.upgrade();
 
-    await updater.doRushUpgradeAsync({
+    await packageJsonUpdater.doRushUpgradeAsync({
       projects: projects,
       packagesToAdd: depsToUpgrade.packages,
       updateOtherPackages: shouldMakeConsistent,

@@ -3,12 +3,8 @@ import colors from 'colors/safe';
 import inquirer from 'inquirer';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { upgradeInteractive } from '../utilities/InteractiveUpgradeUI';
+import { upgradeInteractive, IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-
-interface IDepsToUpgradeAnswers {
-  packages: NpmCheck.INpmCheckPackage[];
-}
 
 interface IUpgradeInteractiveDeps {
   projects: RushConfigurationProject[];
@@ -23,13 +19,12 @@ export class InteractiveUpgrader {
   }
 
   public async upgrade(): Promise<IUpgradeInteractiveDeps> {
-    const { selectProject: rushProject } = await this._getUserSelectedProjectForUpgrade();
+    const rushProject: RushConfigurationProject = await this._getUserSelectedProjectForUpgrade();
 
     const dependenciesState: NpmCheck.INpmCheckPackage[] = await this._getPackageDependenciesStatus(
       rushProject
     );
 
-    // cast inquirer.Answer type for more type strictness
     const depsToUpgrade: IDepsToUpgradeAnswers = await this._getUserSelectedDependenciesToUpgrade(
       dependenciesState
     );
@@ -39,13 +34,13 @@ export class InteractiveUpgrader {
   private async _getUserSelectedDependenciesToUpgrade(
     packages: NpmCheck.INpmCheckPackage[]
   ): Promise<IDepsToUpgradeAnswers> {
-    return upgradeInteractive(packages) as unknown as IDepsToUpgradeAnswers;
+    return upgradeInteractive(packages);
   }
 
-  private async _getUserSelectedProjectForUpgrade(): Promise<{ selectProject: RushConfigurationProject }> {
+  private async _getUserSelectedProjectForUpgrade(): Promise<RushConfigurationProject> {
     const projects: RushConfigurationProject[] | undefined = this._rushConfiguration.projects;
 
-    return inquirer.prompt({
+    const { selectProject } = await inquirer.prompt({
       name: 'selectProject',
       message: 'Select a project you would like to upgrade',
       type: 'list',
@@ -56,6 +51,8 @@ export class InteractiveUpgrader {
         };
       })
     });
+
+    return selectProject;
   }
 
   private async _getPackageDependenciesStatus(

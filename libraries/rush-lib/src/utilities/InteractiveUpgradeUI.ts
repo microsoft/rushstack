@@ -1,5 +1,4 @@
 import inquirer from 'inquirer';
-import type * as inquirerTypes from 'inquirer';
 import { AnsiEscape } from '@rushstack/node-core-library';
 
 import _ from 'lodash';
@@ -15,6 +14,10 @@ export interface IUIGroup {
     bump?: undefined | 'major' | 'minor' | 'patch' | 'nonSemver';
     notInstalled?: boolean;
   };
+}
+
+export interface IDepsToUpgradeAnswers {
+  packages: NpmCheck.INpmCheckPackage[];
 }
 
 export interface IUpgradeInteractiveDepChoice {
@@ -138,17 +141,15 @@ function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup)
 }
 
 export const upgradeInteractive = async (
-  packages: NpmCheck.INpmCheckPackage[]
-): Promise<inquirerTypes.Answers | void> => {
-  const choicesGrouped: ChoiceTable[] = UI_GROUPS.map((group) => createChoices(packages, group)).filter(
-    Boolean
-  );
+  pkgs: NpmCheck.INpmCheckPackage[]
+): Promise<IDepsToUpgradeAnswers> => {
+  const choicesGrouped: ChoiceTable[] = UI_GROUPS.map((group) => createChoices(pkgs, group)).filter(Boolean);
 
   const choices: ChoiceTable = _.flatten(choicesGrouped);
 
   if (!choices.length) {
     console.log('All dependencies are up to date!');
-    return;
+    return { packages: [] };
   }
 
   choices.push(unselectable());
@@ -164,5 +165,7 @@ export const upgradeInteractive = async (
     }
   ];
 
-  return inquirer.prompt(promptQuestions);
+  const answers: IDepsToUpgradeAnswers = (await inquirer.prompt(promptQuestions)) as IDepsToUpgradeAnswers;
+
+  return answers;
 };
