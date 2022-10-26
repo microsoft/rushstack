@@ -16,6 +16,7 @@ export interface ILockfileNode {
       optional: boolean;
     };
   };
+  transitivePeerDependencies?: string[];
 }
 
 export enum IDependencyType {
@@ -106,6 +107,11 @@ export class LockfileDependency {
         dependencies.push(
           new LockfileDependency(pkgName, pkgVersion, IDependencyType.PEER_DEPENDENCY, lockfileEntry, node)
         );
+      }
+    }
+    if (node.transitivePeerDependencies) {
+      for (const dep of node.transitivePeerDependencies) {
+        lockfileEntry.transitivePeerDependencies.add(dep);
       }
     }
   }

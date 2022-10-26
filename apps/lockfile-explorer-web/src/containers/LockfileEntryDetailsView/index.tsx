@@ -13,6 +13,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const dispatch = useAppDispatch();
 
   const [inspectDep, setInspectDep] = useState<LockfileDependency | null>(null);
+  const [influencers, setInfluencers] = useState([]);
 
   useEffect(() => {
     if (selectedEntry) {
@@ -34,6 +35,41 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         }
       } else {
         setInspectDep(dependency);
+        console.log('current selected entry: ', selectedEntry);
+        console.log('inspecting dependency: ', dependency);
+        // calculate influencers
+        const stack = [selectedEntry];
+        const determinants = new Set();
+        const transitiveReferrers = new Set();
+        const visitedNodes = new Set();
+        visitedNodes.add(selectedEntry);
+        while (stack.length) {
+          const currEntry = stack.pop();
+          if (currEntry) {
+            let flag = false;
+            for (const referrer of currEntry.referencers) {
+              for (const dep of referrer.dependencies) {
+                if (dep.name === dependency.name) {
+                  determinants.add(referrer);
+                  flag = true;
+                  break;
+                } else if (!flag) {
+                  transitiveReferrers.add(referrer);
+                }
+              }
+            }
+            if (!flag) {
+              for (const referencer of currEntry.referencers) {
+                if (!visitedNodes.has(referencer)) {
+                  stack.push(referencer);
+                  visitedNodes.add(referencer);
+                }
+              }
+            }
+          }
+        }
+        console.log('determinants: ', determinants);
+        console.log('transitive referrers: ', transitiveReferrers);
       }
     },
     [selectedEntry, inspectDep]
@@ -45,6 +81,35 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     },
     [selectedEntry]
   );
+
+  const renderPeerDependencies = () => {
+    if (!selectedEntry) return null;
+    const peerDeps = selectedEntry.dependencies.filter(
+      (d) => d.dependencyType === IDependencyType.PEER_DEPENDENCY
+    );
+    console.log('peer deps: ', peerDeps);
+    if (!peerDeps.length) {
+      return (
+        <div className={appStyles.containerCard}>
+          <h5>No peer dependencies.</h5>
+        </div>
+      );
+    }
+    if (!inspectDep || inspectDep.dependencyType !== IDependencyType.PEER_DEPENDENCY) {
+      return (
+        <div>
+          <h5>Select a peer dependency to view influencers</h5>
+        </div>
+      );
+    }
+    // Calculate determinants and transitive referrers
+
+    return (
+      <div className={appStyles.containerCard}>
+        <h5>Influencers:</h5>
+      </div>
+    );
+  };
 
   if (!selectedEntry) {
     return (
@@ -102,20 +167,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           </div>
         </div>
       </div>
-      <div>
-        <h5>Peer dependencies:</h5>
-        {selectedEntry.dependencies
-          .filter((d) => d.dependencyType === IDependencyType.PEER_DEPENDENCY)
-          .map((dep) => (
-            <div className={styles.DependencyItem} key={dep.name} onClick={selectResolvedEntry(dep)}>
-              <h5>Name: {dep.peerDependencyMeta.name}</h5>
-              <div>
-                <p>Version: {dep.peerDependencyMeta.version}</p>
-                <p>optional: {`${dep.peerDependencyMeta.optional}`}</p>
-              </div>
-            </div>
-          ))}
-      </div>
+      {renderPeerDependencies()}
     </>
   );
 };

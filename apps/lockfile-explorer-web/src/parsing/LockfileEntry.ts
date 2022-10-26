@@ -26,6 +26,7 @@ export class LockfileEntry {
   public displayText: string = '';
 
   public dependencies: LockfileDependency[] = [];
+  public transitivePeerDependencies: Set<string> = new Set();
   public referencers: LockfileEntry[] = [];
 
   private static _packageEntryIdRegex: RegExp = new RegExp('/(.*)/([^/]+)$');
