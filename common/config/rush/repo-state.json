@@ -1,34 +1,5 @@
 // DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-  "pnpmShrinkwrapHash": "95cde0bda115fc9db175b4e6bc42ab3d6b1457e8",
-=======
-=======
->>>>>>> a79cf8e20d (rush update)
-<<<<<<< HEAD
-  "pnpmShrinkwrapHash": "e994dcc9031eebc3634b40a12a9dcb03231da322",
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-  "pnpmShrinkwrapHash": "2772260740ee0d1cfcb302a317f4b2dcf31fdbe1",
-=======
-  "pnpmShrinkwrapHash": "98d3003d2ae63f27dd0a279b53321789e550e3e4",
->>>>>>> 91247e1224 (rush update)
-=======
-  "pnpmShrinkwrapHash": "b45f869294f4940de9dd71b5de80d92a2010c679",
->>>>>>> 4976d128da (rush update)
->>>>>>> 5597763d58 (initial commit)
-<<<<<<< HEAD
->>>>>>> 209d4c777a (initial commit)
-=======
-=======
-  "pnpmShrinkwrapHash": "efdd8b95140615d8a8002206c92bb1d1ef7ee80f",
->>>>>>> 0cda1b3fee (rush update)
->>>>>>> a79cf8e20d (rush update)
-=======
-  "pnpmShrinkwrapHash": "722d6002046a04b13fa9eec72b5bdd66b7508dfb",
->>>>>>> cd76a0531a (rush update)
+  "pnpmShrinkwrapHash": "f15a13315e943a4e5df845647bfdf8d00ccc1a65",
   "preferredVersionsHash": "5222ca779ae69ebfd201e39c17f48ce9eaf8c3c2"
 }
