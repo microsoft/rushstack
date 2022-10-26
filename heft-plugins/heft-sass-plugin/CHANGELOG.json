@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@rushstack/heft-sass-plugin_v0.7.0",
+      "date": "Wed, 26 Oct 2022 15:16:29 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update sass transpiler to dart-sass"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.4",
       "tag": "@rushstack/heft-sass-plugin_v0.6.4",
       "date": "Wed, 26 Oct 2022 00:16:16 GMT",
