@@ -8,16 +8,22 @@ import { ReactNull } from '../../types/ReactNull';
 import { LockfileEntry } from '../../parsing/LockfileEntry';
 import { findPeerDependencies } from '../../parsing/findPeerDependencies';
 
+enum INFLUENCER_TYPES {
+  DETERMINANT,
+  TRANSITIVE_REFERRER
+}
+
 export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
   const dispatch = useAppDispatch();
 
   const [inspectDep, setInspectDep] = useState<LockfileDependency | null>(null);
-  const [influencers, setInfluencers] = useState([]);
+  const [influencers, setInfluencers] = useState<any[]>([]);
 
   useEffect(() => {
     if (selectedEntry) {
       findPeerDependencies(selectedEntry);
+      setInspectDep(null);
       console.log(
         'peers',
         selectedEntry.dependencies.filter((d) => d.dependencyType === IDependencyType.PEER_DEPENDENCY)
@@ -46,29 +52,46 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         while (stack.length) {
           const currEntry = stack.pop();
           if (currEntry) {
-            let flag = false;
             for (const referrer of currEntry.referencers) {
+              let flag = false;
               for (const dep of referrer.dependencies) {
                 if (dep.name === dependency.name) {
                   determinants.add(referrer);
                   flag = true;
                   break;
-                } else if (!flag) {
-                  transitiveReferrers.add(referrer);
                 }
               }
-            }
-            if (!flag) {
-              for (const referencer of currEntry.referencers) {
-                if (!visitedNodes.has(referencer)) {
-                  stack.push(referencer);
-                  visitedNodes.add(referencer);
+              if (!flag) {
+                if (referrer.transitivePeerDependencies.has(dependency.name)) {
+                  transitiveReferrers.add(referrer);
+                } else {
+                  console.error('Found referrer that does not correctly state tpd: ', referrer);
+                }
+                for (const referencer of currEntry.referencers) {
+                  if (!visitedNodes.has(referencer)) {
+                    stack.push(referencer);
+                    visitedNodes.add(referencer);
+                  }
                 }
               }
             }
           }
         }
+        const influencers = [];
         console.log('determinants: ', determinants);
+        for (const det of determinants.values()) {
+          influencers.push({
+            entry: det,
+            type: INFLUENCER_TYPES.DETERMINANT
+          });
+        }
+        for (const ref of transitiveReferrers.values()) {
+          influencers.push({
+            entry: ref,
+            type: INFLUENCER_TYPES.TRANSITIVE_REFERRER
+          });
+        }
+        setInfluencers(influencers);
         console.log('transitive referrers: ', transitiveReferrers);
       }
     },
@@ -107,6 +130,17 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     return (
       <div className={appStyles.containerCard}>
         <h5>Influencers:</h5>
+        {influencers
+          .filter((inf) => inf.type === INFLUENCER_TYPES.DETERMINANT)
+          .map(({ entry }) => (
+            <div key={entry.rawEntryId}>{entry.displayText}</div>
+          ))}
+        <h5>Transitive Referencers:</h5>
+        {influencers
+          .filter((inf) => inf.type === INFLUENCER_TYPES.TRANSITIVE_REFERRER)
+          .map(({ entry }) => (
+            <div key={entry.rawEntryId}>{entry.displayText}</div>
+          ))}
       </div>
     );
   };
@@ -147,7 +181,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                 className={`${styles.DependencyItem} ${
                   inspectDep?.name === dependency.name && styles.SelectedDependencyItem
                 }`}
-                key={dependency.entryId}
+                key={dependency.entryId || dependency.name}
                 onClick={selectResolvedEntry(dependency)}
               >
                 <h5>
