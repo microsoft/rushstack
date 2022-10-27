@@ -282,9 +282,11 @@ export class PackageJsonUpdater {
         }
       );
 
-      for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
-        this.updateProject(update);
-        allPackageUpdates.set(update.project.filePath, update.project);
+      if (updateOtherPackages) {
+        for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
+          this.updateProject(update);
+          allPackageUpdates.set(update.project.filePath, update.project);
+        }
       }
     }
 
@@ -463,8 +465,9 @@ export class PackageJsonUpdater {
             variant: variant
           }
         );
-
-        otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
+        if (updateOtherPackages) {
+          otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
+        }
       }
 
       this.updateProjects(otherPackageUpdates);
