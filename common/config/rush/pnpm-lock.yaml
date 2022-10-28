@@ -1836,7 +1836,6 @@ importers:
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
-      '@types/text-table': ~0.2.2
       '@yarnpkg/lockfile': ~1.0.2
       builtin-modules: ~3.1.0
       cli-table: ~0.3.1
@@ -1861,7 +1860,6 @@ importers:
       strict-uri-encode: ~2.0.0
       tapable: 2.2.1
       tar: ~6.1.11
-      text-table: ~0.2.0
       true-case-path: ~2.2.1
     dependencies:
       '@pnpm/link-bins': 5.3.25
@@ -1897,7 +1895,6 @@ importers:
       strict-uri-encode: 2.0.0
       tapable: 2.2.1
       tar: 6.1.11
-      text-table: 0.2.0
       true-case-path: 2.2.1
     devDependencies:
       '@pnpm/logger': 4.0.0
@@ -1919,7 +1916,6 @@ importers:
       '@types/ssri': 7.1.1
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
-      '@types/text-table': 0.2.2
 
   ../../libraries/rush-sdk:
     specifiers:
@@ -2635,6 +2631,9 @@ packages:
   /@aws-cdk/cloud-assembly-schema/2.7.0:
     resolution: {integrity: sha512-vKTKLMPvzUhsYo3c4/EbMJq+bwIgHkwK0lV9fc5mQlnTUTyHe6nGIvyzmWWMd5BVEkgNzw+QdecxeeYJNu/doA==}
     engines: {node: '>= 14.15.0'}
+    dependencies:
+      jsonschema: 1.4.1
+      semver: 7.3.8
     dev: true
     bundledDependencies:
       - jsonschema
@@ -2658,6 +2657,7 @@ packages:
     engines: {node: '>= 14.15.0'}
     dependencies:
       '@aws-cdk/cloud-assembly-schema': 2.7.0
+      semver: 7.3.8
     dev: true
     bundledDependencies:
       - semver
@@ -4255,6 +4255,10 @@ packages:
       '@babel/helper-string-parser': 7.19.4
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
+
+  /@balena/dockerignore/1.0.2:
+    resolution: {integrity: sha512-wMue2Sy4GAVTk6Ic4tJVcnfdau+gx2EnG7S+uAEe+TWJFqE4YoWN4/H8MSLj4eYJKxGg26lZwboEniNiNwZQ6Q==}
+    dev: true
 
   /@base2/pretty-print-object/1.0.1:
     resolution: {integrity: sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==}
@@ -7499,10 +7503,6 @@ packages:
       '@types/node': 12.20.24
     dev: true
 
-  /@types/text-table/0.2.2:
-    resolution: {integrity: sha512-dGoI5Af7To0R2XE8wJuc6vwlavWARsCh3UKJPjWs1YEqGUqfgBI/j/4GX0yf19/DsDPPf0YAXWAp8psNeIehLg==}
-    dev: true
-
   /@types/through/0.0.30:
     resolution: {integrity: sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==}
     dependencies:
@@ -8617,7 +8617,16 @@ packages:
     peerDependencies:
       constructs: ^10.0.0
     dependencies:
+      '@balena/dockerignore': 1.0.2
+      case: 1.6.3
       constructs: 10.0.130
+      fs-extra: 9.1.0
+      ignore: 5.2.0
+      jsonschema: 1.4.1
+      minimatch: 3.1.2
+      punycode: 2.1.1
+      semver: 7.3.8
+      yaml: 1.10.2
     dev: true
     bundledDependencies:
       - '@balena/dockerignore'
@@ -9406,6 +9415,11 @@ packages:
   /case-sensitive-paths-webpack-plugin/2.4.0:
     resolution: {integrity: sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==}
     engines: {node: '>=4'}
+    dev: true
+
+  /case/1.6.3:
+    resolution: {integrity: sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==}
+    engines: {node: '>= 0.8.0'}
     dev: true
 
   /ccount/1.1.0:
@@ -15023,6 +15037,10 @@ packages:
   /jsonpath-plus/4.0.0:
     resolution: {integrity: sha512-e0Jtg4KAzDJKKwzbLaUtinCn0RZseWBVRTRGihSpvFlM3wTR7ExSp+PTdeTsDrLNJUe7L7JYJe8mblHX5SCT6A==}
     engines: {node: '>=10.0'}
+
+  /jsonschema/1.4.1:
+    resolution: {integrity: sha512-S6cATIPVv1z0IlxdN+zUk5EPjkGCdnhN4wVSBlvoUO1tOLJootbo9CquNJmbIh4yikWHiUedhRYrNPn1arpEmQ==}
+    dev: true
 
   /jsonwebtoken/8.5.1:
     resolution: {integrity: sha512-XjwVfRS6jTMsqYs0EsuJ4LGxXV14zQybNd4L2r0UvbVnSF9Af8x7p5MzbJ90Ioz/9TI41/hTCvznF/loiSzn8w==}
