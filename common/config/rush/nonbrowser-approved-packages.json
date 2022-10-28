@@ -679,10 +679,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "text-table",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "timsort",
       "allowedCategories": [ "libraries" ]
     },

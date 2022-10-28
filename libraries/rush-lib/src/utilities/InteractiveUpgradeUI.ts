@@ -1,9 +1,7 @@
 import inquirer from 'inquirer';
-import { AnsiEscape } from '@rushstack/node-core-library';
-
 import _ from 'lodash';
 import colors from 'colors/safe';
-import table from 'text-table';
+import CliTable from 'cli-table';
 import Separator from 'inquirer/lib/objects/separator';
 
 export interface IUIGroup {
@@ -121,13 +119,30 @@ function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup)
     .map(choice)
     .filter(Boolean);
 
-  const choicesAsATable: string[] = table(_.map(choices, 'name'), {
-    align: ['l', 'l', 'l'],
-    stringLength: function (str: string) {
-      return AnsiEscape.removeCodes(str).length;
-    }
-  }).split('\n');
+  const cliTable: CliTable = new CliTable({
+    chars: {
+      top: '',
+      'top-mid': '',
+      'top-left': '',
+      'top-right': '',
+      bottom: '',
+      'bottom-mid': '',
+      'bottom-left': '',
+      'bottom-right': '',
+      left: '',
+      'left-mid': '',
+      mid: '',
+      'mid-mid': '',
+      right: '',
+      'right-mid': '',
+      middle: ' '
+    },
+    colWidths: [50, 10, 3, 10, 100]
+  });
 
+  cliTable.push(..._.map(choices, 'name'));
+
+  const choicesAsATable: string[] = cliTable.toString().split('\n');
   const choicesWithTableFormatting: boolean[] = _.map(choices, (choice: IUpgradeInteractiveDepChoice, i) => {
     choice.name = choicesAsATable[i];
     return choice;
