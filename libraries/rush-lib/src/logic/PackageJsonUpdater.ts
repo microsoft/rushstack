@@ -274,19 +274,16 @@ export class PackageJsonUpdater {
       this.updateProject(currentProjectDevDepUpdate);
     }
 
-    if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
+    if (updateOtherPackages) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         this._rushConfiguration,
         {
           variant: variant
         }
       );
-
-      if (updateOtherPackages) {
-        for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
-          this.updateProject(update);
-          allPackageUpdates.set(update.project.filePath, update.project);
-        }
+      for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
+        this.updateProject(update);
+        allPackageUpdates.set(update.project.filePath, update.project);
       }
     }
 
@@ -457,17 +454,15 @@ export class PackageJsonUpdater {
 
       let otherPackageUpdates: IUpdateProjectOptions[] = [];
 
-      if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
-        // we need to do a mismatch check
+      // we need to do a mismatch check
+      if (updateOtherPackages) {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
           this._rushConfiguration,
           {
             variant: variant
           }
         );
-        if (updateOtherPackages) {
-          otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
-        }
+        otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
       }
 
       this.updateProjects(otherPackageUpdates);
