@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Oct 2022 00:16:16 GMT and should not be manually modified.
+
+## 7.19.23
+Wed, 26 Oct 2022 00:16:16 GMT
+
+### Patches
+
+- Update the @microsoft/tsdoc dependency version to 0.14.2.
 
 ## 7.19.22
 Mon, 17 Oct 2022 22:14:21 GMT
