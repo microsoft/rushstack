@@ -4,6 +4,19 @@
 
 ```ts
 
+import type { IRushPlugin } from '@rushstack/rush-sdk';
+import type { RushConfiguration } from '@rushstack/rush-sdk';
+import type { RushSession } from '@rushstack/rush-sdk';
+
+// @public (undocumented)
+class ExampleChangePlugin implements IRushPlugin {
+    // (undocumented)
+    apply(rushSession: RushSession, rushConfig: RushConfiguration): void;
+    // (undocumented)
+    pluginName: string;
+}
+export default ExampleChangePlugin;
+
 // (No @packageDocumentation comment for this package)
 
 ```

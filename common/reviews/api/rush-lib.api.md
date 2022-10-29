@@ -252,10 +252,11 @@ export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationB
 
 // @beta (undocumented)
 export interface IChangeExperienceProvider {
-    getCommitMessage?(changeFileData: Map<string, IChangeFile>, commitChangesMessage: string | undefined): Promise<string>;
+    getCommitMessage?(changeFileData: Map<string, IChangeFile>): Promise<string | undefined>;
     promptForBumpType?(promptModule: ChangeExperiencePromptModule, packageName: string, bumpOptions: Record<string, string>): Promise<string>;
     promptForComment?(promptModule: ChangeExperiencePromptModule, packageName: string): Promise<string>;
     promptForCustomFields?(promptModule: ChangeExperiencePromptModule, packageName: string): Promise<Record<string, string | undefined>>;
+    setCommitChangesMessage?(commitChangesMessage: string | undefined): void;
 }
 
 // @beta
@@ -275,6 +276,7 @@ export interface IChangeInfo {
     changeType?: ChangeType;
     comment?: string;
     commit?: string;
+    customFields?: Record<string, string>;
     newRangeDependency?: string;
     newVersion?: string;
     order?: number;

@@ -61,8 +61,7 @@ export class ChangeAction extends BaseRushAction {
   private readonly _commitChangesFlagParameter: CommandLineFlagParameter;
   private readonly _commitChangesMessageStringParameter: CommandLineStringParameter;
 
-  private readonly _experienceProviders: IChangeExperienceProvider[];
-
+  private _experienceProviders!: IChangeExperienceProvider[];
   private _targetBranchName: string | undefined;
 
   public constructor(parser: RushCommandLineParser) {
@@ -175,13 +174,20 @@ export class ChangeAction extends BaseRushAction {
       alternatives: [...Object.keys(this._getBumpOptions())],
       description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
     });
-
-    const factories: ChangeExperienceProviderFactory[] = this.rushSession.getChangeExperienceProviderFactories();
-    this._experienceProviders = factories.map((factory) => factory());
   }
 
   public async runAsync(): Promise<void> {
     console.log(`The target branch is ${this._targetBranch}`);
+
+    const factories: ChangeExperienceProviderFactory[] =
+      this.rushSession.getChangeExperienceProviderFactories();
+    this._experienceProviders = factories.map((factory) => factory());
+
+    for (const provider of this._experienceProviders) {
+      if (provider.setCommitChangesMessage) {
+        provider.setCommitChangesMessage(this._commitChangesMessageStringParameter.value);
+      }
+    }
 
     if (this._verifyParameter.value) {
       const errors: string[] = [
@@ -321,14 +327,20 @@ export class ChangeAction extends BaseRushAction {
     }
     if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
       if (changefiles && changefiles.length !== 0) {
-        let commitMessage: string | undefined = this._commitChangesMessageStringParameter.value;
+        let commitMessage: string | undefined = undefined;
+
         for (const provider of this._experienceProviders) {
           if (provider.getCommitMessage) {
-            commitMessage = await provider.getCommitMessage(changeFileData, commitMessage);
-            break;
+            commitMessage = commitMessage || (await provider.getCommitMessage(changeFileData));
+            if (commitMessage) break;
           }
         }
-        commitMessage = commitMessage || this.rushConfiguration.gitChangefilesCommitMessage || 'Rush change';
+
+        commitMessage =
+          commitMessage ||
+          this._commitChangesMessageStringParameter.value ||
+          this.rushConfiguration.gitChangefilesCommitMessage ||
+          'Rush change';
 
         this._stageAndCommitGitChanges(changefiles, commitMessage);
       } else {
@@ -783,6 +795,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _stageAndCommitGitChanges(pattern: string[], message: string): void {
+    console.log('stage', pattern, message);
     try {
       Utilities.executeCommand({
         command: 'git',

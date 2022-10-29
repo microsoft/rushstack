@@ -10,9 +10,7 @@ import type {
   IChangeExperienceProvider,
   IChangeFile
 } from '@rushstack/rush-sdk';
-import {
-  ChangeType
-} from '@rushstack/rush-sdk';
+import { ChangeType } from '@rushstack/rush-sdk';
 
 const PLUGIN_NAME: string = 'ExampleChangePlugin';
 
@@ -26,12 +24,76 @@ export class ExampleChangeProvider implements IChangeExperienceProvider {
   public readonly rushSession: RushSession;
   public readonly rushConfig: RushConfiguration;
 
+  private _parsedDefaults: boolean = false;
+  private _commitChangesMessage: string | undefined;
+  private _defaultMessage: string = '';
+  private _defaultBumpType: string = 'patch';
+  private _defaultJiraTicket: string = '';
+
   constructor(rushSession: RushSession, rushConfig: RushConfiguration) {
     this.rushSession = rushSession;
     this.rushConfig = rushConfig;
   }
 
-  async promptForCustomFields(promptModule: ChangeExperiencePromptModule, packageName: string): Promise<Record<string, string | undefined>> {
+  setCommitChangesMessage(commitChangesMessage: string | undefined) {
+    this._commitChangesMessage = commitChangesMessage;
+  }
+
+  async promptForComment(promptModule: ChangeExperiencePromptModule, packageName: string): Promise<string> {
+    if (!this._parsedDefaults) {
+      this._parsedDefaults = true;
+
+      console.log(1);
+      const commitMessage: string | undefined =
+        this._commitChangesMessage || ExampleChangeProvider.getLatestCommit();
+      console.log(2);
+      console.log(commitMessage);
+
+      if (commitMessage) {
+        const conventional = ExampleChangeProvider.parseCommitMessage(commitMessage);
+        console.log(conventional);
+
+        this._defaultMessage = conventional.message;
+        this._defaultBumpType = ExampleChangeProvider.conventionalToBumpType(conventional.type);
+        this._defaultJiraTicket = conventional.jiraTicket || '';
+      }
+    }
+
+    const { comment }: { comment: string } = await promptModule({
+      name: 'comment',
+      type: 'input',
+      message: `Describe changes, or ENTER if no changes:`,
+      ...(this._defaultMessage ? { default: this._defaultMessage } : {})
+    });
+
+    return comment;
+  }
+
+  async promptForBumpType(
+    promptModule: ChangeExperiencePromptModule,
+    packageName: string,
+    bumpOptions: Record<string, string>
+  ): Promise<string> {
+    const { bumpType }: { bumpType: string } = await promptModule({
+      choices: Object.keys(bumpOptions).map((option) => {
+        return {
+          value: option,
+          name: bumpOptions[option]
+        };
+      }),
+      default: this._defaultBumpType,
+      message: 'Select the type of change:',
+      name: 'bumpType',
+      type: 'list'
+    });
+
+    return bumpType;
+  }
+
+  async promptForCustomFields(
+    promptModule: ChangeExperiencePromptModule,
+    packageName: string
+  ): Promise<Record<string, string | undefined>> {
     const jiraTicket: string | undefined = await this._promptForJiraTicket(promptModule);
 
     return {
@@ -44,6 +106,7 @@ export class ExampleChangeProvider implements IChangeExperienceProvider {
       name: 'jiraTicket',
       type: 'input',
       message: 'Enter JIRA Ticket, or N/A if none:',
+      ...(this._defaultJiraTicket ? { default: this._defaultJiraTicket } : {}),
       validate: (input: string) => {
         if (input === 'N/A') {
           return true;
@@ -59,10 +122,10 @@ export class ExampleChangeProvider implements IChangeExperienceProvider {
     return jiraTicket.toUpperCase();
   }
 
-  async _getCommitMessage(changeFileData: Map<string, IChangeFile>, commitChangeMessage: string | undefined): Promise<string | undefined> {
+  async getCommitMessage(changeFileData: Map<string, IChangeFile>): Promise<string | undefined> {
     // If the user already provided a message, we don't mess with it
-    if (commitChangeMessage) {
-      return commitChangeMessage;
+    if (this._commitChangesMessage) {
+      return this._commitChangesMessage;
     }
 
     // If we have change data we can use, we construct a message
@@ -86,13 +149,16 @@ export class ExampleChangeProvider implements IChangeExperienceProvider {
   }
 
   static getLatestCommit(): string | undefined {
-    const lines: string[] = child_process.execSync(`git log --since '1 hour ago' --format="%s"`).toString().split('\n');
+    const lines: string[] = child_process
+      .execSync(`git log --since '1 hour ago' --format="%s"`)
+      .toString()
+      .split('\n');
 
     return this.filterCommits(lines)[0];
   }
 
   static filterCommits(commits: string[]): string[] {
-    return commits.filter(line => {
+    return commits.filter((line) => {
       if (line.match(/^Merge/)) return false;
       if (line.match(/\[skip ci\]/)) return false;
       return true;
@@ -103,7 +169,6 @@ export class ExampleChangeProvider implements IChangeExperienceProvider {
     let parsedMessage: string = message;
     let parsedType: string | undefined = undefined;
     let parsedTicket: string | undefined = undefined;
-
 
     const matchedType = parsedMessage.match(/([a-zA-Z]+!?): ?(.+)/);
     if (matchedType) {
@@ -122,7 +187,8 @@ export class ExampleChangeProvider implements IChangeExperienceProvider {
     return { type: parsedType, message: parsedMessage, jiraTicket: parsedTicket };
   }
 
-  static conventionalToBumpType(type: string): ChangeType {
+  static conventionalToBumpType(type: string | undefined): string {
+    type = type || '';
     if (type.endsWith('!')) {
       // A conventional commit type ending with '!' is generally a breaking change,
       // but in a monorepo environment we are still aren't going to default to "major" -
@@ -135,14 +201,14 @@ export class ExampleChangeProvider implements IChangeExperienceProvider {
       case 'test':
       case 'chore':
       case 'refactor':
-        return ChangeType.none;
+        return 'none';
       case 'fix':
       case 'perf':
-        return ChangeType.patch;
+        return 'patch';
       case 'feat':
-        return ChangeType.minor;
+        return 'minor';
       default:
-        return ChangeType.patch;
+        return 'patch';
     }
   }
 

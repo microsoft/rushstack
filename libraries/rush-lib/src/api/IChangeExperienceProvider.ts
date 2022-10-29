@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IChangeFile, IChangeInfo } from './ChangeManagement';
+import type { IChangeFile } from './ChangeManagement';
 export type { IChangeFile, IChangeInfo } from './ChangeManagement';
-import { ChangeType } from './ChangeManagement';
 export { ChangeType } from './ChangeManagement';
 import type { PromptModule as ChangeExperiencePromptModule } from 'inquirer';
 export type { PromptModule as ChangeExperiencePromptModule } from 'inquirer';
@@ -12,6 +11,12 @@ export type { PromptModule as ChangeExperiencePromptModule } from 'inquirer';
  * @beta
  */
 export interface IChangeExperienceProvider {
+  /**
+   * If provided, this function will be called with the commitChangesMessage passed in by the user.
+   * (Using the --commit-message flag.)
+   */
+  setCommitChangesMessage?(commitChangesMessage: string | undefined): void;
+
   /**
    * If provided, the prompt for comment will be completely replaced with your plugin's implementation.
    * If multiple plugins are registered, the first plugin to provide this implementation will
@@ -49,5 +54,5 @@ export interface IChangeExperienceProvider {
    * own default if not. If multiple plugins are registered, the first plugin to provide
    * this function will be used.
    */
-  getCommitMessage?(changeFileData: Map<string, IChangeFile>, commitChangesMessage: string | undefined): Promise<string>;
+  getCommitMessage?(changeFileData: Map<string, IChangeFile>): Promise<string | undefined>;
 }
