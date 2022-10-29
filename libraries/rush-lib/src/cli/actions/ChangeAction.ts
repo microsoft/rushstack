@@ -36,6 +36,9 @@ import {
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Git } from '../../logic/Git';
 
+import type { IChangeExperienceProvider } from '../../api/IChangeExperienceProvider';
+import type { ChangeExperienceProviderFactory } from '../../pluginFramework/RushSession';
+
 import type * as inquirerTypes from 'inquirer';
 import { Utilities } from '../../utilities/Utilities';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
@@ -58,6 +61,7 @@ export class ChangeAction extends BaseRushAction {
   private readonly _commitChangesFlagParameter: CommandLineFlagParameter;
   private readonly _commitChangesMessageStringParameter: CommandLineStringParameter;
 
+  private _experienceProviders!: IChangeExperienceProvider[];
   private _targetBranchName: string | undefined;
 
   public constructor(parser: RushCommandLineParser) {
@@ -174,6 +178,16 @@ export class ChangeAction extends BaseRushAction {
 
   public async runAsync(): Promise<void> {
     console.log(`The target branch is ${this._targetBranch}`);
+
+    const factories: ChangeExperienceProviderFactory[] =
+      this.rushSession.getChangeExperienceProviderFactories();
+    this._experienceProviders = factories.map((factory) => factory());
+
+    for (const provider of this._experienceProviders) {
+      if (provider.setCommitChangesMessage) {
+        provider.setCommitChangesMessage(this._commitChangesMessageStringParameter.value);
+      }
+    }
 
     if (this._verifyParameter.value) {
       const errors: string[] = [
@@ -313,12 +327,22 @@ export class ChangeAction extends BaseRushAction {
     }
     if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
       if (changefiles && changefiles.length !== 0) {
-        this._stageAndCommitGitChanges(
-          changefiles,
+        let commitMessage: string | undefined = undefined;
+
+        for (const provider of this._experienceProviders) {
+          if (provider.getCommitMessage) {
+            commitMessage = commitMessage || (await provider.getCommitMessage(changeFileData));
+            if (commitMessage) break;
+          }
+        }
+
+        commitMessage =
+          commitMessage ||
           this._commitChangesMessageStringParameter.value ||
-            this.rushConfiguration.gitChangefilesCommitMessage ||
-            'Rush change'
-        );
+          this.rushConfiguration.gitChangefilesCommitMessage ||
+          'Rush change';
+
+        this._stageAndCommitGitChanges(changefiles, commitMessage);
       } else {
         this._terminal.writeWarningLine('Warning: No change files generated, nothing to commit.');
       }
@@ -482,38 +506,80 @@ export class ChangeAction extends BaseRushAction {
     packageName: string
   ): Promise<IChangeInfo | undefined> {
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
+
+    let comment: string | undefined = undefined;
+    for (const provider of this._experienceProviders) {
+      if (provider.promptForComment) {
+        comment = await provider.promptForComment(promptModule, packageName);
+        break;
+      }
+    }
+
+    if (comment === undefined) {
+      comment = await this._defaultPromptForComment(promptModule);
+    }
+
+    let bumpType: string | undefined = undefined;
+
+    if (Object.keys(bumpOptions).length === 0 || !comment) {
+      bumpType = 'none';
+    } else {
+      for (const provider of this._experienceProviders) {
+        if (provider.promptForBumpType) {
+          bumpType = await provider.promptForBumpType(promptModule, packageName, bumpOptions);
+          break;
+        }
+      }
+
+      if (bumpType === undefined) {
+        bumpType = await this._defaultPromptForBumpType(promptModule, bumpOptions);
+      }
+    }
+
+    const customFields: Record<string, string | undefined> = {};
+
+    for (const provider of this._experienceProviders) {
+      if (provider.promptForCustomFields) {
+        Object.assign(customFields, await provider.promptForCustomFields(promptModule, packageName));
+      }
+    }
+
+    return {
+      packageName: packageName,
+      comment: comment,
+      type: bumpType,
+      customFields: customFields
+    } as IChangeInfo;
+  }
+
+  private async _defaultPromptForComment(promptModule: inquirerTypes.PromptModule): Promise<string> {
     const { comment }: { comment: string } = await promptModule({
       name: 'comment',
       type: 'input',
       message: `Describe changes, or ENTER if no changes:`
     });
 
-    if (Object.keys(bumpOptions).length === 0 || !comment) {
-      return {
-        packageName: packageName,
-        comment: comment || '',
-        type: ChangeType[ChangeType.none]
-      } as IChangeInfo;
-    } else {
-      const { bumpType }: { bumpType: string } = await promptModule({
-        choices: Object.keys(bumpOptions).map((option) => {
-          return {
-            value: option,
-            name: bumpOptions[option]
-          };
-        }),
-        default: 'patch',
-        message: 'Select the type of change:',
-        name: 'bumpType',
-        type: 'list'
-      });
+    return comment;
+  }
 
-      return {
-        packageName: packageName,
-        comment: comment,
-        type: bumpType
-      } as IChangeInfo;
-    }
+  private async _defaultPromptForBumpType(
+    promptModule: inquirerTypes.PromptModule,
+    bumpOptions: Record<string, string>
+  ): Promise<string> {
+    const { bumpType }: { bumpType: string } = await promptModule({
+      choices: Object.keys(bumpOptions).map((option) => {
+        return {
+          value: option,
+          name: bumpOptions[option]
+        };
+      }),
+      default: 'patch',
+      message: 'Select the type of change:',
+      name: 'bumpType',
+      type: 'list'
+    });
+
+    return bumpType;
   }
 
   private _getBumpOptions(packageName?: string): { [type: string]: string } {
@@ -729,6 +795,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _stageAndCommitGitChanges(pattern: string[], message: string): void {
+    console.log('stage', pattern, message);
     try {
       Utilities.executeCommand({
         command: 'git',

@@ -4,6 +4,7 @@
 import { InternalError, ITerminalProvider } from '@rushstack/node-core-library';
 import { IBuildCacheJson } from '../api/BuildCacheConfiguration';
 import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
+import { IChangeExperienceProvider } from '../api/IChangeExperienceProvider';
 import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
 import { RushLifecycleHooks } from './RushLifeCycle';
 
@@ -23,9 +24,16 @@ export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) =
 /**
  * @beta
  */
+export type ChangeExperienceProviderFactory = () => IChangeExperienceProvider;
+
+/**
+ * @beta
+ */
 export class RushSession {
   private readonly _options: IRushSessionOptions;
   private readonly _cloudBuildCacheProviderFactories: Map<string, CloudBuildCacheProviderFactory> = new Map();
+  private readonly _changeExperienceProviderFactories: Map<string, ChangeExperienceProviderFactory> =
+    new Map();
 
   public readonly hooks: RushLifecycleHooks;
 
@@ -67,5 +75,19 @@ export class RushSession {
     cacheProviderName: string
   ): CloudBuildCacheProviderFactory | undefined {
     return this._cloudBuildCacheProviderFactories.get(cacheProviderName);
+  }
+
+  public registerChangeExperienceProviderFactory(
+    name: string,
+    factory: ChangeExperienceProviderFactory
+  ): void {
+    if (this._changeExperienceProviderFactories.has(name)) {
+      throw new Error(`A ChangeExperienceProviderFactory for ${name} has already been registered`);
+    }
+    this._changeExperienceProviderFactories.set(name, factory);
+  }
+
+  public getChangeExperienceProviderFactories(): ChangeExperienceProviderFactory[] {
+    return [...this._changeExperienceProviderFactories.values()];
   }
 }

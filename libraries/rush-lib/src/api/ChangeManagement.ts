@@ -3,6 +3,7 @@
 
 /**
  * Representation for a changes file
+ * @beta
  */
 export interface IChangeFile {
   changes: IChangeInfo[];
@@ -12,6 +13,7 @@ export interface IChangeFile {
 
 /**
  * Represents all of the types of change requests.
+ * @beta
  */
 export enum ChangeType {
   none = 0,
@@ -41,6 +43,7 @@ export interface IVersionPolicyChangeInfo {
 
 /**
  * Defines an IChangeInfo object.
+ * @beta
  */
 export interface IChangeInfo {
   /**
@@ -59,6 +62,11 @@ export interface IChangeInfo {
    * A user provided comment for the change.
    */
   comment?: string;
+
+  /**
+   * An optional dictionary of custom string fields.
+   */
+  customFields?: Record<string, string>;
 
   /**
    * The email of the user who provided the comment. Pulled from the Git log.

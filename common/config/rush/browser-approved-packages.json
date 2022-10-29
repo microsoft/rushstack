@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "example-change-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests" ]
     },

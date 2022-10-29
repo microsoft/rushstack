@@ -1,0 +1,35 @@
+{
+  "name": "example-change-plugin",
+  "version": "0.0.1",
+  "description": "An example change provider plugin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack",
+    "directory": "heft-plugins/heft-webpack5-plugin"
+  },
+  "homepage": "https://rushjs.io",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "dependencies": {
+    "@azure/identity": "~2.1.0",
+    "@azure/storage-blob": "~12.11.0",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24"
+  }
+}

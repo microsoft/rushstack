@@ -9,6 +9,7 @@
 import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
+import { PromptModule as ChangeExperiencePromptModule } from 'inquirer';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
@@ -85,9 +86,30 @@ export enum BumpType {
     'prerelease' = 1
 }
 
+export { ChangeExperiencePromptModule }
+
+// @beta (undocumented)
+export type ChangeExperienceProviderFactory = () => IChangeExperienceProvider;
+
 // @public
 export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
+}
+
+// @beta
+export enum ChangeType {
+    // (undocumented)
+    dependency = 1,
+    // (undocumented)
+    hotfix = 2,
+    // (undocumented)
+    major = 5,
+    // (undocumented)
+    minor = 4,
+    // (undocumented)
+    none = 0,
+    // (undocumented)
+    patch = 3
 }
 
 // Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
@@ -226,6 +248,40 @@ export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) =>
 export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
     // (undocumented)
     pluginPackageFolder: string;
+}
+
+// @beta (undocumented)
+export interface IChangeExperienceProvider {
+    getCommitMessage?(changeFileData: Map<string, IChangeFile>): Promise<string | undefined>;
+    promptForBumpType?(promptModule: ChangeExperiencePromptModule, packageName: string, bumpOptions: Record<string, string>): Promise<string>;
+    promptForComment?(promptModule: ChangeExperiencePromptModule, packageName: string): Promise<string>;
+    promptForCustomFields?(promptModule: ChangeExperiencePromptModule, packageName: string): Promise<Record<string, string | undefined>>;
+    setCommitChangesMessage?(commitChangesMessage: string | undefined): void;
+}
+
+// @beta
+export interface IChangeFile {
+    // (undocumented)
+    changes: IChangeInfo[];
+    // (undocumented)
+    email: string | undefined;
+    // (undocumented)
+    packageName: string;
+}
+
+// @beta
+export interface IChangeInfo {
+    author?: string;
+    changes?: IChangeInfo[];
+    changeType?: ChangeType;
+    comment?: string;
+    commit?: string;
+    customFields?: Record<string, string>;
+    newRangeDependency?: string;
+    newVersion?: string;
+    order?: number;
+    packageName: string;
+    type?: string;
 }
 
 // @beta (undocumented)
@@ -958,11 +1014,15 @@ export class RushLifecycleHooks {
 export class RushSession {
     constructor(options: IRushSessionOptions);
     // (undocumented)
+    getChangeExperienceProviderFactories(): ChangeExperienceProviderFactory[];
+    // (undocumented)
     getCloudBuildCacheProviderFactory(cacheProviderName: string): CloudBuildCacheProviderFactory | undefined;
     // (undocumented)
     getLogger(name: string): ILogger;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
+    // (undocumented)
+    registerChangeExperienceProviderFactory(name: string, factory: ChangeExperienceProviderFactory): void;
     // (undocumented)
     registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: CloudBuildCacheProviderFactory): void;
     // (undocumented)

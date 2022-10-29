@@ -78,4 +78,9 @@ export interface IChangeLogComment {
    * The commit, if applicable, including the change request.
    */
   commit?: string;
+
+  /**
+   * An optional dictionary of custom string fields.
+   */
+  customFields?: Record<string, string>;
 }
