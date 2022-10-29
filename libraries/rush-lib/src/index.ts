@@ -113,7 +113,7 @@ export { IRushPluginConfigurationBase as _IRushPluginConfigurationBase } from '.
 export { ILogger } from './pluginFramework/logging/Logger';
 
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
-export { IChangeExperienceProvider, ChangeExperiencePromptModule } from './api/IChangeExperienceProvider';
+export { IChangeExperienceProvider, ChangeExperiencePromptModule, IChangeFile, ChangeType, IChangeInfo } from './api/IChangeExperienceProvider';
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 

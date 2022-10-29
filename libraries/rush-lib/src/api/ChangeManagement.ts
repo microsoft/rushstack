@@ -3,6 +3,7 @@
 
 /**
  * Representation for a changes file
+ * @beta
  */
 export interface IChangeFile {
   changes: IChangeInfo[];
@@ -12,6 +13,7 @@ export interface IChangeFile {
 
 /**
  * Represents all of the types of change requests.
+ * @beta
  */
 export enum ChangeType {
   none = 0,
@@ -41,6 +43,7 @@ export interface IVersionPolicyChangeInfo {
 
 /**
  * Defines an IChangeInfo object.
+ * @beta
  */
 export interface IChangeInfo {
   /**

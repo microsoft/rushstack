@@ -61,6 +61,8 @@ export class ChangeAction extends BaseRushAction {
   private readonly _commitChangesFlagParameter: CommandLineFlagParameter;
   private readonly _commitChangesMessageStringParameter: CommandLineStringParameter;
 
+  private readonly _experienceProviders: IChangeExperienceProvider[];
+
   private _targetBranchName: string | undefined;
 
   public constructor(parser: RushCommandLineParser) {
@@ -173,6 +175,9 @@ export class ChangeAction extends BaseRushAction {
       alternatives: [...Object.keys(this._getBumpOptions())],
       description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
     });
+
+    const factories: ChangeExperienceProviderFactory[] = this.rushSession.getChangeExperienceProviderFactories();
+    this._experienceProviders = factories.map((factory) => factory());
   }
 
   public async runAsync(): Promise<void> {
@@ -316,12 +321,16 @@ export class ChangeAction extends BaseRushAction {
     }
     if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
       if (changefiles && changefiles.length !== 0) {
-        this._stageAndCommitGitChanges(
-          changefiles,
-          this._commitChangesMessageStringParameter.value ||
-            this.rushConfiguration.gitChangefilesCommitMessage ||
-            'Rush change'
-        );
+        let commitMessage: string | undefined = this._commitChangesMessageStringParameter.value;
+        for (const provider of this._experienceProviders) {
+          if (provider.getCommitMessage) {
+            commitMessage = await provider.getCommitMessage(changeFileData, commitMessage);
+            break;
+          }
+        }
+        commitMessage = commitMessage || this.rushConfiguration.gitChangefilesCommitMessage || 'Rush change';
+
+        this._stageAndCommitGitChanges(changefiles, commitMessage);
       } else {
         this._terminal.writeWarningLine('Warning: No change files generated, nothing to commit.');
       }
@@ -484,13 +493,10 @@ export class ChangeAction extends BaseRushAction {
     promptModule: inquirerTypes.PromptModule,
     packageName: string
   ): Promise<IChangeInfo | undefined> {
-    const factories: ChangeExperienceProviderFactory[] =
-      this.rushSession.getChangeExperienceProviderFactories();
-    const providers: IChangeExperienceProvider[] = factories.map((factory) => factory());
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
 
     let comment: string | undefined = undefined;
-    for (const provider of providers) {
+    for (const provider of this._experienceProviders) {
       if (provider.promptForComment) {
         comment = await provider.promptForComment(promptModule, packageName);
         break;
@@ -506,7 +512,7 @@ export class ChangeAction extends BaseRushAction {
     if (Object.keys(bumpOptions).length === 0 || !comment) {
       bumpType = 'none';
     } else {
-      for (const provider of providers) {
+      for (const provider of this._experienceProviders) {
         if (provider.promptForBumpType) {
           bumpType = await provider.promptForBumpType(promptModule, packageName, bumpOptions);
           break;
@@ -520,7 +526,7 @@ export class ChangeAction extends BaseRushAction {
 
     const customFields: Record<string, string | undefined> = {};
 
-    for (const provider of providers) {
+    for (const provider of this._experienceProviders) {
       if (provider.promptForCustomFields) {
         Object.assign(customFields, await provider.promptForCustomFields(promptModule, packageName));
       }

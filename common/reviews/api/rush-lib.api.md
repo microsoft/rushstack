@@ -96,6 +96,22 @@ export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
+// @beta
+export enum ChangeType {
+    // (undocumented)
+    dependency = 1,
+    // (undocumented)
+    hotfix = 2,
+    // (undocumented)
+    major = 5,
+    // (undocumented)
+    minor = 4,
+    // (undocumented)
+    none = 0,
+    // (undocumented)
+    patch = 3
+}
+
 // Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
 //
 // @beta (undocumented)
@@ -236,9 +252,34 @@ export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationB
 
 // @beta (undocumented)
 export interface IChangeExperienceProvider {
+    getCommitMessage?(changeFileData: Map<string, IChangeFile>, commitChangesMessage: string | undefined): Promise<string>;
     promptForBumpType?(promptModule: ChangeExperiencePromptModule, packageName: string, bumpOptions: Record<string, string>): Promise<string>;
     promptForComment?(promptModule: ChangeExperiencePromptModule, packageName: string): Promise<string>;
     promptForCustomFields?(promptModule: ChangeExperiencePromptModule, packageName: string): Promise<Record<string, string | undefined>>;
+}
+
+// @beta
+export interface IChangeFile {
+    // (undocumented)
+    changes: IChangeInfo[];
+    // (undocumented)
+    email: string | undefined;
+    // (undocumented)
+    packageName: string;
+}
+
+// @beta
+export interface IChangeInfo {
+    author?: string;
+    changes?: IChangeInfo[];
+    changeType?: ChangeType;
+    comment?: string;
+    commit?: string;
+    newRangeDependency?: string;
+    newVersion?: string;
+    order?: number;
+    packageName: string;
+    type?: string;
 }
 
 // @beta (undocumented)
