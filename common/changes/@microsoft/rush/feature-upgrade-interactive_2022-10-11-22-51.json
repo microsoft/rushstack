@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Introduce a `rush upgrade-interactive` action that provides an interactive way to upgrade outdated dependencies.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
