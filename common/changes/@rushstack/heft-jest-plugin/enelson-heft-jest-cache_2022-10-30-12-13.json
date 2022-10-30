@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Enable build caching for heft-jest-plugin",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}
