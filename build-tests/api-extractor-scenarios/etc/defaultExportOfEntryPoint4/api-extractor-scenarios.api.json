@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -186,6 +186,7 @@
               "text": "\"literal\""
             }
           ],
+          "fileUrlPath": "src/defaultExportOfEntryPoint4/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "_default",

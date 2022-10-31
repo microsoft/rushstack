@@ -34,6 +34,18 @@
   /*[LINE "DEMO"]*/ "strictPeerDependencies": true,
 
   /**
+   * Environment variables that will be provided to PNPM.
+   */
+  /*[BEGIN "DEMO"]*/
+  "environmentVariables": {
+    "NODE_OPTIONS": {
+      "value": "--max-old-space-size=4096",
+      "override": false
+    }
+  },
+  /*[END "DEMO"]*/
+
+  /**
    * Specifies the location of the PNPM store.  There are two possible values:
    *
    * - `local` - use the `pnpm-store` folder in the current configured temp folder:
@@ -145,9 +157,7 @@
    *
    * PNPM documentation: https://pnpm.io/package_json#pnpmneverbuiltdependencies
    */
-  "globalNeverBuiltDependencies": [
-    /*[LINE "HYPOTHETICAL"]*/ "fsevents"
-  ],
+  "globalNeverBuiltDependencies": [/*[LINE "HYPOTHETICAL"]*/ "fsevents"],
 
   /**
    * The `globalAllowedDeprecatedVersions` setting suppresses installation warnings for package
@@ -161,7 +171,7 @@
    * If you are working to eliminate a deprecated version, it's better to specify `allowedDeprecatedVersions`
    * in the package.json file for individual Rush projects.
    */
-   "globalAllowedDeprecatedVersions": {
+  "globalAllowedDeprecatedVersions": {
     /*[LINE "HYPOTHETICAL"]*/ "request": "*"
   },
 

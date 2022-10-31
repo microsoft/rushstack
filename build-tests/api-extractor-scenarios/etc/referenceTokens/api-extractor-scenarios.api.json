@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -182,6 +182,7 @@
               "text": "export declare namespace n1 "
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "n1",
           "preserveMemberOrder": false,
@@ -389,6 +390,7 @@
               "text": "export declare class SomeClass1 "
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeClass1",
           "preserveMemberOrder": false,
@@ -444,6 +446,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeClass3",
           "preserveMemberOrder": false,
@@ -473,6 +476,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeClass4",
           "preserveMemberOrder": false,
@@ -493,6 +497,7 @@
               "text": "export declare enum SomeEnum "
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeEnum",
           "preserveMemberOrder": false,
@@ -581,6 +586,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -613,6 +619,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 3
@@ -658,6 +665,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 4,
             "endIndex": 6
@@ -703,6 +711,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 3,
             "endIndex": 4
@@ -748,6 +757,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 3,
             "endIndex": 4
@@ -776,10 +786,47 @@
               "text": "export interface SomeInterface1 "
             }
           ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
           "name": "SomeInterface1",
           "preserveMemberOrder": false,
           "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!SomeInterface1#[SomeSymbol1]:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "["
+                },
+                {
+                  "kind": "Reference",
+                  "text": "SomeSymbol1",
+                  "canonicalReference": "api-extractor-scenarios!SomeSymbol1:var"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "() => string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "[SomeSymbol1]",
+              "propertyTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            },
             {
               "kind": "PropertySignature",
               "canonicalReference": "api-extractor-scenarios!SomeInterface1#prop:member",
@@ -806,9 +853,95 @@
                 "startIndex": 1,
                 "endIndex": 2
               }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!SomeInterface1#ThisIsSomeVar1:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "["
+                },
+                {
+                  "kind": "Reference",
+                  "text": "SomeVar1",
+                  "canonicalReference": "api-extractor-scenarios!SomeVar1:var"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "() => string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "ThisIsSomeVar1",
+              "propertyTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
             }
           ],
           "extendsTokenRanges": []
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!SomeSymbol1:var",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "SomeSymbol1: "
+            },
+            {
+              "kind": "Content",
+              "text": "unique symbol"
+            }
+          ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "SomeSymbol1",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!SomeVar1:var",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "SomeVar1 = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"ThisIsSomeVar1\""
+            }
+          ],
+          "fileUrlPath": "src/referenceTokens/index.ts",
+          "initializerTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "SomeVar1",
+          "variableTypeTokenRange": {
+            "startIndex": 0,
+            "endIndex": 0
+          }
         }
       ]
     }

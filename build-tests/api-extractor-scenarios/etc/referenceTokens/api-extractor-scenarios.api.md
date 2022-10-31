@@ -79,6 +79,20 @@ export interface SomeInterface1 {
     prop: number;
 }
 
+// @public
+export interface SomeInterface1 {
+    // (undocumented)
+    [SomeSymbol1]: () => string;
+    // (undocumented)
+    [SomeVar1]: () => string;
+}
+
+// @public (undocumented)
+export const SomeSymbol1: unique symbol;
+
+// @public (undocumented)
+export const SomeVar1 = "ThisIsSomeVar1";
+
 // (No @packageDocumentation comment for this package)
 
 ```

@@ -26,6 +26,7 @@ import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstImport } from '../analyzer/AstImport';
+import { SourceMapper } from './SourceMapper';
 
 /**
  * Options for Collector constructor.
@@ -44,6 +45,8 @@ export interface ICollectorOptions {
   messageRouter: MessageRouter;
 
   extractorConfig: ExtractorConfig;
+
+  sourceMapper: SourceMapper;
 }
 
 /**
@@ -65,6 +68,8 @@ export class Collector {
   public readonly workingPackage: WorkingPackage;
 
   public readonly extractorConfig: ExtractorConfig;
+
+  public readonly sourceMapper: SourceMapper;
 
   /**
    * The `ExtractorConfig.bundledPackages` names in a set.
@@ -97,6 +102,7 @@ export class Collector {
 
     this._program = options.program;
     this.extractorConfig = options.extractorConfig;
+    this.sourceMapper = options.sourceMapper;
 
     const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
       this.extractorConfig.mainEntryPointFilePath

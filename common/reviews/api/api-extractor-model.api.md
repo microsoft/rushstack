@@ -7,6 +7,7 @@
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 import { IJsonFileSaveOptions } from '@rushstack/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 import * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocTagDefinition } from '@microsoft/tsdoc';
@@ -100,6 +101,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     buildExcerpt(tokenRange: IExcerptTokenRange): Excerpt;
     get excerpt(): Excerpt;
     get excerptTokens(): ReadonlyArray<ExcerptToken>;
+    get fileUrlPath(): string | undefined;
     getExcerptWithModifiers(): string;
     // Warning: (ae-forgotten-export) The symbol "IApiDeclaredItemJson" needs to be exported by the entry point index.d.ts
     //
@@ -107,6 +109,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, context: DeserializerContext, jsonObject: IApiDeclaredItemJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void;
+    get sourceLocation(): SourceLocation;
 }
 
 // @public
@@ -471,6 +474,12 @@ export class ApiPackage extends ApiPackage_base {
     get kind(): ApiItemKind;
     // (undocumented)
     static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
+    // Warning: (ae-forgotten-export) The symbol "IApiPackageJson" needs to be exported by the entry point index.d.ts
+    //
+    // @override (undocumented)
+    static onDeserializeInto(options: Partial<IApiPackageOptions>, context: DeserializerContext, jsonObject: IApiPackageJson): void;
+    // (undocumented)
+    get projectFolderUrl(): string | undefined;
     // (undocumented)
     saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
     get tsdocConfiguration(): TSDocConfiguration;
@@ -742,6 +751,8 @@ export interface IApiConstructSignatureOptions extends IApiTypeParameterListMixi
 export interface IApiDeclaredItemOptions extends IApiDocumentedItemOptions {
     // (undocumented)
     excerptTokens: IExcerptToken[];
+    // (undocumented)
+    fileUrlPath?: string;
 }
 
 // @public
@@ -830,6 +841,8 @@ export interface IApiOptionalMixinOptions extends IApiItemOptions {
 
 // @public
 export interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiDocumentedItemOptions {
+    // (undocumented)
+    projectFolderUrl?: string;
     // (undocumented)
     tsdocConfiguration: TSDocConfiguration;
 }
@@ -980,6 +993,12 @@ export interface IResolveDeclarationReferenceResult {
 }
 
 // @public
+export interface ISourceLocationOptions {
+    fileUrlPath?: string;
+    projectFolderUrl?: string;
+}
+
+// @public
 export interface ITypeParameterOptions {
     // (undocumented)
     constraintExcerpt: Excerpt;
@@ -1020,6 +1039,12 @@ export enum ReleaseTag {
 export namespace ReleaseTag {
     export function compare(a: ReleaseTag, b: ReleaseTag): number;
     export function getTagName(releaseTag: ReleaseTag): string;
+}
+
+// @public
+export class SourceLocation {
+    constructor(options: ISourceLocationOptions);
+    get fileUrl(): string | undefined;
 }
 
 // @public

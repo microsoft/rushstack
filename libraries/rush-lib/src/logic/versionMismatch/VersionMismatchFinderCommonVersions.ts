@@ -59,6 +59,10 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
     this._fileManager.preferredVersions.set(packageName, newVersion);
   }
 
+  public removeDependency(packageName: string): void {
+    throw new Error('Not supported.');
+  }
+
   public saveIfModified(): boolean {
     return this._fileManager.save();
   }

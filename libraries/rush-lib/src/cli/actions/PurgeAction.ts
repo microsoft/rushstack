@@ -13,7 +13,7 @@ import { PurgeManager } from '../../logic/PurgeManager';
 import { UnlinkManager } from '../../logic/UnlinkManager';
 
 export class PurgeAction extends BaseRushAction {
-  private _unsafeParameter!: CommandLineFlagParameter;
+  private readonly _unsafeParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -25,9 +25,7 @@ export class PurgeAction extends BaseRushAction {
         ' useful if you are having problems and suspect that cache files may be corrupt.',
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
     this._unsafeParameter = this.defineFlagParameter({
       parameterLongName: '--unsafe',
       description:

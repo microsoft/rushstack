@@ -50,6 +50,10 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
     return this._fileManager.addOrUpdateDependency(packageName, newVersion, dependencyType);
   }
 
+  public removeDependency(packageName: string, dependencyType: DependencyType): void {
+    return this._fileManager.removeDependency(packageName, dependencyType);
+  }
+
   public saveIfModified(): boolean {
     return this._fileManager.saveIfModified();
   }

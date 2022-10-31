@@ -1,0 +1,29 @@
+.LockfileViewerWrapper {
+  margin: 24px;
+  display: flex;
+  height: calc(100% - 48px);
+
+  & > * + * {
+    margin-left: 24px;
+  }
+}
+
+.LockfileEntryListWrapper {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+
+  min-width: 300px;
+  max-width: 400px;
+
+  overflow: scroll;
+
+  & > * + * {
+    margin-top: 12px;
+  }
+
+  .lockfileEntries {
+    height: calc(100% - 40px);
+    overflow: scroll;
+  }
+}

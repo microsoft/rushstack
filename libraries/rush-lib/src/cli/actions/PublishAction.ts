@@ -29,26 +29,26 @@ import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';
 
 export class PublishAction extends BaseRushAction {
-  private _addCommitDetails!: CommandLineFlagParameter;
-  private _apply!: CommandLineFlagParameter;
-  private _includeAll!: CommandLineFlagParameter;
-  private _npmAuthToken!: CommandLineStringParameter;
-  private _npmTag!: CommandLineStringParameter;
-  private _npmAccessLevel!: CommandLineChoiceParameter;
-  private _publish!: CommandLineFlagParameter;
-  private _regenerateChangelogs!: CommandLineFlagParameter;
-  private _registryUrl!: CommandLineStringParameter;
-  private _targetBranch!: CommandLineStringParameter;
-  private _prereleaseName!: CommandLineStringParameter;
-  private _partialPrerelease!: CommandLineFlagParameter;
-  private _suffix!: CommandLineStringParameter;
-  private _force!: CommandLineFlagParameter;
-  private _versionPolicy!: CommandLineStringParameter;
-  private _applyGitTagsOnPack!: CommandLineFlagParameter;
-  private _commitId!: CommandLineStringParameter;
-  private _releaseFolder!: CommandLineStringParameter;
-  private _pack!: CommandLineFlagParameter;
-  private _ignoreGitHooksParameter!: CommandLineFlagParameter;
+  private readonly _addCommitDetails: CommandLineFlagParameter;
+  private readonly _apply: CommandLineFlagParameter;
+  private readonly _includeAll: CommandLineFlagParameter;
+  private readonly _npmAuthToken: CommandLineStringParameter;
+  private readonly _npmTag: CommandLineStringParameter;
+  private readonly _npmAccessLevel: CommandLineChoiceParameter;
+  private readonly _publish: CommandLineFlagParameter;
+  private readonly _regenerateChangelogs: CommandLineFlagParameter;
+  private readonly _registryUrl: CommandLineStringParameter;
+  private readonly _targetBranch: CommandLineStringParameter;
+  private readonly _prereleaseName: CommandLineStringParameter;
+  private readonly _partialPrerelease: CommandLineFlagParameter;
+  private readonly _suffix: CommandLineStringParameter;
+  private readonly _force: CommandLineFlagParameter;
+  private readonly _versionPolicy: CommandLineStringParameter;
+  private readonly _applyGitTagsOnPack: CommandLineFlagParameter;
+  private readonly _commitId: CommandLineStringParameter;
+  private readonly _releaseFolder: CommandLineStringParameter;
+  private readonly _pack: CommandLineFlagParameter;
+  private readonly _ignoreGitHooksParameter: CommandLineFlagParameter;
 
   private _prereleaseToken!: PrereleaseToken;
   private _hotfixTagOverride!: string;
@@ -65,9 +65,7 @@ export class PublishAction extends BaseRushAction {
         'changes and publish packages, you must use the --commit flag and/or the --publish flag.',
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
     this._apply = this.defineFlagParameter({
       parameterLongName: '--apply',
       parameterShortName: '-a',

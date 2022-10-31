@@ -246,9 +246,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
         const getRealId: (id: number | string) => number | string | undefined = (id: number | string) =>
           this.hooks.finalModuleId.call(id, compilation);
 
-        const postProcessCode: (code: ReplaceSource, context: IPostProcessFragmentContext) => ReplaceSource =
-          (code: ReplaceSource, context: IPostProcessFragmentContext) =>
-            this.hooks.postProcessCodeFragment.call(code, context);
+        const postProcessCode: (
+          code: ReplaceSource,
+          context: IPostProcessFragmentContext
+        ) => ReplaceSource = (code: ReplaceSource, context: IPostProcessFragmentContext) =>
+          this.hooks.postProcessCodeFragment.call(code, context);
 
         /**
          * Callback to invoke when a file has finished minifying.

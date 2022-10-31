@@ -72,6 +72,7 @@ export class ExtractorConfig {
     readonly packageJson: INodePackageJson | undefined;
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
     readonly projectFolder: string;
+    readonly projectFolderUrl: string | undefined;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
     readonly reportTempFilePath: string;
@@ -188,6 +189,7 @@ export interface IConfigDocModel {
     apiJsonFilePath?: string;
     enabled: boolean;
     includeForgottenExports?: boolean;
+    projectFolderUrl?: string;
 }
 
 // @public

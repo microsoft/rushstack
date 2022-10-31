@@ -253,6 +253,26 @@ export class PackageJsonEditor {
     this._modified = true;
   }
 
+  public removeDependency(packageName: string, dependencyType: DependencyType): void {
+    switch (dependencyType) {
+      case DependencyType.Regular:
+      case DependencyType.Optional:
+      case DependencyType.Peer:
+        this._dependencies.delete(packageName);
+        break;
+      case DependencyType.Dev:
+        this._devDependencies.delete(packageName);
+        break;
+      case DependencyType.YarnResolutions:
+        this._resolutions.delete(packageName);
+        break;
+      default:
+        throw new InternalError('Unsupported DependencyType');
+    }
+
+    this._modified = true;
+  }
+
   public saveIfModified(): boolean {
     if (this._modified) {
       this._modified = false;

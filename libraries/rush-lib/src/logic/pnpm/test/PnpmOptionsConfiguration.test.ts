@@ -37,6 +37,13 @@ describe(PnpmOptionsConfiguration.name, () => {
       'bar@^2.1.0': '3.0.0',
       'qar@1>zoo': '2'
     });
+
+    expect(pnpmConfiguration.environmentVariables).toEqual({
+      NODE_OPTIONS: {
+        value: '--max-old-space-size=4096',
+        override: false
+      }
+    });
   });
 
   it('loads packageExtensions', () => {

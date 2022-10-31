@@ -10,8 +10,8 @@ import { SelectionParameterSet } from '../SelectionParameterSet';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 export class UpdateAction extends BaseInstallAction {
-  private _fullParameter!: CommandLineFlagParameter;
-  private _recheckParameter!: CommandLineFlagParameter;
+  private readonly _fullParameter!: CommandLineFlagParameter;
+  private readonly _recheckParameter!: CommandLineFlagParameter;
   private _ignoreScriptsParameter!: CommandLineFlagParameter;
   /**
    * Whether split workspace projects are included in update
@@ -39,10 +39,6 @@ export class UpdateAction extends BaseInstallAction {
         ' -- for details, see the command help for "rush install".',
       parser
     });
-  }
-
-  protected onDefineParameters(): void {
-    super.onDefineParameters();
 
     if (this.rushConfiguration?.hasSplitWorkspaceProject) {
       // Partial update is supported only when there is split workspace project
