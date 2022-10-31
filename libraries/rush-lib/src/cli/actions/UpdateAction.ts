@@ -6,7 +6,7 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { SelectionParameterSet } from '../SelectionParameterSet';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 export class UpdateAction extends BaseInstallAction {
