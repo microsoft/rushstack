@@ -2,6 +2,29 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.19.23",
+      "tag": "@microsoft/api-documenter_v7.19.23",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the @microsoft/tsdoc dependency version to 0.14.2."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.25.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.19.22",
       "tag": "@microsoft/api-documenter_v7.19.22",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",

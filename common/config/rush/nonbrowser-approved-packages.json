@@ -571,6 +571,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "npm-check",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "npm-package-arg",
       "allowedCategories": [ "libraries" ]
     },

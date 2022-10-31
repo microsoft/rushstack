@@ -11,44 +11,81 @@ import { FileSystem } from '@rushstack/node-core-library';
  * @public
  */
 export class CertificateStore {
-  private _userProfilePath: string;
-  private _serveDataPath: string;
-  private _certificatePath: string;
-  private _keyPath: string;
+  private readonly _caCertificatePath: string;
+  private readonly _certificatePath: string;
+  private readonly _keyPath: string;
 
+  private _caCertificateData: string | undefined;
   private _certificateData: string | undefined;
   private _keyData: string | undefined;
 
   public constructor() {
     const unresolvedUserFolder: string = homedir();
-    this._userProfilePath = path.resolve(unresolvedUserFolder);
-    if (!FileSystem.exists(this._userProfilePath)) {
+    const userProfilePath: string = path.resolve(unresolvedUserFolder);
+    if (!FileSystem.exists(userProfilePath)) {
       throw new Error("Unable to determine the current user's home directory");
     }
 
-    this._serveDataPath = path.join(this._userProfilePath, '.rushstack');
-    FileSystem.ensureFolder(this._serveDataPath);
+    const serveDataPath: string = path.join(userProfilePath, '.rushstack');
+    FileSystem.ensureFolder(serveDataPath);
 
-    this._certificatePath = path.join(this._serveDataPath, 'rushstack-serve.pem');
-    this._keyPath = path.join(this._serveDataPath, 'rushstack-serve.key');
+    this._caCertificatePath = path.join(serveDataPath, 'rushstack-ca.pem');
+    this._certificatePath = path.join(serveDataPath, 'rushstack-serve.pem');
+    this._keyPath = path.join(serveDataPath, 'rushstack-serve.key');
   }
 
   /**
-   * Path to the saved debug certificate
+   * Path to the saved debug CA certificate
+   */
+  public get caCertificatePath(): string {
+    return this._caCertificatePath;
+  }
+
+  /**
+   * Path to the saved debug TLS certificate
    */
   public get certificatePath(): string {
     return this._certificatePath;
   }
 
   /**
-   * Debug certificate pem file contents.
+   * Debug Certificate Authority certificate pem file contents.
+   */
+  public get caCertificateData(): string | undefined {
+    if (!this._caCertificateData) {
+      try {
+        this._caCertificateData = FileSystem.readFile(this._caCertificatePath);
+      } catch (err) {
+        if (!FileSystem.isNotExistError(err)) {
+          throw err;
+        }
+      }
+    }
+
+    return this._caCertificateData;
+  }
+
+  public set caCertificateData(certificate: string | undefined) {
+    if (certificate) {
+      FileSystem.writeFile(this._caCertificatePath, certificate);
+    } else if (FileSystem.exists(this._caCertificatePath)) {
+      FileSystem.deleteFile(this._caCertificatePath);
+    }
+
+    this._caCertificateData = certificate;
+  }
+
+  /**
+   * Debug TLS Server certificate pem file contents.
    */
   public get certificateData(): string | undefined {
     if (!this._certificateData) {
-      if (FileSystem.exists(this._certificatePath)) {
+      try {
         this._certificateData = FileSystem.readFile(this._certificatePath);
-      } else {
-        return undefined;
+      } catch (err) {
+        if (!FileSystem.isNotExistError(err)) {
+          throw err;
+        }
       }
     }
 
@@ -70,10 +107,12 @@ export class CertificateStore {
    */
   public get keyData(): string | undefined {
     if (!this._keyData) {
-      if (FileSystem.exists(this._keyPath)) {
+      try {
         this._keyData = FileSystem.readFile(this._keyPath);
-      } else {
-        return undefined;
+      } catch (err) {
+        if (!FileSystem.isNotExistError(err)) {
+          throw err;
+        }
       }
     }
 
