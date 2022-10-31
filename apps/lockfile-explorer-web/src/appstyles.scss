@@ -7,28 +7,12 @@
   width: calc(100% - 48px);
 }
 
-.containerCard {
+.ContainerCard {
   @include card;
 }
 
 .AppContainer {
   padding: 24px;
-}
-
-.SelectLockfileContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.selectModal {
-  @include card;
-  width: fit-content;
-  text-align: center;
-  & > * + * {
-    margin-top: 12px;
-  }
 }
 
 .BodyContainer {

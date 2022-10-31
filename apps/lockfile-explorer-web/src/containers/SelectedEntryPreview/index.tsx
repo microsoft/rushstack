@@ -19,15 +19,15 @@ export const SelectedEntryPreview = (): JSX.Element => {
 
   if (!selectedEntry) {
     return (
-      <div className={styles.selectedEntryCard}>
+      <div className={styles.SelectedEntryCard}>
         <h5>No Entry Selected</h5>
       </div>
     );
   }
 
   return (
-    <div className={styles.selectedEntryCard}>
-      <div className={styles.selectedEntryHeader}>
+    <div className={styles.SelectedEntryCard}>
+      <div className={styles.SelectedEntryHeader}>
         <h5>Selected entry:</h5>
         <span>{selectedEntry.displayText}</span>
       </div>

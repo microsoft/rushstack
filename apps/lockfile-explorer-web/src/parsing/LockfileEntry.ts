@@ -11,7 +11,6 @@ export enum LockfileEntryFilter {
 }
 
 interface IProps {
-  // entryId: string;
   rawEntryId: string;
   kind: LockfileEntryFilter;
   rawYamlData: ILockfileNode;

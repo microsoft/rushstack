@@ -22,7 +22,6 @@ export const readPackageJSON = async (projectPath: string): Promise<IPackageJson
       })
     });
     return await response.json();
-    // return JSON.stringify(cjsFile, null, 2);
   } catch (e) {
     console.error('Could not load package json file: ', e);
     return undefined;
@@ -41,8 +40,6 @@ export const readParsedCJS = async (projectPath: string): Promise<IPackageJson |
       })
     });
     return await response.json();
-
-    // return JSON.stringify(parsedPackageJSON, null, 2);
   } catch (e) {
     console.error('Could not load cjs file: ', e);
     return undefined;

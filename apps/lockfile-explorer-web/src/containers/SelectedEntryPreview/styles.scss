@@ -1,6 +1,6 @@
 @import 'office-ui-fabric-core/dist/sass/References';
 
-.selectedEntryCard {
+.SelectedEntryCard {
   box-shadow: $ms-depth-shadow-8;
   background-color: $ms-color-gray10;
   padding: 24px;
@@ -14,7 +14,7 @@
   }
 }
 
-.selectedEntryHeader {
+.SelectedEntryHeader {
   display: flex;
   align-items: center;
   & > * + * {

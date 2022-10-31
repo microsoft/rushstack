@@ -23,7 +23,7 @@ export const BookmarksSidebar = (): JSX.Element => {
   );
 
   return (
-    <div className={`${appStyles.containerCard} ${styles.BookmarksWrapper}`}>
+    <div className={`${appStyles.ContainerCard} ${styles.BookmarksWrapper}`}>
       <h5>Bookmarks</h5>
       <hr />
       {bookmarks.map((bookmarkedEntry) => (

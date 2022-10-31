@@ -56,7 +56,7 @@ export const PackageJsonViewer = (): JSX.Element => {
         case 'ADDED_DEP':
           return (
             <p key={dep}>
-              <span className={styles.addedSpec}>
+              <span className={styles.AddedSpec}>
                 {dep}: {version}
               </span>{' '}
               [Added by .pnpmfile.cjs]
@@ -65,7 +65,7 @@ export const PackageJsonViewer = (): JSX.Element => {
         case 'DIFF_DEP':
           return (
             <p key={dep}>
-              <span className={styles.changedSpec}>
+              <span className={styles.ChangedSpec}>
                 {dep}: {version}
               </span>{' '}
               [Changed from {specChanges.get(dep)?.from}]
@@ -74,7 +74,7 @@ export const PackageJsonViewer = (): JSX.Element => {
         case 'DELETED_DEP':
           return (
             <p key={dep}>
-              <span className={styles.deletedSpec}>
+              <span className={styles.DeletedSpec}>
                 {dep}: {version}
               </span>{' '}
               [Deleted by .pnpmfile.cjs]
@@ -106,7 +106,7 @@ export const PackageJsonViewer = (): JSX.Element => {
       case PackageView.PARSED_PACKAGE_JSON:
         if (!parsedPackageJSON) return null;
         return (
-          <div className={styles.packageSpecWrapper}>
+          <div className={styles.PackageSpecWrapper}>
             <h5>Dependencies</h5>
             {parsedPackageJSON.dependencies && Object.entries(parsedPackageJSON.dependencies).map(renderDep)}
             <h5>Dev Dependencies</h5>
@@ -139,8 +139,8 @@ export const PackageJsonViewer = (): JSX.Element => {
           { text: '.pnpmfile.cjs', active: selection === PackageView.CJS, onClick: cb(PackageView.CJS) }
         ]}
       />
-      <div className={appStyles.containerCard}>
-        <div className={styles.fileContents}>{renderFile()}</div>
+      <div className={appStyles.ContainerCard}>
+        <div className={styles.FileContents}>{renderFile()}</div>
       </div>
     </div>
   );
