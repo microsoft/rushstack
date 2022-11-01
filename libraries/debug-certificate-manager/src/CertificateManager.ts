@@ -4,12 +4,10 @@
 import type { pki } from 'node-forge';
 import * as path from 'path';
 import { EOL } from 'os';
-import { FileSystem, ITerminal, Import } from '@rushstack/node-core-library';
+import { FileSystem, ITerminal } from '@rushstack/node-core-library';
 
 import { runSudoAsync, IRunResult, runAsync } from './runCommand';
 import { CertificateStore } from './CertificateStore';
-
-const forge: typeof import('node-forge') = Import.lazy('node-forge', require);
 
 const CA_SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
 const TLS_SERIAL_NUMBER: string = '731c321744e34650a202e3ef00000001';
@@ -116,7 +114,8 @@ export class CertificateManager {
     if (this._certificateStore.certificateData && this._certificateStore.keyData) {
       const messages: string[] = [];
 
-      const altNamesExtension: ISubjectAltNameExtension | undefined = this._getCertificateSubjectAltName();
+      const altNamesExtension: ISubjectAltNameExtension | undefined =
+        await this._getCertificateSubjectAltNameAsync();
       if (!altNamesExtension) {
         messages.push(
           'The existing development certificate is missing the subjectAltName ' +
@@ -250,7 +249,10 @@ export class CertificateManager {
     }
   }
 
-  private _createCACertificate(validityInDays: number): ICaCertificate {
+  private async _createCACertificateAsync(
+    validityInDays: number,
+    forge: typeof import('node-forge')
+  ): Promise<ICaCertificate> {
     const keys: pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
     const certificate: pki.Certificate = forge.pki.createCertificate();
     certificate.publicKey = keys.publicKey;
@@ -320,7 +322,10 @@ export class CertificateManager {
     };
   }
 
-  private _createDevelopmentCertificate(options: Required<ICertificateGenerationOptions>): ICertificate {
+  private async _createDevelopmentCertificateAsync(
+    options: Required<ICertificateGenerationOptions>
+  ): Promise<ICertificate> {
+    const forge: typeof import('node-forge') = await import('node-forge');
     const keys: pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
     const certificate: pki.Certificate = forge.pki.createCertificate();
 
@@ -329,8 +334,10 @@ export class CertificateManager {
 
     const { subjectAltNames: subjectNames, validityInDays } = options;
 
-    const { certificate: caCertificate, privateKey: caPrivateKey } =
-      this._createCACertificate(validityInDays);
+    const { certificate: caCertificate, privateKey: caPrivateKey } = await this._createCACertificateAsync(
+      validityInDays,
+      forge
+    );
 
     const now: Date = new Date();
     certificate.validity.notBefore = now;
@@ -613,7 +620,7 @@ export class CertificateManager {
     terminal: ITerminal
   ): Promise<ICertificate> {
     const certificateStore: CertificateStore = this._certificateStore;
-    const generatedCertificate: ICertificate = this._createDevelopmentCertificate(options);
+    const generatedCertificate: ICertificate = await this._createDevelopmentCertificateAsync(options);
 
     const certificateName: string = Date.now().toString();
     const tempDirName: string = path.join(__dirname, '..', 'temp');
@@ -659,11 +666,12 @@ export class CertificateManager {
     };
   }
 
-  private _getCertificateSubjectAltName(): ISubjectAltNameExtension | undefined {
+  private async _getCertificateSubjectAltNameAsync(): Promise<ISubjectAltNameExtension | undefined> {
     const certificateData: string | undefined = this._certificateStore.certificateData;
     if (!certificateData) {
       return;
     }
+    const forge: typeof import('node-forge') = await import('node-forge');
     const certificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
     return certificate.getExtension('subjectAltName') as ISubjectAltNameExtension;
   }

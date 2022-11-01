@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Remove usage of Import.lazy so that the tool can be bundled.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager"
+}
