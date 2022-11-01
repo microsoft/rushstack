@@ -1,0 +1,7 @@
+{
+  "docModel": {
+    "enabled": true,
+    "apiJsonFilePath": "<projectFolder>/etc/projectFolderUrl/<unscopedPackageName>.api.json",
+    "projectFolderUrl": "http://github.com/path/to/some/projectFolder"
+  }
+}

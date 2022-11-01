@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin-packlets
 
-This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+This log was last generated on Mon, 10 Oct 2022 15:23:44 GMT and should not be manually modified.
+
+## 0.6.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+### Patches
+
+- Fix a link in the README.
 
 ## 0.6.0
 Thu, 29 Sep 2022 07:13:06 GMT

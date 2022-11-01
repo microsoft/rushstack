@@ -5,7 +5,7 @@
 
 
 
-[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://dev.azure.com/RushStack/GitHubProjects/_apis/build/status/rushstack/rushstack%20CI%20Build?branchName=main)](https://dev.azure.com/RushStack/GitHubProjects/_build/latest?definitionId=3&branchName=main) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
+[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
 
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
 for large scale TypeScript monorepos.
@@ -98,6 +98,8 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 
 | Folder | Description |
 | ------ | -----------|
+| [/apps/lockfile-explorer](./apps/lockfile-explorer/) | Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo |
+| [/apps/lockfile-explorer-web](./apps/lockfile-explorer-web/) | Rush Lockfile Explorer: helper project for building the React web application component |
 | [/build-tests-samples/heft-node-basic-tutorial](./build-tests-samples/heft-node-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-jest-tutorial](./build-tests-samples/heft-node-jest-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-rig-tutorial](./build-tests-samples/heft-node-rig-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |

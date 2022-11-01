@@ -162,6 +162,7 @@ interface IExtractorConfigParameters {
   docModelEnabled: boolean;
   apiJsonFilePath: string;
   docModelIncludeForgottenExports: boolean;
+  projectFolderUrl: string | undefined;
   rollupEnabled: boolean;
   untrimmedFilePath: string;
   alphaTrimmedFilePath: string;
@@ -257,6 +258,8 @@ export class ExtractorConfig {
   public readonly apiJsonFilePath: string;
   /** {@inheritDoc IConfigDocModel.includeForgottenExports} */
   public readonly docModelIncludeForgottenExports: boolean;
+  /** {@inheritDoc IConfigDocModel.projectFolderUrl} */
+  public readonly projectFolderUrl: string | undefined;
 
   /** {@inheritDoc IConfigDtsRollup.enabled} */
   public readonly rollupEnabled: boolean;
@@ -317,6 +320,7 @@ export class ExtractorConfig {
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
     this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
+    this.projectFolderUrl = parameters.projectFolderUrl;
     this.rollupEnabled = parameters.rollupEnabled;
     this.untrimmedFilePath = parameters.untrimmedFilePath;
     this.alphaTrimmedFilePath = parameters.alphaTrimmedFilePath;
@@ -894,6 +898,7 @@ export class ExtractorConfig {
       let docModelEnabled: boolean = false;
       let apiJsonFilePath: string = '';
       let docModelIncludeForgottenExports: boolean = false;
+      let projectFolderUrl: string | undefined;
       if (configObject.docModel) {
         docModelEnabled = !!configObject.docModel.enabled;
         apiJsonFilePath = ExtractorConfig._resolvePathWithTokens(
@@ -902,6 +907,7 @@ export class ExtractorConfig {
           tokenContext
         );
         docModelIncludeForgottenExports = !!configObject.docModel.includeForgottenExports;
+        projectFolderUrl = configObject.docModel.projectFolderUrl;
       }
 
       let tsdocMetadataEnabled: boolean = false;
@@ -1009,6 +1015,7 @@ export class ExtractorConfig {
         docModelEnabled,
         apiJsonFilePath,
         docModelIncludeForgottenExports,
+        projectFolderUrl,
         rollupEnabled,
         untrimmedFilePath,
         alphaTrimmedFilePath,

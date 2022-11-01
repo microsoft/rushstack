@@ -142,6 +142,20 @@ export interface IConfigDocModel {
    * @defaultValue `false`
    */
   includeForgottenExports?: boolean;
+
+  /**
+   * The base URL where the project's source code can be viewed on a website such as GitHub or
+   * Azure DevOps. This URL path corresponds to the `<projectFolder>` path on disk.
+   *
+   * @remarks
+   * This URL is concatenated with the file paths serialized to the doc model to produce URL file paths to individual API items.
+   * For example, if the `projectFolderUrl` is "https://github.com/microsoft/rushstack/tree/main/apps/api-extractor" and an API
+   * item's file path is "api/ExtractorConfig.ts", the full URL file path would be
+   * "https://github.com/microsoft/rushstack/tree/main/apps/api-extractor/api/ExtractorConfig.js".
+   *
+   * Can be omitted if you don't need source code links in your API documentation reference.
+   */
+  projectFolderUrl?: string;
 }
 
 /**

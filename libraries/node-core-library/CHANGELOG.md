@@ -1,6 +1,18 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Oct 2022 00:20:15 GMT and should not be manually modified.
+
+## 3.53.2
+Thu, 13 Oct 2022 00:20:15 GMT
+
+### Patches
+
+- Fix a bug where `Sort.isSorted` and `Sort.isSortedBy` unexpectedly compared the first element against `undefined`. Optimize `Sort.sortMapKeys` to run the check for already being sorted against the original Map instead of a derived array.
+
+## 3.53.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
 
 ## 3.53.0
 Thu, 29 Sep 2022 07:13:06 GMT

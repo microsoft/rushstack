@@ -81,6 +81,8 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     } else {
       this._autoinstallerFullPath = '';
     }
+
+    this.defineScriptParameters();
   }
 
   private async _prepareAutoinstallerName(): Promise<void> {
@@ -162,10 +164,6 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
       console.log(os.EOL + colors.red(`The script failed with exit code ${exitCode}`));
       throw new AlreadyReportedError();
     }
-  }
-
-  protected onDefineParameters(): void {
-    this.defineScriptParameters();
   }
 
   private _expandShellCommandWithTokens(

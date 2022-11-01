@@ -3,9 +3,13 @@
 
 import * as path from 'path';
 import * as tsdoc from '@microsoft/tsdoc';
-import colors from 'colors';
+import colors from 'colors/safe';
 
-import { CommandLineAction, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import {
+  CommandLineAction,
+  CommandLineStringParameter,
+  type ICommandLineActionOptions
+} from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';
 import {
   ApiModel,
@@ -22,10 +26,12 @@ export interface IBuildApiModelResult {
 }
 
 export abstract class BaseAction extends CommandLineAction {
-  private _inputFolderParameter!: CommandLineStringParameter;
-  private _outputFolderParameter!: CommandLineStringParameter;
+  private readonly _inputFolderParameter: CommandLineStringParameter;
+  private readonly _outputFolderParameter: CommandLineStringParameter;
 
-  protected onDefineParameters(): void {
+  protected constructor(options: ICommandLineActionOptions) {
+    super(options);
+
     // override
     this._inputFolderParameter = this.defineStringParameter({
       parameterLongName: '--input-folder',

@@ -42,6 +42,20 @@ export interface MergedInterfaces {
     someProp: number;
 }
 
+// @public (undocumented)
+export namespace MergedNamespaces {
+    // (undocumented)
+    export class SomeClass {
+    }
+}
+
+// @public (undocumented)
+export namespace MergedNamespaces {
+    // (undocumented)
+    export class AnotherClass {
+    }
+}
+
 // (No @packageDocumentation comment for this package)
 
 ```

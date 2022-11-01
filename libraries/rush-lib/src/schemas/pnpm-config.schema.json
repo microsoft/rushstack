@@ -26,6 +26,23 @@
       "enum": ["local", "global"]
     },
 
+    "environmentVariables": {
+      "description": "Environment variables for PNPM invocation",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "override": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+
     "preventManualShrinkwrapChanges": {
       "description": "If true, then \"rush install\" will report an error if manual modifications were made to the PNPM shrinkwrap file without running `rush update` afterwards. To temporarily disable this validation when invoking \"rush install\", use the \"--bypassPolicy\" command-line parameter. The default value is false.",
       "type": "boolean"

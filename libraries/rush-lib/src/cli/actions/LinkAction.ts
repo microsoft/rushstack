@@ -16,7 +16,7 @@ const linkManagerFactoryModule: typeof LinkManagerFactoryTypes = Import.lazy(
 );
 
 export class LinkAction extends BaseRushAction {
-  private _force!: CommandLineFlagParameter;
+  private readonly _force: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -29,9 +29,7 @@ export class LinkAction extends BaseRushAction {
         ' for "rush install" or "rush update".',
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
       parameterShortName: '-f',

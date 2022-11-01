@@ -680,6 +680,8 @@ export class PackageJsonEditor {
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
     get name(): string;
+    // (undocumented)
+    removeDependency(packageName: string, dependencyType: DependencyType): void;
     get resolutionsList(): ReadonlyArray<PackageJsonDependency>;
     // (undocumented)
     saveIfModified(): boolean;

@@ -58,7 +58,8 @@ export class SetupChecks {
       }
     }
 
-    SetupChecks._checkForPhantomFolders(rushConfiguration);
+    // To avoid confusion, suppress phantom dependencies warning
+    // SetupChecks._checkForPhantomFolders(rushConfiguration);
   }
 
   private static _checkForPhantomFolders(rushConfiguration: RushConfiguration): void {
