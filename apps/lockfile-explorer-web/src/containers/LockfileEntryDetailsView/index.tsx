@@ -7,9 +7,14 @@ import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
 import { LockfileEntry } from '../../parsing/LockfileEntry';
 
-enum INFLUENCER_TYPES {
+enum InfluencerTypes {
   DETERMINANT,
   TRANSITIVE_REFERRER
+}
+
+interface IInfluencerType {
+  entry: LockfileEntry;
+  type: InfluencerTypes;
 }
 
 export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
@@ -17,7 +22,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const dispatch = useAppDispatch();
 
   const [inspectDep, setInspectDep] = useState<LockfileDependency | null>(null);
-  const [influencers, setInfluencers] = useState<any[]>([]);
+  const [influencers, setInfluencers] = useState<IInfluencerType[]>([]);
 
   useEffect(() => {
     if (selectedEntry) {
@@ -33,13 +38,13 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         } else {
           console.error('No resolved entry for dependency: ', dependency);
         }
-      } else {
+      } else if (selectedEntry) {
         setInspectDep(dependency);
         // calculate influencers
         const stack = [selectedEntry];
-        const determinants = new Set();
-        const transitiveReferrers = new Set();
-        const visitedNodes = new Set();
+        const determinants = new Set<LockfileEntry>();
+        const transitiveReferrers = new Set<LockfileEntry>();
+        const visitedNodes = new Set<LockfileEntry>();
         visitedNodes.add(selectedEntry);
         while (stack.length) {
           const currEntry = stack.pop();
@@ -69,17 +74,17 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
             }
           }
         }
-        const influencers = [];
+        const influencers: IInfluencerType[] = [];
         for (const det of determinants.values()) {
           influencers.push({
             entry: det,
-            type: INFLUENCER_TYPES.DETERMINANT
+            type: InfluencerTypes.DETERMINANT
           });
         }
         for (const ref of transitiveReferrers.values()) {
           influencers.push({
             entry: ref,
-            type: INFLUENCER_TYPES.TRANSITIVE_REFERRER
+            type: InfluencerTypes.TRANSITIVE_REFERRER
           });
         }
         setInfluencers(influencers);
@@ -95,8 +100,8 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     [selectedEntry]
   );
 
-  const renderPeerDependencies = () => {
-    if (!selectedEntry) return null;
+  const renderPeerDependencies = (): JSX.Element | ReactNull => {
+    if (!selectedEntry) return ReactNull;
     const peerDeps = selectedEntry.dependencies.filter(
       (d) => d.dependencyType === IDependencyType.PEER_DEPENDENCY
     );
@@ -119,13 +124,13 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
       <div className={appStyles.ContainerCard}>
         <h5>Influencers:</h5>
         {influencers
-          .filter((inf) => inf.type === INFLUENCER_TYPES.DETERMINANT)
+          .filter((inf) => inf.type === InfluencerTypes.DETERMINANT)
           .map(({ entry }) => (
             <div key={entry.rawEntryId}>{entry.displayText}</div>
           ))}
         <h5>Transitive Referencers:</h5>
         {influencers
-          .filter((inf) => inf.type === INFLUENCER_TYPES.TRANSITIVE_REFERRER)
+          .filter((inf) => inf.type === InfluencerTypes.TRANSITIVE_REFERRER)
           .map(({ entry }) => (
             <div key={entry.rawEntryId}>{entry.displayText}</div>
           ))}
