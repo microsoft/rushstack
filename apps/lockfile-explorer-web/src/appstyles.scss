@@ -12,7 +12,14 @@
 }
 
 .AppContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   padding: 24px;
+}
+
+.AppGrid {
+  flex-grow: 1;
 }
 
 .BodyContainer {
