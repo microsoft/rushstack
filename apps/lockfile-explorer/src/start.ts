@@ -19,6 +19,8 @@ app.use(cors());
 
 app.use('/app', express.static(path.resolve(__dirname, '../dist')));
 
+app.use('/favicon.ico', express.static(path.resolve(__dirname, '../dist'), { index: 'favicon.ico' }));
+
 app.get('/', (req: express.Request, res: express.Response) => {
   const doc = yaml.load(fs.readFileSync(appState.pnpmLockfileLocation).toString());
   res.send(doc);

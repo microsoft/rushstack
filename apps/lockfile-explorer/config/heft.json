@@ -133,7 +133,12 @@
         {
           "sourceFolder": "node_modules/@rushstack/lockfile-explorer-web/dist",
           "destinationFolders": ["dist"],
-          "fileExtensions": [".js", ".html"]
+          "fileExtensions": [".js", ".html", ".svg"]
+        },
+        {
+          "sourceFolder": "assets",
+          "destinationFolders": ["dist"],
+          "includeGlobs": ["favicon.ico"]
         }
       ]
     }
