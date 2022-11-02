@@ -8,6 +8,7 @@ import { loadEntries } from './store/slices/entrySlice';
 import { LockfileEntryDetailsView } from './containers/LockfileEntryDetailsView';
 import { BookmarksSidebar } from './containers/BookmarksSidebar';
 import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
+import { LogoPanel } from './containers/LogoPanel';
 
 /**
  * This React component renders the application page.
@@ -26,21 +27,24 @@ export const App = (): JSX.Element => {
 
   return (
     <div className={styles.AppContainer}>
-      <div className="ms-Grid" dir="ltr">
-        <div className="ms-Grid-row">
-          <div className="ms-Grid-col ms-sm3">
-            <LockfileViewer />
-          </div>
-          <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
-            <SelectedEntryPreview />
-            <PackageJsonViewer />
-            <LockfileEntryDetailsView />
-          </div>
-          <div className="ms-Grid-col ms-sm2">
-            <BookmarksSidebar />
+      <div className={styles.AppGrid}>
+        <div className="ms-Grid" dir="ltr">
+          <div className="ms-Grid-row">
+            <div className="ms-Grid-col ms-sm3">
+              <LockfileViewer />
+            </div>
+            <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
+              <SelectedEntryPreview />
+              <PackageJsonViewer />
+              <LockfileEntryDetailsView />
+            </div>
+            <div className="ms-Grid-col ms-sm2">
+              <BookmarksSidebar />
+            </div>
           </div>
         </div>
       </div>
+      <LogoPanel />
     </div>
   );
 };
