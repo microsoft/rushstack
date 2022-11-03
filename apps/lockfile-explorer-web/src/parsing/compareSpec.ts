@@ -1,8 +1,8 @@
 import { IPackageJson } from '../types/IPackageJson';
 
 export interface ISpecChange {
-  type: string;
-  pkg: string;
+  type: 'add' | 'remove' | 'diff';
+  packageName: string;
   from?: string;
   to?: string;
 }
@@ -11,47 +11,49 @@ export const compareSpec = (
   packageJson: IPackageJson,
   packageSpec: IPackageJson
 ): Map<string, ISpecChange> => {
-  const pkgJsonMap = new Map();
-  const pkgSpecMap = new Map();
+  // packageName -> packageVersion (For all dependencies in a package.json file)
+  const packageJsonMap: Map<string, string> = new Map();
+  // packageName -> packageVersion (For all dependencies in a parsed package.json file)
+  const packageSpecMap: Map<string, string> = new Map();
   for (const [entry, version] of Object.entries({
     ...packageJson.dependencies,
     ...packageJson.devDependencies,
     ...packageJson.peerDependencies
   })) {
-    pkgJsonMap.set(entry, version);
+    packageJsonMap.set(entry, version);
   }
   for (const [entry, version] of Object.entries({
     ...packageSpec.dependencies,
     ...packageSpec.devDependencies,
     ...packageSpec.peerDependencies
   })) {
-    pkgSpecMap.set(entry, version);
+    packageSpecMap.set(entry, version);
   }
-  const diffDeps: Map<string, ISpecChange> = new Map();
+  const differentDependencies: Map<string, ISpecChange> = new Map();
 
-  for (const dep of pkgJsonMap.keys()) {
-    if (!pkgSpecMap.has(dep)) {
-      diffDeps.set(dep, {
-        type: 'DELETED_DEP',
-        pkg: dep
+  for (const dependency of packageJsonMap.keys()) {
+    if (!packageSpecMap.has(dependency)) {
+      differentDependencies.set(dependency, {
+        type: 'remove',
+        packageName: dependency
       });
-    } else if (pkgSpecMap.get(dep) !== pkgJsonMap.get(dep)) {
-      diffDeps.set(dep, {
-        type: 'DIFF_DEP',
-        pkg: dep,
-        from: pkgJsonMap.get(dep),
-        to: pkgSpecMap.get(dep)
+    } else if (packageSpecMap.get(dependency) !== packageJsonMap.get(dependency)) {
+      differentDependencies.set(dependency, {
+        type: 'diff',
+        packageName: dependency,
+        from: packageJsonMap.get(dependency),
+        to: packageSpecMap.get(dependency)
       });
     }
   }
 
-  for (const dep of pkgSpecMap.keys()) {
-    if (!pkgJsonMap.has(dep)) {
-      diffDeps.set(dep, {
-        type: 'ADDED_DEP',
-        pkg: dep
+  for (const dependency of packageSpecMap.keys()) {
+    if (!packageJsonMap.has(dependency)) {
+      differentDependencies.set(dependency, {
+        type: 'add',
+        packageName: dependency
       });
     }
   }
-  return diffDeps;
+  return differentDependencies;
 };

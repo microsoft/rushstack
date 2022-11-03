@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import styles from './appstyles.scss';
+import styles from './App.scss';
 import { readLockfile } from './parsing/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';
 import { PackageJsonViewer } from './containers/PackageJsonViewer';
@@ -21,8 +21,9 @@ export const App = (): JSX.Element => {
       const lockfile = await readLockfile();
       dispatch(loadEntries(lockfile));
     }
-    /* eslint @typescript-eslint/no-floating-promises: off */
-    loadLockfile();
+    loadLockfile().catch((e) => {
+      console.log(`Failed to read lockfile: ${e}`);
+    });
   }, []);
 
   return (

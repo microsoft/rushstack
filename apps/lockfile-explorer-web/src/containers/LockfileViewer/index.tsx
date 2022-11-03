@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import appStyles from '../../appstyles.scss';
+import appStyles from '../../App.scss';
 import styles from './styles.scss';
 import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { ReactNull } from '../../types/ReactNull';

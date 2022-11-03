@@ -10,7 +10,7 @@ export const readPnpmfile = async (): Promise<string> => {
   }
 };
 
-export const readPackageJSON = async (projectPath: string): Promise<IPackageJson | undefined> => {
+export const readPackageJson = async (projectPath: string): Promise<IPackageJson | undefined> => {
   try {
     const response = await fetch(`http://localhost:8091/api/package-json`, {
       method: 'POST',
@@ -28,7 +28,7 @@ export const readPackageJSON = async (projectPath: string): Promise<IPackageJson
   }
 };
 
-export const readParsedCJS = async (projectPath: string): Promise<IPackageJson | undefined> => {
+export const readPackageSpec = async (projectPath: string): Promise<IPackageJson | undefined> => {
   try {
     const response = await fetch(`http://localhost:8091/api/package-spec`, {
       method: 'POST',

@@ -91,7 +91,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
         matchedEntry.referencers.push(entry);
       } else {
         // Local package
-        console.error('Could not resolved dependency entryId: ', dependency.entryId);
+        console.error('Could not resolve dependency entryId: ', dependency.entryId);
       }
     }
   }

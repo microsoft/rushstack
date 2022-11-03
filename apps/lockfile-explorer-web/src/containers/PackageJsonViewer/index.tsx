@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { readPnpmfile, readParsedCJS, readPackageJSON } from '../../parsing/getPackageFiles';
+import { readPnpmfile, readPackageSpec, readPackageJson } from '../../parsing/getPackageFiles';
 import styles from './styles.scss';
-import appStyles from '../../appstyles.scss';
+import appStyles from '../../App.scss';
 import { useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
 import { IPackageJson } from '../../types/IPackageJson';
@@ -29,9 +29,9 @@ export const PackageJsonViewer = (): JSX.Element => {
     async function loadPackageDetails(packageName: string): Promise<void> {
       const cjsFile = await readPnpmfile();
       setCjs(cjsFile);
-      const packageJSONFile = await readPackageJSON(packageName);
+      const packageJSONFile = await readPackageJson(packageName);
       setPackageJSON(packageJSONFile);
-      const parsedJSON = await readParsedCJS(packageName);
+      const parsedJSON = await readPackageSpec(packageName);
       setParsedPackageJSON(parsedJSON);
 
       if (packageJSONFile && parsedJSON) {
@@ -44,7 +44,8 @@ export const PackageJsonViewer = (): JSX.Element => {
         /* eslint @typescript-eslint/no-floating-promises: off */
         loadPackageDetails(selectedEntry.packageJsonFolderPath);
       } else {
-        console.log('selected entry has no entry name: ', selectedEntry.entryPackageName);
+        // This is used to develop the lockfile explorer application in case there is a mistake in our logic
+        console.log('The selected entry has no entry name: ', selectedEntry.entryPackageName);
       }
     }
   }, [selectedEntry]);
@@ -53,7 +54,7 @@ export const PackageJsonViewer = (): JSX.Element => {
     const [dep, version] = dependencyDetails;
     if (specChanges.has(dep)) {
       switch (specChanges.get(dep)?.type) {
-        case 'ADDED_DEP':
+        case 'add':
           return (
             <p key={dep}>
               <span className={styles.AddedSpec}>
@@ -62,7 +63,7 @@ export const PackageJsonViewer = (): JSX.Element => {
               [Added by .pnpmfile.cjs]
             </p>
           );
-        case 'DIFF_DEP':
+        case 'diff':
           return (
             <p key={dep}>
               <span className={styles.ChangedSpec}>
@@ -71,7 +72,7 @@ export const PackageJsonViewer = (): JSX.Element => {
               [Changed from {specChanges.get(dep)?.from}]
             </p>
           );
-        case 'DELETED_DEP':
+        case 'remove':
           return (
             <p key={dep}>
               <span className={styles.DeletedSpec}>

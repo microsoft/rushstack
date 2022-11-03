@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import appStyles from '../../appstyles.scss';
+import appStyles from '../../App.scss';
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { LockfileEntry } from '../../parsing/LockfileEntry';
