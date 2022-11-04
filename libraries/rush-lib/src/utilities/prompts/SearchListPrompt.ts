@@ -1,7 +1,13 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import type { Interface } from 'readline';
 import _ from 'lodash';
 import colors from 'colors/safe';
 
+// Modified from the choice list prompt in inquirer:
+// https://github.com/SBoudrias/Inquirer.js/blob/inquirer%407.3.3/packages/inquirer/lib/prompts/list.js
+// Extended to include text filtering for the list
 import type inquirer from 'inquirer';
 import type { Answers, ListQuestion, DistinctChoice } from 'inquirer';
 import BasePrompt from 'inquirer/lib/prompts/base';
