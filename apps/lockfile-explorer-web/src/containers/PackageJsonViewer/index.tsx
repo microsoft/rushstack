@@ -41,8 +41,9 @@ export const PackageJsonViewer = (): JSX.Element => {
     }
     if (selectedEntry) {
       if (selectedEntry.entryPackageName) {
-        /* eslint @typescript-eslint/no-floating-promises: off */
-        loadPackageDetails(selectedEntry.packageJsonFolderPath);
+        loadPackageDetails(selectedEntry.packageJsonFolderPath).catch((e) => {
+          console.error(`Failed to load project information: ${e}`);
+        });
       } else {
         // This is used to develop the lockfile explorer application in case there is a mistake in our logic
         console.log('The selected entry has no entry name: ', selectedEntry.entryPackageName);
