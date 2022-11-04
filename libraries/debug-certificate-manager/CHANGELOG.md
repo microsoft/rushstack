@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Wed, 26 Oct 2022 00:16:16 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Nov 2022 00:15:59 GMT and should not be manually modified.
+
+## 1.2.2
+Fri, 04 Nov 2022 00:15:59 GMT
+
+### Patches
+
+- Remove usage of Import.lazy so that the tool can be bundled.
 
 ## 1.2.1
 Wed, 26 Oct 2022 00:16:16 GMT

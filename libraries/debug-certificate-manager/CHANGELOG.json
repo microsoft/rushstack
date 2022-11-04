@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.2",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.2",
+      "date": "Fri, 04 Nov 2022 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove usage of Import.lazy so that the tool can be bundled."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.1",
       "tag": "@rushstack/debug-certificate-manager_v1.2.1",
       "date": "Wed, 26 Oct 2022 00:16:16 GMT",
