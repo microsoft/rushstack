@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/lockfile-explorer",
+  "entries": [
+    {
+      "version": "0.0.1",
+      "tag": "@rushstack/lockfile-explorer_v0.0.1",
+      "date": "Fri, 04 Nov 2022 17:48:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial preview release"
+          }
+        ]
+      }
+    }
+  ]
+}
