@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { readPnpmfile, readPackageSpec, readPackageJson } from '../../parsing/getPackageFiles';
 import styles from './styles.scss';

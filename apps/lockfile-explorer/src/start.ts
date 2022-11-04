@@ -5,6 +5,9 @@ import fs from 'fs';
 import path from 'path';
 import open from 'open';
 import { init } from './init';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { IAppState } from './state';
 
 const PORT: number = 8091;

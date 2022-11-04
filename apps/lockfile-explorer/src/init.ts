@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 // This function will read the current directory and try to figure out if it's a rush project or regular pnpm workspace
 // Currently it will throw error if neither can be determined
 import fs from 'fs';
