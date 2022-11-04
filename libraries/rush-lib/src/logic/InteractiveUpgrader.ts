@@ -1,10 +1,12 @@
 import npmCheck from 'npm-check';
 import colors from 'colors/safe';
-import inquirer from 'inquirer';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { upgradeInteractive, IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import Prompt from 'inquirer/lib/ui/prompt';
+
+import { SearchListPrompt } from '../utilities/prompts/SearchListPrompt';
 
 interface IUpgradeInteractiveDeps {
   projects: RushConfigurationProject[];
@@ -39,18 +41,24 @@ export class InteractiveUpgrader {
 
   private async _getUserSelectedProjectForUpgrade(): Promise<RushConfigurationProject> {
     const projects: RushConfigurationProject[] | undefined = this._rushConfiguration.projects;
-
-    const { selectProject } = await inquirer.prompt({
-      name: 'selectProject',
-      message: 'Select a project you would like to upgrade',
-      type: 'list',
-      choices: projects.map((project) => {
-        return {
-          name: colors.green(project.packageName),
-          value: project
-        };
-      })
+    const ui: Prompt = new Prompt({
+      list: SearchListPrompt
     });
+
+    const { selectProject } = await ui.run([
+      {
+        name: 'selectProject',
+        message: 'Select a project you would like to upgrade',
+        type: 'list',
+        choices: projects.map((project) => {
+          return {
+            name: colors.green(project.packageName),
+            value: project
+          };
+        }),
+        pageSize: 12
+      }
+    ]);
 
     return selectProject;
   }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add project filtering to upgrade-interactive ui prompt. Also increase default page size for project lists in UI.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
