@@ -1852,6 +1852,7 @@ importers:
       builtin-modules: ~3.1.0
       cli-table: ~0.3.1
       colors: ~1.2.1
+      figures: 3.0.0
       git-repo-info: ~2.1.0
       glob: ~7.0.5
       glob-escape: ~0.0.2
@@ -1887,6 +1888,7 @@ importers:
       builtin-modules: 3.1.0
       cli-table: 0.3.11
       colors: 1.2.5
+      figures: 3.0.0
       git-repo-info: 2.1.1
       glob: 7.0.6
       glob-escape: 0.0.2
@@ -12304,6 +12306,13 @@ packages:
     dependencies:
       escape-string-regexp: 1.0.5
       object-assign: 4.1.1
+    dev: false
+
+  /figures/3.0.0:
+    resolution: {integrity: sha512-HKri+WoWoUgr83pehn/SIgLOMZ9nAWC6dcGj26RY2R4F50u4+RTUz0RCrUlOV3nKRAICW1UGzyb+kcX2qK1S/g==}
+    engines: {node: '>=8'}
+    dependencies:
+      escape-string-regexp: 1.0.5
     dev: false
 
   /figures/3.2.0:
