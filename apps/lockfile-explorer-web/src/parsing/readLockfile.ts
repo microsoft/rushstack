@@ -41,6 +41,12 @@ export interface ILockfilePackageType {
   };
 }
 
+/**
+ * Parse through the lockfile and create all the corresponding LockfileEntries and LockfileDependencies
+ * to construct the lockfile graph.
+ *
+ * @returns A list of all the LockfileEntries in the lockfile.
+ */
 export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileEntry[] => {
   const allEntries: LockfileEntry[] = [];
   const allEntriesById: { [key in string]: LockfileEntry } = {};

@@ -7,6 +7,19 @@ export interface ISpecChange {
   to?: string;
 }
 
+/**
+ * Calculate the diff between a package.json file and its transformed "package spec".
+ *
+ * @remarks
+ * During installation, PNPM applies various transforms to `package.json` files, for example
+ * .pnpmfile.cjs may add/remove/rewrite version ranges. The transformed result is called
+ * the "package spec" by Lockfile Explorer, and its tab pane displays the diff between
+ * the original `package.json` and the final spec.
+ *
+ * @returns A map of `ISpecChange` differences, looked up by package name. For example:
+ *
+ * 'react' --> { packageName: 'react', type: 'diff', from: '^16.0.0', to: '~16.2.0' }
+ */
 export const compareSpec = (
   packageJson: IPackageJson,
   packageSpec: IPackageJson

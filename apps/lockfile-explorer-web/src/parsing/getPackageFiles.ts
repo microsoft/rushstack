@@ -1,5 +1,10 @@
 import { IPackageJson } from '../types/IPackageJson';
 
+/**
+ * Fetches a projects configuration files from the local file system
+ *
+ * @returns a json object representing a package.json or a text file to be rendered (in the case of readPnpmfile)
+ */
 export const readPnpmfile = async (): Promise<string> => {
   try {
     const response = await fetch(`http://localhost:8091/api/pnpmfile`);

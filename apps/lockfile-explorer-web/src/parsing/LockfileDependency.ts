@@ -25,6 +25,16 @@ export enum IDependencyType {
   PEER_DEPENDENCY
 }
 
+/**
+ * Represents a dependency listed under a LockfileEntry
+ *
+ * @remarks
+ * Each dependency listed under a package in the lockfile should have a separate entry. These Dependencies
+ * will link to the "containingEntry", which is the LockfileEntry that specified this dependency.
+ * The "resolvedEntry" field is the corresponding LockfileEntry for this dependency, as all dependencies also have
+ * their own entries in the pnpm lockfile.
+ *
+ */
 export class LockfileDependency {
   public name: string;
   public version: string;
