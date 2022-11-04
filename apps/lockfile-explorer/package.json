@@ -1,8 +1,27 @@
 {
   "name": "@rushstack/lockfile-explorer",
-  "description": "Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo",
   "version": "0.0.0",
-  "private": true,
+  "description": "Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo",
+  "keywords": [
+    "conflict",
+    "dependency",
+    "doppelganger",
+    "interactive",
+    "lockfile",
+    "monorepo",
+    "package",
+    "phantom",
+    "tool",
+    "version",
+    "visualization",
+    "visualize",
+    "visualizer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/lockfile-explorer"
+  },
   "license": "MIT",
   "bin": {
     "lockfile-explorer": "./bin/lockfile-explorer"

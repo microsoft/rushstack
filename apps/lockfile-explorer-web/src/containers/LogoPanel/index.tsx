@@ -5,7 +5,10 @@ import React from 'react';
 import styles from './styles.scss';
 
 export const LogoPanel = (): JSX.Element => {
-  const appPackageVersion: string = '0.0.0';
+  // TODO: Add a mechanism to keep this in sync with the @rushstack/lockfile-explorer
+  // package version.
+  const appPackageVersion: string = '0.1.0';
+
   return (
     <div className={styles.LogoPanel}>
       <a href="https://www.npmjs.com/package/@rushstack/lockfile-explorer" target="_blank" rel="noreferrer">

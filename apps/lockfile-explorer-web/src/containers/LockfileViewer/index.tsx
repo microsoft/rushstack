@@ -71,7 +71,7 @@ const multipleVersions = (entries: LockfileEntry[]): boolean => {
 };
 
 export const LockfileViewer = (): JSX.Element | ReactNull => {
-  const [filter, setFilter] = useState('react-dom');
+  const [filter, setFilter] = useState('');
   const entries = useAppSelector(selectFilteredEntries);
   const activeFilters = useAppSelector((state) => state.entry.filters);
   const updateFilter = useCallback((e) => setFilter(e.target.value), []);
