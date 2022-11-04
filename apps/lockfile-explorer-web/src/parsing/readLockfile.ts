@@ -1,4 +1,7 @@
-import { LockfileEntry, LockfileEntryKind } from './LockfileEntry';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
 
 export interface IPackageJsonType {
   name: string;
@@ -41,6 +44,12 @@ export interface ILockfilePackageType {
   };
 }
 
+/**
+ * Parse through the lockfile and create all the corresponding LockfileEntries and LockfileDependencies
+ * to construct the lockfile graph.
+ *
+ * @returns A list of all the LockfileEntries in the lockfile.
+ */
 export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileEntry[] => {
   const allEntries: LockfileEntry[] = [];
   const allEntriesById: { [key in string]: LockfileEntry } = {};
@@ -54,12 +63,12 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
       const importer = new LockfileEntry({
         // entryId: normalizedPath,
         rawEntryId: importerKey,
-        kind: LockfileEntryKind.Project,
+        kind: LockfileEntryFilter.Project,
         rawYamlData: importerValue
       });
       allImporters.push(importer);
       allEntries.push(importer);
-      allEntriesById[importerKey] = importer;
+      allEntriesById[importer.entryId] = importer;
     }
   }
 
@@ -71,7 +80,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
       const currEntry = new LockfileEntry({
         // entryId: normalizedPath,
         rawEntryId: dependencyKey,
-        kind: LockfileEntryKind.Package,
+        kind: LockfileEntryFilter.Package,
         rawYamlData: dependencyValue
       });
 
@@ -86,12 +95,12 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
     for (const dependency of entry.dependencies) {
       const matchedEntry = allEntriesById[dependency.entryId];
       if (matchedEntry) {
-        // Create a two way link between the dependency and the entry
-
+        // Create a two-way link between the dependency and the entry
         dependency.resolvedEntry = matchedEntry;
-        matchedEntry.referencers.push(dependency);
+        matchedEntry.referrers.push(entry);
       } else {
-        // console.error('Could not resolved dependency entryId: ', dependency.entryId);
+        // Local package
+        console.error('Could not resolve dependency entryId: ', dependency.entryId);
       }
     }
   }
@@ -100,7 +109,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
 };
 
 export const readLockfile = async (): Promise<LockfileEntry[]> => {
-  const response = await fetch('http://localhost:8091');
+  const response = await fetch('http://localhost:8091/');
   const lockfile: ILockfilePackageType = await response.json();
 
   return generateLockfileGraph(lockfile);

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { Path } from '@lifaon/path';
 import { LockfileEntry } from './LockfileEntry';
 
@@ -8,21 +11,59 @@ export interface ILockfileNode {
   devDependencies?: {
     [key in string]: string;
   };
+  peerDependencies?: {
+    [key in string]: string;
+  };
+  peerDependenciesMeta?: {
+    [key in string]: {
+      optional: boolean;
+    };
+  };
+  transitivePeerDependencies?: string[];
 }
 
+export enum IDependencyType {
+  DEPENDENCY,
+  DEV_DEPENDENCY,
+  PEER_DEPENDENCY
+}
+
+/**
+ * Represents a dependency listed under a LockfileEntry
+ *
+ * @remarks
+ * Each dependency listed under a package in the lockfile should have a separate entry. These Dependencies
+ * will link to the "containingEntry", which is the LockfileEntry that specified this dependency.
+ * The "resolvedEntry" field is the corresponding LockfileEntry for this dependency, as all dependencies also have
+ * their own entries in the pnpm lockfile.
+ *
+ */
 export class LockfileDependency {
   public name: string;
   public version: string;
   public entryId: string = '';
-  public devDependency: boolean;
+  public dependencyType: IDependencyType;
   public containingEntry: LockfileEntry;
   public resolvedEntry: LockfileEntry | undefined;
 
-  public constructor(name: string, version: string, devDependency: boolean, containingEntry: LockfileEntry) {
+  public peerDependencyMeta: {
+    name?: string;
+    version?: string;
+    optional?: boolean;
+  };
+
+  public constructor(
+    name: string,
+    version: string,
+    dependencyType: IDependencyType,
+    containingEntry: LockfileEntry,
+    node?: ILockfileNode
+  ) {
     this.name = name;
     this.version = version;
-    this.devDependency = devDependency;
+    this.dependencyType = dependencyType;
     this.containingEntry = containingEntry;
+    this.peerDependencyMeta = {};
 
     if (this.version.startsWith('link:')) {
       const relativePath = this.version.substring('link:'.length);
@@ -33,9 +74,22 @@ export class LockfileDependency {
         console.error('No root relative path for dependency!', name);
         return;
       }
-      this.entryId = 'package:' + rootRelativePath.toString();
+      this.entryId = 'project:' + rootRelativePath.toString();
     } else if (this.version.startsWith('/')) {
       this.entryId = this.version;
+    } else if (this.dependencyType === IDependencyType.PEER_DEPENDENCY) {
+      if (node?.peerDependencies) {
+        this.peerDependencyMeta = {
+          name: this.name,
+          version: node.peerDependencies[this.name],
+          optional:
+            node.peerDependenciesMeta && node.peerDependenciesMeta[this.name]
+              ? node.peerDependenciesMeta[this.name].optional
+              : false
+        };
+      } else {
+        console.error('Peer dependencies info missing!', node);
+      }
     } else {
       this.entryId = '/' + this.name + '/' + this.version;
     }
@@ -49,12 +103,28 @@ export class LockfileDependency {
   ): void {
     if (node.dependencies) {
       for (const [pkgName, pkgVersion] of Object.entries(node.dependencies)) {
-        dependencies.push(new LockfileDependency(pkgName, pkgVersion, false, lockfileEntry));
+        dependencies.push(
+          new LockfileDependency(pkgName, pkgVersion, IDependencyType.DEPENDENCY, lockfileEntry)
+        );
       }
     }
     if (node.devDependencies) {
       for (const [pkgName, pkgVersion] of Object.entries(node.devDependencies)) {
-        dependencies.push(new LockfileDependency(pkgName, pkgVersion, true, lockfileEntry));
+        dependencies.push(
+          new LockfileDependency(pkgName, pkgVersion, IDependencyType.DEV_DEPENDENCY, lockfileEntry)
+        );
+      }
+    }
+    if (node.peerDependencies) {
+      for (const [pkgName, pkgVersion] of Object.entries(node.peerDependencies)) {
+        dependencies.push(
+          new LockfileDependency(pkgName, pkgVersion, IDependencyType.PEER_DEPENDENCY, lockfileEntry, node)
+        );
+      }
+    }
+    if (node.transitivePeerDependencies) {
+      for (const dep of node.transitivePeerDependencies) {
+        lockfileEntry.transitivePeerDependencies.add(dep);
       }
     }
   }
