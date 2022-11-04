@@ -49,18 +49,18 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         while (stack.length) {
           const currEntry = stack.pop();
           if (currEntry) {
-            for (const reference of currEntry.referencers) {
+            for (const referrer of currEntry.referrers) {
               let hasDependency = false;
-              for (const dependency of reference.dependencies) {
+              for (const dependency of referrer.dependencies) {
                 if (dependency.name === dependencyToTrace.name) {
-                  determinants.add(reference);
+                  determinants.add(referrer);
                   hasDependency = true;
                   break;
                 }
               }
               if (!hasDependency) {
-                if (reference.transitivePeerDependencies.has(dependencyToTrace.name)) {
-                  transitiveReferrers.add(reference);
+                if (referrer.transitivePeerDependencies.has(dependencyToTrace.name)) {
+                  transitiveReferrers.add(referrer);
                 } else {
                   // Since this referrer does not declare "dependency", it is a
                   // transitive peer dependency, and we call the referrer a "transitive referrer".
@@ -70,13 +70,13 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                   // field.
                   console.error(
                     'Error analyzing influencers: A referrer appears to be missing its "transitivePeerDependencies" field in the YAML file: ',
-                    reference
+                    referrer
                   );
                 }
-                for (const referencer of currEntry.referencers) {
-                  if (!visitedNodes.has(referencer)) {
-                    stack.push(referencer);
-                    visitedNodes.add(referencer);
+                for (const referrer of currEntry.referrers) {
+                  if (!visitedNodes.has(referrer)) {
+                    stack.push(referrer);
+                    visitedNodes.add(referrer);
                   }
                 }
               }
@@ -103,8 +103,8 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   );
 
   const selectResolvedReferencer = useCallback(
-    (referencer) => () => {
-      dispatch(pushToStack(referencer));
+    (referrer) => () => {
+      dispatch(pushToStack(referrer));
     },
     [selectedEntry]
   );
@@ -161,15 +161,15 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         <div className={appStyles.ContainerCard}>
           <h5>Direct Referrers</h5>
           <div className={styles.DependencyListWrapper}>
-            {selectedEntry.referencers?.map((referencer: LockfileEntry) => (
+            {selectedEntry.referrers?.map((referrer: LockfileEntry) => (
               <div
                 className={styles.DependencyItem}
-                key={referencer.rawEntryId}
-                onClick={selectResolvedReferencer(referencer)}
+                key={referrer.rawEntryId}
+                onClick={selectResolvedReferencer(referrer)}
               >
-                <h5>Name: {referencer.displayText}</h5>
+                <h5>Name: {referrer.displayText}</h5>
                 <div>
-                  <p>Entry ID: {referencer.rawEntryId}</p>
+                  <p>Entry ID: {referrer.rawEntryId}</p>
                 </div>
               </div>
             ))}

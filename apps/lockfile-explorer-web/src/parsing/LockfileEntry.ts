@@ -36,7 +36,7 @@ interface IProps {
  *    Note that dependencies, dev dependencies, as well as peer dependencies are all included.
  * @property transitivePeerDependencies {Set<string>} A list of dependencies that are listed under the
  *    "transitivePeerDependencies" in the pnpm lockfile.
- * @property referencers {LockfileEntry[]} a list of entries that specify this entry as a dependency.
+ * @property referrers {LockfileEntry[]} a list of entries that specify this entry as a dependency.
  *
  */
 export class LockfileEntry {
@@ -50,7 +50,7 @@ export class LockfileEntry {
 
   public dependencies: LockfileDependency[] = [];
   public transitivePeerDependencies: Set<string> = new Set();
-  public referencers: LockfileEntry[] = [];
+  public referrers: LockfileEntry[] = [];
 
   private static _packageEntryIdRegex: RegExp = new RegExp('/(.*)/([^/]+)$');
 
