@@ -157,28 +157,35 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
     this._adjustSelected(0);
   }
 
+  // Provide the delta in deplayed choices and change the selected
+  // index accordingly by the delta in real choices
   private _adjustSelected(delta: number): void {
     const { choices } = this.opt.choices;
     const pointer: number = this._selected;
     let lastValidIndex: number = pointer;
+
+    // if delta is greater than 0, we are moving down in list w/ selected index
     if (delta < 0) {
       for (let i: number = pointer - 1; i >= 0; i--) {
         const choice: Choice<Answers> = choices[i] as Choice<Answers>;
         if (isValidChoice(choice)) {
           ++delta;
           lastValidIndex = i;
+          // if delta is 0, we have found the next valid choice that has an index greater than the selected index
           if (delta === 0) {
             break;
           }
         }
       }
     } else {
+      // if delta is less than 0, we are moving up in list w/ selected index
       ++delta;
       for (let i: number = pointer, len: number = choices.length; i < len; i++) {
         const choice: Choice<Answers> = choices[i] as Choice<Answers>;
         if (isValidChoice(choice)) {
           --delta;
           lastValidIndex = i;
+          // if delta is 0, we have found the next valid choice that has an index greater than the selected index
           if (delta === 0) {
             break;
           }
