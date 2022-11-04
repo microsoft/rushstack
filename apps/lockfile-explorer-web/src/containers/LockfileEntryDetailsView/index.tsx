@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
 import { LockfileEntry } from '../../parsing/LockfileEntry';
+import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
 
 enum InfluencerTypes {
   Determinant,
@@ -36,7 +37,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         if (dependencyToTrace.resolvedEntry) {
           dispatch(pushToStack(dependencyToTrace.resolvedEntry));
         } else {
-          console.error('No resolved entry for dependency: ', dependencyToTrace);
+          logDiagnosticInfo('No resolved entry for dependency:', dependencyToTrace);
         }
       } else if (selectedEntry) {
         setInspectDependency(dependencyToTrace);
