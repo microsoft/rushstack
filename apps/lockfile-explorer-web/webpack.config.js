@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const createWebpackConfig = require('@rushstack/heft-web-rig/profiles/app/webpack-base.config');
 
 module.exports = function createConfig(env, argv) {
@@ -24,7 +25,10 @@ module.exports = function createConfig(env, argv) {
         // maxAssetSize: 500000
       },
       devServer: {
-        port: 8096
+        port: 8096,
+        static: {
+          directory: path.join(__dirname, 'dist')
+        }
       }
     }
   });

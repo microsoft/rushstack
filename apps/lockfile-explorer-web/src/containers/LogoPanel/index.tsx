@@ -7,7 +7,7 @@ import styles from './styles.scss';
 export const LogoPanel = (): JSX.Element => {
   // TODO: Add a mechanism to keep this in sync with the @rushstack/lockfile-explorer
   // package version.
-  const appPackageVersion: string = '0.1.0';
+  const appPackageVersion: string = window.appContext.appVersion;
 
   return (
     <div className={styles.LogoPanel}>
