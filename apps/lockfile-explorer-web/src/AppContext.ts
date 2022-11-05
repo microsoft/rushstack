@@ -14,6 +14,14 @@
  */
 export interface IAppContext {
   /**
+   * The service URL, without the trailing slash.
+   *
+   * @example
+   * Example: `http://localhost:8091`
+   */
+  serviceUrl: string;
+
+  /**
    * The `package.json` version for the app.
    */
   appVersion: string;

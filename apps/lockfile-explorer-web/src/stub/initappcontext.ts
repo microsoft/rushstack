@@ -8,6 +8,7 @@
 console.log('Loaded stub/initappcontext.js');
 
 window.appContext = {
+  serviceUrl: 'http://localhost:8091',
   appVersion: '(dev)',
   debugMode: true
 };

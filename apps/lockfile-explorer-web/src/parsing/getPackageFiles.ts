@@ -3,6 +3,8 @@
 
 import { IPackageJson } from '../types/IPackageJson';
 
+const serviceUrl: string = window.appContext.serviceUrl;
+
 /**
  * Fetches a projects configuration files from the local file system
  *
@@ -10,7 +12,7 @@ import { IPackageJson } from '../types/IPackageJson';
  */
 export const readPnpmfile = async (): Promise<string> => {
   try {
-    const response = await fetch(`http://localhost:8091/api/pnpmfile`);
+    const response = await fetch(`${serviceUrl}/api/pnpmfile`);
     return await response.text();
   } catch (e) {
     console.error('Could not load cjs file: ', e);
@@ -20,7 +22,7 @@ export const readPnpmfile = async (): Promise<string> => {
 
 export const readPackageJson = async (projectPath: string): Promise<IPackageJson | undefined> => {
   try {
-    const response = await fetch(`http://localhost:8091/api/package-json`, {
+    const response = await fetch(`${serviceUrl}/api/package-json`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -38,7 +40,7 @@ export const readPackageJson = async (projectPath: string): Promise<IPackageJson
 
 export const readPackageSpec = async (projectPath: string): Promise<IPackageJson | undefined> => {
   try {
-    const response = await fetch(`http://localhost:8091/api/package-spec`, {
+    const response = await fetch(`${serviceUrl}/api/package-spec`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -14,7 +14,9 @@ import { IAppState } from './state';
 import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/AppContext';
 
 const PORT: number = 8091;
-const APP_URL: string = `http://localhost:${PORT}/app/`;
+// Must not have a trailing slash
+const SERVICE_URL: string = `http://localhost:${PORT}`;
+const APP_URL: string = `${SERVICE_URL}/app/`;
 
 const appState: IAppState = init();
 
@@ -26,6 +28,7 @@ app.use(cors());
 // This takes precedence over the `/app` static route, which also has an `initappcontext.js` file.
 app.get('/app/initappcontext.js', (req: express.Request, res: express.Response) => {
   const appContext: IAppContext = {
+    serviceUrl: SERVICE_URL,
     appVersion: appState.appVersion,
     debugMode: process.argv.indexOf('--debug') >= 0
   };
