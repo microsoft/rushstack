@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "The CLI now supports a \"--debug\" parameter for troubleshooting",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}
