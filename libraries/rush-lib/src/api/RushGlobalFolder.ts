@@ -25,7 +25,7 @@ export class RushGlobalFolder {
    * in a global folder to speed up installations.  The default location is `~/.rush` on POSIX-like
    * operating systems or `C:\Users\YourName` on Windows.
    *
-   * You can use the {@link EnvironmentVariableNames.RUSH_GLOBAL_FOLDER} environment  variable to specify
+   * You can use the {@link (EnvironmentVariableNames:variable).RUSH_GLOBAL_FOLDER} environment  variable to specify
    * a different folder path.  This is useful for example if a Windows group policy forbids executing scripts
    * installed in a user's home directory.
    *

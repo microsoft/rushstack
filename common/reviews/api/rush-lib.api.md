@@ -70,20 +70,17 @@ export class BuildCacheConfiguration {
 }
 
 // @public
-export enum BumpType {
-    // (undocumented)
-    'major' = 5,
-    // (undocumented)
-    'minor' = 4,
-    // (undocumented)
-    'none' = 0,
-    // (undocumented)
-    'patch' = 2,
-    // (undocumented)
-    'preminor' = 3,
-    // (undocumented)
-    'prerelease' = 1
-}
+export const BumpType: {
+    readonly none: "none";
+    readonly prerelease: "prerelease";
+    readonly patch: "patch";
+    readonly preminor: "preminor";
+    readonly minor: "minor";
+    readonly major: "major";
+};
+
+// @public (undocumented)
+export type BumpType = typeof BumpType[keyof typeof BumpType];
 
 // @public
 export class ChangeManager {
@@ -128,18 +125,16 @@ export class CredentialCache {
 }
 
 // @public (undocumented)
-export enum DependencyType {
-    // (undocumented)
-    Dev = "devDependencies",
-    // (undocumented)
-    Optional = "optionalDependencies",
-    // (undocumented)
-    Peer = "peerDependencies",
-    // (undocumented)
-    Regular = "dependencies",
-    // (undocumented)
-    YarnResolutions = "resolutions"
-}
+export const DependencyType: {
+    readonly Regular: "dependencies";
+    readonly Dev: "devDependencies";
+    readonly Optional: "optionalDependencies";
+    readonly Peer: "peerDependencies";
+    readonly YarnResolutions: "resolutions";
+};
+
+// @public (undocumented)
+export type DependencyType = typeof DependencyType[keyof typeof DependencyType];
 
 // @beta
 export class EnvironmentConfiguration {
@@ -166,33 +161,39 @@ export class EnvironmentConfiguration {
 }
 
 // @beta
-export enum EnvironmentVariableNames {
-    RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
-    RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
-    RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD = "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD",
-    RUSH_BUILD_CACHE_CREDENTIAL = "RUSH_BUILD_CACHE_CREDENTIAL",
-    RUSH_BUILD_CACHE_ENABLED = "RUSH_BUILD_CACHE_ENABLED",
-    RUSH_BUILD_CACHE_WRITE_ALLOWED = "RUSH_BUILD_CACHE_WRITE_ALLOWED",
-    RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
-    RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
-    RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
-    RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
-    RUSH_PARALLELISM = "RUSH_PARALLELISM",
-    RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
-    RUSH_PNPM_VERIFY_STORE_INTEGRITY = "RUSH_PNPM_VERIFY_STORE_INTEGRITY",
-    RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
-    RUSH_TAR_BINARY_PATH = "RUSH_TAR_BINARY_PATH",
-    RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
-    RUSH_VARIANT = "RUSH_VARIANT"
-}
+export const EnvironmentVariableNames: {
+    readonly RUSH_TEMP_FOLDER: "RUSH_TEMP_FOLDER";
+    readonly RUSH_PREVIEW_VERSION: "RUSH_PREVIEW_VERSION";
+    readonly RUSH_ALLOW_UNSUPPORTED_NODEJS: "RUSH_ALLOW_UNSUPPORTED_NODEJS";
+    readonly RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD";
+    readonly RUSH_VARIANT: "RUSH_VARIANT";
+    readonly RUSH_PARALLELISM: "RUSH_PARALLELISM";
+    readonly RUSH_ABSOLUTE_SYMLINKS: "RUSH_ABSOLUTE_SYMLINKS";
+    readonly RUSH_PNPM_STORE_PATH: "RUSH_PNPM_STORE_PATH";
+    readonly RUSH_PNPM_VERIFY_STORE_INTEGRITY: "RUSH_PNPM_VERIFY_STORE_INTEGRITY";
+    readonly RUSH_DEPLOY_TARGET_FOLDER: "RUSH_DEPLOY_TARGET_FOLDER";
+    readonly RUSH_GLOBAL_FOLDER: "RUSH_GLOBAL_FOLDER";
+    readonly RUSH_BUILD_CACHE_CREDENTIAL: "RUSH_BUILD_CACHE_CREDENTIAL";
+    readonly RUSH_BUILD_CACHE_ENABLED: "RUSH_BUILD_CACHE_ENABLED";
+    readonly RUSH_BUILD_CACHE_WRITE_ALLOWED: "RUSH_BUILD_CACHE_WRITE_ALLOWED";
+    readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
+    readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
+    readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
+};
+
+// @public (undocumented)
+export type EnvironmentVariableNames = typeof EnvironmentVariableNames[keyof typeof EnvironmentVariableNames];
 
 // @beta
-export enum Event {
-    postRushBuild = 4,
-    postRushInstall = 2,
-    preRushBuild = 3,
-    preRushInstall = 1
-}
+export const Event: {
+    readonly preRushInstall: "preRushInstall";
+    readonly postRushInstall: "postRushInstall";
+    readonly preRushBuild: "preRushBuild";
+    readonly postRushBuild: "postRushBuild";
+};
+
+// @public (undocumented)
+export type Event = typeof Event[keyof typeof Event];
 
 // @beta
 export class EventHooks {
@@ -615,17 +616,20 @@ export class _OperationStateFile {
 }
 
 // @beta
-export enum OperationStatus {
-    Blocked = "BLOCKED",
-    Executing = "EXECUTING",
-    Failure = "FAILURE",
-    FromCache = "FROM CACHE",
-    NoOp = "NO OP",
-    Ready = "READY",
-    Skipped = "SKIPPED",
-    Success = "SUCCESS",
-    SuccessWithWarning = "SUCCESS WITH WARNINGS"
-}
+export const OperationStatus: {
+    readonly Ready: "READY";
+    readonly Executing: "EXECUTING";
+    readonly Success: "SUCCESS";
+    readonly SuccessWithWarning: "SUCCESS WITH WARNINGS";
+    readonly Skipped: "SKIPPED";
+    readonly FromCache: "FROM CACHE";
+    readonly Failure: "FAILURE";
+    readonly Blocked: "BLOCKED";
+    readonly NoOp: "NO OP";
+};
+
+// @public (undocumented)
+export type OperationStatus = typeof OperationStatus[keyof typeof OperationStatus];
 
 // @public (undocumented)
 export class PackageJsonDependency {
@@ -1012,12 +1016,13 @@ export class VersionPolicyConfiguration {
 }
 
 // @public
-export enum VersionPolicyDefinitionName {
-    // (undocumented)
-    'individualVersion' = 1,
-    // (undocumented)
-    'lockStepVersion' = 0
-}
+export const VersionPolicyDefinitionName: {
+    readonly lockStepVersion: "lockStepVersion";
+    readonly individualVersion: "individualVersion";
+};
+
+// @public (undocumented)
+export type VersionPolicyDefinitionName = typeof VersionPolicyDefinitionName[keyof typeof VersionPolicyDefinitionName];
 
 // @public
 export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

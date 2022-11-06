@@ -5,7 +5,7 @@ import * as path from 'path';
 import readPackageTree = require('read-package-tree');
 import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
 
-import { BasePackage, IRushTempPackageJson } from '../base/BasePackage';
+import { BasePackage, IRushTempPackageJson, PackageDependencyKind } from '../base/BasePackage';
 
 /**
  * Used by the linking algorithm when doing NPM package resolution.
@@ -13,22 +13,6 @@ import { BasePackage, IRushTempPackageJson } from '../base/BasePackage';
 export interface IResolveOrCreateResult {
   found: BasePackage | undefined;
   parentForCreate: BasePackage | undefined;
-}
-
-/**
- * The type of dependency; used by IPackageDependency.
- */
-export enum PackageDependencyKind {
-  Normal,
-  /**
-   * The dependency was listed in the optionalDependencies section of package.json.
-   */
-  Optional,
-
-  /**
-   * The dependency should be a symlink to a project that is locally built by Rush..
-   */
-  LocalLink
 }
 
 export interface IPackageDependency {

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Convert enums in the API to consts.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

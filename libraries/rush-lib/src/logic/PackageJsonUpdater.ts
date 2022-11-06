@@ -23,12 +23,14 @@ import type { DependencyAnalyzer, IDependencyAnalysis } from './DependencyAnalyz
 /**
  * The type of SemVer range specifier that is prepended to the version
  */
-export const enum SemVerStyle {
-  Exact = 'exact',
-  Caret = 'caret',
-  Tilde = 'tilde',
-  Passthrough = 'passthrough'
-}
+// eslint-disable-next-line @typescript-eslint/typedef
+export const SemVerStyle = {
+  Exact: 'exact',
+  Caret: 'caret',
+  Tilde: 'tilde',
+  Passthrough: 'passthrough'
+} as const;
+export type SemVerStyle = typeof SemVerStyle[keyof typeof SemVerStyle];
 
 export interface IPackageForRushUpdate {
   packageName: string;

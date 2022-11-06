@@ -26,15 +26,19 @@ export interface IIndividualVersionJson extends IVersionPolicyJson {
   lockedMajor?: number;
 }
 
-export enum VersionFormatForPublish {
-  original = 'original',
-  exact = 'exact'
-}
+// eslint-disable-next-line @typescript-eslint/typedef
+export const VersionFormatForPublish = {
+  original: 'original',
+  exact: 'exact'
+} as const;
+export type VersionFormatForPublish = typeof VersionFormatForPublish[keyof typeof VersionFormatForPublish];
 
-export enum VersionFormatForCommit {
-  wildcard = 'wildcard',
-  original = 'original'
-}
+// eslint-disable-next-line @typescript-eslint/typedef
+export const VersionFormatForCommit = {
+  wildcard: 'wildcard',
+  original: 'original'
+} as const;
+export type VersionFormatForCommit = typeof VersionFormatForCommit[keyof typeof VersionFormatForCommit];
 
 export interface IVersionPolicyDependencyJson {
   versionFormatForPublish?: VersionFormatForPublish;

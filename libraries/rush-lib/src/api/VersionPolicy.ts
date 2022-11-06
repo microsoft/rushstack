@@ -22,29 +22,46 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
  * Type of version bumps
  * @public
  */
-export enum BumpType {
-  // No version bump
-  'none',
-  // Prerelease version bump
-  'prerelease',
-  // Patch version bump
-  'patch',
-  // Preminor version bump
-  'preminor',
-  // Minor version bump
-  'minor',
-  // Major version bump
-  'major'
-}
+// eslint-disable-next-line @typescript-eslint/typedef
+export const BumpType = {
+  /**
+   * No version bump
+   */
+  none: 'none',
+  /**
+   * Prerelease version bump
+   */
+  prerelease: 'prerelease',
+  /**
+   * Patch version bump
+   */
+  patch: 'patch',
+  /**
+   * Preminor version bump
+   */
+  preminor: 'preminor',
+  /**
+   * Minor version bump
+   */
+  minor: 'minor',
+  /**
+   * Major version bump
+   */
+  major: 'major'
+} as const;
+export type BumpType = typeof BumpType[keyof typeof BumpType];
 
 /**
  * Version policy base type names
  * @public
  */
-export enum VersionPolicyDefinitionName {
-  'lockStepVersion',
-  'individualVersion'
-}
+// eslint-disable-next-line @typescript-eslint/typedef
+export const VersionPolicyDefinitionName = {
+  lockStepVersion: 'lockStepVersion',
+  individualVersion: 'individualVersion'
+} as const;
+export type VersionPolicyDefinitionName =
+  typeof VersionPolicyDefinitionName[keyof typeof VersionPolicyDefinitionName];
 
 /**
  * This is the base class for version policy which controls how versions get bumped.

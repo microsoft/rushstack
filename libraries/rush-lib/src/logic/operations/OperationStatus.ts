@@ -5,41 +5,43 @@
  * Enumeration defining potential states of an operation
  * @beta
  */
-export enum OperationStatus {
+// eslint-disable-next-line @typescript-eslint/typedef
+export const OperationStatus = {
   /**
    * The Operation is on the queue, ready to execute (but may be waiting for dependencies)
    */
-  Ready = 'READY',
+  Ready: 'READY',
   /**
    * The Operation is currently executing
    */
-  Executing = 'EXECUTING',
+  Executing: 'EXECUTING',
   /**
    * The Operation completed successfully and did not write to standard output
    */
-  Success = 'SUCCESS',
+  Success: 'SUCCESS',
   /**
    * The Operation completed successfully, but wrote to standard output
    */
-  SuccessWithWarning = 'SUCCESS WITH WARNINGS',
+  SuccessWithWarning: 'SUCCESS WITH WARNINGS',
   /**
    * The Operation was skipped via the legacy incremental build logic
    */
-  Skipped = 'SKIPPED',
+  Skipped: 'SKIPPED',
   /**
    * The Operation had its outputs restored from the build cache
    */
-  FromCache = 'FROM CACHE',
+  FromCache: 'FROM CACHE',
   /**
    * The Operation failed
    */
-  Failure = 'FAILURE',
+  Failure: 'FAILURE',
   /**
    * The Operation could not be executed because one or more of its dependencies failed
    */
-  Blocked = 'BLOCKED',
+  Blocked: 'BLOCKED',
   /**
    * The Operation was a no-op (for example, it had an empty script)
    */
-  NoOp = 'NO OP'
-}
+  NoOp: 'NO OP'
+} as const;
+export type OperationStatus = typeof OperationStatus[keyof typeof OperationStatus];

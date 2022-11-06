@@ -6,18 +6,20 @@ import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
 /**
  * The type of dependency; used by IPackageDependency.
  */
-export enum PackageDependencyKind {
-  Normal,
+// eslint-disable-next-line @typescript-eslint/typedef
+export const PackageDependencyKind = {
+  Normal: 'Normal',
   /**
    * The dependency was listed in the optionalDependencies section of package.json.
    */
-  Optional,
+  Optional: 'Optional',
 
   /**
    * The dependency should be a symlink to a project that is locally built by Rush..
    */
-  LocalLink
-}
+  LocalLink: 'LocalLink'
+} as const;
+export type PackageDependencyKind = typeof PackageDependencyKind[keyof typeof PackageDependencyKind];
 
 export interface IPackageDependency {
   /**

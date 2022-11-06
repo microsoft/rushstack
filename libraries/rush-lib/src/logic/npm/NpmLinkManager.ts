@@ -12,9 +12,10 @@ import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-
 import { RushConstants } from '../../logic/RushConstants';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
-import { NpmPackage, IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
+import { NpmPackage, IResolveOrCreateResult } from './NpmPackage';
 import { PackageLookup } from '../PackageLookup';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
+import { PackageDependencyKind } from '../base/BasePackage';
 
 interface IQueueItem {
   // A project from somewhere under "common/temp/node_modules"

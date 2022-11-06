@@ -8,24 +8,26 @@ import { Enum } from '@rushstack/node-core-library';
  * Events happen during Rush runs.
  * @beta
  */
-export enum Event {
+// eslint-disable-next-line @typescript-eslint/typedef
+export const Event = {
   /**
    * Pre Rush install event
    */
-  preRushInstall = 1,
+  preRushInstall: 'preRushInstall',
   /**
    * Post Rush install event
    */
-  postRushInstall = 2,
+  postRushInstall: 'postRushInstall',
   /**
    * Pre Rush build event
    */
-  preRushBuild = 3,
+  preRushBuild: 'preRushBuild',
   /**
    * Post Rush build event
    */
-  postRushBuild = 4
-}
+  postRushBuild: 'postRushBuild'
+} as const;
+export type Event = typeof Event[keyof typeof Event];
 
 /**
  * This class represents Rush event hooks configured for this repo.

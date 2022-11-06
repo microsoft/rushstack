@@ -9,13 +9,15 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 /**
  * @public
  */
-export enum DependencyType {
-  Regular = 'dependencies',
-  Dev = 'devDependencies',
-  Optional = 'optionalDependencies',
-  Peer = 'peerDependencies',
-  YarnResolutions = 'resolutions'
-}
+// eslint-disable-next-line @typescript-eslint/typedef
+export const DependencyType = {
+  Regular: 'dependencies',
+  Dev: 'devDependencies',
+  Optional: 'optionalDependencies',
+  Peer: 'peerDependencies',
+  YarnResolutions: 'resolutions'
+} as const;
+export type DependencyType = typeof DependencyType[keyof typeof DependencyType];
 
 /**
  * @public

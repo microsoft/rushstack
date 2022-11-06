@@ -19,10 +19,12 @@ import { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
-export enum SymlinkKind {
-  File,
-  Directory
-}
+// eslint-disable-next-line @typescript-eslint/typedef
+export const SymlinkKind = {
+  File: 'File',
+  Directory: 'Directory'
+} as const;
+export type SymlinkKind = typeof SymlinkKind[keyof typeof SymlinkKind];
 
 export interface IBaseLinkManagerCreateSymlinkOptions extends IFileSystemCreateLinkOptions {
   symlinkKind: SymlinkKind;

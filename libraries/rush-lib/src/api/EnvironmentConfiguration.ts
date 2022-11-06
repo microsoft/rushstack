@@ -18,7 +18,8 @@ export interface IEnvironmentConfigurationInitializeOptions {
  * Names of environment variables used by Rush.
  * @beta
  */
-export enum EnvironmentVariableNames {
+// eslint-disable-next-line @typescript-eslint/typedef
+export const EnvironmentVariableNames = {
   /**
    * This variable overrides the temporary folder used by Rush.
    * The default value is "common/temp" under the repository root.
@@ -26,28 +27,28 @@ export enum EnvironmentVariableNames {
    * @remarks This environment variable is not compatible with workspace installs. If attempting
    * to move the PNPM store path, see the `RUSH_PNPM_STORE_PATH` environment variable.
    */
-  RUSH_TEMP_FOLDER = 'RUSH_TEMP_FOLDER',
+  RUSH_TEMP_FOLDER: 'RUSH_TEMP_FOLDER',
 
   /**
    * This variable overrides the version of Rush that will be installed by
    * the version selector.  The default value is determined by the "rushVersion"
    * field from rush.json.
    */
-  RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
+  RUSH_PREVIEW_VERSION: 'RUSH_PREVIEW_VERSION',
 
   /**
    * If this variable is set to "1", Rush will not fail the build when running a version
    * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
    * field from rush.json.
    */
-  RUSH_ALLOW_UNSUPPORTED_NODEJS = 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
+  RUSH_ALLOW_UNSUPPORTED_NODEJS: 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
 
   /**
    * Setting this environment variable overrides the value of `allowWarningsInSuccessfulBuild`
    * in the `command-line.json` configuration file. Specify `1` to allow warnings in a successful build,
    * or `0` to disallow them. (See the comments in the command-line.json file for more information).
    */
-  RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD = 'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD',
+  RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD',
 
   /**
    * This variable selects a specific installation variant for Rush to use when installing
@@ -55,20 +56,20 @@ export enum EnvironmentVariableNames {
    * For more information, see the command-line help for the `--variant` parameter
    * and this article:  https://rushjs.io/pages/advanced/installation_variants/
    */
-  RUSH_VARIANT = 'RUSH_VARIANT',
+  RUSH_VARIANT: 'RUSH_VARIANT',
 
   /**
    * Specifies the maximum number of concurrent processes to launch during a build.
    * For more information, see the command-line help for the `--parallelism` parameter for "rush build".
    */
-  RUSH_PARALLELISM = 'RUSH_PARALLELISM',
+  RUSH_PARALLELISM: 'RUSH_PARALLELISM',
 
   /**
    * If this variable is set to "1", Rush will create symlinks with absolute paths instead
    * of relative paths. This can be necessary when a repository is moved during a build or
    * if parts of a repository are moved into a sandbox.
    */
-  RUSH_ABSOLUTE_SYMLINKS = 'RUSH_ABSOLUTE_SYMLINKS',
+  RUSH_ABSOLUTE_SYMLINKS: 'RUSH_ABSOLUTE_SYMLINKS',
 
   /**
    * When using PNPM as the package manager, this variable can be used to configure the path that
@@ -77,20 +78,20 @@ export enum EnvironmentVariableNames {
    * If a relative path is used, then the store path will be resolved relative to the process's
    * current working directory.  An absolute path is recommended.
    */
-  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH',
+  RUSH_PNPM_STORE_PATH: 'RUSH_PNPM_STORE_PATH',
 
   /**
    * When using PNPM as the package manager, this variable can be used to control whether or not PNPM
    * validates the integrity of the PNPM store during installation. The value of this environment variable must be
    * `1` (for true) or `0` (for false). If not specified, defaults to the value in .npmrc.
    */
-  RUSH_PNPM_VERIFY_STORE_INTEGRITY = 'RUSH_PNPM_VERIFY_STORE_INTEGRITY',
+  RUSH_PNPM_VERIFY_STORE_INTEGRITY: 'RUSH_PNPM_VERIFY_STORE_INTEGRITY',
 
   /**
    * This environment variable can be used to specify the `--target-folder` parameter
    * for the "rush deploy" command.
    */
-  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER',
+  RUSH_DEPLOY_TARGET_FOLDER: 'RUSH_DEPLOY_TARGET_FOLDER',
 
   /**
    * Overrides the location of the `~/.rush` global folder where Rush stores temporary files.
@@ -108,7 +109,7 @@ export enum EnvironmentVariableNames {
    *
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
-  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER',
+  RUSH_GLOBAL_FOLDER: 'RUSH_GLOBAL_FOLDER',
 
   /**
    * Provides a credential for a remote build cache, if configured.  This credential overrides any cached credentials.
@@ -123,7 +124,7 @@ export enum EnvironmentVariableNames {
    *
    * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
    */
-  RUSH_BUILD_CACHE_CREDENTIAL = 'RUSH_BUILD_CACHE_CREDENTIAL',
+  RUSH_BUILD_CACHE_CREDENTIAL: 'RUSH_BUILD_CACHE_CREDENTIAL',
 
   /**
    * Setting this environment variable overrides the value of `buildCacheEnabled` in the `build-cache.json`
@@ -136,24 +137,24 @@ export enum EnvironmentVariableNames {
    *
    * If there is no build cache configured, then this environment variable is ignored.
    */
-  RUSH_BUILD_CACHE_ENABLED = 'RUSH_BUILD_CACHE_ENABLED',
+  RUSH_BUILD_CACHE_ENABLED: 'RUSH_BUILD_CACHE_ENABLED',
 
   /**
    * Overrides the value of `isCacheWriteAllowed` in the `build-cache.json` configuration file. The value of this
    * environment variable must be `1` (for true) or `0` (for false). If there is no build cache configured, then
    * this environment variable is ignored.
    */
-  RUSH_BUILD_CACHE_WRITE_ALLOWED = 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
+  RUSH_BUILD_CACHE_WRITE_ALLOWED: 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
 
   /**
    * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
    */
-  RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
+  RUSH_GIT_BINARY_PATH: 'RUSH_GIT_BINARY_PATH',
 
   /**
    * Explicitly specifies the path for the `tar` binary that is invoked by certain Rush operations.
    */
-  RUSH_TAR_BINARY_PATH = 'RUSH_TAR_BINARY_PATH',
+  RUSH_TAR_BINARY_PATH: 'RUSH_TAR_BINARY_PATH',
 
   /**
    * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
@@ -164,8 +165,9 @@ export enum EnvironmentVariableNames {
    * The `RUSH_INVOKED_FOLDER` variable is the same idea as the `INIT_CWD` variable that package managers
    * assign when they execute lifecycle scripts.
    */
-  RUSH_INVOKED_FOLDER = 'RUSH_INVOKED_FOLDER'
-}
+  RUSH_INVOKED_FOLDER: 'RUSH_INVOKED_FOLDER'
+} as const;
+export type EnvironmentVariableNames = typeof EnvironmentVariableNames[keyof typeof EnvironmentVariableNames];
 
 /**
  * Provides Rush-specific environment variable data. All Rush environment variables must start with "RUSH_". This class
@@ -212,7 +214,7 @@ export class EnvironmentConfiguration {
 
   /**
    * If "1", create symlinks with absolute paths instead of relative paths.
-   * See {@link EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_ABSOLUTE_SYMLINKS}
    */
   public static get absoluteSymlinks(): boolean {
     EnvironmentConfiguration._ensureValidated();
@@ -224,7 +226,7 @@ export class EnvironmentConfiguration {
    * instead of causing a hard error if the environment's Node.js version doesn't match the
    * version specifier in `rush.json`'s "nodeSupportedVersionRange" property.
    *
-   * See {@link EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS}.
+   * See {@link (EnvironmentVariableNames:variable).RUSH_ALLOW_UNSUPPORTED_NODEJS}.
    */
   public static get allowUnsupportedNodeVersion(): boolean {
     EnvironmentConfiguration._ensureValidated();
@@ -243,7 +245,7 @@ export class EnvironmentConfiguration {
 
   /**
    * An override for the PNPM store path, if `pnpmStore` configuration is set to 'path'
-   * See {@link EnvironmentVariableNames.RUSH_PNPM_STORE_PATH}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_PNPM_STORE_PATH}
    */
   public static get pnpmStorePathOverride(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
@@ -252,7 +254,7 @@ export class EnvironmentConfiguration {
 
   /**
    * If specified, enables or disables integrity verification of the pnpm store during install.
-   * See {@link EnvironmentVariableNames.RUSH_PNPM_VERIFY_STORE_INTEGRITY}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_PNPM_VERIFY_STORE_INTEGRITY}
    */
   public static get pnpmVerifyStoreIntegrity(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
@@ -261,7 +263,7 @@ export class EnvironmentConfiguration {
 
   /**
    * Overrides the location of the `~/.rush` global folder where Rush stores temporary files.
-   * See {@link EnvironmentVariableNames.RUSH_GLOBAL_FOLDER}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_GLOBAL_FOLDER}
    */
   public static get rushGlobalFolderOverride(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
@@ -270,7 +272,7 @@ export class EnvironmentConfiguration {
 
   /**
    * Provides a credential for reading from and writing to a remote build cache, if configured.
-   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_BUILD_CACHE_CREDENTIAL}
    */
   public static get buildCacheCredential(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
@@ -279,7 +281,7 @@ export class EnvironmentConfiguration {
 
   /**
    * If set, enables or disables the cloud build cache feature.
-   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_BUILD_CACHE_ENABLED}
    */
   public static get buildCacheEnabled(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
@@ -288,7 +290,7 @@ export class EnvironmentConfiguration {
 
   /**
    * If set, enables or disables writing to the cloud build cache.
-   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_BUILD_CACHE_WRITE_ALLOWED}
    */
   public static get buildCacheWriteAllowed(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
@@ -297,7 +299,7 @@ export class EnvironmentConfiguration {
 
   /**
    * Allows the git binary path to be explicitly provided.
-   * See {@link EnvironmentVariableNames.RUSH_GIT_BINARY_PATH}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_GIT_BINARY_PATH}
    */
   public static get gitBinaryPath(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
@@ -306,7 +308,7 @@ export class EnvironmentConfiguration {
 
   /**
    * Allows the tar binary path to be explicitly provided.
-   * See {@link EnvironmentVariableNames.RUSH_TAR_BINARY_PATH}
+   * See {@link (EnvironmentVariableNames:variable).RUSH_TAR_BINARY_PATH}
    */
   public static get tarBinaryPath(): string | undefined {
     EnvironmentConfiguration._ensureValidated();

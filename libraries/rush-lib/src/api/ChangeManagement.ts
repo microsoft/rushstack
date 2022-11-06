@@ -12,6 +12,8 @@ export interface IChangeFile {
 
 /**
  * Represents all of the types of change requests.
+ *
+ * todo: Replace enum
  */
 export enum ChangeType {
   none = 0,

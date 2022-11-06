@@ -7,52 +7,54 @@ import { InternalError } from '@rushstack/node-core-library';
 /**
  * The parsed format of a provided version specifier.
  */
-export enum DependencySpecifierType {
+// eslint-disable-next-line @typescript-eslint/typedef
+export const DependencySpecifierType = {
   /**
    * A git repository
    */
-  Git = 'Git',
+  Git: 'Git',
 
   /**
    * A tagged version, e.g. "example@latest"
    */
-  Tag = 'Tag',
+  Tag: 'Tag',
 
   /**
    * A specific version number, e.g. "example@1.2.3"
    */
-  Version = 'Version',
+  Version: 'Version',
 
   /**
    * A version range, e.g. "example@2.x"
    */
-  Range = 'Range',
+  Range: 'Range',
 
   /**
    * A local .tar.gz, .tar or .tgz file
    */
-  File = 'File',
+  File: 'File',
 
   /**
    * A local directory
    */
-  Directory = 'Directory',
+  Directory: 'Directory',
 
   /**
    * An HTTP url to a .tar.gz, .tar or .tgz file
    */
-  Remote = 'Remote',
+  Remote: 'Remote',
 
   /**
    * A package alias, e.g. "npm:other-package@^1.2.3"
    */
-  Alias = 'Alias',
+  Alias: 'Alias',
 
   /**
    * A package specified using workspace protocol, e.g. "workspace:^1.2.3"
    */
-  Workspace = 'Workspace'
-}
+  Workspace: 'Workspace'
+} as const;
+export type DependencySpecifierType = typeof DependencySpecifierType[keyof typeof DependencySpecifierType];
 
 /**
  * An NPM "version specifier" is a string that can appear as a package.json "dependencies" value.
