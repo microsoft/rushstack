@@ -17,6 +17,7 @@ export interface IAppState {
   projectType: ProjectType;
   pnpmLockfileLocation: string;
   pnpmfileLocation: string;
+  appVersion: string;
   rush: {
     projects: {
       [key in string]: IRushProjectDetails;
@@ -33,6 +34,7 @@ export class AppState implements IAppState {
   public projectType: ProjectType = ProjectType.RUSH_PROJECT;
   public pnpmLockfileLocation: string = '';
   public pnpmfileLocation: string = '';
+  public appVersion: string = '';
   public rush: {
     projects: {
       [key in string]: IRushProjectDetails;

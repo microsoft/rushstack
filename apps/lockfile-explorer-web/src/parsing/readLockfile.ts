@@ -3,6 +3,8 @@
 
 import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
 
+const serviceUrl: string = window.appContext.serviceUrl;
+
 export interface IPackageJsonType {
   name: string;
   dependencies: {
@@ -109,7 +111,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
 };
 
 export const readLockfile = async (): Promise<LockfileEntry[]> => {
-  const response = await fetch('http://localhost:8091/');
+  const response = await fetch(`${serviceUrl}/`);
   const lockfile: ILockfilePackageType = await response.json();
 
   return generateLockfileGraph(lockfile);

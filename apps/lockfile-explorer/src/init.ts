@@ -13,6 +13,8 @@ export const init = (): AppState => {
     currDir
   });
 
+  appState.appVersion = require(path.join(__dirname, '../package.json')).version;
+
   let currExploredDir = currDir;
   while (path.resolve(currExploredDir) !== '/') {
     // Look for a rush.json [rush project] or pnpm-lock.yaml file [regular pnpm workspace]

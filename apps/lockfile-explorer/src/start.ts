@@ -1,17 +1,22 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import express from 'express';
 import yaml from 'js-yaml';
 import cors from 'cors';
 import fs from 'fs';
+import process from 'process';
 import path from 'path';
 import open from 'open';
 import { init } from './init';
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.
 
 import { IAppState } from './state';
+import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/AppContext';
 
 const PORT: number = 8091;
-const APP_URL: string = `http://localhost:${PORT}/app/`;
+// Must not have a trailing slash
+const SERVICE_URL: string = `http://localhost:${PORT}`;
+const APP_URL: string = `${SERVICE_URL}/app/`;
 
 const appState: IAppState = init();
 
@@ -19,6 +24,21 @@ process.chdir(path.join(__dirname, '..'));
 const app: express.Application = express();
 app.use(express.json());
 app.use(cors());
+
+// This takes precedence over the `/app` static route, which also has an `initappcontext.js` file.
+app.get('/app/initappcontext.js', (req: express.Request, res: express.Response) => {
+  const appContext: IAppContext = {
+    serviceUrl: SERVICE_URL,
+    appVersion: appState.appVersion,
+    debugMode: process.argv.indexOf('--debug') >= 0
+  };
+  const sourceCode: string = [
+    `console.log('Loaded initappcontext.js');`,
+    `appContext = ${JSON.stringify(appContext)}`
+  ].join('\n');
+
+  res.type('application/javascript').send(sourceCode);
+});
 
 app.use('/app', express.static(path.resolve(__dirname, '../dist')));
 
@@ -70,7 +90,7 @@ app.post(
 );
 
 app.listen(PORT, async () => {
-  console.log(`Rush Lockfile Explorer running at ${APP_URL}`);
+  console.log(`Rush Lockfile Explorer ${appState.appVersion} running at ${APP_URL}`);
 
   if (!process.argv.includes('--debug')) {
     try {
