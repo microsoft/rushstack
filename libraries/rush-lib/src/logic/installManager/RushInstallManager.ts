@@ -26,7 +26,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
-import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
+import { PackageJsonEditor, PackageJsonDependency } from '../../api/PackageJsonEditor';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
 import { TempProjectHelper } from '../TempProjectHelper';
@@ -193,7 +193,7 @@ export class RushInstallManager extends BaseInstallManager {
         }
 
         // If there are any optional dependencies, copy directly into the optionalDependencies field.
-        if (dependency.dependencyType === DependencyType.Optional) {
+        if (dependency.dependencyType === 'optionalDependencies') {
           if (!tempPackageJson.optionalDependencies) {
             tempPackageJson.optionalDependencies = {};
           }

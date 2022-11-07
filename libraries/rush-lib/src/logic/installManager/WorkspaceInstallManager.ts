@@ -10,7 +10,7 @@ import { FileSystem, FileConstants, AlreadyReportedError, Async } from '@rushsta
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
+import { PackageJsonEditor } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
@@ -141,7 +141,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // Allow the package manager to handle peer dependency resolution, since this is simply a constraint
         // enforced by the package manager. Additionally, peer dependencies are simply a version constraint
         // and do not need to be converted to workspaces protocol.
-        if (dependencyType === DependencyType.Peer) {
+        if (dependencyType === 'peerDependencies') {
           continue;
         }
 

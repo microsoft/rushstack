@@ -3,7 +3,7 @@
 
 import * as semver from 'semver';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
-import { DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
+import { PackageJsonDependency } from '../api/PackageJsonEditor';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
@@ -87,7 +87,7 @@ export class DependencyAnalyzer {
         ...project.packageJsonEditor.devDependencyList
       ];
       for (const { name: dependencyName, version: dependencyVersion, dependencyType } of dependencies) {
-        if (dependencyType === DependencyType.Peer) {
+        if (dependencyType === 'peerDependencies') {
           // If this is a peer dependency, it isn't a real dependency in this context, so it shouldn't
           // be included in the list of dependency versions.
           continue;

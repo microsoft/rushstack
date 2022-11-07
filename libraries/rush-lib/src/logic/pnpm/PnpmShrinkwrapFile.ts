@@ -15,7 +15,7 @@ import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFileP
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { DependencyType, PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
+import { PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
@@ -575,7 +575,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const dependencyVersions: Map<string, PackageJsonDependency> = new Map();
     for (const packageDependency of [...dependencyList, ...devDependencyList]) {
       // We will also filter out peer dependencies since these are not installed at development time.
-      if (packageDependency.dependencyType === DependencyType.Peer) {
+      if (packageDependency.dependencyType === 'peerDependencies') {
         continue;
       }
 
@@ -589,14 +589,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         // the least prioritized. We will only keep the most prioritized option.
         // See: https://github.com/pnpm/pnpm/blob/main/packages/lockfile-utils/src/satisfiesPackageManifest.ts
         switch (foundDependency.dependencyType) {
-          case DependencyType.Optional:
+          case 'optionalDependencies':
             break;
-          case DependencyType.Regular:
-            if (packageDependency.dependencyType === DependencyType.Optional) {
+          case 'dependencies':
+            if (packageDependency.dependencyType === 'optionalDependencies') {
               dependencyVersions.set(packageDependency.name, packageDependency);
             }
             break;
-          case DependencyType.Dev:
+          case 'devDependencies':
             dependencyVersions.set(packageDependency.name, packageDependency);
             break;
         }
@@ -607,14 +607,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // when moving a package from one field to the other.
     for (const dependencyVersion of dependencyVersions.values()) {
       switch (dependencyVersion.dependencyType) {
-        case DependencyType.Optional:
+        case 'optionalDependencies':
           if (!importer.optionalDependencies || !importer.optionalDependencies[dependencyVersion.name])
             return true;
           break;
-        case DependencyType.Regular:
+        case 'dependencies':
           if (!importer.dependencies || !importer.dependencies[dependencyVersion.name]) return true;
           break;
-        case DependencyType.Dev:
+        case 'devDependencies':
           if (!importer.devDependencies || !importer.devDependencies[dependencyVersion.name]) return true;
           break;
       }

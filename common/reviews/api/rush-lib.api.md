@@ -124,17 +124,11 @@ export class CredentialCache {
     static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
 }
 
-// @public (undocumented)
-export const DependencyType: {
-    readonly Regular: "dependencies";
-    readonly Dev: "devDependencies";
-    readonly Optional: "optionalDependencies";
-    readonly Peer: "peerDependencies";
-    readonly YarnResolutions: "resolutions";
-};
+// @public @deprecated (undocumented)
+export const DependencyType: Record<string, DependencyType>;
 
 // @public (undocumented)
-export type DependencyType = typeof DependencyType[keyof typeof DependencyType];
+export type DependencyType = 'dependencies' | 'devDependencies' | 'optionalDependencies' | 'peerDependencies' | 'resolutions';
 
 // @beta
 export class EnvironmentConfiguration {

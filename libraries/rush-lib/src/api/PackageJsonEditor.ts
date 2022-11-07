@@ -7,17 +7,27 @@ import { Import, InternalError, IPackageJson, JsonFile, Sort } from '@rushstack/
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
+ * @deprecated
+ * Use a string literal instead of an enum.
+ *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/typedef
-export const DependencyType = {
+export const DependencyType: Record<string, DependencyType> = {
   Regular: 'dependencies',
   Dev: 'devDependencies',
   Optional: 'optionalDependencies',
   Peer: 'peerDependencies',
   YarnResolutions: 'resolutions'
 } as const;
-export type DependencyType = typeof DependencyType[keyof typeof DependencyType];
+/**
+ * @public
+ */
+export type DependencyType =
+  | 'dependencies'
+  | 'devDependencies'
+  | 'optionalDependencies'
+  | 'peerDependencies'
+  | 'resolutions';
 
 /**
  * @public
@@ -108,7 +118,7 @@ export class PackageJsonEditor {
 
         this._dependencies.set(
           packageName,
-          new PackageJsonDependency(packageName, dependencies[packageName], DependencyType.Regular, _onChange)
+          new PackageJsonDependency(packageName, dependencies[packageName], 'dependencies', _onChange)
         );
       });
 
@@ -124,7 +134,7 @@ export class PackageJsonEditor {
           new PackageJsonDependency(
             packageName,
             optionalDependencies[packageName],
-            DependencyType.Optional,
+            'optionalDependencies',
             _onChange
           )
         );
@@ -133,31 +143,21 @@ export class PackageJsonEditor {
       Object.keys(peerDependencies || {}).forEach((packageName: string) => {
         this._dependencies.set(
           packageName,
-          new PackageJsonDependency(
-            packageName,
-            peerDependencies[packageName],
-            DependencyType.Peer,
-            _onChange
-          )
+          new PackageJsonDependency(packageName, peerDependencies[packageName], 'peerDependencies', _onChange)
         );
       });
 
       Object.keys(devDependencies || {}).forEach((packageName: string) => {
         this._devDependencies.set(
           packageName,
-          new PackageJsonDependency(packageName, devDependencies[packageName], DependencyType.Dev, _onChange)
+          new PackageJsonDependency(packageName, devDependencies[packageName], 'devDependencies', _onChange)
         );
       });
 
       Object.keys(resolutions || {}).forEach((packageName: string) => {
         this._resolutions.set(
           packageName,
-          new PackageJsonDependency(
-            packageName,
-            resolutions[packageName],
-            DependencyType.YarnResolutions,
-            _onChange
-          )
+          new PackageJsonDependency(packageName, resolutions[packageName], 'resolutions', _onChange)
         );
       });
 
@@ -190,14 +190,14 @@ export class PackageJsonEditor {
   }
 
   /**
-   * The list of dependencies of type DependencyType.Regular, DependencyType.Optional, or DependencyType.Peer.
+   * The list of dependencies of type 'dependencies', 'optionalDependencies', or 'peerDependencies'.
    */
   public get dependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._dependencies.values()];
   }
 
   /**
-   * The list of dependencies of type DependencyType.Dev.
+   * The list of dependencies of type 'devDependencies'.
    */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
@@ -237,15 +237,15 @@ export class PackageJsonEditor {
     // Rush collapses everything that isn't a devDependency into the dependencies
     // field, so we need to set the value depending on dependency type
     switch (dependencyType) {
-      case DependencyType.Regular:
-      case DependencyType.Optional:
-      case DependencyType.Peer:
+      case 'dependencies':
+      case 'optionalDependencies':
+      case 'peerDependencies':
         this._dependencies.set(packageName, dependency);
         break;
-      case DependencyType.Dev:
+      case 'devDependencies':
         this._devDependencies.set(packageName, dependency);
         break;
-      case DependencyType.YarnResolutions:
+      case 'resolutions':
         this._resolutions.set(packageName, dependency);
         break;
       default:
@@ -257,15 +257,15 @@ export class PackageJsonEditor {
 
   public removeDependency(packageName: string, dependencyType: DependencyType): void {
     switch (dependencyType) {
-      case DependencyType.Regular:
-      case DependencyType.Optional:
-      case DependencyType.Peer:
+      case 'dependencies':
+      case 'optionalDependencies':
+      case 'peerDependencies':
         this._dependencies.delete(packageName);
         break;
-      case DependencyType.Dev:
+      case 'devDependencies':
         this._devDependencies.delete(packageName);
         break;
-      case DependencyType.YarnResolutions:
+      case 'resolutions':
         this._resolutions.delete(packageName);
         break;
       default:
@@ -322,26 +322,26 @@ export class PackageJsonEditor {
       const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
 
       switch (dependency.dependencyType) {
-        case DependencyType.Regular:
+        case 'dependencies':
           if (!normalizedData.dependencies) {
             normalizedData.dependencies = {};
           }
           normalizedData.dependencies[dependency.name] = dependency.version;
           break;
-        case DependencyType.Optional:
+        case 'optionalDependencies':
           if (!normalizedData.optionalDependencies) {
             normalizedData.optionalDependencies = {};
           }
           normalizedData.optionalDependencies[dependency.name] = dependency.version;
           break;
-        case DependencyType.Peer:
+        case 'peerDependencies':
           if (!normalizedData.peerDependencies) {
             normalizedData.peerDependencies = {};
           }
           normalizedData.peerDependencies[dependency.name] = dependency.version;
           break;
-        case DependencyType.Dev: // uses this._devDependencies instead
-        case DependencyType.YarnResolutions: // uses this._resolutions instead
+        case 'devDependencies': // uses this._devDependencies instead
+        case 'resolutions': // uses this._resolutions instead
         default:
           throw new InternalError('Unsupported DependencyType');
       }

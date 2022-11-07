@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
+import { PackageJsonDependency } from '../../api/PackageJsonEditor';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
@@ -250,7 +250,7 @@ export class VersionMismatchFinder {
         // levels of compatibility -- we should wait for someone to actually request this feature
         // before we get into that.)
         project.allDependencies.forEach((dependency: PackageJsonDependency) => {
-          if (dependency.dependencyType !== DependencyType.Peer) {
+          if (dependency.dependencyType !== 'peerDependencies') {
             const version: string = dependency.version!;
 
             const isCyclic: boolean = project.decoupledLocalDependencies.has(dependency.name);

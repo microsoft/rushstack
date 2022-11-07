@@ -50,10 +50,8 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
     newVersion: string,
     dependencyType: DependencyType
   ): void {
-    if (dependencyType !== DependencyType.Regular) {
-      throw new Error(
-        `${RushConstants.commonVersionsFilename} only accepts "${DependencyType.Regular}" dependencies`
-      );
+    if (dependencyType !== 'dependencies') {
+      throw new Error(`${RushConstants.commonVersionsFilename} only accepts "dependencies" dependencies`);
     }
 
     this._fileManager.preferredVersions.set(packageName, newVersion);
@@ -68,8 +66,8 @@ export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEn
   }
 
   private _getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {
-    return new PackageJsonDependency(dependencyName, version, DependencyType.Regular, () =>
-      this.addOrUpdateDependency(dependencyName, version, DependencyType.Regular)
+    return new PackageJsonDependency(dependencyName, version, 'dependencies', () =>
+      this.addOrUpdateDependency(dependencyName, version, 'dependencies')
     );
   }
 }

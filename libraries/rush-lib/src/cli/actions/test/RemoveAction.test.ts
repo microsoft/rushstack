@@ -54,9 +54,9 @@ describe(RemoveAction.name, () => {
         const packageName: string = removeDependencyMock.mock.calls[0][0];
         expect(packageName).toEqual('assert');
         const dependencyType1: DependencyType = removeDependencyMock.mock.calls[0][1];
-        expect(dependencyType1).toEqual(DependencyType.Regular);
+        expect(dependencyType1).toEqual('dependencies');
         const dependencyType2: DependencyType = removeDependencyMock.mock.calls[1][1];
-        expect(dependencyType2).toEqual(DependencyType.Dev);
+        expect(dependencyType2).toEqual('devDependencies');
       });
       it(`remove a dependency to just one repo in the workspace`, async () => {
         const startPath: string = `${__dirname}/removeRepo`;
