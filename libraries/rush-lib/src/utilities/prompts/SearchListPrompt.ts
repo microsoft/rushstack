@@ -47,10 +47,7 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
     ) {
       this._selected = this.opt.default;
     } else if (!_.isNumber(this.opt.default) && this.opt.default !== null) {
-      const index: number = _.findIndex(
-        this.opt.choices.realChoices,
-        ({ value }) => value === this.opt.default
-      );
+      const index: number = this.opt.choices.realChoices.findIndex(({ value }) => value === this.opt.default);
       this._selected = Math.max(index, 0);
     }
 
@@ -127,6 +124,19 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
       }
     } else {
       switch (event.key.name) {
+        // Go to beginning of list
+        case 'home':
+          return this._adjustSelected(-Infinity);
+        // Got to end of list
+        case 'end':
+          return this._adjustSelected(Infinity);
+        // Paginate up
+        case 'pageup':
+          return this._adjustSelected(-(this.opt.pageSize ?? 1));
+        // Paginate down
+        case 'pagedown':
+          return this._adjustSelected(this.opt.pageSize ?? 1);
+
         case 'backspace':
           return this._setQuery(this._query.slice(0, -1));
         case 'up':
