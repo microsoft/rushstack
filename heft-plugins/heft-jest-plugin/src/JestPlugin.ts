@@ -263,7 +263,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       debug: taskSession.parameters.debug,
       detectOpenHandles: options?.detectOpenHandles || false,
 
-      cacheDirectory: taskSession.cacheFolderPath,
+      // Use the temp folder. Cache is unreliable, so we want it cleared on every --clean run
+      cacheDirectory: taskSession.tempFolderPath,
       updateSnapshot: options?.updateSnapshots,
 
       listTests: false,
