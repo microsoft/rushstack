@@ -31,7 +31,7 @@ export interface IRunScript {
   /**
    * The method that is called by the RunScriptPlugin to run the script.
    */
-  runAsync?: (options: IRunScriptOptions) => Promise<void>;
+  runAsync: (options: IRunScriptOptions) => Promise<void>;
 }
 
 export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions> {
