@@ -14,7 +14,7 @@ export class HeftPhase {
   private _phaseSpecifier: IHeftConfigurationJsonPhaseSpecifier;
   private _consumingPhases: Set<HeftPhase> | undefined;
   private _dependencyPhases: Set<HeftPhase> | undefined;
-  private _cleanAdditionalFiles: Set<IDeleteOperation> | undefined;
+  private _cleanFiles: Set<IDeleteOperation> | undefined;
   private _tasks: Set<HeftTask> | undefined;
   private _tasksByName: Map<string, HeftTask> | undefined;
 
@@ -47,11 +47,11 @@ export class HeftPhase {
   /**
    * Returns delete operations that are specified on the phase.
    */
-  public get cleanAdditionalFiles(): ReadonlySet<IDeleteOperation> {
-    if (!this._cleanAdditionalFiles) {
-      this._cleanAdditionalFiles = new Set(this._phaseSpecifier.cleanAdditionalFiles || []);
+  public get cleanFiles(): ReadonlySet<IDeleteOperation> {
+    if (!this._cleanFiles) {
+      this._cleanFiles = new Set(this._phaseSpecifier.cleanFiles || []);
     }
-    return this._cleanAdditionalFiles;
+    return this._cleanFiles;
   }
 
   /**

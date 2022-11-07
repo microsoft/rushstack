@@ -10,7 +10,6 @@ import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
-  IHeftTaskCleanHookOptions,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IScopedLogger,
@@ -19,7 +18,6 @@ import type {
 
 import type {
   IWebpackConfiguration,
-  IWebpackConfigurationWithDevServer,
   IWebpackPluginAccessor
 } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
@@ -101,28 +99,6 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         )} parameter is only available when running in watch mode.`
       );
     }
-
-    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      // Obtain the finalized webpack configuration
-      const webpackConfiguration: IWebpackConfiguration | undefined =
-        await this._getWebpackConfigurationAsync(taskSession, heftConfiguration, options);
-      if (webpackConfiguration) {
-        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] = Array.isArray(
-          webpackConfiguration
-        )
-          ? webpackConfiguration
-          : [webpackConfiguration];
-
-        // Add each output path to the clean list
-        // NOTE: Webpack plugins that write assets to paths that start with '../' or outside of the
-        // `output.path` will need to be manually added to the phase-level cleanup list in heft.json.
-        for (const config of webpackConfigurationArray) {
-          if (config.output?.path) {
-            cleanOptions.addDeleteOperations({ sourcePath: config.output.path });
-          }
-        }
-      }
-    });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await this._runWebpackAsync(taskSession, heftConfiguration, options);

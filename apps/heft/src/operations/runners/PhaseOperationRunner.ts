@@ -2,14 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { performance } from 'perf_hooks';
-import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { OperationStatus } from '../OperationStatus';
 import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
-import type { HeftTaskSession, IHeftTaskCleanHookOptions } from '../../pluginFramework/HeftTaskSession';
+import type { HeftTaskSession } from '../../pluginFramework/HeftTaskSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 
 export interface IPhaseOperationRunnerOptions {
@@ -36,7 +35,7 @@ export class PhaseOperationRunner implements IOperationRunner {
 
     // Load and apply the plugins for this phase only
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(phase);
-    const { phaseLogger, cleanLogger, cleanHook } = phaseSession;
+    const { phaseLogger, cleanLogger } = phaseSession;
     phaseLogger.terminal.writeVerboseLine('Applying task plugins');
     await phaseSession.applyPluginsAsync();
 
@@ -51,7 +50,7 @@ export class PhaseOperationRunner implements IOperationRunner {
 
       // Grab the additional clean operations from the phase
       cleanLogger.terminal.writeVerboseLine('Starting clean');
-      const deleteOperations: IDeleteOperation[] = [...phase.cleanAdditionalFiles];
+      const deleteOperations: IDeleteOperation[] = Array.from(phase.cleanFiles);
 
       // Delete all temp folders for tasks by default
       for (const task of phase.tasks) {
@@ -61,25 +60,6 @@ export class PhaseOperationRunner implements IOperationRunner {
         // Also delete the cache folder if requested
         if (cleanCache) {
           deleteOperations.push({ sourcePath: taskSession.cacheFolderPath });
-        }
-      }
-
-      // Create the options and provide a utility method to obtain paths to delete
-      const cleanHookOptions: IHeftTaskCleanHookOptions = {
-        addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
-          deleteOperations.push(...deleteOperationsToAdd)
-      };
-
-      // Run the plugin clean hook
-      if (cleanHook.isUsed()) {
-        try {
-          await cleanHook.promise(cleanHookOptions);
-        } catch (e: unknown) {
-          // Log out using the clean logger, and return an error status
-          if (!(e instanceof AlreadyReportedError)) {
-            cleanLogger.emitError(e as Error);
-          }
-          return OperationStatus.Failure;
         }
       }
 

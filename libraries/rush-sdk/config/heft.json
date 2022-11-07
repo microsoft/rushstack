@@ -9,7 +9,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanAdditionalFiles": [
+      "cleanFiles": [
         {
           "sourcePath": "./dist/rush-lib.d.ts"
         }

@@ -7,6 +7,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }, { "sourcePath": "lib-commonjs" }],
       "tasksByName": {
         "sass": {
           "taskPlugin": {

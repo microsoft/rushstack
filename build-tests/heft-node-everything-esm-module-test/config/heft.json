@@ -6,6 +6,12 @@
 
   "phasesByName": {
     "build": {
+      "cleanFiles": [
+        { "sourcePath": "dist" },
+        { "sourcePath": "lib" },
+        { "sourcePath": "lib-esnext" },
+        { "sourcePath": "lib-umd" }
+      ],
       "tasksByName": {
         "typescript": {
           "taskPlugin": {

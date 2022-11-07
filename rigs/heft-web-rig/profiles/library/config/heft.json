@@ -13,6 +13,13 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [
+        { "sourcePath": "dist" },
+        { "sourcePath": "lib" },
+        { "sourcePath": "lib-amd" },
+        { "sourcePath": "lib-commonjs" },
+        { "sourcePath": "lib-es6" }
+      ],
       "tasksByName": {
         "sass-typings": {
           "taskPlugin": {

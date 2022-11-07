@@ -132,8 +132,8 @@
               }
             },
 
-            "cleanAdditionalFiles": {
-              "description": "List of delete operations to perform when the clean phase is run. This list is in addition to the clean that plugins already perform.",
+            "cleanFiles": {
+              "description": "List of delete operations to perform when cleaning at the beginning of phase execution.",
               "type": "array",
               "items": { "$ref": "#/definitions/delete-operation" }
             },

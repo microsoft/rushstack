@@ -9,8 +9,7 @@ import type {
   HeftConfiguration,
   IHeftTaskSession,
   IHeftTaskPlugin,
-  IHeftTaskRunHookOptions,
-  IHeftTaskCleanHookOptions
+  IHeftTaskRunHookOptions
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
@@ -236,10 +235,6 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
   };
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      await this._updateClean(taskSession, heftConfiguration, cleanOptions);
-    });
-
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await this._runTypeScriptAsync(taskSession, heftConfiguration);
       // TODO: We should consider maybe only doing one copy of static assets and pointing
@@ -248,34 +243,6 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       // package size.
       await this._updateStaticAssetsToCopy(taskSession, heftConfiguration, runOptions);
     });
-  }
-
-  private async _updateClean(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    cleanOptions: IHeftTaskCleanHookOptions
-  ): Promise<void> {
-    const configurationFile: ITypeScriptConfigurationJson | undefined =
-      await loadTypeScriptConfigurationFileAsync(heftConfiguration, taskSession.logger.terminal);
-
-    // For now, delete the entire output folder and additional module kind output folders. In the future,
-    // we may want to clean specific files that we know are produced by the TypeScript compiler.
-    const tsconfigOutDir: string | undefined = await this._getTsconfigOutDirAsync(
-      taskSession,
-      heftConfiguration,
-      configurationFile
-    );
-    if (tsconfigOutDir) {
-      cleanOptions.addDeleteOperations({ sourcePath: tsconfigOutDir });
-    }
-
-    if (configurationFile?.additionalModuleKindsToEmit) {
-      for (const additionalModuleKindToEmit of configurationFile.additionalModuleKindsToEmit) {
-        cleanOptions.addDeleteOperations({
-          sourcePath: `${heftConfiguration.buildFolderPath}/${additionalModuleKindToEmit.outFolderName}`
-        });
-      }
-    }
   }
 
   private async _updateStaticAssetsToCopy(

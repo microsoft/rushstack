@@ -35,7 +35,7 @@ export interface IHeftConfigurationJsonTasks {
 export interface IHeftConfigurationJsonPhaseSpecifier {
   phaseDescription?: string;
   phaseDependencies?: string[];
-  cleanAdditionalFiles?: IDeleteOperation[];
+  cleanFiles?: IDeleteOperation[];
   tasksByName?: IHeftConfigurationJsonTasks;
 }
 

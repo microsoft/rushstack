@@ -6,8 +6,7 @@ import type {
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IHeftTaskSession,
-  HeftConfiguration,
-  IHeftTaskCleanHookOptions
+  HeftConfiguration
 } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
 
@@ -50,20 +49,6 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     | undefined;
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      // Load up the configuration, but ignore if target files are missing, since we will be deleting
-      // them anyway.
-      const result: IApiExtractorConfigurationResult | undefined =
-        await this._getApiExtractorConfigurationAsync(
-          taskSession,
-          heftConfiguration,
-          /* ignoreMissingEntryPoint: */ true
-        );
-      if (result) {
-        this._includeOutputPathsInClean(cleanOptions, result.apiExtractorConfiguration);
-      }
-    });
-
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       const result: IApiExtractorConfigurationResult | undefined =
         await this._getApiExtractorConfigurationAsync(taskSession, heftConfiguration);
@@ -170,38 +155,6 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       heftConfiguration.buildFolderPath,
       heftConfiguration.rigConfig
     );
-  }
-
-  private _includeOutputPathsInClean(
-    cleanOptions: IHeftTaskCleanHookOptions,
-    apiExtractorConfiguration: TApiExtractor.ExtractorConfig
-  ): void {
-    const extractorGeneratedFilePaths: string[] = [];
-    if (apiExtractorConfiguration.apiReportEnabled) {
-      // Keep apiExtractorConfiguration.reportFilePath as-is, since API-Extractor uses the existing
-      // content to write a warning if the output has changed.
-      extractorGeneratedFilePaths.push(apiExtractorConfiguration.reportTempFilePath);
-    }
-    if (apiExtractorConfiguration.docModelEnabled) {
-      extractorGeneratedFilePaths.push(apiExtractorConfiguration.apiJsonFilePath);
-    }
-    if (apiExtractorConfiguration.rollupEnabled) {
-      extractorGeneratedFilePaths.push(
-        apiExtractorConfiguration.alphaTrimmedFilePath,
-        apiExtractorConfiguration.betaTrimmedFilePath,
-        apiExtractorConfiguration.publicTrimmedFilePath,
-        apiExtractorConfiguration.untrimmedFilePath
-      );
-    }
-    if (apiExtractorConfiguration.tsdocMetadataEnabled) {
-      extractorGeneratedFilePaths.push(apiExtractorConfiguration.tsdocMetadataFilePath);
-    }
-
-    for (const generatedFilePath of extractorGeneratedFilePaths) {
-      if (generatedFilePath) {
-        cleanOptions.addDeleteOperations({ sourcePath: generatedFilePath });
-      }
-    }
   }
 
   private async _runApiExtractorAsync(

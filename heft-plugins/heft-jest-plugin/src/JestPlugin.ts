@@ -15,7 +15,6 @@ import type {
   IHeftTaskPlugin,
   IHeftTaskSession,
   IHeftTaskRunHookOptions,
-  IHeftTaskCleanHookOptions,
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringParameter
@@ -129,17 +128,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     // Integers
     const testTimeoutParameter: CommandLineIntegerParameter =
       parameters.getIntegerParameter('--test-timeout-ms');
-
-    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      // Jest's cache is not reliable.  For example, if a Jest configuration change causes files to be
-      // transformed differently, the cache will continue to return the old results unless we manually
-      // clean it.  Thus we need to ensure that we always cleans the Jest cache.
-      cleanOptions.addDeleteOperations({ sourcePath: taskSession.cacheFolderPath });
-
-      // We should also clean the data file that we generate for the BuildTransformer
-      const dataFilePath: string = HeftJestDataFile.getConfigFilePath(heftConfiguration.buildFolderPath);
-      cleanOptions.addDeleteOperations({ sourcePath: dataFilePath });
-    });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       const combinedOptions: IJestPluginOptions = {
