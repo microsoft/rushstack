@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "TypeScriptPlugin",
+      "pluginName": "typescript-plugin",
       "entryPoint": "./lib/TypeScriptPlugin"
     }
   ]

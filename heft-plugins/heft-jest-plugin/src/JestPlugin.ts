@@ -73,7 +73,7 @@ export interface IJestPluginOptions {
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
 
-const PLUGIN_NAME: string = 'JestPlugin';
+const PLUGIN_NAME: 'jest-plugin' = 'jest-plugin';
 const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
 const PLUGIN_PACKAGE_FOLDER: string = path.resolve(__dirname, '..');
 const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;

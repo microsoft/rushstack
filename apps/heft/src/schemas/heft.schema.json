@@ -24,7 +24,7 @@
         "pluginName": {
           "description": "Name of the plugin to load from the specified package. If not specified and the plugin package provides a single plugin, that plugin will be loaded.",
           "type": "string",
-          "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+          "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
         },
         "options": {
           "description": "Options to pass to the plugin.",
@@ -113,7 +113,7 @@
       "description": "Heft phases that can be run during an execution of Heft.",
       "additionalProperties": false,
       "patternProperties": {
-        "^[a-zA-Z0-9-_]+$": {
+        "^[a-z][a-z0-9]*([-][a-z0-9]+)*$": {
           "description": "Defines a Heft phase.",
           "type": "object",
           "additionalProperties": false,
@@ -128,7 +128,7 @@
               "description": "List of phase names that must be run before this phase.",
               "items": {
                 "type": "string",
-                "pattern": "[a-zA-Z0-9-_]+"
+                "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
               }
             },
 
@@ -143,7 +143,7 @@
               "type": "object",
               "additionalProperties": false,
               "patternProperties": {
-                "^[a-zA-Z0-9-_]+$": {
+                "^[a-z][a-z0-9]*([-][a-z0-9]+)*$": {
                   "type": "object",
                   "description": "Defines a Heft task.",
                   "additionalProperties": false,
@@ -176,7 +176,7 @@
                       "description": "List of task names that must be run before this task.",
                       "items": {
                         "type": "string",
-                        "pattern": "[a-zA-Z0-9-_]+"
+                        "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
                       }
                     }
                   }

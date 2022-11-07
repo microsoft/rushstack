@@ -52,7 +52,7 @@
         "trust-dev-cert": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-dev-cert-plugin",
-            "pluginName": "TrustDevCertificatePlugin"
+            "pluginName": "trust-dev-certificate-plugin"
           }
         }
       }
@@ -63,7 +63,7 @@
         "untrust-dev-cert": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-dev-cert-plugin",
-            "pluginName": "UntrustDevCertificatePlugin"
+            "pluginName": "untrust-dev-certificate-plugin"
           }
         }
       }

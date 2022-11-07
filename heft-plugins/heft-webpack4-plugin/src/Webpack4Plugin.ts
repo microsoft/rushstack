@@ -16,10 +16,7 @@ import type {
   IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
 
-import type {
-  IWebpackConfiguration,
-  IWebpackPluginAccessor
-} from './shared';
+import type { IWebpackConfiguration, IWebpackPluginAccessor } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
 type ExtendedWatching = TWebpack.Watching & {
@@ -57,7 +54,7 @@ export interface IWebpackPluginOptions {
 /**
  * @public
  */
-export const PLUGIN_NAME: 'Webpack4Plugin' = 'Webpack4Plugin';
+export const PLUGIN_NAME: 'webpack4-plugin' = 'webpack4-plugin';
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';

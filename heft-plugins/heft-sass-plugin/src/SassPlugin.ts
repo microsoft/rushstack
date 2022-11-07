@@ -17,7 +17,7 @@ import { ISassConfiguration, SassProcessor } from './SassProcessor';
 
 export interface ISassConfigurationJson extends Partial<ISassConfiguration> {}
 
-const PLUGIN_NAME: string = 'SassPlugin';
+const PLUGIN_NAME: 'sass-plugin' = 'sass-plugin';
 const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-sass-plugin.schema.json`;
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 

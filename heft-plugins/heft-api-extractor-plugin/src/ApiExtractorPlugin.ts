@@ -15,7 +15,7 @@ import { ApiExtractorRunner } from './ApiExtractorRunner';
 // eslint-disable-next-line @rushstack/no-new-null
 const UNINITIALIZED: null = null;
 
-const PLUGIN_NAME: string = 'ApiExtractorPlugin';
+const PLUGIN_NAME: string = 'api-extractor-plugin';
 const TASK_CONFIG_SCHEMA_PATH: string = `${__dirname}/schemas/api-extractor-task.schema.json`;
 const TASK_CONFIG_RELATIVE_PATH: string = './config/api-extractor-task.json';
 const EXTRACTOR_CONFIG_FILENAME: typeof TApiExtractor.ExtractorConfig.FILENAME = 'api-extractor.json';

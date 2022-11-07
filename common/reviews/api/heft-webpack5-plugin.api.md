@@ -44,7 +44,7 @@ export interface IWebpackPluginAccessorHooks {
 }
 
 // @public (undocumented)
-export const PluginName: 'Webpack5Plugin';
+export const PluginName: 'webpack5-plugin';
 
 // (No @packageDocumentation comment for this package)
 

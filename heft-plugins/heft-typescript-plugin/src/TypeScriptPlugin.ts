@@ -19,7 +19,7 @@ import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScript
  *
  * @public
  */
-export const PLUGIN_NAME: 'TypeScriptPlugin' = 'TypeScriptPlugin';
+export const PLUGIN_NAME: 'typescript-plugin' = 'typescript-plugin';
 
 /**
  * @beta

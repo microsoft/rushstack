@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "Webpack4Plugin",
+      "pluginName": "webpack4-plugin",
       "entryPoint": "./lib/Webpack4Plugin",
       "optionsSchema": "./lib/schemas/heft-webpack4-plugin.schema.json",
 

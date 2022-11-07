@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "SassPlugin",
+      "pluginName": "sass-plugin",
       "entryPoint": "./lib/SassPlugin"
     }
   ]

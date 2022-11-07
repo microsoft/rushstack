@@ -16,10 +16,7 @@ import type {
   IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
 
-import type {
-  IWebpackConfiguration,
-  IWebpackPluginAccessor
-} from './shared';
+import type { IWebpackConfiguration, IWebpackPluginAccessor } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
 type ExtendedCompiler = TWebpack.Compiler & { watching: TWebpack.Watching };
@@ -33,7 +30,7 @@ export interface IWebpackPluginOptions {
 /**
  * @public
  */
-export const PLUGIN_NAME: 'Webpack5Plugin' = 'Webpack5Plugin';
+export const PLUGIN_NAME: 'webpack5-plugin' = 'webpack5-plugin';
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';

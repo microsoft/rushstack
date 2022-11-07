@@ -44,7 +44,7 @@ export interface IWebpackPluginAccessorHooks {
 }
 
 // @public (undocumented)
-export const PluginName: 'Webpack4Plugin';
+export const PluginName: 'webpack4-plugin';
 
 // (No @packageDocumentation comment for this package)
 
