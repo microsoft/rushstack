@@ -1,0 +1,8 @@
+{
+  "plugins": [
+    {
+      "pluginName": "rush-command-parameters-plugin",
+      "description": "Rush plugin for testing command line parameters"
+    }
+  ]
+}
