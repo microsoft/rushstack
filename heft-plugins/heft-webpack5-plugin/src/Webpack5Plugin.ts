@@ -42,6 +42,7 @@ const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
  * @internal
  */
 export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
+  private _accessor: IWebpackPluginAccessor | undefined;
   private _serve: boolean = false;
   private _webpack: typeof TWebpack | undefined;
   private _webpackCompiler: ExtendedCompiler | ExtendedMultiCompiler | undefined;
@@ -50,14 +51,22 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private _webpackCompilationDonePromise: Promise<void> | undefined;
   private _webpackCompilationDonePromiseResolveFn: (() => void) | undefined;
 
-  public readonly accessor: IWebpackPluginAccessor = {
-    hooks: {
-      onLoadConfiguration: new AsyncSeriesBailHook(),
-      onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
-      onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
-      onEmitStats: new AsyncParallelHook(['webpackStats'])
+  public get accessor(): IWebpackPluginAccessor {
+    if (!this._accessor) {
+      this._accessor = {
+        hooks: {
+          onLoadConfiguration: new AsyncSeriesBailHook(),
+          onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
+          onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
+          onEmitStats: new AsyncParallelHook(['webpackStats'])
+        },
+        parameters: {
+          serve: this._serve
+        }
+      };
     }
-  };
+    return this._accessor;
+  }
 
   public apply(
     taskSession: IHeftTaskSession,

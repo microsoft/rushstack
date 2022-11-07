@@ -33,6 +33,7 @@ export interface IWebpackConfigurationWithDevServer extends TWebpack.Configurati
 // @public (undocumented)
 export interface IWebpackPluginAccessor {
     hooks: IWebpackPluginAccessorHooks;
+    parameters: IWebpackPluginAccessorParameters;
 }
 
 // @public (undocumented)
@@ -41,6 +42,11 @@ export interface IWebpackPluginAccessorHooks {
     readonly onConfigure: AsyncSeriesHook<IWebpackConfiguration, never, never>;
     readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.MultiStats, never, never>;
     readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IWebpackConfiguration | false>;
+}
+
+// @public (undocumented)
+export interface IWebpackPluginAccessorParameters {
+    serve: boolean;
 }
 
 // @public (undocumented)
