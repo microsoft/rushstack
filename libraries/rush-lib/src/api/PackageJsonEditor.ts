@@ -8,26 +8,26 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
  * @deprecated
- * Use a string literal instead of an enum.
+ * Use a string literal instead.
  *
  * @public
  */
 export const DependencyType: Record<string, DependencyType> = {
-  Regular: 'dependencies',
-  Dev: 'devDependencies',
-  Optional: 'optionalDependencies',
-  Peer: 'peerDependencies',
-  YarnResolutions: 'resolutions'
+  Regular: 'regularDependency',
+  Dev: 'devDependency',
+  Optional: 'optionalDependency',
+  Peer: 'peerDependency',
+  YarnResolutions: 'yarnResolutions'
 } as const;
 /**
  * @public
  */
 export type DependencyType =
-  | 'dependencies'
-  | 'devDependencies'
-  | 'optionalDependencies'
-  | 'peerDependencies'
-  | 'resolutions';
+  | 'regularDependency'
+  | 'devDependency'
+  | 'optionalDependency'
+  | 'peerDependency'
+  | 'yarnResolutions';
 
 /**
  * @public
@@ -118,7 +118,7 @@ export class PackageJsonEditor {
 
         this._dependencies.set(
           packageName,
-          new PackageJsonDependency(packageName, dependencies[packageName], 'dependencies', _onChange)
+          new PackageJsonDependency(packageName, dependencies[packageName], 'regularDependency', _onChange)
         );
       });
 
@@ -134,7 +134,7 @@ export class PackageJsonEditor {
           new PackageJsonDependency(
             packageName,
             optionalDependencies[packageName],
-            'optionalDependencies',
+            'optionalDependency',
             _onChange
           )
         );
@@ -143,21 +143,21 @@ export class PackageJsonEditor {
       Object.keys(peerDependencies || {}).forEach((packageName: string) => {
         this._dependencies.set(
           packageName,
-          new PackageJsonDependency(packageName, peerDependencies[packageName], 'peerDependencies', _onChange)
+          new PackageJsonDependency(packageName, peerDependencies[packageName], 'peerDependency', _onChange)
         );
       });
 
       Object.keys(devDependencies || {}).forEach((packageName: string) => {
         this._devDependencies.set(
           packageName,
-          new PackageJsonDependency(packageName, devDependencies[packageName], 'devDependencies', _onChange)
+          new PackageJsonDependency(packageName, devDependencies[packageName], 'devDependency', _onChange)
         );
       });
 
       Object.keys(resolutions || {}).forEach((packageName: string) => {
         this._resolutions.set(
           packageName,
-          new PackageJsonDependency(packageName, resolutions[packageName], 'resolutions', _onChange)
+          new PackageJsonDependency(packageName, resolutions[packageName], 'yarnResolutions', _onChange)
         );
       });
 
@@ -190,14 +190,14 @@ export class PackageJsonEditor {
   }
 
   /**
-   * The list of dependencies of type 'dependencies', 'optionalDependencies', or 'peerDependencies'.
+   * The list of dependencies of type 'regularDependency', 'optionalDependency', or 'peerDependency'.
    */
   public get dependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._dependencies.values()];
   }
 
   /**
-   * The list of dependencies of type 'devDependencies'.
+   * The list of dependencies of type 'devDependency'.
    */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
@@ -237,15 +237,15 @@ export class PackageJsonEditor {
     // Rush collapses everything that isn't a devDependency into the dependencies
     // field, so we need to set the value depending on dependency type
     switch (dependencyType) {
-      case 'dependencies':
-      case 'optionalDependencies':
-      case 'peerDependencies':
+      case 'regularDependency':
+      case 'optionalDependency':
+      case 'peerDependency':
         this._dependencies.set(packageName, dependency);
         break;
-      case 'devDependencies':
+      case 'devDependency':
         this._devDependencies.set(packageName, dependency);
         break;
-      case 'resolutions':
+      case 'yarnResolutions':
         this._resolutions.set(packageName, dependency);
         break;
       default:
@@ -257,15 +257,15 @@ export class PackageJsonEditor {
 
   public removeDependency(packageName: string, dependencyType: DependencyType): void {
     switch (dependencyType) {
-      case 'dependencies':
-      case 'optionalDependencies':
-      case 'peerDependencies':
+      case 'regularDependency':
+      case 'optionalDependency':
+      case 'peerDependency':
         this._dependencies.delete(packageName);
         break;
-      case 'devDependencies':
+      case 'devDependency':
         this._devDependencies.delete(packageName);
         break;
-      case 'resolutions':
+      case 'yarnResolutions':
         this._resolutions.delete(packageName);
         break;
       default:
@@ -322,26 +322,26 @@ export class PackageJsonEditor {
       const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
 
       switch (dependency.dependencyType) {
-        case 'dependencies':
+        case 'regularDependency':
           if (!normalizedData.dependencies) {
             normalizedData.dependencies = {};
           }
           normalizedData.dependencies[dependency.name] = dependency.version;
           break;
-        case 'optionalDependencies':
+        case 'optionalDependency':
           if (!normalizedData.optionalDependencies) {
             normalizedData.optionalDependencies = {};
           }
           normalizedData.optionalDependencies[dependency.name] = dependency.version;
           break;
-        case 'peerDependencies':
+        case 'peerDependency':
           if (!normalizedData.peerDependencies) {
             normalizedData.peerDependencies = {};
           }
           normalizedData.peerDependencies[dependency.name] = dependency.version;
           break;
-        case 'devDependencies': // uses this._devDependencies instead
-        case 'resolutions': // uses this._resolutions instead
+        case 'devDependency': // uses this._devDependencies instead
+        case 'yarnResolutions': // uses this._resolutions instead
         default:
           throw new InternalError('Unsupported DependencyType');
       }

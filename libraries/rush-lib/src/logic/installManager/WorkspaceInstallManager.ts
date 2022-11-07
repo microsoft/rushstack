@@ -141,7 +141,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // Allow the package manager to handle peer dependency resolution, since this is simply a constraint
         // enforced by the package manager. Additionally, peer dependencies are simply a version constraint
         // and do not need to be converted to workspaces protocol.
-        if (dependencyType === 'peerDependencies') {
+        if (dependencyType === 'peerDependency') {
           continue;
         }
 

@@ -261,13 +261,13 @@ export class PackageJsonUpdater {
       const currentProjectDepUpdate: IUpdateProjectOptions = {
         project: mismatchFinderProject,
         dependenciesToAddOrUpdateOrRemove: dependenciesToUpdate,
-        dependencyType: 'dependencies'
+        dependencyType: 'regularDependency'
       };
 
       const currentProjectDevDepUpdate: IUpdateProjectOptions = {
         project: mismatchFinderProject,
         dependenciesToAddOrUpdateOrRemove: devDependenciesToUpdate,
-        dependencyType: 'devDependencies'
+        dependencyType: 'devDependency'
       };
 
       allPackageUpdates.set(mismatchFinderProject.filePath, mismatchFinderProject);
@@ -450,7 +450,7 @@ export class PackageJsonUpdater {
       const currentProjectUpdate: IUpdateProjectOptions = {
         project: new VersionMismatchFinderProject(project),
         dependenciesToAddOrUpdateOrRemove: dependenciesToAddOrUpdate,
-        dependencyType: devDependency ? 'devDependencies' : undefined
+        dependencyType: devDependency ? 'devDependency' : undefined
       };
       this.updateProject(currentProjectUpdate);
 
@@ -559,7 +559,7 @@ export class PackageJsonUpdater {
         ? oldDependency.dependencyType
         : undefined;
 
-      dependencyType = dependencyType || oldDependencyType || 'dependencies';
+      dependencyType = dependencyType || oldDependencyType || 'regularDependency';
 
       project.addOrUpdateDependency(packageName, newVersion, dependencyType!);
     }

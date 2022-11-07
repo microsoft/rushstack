@@ -87,7 +87,7 @@ export class DependencyAnalyzer {
         ...project.packageJsonEditor.devDependencyList
       ];
       for (const { name: dependencyName, version: dependencyVersion, dependencyType } of dependencies) {
-        if (dependencyType === 'peerDependencies') {
+        if (dependencyType === 'peerDependency') {
           // If this is a peer dependency, it isn't a real dependency in this context, so it shouldn't
           // be included in the list of dependency versions.
           continue;

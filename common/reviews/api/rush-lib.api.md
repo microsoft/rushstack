@@ -128,7 +128,7 @@ export class CredentialCache {
 export const DependencyType: Record<string, DependencyType>;
 
 // @public (undocumented)
-export type DependencyType = 'dependencies' | 'devDependencies' | 'optionalDependencies' | 'peerDependencies' | 'resolutions';
+export type DependencyType = 'regularDependency' | 'devDependency' | 'optionalDependency' | 'peerDependency' | 'yarnResolutions';
 
 // @beta
 export class EnvironmentConfiguration {

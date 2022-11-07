@@ -250,7 +250,7 @@ export class VersionMismatchFinder {
         // levels of compatibility -- we should wait for someone to actually request this feature
         // before we get into that.)
         project.allDependencies.forEach((dependency: PackageJsonDependency) => {
-          if (dependency.dependencyType !== 'peerDependencies') {
+          if (dependency.dependencyType !== 'peerDependency') {
             const version: string = dependency.version!;
 
             const isCyclic: boolean = project.decoupledLocalDependencies.has(dependency.name);

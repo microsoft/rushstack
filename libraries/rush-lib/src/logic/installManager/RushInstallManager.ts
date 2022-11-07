@@ -193,7 +193,7 @@ export class RushInstallManager extends BaseInstallManager {
         }
 
         // If there are any optional dependencies, copy directly into the optionalDependencies field.
-        if (dependency.dependencyType === 'optionalDependencies') {
+        if (dependency.dependencyType === 'optionalDependency') {
           if (!tempPackageJson.optionalDependencies) {
             tempPackageJson.optionalDependencies = {};
           }
