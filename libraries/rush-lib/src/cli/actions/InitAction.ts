@@ -155,10 +155,9 @@ export class InitAction extends BaseConfiglessRushAction {
     // The "[dot]" base name is used for hidden files to prevent various tools from interpreting them.
     // For example, "npm publish" will always exclude the filename ".gitignore"
     const templateFilePaths: string[] = [
-      'rush.json',
-      '[dot]gitattributes',
       '[dot]github/workflows/ci.yml',
-      '[dot]gitignore',
+
+      'common/config/rush/.pnpmfile.cjs',
       'common/config/rush/[dot]npmrc',
       'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/artifactory.json',
@@ -166,10 +165,15 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',
-      'common/config/rush/.pnpmfile.cjs',
-      'common/config/rush/version-policies.json',
+      'common/config/rush/pnpm-config.json',
       'common/config/rush/rush-plugins.json',
-      'common/git-hooks/commit-msg.sample'
+      'common/config/rush/version-policies.json',
+
+      'common/git-hooks/commit-msg.sample',
+
+      '[dot]gitattributes',
+      '[dot]gitignore',
+      'rush.json'
     ];
 
     const assetsSubfolder: string = path.resolve(__dirname, '../../../assets/rush-init');
