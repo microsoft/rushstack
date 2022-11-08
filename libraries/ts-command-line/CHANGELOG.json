@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.13.1",
+      "tag": "@rushstack/ts-command-line_v4.13.1",
+      "date": "Tue, 08 Nov 2022 01:20:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make ScopedCommandLineAction.onDefineUnscopedParameters optional to match CommandLineAciton.onDefineParameters"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.13.0",
       "tag": "@rushstack/ts-command-line_v4.13.0",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",

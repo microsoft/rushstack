@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.1.91",
+      "tag": "@rushstack/heft-storybook-plugin_v0.1.91",
+      "date": "Tue, 08 Nov 2022 01:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.7` to `^0.48.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.90",
       "tag": "@rushstack/heft-storybook-plugin_v0.1.90",
       "date": "Wed, 26 Oct 2022 00:16:16 GMT",
