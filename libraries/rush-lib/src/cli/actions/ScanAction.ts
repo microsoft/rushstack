@@ -28,8 +28,8 @@ export interface IJsonOutput {
 }
 
 export class ScanAction extends BaseConfiglessRushAction {
-  private _jsonFlag!: CommandLineFlagParameter;
-  private _allFlag!: CommandLineFlagParameter;
+  private readonly _jsonFlag: CommandLineFlagParameter;
+  private readonly _allFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -49,9 +49,7 @@ export class ScanAction extends BaseConfiglessRushAction {
       safeForSimultaneousRushProcesses: true,
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'

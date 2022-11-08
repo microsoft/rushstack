@@ -5,7 +5,7 @@
 
 
 
-[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://dev.azure.com/RushStack/GitHubProjects/_apis/build/status/rushstack/rushstack%20CI%20Build?branchName=main)](https://dev.azure.com/RushStack/GitHubProjects/_build/latest?definitionId=3&branchName=main) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
+[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
 
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
 for large scale TypeScript monorepos.
@@ -44,6 +44,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/apps/api-documenter](./apps/api-documenter/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-documenter.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-documenter) | [changelog](./apps/api-documenter/CHANGELOG.md) | [@microsoft/api-documenter](https://www.npmjs.com/package/@microsoft/api-documenter) |
 | [/apps/api-extractor](./apps/api-extractor/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor) | [changelog](./apps/api-extractor/CHANGELOG.md) | [@microsoft/api-extractor](https://www.npmjs.com/package/@microsoft/api-extractor) |
 | [/apps/heft](./apps/heft/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft.svg)](https://badge.fury.io/js/%40rushstack%2Fheft) | [changelog](./apps/heft/CHANGELOG.md) | [@rushstack/heft](https://www.npmjs.com/package/@rushstack/heft) |
+| [/apps/lockfile-explorer](./apps/lockfile-explorer/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Flockfile-explorer.svg)](https://badge.fury.io/js/%40rushstack%2Flockfile-explorer) | [changelog](./apps/lockfile-explorer/CHANGELOG.md) | [@rushstack/lockfile-explorer](https://www.npmjs.com/package/@rushstack/lockfile-explorer) |
 | [/apps/rundown](./apps/rundown/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frundown.svg)](https://badge.fury.io/js/%40rushstack%2Frundown) | [changelog](./apps/rundown/CHANGELOG.md) | [@rushstack/rundown](https://www.npmjs.com/package/@rushstack/rundown) |
 | [/apps/rush](./apps/rush/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush) | [changelog](./apps/rush/CHANGELOG.md) | [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush) |
 | [/eslint/eslint-config](./eslint/eslint-config/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-config.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-config) | [changelog](./eslint/eslint-config/CHANGELOG.md) | [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) |
@@ -98,6 +99,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 
 | Folder | Description |
 | ------ | -----------|
+| [/apps/lockfile-explorer-web](./apps/lockfile-explorer-web/) | Rush Lockfile Explorer: helper project for building the React web application component |
 | [/build-tests-samples/heft-node-basic-tutorial](./build-tests-samples/heft-node-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-jest-tutorial](./build-tests-samples/heft-node-jest-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-rig-tutorial](./build-tests-samples/heft-node-rig-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |

@@ -95,7 +95,10 @@ export default class SassPlugin implements IHeftPlugin {
         heftConfiguration,
         logger
       );
-      this._sassProcessor = new SassProcessor({ sassConfiguration });
+      this._sassProcessor = new SassProcessor({
+        sassConfiguration,
+        buildFolder: heftConfiguration.buildFolderPath
+      });
     }
     return this._sassProcessor;
   }

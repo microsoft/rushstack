@@ -1,0 +1,38 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+
+  /**
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
+   */
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        "copy-app-bundle": {
+          "taskEvent": {
+            "eventKind": "copyFiles",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "node_modules/@rushstack/lockfile-explorer-web/dist",
+                  "destinationFolders": ["dist"],
+                  "fileExtensions": [".js", ".html", ".svg"]
+                },
+                {
+                  "sourcePath": "assets",
+                  "destinationFolders": ["dist"],
+                  "includeGlobs": ["favicon.ico"]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -20,25 +20,50 @@
       "type": "array",
       "description": "Routing rules",
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["projectRelativeFolder", "servePath"],
-        "properties": {
-          "projectRelativeFolder": {
-            "type": "string",
-            "description": "The folder from which to read assets, relative to the root of the current project."
-          },
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["projectRelativeFolder", "servePath"],
+            "properties": {
+              "projectRelativeFolder": {
+                "type": "string",
+                "description": "The folder from which to read assets, relative to the root of the current project."
+              },
 
-          "servePath": {
-            "type": "string",
-            "description": "The server path at which to serve the assets in \"projectRelativeFolder\"."
-          },
+              "servePath": {
+                "type": "string",
+                "description": "The server path at which to serve the assets in \"projectRelativeFolder\"."
+              },
 
-          "immutable": {
-            "type": "boolean",
-            "description": "Enables or disables the `immutable` directive in the `Cache-Control` resoponse header. See (https://expressjs.com/en/4x/api.html#express.static)."
+              "immutable": {
+                "type": "boolean",
+                "description": "Enables or disables the `immutable` directive in the `Cache-Control` resoponse header. See (https://expressjs.com/en/4x/api.html#express.static)."
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["projectRelativeFile", "servePath"],
+            "properties": {
+              "projectRelativeFile": {
+                "type": "string",
+                "description": "The file to serve, relative to the root of the current project."
+              },
+
+              "servePath": {
+                "type": "string",
+                "description": "The server path at which to serve \"projectRelativeFile\"."
+              },
+
+              "immutable": {
+                "type": "boolean",
+                "description": "Enables or disables the `immutable` directive in the `Cache-Control` resoponse header. See (https://expressjs.com/en/4x/api.html#express.static)."
+              }
+            }
           }
-        }
+        ]
       }
     }
   }

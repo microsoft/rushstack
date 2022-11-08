@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.47.9",
+  "version": "0.48.7",
   "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
@@ -51,10 +51,11 @@
     "@nodelib/fs.scandir": "2.1.5",
     "@nodelib/fs.stat": "2.0.5",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.47.9",
-    "@rushstack/heft-node-rig": "1.10.0",
+    "@rushstack/heft": "0.48.0",
+    "@rushstack/heft-node-rig": "1.11.0",
     "@types/argparse": "1.0.38",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24"
+    "@types/node": "12.20.24",
+    "typescript": "~4.8.4"
   }
 }

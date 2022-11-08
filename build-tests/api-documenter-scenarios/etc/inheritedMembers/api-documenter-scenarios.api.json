@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -195,6 +195,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "Class1",
           "preserveMemberOrder": false,
@@ -330,6 +331,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -473,6 +475,7 @@
               "text": "{\n    new (): {\n        someProp: number;\n    };\n}"
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "ClassLikeVariable",
@@ -500,6 +503,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "ExtendsAnonymousClass",
           "preserveMemberOrder": false,
@@ -529,6 +533,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "ExtendsClassFromAnotherPackage",
           "preserveMemberOrder": false,
@@ -558,6 +563,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "ExtendsClassLikeVariable",
           "preserveMemberOrder": false,
@@ -587,6 +593,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "ExtendsUnexportedClass",
           "preserveMemberOrder": false,
@@ -625,6 +632,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IExtendsInterfaceLikeTypeAlias",
           "preserveMemberOrder": false,
@@ -668,6 +676,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IExtendsMultipleInterfaces",
           "preserveMemberOrder": false,
@@ -748,6 +757,7 @@
               "text": "export interface IInterface1 "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IInterface1",
           "preserveMemberOrder": false,
@@ -819,6 +829,7 @@
               "text": "export interface IInterface2 "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IInterface2",
           "preserveMemberOrder": false,
@@ -871,6 +882,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "IInterfaceLikeTypeAlias",
           "typeTokenRange": {
@@ -888,6 +900,7 @@
               "text": "export declare namespace Namespace1 "
             }
           ],
+          "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
           "name": "Namespace1",
           "preserveMemberOrder": false,

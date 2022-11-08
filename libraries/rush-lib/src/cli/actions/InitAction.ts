@@ -18,40 +18,40 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { Rush } from '../../api/Rush';
 
+// Matches a well-formed BEGIN macro starting a block section.
+// Example:  /*[BEGIN "DEMO"]*/
+//
+// Group #1 is the indentation spaces before the macro
+// Group #2 is the section name
+const BEGIN_MARCO_REGEXP: RegExp = /^(\s*)\/\*\[BEGIN "([A-Z]+)"\]\s*\*\/\s*$/;
+
+// Matches a well-formed END macro ending a block section.
+// Example:  /*[END "DEMO"]*/
+//
+// Group #1 is the indentation spaces before the macro
+// Group #2 is the section name
+const END_MACRO_REGEXP: RegExp = /^(\s*)\/\*\[END "([A-Z]+)"\]\s*\*\/\s*$/;
+
+// Matches a well-formed single-line section, including the space character after it
+// if present.
+// Example:  /*[LINE "HYPOTHETICAL"]*/
+//
+// Group #1 is the section name
+const LINE_MACRO_REGEXP: RegExp = /\/\*\[LINE "([A-Z]+)"\]\s*\*\/\s?/;
+
+// Matches a variable expansion.
+// Example:  [%RUSH_VERSION%]
+//
+// Group #1 is the variable name including the dollar sign
+const VARIABLE_MACRO_REGEXP: RegExp = /\[(%[A-Z0-9_]+%)\]/;
+
+// Matches anything that starts with "/*[" and ends with "]*/"
+// Used to catch malformed macro expressions
+const ANY_MACRO_REGEXP: RegExp = /\/\*\s*\[.*\]\s*\*\//;
+
 export class InitAction extends BaseConfiglessRushAction {
-  // Matches a well-formed BEGIN macro starting a block section.
-  // Example:  /*[BEGIN "DEMO"]*/
-  //
-  // Group #1 is the indentation spaces before the macro
-  // Group #2 is the section name
-  private static _beginMacroRegExp: RegExp = /^(\s*)\/\*\[BEGIN "([A-Z]+)"\]\s*\*\/\s*$/;
-
-  // Matches a well-formed END macro ending a block section.
-  // Example:  /*[END "DEMO"]*/
-  //
-  // Group #1 is the indentation spaces before the macro
-  // Group #2 is the section name
-  private static _endMacroRegExp: RegExp = /^(\s*)\/\*\[END "([A-Z]+)"\]\s*\*\/\s*$/;
-
-  // Matches a well-formed single-line section, including the space character after it
-  // if present.
-  // Example:  /*[LINE "HYPOTHETICAL"]*/
-  //
-  // Group #1 is the section name
-  private static _lineMacroRegExp: RegExp = /\/\*\[LINE "([A-Z]+)"\]\s*\*\/\s?/;
-
-  // Matches a variable expansion.
-  // Example:  [%RUSH_VERSION%]
-  //
-  // Group #1 is the variable name including the dollar sign
-  private static _variableMacroRegExp: RegExp = /\[(%[A-Z0-9_]+%)\]/;
-
-  // Matches anything that starts with "/*[" and ends with "]*/"
-  // Used to catch malformed macro expressions
-  private static _anyMacroRegExp: RegExp = /\/\*\s*\[.*\]\s*\*\//;
-
-  private _overwriteParameter!: CommandLineFlagParameter;
-  private _rushExampleParameter!: CommandLineFlagParameter;
+  private readonly _overwriteParameter: CommandLineFlagParameter;
+  private readonly _rushExampleParameter: CommandLineFlagParameter;
 
   // template section name --> whether it should be commented out
   private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
@@ -65,10 +65,7 @@ export class InitAction extends BaseConfiglessRushAction {
         ' set of config file templates to start managing projects using Rush.',
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
-    // abstract
     this._overwriteParameter = this.defineFlagParameter({
       parameterLongName: '--overwrite-existing',
       description:
@@ -160,8 +157,8 @@ export class InitAction extends BaseConfiglessRushAction {
     const templateFilePaths: string[] = [
       'rush.json',
       '[dot]gitattributes',
+      '[dot]github/workflows/ci.yml',
       '[dot]gitignore',
-      '[dot]travis.yml',
       'common/config/rush/[dot]npmrc',
       'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/artifactory.json',
@@ -253,7 +250,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
       // Check for a block section start
       // Example:  /*[BEGIN "DEMO"]*/
-      match = line.match(InitAction._beginMacroRegExp);
+      match = line.match(BEGIN_MARCO_REGEXP);
       if (match) {
         if (activeBlockSectionName) {
           // If this happens, please report a Rush bug
@@ -270,7 +267,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
       // Check for a block section end
       // Example:  /*[END "DEMO"]*/
-      match = line.match(InitAction._endMacroRegExp);
+      match = line.match(END_MACRO_REGEXP);
       if (match) {
         if (activeBlockSectionName === undefined) {
           // If this happens, please report a Rush bug
@@ -303,23 +300,23 @@ export class InitAction extends BaseConfiglessRushAction {
 
       // Check for a single-line section
       // Example:  /*[LINE "HYPOTHETICAL"]*/
-      match = transformedLine.match(InitAction._lineMacroRegExp);
+      match = transformedLine.match(LINE_MACRO_REGEXP);
       if (match) {
         const sectionName: string = match[1];
         const replacement: string = this._isSectionCommented(sectionName) ? '// ' : '';
-        transformedLine = transformedLine.replace(InitAction._lineMacroRegExp, replacement);
+        transformedLine = transformedLine.replace(LINE_MACRO_REGEXP, replacement);
       }
 
       // Check for variable expansions
       // Example:  [%RUSH_VERSION%]
-      while ((match = transformedLine.match(InitAction._variableMacroRegExp))) {
+      while ((match = transformedLine.match(VARIABLE_MACRO_REGEXP))) {
         const variableName: string = match[1];
         const replacement: string = this._expandMacroVariable(variableName);
-        transformedLine = transformedLine.replace(InitAction._variableMacroRegExp, replacement);
+        transformedLine = transformedLine.replace(VARIABLE_MACRO_REGEXP, replacement);
       }
 
       // Verify that all macros were handled
-      match = transformedLine.match(InitAction._anyMacroRegExp);
+      match = transformedLine.match(ANY_MACRO_REGEXP);
       if (match) {
         // If this happens, please report a Rush bug
         throw new InternalError(

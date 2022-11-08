@@ -42,84 +42,91 @@ describe(ConfigurationFile.name, () => {
 
   describe('A simple config file', () => {
     const configFileFolderName: string = 'simplestConfigFile';
-    const projectRelativeFilePath: string = `${configFileFolderName}/simplestConfigFile.json`;
-    const schemaPath: string = nodeJsPath.resolve(
-      __dirname,
-      configFileFolderName,
-      'simplestConfigFile.schema.json'
-    );
+    function runTests(partialOptions: { jsonSchemaPath: string } | { jsonSchemaObject: object }): void {
+      const projectRelativeFilePath: string = `${configFileFolderName}/simplestConfigFile.json`;
 
-    interface ISimplestConfigFile {
-      thing: string;
+      interface ISimplestConfigFile {
+        thing: string;
+      }
+
+      it('Correctly loads the config file', async () => {
+        const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
+          new ConfigurationFile<ISimplestConfigFile>({
+            projectRelativeFilePath: projectRelativeFilePath,
+            ...partialOptions
+          });
+        const loadedConfigFile: ISimplestConfigFile =
+          await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
+        const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
+
+        expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+        expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
+          nodeJsPath.resolve(__dirname, projectRelativeFilePath)
+        );
+        expect(
+          configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
+        ).toEqual('A');
+      });
+
+      it('Correctly resolves paths relative to the config file', async () => {
+        const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
+          new ConfigurationFile<ISimplestConfigFile>({
+            projectRelativeFilePath: projectRelativeFilePath,
+            ...partialOptions,
+            jsonPathMetadata: {
+              '$.thing': {
+                pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
+              }
+            }
+          });
+        const loadedConfigFile: ISimplestConfigFile =
+          await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
+        const expectedConfigFile: ISimplestConfigFile = {
+          thing: nodeJsPath.resolve(__dirname, configFileFolderName, 'A')
+        };
+        expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+        expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
+          nodeJsPath.resolve(__dirname, projectRelativeFilePath)
+        );
+        expect(
+          configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
+        ).toEqual('A');
+      });
+
+      it('Correctly resolves paths relative to the project root', async () => {
+        const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
+          new ConfigurationFile<ISimplestConfigFile>({
+            projectRelativeFilePath: projectRelativeFilePath,
+            ...partialOptions,
+            jsonPathMetadata: {
+              '$.thing': {
+                pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+              }
+            }
+          });
+        const loadedConfigFile: ISimplestConfigFile =
+          await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
+        const expectedConfigFile: ISimplestConfigFile = {
+          thing: nodeJsPath.resolve(projectRoot, 'A')
+        };
+        expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+        expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
+          nodeJsPath.resolve(__dirname, projectRelativeFilePath)
+        );
+        expect(
+          configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
+        ).toEqual('A');
+      });
     }
 
-    it('Correctly loads the config file', async () => {
-      const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
-        new ConfigurationFile<ISimplestConfigFile>({
-          projectRelativeFilePath: projectRelativeFilePath,
-          jsonSchemaPath: schemaPath
-        });
-      const loadedConfigFile: ISimplestConfigFile =
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-      const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
-
-      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
-      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
-        nodeJsPath.resolve(__dirname, projectRelativeFilePath)
-      );
-      expect(
-        configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
-      ).toEqual('A');
+    describe('with a JSON schema path', () => {
+      runTests({ jsonSchemaPath: `${__dirname}/${configFileFolderName}/simplestConfigFile.schema.json` });
     });
 
-    it('Correctly resolves paths relative to the config file', async () => {
-      const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
-        new ConfigurationFile<ISimplestConfigFile>({
-          projectRelativeFilePath: projectRelativeFilePath,
-          jsonSchemaPath: schemaPath,
-          jsonPathMetadata: {
-            '$.thing': {
-              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
-            }
-          }
-        });
-      const loadedConfigFile: ISimplestConfigFile =
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-      const expectedConfigFile: ISimplestConfigFile = {
-        thing: nodeJsPath.resolve(__dirname, configFileFolderName, 'A')
-      };
-      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
-      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
-        nodeJsPath.resolve(__dirname, projectRelativeFilePath)
-      );
-      expect(
-        configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
-      ).toEqual('A');
-    });
-
-    it('Correctly resolves paths relative to the project root', async () => {
-      const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
-        new ConfigurationFile<ISimplestConfigFile>({
-          projectRelativeFilePath: projectRelativeFilePath,
-          jsonSchemaPath: schemaPath,
-          jsonPathMetadata: {
-            '$.thing': {
-              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-            }
-          }
-        });
-      const loadedConfigFile: ISimplestConfigFile =
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-      const expectedConfigFile: ISimplestConfigFile = {
-        thing: nodeJsPath.resolve(projectRoot, 'A')
-      };
-      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
-      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
-        nodeJsPath.resolve(__dirname, projectRelativeFilePath)
-      );
-      expect(
-        configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
-      ).toEqual('A');
+    describe('with a JSON schema object', () => {
+      runTests({
+        jsonSchemaObject: JsonFile.load(`${__dirname}/${configFileFolderName}/simplestConfigFile.schema.json`)
+      });
     });
   });
 

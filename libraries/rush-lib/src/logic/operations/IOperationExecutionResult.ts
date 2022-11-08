@@ -31,6 +31,10 @@ export interface IOperationExecutionResult {
    * Object used to report a summary at the end of the Rush invocation.
    */
   readonly stdioSummarizer: StdioSummarizer;
+  /**
+   * The value indicates the duration of the same operation without cache hit.
+   */
+  readonly nonCachedDurationMs: number | undefined;
 }
 
 /**

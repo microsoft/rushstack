@@ -273,7 +273,10 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
             }
           },
           client: {
-            logging: 'info'
+            logging: 'info',
+            webSocketURL: {
+              port: 8080
+            }
           },
           port: 8080,
           onListening: (server: TWebpackDevServer) => {
@@ -309,11 +312,26 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
             true,
             taskSession.logger.terminal
           );
+
+          // Update the web socket URL to use the hostname provided by the certificate
+          const clientConfiguration: TWebpackDevServer.Configuration['client'] = devServerOptions.client;
+          const hostname: string | undefined = certificate.subjectAltNames?.[0];
+          if (hostname && typeof clientConfiguration === 'object') {
+            const { webSocketURL } = clientConfiguration;
+            if (typeof webSocketURL === 'object') {
+              clientConfiguration.webSocketURL = {
+                ...webSocketURL,
+                hostname
+              };
+            }
+          }
+
           devServerOptions = {
             ...devServerOptions,
             server: {
               type: 'https',
               options: {
+                minVersion: 'TLSv1.3',
                 key: certificate.pemKey,
                 cert: certificate.pemCertificate
               }

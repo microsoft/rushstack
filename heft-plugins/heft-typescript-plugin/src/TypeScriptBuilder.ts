@@ -109,7 +109,7 @@ const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
 const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 4;
-const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 7;
+const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 8;
 
 export class TypeScriptBuilder {
   private readonly _configuration: ITypeScriptBuilderConfiguration;

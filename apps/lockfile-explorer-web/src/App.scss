@@ -1,0 +1,29 @@
+@import 'office-ui-fabric-core/dist/sass/References';
+
+@mixin card {
+  box-shadow: $ms-depth-shadow-8;
+  background-color: $ms-color-gray10;
+  padding: 24px;
+  width: calc(100% - 48px);
+}
+
+.ContainerCard {
+  @include card;
+}
+
+.AppContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  padding: 24px;
+}
+
+.AppGrid {
+  flex-grow: 1;
+}
+
+.BodyContainer {
+  & > * + * {
+    margin-top: 24px;
+  }
+}

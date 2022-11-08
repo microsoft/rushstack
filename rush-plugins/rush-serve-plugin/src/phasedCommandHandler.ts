@@ -35,6 +35,19 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
   const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
 
   let activePort: number | undefined;
+  // The DNS name by which this server can be accessed.
+  // Defaults to 'localhost' but depends on the certificate
+  let activeHostNames: readonly string[] = ['localhost'];
+
+  function logHost(): void {
+    if (activePort !== undefined) {
+      logger.terminal.writeLine(
+        `Content is being served from:\n  ${activeHostNames
+          .map((hostName) => `https://${hostName}:${activePort}/`)
+          .join('\n  ')}`
+      );
+    }
+  }
 
   command.hooks.createOperations.tapPromise(
     {
@@ -89,22 +102,50 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
         logger.terminal
       );
 
-      function setHeaders(response: express.Response, path: string, stat: unknown): void {
+      const fileRoutingRules: Map<string, IRoutingRule> = new Map();
+
+      const wbnRegex: RegExp = /\.wbn$/i;
+      function setHeaders(response: express.Response, path?: string, stat?: unknown): void {
         response.set('Access-Control-Allow-Origin', '*');
-        response.set('Access-Control-Allow-Methods', 'GET');
+        response.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        // TODO: Generalize headers and MIME types with an external database or JSON file.
+        if (path && wbnRegex.test(path)) {
+          response.set('X-Content-Type-Options', 'nosniff');
+          response.set('Content-Type', 'application/webbundle');
+        }
       }
 
       for (const rule of routingRules) {
-        app.use(
-          rule.servePath,
-          express.static(rule.diskPath, {
-            dotfiles: 'ignore',
-            immutable: rule.immutable,
-            index: false,
-            redirect: false,
-            setHeaders
-          })
-        );
+        const { diskPath, servePath } = rule;
+        if (rule.type === 'file') {
+          const existingRule: IRoutingRule | undefined = fileRoutingRules.get(servePath);
+          if (existingRule) {
+            throw new Error(
+              `Request to serve "${diskPath}" at "${servePath}" conflicts with existing rule to serve "${existingRule.diskPath}" from this location.`
+            );
+          } else {
+            fileRoutingRules.set(diskPath, rule);
+            app.get(servePath, (request: express.Request, response: express.Response) => {
+              response.sendFile(diskPath, {
+                headers: {
+                  'Access-Control-Allow-Origin': '*',
+                  'Access-Control-Allow-Methods': 'GET, OPTIONS'
+                }
+              });
+            });
+          }
+        } else {
+          app.use(
+            servePath,
+            express.static(diskPath, {
+              dotfiles: 'ignore',
+              immutable: rule.immutable,
+              index: false,
+              redirect: false,
+              setHeaders
+            })
+          );
+        }
       }
 
       const server: https.Server = https.createServer(
@@ -121,7 +162,10 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       const address: AddressInfo | undefined = server.address() as AddressInfo;
       activePort = address?.port;
 
-      logger.terminal.writeLine(`Content is being served from:\n  https://localhost:${activePort}/`);
+      if (certificate.subjectAltNames) {
+        activeHostNames = certificate.subjectAltNames;
+      }
+
       if (portParameter) {
         // Hack the value of the parsed command line parameter to the actual runtime value.
         // This will cause the resolved value to be forwarded to operations that may use it.
@@ -132,7 +176,5 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
     }
   );
 
-  command.hooks.waitingForChanges.tap(PLUGIN_NAME, () => {
-    logger.terminal.writeLine(`Content is being served from:\n  https://localhost:${activePort}/`);
-  });
+  command.hooks.waitingForChanges.tap(PLUGIN_NAME, logHost);
 }

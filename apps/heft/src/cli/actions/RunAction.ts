@@ -6,7 +6,7 @@ import {
   type CommandLineParameterProvider,
   type CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-import { AlreadyReportedError, InternalError, type ITerminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, type ITerminal } from '@rushstack/node-core-library';
 
 import { Selection } from '../../utilities/Selection';
 import { HeftActionRunner } from '../HeftActionRunner';
@@ -89,10 +89,6 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     return this._selectedPhases;
   }
 
-  protected onDefineUnscopedParameters(): void {
-    // No-op. Defined in the constructor.
-  }
-
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
     this._actionRunner.defineParameters(scopedParameterProvider);
   }
@@ -105,10 +101,6 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     phaseParameter: CommandLineStringListParameter,
     terminal: ITerminal
   ): Set<HeftPhase> {
-    if (!phaseParameter) {
-      throw new InternalError(`onDefineParameters() has not been called.`);
-    }
-
     const parameterName: string = phaseParameter.longName;
     const selection: Set<HeftPhase> = new Set();
     for (const rawSelector of phaseParameter.values) {

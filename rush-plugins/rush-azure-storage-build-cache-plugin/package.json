@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-azure-storage-build-cache-plugin",
-  "version": "5.77.3",
+  "version": "5.82.1",
   "description": "Rush plugin for Azure storage cloud build cache",
   "repository": {
     "type": "git",
@@ -18,8 +18,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@azure/identity": "~1.0.0",
-    "@azure/storage-blob": "~12.3.0",
+    "@azure/identity": "~2.1.0",
+    "@azure/storage-blob": "~12.11.0",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/terminal": "workspace:*"

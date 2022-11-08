@@ -3,6 +3,7 @@
 
 import colors from 'colors/safe';
 import * as semver from 'semver';
+import { ConsoleTerminalProvider, Terminal, ITerminalProvider, Colors } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
@@ -29,9 +30,11 @@ export const enum SemVerStyle {
   Passthrough = 'passthrough'
 }
 
-export interface IPackageForRushAdd {
+export interface IPackageForRushUpdate {
   packageName: string;
+}
 
+export interface IPackageForRushAdd extends IPackageForRushUpdate {
   /**
    * The style of range that should be used if the version is automatically detected.
    */
@@ -44,10 +47,39 @@ export interface IPackageForRushAdd {
   version?: string;
 }
 
+export interface IPackageForRushRemove extends IPackageForRushUpdate {}
+
+export interface IPackageJsonUpdaterRushBaseUpdateOptions {
+  /**
+   * The projects whose package.jsons should get updated
+   */
+  projects: RushConfigurationProject[];
+  /**
+   * The dependencies to be added or removed.
+   */
+  packagesToUpdate: IPackageForRushUpdate[];
+  /**
+   * If specified, "rush update" will not be run after updating the package.json file(s).
+   */
+  skipUpdate: boolean;
+  /**
+   * If specified, "rush update" will be run in debug mode.
+   */
+  debugInstall: boolean;
+  /**
+   * actionName
+   */
+  actionName: string;
+  /**
+   * The variant to consider when performing installations and validating shrinkwrap updates.
+   */
+  variant?: string | undefined;
+}
+
 /**
  * Options for adding a dependency to a particular project.
  */
-export interface IPackageJsonUpdaterRushAddOptions {
+export interface IPackageJsonUpdaterRushUpgradeOptions {
   /**
    * The projects whose package.jsons should get updated
    */
@@ -55,11 +87,7 @@ export interface IPackageJsonUpdaterRushAddOptions {
   /**
    * The dependencies to be added.
    */
-  packagesToAdd: IPackageForRushAdd[];
-  /**
-   * Whether or not this dependency should be added as a devDependency or a regular dependency.
-   */
-  devDependency: boolean;
+  packagesToAdd: NpmCheck.INpmCheckPackage[];
   /**
    * If specified, other packages that use this dependency will also have their package.json's updated.
    */
@@ -81,7 +109,31 @@ export interface IPackageJsonUpdaterRushAddOptions {
 /**
  * Configuration options for adding or updating a dependency in a single project
  */
-export interface IUpdateProjectOptions {
+export interface IPackageJsonUpdaterRushAddOptions extends IPackageJsonUpdaterRushBaseUpdateOptions {
+  /**
+   * Whether or not this dependency should be added as a devDependency or a regular dependency.
+   */
+  devDependency: boolean;
+  /**
+   * If specified, other packages that use this dependency will also have their package.json's updated.
+   */
+  updateOtherPackages: boolean;
+  /**
+   * The dependencies to be added.
+   */
+  packagesToUpdate: IPackageForRushAdd[];
+}
+
+/**
+ * Options for remove a dependency from a particular project.
+ */
+export interface IPackageJsonUpdaterRushRemoveOptions extends IPackageJsonUpdaterRushBaseUpdateOptions {}
+
+/**
+ * Configuration options for adding or updating a dependency in single project
+ * or removing a dependency from a particular project
+ */
+export interface IBaseUpdateProjectOptions {
   /**
    * The project which will have its package.json updated
    */
@@ -90,14 +142,25 @@ export interface IUpdateProjectOptions {
    * Map of packages to update
    * Its key is the name of the dependency to be added or updated in the project
    * Its value is the new SemVer specifier that should be added to the project's package.json
+   * If trying to remove this packages, value can be empty string
    */
-  dependenciesToAddOrUpdate: Record<string, string>;
+  dependenciesToAddOrUpdateOrRemove: Record<string, string>;
+}
+
+/**
+ * Configuration options for adding or updating a dependency in a single project
+ */
+export interface IUpdateProjectOptions extends IBaseUpdateProjectOptions {
   /**
    * The type of dependency that should be updated. If left empty, this will be auto-detected.
    * If it cannot be auto-detected an exception will be thrown.
    */
   dependencyType?: DependencyType;
 }
+/**
+ * Configuration options for removing dependencies from a single project
+ */
+export interface IRemoveProjectOptions extends IBaseUpdateProjectOptions {}
 
 /**
  * A helper class for managing the dependencies of various package.json files.
@@ -107,18 +170,23 @@ export class PackageJsonUpdater {
   private _rushConfiguration: RushConfiguration;
   private _rushGlobalFolder: RushGlobalFolder;
 
+  private readonly _terminalProvider: ITerminalProvider;
+  private readonly _terminal: Terminal;
+
   public constructor(rushConfiguration: RushConfiguration, rushGlobalFolder: RushGlobalFolder) {
     this._rushConfiguration = rushConfiguration;
     this._rushGlobalFolder = rushGlobalFolder;
+
+    this._terminalProvider = new ConsoleTerminalProvider();
+    this._terminal = new Terminal(this._terminalProvider);
   }
 
   /**
-   * Adds a dependency to a particular project. The core business logic for "rush add".
+   * Upgrade dependencies to a particular project, or across specified projects. This is the core business logic for
+   * "rush upgrade-interactive".
    */
-  public async doRushAddAsync(options: IPackageJsonUpdaterRushAddOptions): Promise<void> {
-    const { projects, packagesToAdd, devDependency, updateOtherPackages, skipUpdate, debugInstall, variant } =
-      options;
-
+  public async doRushUpgradeAsync(options: IPackageJsonUpdaterRushUpgradeOptions): Promise<void> {
+    const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall, variant } = options;
     const { DependencyAnalyzer } = await import('./DependencyAnalyzer');
     const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
       this._rushConfiguration
@@ -129,29 +197,38 @@ export class PackageJsonUpdater {
       commonVersionsConfiguration
     }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(variant);
 
-    console.log();
-    const dependenciesToAddOrUpdate: Record<string, string> = {};
-    for (const { packageName, version: initialVersion, rangeStyle } of packagesToAdd) {
+    const dependenciesToUpdate: Record<string, string> = {};
+    const devDependenciesToUpdate: Record<string, string> = {};
+
+    for (const { moduleName, latest: latestVersion, packageJson, devDependency } of packagesToAdd) {
+      const inferredRangeStyle: SemVerStyle = this._cheaplyDetectSemVerRangeStyle(packageJson);
       const implicitlyPreferredVersion: string | undefined =
-        implicitlyPreferredVersionByPackageName.get(packageName);
+        implicitlyPreferredVersionByPackageName.get(moduleName);
 
       const explicitlyPreferredVersion: string | undefined =
-        commonVersionsConfiguration.preferredVersions.get(packageName);
+        commonVersionsConfiguration.preferredVersions.get(moduleName);
 
       const version: string = await this._getNormalizedVersionSpec(
         projects,
-        packageName,
-        initialVersion,
+        moduleName,
+        latestVersion,
         implicitlyPreferredVersion,
         explicitlyPreferredVersion,
-        rangeStyle
+        inferredRangeStyle
       );
 
-      dependenciesToAddOrUpdate[packageName] = version;
-      console.log(colors.green(`Updating projects to use `) + packageName + '@' + colors.cyan(version));
-      console.log();
+      if (devDependency) {
+        devDependenciesToUpdate[moduleName] = version;
+      } else {
+        dependenciesToUpdate[moduleName] = version;
+      }
 
-      const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(packageName);
+      this._terminal.writeLine(
+        colors.green(`Updating projects to use `) + moduleName + '@' + colors.cyan(version)
+      );
+      this._terminal.writeLine();
+
+      const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(moduleName);
       if (
         existingSpecifiedVersions &&
         !existingSpecifiedVersions.has(version) &&
@@ -163,77 +240,114 @@ export class PackageJsonUpdater {
 
         const existingVersionList: string = Array.from(existingSpecifiedVersions).join(', ');
         throw new Error(
-          `Adding '${packageName}@${version}' ` +
+          `Adding '${moduleName}@${version}' ` +
             `causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use ` +
             `this version, or try specify one of the existing versions (${existingVersionList}).`
         );
       }
     }
 
-    const allPackageUpdates: IUpdateProjectOptions[] = [];
+    const allPackageUpdates: Map<string, VersionMismatchFinderEntity> = new Map();
+    const allDependenciesToUpdate: [string, string][] = [
+      ...Object.entries(dependenciesToUpdate),
+      ...Object.entries(devDependenciesToUpdate)
+    ];
 
     for (const project of projects) {
-      const currentProjectUpdate: IUpdateProjectOptions = {
-        project: new VersionMismatchFinderProject(project),
-        dependenciesToAddOrUpdate: dependenciesToAddOrUpdate,
-        dependencyType: devDependency ? DependencyType.Dev : undefined
+      const mismatchFinderProject: VersionMismatchFinderProject = new VersionMismatchFinderProject(project);
+
+      const currentProjectDepUpdate: IUpdateProjectOptions = {
+        project: mismatchFinderProject,
+        dependenciesToAddOrUpdateOrRemove: dependenciesToUpdate,
+        dependencyType: DependencyType.Regular
       };
-      this.updateProject(currentProjectUpdate);
 
-      const otherPackageUpdates: IUpdateProjectOptions[] = [];
+      const currentProjectDevDepUpdate: IUpdateProjectOptions = {
+        project: mismatchFinderProject,
+        dependenciesToAddOrUpdateOrRemove: devDependenciesToUpdate,
+        dependencyType: DependencyType.Dev
+      };
 
-      if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
-        // we need to do a mismatch check
-        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-          this._rushConfiguration,
-          {
-            variant: variant
-          }
-        );
+      allPackageUpdates.set(mismatchFinderProject.filePath, mismatchFinderProject);
 
-        const mismatches: string[] = mismatchFinder.getMismatches().filter((mismatch) => {
-          return !projects.find((proj) => proj.packageName === mismatch);
-        });
-        if (mismatches.length && updateOtherPackages) {
-          for (const [packageName, version] of Object.entries(dependenciesToAddOrUpdate)) {
-            const mismatchedVersions: string[] | undefined =
-              mismatchFinder.getVersionsOfMismatch(packageName);
-            if (mismatchedVersions) {
-              for (const mismatchedVersion of mismatchedVersions) {
-                for (const consumer of mismatchFinder.getConsumersOfMismatch(
-                  packageName,
-                  mismatchedVersion
-                )!) {
-                  if (consumer instanceof VersionMismatchFinderEntity) {
-                    otherPackageUpdates.push({
-                      project: consumer,
-                      dependenciesToAddOrUpdate: {
-                        [packageName]: version
-                      }
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      this.updateProjects(otherPackageUpdates);
-
-      allPackageUpdates.push(currentProjectUpdate, ...otherPackageUpdates);
+      this.updateProject(currentProjectDepUpdate);
+      this.updateProject(currentProjectDevDepUpdate);
     }
 
-    for (const { project } of allPackageUpdates) {
+    if (updateOtherPackages) {
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+        this._rushConfiguration,
+        {
+          variant: variant
+        }
+      );
+      for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
+        this.updateProject(update);
+        allPackageUpdates.set(update.project.filePath, update.project);
+      }
+    }
+
+    for (const [filePath, project] of allPackageUpdates) {
       if (project.saveIfModified()) {
-        console.log(colors.green('Wrote ') + project.filePath);
+        this._terminal.writeLine(colors.green('Wrote ') + filePath);
       }
     }
 
     if (!skipUpdate) {
-      console.log();
-      console.log(colors.green('Running "rush update"'));
-      console.log();
+      this._terminal.writeLine();
+      this._terminal.writeLine(colors.green('Running "rush update"'));
+      this._terminal.writeLine();
+
+      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
+      const installManagerOptions: IInstallManagerOptions = {
+        debug: debugInstall,
+        allowShrinkwrapUpdates: true,
+        bypassPolicy: false,
+        noLink: false,
+        fullUpgrade: false,
+        recheckShrinkwrap: false,
+        networkConcurrency: undefined,
+        collectLogFile: false,
+        variant: variant,
+        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+        pnpmFilterArguments: [],
+        checkOnly: false
+      };
+
+      const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+        this._rushConfiguration,
+        this._rushGlobalFolder,
+        purgeManager,
+        installManagerOptions
+      );
+      try {
+        await installManager.doInstallAsync();
+      } finally {
+        purgeManager.deleteAll();
+      }
+    }
+  }
+
+  public async doRushUpdateAsync(options: IPackageJsonUpdaterRushBaseUpdateOptions): Promise<void> {
+    let allPackageUpdates: IUpdateProjectOptions[] = [];
+    if (options.actionName === 'add') {
+      allPackageUpdates = await this._doRushAddAsync(options as IPackageJsonUpdaterRushAddOptions);
+    } else if (options.actionName === 'remove') {
+      allPackageUpdates = await this._doRushRemoveAsync(options as IPackageJsonUpdaterRushRemoveOptions);
+    } else {
+      throw new Error('only accept "rush add" or "rush remove"');
+    }
+    const { skipUpdate, debugInstall, variant } = options;
+    for (const { project } of allPackageUpdates) {
+      if (project.saveIfModified()) {
+        this._terminal.writeLine(Colors.green('Wrote'), project.filePath);
+      }
+    }
+
+    if (!skipUpdate) {
+      this._terminal.writeLine();
+      this._terminal.writeLine(Colors.green('Running "rush update"'));
+      this._terminal.writeLine();
 
       const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
       const installManagerOptions: IInstallManagerOptions = {
@@ -266,6 +380,158 @@ export class PackageJsonUpdater {
   }
 
   /**
+   * Adds a dependency to a particular project. The core business logic for "rush add".
+   */
+  private async _doRushAddAsync(
+    options: IPackageJsonUpdaterRushAddOptions
+  ): Promise<IUpdateProjectOptions[]> {
+    const { projects, packagesToUpdate, devDependency, updateOtherPackages, variant } = options;
+
+    const { DependencyAnalyzer } = await import('./DependencyAnalyzer');
+    const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
+      this._rushConfiguration
+    );
+    const {
+      allVersionsByPackageName,
+      implicitlyPreferredVersionByPackageName,
+      commonVersionsConfiguration
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(variant);
+
+    this._terminal.writeLine();
+    const dependenciesToAddOrUpdate: Record<string, string> = {};
+    for (const { packageName, version: initialVersion, rangeStyle } of packagesToUpdate) {
+      const implicitlyPreferredVersion: string | undefined =
+        implicitlyPreferredVersionByPackageName.get(packageName);
+
+      const explicitlyPreferredVersion: string | undefined =
+        commonVersionsConfiguration.preferredVersions.get(packageName);
+
+      const version: string = await this._getNormalizedVersionSpec(
+        projects,
+        packageName,
+        initialVersion,
+        implicitlyPreferredVersion,
+        explicitlyPreferredVersion,
+        rangeStyle
+      );
+
+      dependenciesToAddOrUpdate[packageName] = version;
+      this._terminal.writeLine(
+        Colors.green('Updating projects to use'),
+        `${packageName}@`,
+        Colors.cyan(version)
+      );
+      this._terminal.writeLine();
+
+      const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(packageName);
+      if (
+        existingSpecifiedVersions &&
+        !existingSpecifiedVersions.has(version) &&
+        this._rushConfiguration.ensureConsistentVersions &&
+        !updateOtherPackages
+      ) {
+        // There are existing versions, and the version we're going to use is not one of them, and this repo
+        // requires consistent versions, and we aren't going to update other packages, so we can't proceed.
+
+        const existingVersionList: string = Array.from(existingSpecifiedVersions).join(', ');
+        throw new Error(
+          `Adding '${packageName}@${version}' ` +
+            `causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use ` +
+            `this version, or try specify one of the existing versions (${existingVersionList}).`
+        );
+      }
+    }
+
+    const allPackageUpdates: IUpdateProjectOptions[] = [];
+
+    for (const project of projects) {
+      const currentProjectUpdate: IUpdateProjectOptions = {
+        project: new VersionMismatchFinderProject(project),
+        dependenciesToAddOrUpdateOrRemove: dependenciesToAddOrUpdate,
+        dependencyType: devDependency ? DependencyType.Dev : undefined
+      };
+      this.updateProject(currentProjectUpdate);
+
+      let otherPackageUpdates: IUpdateProjectOptions[] = [];
+
+      // we need to do a mismatch check
+      if (updateOtherPackages) {
+        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+          this._rushConfiguration,
+          {
+            variant: variant
+          }
+        );
+        otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
+      }
+
+      this.updateProjects(otherPackageUpdates);
+
+      allPackageUpdates.push(currentProjectUpdate, ...otherPackageUpdates);
+    }
+
+    return allPackageUpdates;
+  }
+
+  private _getUpdates(
+    mismatchFinder: VersionMismatchFinder,
+    dependenciesToUpdate: Iterable<[string, string]>
+  ): IUpdateProjectOptions[] {
+    const result: IUpdateProjectOptions[] = [];
+
+    const { mismatches } = mismatchFinder;
+
+    for (const [packageName, version] of dependenciesToUpdate) {
+      const projectsByVersion: ReadonlyMap<string, Iterable<VersionMismatchFinderEntity>> | undefined =
+        mismatches.get(packageName);
+      if (projectsByVersion) {
+        for (const consumers of projectsByVersion.values()) {
+          for (const consumer of consumers) {
+            result.push({
+              project: consumer,
+              dependenciesToAddOrUpdateOrRemove: {
+                [packageName]: version
+              }
+            });
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Remove a dependency from a particular project. The core business logic for "rush remove".
+   */
+  private async _doRushRemoveAsync(
+    options: IPackageJsonUpdaterRushRemoveOptions
+  ): Promise<IRemoveProjectOptions[]> {
+    const { projects, packagesToUpdate } = options;
+
+    this._terminal.writeLine();
+    const dependenciesToRemove: Record<string, string> = {};
+
+    const allPackageUpdates: IRemoveProjectOptions[] = [];
+
+    for (const project of projects) {
+      for (const { packageName } of packagesToUpdate) {
+        dependenciesToRemove[packageName] = '';
+      }
+
+      const currentProjectUpdate: IRemoveProjectOptions = {
+        project: new VersionMismatchFinderProject(project),
+        dependenciesToAddOrUpdateOrRemove: dependenciesToRemove
+      };
+      this.removePackageFromProject(currentProjectUpdate);
+
+      allPackageUpdates.push(currentProjectUpdate);
+    }
+
+    return allPackageUpdates;
+  }
+
+  /**
    * Updates several projects' package.json files
    */
   public updateProjects(projectUpdates: IUpdateProjectOptions[]): void {
@@ -279,9 +545,9 @@ export class PackageJsonUpdater {
    */
   public updateProject(options: IUpdateProjectOptions): void {
     let { dependencyType } = options;
-    const { project, dependenciesToAddOrUpdate } = options;
+    const { project, dependenciesToAddOrUpdateOrRemove } = options;
 
-    for (const [packageName, newVersion] of Object.entries(dependenciesToAddOrUpdate)) {
+    for (const [packageName, newVersion] of Object.entries(dependenciesToAddOrUpdateOrRemove)) {
       const oldDependency: PackageJsonDependency | undefined = project.tryGetDependency(packageName);
       const oldDevDependency: PackageJsonDependency | undefined = project.tryGetDevDependency(packageName);
 
@@ -294,6 +560,23 @@ export class PackageJsonUpdater {
       dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 
       project.addOrUpdateDependency(packageName, newVersion, dependencyType!);
+    }
+  }
+
+  public removePackageFromProject(options: IRemoveProjectOptions): void {
+    const { project, dependenciesToAddOrUpdateOrRemove } = options;
+
+    for (const packageName of Object.keys(dependenciesToAddOrUpdateOrRemove)) {
+      const packageJsonDependencies: (PackageJsonDependency | undefined)[] = [
+        project.tryGetDependency(packageName),
+        project.tryGetDevDependency(packageName)
+      ];
+      for (const packageJsonDependency of packageJsonDependencies) {
+        if (!packageJsonDependency) {
+          continue;
+        }
+        project.removeDependency(packageName, packageJsonDependency.dependencyType);
+      }
     }
   }
 
@@ -316,19 +599,21 @@ export class PackageJsonUpdater {
     explicitlyPreferredVersion: string | undefined,
     rangeStyle: SemVerStyle
   ): Promise<string> {
-    console.log(colors.gray(`Determining new version for dependency: ${packageName}`));
+    this._terminal.writeLine(colors.gray(`Determining new version for dependency: ${packageName}`));
     if (initialSpec) {
-      console.log(`Specified version selector: ${colors.cyan(initialSpec)}`);
+      this._terminal.writeLine(`Specified version selector: ${colors.cyan(initialSpec)}`);
     } else {
-      console.log(`No version selector was specified, so the version will be determined automatically.`);
+      this._terminal.writeLine(
+        `No version selector was specified, so the version will be determined automatically.`
+      );
     }
-    console.log();
+    this._terminal.writeLine();
 
     // if ensureConsistentVersions => reuse the pinned version
     // else, query the registry and use the latest that satisfies semver spec
     if (initialSpec) {
       if (initialSpec === implicitlyPreferredVersion) {
-        console.log(
+        this._terminal.writeLine(
           colors.green('Assigning "') +
             colors.cyan(initialSpec) +
             colors.green(
@@ -339,7 +624,7 @@ export class PackageJsonUpdater {
       }
 
       if (initialSpec === explicitlyPreferredVersion) {
-        console.log(
+        this._terminal.writeLine(
           colors.green('Assigning "') +
             colors.cyan(initialSpec) +
             colors.green(
@@ -352,7 +637,7 @@ export class PackageJsonUpdater {
 
     if (this._rushConfiguration.ensureConsistentVersions && !initialSpec) {
       if (implicitlyPreferredVersion) {
-        console.log(
+        this._terminal.writeLine(
           `Assigning the version "${colors.cyan(implicitlyPreferredVersion)}" for "${packageName}" ` +
             'because it is already used by other projects in this repo.'
         );
@@ -360,7 +645,7 @@ export class PackageJsonUpdater {
       }
 
       if (explicitlyPreferredVersion) {
-        console.log(
+        this._terminal.writeLine(
           `Assigning the version "${colors.cyan(explicitlyPreferredVersion)}" for "${packageName}" ` +
             `because it is the preferred version listed in ${RushConstants.commonVersionsFilename}.`
         );
@@ -394,8 +679,8 @@ export class PackageJsonUpdater {
     let selectedVersionPrefix: string = '';
 
     if (initialSpec && initialSpec !== 'latest') {
-      console.log(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
-      console.log();
+      this._terminal.writeLine(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
+      this._terminal.writeLine();
 
       if (localProject !== undefined) {
         const version: string = localProject.packageJson.version;
@@ -418,7 +703,7 @@ export class PackageJsonUpdater {
           );
         }
       } else {
-        console.log(`Querying registry for all versions of "${packageName}"...`);
+        this._terminal.writeLine(`Querying registry for all versions of "${packageName}"...`);
 
         let commandArgs: string[];
         if (this._rushConfiguration.packageManager === 'yarn') {
@@ -440,12 +725,14 @@ export class PackageJsonUpdater {
           versionList = JSON.parse(allVersions);
         }
 
-        console.log(colors.gray(`Found ${versionList.length} available versions.`));
+        this._terminal.writeLine(colors.gray(`Found ${versionList.length} available versions.`));
 
         for (const version of versionList) {
           if (semver.satisfies(version, initialSpec)) {
             selectedVersion = initialSpec;
-            console.log(`Found a version that satisfies ${initialSpec}: ${colors.cyan(version)}`);
+            this._terminal.writeLine(
+              `Found a version that satisfies ${initialSpec}: ${colors.cyan(version)}`
+            );
             break;
           }
         }
@@ -469,15 +756,15 @@ export class PackageJsonUpdater {
         }
       } else {
         if (!this._rushConfiguration.ensureConsistentVersions) {
-          console.log(
+          this._terminal.writeLine(
             colors.gray(
               `The "ensureConsistentVersions" policy is NOT active, so we will assign the latest version.`
             )
           );
-          console.log();
+          this._terminal.writeLine();
         }
 
-        console.log(`Querying NPM registry for latest version of "${packageName}"...`);
+        this._terminal.writeLine(`Querying NPM registry for latest version of "${packageName}"...`);
 
         let commandArgs: string[];
         if (this._rushConfiguration.packageManager === 'yarn') {
@@ -493,12 +780,12 @@ export class PackageJsonUpdater {
         ).trim();
       }
 
-      console.log();
+      this._terminal.writeLine();
 
-      console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
+      this._terminal.writeLine(`Found latest version: ${colors.cyan(selectedVersion)}`);
     }
 
-    console.log();
+    this._terminal.writeLine();
 
     let reasonForModification: string = '';
     if (selectedVersion !== '*') {
@@ -530,7 +817,7 @@ export class PackageJsonUpdater {
     }
 
     const normalizedVersion: string = selectedVersionPrefix + selectedVersion;
-    console.log(
+    this._terminal.writeLine(
       colors.gray(`Assigning version "${normalizedVersion}" for "${packageName}"${reasonForModification}.`)
     );
     return normalizedVersion;
@@ -618,5 +905,32 @@ export class PackageJsonUpdater {
     }
 
     return foundProject;
+  }
+
+  private _cheaplyDetectSemVerRangeStyle(version: string): SemVerStyle {
+    // create a swtich statement to detect the first character of the version string and determine the range style
+    // TODO: This is a temporary solution until we have a better way to detect more complext range styles
+    // TODO: Should we handle/care about peerDependencies?
+    switch (version[0]) {
+      case '~':
+        return SemVerStyle.Tilde;
+      case '^':
+        return SemVerStyle.Caret;
+      default:
+        this._terminal.writeLine(
+          `No SemVer range detected for version: ${version}. The exact version will be set in package.json.`
+        );
+        return SemVerStyle.Exact;
+    }
+  }
+
+  private _normalizeDepsToUpgrade(deps: NpmCheck.INpmCheckPackage[]): IPackageForRushAdd[] {
+    return deps.map((dep) => {
+      return {
+        packageName: dep.moduleName,
+        version: dep.latest,
+        rangeStyle: this._cheaplyDetectSemVerRangeStyle(dep.packageJson)
+      };
+    });
   }
 }

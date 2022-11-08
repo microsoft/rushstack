@@ -8,6 +8,7 @@ type MessageIds = 'error-untyped-underscore';
 type Options = [];
 
 const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
+  defaultOptions: [],
   meta: {
     type: 'problem',
     messages: {

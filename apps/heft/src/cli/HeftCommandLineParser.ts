@@ -57,7 +57,11 @@ export class HeftCommandLineParser extends CommandLineParser {
     // don't throw due to an unrecognized parameter.
     this._unmanagedFlag = this.defineFlagParameter({
       parameterLongName: Constants.unmanagedParameterLongName,
-      description: 'Indicates that the tool is running in an unmanaged environment'
+      description:
+        'Disables the Heft version selector: When Heft is invoked via the shell path, normally it' +
+        " will examine the project's package.json dependencies and try to use the locally installed version" +
+        ' of Heft. Specify "--unmanaged" to force the invoked version of Heft to be used. This is useful for' +
+        ' example if you want to test a different version of Heft.'
     });
 
     // Pre-initialize with known argument values to determine state of "--debug"
@@ -84,10 +88,6 @@ export class HeftCommandLineParser extends CommandLineParser {
     });
 
     this._metricsCollector = new MetricsCollector();
-  }
-
-  protected onDefineParameters(): void {
-    // No-op. Defined in the constructor.
   }
 
   public async execute(args?: string[]): Promise<boolean> {

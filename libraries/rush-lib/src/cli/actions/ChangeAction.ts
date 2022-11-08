@@ -37,19 +37,26 @@ import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Git } from '../../logic/Git';
 
 import type * as inquirerTypes from 'inquirer';
+import { Utilities } from '../../utilities/Utilities';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
+
+const BULK_LONG_NAME: string = '--bulk';
+const BULK_MESSAGE_LONG_NAME: string = '--message';
+const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
 
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
   private readonly _terminal: ITerminal;
-  private _verifyParameter!: CommandLineFlagParameter;
-  private _noFetchParameter!: CommandLineFlagParameter;
-  private _targetBranchParameter!: CommandLineStringParameter;
-  private _changeEmailParameter!: CommandLineStringParameter;
-  private _bulkChangeParameter!: CommandLineFlagParameter;
-  private _bulkChangeMessageParameter!: CommandLineStringParameter;
-  private _bulkChangeBumpTypeParameter!: CommandLineChoiceParameter;
-  private _overwriteFlagParameter!: CommandLineFlagParameter;
+  private readonly _verifyParameter: CommandLineFlagParameter;
+  private readonly _noFetchParameter: CommandLineFlagParameter;
+  private readonly _targetBranchParameter: CommandLineStringParameter;
+  private readonly _changeEmailParameter: CommandLineStringParameter;
+  private readonly _bulkChangeParameter: CommandLineFlagParameter;
+  private readonly _bulkChangeMessageParameter: CommandLineStringParameter;
+  private readonly _bulkChangeBumpTypeParameter: CommandLineChoiceParameter;
+  private readonly _overwriteFlagParameter: CommandLineFlagParameter;
+  private readonly _commitChangesFlagParameter: CommandLineFlagParameter;
+  private readonly _commitChangesMessageStringParameter: CommandLineStringParameter;
 
   private _targetBranchName: string | undefined;
 
@@ -95,12 +102,6 @@ export class ChangeAction extends BaseRushAction {
 
     this._git = new Git(this.rushConfiguration);
     this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
-  }
-
-  public onDefineParameters(): void {
-    const BULK_LONG_NAME: string = '--bulk';
-    const BULK_MESSAGE_LONG_NAME: string = '--message';
-    const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
 
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
@@ -128,6 +129,18 @@ export class ChangeAction extends BaseRushAction {
       description:
         `If a changefile already exists, overwrite without prompting ` +
         `(or erroring in ${BULK_LONG_NAME} mode).`
+    });
+
+    this._commitChangesFlagParameter = this.defineFlagParameter({
+      parameterLongName: '--commit',
+      parameterShortName: '-c',
+      description: `If this flag is specified generated changefiles will be commited automatically.`
+    });
+
+    this._commitChangesMessageStringParameter = this.defineStringParameter({
+      parameterLongName: '--commit-message',
+      argumentName: 'COMMIT_MESSAGE',
+      description: `If this parameter is specified generated changefiles will be commited automatically with the specified commit message.`
     });
 
     this._changeEmailParameter = this.defineStringParameter({
@@ -167,7 +180,8 @@ export class ChangeAction extends BaseRushAction {
         this._bulkChangeParameter,
         this._bulkChangeMessageParameter,
         this._bulkChangeBumpTypeParameter,
-        this._overwriteFlagParameter
+        this._overwriteFlagParameter,
+        this._commitChangesFlagParameter
       ]
         .map((parameter) => {
           return parameter.value
@@ -286,9 +300,9 @@ export class ChangeAction extends BaseRushAction {
         });
       }
     }
-
+    let changefiles: string[];
     try {
-      return await this._writeChangeFiles(
+      changefiles = await this._writeChangeFiles(
         promptModule,
         changeFileData,
         this._overwriteFlagParameter.value,
@@ -296,6 +310,18 @@ export class ChangeAction extends BaseRushAction {
       );
     } catch (error) {
       throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
+    }
+    if (this._commitChangesFlagParameter.value || this._commitChangesMessageStringParameter.value) {
+      if (changefiles && changefiles.length !== 0) {
+        this._stageAndCommitGitChanges(
+          changefiles,
+          this._commitChangesMessageStringParameter.value ||
+            this.rushConfiguration.gitChangefilesCommitMessage ||
+            'Rush change'
+        );
+      } else {
+        this._terminal.writeWarningLine('Warning: No change files generated, nothing to commit.');
+      }
     }
   }
 
@@ -624,10 +650,20 @@ export class ChangeAction extends BaseRushAction {
     changeFileData: Map<string, IChangeFile>,
     overwrite: boolean,
     interactiveMode: boolean
-  ): Promise<void> {
+  ): Promise<string[]> {
+    const writtenFiles: string[] = [];
     await changeFileData.forEach(async (changeFile: IChangeFile) => {
-      await this._writeChangeFile(promptModule, changeFile, overwrite, interactiveMode);
+      const writtenFile: string | undefined = await this._writeChangeFile(
+        promptModule,
+        changeFile,
+        overwrite,
+        interactiveMode
+      );
+      if (writtenFile) {
+        writtenFiles.push(writtenFile);
+      }
     });
+    return writtenFiles;
   }
 
   private async _writeChangeFile(
@@ -635,7 +671,7 @@ export class ChangeAction extends BaseRushAction {
     changeFileData: IChangeFile,
     overwrite: boolean,
     interactiveMode: boolean
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     const output: string = JSON.stringify(changeFileData, undefined, 2);
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
@@ -652,6 +688,7 @@ export class ChangeAction extends BaseRushAction {
 
     if (shouldWrite) {
       this._writeFile(filePath, output, shouldWrite && fileExists);
+      return filePath;
     }
   }
 
@@ -689,5 +726,22 @@ export class ChangeAction extends BaseRushAction {
 
   private _logNoChangeFileRequired(): void {
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
+  }
+
+  private _stageAndCommitGitChanges(pattern: string[], message: string): void {
+    try {
+      Utilities.executeCommand({
+        command: 'git',
+        args: ['add', ...pattern],
+        workingDirectory: this.rushConfiguration.changesFolder
+      });
+      Utilities.executeCommand({
+        command: 'git',
+        args: ['commit', ...pattern, '-m', message],
+        workingDirectory: this.rushConfiguration.changesFolder
+      });
+    } catch (error) {
+      this._terminal.writeErrorLine(`ERROR: Cannot stage and commit git changes ${(error as Error).message}`);
+    }
   }
 }

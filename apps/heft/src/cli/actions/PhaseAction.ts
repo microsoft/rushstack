@@ -34,6 +34,7 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
     this.watch = options.watch ?? false;
     this._phase = options.phase;
     this._actionRunner = new HeftActionRunner({ action: this, ...options });
+    this._actionRunner.defineParameters();
   }
 
   public get selectedPhases(): Set<HeftPhase> {
@@ -44,10 +45,6 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
       );
     }
     return this._selectedPhases;
-  }
-
-  public onDefineParameters(): void {
-    this._actionRunner.defineParameters();
   }
 
   protected async onExecute(): Promise<void> {
