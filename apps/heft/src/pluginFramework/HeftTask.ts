@@ -40,8 +40,8 @@ function _getDeleteFilesPluginDefinition(): HeftTaskPluginDefinition {
     _deleteFilesPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
       heftPluginDefinitionJson: {
         pluginName: 'DeleteFilesPlugin',
-        entryPoint: './lib/plugins/DeleteGlobsPlugin',
-        optionsSchema: './lib/schemas/delete-globs-options.schema.json'
+        entryPoint: './lib/plugins/DeleteFilesPlugin',
+        optionsSchema: './lib/schemas/delete-files-options.schema.json'
       },
       packageRoot: `${__dirname}/../..`,
       packageName: '@rushstack/heft'

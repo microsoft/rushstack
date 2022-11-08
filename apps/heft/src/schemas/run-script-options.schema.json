@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "DeleteGlobs Heft Task Event Options",
-  "description": "Defines configuration used by the \"deleteGlobs\" Heft task event.",
+  "title": "RunScript Heft Task Event Options",
+  "description": "Defines configuration used by the \"runScript\" Heft task event.",
   "type": "object",
 
   "definitions": {

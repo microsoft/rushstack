@@ -42,7 +42,7 @@
         "eventKind": {
           "description": "Name of the event to trigger.",
           "type": "string",
-          "enum": ["copyFiles", "deleteGlobs", "runScript"]
+          "enum": ["copyFiles", "deleteFiles", "runScript"]
         },
         "options": {
           "description": "Options to pass to the event.",
