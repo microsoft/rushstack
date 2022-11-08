@@ -219,6 +219,8 @@ function _resolveCopyOperationPaths(
   }
 }
 
+const PLUGIN_NAME: 'copy-files-plugin' = 'copy-files-plugin';
+
 export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions> {
   public apply(
     taskSession: IHeftTaskSession,
@@ -228,13 +230,13 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
     // TODO: Remove once improved heft-config-file is used to resolve paths
     _resolveCopyOperationPaths(heftConfiguration, pluginOptions.copyOperations);
 
-    taskSession.hooks.run.tapPromise(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await copyFilesAsync(pluginOptions.copyOperations, taskSession.logger);
     });
 
     const impactedFileStates: Map<string, IChangedFileState> = new Map();
     taskSession.hooks.runIncremental.tapPromise(
-      taskSession.taskName,
+      PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
         // TODO: Allow the copy descriptors to be resolved from a static list of files so
         // that we don't have to query the file system for each copy operation

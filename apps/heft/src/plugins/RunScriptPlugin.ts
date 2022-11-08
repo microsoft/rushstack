@@ -34,18 +34,17 @@ export interface IRunScript {
   runAsync: (options: IRunScriptOptions) => Promise<void>;
 }
 
+const PLUGIN_NAME: 'run-script-plugin' = 'run-script-plugin';
+
 export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions> {
   public apply(
     heftTaskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     pluginOptions: IRunScriptPluginOptions
   ): void {
-    heftTaskSession.hooks.run.tapPromise(
-      heftTaskSession.taskName,
-      async (runOptions: IHeftTaskRunHookOptions) => {
-        await this._runScriptAsync(heftTaskSession, heftConfiguration, pluginOptions, runOptions);
-      }
-    );
+    heftTaskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
+      await this._runScriptAsync(heftTaskSession, heftConfiguration, pluginOptions, runOptions);
+    });
   }
 
   private async _runScriptAsync(

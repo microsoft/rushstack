@@ -104,6 +104,8 @@ function _resolveDeleteOperationPaths(
   }
 }
 
+const PLUGIN_NAME: 'delete-files-plugin' = 'delete-files-plugin';
+
 export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOptions> {
   public apply(
     taskSession: IHeftTaskSession,
@@ -113,7 +115,7 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     // TODO: Remove once improved heft-config-file is used
     _resolveDeleteOperationPaths(heftConfiguration, pluginOptions.deleteOperations);
 
-    taskSession.hooks.run.tapPromise(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await deleteFilesAsync(pluginOptions.deleteOperations, taskSession.logger);
     });
   }
