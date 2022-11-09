@@ -6,9 +6,10 @@ import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry'
 import { RootState } from '../index';
 import {
   getBookmarksFromStorage,
+  getFilterFromLocalStorage,
   removeBookmarkFromLocalStorage,
   saveBookmarkToLocalStorage
-} from '../../helpers/bookmarkLocalStorage';
+} from '../../helpers/localStorage';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type EntryState = {

@@ -43,7 +43,15 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           logDiagnosticInfo('No resolved entry for dependency:', dependencyToTrace);
         }
       } else if (selectedEntry) {
+        console.log('dependency to trace: ', dependencyToTrace);
         setInspectDependency(dependencyToTrace);
+
+        // Check if we need to calculate influencers.
+        // If the current dependencyToTrace is a peer dependency then we do
+        if (dependencyToTrace.dependencyType !== IDependencyType.PEER_DEPENDENCY) {
+          return;
+        }
+
         // calculate influencers
         const stack = [selectedEntry];
         const determinants = new Set<LockfileEntry>();
@@ -74,7 +82,9 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                   // field.
                   console.error(
                     'Error analyzing influencers: A referrer appears to be missing its "transitivePeerDependencies" field in the YAML file: ',
-                    referrer
+                    dependencyToTrace,
+                    referrer,
+                    currEntry
                   );
                 }
                 for (const referrer of currEntry.referrers) {
@@ -108,6 +118,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   const selectResolvedReferencer = useCallback(
     (referrer) => () => {
+      console.log('going to entry: ', referrer);
       dispatch(pushToStack(referrer));
     },
     [selectedEntry]
@@ -135,17 +146,29 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
     return (
       <div className={appStyles.ContainerCard}>
-        <h5>Influencers:</h5>
+        <h5>Determinants:</h5>
         {influencers
           .filter((inf) => inf.type === InfluencerTypes.Determinant)
           .map(({ entry }) => (
-            <div key={entry.rawEntryId}>{entry.displayText}</div>
+            <a
+              className={styles.InfluencerEntry}
+              key={entry.rawEntryId}
+              onClick={selectResolvedReferencer(entry)}
+            >
+              {entry.displayText}
+            </a>
           ))}
         <h5>Transitive Referencers:</h5>
         {influencers
           .filter((inf) => inf.type === InfluencerTypes.TransitiveReferrer)
           .map(({ entry }) => (
-            <div key={entry.rawEntryId}>{entry.displayText}</div>
+            <a
+              className={styles.InfluencerEntry}
+              key={entry.rawEntryId}
+              onClick={selectResolvedReferencer(entry)}
+            >
+              {entry.displayText}
+            </a>
           ))}
       </div>
     );
@@ -185,7 +208,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
             {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
               <div
                 className={`${styles.DependencyItem} ${
-                  inspectDependency?.name === dependency.name && styles.SelectedDependencyItem
+                  inspectDependency?.entryId === dependency.entryId && styles.SelectedDependencyItem
                 }`}
                 key={dependency.entryId || dependency.name}
                 onClick={selectResolvedEntry(dependency)}

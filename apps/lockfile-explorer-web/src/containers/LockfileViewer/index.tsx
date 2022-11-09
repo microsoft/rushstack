@@ -15,6 +15,7 @@ import {
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
 import { FilterBar } from '../../components/FilterBar';
+import { getFilterFromLocalStorage, saveFilterToLocalStorage } from '../../helpers/localStorage';
 
 interface ILockfileEntryGroup {
   entryName: string;
@@ -74,7 +75,17 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   const [filter, setFilter] = useState('');
   const entries = useAppSelector(selectFilteredEntries);
   const activeFilters = useAppSelector((state) => state.entry.filters);
-  const updateFilter = useCallback((e) => setFilter(e.target.value), []);
+  const updateFilter = useCallback((e) => {
+    setFilter(e.target.value);
+    saveFilterToLocalStorage(e.target.value);
+  }, []);
+  const pop = useCallback(() => {
+    dispatch(popStack());
+  }, []);
+
+  useEffect(() => {
+    setFilter(getFilterFromLocalStorage());
+  }, []);
 
   // const selectedEntry = useAppSelector(selectCurrentEntry);
   const entryStack = useAppSelector((state) => state.entry.selectedEntryStack);
@@ -82,10 +93,6 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   const dispatch = useAppDispatch();
 
   if (!entries) return ReactNull;
-
-  const pop = useCallback(() => {
-    dispatch(popStack());
-  }, []);
 
   const getEntriesToShow = (): ILockfileEntryGroup[] => {
     let filteredEntries: LockfileEntry[] = [];

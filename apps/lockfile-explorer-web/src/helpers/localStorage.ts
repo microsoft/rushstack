@@ -24,3 +24,12 @@ export const removeBookmarkFromLocalStorage = (entry: LockfileEntry): void => {
   delete currBookmarks[key];
   localStorage.setItem(BOOKMARK_KEY, JSON.stringify(currBookmarks));
 };
+
+const FILTER_KEY = 'LOCKFILE_EXPLORER_FILTER';
+export const saveFilterToLocalStorage = (filter: string): void => {
+  localStorage.setItem(FILTER_KEY, filter);
+};
+
+export const getFilterFromLocalStorage = (): string => {
+  return localStorage.getItem(FILTER_KEY) || '';
+};

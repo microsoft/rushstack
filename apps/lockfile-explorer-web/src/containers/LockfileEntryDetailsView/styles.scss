@@ -35,3 +35,11 @@
 .SelectedDependencyItem {
   background-color: #dff6dd;
 }
+
+.InfluencerEntry {
+  cursor: pointer;
+  &:hover {
+    color: #107c10;
+    text-decoration: underline;
+  }
+}
