@@ -128,7 +128,7 @@ export const PackageJsonViewer = (): JSX.Element => {
   };
 
   return (
-    <div>
+    <div className={styles.PackageJsonWrapper}>
       <FilterBar
         options={[
           {

@@ -31,24 +31,22 @@ export const App = (): JSX.Element => {
 
   return (
     <div className={styles.AppContainer}>
-      <div className={styles.AppGrid}>
-        <div className="ms-Grid" dir="ltr">
-          <div className="ms-Grid-row">
-            <div className="ms-Grid-col ms-sm3">
-              <LockfileViewer />
-            </div>
-            <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
-              <SelectedEntryPreview />
-              <PackageJsonViewer />
-              <LockfileEntryDetailsView />
-            </div>
-            <div className="ms-Grid-col ms-sm2">
-              <BookmarksSidebar />
-            </div>
+      <div className="ms-Grid" dir="ltr">
+        <div className="ms-Grid-row">
+          <div className={`ms-Grid-col ms-sm3 ${styles.BodyContainer}`}>
+            <LogoPanel />
+            <LockfileViewer />
+          </div>
+          <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
+            <SelectedEntryPreview />
+            <PackageJsonViewer />
+            <LockfileEntryDetailsView />
+          </div>
+          <div className={`ms-Grid-col ms-sm2 ${styles.BodyContainer}`}>
+            <BookmarksSidebar />
           </div>
         </div>
       </div>
-      <LogoPanel />
     </div>
   );
 };

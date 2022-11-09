@@ -36,7 +36,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   const selectResolvedEntry = useCallback(
     (dependencyToTrace) => () => {
-      if (inspectDependency && inspectDependency.name === dependencyToTrace.name) {
+      if (inspectDependency && inspectDependency.entryId === dependencyToTrace.entryId) {
         if (dependencyToTrace.resolvedEntry) {
           dispatch(pushToStack(dependencyToTrace.resolvedEntry));
         } else {
@@ -131,21 +131,21 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     );
     if (!peerDeps.length) {
       return (
-        <div className={appStyles.ContainerCard}>
+        <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
           <h5>No peer dependencies.</h5>
         </div>
       );
     }
     if (!inspectDependency || inspectDependency.dependencyType !== IDependencyType.PEER_DEPENDENCY) {
       return (
-        <div>
+        <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
           <h5>Select a peer dependency to view its influencers</h5>
         </div>
       );
     }
 
     return (
-      <div className={appStyles.ContainerCard}>
+      <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
         <h5>Determinants:</h5>
         {influencers
           .filter((inf) => inf.type === InfluencerTypes.Determinant)
@@ -176,7 +176,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   if (!selectedEntry) {
     return (
-      <div className={appStyles.ContainerCard}>
+      <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
         <h5>Select an entry to view its details</h5>
       </div>
     );

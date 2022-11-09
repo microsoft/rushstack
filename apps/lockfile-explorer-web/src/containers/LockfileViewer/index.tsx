@@ -147,7 +147,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   );
 
   return (
-    <>
+    <div className={styles.ViewWrapper}>
       <FilterBar
         options={[
           {
@@ -162,7 +162,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
           }
         ]}
       />
-      <div className={`${appStyles.ContainerCard} ${styles.ViewWrapper}`}>
+      <div className={`${styles.ViewContents} ${appStyles.ContainerCard}`}>
         <div className={styles.LockfileFilterBar}>
           {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
           <h5>filter:</h5>
@@ -193,6 +193,6 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };

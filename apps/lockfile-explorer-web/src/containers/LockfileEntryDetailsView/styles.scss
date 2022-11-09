@@ -3,6 +3,7 @@
 .LockfileEntryListView {
   display: flex;
   justify-content: space-between;
+  height: 30%;
   & > * {
     width: calc(50% - 48px - 12px);
   }
@@ -36,7 +37,14 @@
   background-color: #dff6dd;
 }
 
+.InfluencerList {
+  margin-top: 12px;
+  height: 10%;
+  overflow: scroll;
+}
+
 .InfluencerEntry {
+  display: block;
   cursor: pointer;
   &:hover {
     color: #107c10;

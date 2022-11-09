@@ -1,5 +1,13 @@
 .ViewWrapper {
-  height: calc(95vh - 96px);
+  // Logo is 70px tall
+  height: calc(100% - 70px);
+  padding-top: 12px;
+}
+
+.ViewContents {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100% - 70px - 35px);
 }
 
 .LockfileEntryListViewWrapper {
@@ -44,8 +52,8 @@
 }
 
 .lockfileEntriesWrapper {
-  height: calc(95vh - 220px);
   overflow: scroll;
+  flex: 1;
   & > * + * {
     margin-top: 12px;
   }

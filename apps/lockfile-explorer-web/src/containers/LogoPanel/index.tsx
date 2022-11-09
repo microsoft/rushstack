@@ -15,14 +15,15 @@ export const LogoPanel = (): JSX.Element => {
         <div className={styles.Icon}>
           <img className={styles.Image} src={require('./lockfile-explorer-icon.svg')} />
         </div>
-        <div className={styles.Title1}>
-          <img className={styles.Image} src={require('./lockfile-explorer-title-1.svg')} />
+        <div>
+          <div className={styles.Title1}>
+            <img className={styles.Image} src={require('./lockfile-explorer-title-1.svg')} />
+          </div>
+          <div className={styles.Title2}>
+            <img className={styles.Image} src={require('./lockfile-explorer-title-2.svg')} />
+          </div>
+          <div className={styles.Detail}>{appPackageVersion}&nbsp;rushstack.io</div>
         </div>
-        <div className={styles.Title2}>
-          <img className={styles.Image} src={require('./lockfile-explorer-title-2.svg')} />
-        </div>
-        <div className={styles.Detail}>{appPackageVersion}</div>
-        <div className={styles.Detail}>rushstack.io</div>
       </a>
     </div>
   );

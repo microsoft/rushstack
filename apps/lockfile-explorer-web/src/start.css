@@ -8,6 +8,7 @@ body {
   height: 100%;
   background-color: #f3f2f1;
   font-family: Tahoma, sans-serif;
+  box-sizing: border-box;
 }
 
 h5,

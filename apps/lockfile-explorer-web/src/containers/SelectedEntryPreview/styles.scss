@@ -1,11 +1,11 @@
 @import 'office-ui-fabric-core/dist/sass/References';
 
 .SelectedEntryCard {
+  margin-top: 12px;
   box-shadow: $ms-depth-shadow-8;
   background-color: $ms-color-gray10;
   padding: 24px;
-  width: calc(100% - 48px);
-  height: calc(13vh - 48px);
+  height: 10%;
   p {
     font-size: 12px;
   }
