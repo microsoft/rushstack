@@ -4,6 +4,11 @@
 import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
 import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { RootState } from '../index';
+import {
+  getBookmarksFromStorage,
+  removeBookmarkFromLocalStorage,
+  saveBookmarkToLocalStorage
+} from '../../helpers/bookmarkLocalStorage';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type EntryState = {
@@ -34,6 +39,13 @@ const entrySlice = createSlice({
   reducers: {
     loadEntries: (state, payload: PayloadAction<LockfileEntry[]>) => {
       state.allEntries = payload.payload;
+      // Hydrate the bookmarks state
+      const bookmarkSet = getBookmarksFromStorage();
+      for (const entry of payload.payload) {
+        if (bookmarkSet.has(entry.rawEntryId)) {
+          state.bookmarkedEntries.push(entry);
+        }
+      }
     },
     setFilter: (state, payload: PayloadAction<{ filter: LockfileEntryFilter; state: boolean }>) => {
       state.filters[payload.payload.filter] = payload.payload.state;
@@ -52,12 +64,14 @@ const entrySlice = createSlice({
     addBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
       if (!state.bookmarkedEntries.includes(payload.payload)) {
         state.bookmarkedEntries.push(payload.payload);
+        saveBookmarkToLocalStorage(payload.payload);
       }
     },
     removeBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
       state.bookmarkedEntries = state.bookmarkedEntries.filter(
         (entry: LockfileEntry) => entry.rawEntryId !== payload.payload.rawEntryId
       );
+      removeBookmarkFromLocalStorage(payload.payload);
     }
   }
 });
