@@ -42,7 +42,7 @@
         "eventKind": {
           "description": "Name of the event to trigger.",
           "type": "string",
-          "enum": ["copyFiles", "deleteFiles", "runScript"]
+          "enum": ["copyFiles", "deleteFiles", "runScript", "nodeService"]
         },
         "options": {
           "description": "Options to pass to the event.",

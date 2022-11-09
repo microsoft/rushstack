@@ -488,6 +488,7 @@ export class HeftActionRunner {
           // the existence of files in the changedFiles map.
           staticFileSystemAdapter.removeAllFiles();
           this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+          this._terminal.writeLine('');
           await sourceChangesPromise;
         }
       } catch (e) {
@@ -496,6 +497,7 @@ export class HeftActionRunner {
         // encountering an error.
         if (e instanceof AlreadyReportedError) {
           this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+          this._terminal.writeLine('');
           await sourceChangesPromise;
         } else {
           // We don't know where this error is coming from, throw

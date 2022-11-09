@@ -21,6 +21,17 @@
           }
         }
       }
+    },
+
+    "serve": {
+      "phaseDependencies": ["build"],
+      "tasksByName": {
+        "fastify": {
+          "taskEvent": {
+            "eventKind": "nodeService"
+          }
+        }
+      }
     }
   }
 }

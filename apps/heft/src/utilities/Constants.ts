@@ -8,6 +8,10 @@ export class Constants {
 
   public static tempFolderName: string = 'temp';
 
+  public static heftConfigurationFilename: string = 'heft.json';
+
+  public static nodeServiceConfigurationFilename: string = 'node-service.json';
+
   public static cleanParameterLongName: string = '--clean';
 
   public static cleanCacheParameterLongName: string = '--clean-cache';

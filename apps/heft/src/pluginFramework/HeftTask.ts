@@ -66,6 +66,21 @@ function _getRunScriptPluginDefinition(): HeftTaskPluginDefinition {
   return _runScriptPluginDefinition;
 }
 
+let _nodeServicePluginDefinition: HeftTaskPluginDefinition | undefined;
+function _getNodeServicePluginDefinition(): HeftTaskPluginDefinition {
+  if (!_nodeServicePluginDefinition) {
+    _nodeServicePluginDefinition = HeftTaskPluginDefinition.loadFromObject({
+      heftPluginDefinitionJson: {
+        pluginName: 'node-service-plugin',
+        entryPoint: './lib/plugins/NodeServicePlugin'
+      },
+      packageRoot: `${__dirname}/../..`,
+      packageName: '@rushstack/heft'
+    });
+  }
+  return _nodeServicePluginDefinition;
+}
+
 /**
  * @internal
  */
@@ -187,6 +202,9 @@ export class HeftTask {
         }
         case 'runScript': {
           return _getRunScriptPluginDefinition();
+        }
+        case 'nodeService': {
+          return _getNodeServicePluginDefinition();
         }
         default: {
           throw new InternalError(

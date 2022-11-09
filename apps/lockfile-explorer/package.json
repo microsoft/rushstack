@@ -28,7 +28,7 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start --clean",
+    "start": "heft serve-watch",
     "serve": "node ./lib/start.js --debug",
     "test": "heft test",
     "_phase:build": "heft build --clean",

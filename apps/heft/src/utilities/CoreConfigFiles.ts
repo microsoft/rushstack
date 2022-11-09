@@ -7,8 +7,10 @@ import { Import, ITerminal } from '@rushstack/node-core-library';
 import type { RigConfig } from '@rushstack/rig-package';
 
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
+import type { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
+import { Constants } from './Constants';
 
-export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript';
+export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript' | 'nodeService';
 
 export interface IHeftConfigurationJsonEventSpecifier {
   eventKind: HeftEventKind;
@@ -50,6 +52,9 @@ export interface IHeftConfigurationJson {
 
 export class CoreConfigFiles {
   private static _heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> | undefined;
+  private static _nodeServiceConfigurationLoader:
+    | ConfigurationFile<INodeServicePluginConfiguration>
+    | undefined;
 
   /**
    * Returns the loader for the `config/heft.json` config file.
@@ -74,7 +79,7 @@ export class CoreConfigFiles {
 
       const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
       CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
-        projectRelativeFilePath: 'config/heft.json',
+        projectRelativeFilePath: `${Constants.projectConfigFolderName}/${Constants.heftConfigurationFilename}`,
         jsonSchemaPath: schemaPath,
         propertyInheritanceDefaults: {
           array: { inheritanceType: InheritanceType.append },
@@ -133,5 +138,17 @@ export class CoreConfigFiles {
     }
 
     return configurationFile;
+  }
+
+  public static get nodeServiceConfigurationFile(): ConfigurationFile<INodeServicePluginConfiguration> {
+    if (!CoreConfigFiles._nodeServiceConfigurationLoader) {
+      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'node-service.schema.json');
+      CoreConfigFiles._nodeServiceConfigurationLoader =
+        new ConfigurationFile<INodeServicePluginConfiguration>({
+          projectRelativeFilePath: `${Constants.projectConfigFolderName}/${Constants.nodeServiceConfigurationFilename}`,
+          jsonSchemaPath: schemaPath
+        });
+    }
+    return CoreConfigFiles._nodeServiceConfigurationLoader;
   }
 }
