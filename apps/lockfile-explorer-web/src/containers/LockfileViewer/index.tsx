@@ -9,6 +9,7 @@ import { ReactNull } from '../../types/ReactNull';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   clearStackAndPush,
+  forwardStack,
   popStack,
   selectCurrentEntry,
   selectFilteredEntries,
@@ -82,13 +83,17 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   const pop = useCallback(() => {
     dispatch(popStack());
   }, []);
+  const forward = useCallback(() => {
+    dispatch(forwardStack());
+  }, []);
 
   useEffect(() => {
     setFilter(getFilterFromLocalStorage());
   }, []);
 
-  // const selectedEntry = useAppSelector(selectCurrentEntry);
   const entryStack = useAppSelector((state) => state.entry.selectedEntryStack);
+  const entryForwardStack = useAppSelector((state) => state.entry.selectedEntryForwardStack);
+  console.log('entry forward stack: ', entryForwardStack);
 
   const dispatch = useAppDispatch();
 
@@ -164,9 +169,14 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       />
       <div className={`${styles.ViewContents} ${appStyles.ContainerCard}`}>
         <div className={styles.LockfileFilterBar}>
-          {entryStack.length > 1 ? <button onClick={pop}>back</button> : null}
-          <h5>filter:</h5>
+          <h5>Filter:</h5>
           <input type="text" value={filter} onChange={updateFilter} />
+          <button disabled={entryStack.length > 1} onClick={pop}>
+            Back
+          </button>
+          <button disabled={entryForwardStack.length > 0} onClick={forward}>
+            Forward
+          </button>
         </div>
         <div className={styles.lockfileEntriesWrapper}>
           {getEntriesToShow().map((lockfileEntryGroup) => (

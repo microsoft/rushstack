@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
+import { createSlice, current, PayloadAction, Reducer } from '@reduxjs/toolkit';
 import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { RootState } from '../index';
 import {
   getBookmarksFromStorage,
-  getFilterFromLocalStorage,
   removeBookmarkFromLocalStorage,
   saveBookmarkToLocalStorage
 } from '../../helpers/localStorage';
@@ -18,6 +17,7 @@ type EntryState = {
     [key in LockfileEntryFilter]: boolean;
   };
   selectedEntryStack: LockfileEntry[];
+  selectedEntryForwardStack: LockfileEntry[];
   bookmarkedEntries: LockfileEntry[];
 };
 
@@ -30,6 +30,7 @@ const initialState: EntryState = {
     [LockfileEntryFilter.Doppelganger]: false
   },
   selectedEntryStack: [],
+  selectedEntryForwardStack: [],
   bookmarkedEntries: []
 };
 
@@ -53,13 +54,21 @@ const entrySlice = createSlice({
     },
     clearStackAndPush: (state, payload: PayloadAction<LockfileEntry>) => {
       state.selectedEntryStack = [payload.payload];
+      state.selectedEntryForwardStack = [];
     },
     pushToStack: (state, payload: PayloadAction<LockfileEntry>) => {
       state.selectedEntryStack.push(payload.payload);
     },
     popStack: (state) => {
       if (state.selectedEntryStack.length > 1) {
-        state.selectedEntryStack.pop();
+        const poppedEntry = state.selectedEntryStack.pop() as LockfileEntry;
+        state.selectedEntryForwardStack.push(poppedEntry);
+      }
+    },
+    forwardStack: (state) => {
+      if (state.selectedEntryForwardStack.length > 0) {
+        const poppedEntry = state.selectedEntryForwardStack.pop() as LockfileEntry;
+        state.selectedEntryStack.push(poppedEntry);
       }
     },
     addBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
@@ -105,6 +114,7 @@ export const {
   clearStackAndPush,
   pushToStack,
   popStack,
+  forwardStack,
   addBookmark,
   removeBookmark
 } = entrySlice.actions;

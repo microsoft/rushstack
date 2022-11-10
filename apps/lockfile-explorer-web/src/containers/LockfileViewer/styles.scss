@@ -1,6 +1,6 @@
 .ViewWrapper {
   // Logo is 70px tall
-  height: calc(100% - 70px);
+  height: calc(100% - 82px);
   padding-top: 12px;
 }
 
@@ -24,6 +24,10 @@
   display: flex;
   align-items: center;
   margin-bottom: 12px;
+
+  input {
+    width: 100%;
+  }
 
   & > * + * {
     margin-left: 12px;
