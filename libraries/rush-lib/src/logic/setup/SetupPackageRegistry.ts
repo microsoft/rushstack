@@ -326,6 +326,15 @@ export class SetupPackageRegistry {
     }
     responseLines.shift(); // Remove the @.npm line
 
+    // If we are configured to use authToken for authentication, we still go through the above process
+    // (both to ensure the user's credentials are valid, and to let Artifactory format the standard
+    // npmrc boilerplate for us), but we'll discard the generated password and use the authToken instead.
+    if (packageRegistry.credentialType === 'authToken') {
+      for (let i: number = 0; i < responseLines.length; i++) {
+        responseLines[i] = responseLines[i].replace(/_password=.+/, '_authToken=' + artifactoryKey);
+      }
+    }
+
     // These are the lines to be injected in ~/.npmrc
     const linesToAdd: string[] = [];
 
