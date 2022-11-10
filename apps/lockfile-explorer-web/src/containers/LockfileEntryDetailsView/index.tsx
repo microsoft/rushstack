@@ -10,6 +10,7 @@ import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
 import { LockfileEntry } from '../../parsing/LockfileEntry';
 import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
+import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 
 enum InfluencerTypes {
   Determinant,
@@ -23,6 +24,7 @@ interface IInfluencerType {
 
 export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
+  const specChanges = useAppSelector((state) => state.workspace.specChanges);
   const dispatch = useAppDispatch();
 
   const [inspectDependency, setInspectDependency] = useState<LockfileDependency | null>(null);
@@ -128,16 +130,33 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     if (!inspectDependency) {
       return ReactNull;
     }
+    console.log('inspect dependency: ', inspectDependency, specChanges.get(inspectDependency.name));
     return (
-      <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
+      <div className={`${appStyles.ContainerCard} ${styles.DependencyDetails}`}>
         <div className={styles.DependencyDetailInfo}>
           <h5>Selected&nbsp;Dependency: </h5>
           <span>
             {inspectDependency.name}: {inspectDependency.version}
           </span>
         </div>
-        <h5>package.json spec: </h5>
-        <h5>.pnpmfile.cjs: </h5>
+        <div className={styles.DependencyDetailInfo}>
+          <h5>package.json spec: </h5>
+          <span>
+            {inspectDependency.dependencyType === IDependencyType.PEER_DEPENDENCY
+              ? `"${inspectDependency.peerDependencyMeta.version}" ${
+                  inspectDependency.peerDependencyMeta.optional ? 'Optional' : 'Required'
+                } Peer`
+              : inspectDependency.version}
+          </span>
+        </div>
+        <div className={styles.DependencyDetailInfo}>
+          <h5>.pnpmfile.cjs: </h5>
+          <span>
+            {specChanges.has(inspectDependency.name)
+              ? displaySpecChanges(specChanges, inspectDependency.name)
+              : 'No Effect'}
+          </span>
+        </div>
       </div>
     );
   };

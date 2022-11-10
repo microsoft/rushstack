@@ -11,6 +11,7 @@ import { IPackageJson } from '../../types/IPackageJson';
 import { compareSpec, ISpecChange } from '../../parsing/compareSpec';
 import { FilterBar } from '../../components/FilterBar';
 import { loadSpecChanges } from '../../store/slices/workspaceSlice';
+import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -67,7 +68,7 @@ export const PackageJsonViewer = (): JSX.Element => {
               <span className={styles.AddedSpec}>
                 {dep}: {version}
               </span>{' '}
-              [Added by .pnpmfile.cjs]
+              {displaySpecChanges(specChanges, dep)}
             </p>
           );
         case 'diff':
@@ -76,7 +77,7 @@ export const PackageJsonViewer = (): JSX.Element => {
               <span className={styles.ChangedSpec}>
                 {dep}: {version}
               </span>{' '}
-              [Changed from {specChanges.get(dep)?.from}]
+              {displaySpecChanges(specChanges, dep)}
             </p>
           );
         case 'remove':
@@ -85,7 +86,7 @@ export const PackageJsonViewer = (): JSX.Element => {
               <span className={styles.DeletedSpec}>
                 {dep}: {version}
               </span>{' '}
-              [Deleted by .pnpmfile.cjs]
+              {displaySpecChanges(specChanges, dep)}
             </p>
           );
         default:

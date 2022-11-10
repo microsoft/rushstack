@@ -73,6 +73,7 @@ const multipleVersions = (entries: LockfileEntry[]): boolean => {
 };
 
 export const LockfileViewer = (): JSX.Element | ReactNull => {
+  const dispatch = useAppDispatch();
   const [filter, setFilter] = useState('');
   const entries = useAppSelector(selectFilteredEntries);
   const activeFilters = useAppSelector((state) => state.entry.filters);
@@ -93,9 +94,6 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
 
   const entryStack = useAppSelector((state) => state.entry.selectedEntryStack);
   const entryForwardStack = useAppSelector((state) => state.entry.selectedEntryForwardStack);
-  console.log('entry forward stack: ', entryForwardStack);
-
-  const dispatch = useAppDispatch();
 
   if (!entries) return ReactNull;
 
