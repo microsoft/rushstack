@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "support more parameterKind in rush plugin",
+      "comment": "Add support for integer, integer list, string list, and choice list parameters in plugins.",
       "type": "none"
     }
   ],
