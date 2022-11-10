@@ -124,6 +124,24 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     [selectedEntry]
   );
 
+  const renderDependencyMetadata = (): JSX.Element | ReactNull => {
+    if (!inspectDependency) {
+      return ReactNull;
+    }
+    return (
+      <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
+        <div className={styles.DependencyDetailInfo}>
+          <h5>Selected&nbsp;Dependency: </h5>
+          <span>
+            {inspectDependency.name}: {inspectDependency.version}
+          </span>
+        </div>
+        <h5>package.json spec: </h5>
+        <h5>.pnpmfile.cjs: </h5>
+      </div>
+    );
+  };
+
   const renderPeerDependencies = (): JSX.Element | ReactNull => {
     if (!selectedEntry) return ReactNull;
     const peerDeps = selectedEntry.dependencies.filter(
@@ -230,6 +248,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           </div>
         </div>
       </div>
+      {renderDependencyMetadata()}
       {renderPeerDependencies()}
     </>
   );

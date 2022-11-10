@@ -4,6 +4,7 @@
   display: flex;
   justify-content: space-between;
   height: 30%;
+  padding-top: 12px;
   & > * {
     width: calc(50% - 48px - 12px);
   }
@@ -49,5 +50,14 @@
   &:hover {
     color: #107c10;
     text-decoration: underline;
+  }
+}
+
+.DependencyDetailInfo {
+  display: flex;
+  align-items: center;
+  span {
+    font-size: 12px;
+    margin-left: 4px;
   }
 }

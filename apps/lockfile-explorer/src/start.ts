@@ -56,7 +56,8 @@ app.post(
     const fileLocation = path.resolve(appState.projectRoot, projectPath, 'package.json');
     if (!fs.existsSync(fileLocation)) {
       return res.status(400).send({
-        message: `Could not load package.json file in location: ${projectPath}`
+        message: `Could not load package.json file for this package. Have you installed all the dependencies for this workspace?`,
+        error: `No package.json in location: ${projectPath}`
       });
     }
     const packageJson = fs.readFileSync(fileLocation);
