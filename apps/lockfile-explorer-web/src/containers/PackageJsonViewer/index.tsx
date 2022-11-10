@@ -5,24 +5,27 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { readPnpmfile, readPackageSpec, readPackageJson } from '../../parsing/getPackageFiles';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
 import { IPackageJson } from '../../types/IPackageJson';
 import { compareSpec, ISpecChange } from '../../parsing/compareSpec';
 import { FilterBar } from '../../components/FilterBar';
+import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 
 enum PackageView {
   PACKAGE_JSON,
-  CJS,
+  PACKAGE_SPEC,
   PARSED_PACKAGE_JSON
 }
 
 export const PackageJsonViewer = (): JSX.Element => {
+  const dispatch = useAppDispatch();
   const [packageJSON, setPackageJSON] = useState<IPackageJson | undefined>(undefined);
   const [parsedPackageJSON, setParsedPackageJSON] = useState<IPackageJson | undefined>(undefined);
-  const [specChanges, setSpecChanges] = useState<Map<string, ISpecChange>>(new Map());
-  const [cjs, setCjs] = useState('');
+  const [pnpmfile, setPnpmfile] = useState('');
   const selectedEntry = useAppSelector(selectCurrentEntry);
+
+  const specChanges = useAppSelector((state) => state.workspace.specChanges);
 
   const [selection, setSelection] = useState<PackageView>(PackageView.PARSED_PACKAGE_JSON);
 
@@ -30,8 +33,8 @@ export const PackageJsonViewer = (): JSX.Element => {
 
   useEffect(() => {
     async function loadPackageDetails(packageName: string): Promise<void> {
-      const cjsFile = await readPnpmfile();
-      setCjs(cjsFile);
+      const pnpmfile = await readPnpmfile();
+      setPnpmfile(pnpmfile);
       const packageJSONFile = await readPackageJson(packageName);
       setPackageJSON(packageJSONFile);
       const parsedJSON = await readPackageSpec(packageName);
@@ -39,7 +42,7 @@ export const PackageJsonViewer = (): JSX.Element => {
 
       if (packageJSONFile && parsedJSON) {
         const diffDeps = compareSpec(packageJSONFile, parsedJSON);
-        setSpecChanges(diffDeps);
+        dispatch(loadSpecChanges(diffDeps));
       }
     }
     if (selectedEntry) {
@@ -106,12 +109,20 @@ export const PackageJsonViewer = (): JSX.Element => {
       case PackageView.PACKAGE_JSON:
         if (!packageJSON) return null;
         return <pre>{JSON.stringify(packageJSON, null, 2)}</pre>;
-      case PackageView.CJS:
-        return <pre>{cjs}</pre>;
+      case PackageView.PACKAGE_SPEC:
+        return <pre>{pnpmfile}</pre>;
       case PackageView.PARSED_PACKAGE_JSON:
         if (!parsedPackageJSON) return null;
         return (
           <div className={styles.PackageSpecWrapper}>
+            <div className={styles.PackageSpecEntry}>
+              <h5>Package Name:</h5>
+              <p>{selectedEntry?.displayText}</p>
+            </div>
+            <div className={styles.PackageSpecEntry}>
+              <h5>Version:</h5>
+              <p>{selectedEntry?.entryPackageVersion}</p>
+            </div>
             <h5>Dependencies</h5>
             {parsedPackageJSON.dependencies && Object.entries(parsedPackageJSON.dependencies).map(renderDep)}
             <h5>Dev Dependencies</h5>
@@ -141,7 +152,11 @@ export const PackageJsonViewer = (): JSX.Element => {
             active: selection === PackageView.PACKAGE_JSON,
             onClick: cb(PackageView.PACKAGE_JSON)
           },
-          { text: '.pnpmfile.cjs', active: selection === PackageView.CJS, onClick: cb(PackageView.CJS) }
+          {
+            text: '.pnpmfile.cjs',
+            active: selection === PackageView.PACKAGE_SPEC,
+            onClick: cb(PackageView.PACKAGE_SPEC)
+          }
         ]}
       />
       <div className={appStyles.ContainerCard}>

@@ -37,3 +37,12 @@
     margin-top: 8px;
   }
 }
+
+.PackageSpecEntry {
+  & > * {
+    display: inline;
+  }
+  & > * + * {
+    margin-left: 12px;
+  }
+}
