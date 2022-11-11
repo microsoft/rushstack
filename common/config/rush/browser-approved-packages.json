@@ -43,6 +43,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "rxjs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests" ]
     }

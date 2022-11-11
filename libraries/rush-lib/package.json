@@ -51,6 +51,7 @@
     "npm-packlist": "~2.1.2",
     "read-package-tree": "~5.1.5",
     "resolve": "~1.17.0",
+    "rxjs": "~6.6.7",
     "semver": "~7.3.0",
     "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
