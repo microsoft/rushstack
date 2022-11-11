@@ -15,9 +15,11 @@ import type {
   IHeftTaskPlugin,
   IHeftTaskSession,
   IHeftTaskRunHookOptions,
+  IHeftTaskRunIncrementalHookOptions,
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineStringListParameter
 } from '@rushstack/heft';
 import {
   ConfigurationFile,
@@ -60,7 +62,7 @@ export interface IJestPluginOptions {
   disableCodeCoverage?: boolean;
   disableConfigurationModuleResolution?: boolean;
   extensionForTests?: '.js' | '.cjs' | '.mjs';
-  findRelatedTests?: string;
+  findRelatedTests?: string[];
   folderNameForTests?: string;
   maxWorkers?: string;
   passWithNoTests?: boolean;
@@ -118,36 +120,60 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     // Strings
     const configParameter: CommandLineStringParameter = parameters.getStringParameter('--config');
     const maxWorkersParameter: CommandLineStringParameter = parameters.getStringParameter('--max-workers');
-    const findRelatedTestsParameter: CommandLineStringParameter =
-      parameters.getStringParameter('--find-related-tests');
     const testNamePatternParameter: CommandLineStringParameter =
       parameters.getStringParameter('--test-name-pattern');
     const testPathPatternParameter: CommandLineStringParameter =
       parameters.getStringParameter('--test-path-pattern');
 
+    // String lists
+    const findRelatedTestsParameter: CommandLineStringListParameter =
+      parameters.getStringListParameter('--find-related-tests');
+
     // Integers
     const testTimeoutParameter: CommandLineIntegerParameter =
       parameters.getIntegerParameter('--test-timeout-ms');
 
+    const combinedOptions: IJestPluginOptions = {
+      ...pluginOptions,
+      configurationPath: configParameter.value || pluginOptions?.configurationPath,
+      debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
+      detectOpenHandles: detectOpenHandlesParameter.value || pluginOptions?.detectOpenHandles,
+      disableCodeCoverage: disableCodeCoverageParameter.value || pluginOptions?.disableCodeCoverage,
+      findRelatedTests: findRelatedTestsParameter.values
+        ? Array.from(findRelatedTestsParameter.values)
+        : pluginOptions?.findRelatedTests,
+      // Setting maxWorkers to 1 will ensure that Jest runs tests in-band. Running in-band can be more
+      // efficent than using multiple Jest worker processes due to overhead
+      maxWorkers: maxWorkersParameter.value || pluginOptions?.maxWorkers || '1',
+      // Default to true and always pass with no tests
+      passWithNoTests: true,
+      silent: silentParameter.value || pluginOptions?.silent,
+      testNamePattern: testNamePatternParameter.value || pluginOptions?.testNamePattern,
+      testPathPattern: testPathPatternParameter.value || pluginOptions?.testPathPattern,
+      testTimeout: testTimeoutParameter.value ?? pluginOptions?.testTimeout,
+      updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots
+    };
+
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      const combinedOptions: IJestPluginOptions = {
-        ...pluginOptions,
-        configurationPath: configParameter.value || pluginOptions?.configurationPath,
-        debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
-        detectOpenHandles: detectOpenHandlesParameter.value || pluginOptions?.detectOpenHandles,
-        disableCodeCoverage: disableCodeCoverageParameter.value || pluginOptions?.disableCodeCoverage,
-        findRelatedTests: findRelatedTestsParameter.value || pluginOptions?.findRelatedTests,
-        maxWorkers: maxWorkersParameter.value || pluginOptions?.maxWorkers,
-        // Default to true and always pass with no tests
-        passWithNoTests: true,
-        silent: silentParameter.value || pluginOptions?.silent,
-        testNamePattern: testNamePatternParameter.value || pluginOptions?.testNamePattern,
-        testPathPattern: testPathPatternParameter.value || pluginOptions?.testPathPattern,
-        testTimeout: testTimeoutParameter.value ?? pluginOptions?.testTimeout,
-        updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots
-      };
       await this._runJestAsync(taskSession, heftConfiguration, combinedOptions);
     });
+
+    taskSession.hooks.runIncremental.tapPromise(
+      PLUGIN_NAME,
+      async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
+        // Jest's watch mode runs in a blocking manner and does not return control to the caller
+        // after invoking. Instead, we will run all the tests relating to changed files that we have
+        // already detected.
+        if (findRelatedTestsParameter.values.length) {
+          // We use the findRelatedTests option to select which tests to run in watch mode, so it can't
+          // also be provided via CLI
+          throw new Error('The --find-related-tests parameter cannot be used in watch mode.');
+        } else {
+          combinedOptions.findRelatedTests = Array.from(runIncrementalOptions.changedFiles.keys());
+        }
+        await this._runJestAsync(taskSession, heftConfiguration, combinedOptions);
+      }
+    );
   }
 
   /**
@@ -194,9 +220,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         options?.extensionForTests || typeScriptConfigurationJson?.emitCjsExtensionForCommonJS
           ? '.cjs'
           : '.js',
-      isTypeScriptProject: !!partialTsconfigFile,
-      // TODO: Handle for watch mode
-      skipTimestampCheck: true
+      isTypeScriptProject: !!partialTsconfigFile
     });
     terminal.writeVerboseLine(`Wrote ${HEFT_JEST_DATA_FILENAME} file`);
   }
@@ -207,7 +231,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private async _runJestAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options?: IJestPluginOptions
+    options: IJestPluginOptions
   ): Promise<void> {
     const logger: IScopedLogger = taskSession.logger;
     const terminal: ITerminal = logger.terminal;
@@ -255,34 +279,31 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     }
 
     const jestArgv: Config.Argv = {
-      // TODO: Watch mode
-      // watch: testStageProperties.watchMode,
-
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: taskSession.parameters.debug,
       debug: taskSession.parameters.debug,
-      detectOpenHandles: options?.detectOpenHandles || false,
+      detectOpenHandles: options.detectOpenHandles || false,
 
       // Use the temp folder. Cache is unreliable, so we want it cleared on every --clean run
       cacheDirectory: taskSession.tempFolderPath,
-      updateSnapshot: options?.updateSnapshots,
+      updateSnapshot: options.updateSnapshots,
 
       listTests: false,
       rootDir: buildFolderPath,
 
-      silent: options?.silent || false,
-      testNamePattern: options?.testNamePattern,
-      testPathPattern: options?.testPathPattern ? [...options.testPathPattern] : undefined,
-      testTimeout: options?.testTimeout,
-      maxWorkers: options?.maxWorkers,
+      silent: options.silent || false,
+      testNamePattern: options.testNamePattern,
+      testPathPattern: options.testPathPattern ? [...options.testPathPattern] : undefined,
+      testTimeout: options.testTimeout,
+      maxWorkers: options.maxWorkers,
 
-      passWithNoTests: options?.passWithNoTests,
+      passWithNoTests: options.passWithNoTests,
 
       $0: process.argv0,
       _: []
     };
 
-    if (!options?.debugHeftReporter) {
+    if (!options.debugHeftReporter) {
       // Extract the reporters and transform to include the Heft reporter by default
       jestArgv.reporters = JestPlugin._extractHeftJestReporters(
         taskSession,
@@ -296,13 +317,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       );
     }
 
-    if (options?.findRelatedTests?.length) {
+    if (options.findRelatedTests?.length) {
       // Pass test names as the command line remainder
       jestArgv.findRelatedTests = true;
       jestArgv._ = [...options.findRelatedTests];
     }
 
-    if (options?.disableCodeCoverage) {
+    if (options.disableCodeCoverage) {
       jestConfig.collectCoverage = false;
     }
 

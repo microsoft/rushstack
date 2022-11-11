@@ -21,14 +21,6 @@ export interface IHeftJestDataFileJson {
   extensionForTests: '.js' | '.cjs' | '.mjs';
 
   /**
-   * Normally the jest-build-transform compares the timestamps of the .js output file and .ts source file
-   * to determine whether the TypeScript compiler has completed.  However this heuristic is only necessary
-   * in the interactive "--watch" mode, since otherwise Heft doesn't invoke Jest until after the compiler
-   * has finished.  Heft improves reliability for a non-watch build by setting skipTimestampCheck=true.
-   */
-  skipTimestampCheck: boolean;
-
-  /**
    * Whether or not the project being tested is a TypeScript project.
    */
   isTypeScriptProject: boolean;
