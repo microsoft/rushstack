@@ -266,7 +266,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
 
     this._state = State.Running;
     this._clearTimeout();
-    this._logger.terminal.writeLine('Invoking command: ' + JSON.stringify(this._shellCommand!));
+    this._logger.terminal.writeLine(`Invoking command: "${this._shellCommand!}"`);
 
     const childProcess: child_process.ChildProcess = child_process.spawn(this._shellCommand!, {
       shell: true,

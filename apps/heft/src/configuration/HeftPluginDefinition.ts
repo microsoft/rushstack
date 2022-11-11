@@ -218,7 +218,7 @@ export abstract class HeftPluginDefinitionBase {
     if (existingPluginPath && existingPluginPath !== this._resolvedEntryPoint) {
       throw new Error(
         `A plugin named ${JSON.stringify(this.pluginName)} has already been loaded from ` +
-          `${JSON.stringify(existingPluginPath)}. Plugins must have unique names.`
+          `"${existingPluginPath}". Plugins must have unique names.`
       );
     } else if (!existingPluginPath) {
       HeftPluginDefinitionBase._loadedPluginPathsByName.set(this.pluginName, this._resolvedEntryPoint);
@@ -292,26 +292,25 @@ export abstract class HeftPluginDefinitionBase {
       if (error.message === 'heftPluginConstructor is not a constructor') {
         // Common error scenario, give a more helpful error message
         throw new Error(
-          `Could not load plugin from ${JSON.stringify(entryPointPath)}: The target module does not ` +
+          `Could not load plugin from "${entryPointPath}": The target module does not ` +
             'export a plugin class with a parameterless constructor.'
         );
       } else {
-        throw new InternalError(`Could not load plugin from ${JSON.stringify(entryPointPath)}: ${error}`);
+        throw new InternalError(`Could not load plugin from "${entryPointPath}": ${error}`);
       }
     }
 
     if (!heftPlugin) {
       throw new InternalError(
-        `Plugin ${JSON.stringify(this.pluginName)} loaded from ${JSON.stringify(entryPointPath)} is null ` +
-          'or undefined.'
+        `Plugin ${JSON.stringify(this.pluginName)} loaded from "${entryPointPath}" is null ` + 'or undefined.'
       );
     }
 
-    logger.terminal.writeVerboseLine(`Loaded plugin from ${JSON.stringify(entryPointPath)}`);
+    logger.terminal.writeVerboseLine(`Loaded plugin from "${entryPointPath}"`);
 
     if (typeof heftPlugin.apply !== 'function') {
       throw new InternalError(
-        `The plugin ${JSON.stringify(this.pluginName)} loaded from ${JSON.stringify(entryPointPath)} ` +
+        `The plugin ${JSON.stringify(this.pluginName)} loaded from "${entryPointPath}" ` +
           'doesn\'t define an "apply" function.'
       );
     }

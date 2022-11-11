@@ -148,9 +148,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
-      this.globalTerminal.writeVerboseLine(
-        `CWD is ${JSON.stringify(currentCwd)}. Normalizing to ${JSON.stringify(buildFolder)}.`
-      );
+      this.globalTerminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to "${buildFolder}".`);
       // If `process.cwd()` and `buildFolder` differ only by casing on Windows, the chdir operation will not fix the casing, which is the entire purpose of the exercise.
       // As such, chdir to a different directory first. That directory needs to exist, so use the parent of the current directory.
       // This will not work if the current folder is the drive root, but that is a rather exotic case.

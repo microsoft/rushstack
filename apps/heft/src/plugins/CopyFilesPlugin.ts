@@ -131,8 +131,7 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
               continue;
             }
             throw new Error(
-              `Cannot copy multiple files to the same destination ` +
-                `${JSON.stringify(resolvedDestinationPath)}.`
+              `Cannot copy multiple files to the same destination "${resolvedDestinationPath}".`
             );
           }
 
@@ -175,8 +174,7 @@ async function _copyFilesInnerAsync(
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
         logger.terminal.writeVerboseLine(
-          `Linked ${JSON.stringify(copyDescriptor.sourcePath)} to ` +
-            `${JSON.stringify(copyDescriptor.destinationPath)}.`
+          `Linked "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}".`
         );
       } else {
         copiedFolderOrFileCount++;
@@ -186,8 +184,7 @@ async function _copyFilesInnerAsync(
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
         logger.terminal.writeVerboseLine(
-          `Copied ${JSON.stringify(copyDescriptor.sourcePath)} to ` +
-            `${JSON.stringify(copyDescriptor.destinationPath)}.`
+          `Copied "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}".`
         );
       }
     },

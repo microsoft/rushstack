@@ -65,7 +65,7 @@ function patchScriptTransformer(scriptPath) {
     match = scriptContent.match(new RegExp(`^\\s*const ${functionName} =`, 'm'));
     if (!match) {
       throw new Error(
-        `The ${JSON.stringify(functionName)} function was not found in the file ${JSON.stringify(scriptPath)}`
+        `The ${JSON.stringify(functionName)} function was not found in the file "${scriptPath}"`
       );
     }
 
