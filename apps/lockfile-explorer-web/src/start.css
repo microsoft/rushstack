@@ -6,6 +6,11 @@ html,
 body {
   margin: 0;
   height: 100%;
-  background-color: #c0c0c0;
+  background-color: #f3f2f1;
   font-family: Tahoma, sans-serif;
+}
+
+h5,
+p {
+  margin: 0;
 }

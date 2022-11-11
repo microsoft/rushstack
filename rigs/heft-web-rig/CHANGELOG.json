@@ -2,6 +2,84 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.12.11",
+      "tag": "@rushstack/heft-web-rig_v0.12.11",
+      "date": "Tue, 08 Nov 2022 01:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.3.45`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.61`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.7` to `^0.48.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.10",
+      "tag": "@rushstack/heft-web-rig_v0.12.10",
+      "date": "Wed, 26 Oct 2022 15:16:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.9",
+      "tag": "@rushstack/heft-web-rig_v0.12.9",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.3.44`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.6.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.60`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.6` to `^0.48.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.8",
+      "tag": "@rushstack/heft-web-rig_v0.12.8",
+      "date": "Tue, 25 Oct 2022 00:20:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.5.59`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.7",
       "tag": "@rushstack/heft-web-rig_v0.12.7",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",

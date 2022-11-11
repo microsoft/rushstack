@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+/// <reference lib="dom" />
 
 import * as path from 'path';
-import { render, Result, SassError } from 'node-sass';
+import { URL, pathToFileURL, fileURLToPath } from 'url';
+import { CompileResult, Syntax, Exception, compileString } from 'sass';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
-import { FileSystem, LegacyAdapters, Sort } from '@rushstack/node-core-library';
+import { FileSystem, Sort } from '@rushstack/node-core-library';
 import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
@@ -55,7 +57,7 @@ export interface ISassConfiguration {
   nonModuleFileExtensions?: string[];
 
   /**
-   * A list of paths used when resolving Sass imports.
+   * A list of paths used when resolving Sass `@imports` and `@use`.
    * The paths should be relative to the project root.
    * Defaults to ["node_modules", "src"]
    */
@@ -194,39 +196,46 @@ export class SassProcessor extends StringValuesTypingsGenerator {
     buildFolder: string,
     importIncludePaths: string[] | undefined
   ): Promise<string> {
-    let result: Result;
+    let result: CompileResult;
+    const nodeModulesUrl: URL = pathToFileURL(`${buildFolder}/node_modules/`);
     try {
-      result = await LegacyAdapters.convertCallbackToPromise(render, {
-        data: fileContents,
-        file: filePath,
-        importer: (url: string) => ({ file: this._patchSassUrl(url) }),
-        includePaths: importIncludePaths
+      result = compileString(fileContents, {
+        importers: [
+          {
+            findFileUrl: (url: string): URL | null => {
+              return this._patchSassUrl(url, nodeModulesUrl);
+            }
+          }
+        ],
+        url: pathToFileURL(filePath),
+        loadPaths: importIncludePaths
           ? importIncludePaths
           : [`${buildFolder}/node_modules`, `${buildFolder}/src`],
-        indentedSyntax: filePath.toLowerCase().endsWith('.sass')
+        syntax: determineSyntaxFromFilePath(filePath)
       });
     } catch (err) {
-      const typedError: SassError = err;
+      const typedError: Exception = err;
+      const { span } = typedError;
 
       // Extract location information and format into the error message until we have a concept
       // of location-aware diagnostics in Heft.
-      throw new Error(`${typedError.file}(${typedError.column},${typedError.line}): ${typedError.message}`);
+      throw new Error(`${typedError}(${span.start.column},${span.start.line}): ${typedError.message}`);
     }
 
-    // Register any @import files as dependencies.
-    for (const dependency of result.stats.includedFiles) {
-      this.registerDependency(filePath, dependency);
+    // Register any @import, @use files as dependencies.
+    for (const dependency of result.loadedUrls) {
+      this.registerDependency(filePath, fileURLToPath(dependency as URL));
     }
 
     return result.css.toString();
   }
 
-  private _patchSassUrl(url: string): string {
-    if (url[0] === '~') {
-      return 'node_modules/' + url.slice(1);
+  private _patchSassUrl(url: string, nodeModulesUrl: URL): URL | null {
+    if (url[0] !== '~') {
+      return null;
     }
 
-    return url;
+    return new URL(url.slice(1), nodeModulesUrl);
   }
 }
 
@@ -294,4 +303,15 @@ function buildExtensionClassifier(sassConfiguration: ISassConfiguration): IExten
     allFileExtensions: [...extensionClassifier.keys()],
     isFileModule
   };
+}
+
+function determineSyntaxFromFilePath(path: string): Syntax {
+  switch (path.substring(path.lastIndexOf('.'))) {
+    case '.sass':
+      return 'indented';
+    case '.scss':
+      return 'scss';
+    default:
+      return 'css';
+  }
 }

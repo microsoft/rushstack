@@ -14,6 +14,10 @@ import type {
   IFlagParameterJson,
   IChoiceParameterJson,
   IStringParameterJson,
+  IIntegerParameterJson,
+  IStringListParameterJson,
+  IIntegerListParameterJson,
+  IChoiceListParameterJson,
   IPhasedCommandWithoutPhasesJson
 } from './CommandLineJson';
 
@@ -110,7 +114,14 @@ export type Command = IGlobalCommandConfig | IPhasedCommandConfig;
  * Metadata about a custom parameter defined in command-line.json
  * @alpha
  */
-export type IParameterJson = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
+export type IParameterJson =
+  | IFlagParameterJson
+  | IChoiceParameterJson
+  | IStringParameterJson
+  | IIntegerParameterJson
+  | IStringListParameterJson
+  | IIntegerListParameterJson
+  | IChoiceListParameterJson;
 
 const DEFAULT_BUILD_COMMAND_JSON: IBulkCommandJson = {
   commandKind: RushConstants.bulkCommandKind,

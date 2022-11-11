@@ -146,6 +146,10 @@ export class VersionMismatchFinder {
     }
   }
 
+  public get mismatches(): ReadonlyMap<string, ReadonlyMap<string, readonly VersionMismatchFinderEntity[]>> {
+    return this._mismatches;
+  }
+
   public get numberOfMismatches(): number {
     return this._mismatches.size;
   }
@@ -257,18 +261,21 @@ export class VersionMismatchFinder {
 
             const name: string = dependency.name + (isCyclic ? ' (cyclic)' : '');
 
-            if (!this._mismatches.has(name)) {
-              this._mismatches.set(name, new Map<string, VersionMismatchFinderEntity[]>());
+            let dependencyVersions: Map<string, VersionMismatchFinderEntity[]> | undefined =
+              this._mismatches.get(name);
+            if (!dependencyVersions) {
+              this._mismatches.set(
+                name,
+                (dependencyVersions = new Map<string, VersionMismatchFinderEntity[]>())
+              );
             }
 
-            const dependencyVersions: Map<string, VersionMismatchFinderEntity[]> =
-              this._mismatches.get(name)!;
-
-            if (!dependencyVersions.has(version)) {
-              dependencyVersions.set(version, []);
+            const consumers: VersionMismatchFinderEntity[] | undefined = dependencyVersions.get(version);
+            if (!consumers) {
+              dependencyVersions.set(version, [project]);
+            } else {
+              consumers.push(project);
             }
-
-            dependencyVersions.get(version)!.push(project);
           }
         });
       }

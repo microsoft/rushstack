@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rush \"setup\" command works even if plugins cannot be installed",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

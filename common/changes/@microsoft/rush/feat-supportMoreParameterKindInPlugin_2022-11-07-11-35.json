@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for integer, integer list, string list, and choice list parameters in plugins.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

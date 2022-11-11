@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a regression from Rush 5.79.0 where \"rush init\" did not create the pnpm-config.json file automatically",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -1,22 +1,50 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { Path } from '@lifaon/path';
 import { ILockfileNode, LockfileDependency } from './LockfileDependency';
 
 const ROOT_PACKAGE_PATH: string = 'common/temp/package.json';
 
-export enum LockfileEntryKind {
+export enum LockfileEntryFilter {
   Project,
-  Package
+  Package,
+  SideBySide,
+  Doppelganger
 }
 
 interface IProps {
-  // entryId: string;
   rawEntryId: string;
-  kind: LockfileEntryKind;
+  kind: LockfileEntryFilter;
   rawYamlData: ILockfileNode;
 }
+
+/**
+ * Represents a project or package listed in the pnpm lockfile.
+ *
+ * @remarks
+ * Each project or package will have its own LockfileEntry, which is created when the lockfile is first parsed.
+ * The fields for the LockfileEntry are outlined below:
+ *
+ * @class LockfileEntry
+ * @property entryId {string} a unique (human-readable) identifier for this lockfile entry. For projects, this is just
+ *    "Project:" + the package json path for this project.
+ * @property rawEntryId {string} the unique identifier assigned to this project/package in the lockfile.
+ *    e.g. /@emotion/core/10.3.1_qjwx5m6wssz3lnb35xwkc3pz6q:
+ * @property kind {LockfileEntryFilter} Whether this entry is a project or a package (specified by importers or packages in the lockfile).
+ * @property packageJsonFolderPath {string} Where the package.json is for this project or package.
+ * @property entryPackageName {string} Just the name of the package with no specifiers.
+ * @property displayText {string} A human friendly name for the project or package.
+ * @property dependencies {LockfileDependency[]} A list of all the dependencies for this entry.
+ *    Note that dependencies, dev dependencies, as well as peer dependencies are all included.
+ * @property transitivePeerDependencies {Set<string>} A list of dependencies that are listed under the
+ *    "transitivePeerDependencies" in the pnpm lockfile.
+ * @property referrers {LockfileEntry[]} a list of entries that specify this entry as a dependency.
+ *
+ */
 export class LockfileEntry {
   public entryId: string = '';
-  public kind: LockfileEntryKind;
+  public kind: LockfileEntryFilter;
   public rawEntryId: string;
   public packageJsonFolderPath: string = '';
 
@@ -24,7 +52,8 @@ export class LockfileEntry {
   public displayText: string = '';
 
   public dependencies: LockfileDependency[] = [];
-  public referencers: LockfileDependency[] = [];
+  public transitivePeerDependencies: Set<string> = new Set();
+  public referrers: LockfileEntry[] = [];
 
   private static _packageEntryIdRegex: RegExp = new RegExp('/(.*)/([^/]+)$');
 
@@ -41,7 +70,7 @@ export class LockfileEntry {
       return;
     }
 
-    if (kind === LockfileEntryKind.Project) {
+    if (kind === LockfileEntryFilter.Project) {
       const rootPackageJsonFolderPath = new Path(ROOT_PACKAGE_PATH).dirname() || '';
       const packageJsonFolderPath = new Path('.').relative(
         new Path(rootPackageJsonFolderPath).concat(rawEntryId)
@@ -95,6 +124,7 @@ export class LockfileEntry {
         this.entryPackageName.replace('/', '+') +
         '@' +
         this.entryPackageVersion +
+        (this.entrySuffix ? `_${this.entrySuffix}` : '') +
         '/node_modules/' +
         this.entryPackageName;
     }

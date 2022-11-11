@@ -16,5 +16,10 @@
  * @packageDocumentation
  */
 
-export { ICertificate, CertificateManager } from './CertificateManager';
+export {
+  ICertificate,
+  CertificateManager,
+  ICertificateGenerationOptions,
+  DEFAULT_CERTIFICATE_SUBJECT_NAMES
+} from './CertificateManager';
 export { CertificateStore } from './CertificateStore';

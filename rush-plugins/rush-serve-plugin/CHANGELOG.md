@@ -1,6 +1,28 @@
 # Change Log - @rushstack/rush-serve-plugin
 
-This log was last generated on Wed, 19 Oct 2022 23:43:41 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Nov 2022 01:20:56 GMT and should not be manually modified.
+
+## 0.3.3
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 0.3.2
+Fri, 04 Nov 2022 00:15:59 GMT
+
+_Version update only_
+
+## 0.3.1
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 0.3.0
+Tue, 25 Oct 2022 00:20:44 GMT
+
+### Minor changes
+
+- Extract host name from active TLS certificate.
 
 ## 0.2.7
 Wed, 19 Oct 2022 23:43:41 GMT

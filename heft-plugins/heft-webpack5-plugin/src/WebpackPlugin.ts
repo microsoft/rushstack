@@ -168,7 +168,10 @@ export class WebpackPlugin implements IHeftPlugin {
           }
         },
         client: {
-          logging: 'info'
+          logging: 'info',
+          webSocketURL: {
+            port: 8080
+          }
         },
         port: 8080
       };

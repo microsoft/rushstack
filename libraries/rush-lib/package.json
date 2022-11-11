@@ -55,7 +55,8 @@
     "tapable": "2.2.1",
     "tar": "~6.1.11",
     "true-case-path": "~2.2.1",
-    "normalize-path": "~3.0.0"
+    "normalize-path": "~3.0.0",
+    "npm-check": "~5.9.2"
   },
   "devDependencies": {
     "@pnpm/logger": "4.0.0",

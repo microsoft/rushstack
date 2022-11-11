@@ -1,6 +1,31 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+
+## 1.2.3
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 1.2.2
+Fri, 04 Nov 2022 00:15:59 GMT
+
+### Patches
+
+- Remove usage of Import.lazy so that the tool can be bundled.
+
+## 1.2.1
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 1.2.0
+Tue, 25 Oct 2022 00:20:44 GMT
+
+### Minor changes
+
+- Support custom certificate subjects and validity period.
+- Generate and trust a separate CA certificate, use that to generate the TLS certificate, then destroy the private key for the CA certificate.
 
 ## 1.1.84
 Mon, 17 Oct 2022 22:14:21 GMT

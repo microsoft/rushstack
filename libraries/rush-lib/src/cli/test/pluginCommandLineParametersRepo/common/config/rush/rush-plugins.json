@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "packageName": "rush-command-parameters-plugin",
+      "pluginName": "rush-command-parameters-plugin",
+      "autoinstallerName": "plugins"
+    }
+  ]
+}
