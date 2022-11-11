@@ -1,9 +1,13 @@
 // DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
   "pnpmShrinkwrapHash": "f1b5560754a56b0869694a51e1c98b1885312bd3",
 =======
   "pnpmShrinkwrapHash": "2d628979c967be8e071745e57d7292d38eee0c2c",
 >>>>>>> 4fba021fb5 (add missing figures dep)
+=======
+  "pnpmShrinkwrapHash": "6db8bddc149abdab1fadf9bfda8c5a6bdd78216e",
+>>>>>>> d6c9692ad8 (rush update)
   "preferredVersionsHash": "5222ca779ae69ebfd201e39c17f48ce9eaf8c3c2"
 }

@@ -1868,6 +1868,7 @@ importers:
       npm-packlist: ~2.1.2
       read-package-tree: ~5.1.5
       resolve: ~1.17.0
+      rxjs: ~6.6.7
       semver: ~7.3.0
       ssri: ~8.0.0
       strict-uri-encode: ~2.0.0
@@ -1904,6 +1905,7 @@ importers:
       npm-packlist: 2.1.5
       read-package-tree: 5.1.6
       resolve: 1.17.0
+      rxjs: 6.6.7
       semver: 7.3.8
       ssri: 8.0.1
       strict-uri-encode: 2.0.0
@@ -12315,13 +12317,6 @@ packages:
       escape-string-regexp: 1.0.5
     dev: false
 
-  /figures/3.2.0:
-    resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
-    engines: {node: '>=8'}
-    dependencies:
-      escape-string-regexp: 1.0.5
-    dev: false
-
   /file-entry-cache/6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -13726,7 +13721,7 @@ packages:
       cli-cursor: 3.1.0
       cli-width: 3.0.0
       external-editor: 3.1.0
-      figures: 3.2.0
+      figures: 3.0.0
       lodash: 4.17.21
       mute-stream: 0.0.8
       run-async: 2.4.1
