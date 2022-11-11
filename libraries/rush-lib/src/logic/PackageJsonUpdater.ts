@@ -302,6 +302,8 @@ export class PackageJsonUpdater {
       const installManagerOptions: IInstallManagerOptions = {
         debug: debugInstall,
         allowShrinkwrapUpdates: true,
+        includeSplitWorkspace: false,
+        ignoreScripts: false,
         bypassPolicy: false,
         noLink: false,
         fullUpgrade: false,
@@ -311,6 +313,7 @@ export class PackageJsonUpdater {
         variant: variant,
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         pnpmFilterArguments: [],
+        splitWorkspacePnpmFilterArguments: [],
         checkOnly: false
       };
 
