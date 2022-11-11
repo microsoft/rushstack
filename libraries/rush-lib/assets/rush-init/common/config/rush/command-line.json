@@ -295,6 +295,124 @@
           "description": "Use the strawberry flavor"
         }
       ]
+    },
+
+    {
+      /**
+       * (Required) Determines the type of custom parameter.
+       * A "integer" is a custom command-line parameter whose value is a simple number.
+       */
+      "parameterKind": "integer",
+      "longName": "--my-integer",
+      "description": "A custom integer parameter for the \"my-global-command\" custom command",
+
+      "associatedCommands": ["my-global-command"],
+
+      /**
+       * The name of the argument, which will be shown in the command-line help.
+       *
+       * For example, if the parameter name is '--my-integer" and the argument name is "SOME_NUMBER",
+       * then the command-line help would display "--my-integer SOME_NUMBER".  The argument name must
+       * be comprised of upper-case letters, numbers, and underscores.  It should be kept short.
+       */
+       "argumentName": "SOME_NUMBER",
+      /**
+       * If true, this parameter must be included with the command.  The default is false.
+       */
+      "required": false
+
+    },
+
+    {
+      /**
+       * (Required) Determines the type of custom parameter.
+       * A "integerList" is a custom command-line parameter whose value is a list of integer.
+       *
+       * For example, if this parameter name is '--my-integer-list' and your associatedCommand is 'my-global-command'
+       * You can run your custom command like `rush my-global-command --my-integer-list 1 --my-integer-list 2 --my-integer-list 3`
+       * And the value of this parameter will be [1,2,3]
+       */
+      "parameterKind": "integerList",
+      "longName": "--my-integer-list",
+      "description": "A custom integer list parameter for the \"my-global-command\" custom command",
+
+      "associatedCommands": ["my-global-command"],
+
+      "argumentName": "SOME_NUMBER",
+
+      "required": false
+
+    },
+
+    {
+      /**
+       * (Required) Determines the type of custom parameter.
+       * A "stringList" is a custom command-line parameter whose value is a list of string.
+       *
+       * For example, if this parameter name is '--my-string-list' and your associatedCommand is 'my-global-command'
+       * You can run your custom command like `rush my-global-command --my-string-list 'foo' --my-string-list 'bar' --my-string-list 'baz'`
+       * And the value of this parameter will be ['foo','bar','baz']
+       */
+      "parameterKind": "stringList",
+      "longName": "--my-string-list",
+      "description": "A custom string list parameter for the \"my-global-command\" custom command",
+
+      "associatedCommands": ["my-global-command"],
+
+      "argumentName": "SOME_TEXT",
+
+      "required": false
+
+    },
+
+    {
+      /**
+       * (Required) Determines the type of custom parameter.
+       * A "choiceList" is a custom command-line parameter whose argument must be chosen from a list of
+       * allowable alternatives.
+       *
+       * For example, if this parameter name is '--my-choice-list' with four alternative choice ['foo','bar','baz','qux']
+       * and your associatedCommand is 'my-global-command'.
+       * You can run your custom command like `rush my-global-command --my-choice-list 'foo' --my-choice-list 'baz'`,
+       * and the value of this parameter will be ['foo','baz']
+       */
+      "parameterKind": "choiceList",
+      "longName": "--my-choice-list",
+      "description": "A custom choice list parameter for the \"my-global-command\" custom command",
+
+      "associatedCommands": ["my-global-command"],
+
+      "required": false,
+      /**
+       * (Required) A list of alternative argument values that can be chosen for this parameter.
+       */
+      "alternatives": [
+        {
+          /**
+           * A token that is one of the alternatives that can be used with the choice parameter,
+           * e.g. "vanilla" in "--flavor vanilla".
+           */
+          "name": "vanilla",
+
+          /**
+           * A detailed description for the alternative that can be shown in the command-line help.
+           *
+           * Whenever you introduce commands/parameters, taking a little time to write meaningful
+           * documentation can make a big difference for the developer experience in your repo.
+           */
+          "description": "Use the vanilla flavor (the default)"
+        },
+
+        {
+          "name": "chocolate",
+          "description": "Use the chocolate flavor"
+        },
+
+        {
+          "name": "strawberry",
+          "description": "Use the strawberry flavor"
+        }
+      ]
     }
     /*[END "DEMO"]*/
   ]

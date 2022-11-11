@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add usage example for integer, integer list, string list, choice list parameterKind in rush init template.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
