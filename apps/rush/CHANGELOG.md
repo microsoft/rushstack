@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 19 Oct 2022 23:44:02 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Nov 2022 03:51:49 GMT and should not be manually modified.
+
+## 5.83.0
+Fri, 11 Nov 2022 03:51:49 GMT
+
+### Updates
+
+- Add credentialType option for rush setup command
+- Rush "setup" command works even if plugins cannot be installed
+- Add support for integer, integer list, string list, and choice list parameters in plugins.
+- Introduce a `rush upgrade-interactive` action that provides an interactive way to upgrade outdated dependencies.
+- Fix a regression from Rush 5.79.0 where "rush init" did not create the pnpm-config.json file automatically
 
 ## 5.82.1
 Wed, 19 Oct 2022 23:44:02 GMT
