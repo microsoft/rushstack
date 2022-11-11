@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-dev-cert-plugin",
+      "comment": "Serve the CA certificate alongside the TLS certificate.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-dev-cert-plugin"
+}

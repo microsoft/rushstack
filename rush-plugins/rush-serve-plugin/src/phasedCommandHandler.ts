@@ -150,6 +150,7 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       const server: https.Server = https.createServer(
         {
+          ca: certificate.pemCaCertificate,
           cert: certificate.pemCertificate,
           key: certificate.pemKey
         },

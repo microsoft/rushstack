@@ -124,7 +124,8 @@ export class DevCertPlugin implements IHeftPlugin {
             options: {
               minVersion: 'TLSv1.3',
               key: certificate.pemKey,
-              cert: certificate.pemCertificate
+              cert: certificate.pemCertificate,
+              ca: certificate.pemCaCertificate
             }
           }
         };
@@ -133,7 +134,8 @@ export class DevCertPlugin implements IHeftPlugin {
           ...originalDevServer,
           https: {
             key: certificate.pemKey,
-            cert: certificate.pemCertificate
+            cert: certificate.pemCertificate,
+            ca: certificate.pemCaCertificate
           }
         };
       }
