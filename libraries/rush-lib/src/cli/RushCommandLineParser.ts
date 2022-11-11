@@ -42,6 +42,7 @@ import { UpdateAction } from './actions/UpdateAction';
 import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
+import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
 
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
@@ -260,6 +261,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpdateAction(this));
       this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
+      this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
 
       this._populateScriptActions();

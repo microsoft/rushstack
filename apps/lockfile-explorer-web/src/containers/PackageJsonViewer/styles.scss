@@ -1,12 +1,34 @@
-.PackageJsonViewerWrapper {
-  background-color: white;
-  border-radius: 10px;
-  margin: 24px 12px;
-  padding: 12px 24px;
-  width: 400px;
+.FileContents {
+  height: calc(25vh - 35px);
+  overflow: scroll;
 }
 
-.fileContents {
-  height: calc(100% - 48px);
-  overflow: scroll;
+@mixin SpecWrapper {
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: white;
+}
+
+.AddedSpec {
+  background-color: #107c10;
+  @include SpecWrapper;
+}
+
+.DeletedSpec {
+  background-color: red;
+  @include SpecWrapper;
+}
+
+.ChangedSpec {
+  background-color: darkgoldenrod;
+  @include SpecWrapper;
+}
+
+.PackageSpecWrapper {
+  h5 {
+    margin-bottom: 12px;
+  }
+  & > * + * {
+    margin-top: 8px;
+  }
 }

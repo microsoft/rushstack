@@ -464,7 +464,7 @@
     },
     {
       "name": "heft-webpack5-plugin",
-      "allowedCategories": []
+      "allowedCategories": [ ]
     },
     {
       "name": "html-webpack-plugin",
@@ -572,6 +572,10 @@
     },
     {
       "name": "normalize-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "npm-check",
       "allowedCategories": [ "libraries" ]
     },
     {

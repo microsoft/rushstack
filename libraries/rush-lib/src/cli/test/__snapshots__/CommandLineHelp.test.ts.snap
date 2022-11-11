@@ -55,6 +55,9 @@ Positional arguments:
     update-cloud-credentials
                         (EXPERIMENTAL) Update the credentials used by the 
                         build cache provider.
+    upgrade-interactive
+                        Provides interactive prompt for upgrading package 
+                        dependencies per project
     version             Manage package versions in the repo.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
@@ -1241,6 +1244,28 @@ Optional arguments:
   --credential CREDENTIAL_STRING
                         A static credential, to be cached.
   -d, --delete          If specified, delete stored credentials.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: upgrade-interactive 1`] = `
+"usage: rush upgrade-interactive [-h] [--make-consistent] [-s]
+
+Provide an interactive way to upgrade your dependencies. Running the command 
+will open an interactive prompt that will ask you which projects and which 
+dependencies you would like to upgrade. It will then update your package.json 
+files, and run \\"rush update\\" for you. If you are using 
+ensureConsistentVersions policy, upgrade-interactive will update all packages 
+which use the dependencies that you are upgrading and match their SemVer 
+range if provided. If ensureConsistentVersions is not enabled, 
+upgrade-interactive will only update the dependency in the package you 
+specify. This can be overriden by using the --make-consistent flag.
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  --make-consistent  When upgrading dependencies from a single project, also 
+                     upgrade dependencies from other projects.
+  -s, --skip-update  If specified, the \\"rush update\\" command will not be run 
+                     after updating the package.json files.
 "
 `;
 
