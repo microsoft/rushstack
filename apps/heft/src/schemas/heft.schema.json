@@ -102,10 +102,10 @@
       "type": "string"
     },
 
-    "watch": {
+    "watchOptions": {
       "title": "Watch Mode Options",
       "type": "object",
-      "description": "Global settings used by Heft when running in watch mode.",
+      "description": "Global options used by Heft when running in watch mode.",
       "properties": {
         "ignoredSourceFileGlobs": {
           "title": "Ignored Source File Globs",

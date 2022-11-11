@@ -53,7 +53,7 @@ export interface IHeftConfigurationJsonWatchOptions {
 export interface IHeftConfigurationJson {
   heftPlugins?: IHeftConfigurationJsonPluginSpecifier[];
   phasesByName?: IHeftConfigurationJsonPhases;
-  watch?: IHeftConfigurationJsonWatchOptions;
+  watchOptions?: IHeftConfigurationJsonWatchOptions;
 }
 
 export class CoreConfigFiles {

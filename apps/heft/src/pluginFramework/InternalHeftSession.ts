@@ -119,10 +119,10 @@ export class InternalHeftSession {
   public get watchOptions(): IHeftSessionWatchOptions {
     if (!this._watchOptions) {
       this._watchOptions = {
-        ignoredSourceFileGlobs: this._heftConfigurationJson.watch?.ignoredSourceFileGlobs || [],
+        ignoredSourceFileGlobs: this._heftConfigurationJson.watchOptions?.ignoredSourceFileGlobs || [],
         forbiddenSourceFileGlobs: [
           ...FORBIDDEN_SOURCE_FILE_GLOBS,
-          ...(this._heftConfigurationJson.watch?.forbiddenSourceFileGlobs || [])
+          ...(this._heftConfigurationJson.watchOptions?.forbiddenSourceFileGlobs || [])
         ]
       };
     }

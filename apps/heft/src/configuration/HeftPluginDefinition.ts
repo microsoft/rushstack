@@ -302,7 +302,7 @@ export abstract class HeftPluginDefinitionBase {
 
     if (!heftPlugin) {
       throw new InternalError(
-        `Plugin ${JSON.stringify(this.pluginName)} loaded from "${entryPointPath}" is null ` + 'or undefined.'
+        `Plugin ${JSON.stringify(this.pluginName)} loaded from "${entryPointPath}" is null or undefined.`
       );
     }
 

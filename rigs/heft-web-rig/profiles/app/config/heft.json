@@ -10,7 +10,7 @@
    */
   // "extends": "base-project/config/heft.json",
 
-  "watch": {
+  "watchOptions": {
     "ignoredSourceFileGlobs": [
       // Snapshots from Jest are updated even when the source file hasn't changed
       "**/*.snap"
