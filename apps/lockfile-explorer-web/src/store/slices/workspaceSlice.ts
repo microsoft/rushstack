@@ -4,6 +4,7 @@
 import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
 import { ISpecChange } from '../../parsing/compareSpec';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type WorkspaceState = {
   specChanges: Map<string, ISpecChange>;
 };
@@ -12,6 +13,7 @@ const initialState: WorkspaceState = {
   specChanges: new Map()
 };
 
+/* eslint @rushstack/typedef-var: off */
 const workspaceSlice = createSlice({
   name: 'workspace',
   initialState,

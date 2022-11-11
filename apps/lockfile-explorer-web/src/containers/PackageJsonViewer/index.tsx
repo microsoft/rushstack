@@ -8,7 +8,7 @@ import appStyles from '../../App.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
 import { IPackageJson } from '../../types/IPackageJson';
-import { compareSpec, ISpecChange } from '../../parsing/compareSpec';
+import { compareSpec } from '../../parsing/compareSpec';
 import { FilterBar } from '../../components/FilterBar';
 import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';

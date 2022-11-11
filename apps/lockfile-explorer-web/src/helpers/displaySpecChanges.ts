@@ -1,4 +1,3 @@
-import React from 'react';
 import { ISpecChange } from '../parsing/compareSpec';
 
 export const displaySpecChanges = (specChanges: Map<string, ISpecChange>, dep: string): string => {
