@@ -8,8 +8,7 @@ import colors from 'colors/safe';
 // Modified from the choice list prompt in inquirer:
 // https://github.com/SBoudrias/Inquirer.js/blob/inquirer%407.3.3/packages/inquirer/lib/prompts/list.js
 // Extended to include text filtering for the list
-import type inquirer from 'inquirer';
-import type { Answers, ListQuestion, DistinctChoice } from 'inquirer';
+import type { default as inquirer, Answers, ListQuestion, DistinctChoice } from 'inquirer';
 import BasePrompt from 'inquirer/lib/prompts/base';
 import observe from 'inquirer/lib/utils/events';
 import Paginator from 'inquirer/lib/utils/paginator';
@@ -19,7 +18,7 @@ import type Choices from 'inquirer/lib/objects/choices';
 
 import figures from 'figures';
 
-const { map, takeUntil } = require('rxjs/operators');
+import { map, takeUntil } from 'rxjs/operators';
 
 interface IKeyPressEvent {
   key: { name: string; ctrl: boolean; sequence?: string };
