@@ -45,9 +45,15 @@ export interface IHeftConfigurationJsonPhases {
   [phaseName: string]: IHeftConfigurationJsonPhaseSpecifier;
 }
 
+export interface IHeftConfigurationJsonWatchOptions {
+  ignoredSourceFileGlobs?: string[];
+  forbiddenSourceFileGlobs?: string[];
+}
+
 export interface IHeftConfigurationJson {
   heftPlugins?: IHeftConfigurationJsonPluginSpecifier[];
   phasesByName?: IHeftConfigurationJsonPhases;
+  watch?: IHeftConfigurationJsonWatchOptions;
 }
 
 export class CoreConfigFiles {
