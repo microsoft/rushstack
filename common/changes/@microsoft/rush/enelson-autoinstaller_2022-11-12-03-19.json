@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Ensure autoinstaller lockfiles are not leftover after an error",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
