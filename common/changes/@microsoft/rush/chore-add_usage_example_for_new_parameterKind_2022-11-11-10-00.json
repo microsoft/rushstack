@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add usage example for integer, integer list, string list, choice list parameterKind in rush init template.",
+      "comment": "Update the \"rush init\" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds",
       "type": "none"
     }
   ],
