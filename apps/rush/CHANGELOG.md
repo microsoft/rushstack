@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 11 Nov 2022 03:51:49 GMT and should not be manually modified.
+This log was last generated on Sat, 12 Nov 2022 04:40:57 GMT and should not be manually modified.
+
+## 5.83.1
+Sat, 12 Nov 2022 04:40:57 GMT
+
+### Updates
+
+- Update the "rush init" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds
 
 ## 5.83.0
 Fri, 11 Nov 2022 03:51:49 GMT

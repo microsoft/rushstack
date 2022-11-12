@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.83.1",
+      "tag": "@microsoft/rush_v5.83.1",
+      "date": "Sat, 12 Nov 2022 04:40:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the \"rush init\" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.83.0",
       "tag": "@microsoft/rush_v5.83.0",
       "date": "Fri, 11 Nov 2022 03:51:49 GMT",
