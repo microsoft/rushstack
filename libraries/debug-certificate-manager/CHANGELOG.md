@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+This log was last generated on Sat, 12 Nov 2022 00:16:31 GMT and should not be manually modified.
+
+## 1.2.4
+Sat, 12 Nov 2022 00:16:31 GMT
+
+### Patches
+
+- Mark X.509 issuerAltName extension non-critical, since Firefox doesn't understand it.
 
 ## 1.2.3
 Tue, 08 Nov 2022 01:20:55 GMT

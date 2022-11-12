@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-serve-plugin
 
-This log was last generated on Tue, 08 Nov 2022 01:20:56 GMT and should not be manually modified.
+This log was last generated on Sat, 12 Nov 2022 00:16:31 GMT and should not be manually modified.
+
+## 0.3.4
+Sat, 12 Nov 2022 00:16:31 GMT
+
+### Patches
+
+- Serve the CA certificate alongside the TLS certificate.
 
 ## 0.3.3
 Tue, 08 Nov 2022 01:20:56 GMT
