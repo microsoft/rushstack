@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update the \"rush init\" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
