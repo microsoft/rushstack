@@ -73,6 +73,42 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
             argumentName: parameter.argumentName
           });
           break;
+        case 'integer':
+          tsCommandLineParameter = this.defineIntegerParameter({
+            parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
+            description: parameter.description,
+            required: parameter.required,
+            argumentName: parameter.argumentName
+          });
+          break;
+        case 'stringList':
+          tsCommandLineParameter = this.defineStringListParameter({
+            parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
+            description: parameter.description,
+            required: parameter.required,
+            argumentName: parameter.argumentName
+          });
+          break;
+        case 'integerList':
+          tsCommandLineParameter = this.defineIntegerListParameter({
+            parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
+            description: parameter.description,
+            required: parameter.required,
+            argumentName: parameter.argumentName
+          });
+          break;
+        case 'choiceList':
+          tsCommandLineParameter = this.defineChoiceListParameter({
+            parameterShortName: parameter.shortName,
+            parameterLongName: parameter.longName,
+            description: parameter.description,
+            required: parameter.required,
+            alternatives: parameter.alternatives.map((x) => x.name)
+          });
+          break;
         default:
           throw new Error(
             `${RushConstants.commandLineFilename} defines a parameter "${

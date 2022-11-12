@@ -150,8 +150,12 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     //   "rush init-autoinstaller"
     //   "rush update-autoinstaller"
     //
+    // In addition, the "rush setup" command is designed to help new users configure their access
+    // to a private NPM registry, which means it can't rely on plugins that might live in that
+    // registry.
+    //
     // Thus we do not report plugin errors when invoking these commands.
-    if (!['update', 'init-autoinstaller', 'update-autoinstaller'].includes(this.actionName)) {
+    if (!['update', 'init-autoinstaller', 'update-autoinstaller', 'setup'].includes(this.actionName)) {
       const pluginError: Error | undefined = this.parser.pluginManager.error;
       if (pluginError) {
         throw pluginError;

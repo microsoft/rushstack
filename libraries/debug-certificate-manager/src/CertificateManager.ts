@@ -295,7 +295,7 @@ export class CertificateManager {
       {
         name: 'issuerAltName',
         altNames,
-        critical: true
+        critical: false
       },
       {
         name: 'keyUsage',
@@ -380,7 +380,7 @@ export class CertificateManager {
       {
         name: 'issuerAltName',
         altNames: issuerAltNames,
-        critical: true
+        critical: false
       },
       {
         name: 'keyUsage',

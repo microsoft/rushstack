@@ -109,9 +109,9 @@ export interface IPhaseJson {
  */
 export interface IBaseParameterJson {
   /**
-   * Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\".
+   * Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\" or \"stringList\" or \"integerList\" or \"choiceList\".
    */
-  parameterKind: 'flag' | 'choice' | 'string';
+  parameterKind: 'flag' | 'choice' | 'string' | 'integer' | 'stringList' | 'integerList' | 'choiceList';
   /**
    * The name of the parameter (e.g. \"--verbose\").  This is a required field.
    */
@@ -197,8 +197,72 @@ export interface IStringParameterJson extends IBaseParameterJson {
    */
   argumentName: string;
 }
+/**
+ * A custom command-line parameter whose value is interpreted as a integer.
+ * @public
+ */
+export interface IIntegerParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a string parameter.
+   */
+  parameterKind: 'integer';
+  /**
+   * The name of the argument for this parameter.
+   */
+  argumentName: string;
+}
 
-export type ParameterJson = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
+/**
+ * A custom command-line parameter whose presence acts as a list of string
+ * @public
+ */
+export interface IStringListParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a string list parameter.
+   */
+  parameterKind: 'stringList';
+  /**
+   * The name of the argument for this parameter.
+   */
+  argumentName: string;
+}
+/**
+ * A custom command-line parameter whose presence acts as a list of integer
+ * @public
+ */
+export interface IIntegerListParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a integer list parameter.
+   */
+  parameterKind: 'integerList';
+  /**
+   * The name of the argument for this parameter.
+   */
+  argumentName: string;
+}
+/**
+ * A custom command-line parameter whose presence acts as a list of choice
+ * @public
+ */
+export interface IChoiceListParameterJson extends IBaseParameterJson {
+  /**
+   * Denotes that this is a choice list parameter.
+   */
+  parameterKind: 'choiceList';
+  /**
+   * A list of alternative argument values that can be chosen for this parameter.
+   */
+  alternatives: IChoiceParameterAlternativeJson[];
+}
+
+export type ParameterJson =
+  | IFlagParameterJson
+  | IChoiceParameterJson
+  | IStringParameterJson
+  | IIntegerParameterJson
+  | IStringListParameterJson
+  | IIntegerListParameterJson
+  | IChoiceListParameterJson;
 
 /**
  * Interfaces for the file format described by command-line.schema.json

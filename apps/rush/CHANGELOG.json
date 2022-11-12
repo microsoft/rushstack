@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.83.0",
+      "tag": "@microsoft/rush_v5.83.0",
+      "date": "Fri, 11 Nov 2022 03:51:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add credentialType option for rush setup command"
+          },
+          {
+            "comment": "Rush \"setup\" command works even if plugins cannot be installed"
+          },
+          {
+            "comment": "Add support for integer, integer list, string list, and choice list parameters in plugins."
+          },
+          {
+            "comment": "Introduce a `rush upgrade-interactive` action that provides an interactive way to upgrade outdated dependencies."
+          },
+          {
+            "comment": "Fix a regression from Rush 5.79.0 where \"rush init\" did not create the pnpm-config.json file automatically"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.82.1",
       "tag": "@microsoft/rush_v5.82.1",
       "date": "Wed, 19 Oct 2022 23:44:02 GMT",

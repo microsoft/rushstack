@@ -333,7 +333,8 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
               options: {
                 minVersion: 'TLSv1.3',
                 key: certificate.pemKey,
-                cert: certificate.pemCertificate
+                cert: certificate.pemCertificate,
+                ca: certificate.pemCaCertificate
               }
             }
           };

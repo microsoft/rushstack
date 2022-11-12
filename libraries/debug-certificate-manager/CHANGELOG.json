@@ -2,6 +2,33 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.4",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.4",
+      "date": "Sat, 12 Nov 2022 00:16:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Mark X.509 issuerAltName extension non-critical, since Firefox doesn't understand it."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.3",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.3",
+      "date": "Tue, 08 Nov 2022 01:20:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.2",
       "tag": "@rushstack/debug-certificate-manager_v1.2.2",
       "date": "Fri, 04 Nov 2022 00:15:59 GMT",

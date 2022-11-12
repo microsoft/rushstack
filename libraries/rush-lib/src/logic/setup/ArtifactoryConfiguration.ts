@@ -11,6 +11,8 @@ export interface IArtifactoryPackageRegistryJson {
   registryUrl: string;
   artifactoryWebsiteUrl: string;
 
+  credentialType?: 'password' | 'authToken';
+
   messageOverrides?: {
     introduction?: string;
     obtainAnAccount?: string;
@@ -56,6 +58,9 @@ export class ArtifactoryConfiguration {
 
     if (FileSystem.exists(this._jsonFileName)) {
       this._setupJson = JsonFile.loadAndValidate(this._jsonFileName, ArtifactoryConfiguration._jsonSchema);
+      if (!this._setupJson.packageRegistry.credentialType) {
+        this._setupJson.packageRegistry.credentialType = 'password';
+      }
     }
   }
 

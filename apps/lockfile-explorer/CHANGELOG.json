@@ -2,6 +2,21 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "0.0.3",
+      "tag": "@rushstack/lockfile-explorer_v0.0.3",
+      "date": "Tue, 08 Nov 2022 01:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.2",
       "tag": "@rushstack/lockfile-explorer_v0.0.2",
       "date": "Mon, 07 Nov 2022 16:22:32 GMT",

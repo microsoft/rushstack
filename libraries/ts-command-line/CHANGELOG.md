@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+
+## 4.13.1
+Tue, 08 Nov 2022 01:20:55 GMT
+
+### Patches
+
+- Make ScopedCommandLineAction.onDefineUnscopedParameters optional to match CommandLineAciton.onDefineParameters
 
 ## 4.13.0
 Mon, 17 Oct 2022 22:14:21 GMT
