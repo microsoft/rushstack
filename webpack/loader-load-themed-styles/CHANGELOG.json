@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "2.0.12",
+      "tag": "@microsoft/loader-load-themed-styles_v2.0.12",
+      "date": "Mon, 14 Nov 2022 05:15:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating webpack/loader-utils to resolve github advisory CVE-2022-37601. https://github.com/advisories/GHSA-76p3-8jx3-jpfq"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.11",
       "tag": "@microsoft/loader-load-themed-styles_v2.0.11",
       "date": "Tue, 08 Nov 2022 01:20:55 GMT",
