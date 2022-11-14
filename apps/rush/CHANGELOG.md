@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 12 Nov 2022 04:40:57 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Nov 2022 05:15:22 GMT and should not be manually modified.
+
+## 5.83.2
+Mon, 14 Nov 2022 05:15:22 GMT
+
+### Updates
+
+- Ensure autoinstaller lockfiles are not leftover after an error
 
 ## 5.83.1
 Sat, 12 Nov 2022 04:40:57 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.83.2",
+      "tag": "@microsoft/rush_v5.83.2",
+      "date": "Mon, 14 Nov 2022 05:15:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Ensure autoinstaller lockfiles are not leftover after an error"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.83.1",
       "tag": "@microsoft/rush_v5.83.1",
       "date": "Sat, 12 Nov 2022 04:40:57 GMT",
