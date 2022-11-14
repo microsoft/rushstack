@@ -106,7 +106,7 @@ export class DevCertPlugin implements IHeftPlugin {
           if (typeof client === 'object') {
             const { webSocketURL } = client;
             if (typeof webSocketURL === 'object') {
-              client = {
+              originalDevServer!.client = {
                 ...client,
                 webSocketURL: {
                   ...webSocketURL,
