@@ -101,7 +101,7 @@ export class DevCertPlugin implements IHeftPlugin {
       const { devServer: originalDevServer } = webpackConfiguration;
       const hostname: string | undefined = certificate.subjectAltNames?.[0];
       if (webpackDevServerMajorVersion && webpackDevServerMajorVersion === 4) {
-        let client: WebpackDevServerConfig['client'] = originalDevServer?.client;
+        const client: WebpackDevServerConfig['client'] = originalDevServer?.client;
         if (hostname) {
           if (typeof client === 'object') {
             const { webSocketURL } = client;
