@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-dev-cert-plugin",
+      "comment": "Fix Webpack auto-refresh issues caused by mismatched hostname",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-dev-cert-plugin"
+}
