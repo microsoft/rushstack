@@ -16,7 +16,7 @@
     "_phase:test": "heft test --no-build"
   },
   "dependencies": {
-    "loader-utils": "~1.1.0"
+    "loader-utils": "1.4.2"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

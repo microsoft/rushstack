@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Updating webpack/loader-utils to resolve github advisory CVE-2022-37601. https://github.com/advisories/GHSA-76p3-8jx3-jpfq",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles"
+}
