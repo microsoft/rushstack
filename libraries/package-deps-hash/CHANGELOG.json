@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "3.2.62",
+      "tag": "@rushstack/package-deps-hash_v3.2.62",
+      "date": "Tue, 15 Nov 2022 18:43:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Get file hashes under git submodule paths when analyzing repo state"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.61",
       "tag": "@rushstack/package-deps-hash_v3.2.61",
       "date": "Tue, 08 Nov 2022 01:20:56 GMT",
