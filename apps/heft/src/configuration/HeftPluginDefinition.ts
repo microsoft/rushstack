@@ -197,6 +197,19 @@ export abstract class HeftPluginDefinitionBase {
     this._pluginPackageName = options.packageName;
     this._resolvedEntryPoint = path.resolve(options.packageRoot, this._heftPluginDefinitionJson.entryPoint);
 
+    // Ensure that the plugin parameters are unique
+    const seenParameters: Set<string> = new Set();
+    for (const parameter of this.pluginParameters) {
+      if (seenParameters.has(parameter.longName)) {
+        throw new Error(
+          `Parameter ${JSON.stringify(parameter.longName)} is defined multiple times by the providing ` +
+            `plugin ${JSON.stringify(this.pluginName)} in package ` +
+            `${JSON.stringify(this.pluginPackageName)}.`
+        );
+      }
+      seenParameters.add(parameter.longName);
+    }
+
     // Ensure that plugin names are unique. Main reason for this restriction is to ensure that command-line
     // parameter conflicts can be handled/undocumented synonms can be provided in all scenarios
     const existingPluginPath: string | undefined = HeftPluginDefinitionBase._loadedPluginPathsByName.get(
@@ -205,7 +218,7 @@ export abstract class HeftPluginDefinitionBase {
     if (existingPluginPath && existingPluginPath !== this._resolvedEntryPoint) {
       throw new Error(
         `A plugin named ${JSON.stringify(this.pluginName)} has already been loaded from ` +
-          `${JSON.stringify(existingPluginPath)}. Plugins must have unique names.`
+          `"${existingPluginPath}". Plugins must have unique names.`
       );
     } else if (!existingPluginPath) {
       HeftPluginDefinitionBase._loadedPluginPathsByName.set(this.pluginName, this._resolvedEntryPoint);
@@ -245,8 +258,11 @@ export abstract class HeftPluginDefinitionBase {
   /**
    * The scope for all parameters defined by this plugin.
    */
-  public get pluginParameterScope(): string | undefined {
-    return this._heftPluginDefinitionJson.parameterScope;
+  public get pluginParameterScope(): string {
+    // Default to the plugin name for the parameter scope. Plugin names should be unique within any run
+    // of Heft. Additionally, plugin names have the same naming restrictions as parameter scopes so can
+    // be used without modification.
+    return this._heftPluginDefinitionJson.parameterScope || this.pluginName;
   }
 
   /**
@@ -276,26 +292,25 @@ export abstract class HeftPluginDefinitionBase {
       if (error.message === 'heftPluginConstructor is not a constructor') {
         // Common error scenario, give a more helpful error message
         throw new Error(
-          `Could not load plugin from ${JSON.stringify(entryPointPath)}: The target module does not ` +
+          `Could not load plugin from "${entryPointPath}": The target module does not ` +
             'export a plugin class with a parameterless constructor.'
         );
       } else {
-        throw new InternalError(`Could not load plugin from ${JSON.stringify(entryPointPath)}: ${error}`);
+        throw new InternalError(`Could not load plugin from "${entryPointPath}": ${error}`);
       }
     }
 
     if (!heftPlugin) {
       throw new InternalError(
-        `Plugin ${JSON.stringify(this.pluginName)} loaded from ${JSON.stringify(entryPointPath)} is null ` +
-          'or undefined.'
+        `Plugin ${JSON.stringify(this.pluginName)} loaded from "${entryPointPath}" is null or undefined.`
       );
     }
 
-    logger.terminal.writeVerboseLine(`Loaded plugin from ${JSON.stringify(entryPointPath)}`);
+    logger.terminal.writeVerboseLine(`Loaded plugin from "${entryPointPath}"`);
 
     if (typeof heftPlugin.apply !== 'function') {
       throw new InternalError(
-        `The plugin ${JSON.stringify(this.pluginName)} loaded from ${JSON.stringify(entryPointPath)} ` +
+        `The plugin ${JSON.stringify(this.pluginName)} loaded from "${entryPointPath}" ` +
           'doesn\'t define an "apply" function.'
       );
     }

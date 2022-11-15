@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "JestPlugin",
+      "pluginName": "jest-plugin",
       "entryPoint": "./lib/JestPlugin",
       "optionsSchema": "./lib/schemas/heft-jest-plugin.schema.json",
 
@@ -32,9 +32,9 @@
         },
         {
           "longName": "--find-related-tests",
-          "parameterKind": "string",
+          "parameterKind": "stringList",
           "argumentName": "SOURCE_FILE",
-          "description": "Find and run the tests that cover a source file that was passed in as an argument.  This corresponds to the \"--findRelatedTests\" parameter in Jest's documentation."
+          "description": "Find and run the tests that cover a source file that was passed in as an argument.  This corresponds to the \"--findRelatedTests\" parameter in Jest's documentation. This parameter is not compatible with watch mode."
         },
         {
           "longName": "--max-workers",

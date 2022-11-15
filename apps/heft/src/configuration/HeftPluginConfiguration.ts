@@ -188,6 +188,9 @@ export class HeftPluginConfiguration {
       );
     }
 
+    // Prevent duplicate plugin names. This is done because parameter scopes default to the plugin name
+    // when none are provided, and we want to avoid conflicting parameter scopes. Additionally, scoped loggers
+    // on lifecycle plugins are mapped to "[lifecycle:<pluginName>]", and scoped loggers must be unique.
     const lifecyclePluginNames: Set<string> = new Set();
     for (const lifecyclePluginDefinitionJson of heftPluginConfigurationJson.lifecyclePlugins || []) {
       if (lifecyclePluginNames.has(lifecyclePluginDefinitionJson.pluginName)) {

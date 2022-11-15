@@ -51,7 +51,16 @@
 
     "fileExtensions": {
       "type": "array",
-      "description": "Files with these extensions will pass through the Sass transpiler for typings generation.",
+      "description": "Files with these extensions will be treated as SCSS modules and pass through the Sass transpiler for typings generation.",
+      "items": {
+        "type": "string",
+        "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+      }
+    },
+
+    "nonModuleFileExtensions": {
+      "type": "array",
+      "description": "Files with these extensions will be treated as non-module SCSS and pass through the Sass transpiler for typings generation.",
       "items": {
         "type": "string",
         "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"

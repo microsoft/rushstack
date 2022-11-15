@@ -57,7 +57,11 @@ export class HeftCommandLineParser extends CommandLineParser {
     // don't throw due to an unrecognized parameter.
     this._unmanagedFlag = this.defineFlagParameter({
       parameterLongName: Constants.unmanagedParameterLongName,
-      description: 'Indicates that the tool is running in an unmanaged environment'
+      description:
+        'Disables the Heft version selector: When Heft is invoked via the shell path, normally it' +
+        " will examine the project's package.json dependencies and try to use the locally installed version" +
+        ' of Heft. Specify "--unmanaged" to force the invoked version of Heft to be used. This is useful for' +
+        ' example if you want to test a different version of Heft.'
     });
 
     // Pre-initialize with known argument values to determine state of "--debug"
@@ -84,10 +88,6 @@ export class HeftCommandLineParser extends CommandLineParser {
     });
 
     this._metricsCollector = new MetricsCollector();
-  }
-
-  protected onDefineParameters(): void {
-    // No-op. Defined in the constructor.
   }
 
   public async execute(args?: string[]): Promise<boolean> {
@@ -148,9 +148,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
-      this.globalTerminal.writeVerboseLine(
-        `CWD is ${JSON.stringify(currentCwd)}. Normalizing to ${JSON.stringify(buildFolder)}.`
-      );
+      this.globalTerminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to "${buildFolder}".`);
       // If `process.cwd()` and `buildFolder` differ only by casing on Windows, the chdir operation will not fix the casing, which is the entire purpose of the exercise.
       // As such, chdir to a different directory first. That directory needs to exist, so use the parent of the current directory.
       // This will not work if the current folder is the drive root, but that is a rather exotic case.

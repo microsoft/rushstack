@@ -30,7 +30,6 @@ export {
 export {
   IHeftTaskSession,
   IHeftTaskHooks,
-  IHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions,
   IChangedFileState,

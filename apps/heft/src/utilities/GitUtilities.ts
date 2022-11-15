@@ -226,7 +226,7 @@ export class GitUtilities {
 
   private _ensurePathIsUnderGitWorkingTree(): void {
     if (!this.isPathUnderGitWorkingTree()) {
-      throw new Error(`The path ${JSON.stringify(this._workingDirectory)} is not under a Git working tree`);
+      throw new Error(`The path "${this._workingDirectory}" is not under a Git working tree`);
     }
   }
 

@@ -5,11 +5,11 @@
 
   "taskPlugins": [
     {
-      "pluginName": "TrustDevCertificatePlugin",
+      "pluginName": "trust-dev-certificate-plugin",
       "entryPoint": "./lib/TrustDevCertificatePlugin"
     },
     {
-      "pluginName": "UntrustDevCertificatePlugin",
+      "pluginName": "untrust-dev-certificate-plugin",
       "entryPoint": "./lib/UntrustDevCertificatePlugin"
     }
   ]

@@ -10,18 +10,13 @@ import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
-  IHeftTaskCleanHookOptions,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IScopedLogger,
   IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
 
-import type {
-  IWebpackConfiguration,
-  IWebpackConfigurationWithDevServer,
-  IWebpackPluginAccessor
-} from './shared';
+import type { IWebpackConfiguration, IWebpackPluginAccessor } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
 type ExtendedWatching = TWebpack.Watching & {
@@ -59,7 +54,7 @@ export interface IWebpackPluginOptions {
 /**
  * @public
  */
-export const PLUGIN_NAME: 'Webpack4Plugin' = 'Webpack4Plugin';
+export const PLUGIN_NAME: 'webpack4-plugin' = 'webpack4-plugin';
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
@@ -71,7 +66,8 @@ const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
  * @internal
  */
 export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
-  private _serve: boolean = false;
+  private _accessor: IWebpackPluginAccessor | undefined;
+  private _isServeMode: boolean = false;
   private _webpack: typeof TWebpack | undefined;
   private _webpackCompiler: ExtendedCompiler | ExtendedMultiCompiler | undefined;
   private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED = UNINITIALIZED;
@@ -79,50 +75,36 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private _webpackCompilationDonePromise: Promise<void> | undefined;
   private _webpackCompilationDonePromiseResolveFn: (() => void) | undefined;
 
-  public readonly accessor: IWebpackPluginAccessor = {
-    hooks: {
-      onLoadConfiguration: new AsyncSeriesBailHook(),
-      onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
-      onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
-      onEmitStats: new AsyncParallelHook(['webpackStats'])
+  public get accessor(): IWebpackPluginAccessor {
+    if (!this._accessor) {
+      this._accessor = {
+        hooks: {
+          onLoadConfiguration: new AsyncSeriesBailHook(),
+          onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
+          onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
+          onEmitStats: new AsyncParallelHook(['webpackStats'])
+        },
+        parameters: {
+          isServeMode: this._isServeMode
+        }
+      };
     }
-  };
+    return this._accessor;
+  }
 
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions
   ): void {
-    this._serve = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
-    if (!taskSession.parameters.watch && this._serve) {
+    this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
+    if (!taskSession.parameters.watch && this._isServeMode) {
       throw new Error(
         `The ${JSON.stringify(
           SERVE_PARAMETER_LONG_NAME
         )} parameter is only available when running in watch mode.`
       );
     }
-
-    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      // Obtain the finalized webpack configuration
-      const webpackConfiguration: IWebpackConfiguration | undefined =
-        await this._getWebpackConfigurationAsync(taskSession, heftConfiguration, options);
-      if (webpackConfiguration) {
-        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] = Array.isArray(
-          webpackConfiguration
-        )
-          ? webpackConfiguration
-          : [webpackConfiguration];
-
-        // Add each output path to the clean list
-        // NOTE: Webpack plugins that write assets to paths that start with '../' or outside of the
-        // `output.path` will need to be manually added to the phase-level cleanup list in heft.json.
-        for (const config of webpackConfigurationArray) {
-          if (config.output?.path) {
-            cleanOptions.addDeleteOperations({ sourcePath: config.output.path });
-          }
-        }
-      }
-    });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await this._runWebpackAsync(taskSession, heftConfiguration, options);
@@ -154,7 +136,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         const configurationLoader: WebpackConfigurationLoader = new WebpackConfigurationLoader(
           taskSession.logger,
           taskSession.parameters.production,
-          taskSession.parameters.watch && this._serve
+          taskSession.parameters.watch && this._isServeMode
         );
         webpackConfiguration = await configurationLoader.tryLoadWebpackConfigurationAsync({
           ...options,
@@ -218,7 +200,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     options: IWebpackPluginOptions
   ): Promise<void> {
     this._validateEnvironmentVariable(taskSession);
-    if (taskSession.parameters.watch || this._serve) {
+    if (taskSession.parameters.watch || this._isServeMode) {
       // Should never happen, but just in case
       throw new InternalError('Cannot run Webpack in compilation mode when watch mode is enabled');
     }
@@ -319,7 +301,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
       // Determine how we will run the compiler. When serving, we will run the compiler
       // via the webpack-dev-server. Otherwise, we will run the compiler directly.
-      if (this._serve) {
+      if (this._isServeMode) {
         const defaultDevServerOptions: TWebpackDevServer.Configuration = {
           host: 'localhost',
           devMiddleware: {
@@ -331,7 +313,10 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
             }
           },
           client: {
-            logging: 'info'
+            logging: 'info',
+            webSocketURL: {
+              port: 8080
+            }
           },
           port: 8080,
           onListening: (server: TWebpackDevServer) => {
@@ -367,13 +352,29 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
             true,
             taskSession.logger.terminal
           );
+
+          // Update the web socket URL to use the hostname provided by the certificate
+          const clientConfiguration: TWebpackDevServer.Configuration['client'] = devServerOptions.client;
+          const hostname: string | undefined = certificate.subjectAltNames?.[0];
+          if (hostname && typeof clientConfiguration === 'object') {
+            const { webSocketURL } = clientConfiguration;
+            if (typeof webSocketURL === 'object') {
+              clientConfiguration.webSocketURL = {
+                ...webSocketURL,
+                hostname
+              };
+            }
+          }
+
           devServerOptions = {
             ...devServerOptions,
             server: {
               type: 'https',
               options: {
+                minVersion: 'TLSv1.3',
                 key: certificate.pemKey,
-                cert: certificate.pemCertificate
+                cert: certificate.pemCertificate,
+                ca: certificate.pemCaCertificate
               }
             }
           };
@@ -431,7 +432,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   }
 
   private _validateEnvironmentVariable(taskSession: IHeftTaskSession): void {
-    if (!this._serve && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
+    if (!this._isServeMode && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
       taskSession.logger.emitWarning(
         new Error(
           `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +

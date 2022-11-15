@@ -28,8 +28,6 @@ describe('JestPlugin', () => {
     const mockTaskSession: IHeftTaskSession = {
       hooks: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        clean: { tapPromise: () => {} } as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         run: { tapPromise: () => {} } as any
       },
       parameters: {

@@ -21,11 +21,18 @@ export interface IInternalHeftSessionOptions {
   debug: boolean;
 }
 
+export interface IHeftSessionWatchOptions {
+  ignoredSourceFileGlobs: readonly string[];
+  forbiddenSourceFileGlobs: readonly string[];
+}
+
 function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
   for (const phase of phases) {
     yield* phase.tasks;
   }
 }
+
+const FORBIDDEN_SOURCE_FILE_GLOBS: string[] = ['package.json', 'config/**/*', '.rush/**/*'];
 
 export class InternalHeftSession {
   private readonly _phaseSessionsByPhase: Map<HeftPhase, HeftPhaseSession> = new Map();
@@ -34,6 +41,7 @@ export class InternalHeftSession {
   private _phases: Set<HeftPhase> | undefined;
   private _phasesByName: Map<string, HeftPhase> | undefined;
   private _parameterManager: HeftParameterManager | undefined;
+  private _watchOptions: IHeftSessionWatchOptions | undefined;
 
   public readonly heftConfiguration: HeftConfiguration;
 
@@ -106,6 +114,19 @@ export class InternalHeftSession {
   public get phasesByName(): ReadonlyMap<string, HeftPhase> {
     this._ensurePhases();
     return this._phasesByName!;
+  }
+
+  public get watchOptions(): IHeftSessionWatchOptions {
+    if (!this._watchOptions) {
+      this._watchOptions = {
+        ignoredSourceFileGlobs: this._heftConfigurationJson.watchOptions?.ignoredSourceFileGlobs || [],
+        forbiddenSourceFileGlobs: [
+          ...FORBIDDEN_SOURCE_FILE_GLOBS,
+          ...(this._heftConfigurationJson.watchOptions?.forbiddenSourceFileGlobs || [])
+        ]
+      };
+    }
+    return this._watchOptions;
   }
 
   public getSessionForPhase(phase: HeftPhase): HeftPhaseSession {

@@ -74,6 +74,6 @@ export function loadPartialTsconfigFileAsync(heftConfiguration: HeftConfiguratio
 export function loadTypeScriptConfigurationFileAsync(heftConfiguration: HeftConfiguration, terminal: ITerminal): Promise<ITypeScriptConfigurationJson | undefined>;
 
 // @public
-export const TypeScriptPluginName: 'TypeScriptPlugin';
+export const TypeScriptPluginName: 'typescript-plugin';
 
 ```

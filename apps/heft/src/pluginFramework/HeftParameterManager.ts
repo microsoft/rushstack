@@ -148,6 +148,8 @@ export class HeftParameterManager {
   // plugin definition => Map< parameter long name => applied parameter >
   private readonly _parametersByDefinition: Map<HeftPluginDefinitionBase, Map<string, CommandLineParameter>> =
     new Map();
+  // parameter scope => plugin definition
+  private readonly _pluginDefinitionsByScope: Map<string, HeftPluginDefinitionBase> = new Map();
 
   private _isFinalized: boolean = false;
 
@@ -255,19 +257,24 @@ export class HeftParameterManager {
     pluginDefinition: HeftPluginDefinitionBase,
     commandLineParameterProvider: CommandLineParameterProvider
   ): void {
+    const existingDefinitionWithScope: HeftPluginDefinitionBase | undefined =
+      this._pluginDefinitionsByScope.get(pluginDefinition.pluginParameterScope);
+    if (existingDefinitionWithScope && existingDefinitionWithScope !== pluginDefinition) {
+      throw new Error(
+        `Plugin ${JSON.stringify(pluginDefinition.pluginName)} in package ` +
+          `${JSON.stringify(pluginDefinition.pluginPackageName)} specifies the same parameter scope ` +
+          `${JSON.stringify(pluginDefinition.pluginParameterScope)} as plugin ` +
+          `${JSON.stringify(existingDefinitionWithScope.pluginName)} from package ` +
+          `${JSON.stringify(existingDefinitionWithScope.pluginPackageName)}.`
+      );
+    } else {
+      this._pluginDefinitionsByScope.set(pluginDefinition.pluginParameterScope, pluginDefinition);
+    }
+
     const definedPluginParametersByName: Map<string, CommandLineParameter> =
       this._parametersByDefinition.get(pluginDefinition)!;
 
-    // Error if a plugin defines a parameter multiple times
     for (const parameter of pluginDefinition.pluginParameters) {
-      if (definedPluginParametersByName.has(parameter.longName)) {
-        throw new Error(
-          `Parameter ${JSON.stringify(parameter.longName)} is defined multiple times by the providing ` +
-            `plugin ${JSON.stringify(pluginDefinition.pluginName)} in package ` +
-            `${JSON.stringify(pluginDefinition.pluginPackageName)}.`
-        );
-      }
-
       // Short names are excluded since it would be difficult and confusing to de-dupe/handle shortname
       // conflicts as well as longname conflicts
       let definedParameter: CommandLineParameter;

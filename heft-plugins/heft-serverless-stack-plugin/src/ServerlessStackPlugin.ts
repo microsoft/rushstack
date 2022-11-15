@@ -23,9 +23,9 @@ import type {
   IWebpackPluginAccessor as IWebpack5PluginAccessor
 } from '@rushstack/heft-webpack5-plugin';
 
-const PLUGIN_NAME: 'ServerlessStackPlugin' = 'ServerlessStackPlugin';
-const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'Webpack4Plugin';
-const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'Webpack5Plugin';
+const PLUGIN_NAME: 'serverless-stack-plugin' = 'serverless-stack-plugin';
+const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'webpack4-plugin';
+const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'webpack5-plugin';
 const SST_CLI_PACKAGE_NAME: string = '@serverless-stack/cli';
 
 export default class ServerlessStackPlugin implements IHeftTaskPlugin {

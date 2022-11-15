@@ -63,7 +63,7 @@ export class RigPackageResolver implements IRigPackageResolver {
     const buildFolder: string = this._buildFolder;
     const projectFolder: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(buildFolder);
     if (!projectFolder) {
-      throw new Error(`Unable to find a package.json file for ${JSON.stringify(buildFolder)}.`);
+      throw new Error(`Unable to find a package.json file for "${buildFolder}".`);
     }
 
     const cacheKey: string = `${projectFolder};${packageName}`;
@@ -140,7 +140,9 @@ export class RigPackageResolver implements IRigPackageResolver {
         packageName: toolPackageName,
         baseFolderPath: this._buildFolder
       });
-      terminal.writeVerboseLine(`Resolved ${JSON.stringify(toolPackageName)} from ${resolvedPackageFolder}.`);
+      terminal.writeVerboseLine(
+        `Resolved ${JSON.stringify(toolPackageName)} from "${resolvedPackageFolder}".`
+      );
       return resolvedPackageFolder;
     } catch (e) {
       throw new Error(

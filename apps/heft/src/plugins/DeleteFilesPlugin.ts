@@ -64,7 +64,7 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScope
     async (pathToDelete: string) => {
       try {
         await FileSystem.deleteFileAsync(pathToDelete, { throwIfNotExists: true });
-        logger.terminal.writeVerboseLine(`Deleted ${JSON.stringify(pathToDelete)}.`);
+        logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}".`);
         deletedFiles++;
       } catch (error) {
         // If it doesn't exist, we can ignore the error.
@@ -74,7 +74,7 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScope
           // linux throws the EISDIR error.
           if (FileSystem.isUnlinkNotPermittedError(error) || FileSystem.isDirectoryError(error)) {
             await FileSystem.deleteFolderAsync(pathToDelete);
-            logger.terminal.writeVerboseLine(`Deleted folder ${JSON.stringify(pathToDelete)}.`);
+            logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}".`);
             deletedFolders++;
           } else {
             throw error;
@@ -104,6 +104,8 @@ function _resolveDeleteOperationPaths(
   }
 }
 
+const PLUGIN_NAME: 'delete-files-plugin' = 'delete-files-plugin';
+
 export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOptions> {
   public apply(
     taskSession: IHeftTaskSession,
@@ -113,7 +115,7 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     // TODO: Remove once improved heft-config-file is used
     _resolveDeleteOperationPaths(heftConfiguration, pluginOptions.deleteOperations);
 
-    taskSession.hooks.run.tapPromise(taskSession.taskName, async (runOptions: IHeftTaskRunHookOptions) => {
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await deleteFilesAsync(pluginOptions.deleteOperations, taskSession.logger);
     });
   }

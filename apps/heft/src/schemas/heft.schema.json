@@ -24,7 +24,7 @@
         "pluginName": {
           "description": "Name of the plugin to load from the specified package. If not specified and the plugin package provides a single plugin, that plugin will be loaded.",
           "type": "string",
-          "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+          "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
         },
         "options": {
           "description": "Options to pass to the plugin.",
@@ -42,7 +42,7 @@
         "eventKind": {
           "description": "Name of the event to trigger.",
           "type": "string",
-          "enum": ["copyFiles", "deleteGlobs", "runScript"]
+          "enum": ["copyFiles", "deleteFiles", "runScript", "nodeService"]
         },
         "options": {
           "description": "Options to pass to the event.",
@@ -102,6 +102,32 @@
       "type": "string"
     },
 
+    "watchOptions": {
+      "title": "Watch Mode Options",
+      "type": "object",
+      "description": "Global options used by Heft when running in watch mode.",
+      "properties": {
+        "ignoredSourceFileGlobs": {
+          "title": "Ignored Source File Globs",
+          "type": "array",
+          "description": "Glob patterns for source files that should be ignored when watching for changes. Changes to these files will still be detected and recorded by Heft, but will not trigger a rebuild.",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        },
+        "forbiddenSourceFileGlobs": {
+          "title": "Forbidden Source File Globs",
+          "type": "array",
+          "description": "Glob patterns for source files that should break the build when watching for changes. Changes to these files will cause Heft to exit with an error. Changes in project \"package.json\" files and \"config\" and \".rush\" folders are always forbidden and do not need to be included in this list.",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        }
+      }
+    },
+
     "heftPlugins": {
       "type": "array",
       "description": "List of Heft plugins that are used by a project.",
@@ -113,7 +139,7 @@
       "description": "Heft phases that can be run during an execution of Heft.",
       "additionalProperties": false,
       "patternProperties": {
-        "^[a-zA-Z0-9-_]+$": {
+        "^[a-z][a-z0-9]*([-][a-z0-9]+)*$": {
           "description": "Defines a Heft phase.",
           "type": "object",
           "additionalProperties": false,
@@ -128,12 +154,12 @@
               "description": "List of phase names that must be run before this phase.",
               "items": {
                 "type": "string",
-                "pattern": "[a-zA-Z0-9-_]+"
+                "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
               }
             },
 
-            "cleanAdditionalFiles": {
-              "description": "List of delete operations to perform when the clean phase is run. This list is in addition to the clean that plugins already perform.",
+            "cleanFiles": {
+              "description": "List of delete operations to perform when cleaning at the beginning of phase execution.",
               "type": "array",
               "items": { "$ref": "#/definitions/delete-operation" }
             },
@@ -143,7 +169,7 @@
               "type": "object",
               "additionalProperties": false,
               "patternProperties": {
-                "^[a-zA-Z0-9-_]+$": {
+                "^[a-z][a-z0-9]*([-][a-z0-9]+)*$": {
                   "type": "object",
                   "description": "Defines a Heft task.",
                   "additionalProperties": false,
@@ -176,7 +202,7 @@
                       "description": "List of task names that must be run before this task.",
                       "items": {
                         "type": "string",
-                        "pattern": "[a-zA-Z0-9-_]+"
+                        "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
                       }
                     }
                   }

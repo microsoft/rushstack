@@ -33,6 +33,7 @@ export interface IWebpackConfigurationWithDevServer extends TWebpack.Configurati
 // @public (undocumented)
 export interface IWebpackPluginAccessor {
     hooks: IWebpackPluginAccessorHooks;
+    parameters: IWebpackPluginAccessorParameters;
 }
 
 // @public (undocumented)
@@ -44,7 +45,12 @@ export interface IWebpackPluginAccessorHooks {
 }
 
 // @public (undocumented)
-export const PluginName: 'Webpack5Plugin';
+export interface IWebpackPluginAccessorParameters {
+    serve: boolean;
+}
+
+// @public (undocumented)
+export const PluginName: 'webpack5-plugin';
 
 // (No @packageDocumentation comment for this package)
 

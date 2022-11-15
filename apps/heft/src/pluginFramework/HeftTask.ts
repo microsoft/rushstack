@@ -23,7 +23,7 @@ function _getCopyFilesPluginDefinition(): HeftTaskPluginDefinition {
   if (!_copyFilesPluginDefinition) {
     _copyFilesPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
       heftPluginDefinitionJson: {
-        pluginName: 'CopyFilesPlugin',
+        pluginName: 'copy-files-plugin',
         entryPoint: './lib/plugins/CopyFilesPlugin',
         optionsSchema: './lib/schemas/copy-files-options.schema.json'
       },
@@ -39,9 +39,9 @@ function _getDeleteFilesPluginDefinition(): HeftTaskPluginDefinition {
   if (!_deleteFilesPluginDefinition) {
     _deleteFilesPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
       heftPluginDefinitionJson: {
-        pluginName: 'DeleteFilesPlugin',
-        entryPoint: './lib/plugins/DeleteGlobsPlugin',
-        optionsSchema: './lib/schemas/delete-globs-options.schema.json'
+        pluginName: 'delete-files-plugin',
+        entryPoint: './lib/plugins/DeleteFilesPlugin',
+        optionsSchema: './lib/schemas/delete-files-options.schema.json'
       },
       packageRoot: `${__dirname}/../..`,
       packageName: '@rushstack/heft'
@@ -55,7 +55,7 @@ function _getRunScriptPluginDefinition(): HeftTaskPluginDefinition {
   if (!_runScriptPluginDefinition) {
     _runScriptPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
       heftPluginDefinitionJson: {
-        pluginName: 'RunScriptPlugin',
+        pluginName: 'run-script-plugin',
         entryPoint: './lib/plugins/RunScriptPlugin',
         optionsSchema: './lib/schemas/run-script-options.schema.json'
       },
@@ -64,6 +64,21 @@ function _getRunScriptPluginDefinition(): HeftTaskPluginDefinition {
     });
   }
   return _runScriptPluginDefinition;
+}
+
+let _nodeServicePluginDefinition: HeftTaskPluginDefinition | undefined;
+function _getNodeServicePluginDefinition(): HeftTaskPluginDefinition {
+  if (!_nodeServicePluginDefinition) {
+    _nodeServicePluginDefinition = HeftTaskPluginDefinition.loadFromObject({
+      heftPluginDefinitionJson: {
+        pluginName: 'node-service-plugin',
+        entryPoint: './lib/plugins/NodeServicePlugin'
+      },
+      packageRoot: `${__dirname}/../..`,
+      packageName: '@rushstack/heft'
+    });
+  }
+  return _nodeServicePluginDefinition;
 }
 
 /**
@@ -187,6 +202,9 @@ export class HeftTask {
         }
         case 'runScript': {
           return _getRunScriptPluginDefinition();
+        }
+        case 'nodeService': {
+          return _getNodeServicePluginDefinition();
         }
         default: {
           throw new InternalError(

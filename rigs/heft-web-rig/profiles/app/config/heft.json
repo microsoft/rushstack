@@ -10,9 +10,23 @@
    */
   // "extends": "base-project/config/heft.json",
 
+  "watchOptions": {
+    "ignoredSourceFileGlobs": [
+      // Snapshots from Jest are updated even when the source file hasn't changed
+      "**/*.snap"
+    ]
+  },
+
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [
+        { "sourcePath": "dist" },
+        { "sourcePath": "lib" },
+        { "sourcePath": "lib-amd" },
+        { "sourcePath": "lib-commonjs" },
+        { "sourcePath": "lib-es6" }
+      ],
       "tasksByName": {
         "sass": {
           "taskPlugin": {

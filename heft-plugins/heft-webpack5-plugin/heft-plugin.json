@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "Webpack5Plugin",
+      "pluginName": "webpack5-plugin",
       "entryPoint": "./lib/Webpack5Plugin",
       "optionsSchema": "./lib/schemas/heft-webpack5-plugin.schema.json",
 
