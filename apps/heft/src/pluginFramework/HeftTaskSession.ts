@@ -92,15 +92,6 @@ export interface IHeftTaskSession {
  */
 export interface IHeftTaskHooks {
   /**
-   * The `clean` hook is called at the beginning of the phase. It can be used to clean up
-   * any files or folders that may be produced by the plugin. To use it, call
-   * `clean.tapPromise(<pluginName>, <callback>)`.
-   *
-   * @public
-   */
-  readonly clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
-
-  /**
    * The `run` hook is called after all dependency task executions have completed during a normal
    * run, or during a watch mode run when no `runIncremental` hook is provided. It is where the
    * plugin can perform its work. To use it, call `run.tapPromise(<pluginName>, <callback>)`.
@@ -115,21 +106,6 @@ export interface IHeftTaskHooks {
    * `run.tapPromise(<pluginName>, <callback>)`.
    */
   readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
-}
-
-/**
- * Options provided to the `clean` hook.
- *
- * @public
- */
-export interface IHeftTaskCleanHookOptions {
-  /**
-   * Add delete operations to be performed during the `clean` hook. These operations will be
-   * performed before any tasks are run within a phase.
-   *
-   * @public
-   */
-  readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
 }
 
 /**
@@ -260,7 +236,6 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
 }
 
 export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
-  cleanHook: AsyncParallelHook<IHeftTaskCleanHookOptions>;
   task: HeftTask;
   taskParameters: IHeftParameters;
   pluginHost: HeftPluginHost;
@@ -283,7 +258,6 @@ export class HeftTaskSession implements IHeftTaskSession {
 
   public constructor(options: IHeftTaskSessionOptions) {
     const {
-      cleanHook,
       heftConfiguration: { cacheFolderPath: cacheFolder, tempFolderPath: tempFolder },
       loggingManager,
       metricsCollector,
@@ -297,7 +271,6 @@ export class HeftTaskSession implements IHeftTaskSession {
     this.metricsCollector = metricsCollector;
     this.taskName = task.taskName;
     this.hooks = {
-      clean: cleanHook,
       run: new AsyncParallelHook(['runHookOptions']),
       runIncremental: new AsyncParallelHook(['runIncrementalHookOptions'])
     };

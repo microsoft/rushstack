@@ -22,7 +22,7 @@ import type {
 } from '@rushstack/ts-command-line';
 import type * as chokidar from 'chokidar';
 
-import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
+import type { IHeftSessionWatchOptions, InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
@@ -55,13 +55,13 @@ export interface IHeftActionRunnerOptions extends IHeftActionOptions {
 interface IWaitForSourceChangesOptions {
   readonly terminal: ITerminal;
   readonly watcher: chokidar.FSWatcher;
+  readonly watchOptions: IHeftSessionWatchOptions;
   readonly git: GitUtilities;
   readonly changedFiles: Map<string, IChangedFileState>;
   readonly staticFileSystemAdapter: StaticFileSystemAdapter;
 }
 
 const INITIAL_CHANGE_STATE: '0' = '0';
-const FORBIDDEN_RELATIVE_PATHS: string[] = ['package.json', 'config', '.rush'];
 const IS_WINDOWS: boolean = process.platform === 'win32';
 
 // Use an async iterator to allow the caller to await for the next source file change.
@@ -70,11 +70,10 @@ const IS_WINDOWS: boolean = process.platform === 'win32';
 async function* _waitForSourceChangesAsync(
   options: IWaitForSourceChangesOptions
 ): AsyncIterableIterator<void> {
-  const { terminal, watcher, git } = options;
+  const { terminal, watcher, watchOptions, git } = options;
+  const ignoredSourceFileGlobs: string[] = Array.from(watchOptions.ignoredSourceFileGlobs);
+  const forbiddenSourceFileGlobs: string[] = Array.from(watchOptions.forbiddenSourceFileGlobs);
   const changedFileStats: Map<string, fs.Stats | undefined> = new Map();
-  const forbiddenFilePaths: Set<string> = new Set(
-    FORBIDDEN_RELATIVE_PATHS.map((relativePath: string) => path.resolve(watcher.options.cwd!, relativePath))
-  );
   const seenFilePaths: Set<string> = new Set();
   const seenSourceFilePaths: Set<string> = new Set();
   let resolveFileChange: () => void;
@@ -87,32 +86,7 @@ async function* _waitForSourceChangesAsync(
   ): Promise<void> {
     // We can short-circuit the call to git if we already know all files have been seen.
     const unseenFilePaths: Set<string> = Selection.difference(filePaths, seenFilePaths);
-    if (unseenFilePaths.size !== 0) {
-      // Validate that all unseen files are safe for watch mode.
-      for (const filePath of unseenFilePaths) {
-        let isForbidden: boolean = false;
-        for (const forbiddenPath of forbiddenFilePaths) {
-          // Search under paths to allow forbidding folders.
-          if (filePath === forbiddenPath || filePath.startsWith(`${forbiddenPath}${path.sep}`)) {
-            isForbidden = true;
-            break;
-          }
-        }
-        if (isForbidden) {
-          // If it's forbidden and we're ignoring it, remove from the unseenFilePaths set, since we
-          // don't want to add it to the seenSourceFilePaths set below.
-          if (ignoreForbidden) {
-            unseenFilePaths.delete(filePath);
-          } else {
-            throw new Error(
-              `Cannot change the file at path ${JSON.stringify(filePath)} while running watch mode.`
-            );
-          }
-        } else {
-          seenFilePaths.add(filePath);
-        }
-      }
-
+    if (unseenFilePaths.size) {
       // Determine which files are ignored or otherwise and stash them away for later.
       // We can perform this check in one call to git to save time.
       const unseenIgnoredFilePaths: Set<string> = await git.checkIgnore(unseenFilePaths);
@@ -120,6 +94,59 @@ async function* _waitForSourceChangesAsync(
         unseenFilePaths,
         unseenIgnoredFilePaths
       );
+      if (unseenSourceFilePaths.size) {
+        // Use a StaticFileSystemAdapter containing only the unseen source files to determine which files
+        // are forbidden or ignored, allowing us to use in-memory globbing.
+        const unseenSourceFileSystemAdapter: StaticFileSystemAdapter = new StaticFileSystemAdapter(
+          unseenSourceFilePaths
+        );
+        const unseenSourceFileGlobOptions: glob.Options = {
+          fs: unseenSourceFileSystemAdapter,
+          cwd: watcher.options.cwd,
+          absolute: true,
+          dot: true
+        };
+
+        // Validate that all unseen source files are allowed for watch mode. We need to convert slashes from
+        // the globber if on Windows, since the globber will return the paths with forward slashes.
+        let forbiddenFilePaths: string[] = glob.sync(forbiddenSourceFileGlobs, unseenSourceFileGlobOptions);
+        if (IS_WINDOWS) {
+          forbiddenFilePaths = forbiddenFilePaths.map(Path.convertToBackslashes);
+        }
+        if (ignoreForbidden) {
+          // If it's forbidden and we're ignoring forbidden files, remove from unseenFilePaths and
+          // unseenSourceFilePaths so that we will ingest it as a new file on future changes.
+          for (const forbiddenFilePath of forbiddenFilePaths) {
+            unseenFilePaths.delete(forbiddenFilePath);
+            unseenSourceFilePaths.delete(forbiddenFilePath);
+          }
+        } else if (forbiddenFilePaths.length) {
+          // Error and report the first forbidden file for readability reasons
+          throw new Error(
+            `Changes to the file at path "${forbiddenFilePaths[0]}" are forbidden while running ` +
+              `in watch mode.`
+          );
+        }
+
+        // If the unseen source file is ignored, remove it from the set of unseenSourceFiles. This file
+        // will then be treated as a non-source file and will not trigger rebuilds. We need to convert
+        // slashes from the globber if on Windows, since the globber will return the paths with forward
+        // slashes.
+        let ignoredFilePaths: string[] = glob.sync(ignoredSourceFileGlobs, unseenSourceFileGlobOptions);
+        if (IS_WINDOWS) {
+          ignoredFilePaths = ignoredFilePaths.map(Path.convertToBackslashes);
+        }
+        for (const ignoredFilePath of ignoredFilePaths) {
+          unseenSourceFilePaths.delete(ignoredFilePath);
+        }
+      }
+
+      // Add the new files to the set of seen files
+      for (const filePath of unseenFilePaths) {
+        seenFilePaths.add(filePath);
+      }
+
+      // Add the new source files to the set of seen source files
       for (const sourceFilePath of unseenSourceFilePaths) {
         seenSourceFilePaths.add(sourceFilePath);
       }
@@ -249,7 +276,7 @@ async function* _waitForSourceChangesAsync(
         // changedFiles map, not whether or not they exist on disk.
         options.staticFileSystemAdapter.addFile(filePath);
         if (state.isSourceFile) {
-          terminal.writeVerboseLine(`Detected change to source file ${JSON.stringify(filePath)}`);
+          terminal.writeVerboseLine(`Detected change to source file "${filePath}"`);
           containsSourceFiles = true;
         }
       }
@@ -445,7 +472,8 @@ export class HeftActionRunner {
       watcher,
       git,
       changedFiles,
-      staticFileSystemAdapter
+      staticFileSystemAdapter,
+      watchOptions: this._internalHeftSession.watchOptions
     });
     await iterator.next();
 
@@ -488,6 +516,7 @@ export class HeftActionRunner {
           // the existence of files in the changedFiles map.
           staticFileSystemAdapter.removeAllFiles();
           this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+          this._terminal.writeLine('');
           await sourceChangesPromise;
         }
       } catch (e) {
@@ -496,6 +525,7 @@ export class HeftActionRunner {
         // encountering an error.
         if (e instanceof AlreadyReportedError) {
           this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+          this._terminal.writeLine('');
           await sourceChangesPromise;
         } else {
           // We don't know where this error is coming from, throw

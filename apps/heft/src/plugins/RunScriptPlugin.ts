@@ -31,8 +31,10 @@ export interface IRunScript {
   /**
    * The method that is called by the RunScriptPlugin to run the script.
    */
-  runAsync?: (options: IRunScriptOptions) => Promise<void>;
+  runAsync: (options: IRunScriptOptions) => Promise<void>;
 }
+
+const PLUGIN_NAME: 'run-script-plugin' = 'run-script-plugin';
 
 export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPluginOptions> {
   public apply(
@@ -40,12 +42,9 @@ export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPlugin
     heftConfiguration: HeftConfiguration,
     pluginOptions: IRunScriptPluginOptions
   ): void {
-    heftTaskSession.hooks.run.tapPromise(
-      heftTaskSession.taskName,
-      async (runOptions: IHeftTaskRunHookOptions) => {
-        await this._runScriptAsync(heftTaskSession, heftConfiguration, pluginOptions, runOptions);
-      }
-    );
+    heftTaskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
+      await this._runScriptAsync(heftTaskSession, heftConfiguration, pluginOptions, runOptions);
+    });
   }
 
   private async _runScriptAsync(

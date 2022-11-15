@@ -18,8 +18,8 @@ import { Eslint } from './Eslint';
 import { Tslint } from './Tslint';
 import type { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
-const PLUGIN_NAME: string = 'LintPlugin';
-const TYPESCRIPT_PLUGIN_NAME: typeof TypeScriptPluginName = 'TypeScriptPlugin';
+const PLUGIN_NAME: 'lint-plugin' = 'lint-plugin';
+const TYPESCRIPT_PLUGIN_NAME: typeof TypeScriptPluginName = 'typescript-plugin';
 const ESLINTRC_JS_FILENAME: string = '.eslintrc.js';
 const ESLINTRC_CJS_FILENAME: string = '.eslintrc.cjs';
 

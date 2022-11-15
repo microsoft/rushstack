@@ -9,7 +9,7 @@ import type {
   IHeftTaskRunHookOptions
 } from '@rushstack/heft';
 
-const PLUGIN_NAME: 'TrustDevCertPlugin' = 'TrustDevCertPlugin';
+const PLUGIN_NAME: 'trust-dev-certificate-plugin' = 'trust-dev-certificate-plugin';
 
 export default class TrustDevCertificatePlugin implements IHeftTaskPlugin {
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {

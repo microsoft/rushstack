@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "LintPlugin",
+      "pluginName": "lint-plugin",
       "entryPoint": "./lib/LintPlugin"
     }
   ]

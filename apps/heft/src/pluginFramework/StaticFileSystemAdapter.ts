@@ -63,9 +63,14 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
     }
     // We should only need to implement these methods for the purposes of fast-glob
     return {
+      isFile: () => !entry.children,
       isDirectory: () => !!entry.children,
-      isFile: () => !entry.children
-    } as fs.Stats;
+      isBlockDevice: () => false,
+      isCharacterDevice: () => false,
+      isSymbolicLink: () => false,
+      isFIFO: () => false,
+      isSocket: () => false
+    };
   }) as StatSynchronousMethod;
 
   /** { @inheritdoc fs.stat } */
@@ -150,10 +155,14 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
         // Partially implement the fs.Dirent interface, only including the properties used by fast-glob
         return {
           name: entry.name,
-          isDirectory: () => !!entry.children,
           isFile: () => !entry.children,
-          isSymbolicLink: () => false
-        } as fs.Dirent;
+          isDirectory: () => !!entry.children,
+          isBlockDevice: () => false,
+          isCharacterDevice: () => false,
+          isSymbolicLink: () => false,
+          isFIFO: () => false,
+          isSocket: () => false
+        };
       });
     } else {
       return result.map((entry: IVirtualFileSystemEntry) => entry.name);

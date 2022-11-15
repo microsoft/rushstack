@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncParallelHook } from 'tapable';
-
-import { HeftTaskSession, type IHeftTaskCleanHookOptions } from './HeftTaskSession';
+import { HeftTaskSession } from './HeftTaskSession';
 import { HeftPluginHost } from './HeftPluginHost';
 import { ScopedLogger } from './logging/ScopedLogger';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
@@ -20,7 +18,6 @@ export interface IHeftPhaseSessionOptions extends IInternalHeftSessionOptions {
 }
 
 export class HeftPhaseSession extends HeftPluginHost {
-  public readonly cleanHook: AsyncParallelHook<IHeftTaskCleanHookOptions>;
   public readonly loggingManager: LoggingManager;
   public readonly metricsCollector: MetricsCollector;
   public readonly phaseLogger: ScopedLogger;
@@ -35,8 +32,6 @@ export class HeftPhaseSession extends HeftPluginHost {
     this.metricsCollector = options.metricsCollector;
     this.loggingManager = options.loggingManager;
 
-    // Create and own the clean hook, to be shared across all task sessions.
-    this.cleanHook = new AsyncParallelHook(['cleanHookOptions']);
     this.phaseLogger = this.loggingManager.requestScopedLogger(options.phase.phaseName);
     this.cleanLogger = this.loggingManager.requestScopedLogger(`${options.phase.phaseName}:clean`);
   }
@@ -51,8 +46,6 @@ export class HeftPhaseSession extends HeftPluginHost {
         ...this._options,
         task,
         taskParameters: this._options.parameterManager.getParametersForPlugin(task.pluginDefinition),
-        // Each task session will share the clean hook but have its own run hook
-        cleanHook: this.cleanHook,
         pluginHost: this
       });
       this._taskSessionsByTask.set(task, taskSession);

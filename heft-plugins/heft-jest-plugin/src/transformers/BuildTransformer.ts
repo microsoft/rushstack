@@ -369,11 +369,6 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
 
       // Example: /path/to/project/lib/folder1/folder2/Example.js.map
       const sourceMapPath: string = `${transpiledPath}.map`;
-
-      if (!heftJestDataFile.skipTimestampCheck) {
-        BuildTransformer._waitForTranspiledFile(sourcePath, transpiledPath);
-      }
-
       const transpiledText: string = BuildTransformer._getTranspiledText(transpiledPath);
       const sourceMapText: string = BuildTransformer._getSourceMapText(sourceMapPath);
 
@@ -422,11 +417,6 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
 
       // Example: /path/to/project/lib/folder1/folder2/Example.js.map
       const sourceMapPath: string = `${transpiledPath}.map`;
-
-      if (!heftJestDataFile.skipTimestampCheck) {
-        await BuildTransformer._waitForTranspiledFileAsync(sourcePath, transpiledPath);
-      }
-
       const [transpiledText, sourceMapText] = await Promise.all([
         BuildTransformer._getTranspiledTextAsync(transpiledPath),
         BuildTransformer._getSourceMapTextAsync(sourceMapPath)

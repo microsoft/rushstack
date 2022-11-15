@@ -10,18 +10,13 @@ import { FileError, InternalError, LegacyAdapters } from '@rushstack/node-core-l
 import type {
   HeftConfiguration,
   IHeftTaskSession,
-  IHeftTaskCleanHookOptions,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IScopedLogger,
   IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
 
-import type {
-  IWebpackConfiguration,
-  IWebpackConfigurationWithDevServer,
-  IWebpackPluginAccessor
-} from './shared';
+import type { IWebpackConfiguration, IWebpackPluginAccessor } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
 type ExtendedCompiler = TWebpack.Compiler & { watching: TWebpack.Watching };
@@ -35,7 +30,7 @@ export interface IWebpackPluginOptions {
 /**
  * @public
  */
-export const PLUGIN_NAME: 'Webpack5Plugin' = 'Webpack5Plugin';
+export const PLUGIN_NAME: 'webpack5-plugin' = 'webpack5-plugin';
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
@@ -47,6 +42,7 @@ const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
  * @internal
  */
 export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
+  private _accessor: IWebpackPluginAccessor | undefined;
   private _serve: boolean = false;
   private _webpack: typeof TWebpack | undefined;
   private _webpackCompiler: ExtendedCompiler | ExtendedMultiCompiler | undefined;
@@ -55,14 +51,22 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private _webpackCompilationDonePromise: Promise<void> | undefined;
   private _webpackCompilationDonePromiseResolveFn: (() => void) | undefined;
 
-  public readonly accessor: IWebpackPluginAccessor = {
-    hooks: {
-      onLoadConfiguration: new AsyncSeriesBailHook(),
-      onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
-      onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
-      onEmitStats: new AsyncParallelHook(['webpackStats'])
+  public get accessor(): IWebpackPluginAccessor {
+    if (!this._accessor) {
+      this._accessor = {
+        hooks: {
+          onLoadConfiguration: new AsyncSeriesBailHook(),
+          onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
+          onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
+          onEmitStats: new AsyncParallelHook(['webpackStats'])
+        },
+        parameters: {
+          serve: this._serve
+        }
+      };
     }
-  };
+    return this._accessor;
+  }
 
   public apply(
     taskSession: IHeftTaskSession,
@@ -77,28 +81,6 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         )} parameter is only available when running in watch mode.`
       );
     }
-
-    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      // Obtain the finalized webpack configuration
-      const webpackConfiguration: IWebpackConfiguration | undefined =
-        await this._getWebpackConfigurationAsync(taskSession, heftConfiguration, options);
-      if (webpackConfiguration) {
-        const webpackConfigurationArray: IWebpackConfigurationWithDevServer[] = Array.isArray(
-          webpackConfiguration
-        )
-          ? webpackConfiguration
-          : [webpackConfiguration];
-
-        // Add each output path to the clean list
-        // NOTE: Webpack plugins that write assets to paths that start with '../' or outside of the
-        // `output.path` will need to be manually added to the phase-level cleanup list in heft.json.
-        for (const config of webpackConfigurationArray) {
-          if (config.output?.path) {
-            cleanOptions.addDeleteOperations({ sourcePath: config.output.path });
-          }
-        }
-      }
-    });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await this._runWebpackAsync(taskSession, heftConfiguration, options);
@@ -291,7 +273,10 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
             }
           },
           client: {
-            logging: 'info'
+            logging: 'info',
+            webSocketURL: {
+              port: 8080
+            }
           },
           port: 8080,
           onListening: (server: TWebpackDevServer) => {
@@ -327,13 +312,29 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
             true,
             taskSession.logger.terminal
           );
+
+          // Update the web socket URL to use the hostname provided by the certificate
+          const clientConfiguration: TWebpackDevServer.Configuration['client'] = devServerOptions.client;
+          const hostname: string | undefined = certificate.subjectAltNames?.[0];
+          if (hostname && typeof clientConfiguration === 'object') {
+            const { webSocketURL } = clientConfiguration;
+            if (typeof webSocketURL === 'object') {
+              clientConfiguration.webSocketURL = {
+                ...webSocketURL,
+                hostname
+              };
+            }
+          }
+
           devServerOptions = {
             ...devServerOptions,
             server: {
               type: 'https',
               options: {
+                minVersion: 'TLSv1.3',
                 key: certificate.pemKey,
-                cert: certificate.pemCertificate
+                cert: certificate.pemCertificate,
+                ca: certificate.pemCaCertificate
               }
             }
           };

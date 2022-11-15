@@ -197,13 +197,7 @@ export interface IHeftRecordMetricsHookOptions {
 }
 
 // @public
-export interface IHeftTaskCleanHookOptions {
-    readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
-}
-
-// @public
 export interface IHeftTaskHooks {
-    readonly clean: AsyncParallelHook<IHeftTaskCleanHookOptions>;
     readonly run: AsyncParallelHook<IHeftTaskRunHookOptions>;
     readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
 }
@@ -266,7 +260,7 @@ export interface IRigPackageResolver {
 
 // @beta
 export interface IRunScript {
-    runAsync?: (options: IRunScriptOptions) => Promise<void>;
+    runAsync: (options: IRunScriptOptions) => Promise<void>;
 }
 
 // @beta

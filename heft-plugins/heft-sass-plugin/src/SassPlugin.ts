@@ -8,7 +8,6 @@ import type {
   IHeftTaskSession,
   IHeftPlugin,
   IScopedLogger,
-  IHeftTaskCleanHookOptions,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
@@ -18,7 +17,7 @@ import { ISassConfiguration, SassProcessor } from './SassProcessor';
 
 export interface ISassConfigurationJson extends Partial<ISassConfiguration> {}
 
-const PLUGIN_NAME: string = 'SassPlugin';
+const PLUGIN_NAME: 'sass-plugin' = 'sass-plugin';
 const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-sass-plugin.schema.json`;
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
@@ -31,20 +30,6 @@ export default class SassPlugin implements IHeftPlugin {
    * Generate typings for Sass files before TypeScript compilation.
    */
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    taskSession.hooks.clean.tapPromise(PLUGIN_NAME, async (cleanOptions: IHeftTaskCleanHookOptions) => {
-      const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
-        heftConfiguration,
-        taskSession.logger
-      );
-      cleanOptions.addDeleteOperations({ sourcePath: sassConfiguration.generatedTsFolder });
-      for (const secondaryGeneratedTsFolder of sassConfiguration.secondaryGeneratedTsFolders || []) {
-        cleanOptions.addDeleteOperations({ sourcePath: secondaryGeneratedTsFolder });
-      }
-      for (const cssOutputFolder of sassConfiguration.cssOutputFolders || []) {
-        cleanOptions.addDeleteOperations({ sourcePath: cssOutputFolder });
-      }
-    });
-
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration);
     });
@@ -112,7 +97,7 @@ export default class SassPlugin implements IHeftPlugin {
       );
       this._sassProcessor = new SassProcessor({
         sassConfiguration,
-        buildFolderPath: heftConfiguration.buildFolderPath
+        buildFolder: heftConfiguration.buildFolderPath
       });
     }
     return this._sassProcessor;

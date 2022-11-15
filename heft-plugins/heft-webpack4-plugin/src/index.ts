@@ -8,5 +8,6 @@ export type {
   IWebpackConfiguration,
   IWebpackConfigurationFnEnvironment,
   IWebpackPluginAccessor,
-  IWebpackPluginAccessorHooks
+  IWebpackPluginAccessorHooks,
+  IWebpackPluginAccessorParameters
 } from './shared';

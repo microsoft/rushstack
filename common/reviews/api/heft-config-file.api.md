@@ -20,12 +20,28 @@ export class ConfigurationFile<TConfigurationFile> {
 }
 
 // @beta (undocumented)
-export interface IConfigurationFileOptions<TConfigurationFile> {
+export type IConfigurationFileOptions<TConfigurationFile> = IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile> | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile>;
+
+// @beta (undocumented)
+export interface IConfigurationFileOptionsBase<TConfigurationFile> {
     jsonPathMetadata?: IJsonPathsMetadata;
-    jsonSchemaPath: string;
     projectRelativeFilePath: string;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
     propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
+}
+
+// @beta (undocumented)
+export interface IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile> extends IConfigurationFileOptionsBase<TConfigurationFile> {
+    // (undocumented)
+    jsonSchemaObject?: never;
+    jsonSchemaPath: string;
+}
+
+// @beta (undocumented)
+export interface IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile> extends IConfigurationFileOptionsBase<TConfigurationFile> {
+    jsonSchemaObject: object;
+    // (undocumented)
+    jsonSchemaPath?: never;
 }
 
 // @beta

@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "ApiExtractorPlugin",
+      "pluginName": "api-extractor-plugin",
       "entryPoint": "./lib/ApiExtractorPlugin"
     }
   ]

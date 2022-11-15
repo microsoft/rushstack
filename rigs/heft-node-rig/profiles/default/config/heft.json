@@ -10,9 +10,17 @@
    */
   // "extends": "base-project/config/heft.json",
 
+  "watchOptions": {
+    "ignoredSourceFileGlobs": [
+      // Snapshots from Jest are updated even when the source file hasn't changed
+      "**/*.snap"
+    ]
+  },
+
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }, { "sourcePath": "lib-commonjs" }],
       "tasksByName": {
         "typescript": {
           "taskPlugin": {
@@ -39,8 +47,7 @@
       "tasksByName": {
         "jest": {
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-jest-plugin",
-            "pluginName": "JestPlugin"
+            "pluginPackage": "@rushstack/heft-jest-plugin"
           }
         }
       }
