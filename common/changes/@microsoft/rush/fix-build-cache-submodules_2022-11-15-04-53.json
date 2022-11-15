@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Supports git submodule in build cache",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
