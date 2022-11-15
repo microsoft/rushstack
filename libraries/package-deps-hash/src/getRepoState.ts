@@ -309,7 +309,7 @@ export function _parseGitSubmoduleForEachGitLsTree(output: string): Record<strin
   output.split('\n').forEach((line) => {
     if (line) {
       line = line.trim();
-      const submodulePath: string | undefined = line.match(/'(.*)'/)?.[1];
+      const submodulePath: string | undefined = line.match(/\s'(.*)'$/)?.[1];
       if (submodulePath) {
         currentSubmodulePath = submodulePath;
         stateBySubmodulePath[currentSubmodulePath] = {};
