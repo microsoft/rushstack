@@ -4,9 +4,17 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 
+  "watchOptions": {
+    "ignoredSourceFileGlobs": [
+      // Snapshots from Jest are updated even when the source file hasn't changed
+      "**/*.snap"
+    ]
+  },
+
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }, { "sourcePath": "lib-commonjs" }],
       "tasksByName": {
         "typescript": {
           "taskPlugin": {
@@ -47,7 +55,7 @@
         "trust-dev-cert": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-dev-cert-plugin",
-            "pluginName": "TrustDevCertificatePlugin"
+            "pluginName": "trust-dev-certificate-plugin"
           }
         }
       }
@@ -58,7 +66,7 @@
         "untrust-dev-cert": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-dev-cert-plugin",
-            "pluginName": "UntrustDevCertificatePlugin"
+            "pluginName": "untrust-dev-certificate-plugin"
           }
         }
       }

@@ -781,6 +781,7 @@ export class PackageNameParser {
 // @public
 export class Path {
     static convertToBackslashes(inputPath: string): string;
+    static convertToPlatformDefault(inputPath: string): string;
     static convertToSlashes(inputPath: string): string;
     static formatConcisely(options: IPathFormatConciselyOptions): string;
     static formatFileLocation(options: IPathFormatFileLocationOptions): string;

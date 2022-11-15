@@ -21,13 +21,19 @@ const GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT: string = '<!-- GENERATED PRO
 const GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY END -->';
 
 export class ReadmeAction extends CommandLineAction {
-  private _verifyParameter!: CommandLineFlagParameter;
+  private readonly _verifyParameter: CommandLineFlagParameter;
 
   public constructor() {
     super({
       actionName: 'readme',
       summary: 'Generates README.md project table based on rush.json inventory',
       documentation: "Use this to update the repo's README.md"
+    });
+
+    this._verifyParameter = this.defineFlagParameter({
+      parameterLongName: '--verify',
+      parameterShortName: '-v',
+      description: 'Verify that the README.md file is up-to-date.'
     });
   }
 
@@ -190,13 +196,5 @@ export class ReadmeAction extends CommandLineAction {
     } else {
       console.log(`The README.md is up to date.`);
     }
-  }
-
-  protected onDefineParameters(): void {
-    this._verifyParameter = this.defineFlagParameter({
-      parameterLongName: '--verify',
-      parameterShortName: '-v',
-      description: 'Verify that the README.md file is up-to-date.'
-    });
   }
 }

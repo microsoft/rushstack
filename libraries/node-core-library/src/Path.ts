@@ -229,6 +229,12 @@ export class Path {
   public static convertToBackslashes(inputPath: string): string {
     return inputPath.replace(/\//g, '\\');
   }
+  /**
+   * Replaces slashes or backslashes with the appropriate slash for the current operating system.
+   */
+  public static convertToPlatformDefault(inputPath: string): string {
+    return path.sep === '/' ? Path.convertToSlashes(inputPath) : Path.convertToBackslashes(inputPath);
+  }
 
   /**
    * Returns true if the specified path is a relative path and does not use `..` to walk upwards.

@@ -87,7 +87,7 @@ export class GitEmailPolicy {
     }
 
     // Show the user's name as well.
-    // Ex. "Mr. Example <mr@example.com>"
+    // Ex. "Example Name <name@example.com>"
     let fancyEmail: string = colors.cyan(userEmail);
     try {
       const userName: string = Utilities.executeCommandAndCaptureOutput(
@@ -126,9 +126,9 @@ export class GitEmailPolicy {
 
   public static getEmailExampleLines(rushConfiguration: RushConfiguration): string[] {
     return [
-      colors.cyan('    git config --local user.name "Mr. Example"'),
+      colors.cyan('    git config --local user.name "Example Name"'),
       colors.cyan(
-        `    git config --local user.email "${rushConfiguration.gitSampleEmail || 'example@contoso.com'}"`
+        `    git config --local user.email "${rushConfiguration.gitSampleEmail || 'name@example.com'}"`
       )
     ];
   }

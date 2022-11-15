@@ -21,11 +21,6 @@ export class InitAction extends CommandLineAction {
     });
   }
 
-  protected onDefineParameters(): void {
-    // override
-    // No parameters yet
-  }
-
   protected async onExecute(): Promise<void> {
     // override
     const inputFilePath: string = path.resolve(__dirname, '../schemas/api-extractor-template.json');

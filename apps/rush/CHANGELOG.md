@@ -1,6 +1,99 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 17 Sep 2022 00:56:37 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Nov 2022 18:43:51 GMT and should not be manually modified.
+
+## 5.83.3
+Tue, 15 Nov 2022 18:43:51 GMT
+
+### Patches
+
+- Fix an issue where Git submodules were not handled correctly by the build cache (GitHub #1711)
+
+## 5.83.2
+Mon, 14 Nov 2022 05:15:22 GMT
+
+### Updates
+
+- Ensure autoinstaller lockfiles are not leftover after an error
+
+## 5.83.1
+Sat, 12 Nov 2022 04:40:57 GMT
+
+### Updates
+
+- Update the "rush init" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds
+
+## 5.83.0
+Fri, 11 Nov 2022 03:51:49 GMT
+
+### Updates
+
+- Add credentialType option for rush setup command
+- Rush "setup" command works even if plugins cannot be installed
+- Add support for integer, integer list, string list, and choice list parameters in plugins.
+- Introduce a `rush upgrade-interactive` action that provides an interactive way to upgrade outdated dependencies.
+- Fix a regression from Rush 5.79.0 where "rush init" did not create the pnpm-config.json file automatically
+
+## 5.82.1
+Wed, 19 Oct 2022 23:44:02 GMT
+
+_Version update only_
+
+## 5.82.0
+Mon, 17 Oct 2022 22:14:39 GMT
+
+### Updates
+
+- Replace Travis with GitHub Actions in the `rush init` template."
+- Handle case in ProjectWatcher where a project contains no git tracked files or status information is or was unavailable.
+- Refactor @rushstack/rush-azure-storage-build-cache-plugin to expose an API for generating and caching Azure credentials for other workloads, in addition to Storage.
+- Validate the change type in changefiles during publishing.
+
+## 5.81.0
+Sat, 08 Oct 2022 02:30:30 GMT
+
+### Updates
+
+- Add a `rush remove` command that removes one or more dependencies from a project.
+- Support passing a lockfile to "install-run.js" and "install-run-rush.js" to ensure stable installation on CI.
+- Add missing "environmentVariables" property to "pnpm-config.json" schema to restore feature parity with "rush.json" "pnpmOptions" field.
+
+## 5.80.1
+Mon, 03 Oct 2022 23:11:35 GMT
+
+### Updates
+
+- Add a more useful error message in cases when a merge base for `rush change` cannot be determined.
+
+## 5.80.0
+Thu, 29 Sep 2022 07:13:24 GMT
+
+### Updates
+
+- Include the operation duration in the telemetry data that was recorded during the non-cached run when a cache hit occurs.
+- Fix an error message that always says to run "rush update --purge" even if the user only needs to run "rush install --purge."
+- Fix an issue where a "Current PNPM store path does not match the last one used." error will erroneously get thrown on Windows with an unchanged path, but with a forward slash instead of a backslash.
+- Remove fallback from tar binary to npm 'tar' package. The npm 'tar' package would sometimes produce invalid output if the cache entry was corrupt.
+- Remove gender from the git config example in rush.json
+
+## 5.79.0
+Sat, 24 Sep 2022 17:37:03 GMT
+
+### Minor changes
+
+- Add a `common/config/pnpm-config.json`, which is used to specify fields like `overrides`, `packageExtensions`, and `neverBuiltDependencies` that would otherwise be placed in a PNPM workspace repo's root-level `package.json`'s `pnpm` field.
+
+### Updates
+
+- Add a `--commit` and `--commit-message` flag to `rush change` that commits the change files automatically.
+
+## 5.78.1
+Fri, 23 Sep 2022 02:54:44 GMT
+
+### Updates
+
+- Fix Git detection when the current working directory is unrelated to the Rush workspace.
+- Fix an error that ocurred if an autoinstaller's  "node_modules" folder was manually deleted (GitHub #2987)
 
 ## 5.78.0
 Sat, 17 Sep 2022 00:56:37 GMT
@@ -1225,8 +1318,9 @@ Tue, 26 Nov 2019 00:53:52 GMT
 ## 5.17.1
 Thu, 21 Nov 2019 00:50:15 GMT
 
-### Updates
+### Patches
 
+- Remove an error thrown when the --registry and --pack arguments are used on rush publish, because --registry might be required to check if a package has already been published against a custom registry.
 - Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies.
 
 ## 5.17.0

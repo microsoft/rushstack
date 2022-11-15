@@ -186,7 +186,7 @@ export function applyWorkingTreeState(
 ): void {
   const statusResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
     gitPath || 'git',
-    ['--no-optional-locks', 'status', '-z', '-u', '--no-renames', '--'],
+    ['--no-optional-locks', 'status', '-z', '-u', '--no-renames', '--ignore-submodules', '--'],
     {
       currentWorkingDirectory: rootDirectory
     }
@@ -215,7 +215,7 @@ export function applyWorkingTreeState(
     const hashObjectResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
       gitPath || 'git',
       ['hash-object', '--stdin-paths'],
-      { input: filesToHash.join('\n') }
+      { currentWorkingDirectory: rootDirectory, input: filesToHash.join('\n') }
     );
 
     if (hashObjectResult.status !== 0) {
@@ -247,6 +247,131 @@ export function applyWorkingTreeState(
 }
 
 /**
+ * Parse the list of all git submodule paths from the output of "git submodule status"
+ *
+ * @param output - The raw output from Git
+ * @internal
+ */
+export function _parseGitSubmoduleStatus(output: string): string[] {
+  const submodulePaths: string[] = [];
+
+  // <hash> <path> (heads/main)\n
+  output.split('\n').forEach((line) => {
+    if (line) {
+      const [, submodulePath] = line.trim().split(' ');
+      submodulePaths.push(submodulePath);
+    }
+  });
+  return submodulePaths;
+}
+
+/**
+ * Get the list of all git submodule paths
+ * @param rootDirectory - The root directory of the Git repository
+ * @param gitPath - The path to the Git executable
+ * @internal
+ */
+function getSubmodulePaths(rootDirectory: string, gitPath?: string): string[] {
+  const submoduleStatusResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+    gitPath || 'git',
+    ['submodule', 'status'],
+    {
+      currentWorkingDirectory: rootDirectory
+    }
+  );
+
+  if (submoduleStatusResult.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
+    throw new Error(
+      `git submodule status exited with status ${submoduleStatusResult.status}: ${submoduleStatusResult.stderr}`
+    );
+  }
+
+  // <hash> <path> (heads/main)\n
+  return _parseGitSubmoduleStatus(submoduleStatusResult.stdout);
+}
+
+/**
+ * Parse the state of all git submodule from the output of "git submodule foreach git --no-optional-locks ls-tree -r --full-name HEAD --"
+ *
+ * @param output - The raw output from Git
+ * @internal
+ */
+export function _parseGitSubmoduleForEachGitLsTree(output: string): Record<string, Record<string, string>> {
+  const stateBySubmodulePath: Record<string, Record<string, string>> = {};
+
+  let currentSubmodulePath: string = '';
+
+  // Note: Entering maybe translated to other languages by Git
+  // Entering '<submoduleFolder>'\n
+  // <mode> <type> <newhash>\t<path>\n
+  output.split('\n').forEach((line) => {
+    if (line) {
+      line = line.trim();
+      const submodulePath: string | undefined = line.match(/\s'(.*)'$/)?.[1];
+      if (submodulePath) {
+        currentSubmodulePath = submodulePath;
+        stateBySubmodulePath[currentSubmodulePath] = {};
+      } else {
+        const tabIndex: number = line.indexOf('\t');
+        const filePath: string = line.slice(tabIndex + 1);
+
+        // The newHash will be all zeros if the file is deleted, or a hash if it exists
+        const hash: string = line.slice(tabIndex - 40, tabIndex);
+        if (stateBySubmodulePath[currentSubmodulePath] === undefined) {
+          stateBySubmodulePath[currentSubmodulePath] = {};
+        }
+        stateBySubmodulePath[currentSubmodulePath][filePath] = hash;
+      }
+    }
+  });
+
+  return stateBySubmodulePath;
+}
+
+/**
+ * Augments the state value with modifications that are in git submodules
+ * @param rootDirectory - The root directory of the Git repository
+ * @param state - The current map of git path -> object hash. Will be mutated.
+ * @param gitPath - The path to the Git executable
+ * @internal
+ */
+function applySubmodulesTreeState(rootDirectory: string, state: Map<string, string>, gitPath?: string): void {
+  const submodulePaths: string[] = getSubmodulePaths(rootDirectory, gitPath);
+
+  if (submodulePaths.length === 0) {
+    return;
+  }
+
+  const submoduleLsTreeResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+    gitPath || 'git',
+    ['submodule', 'foreach', 'git', '--no-optional-locks', 'ls-tree', '-r', '--full-name', 'HEAD', '--'],
+    {
+      currentWorkingDirectory: rootDirectory
+    }
+  );
+
+  if (submoduleLsTreeResult.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
+    throw new Error(
+      `git ls-tree for submodules exited with status ${submoduleLsTreeResult.status}: ${submoduleLsTreeResult.stderr}`
+    );
+  }
+
+  const stateBySubmodulePath: Record<string, Record<string, string>> = _parseGitSubmoduleForEachGitLsTree(
+    submoduleLsTreeResult.stdout
+  );
+
+  for (const submodulePath of submodulePaths) {
+    for (const [filePath, hash] of Object.entries(stateBySubmodulePath[submodulePath])) {
+      state.set(`${submodulePath}/${filePath}`, hash);
+    }
+  }
+}
+
+/**
  * Gets the object hashes for all files in the Git repo, combining the current commit with working tree state.
  * @param currentWorkingDirectory - The working directory. Only used to find the repository root.
  * @param gitPath - The path to the Git executable
@@ -270,6 +395,8 @@ export function getRepoState(currentWorkingDirectory: string, gitPath?: string):
   }
 
   const state: Map<string, string> = parseGitLsTree(lsTreeResult.stdout);
+
+  applySubmodulesTreeState(rootDirectory, state, gitPath);
 
   applyWorkingTreeState(rootDirectory, state, gitPath);
 

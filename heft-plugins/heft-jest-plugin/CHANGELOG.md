@@ -1,6 +1,56 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 13 Sep 2022 18:22:20 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+
+## 0.3.45
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 0.3.44
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 0.3.43
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 0.3.42
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 0.3.41
+Fri, 14 Oct 2022 15:26:32 GMT
+
+_Version update only_
+
+## 0.3.40
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 0.3.39
+Tue, 11 Oct 2022 23:49:12 GMT
+
+_Version update only_
+
+## 0.3.38
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 0.3.37
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 0.3.36
+Tue, 27 Sep 2022 22:17:20 GMT
+
+_Version update only_
 
 ## 0.4.0-dev.1
 Fri, 13 Sep 2022 18:22:20 GMT

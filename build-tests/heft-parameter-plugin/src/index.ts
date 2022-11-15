@@ -16,7 +16,7 @@ import type {
   CommandLineIntegerListParameter
 } from '@rushstack/heft';
 
-const PLUGIN_NAME: string = 'HeftParameterPlugin';
+const PLUGIN_NAME: string = 'heft-parameter-plugin';
 
 export default class HeftParameterPlugin implements IHeftTaskPlugin {
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {

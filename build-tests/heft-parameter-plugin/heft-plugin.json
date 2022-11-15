@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "HeftParameterPlugin",
+      "pluginName": "heft-parameter-plugin",
       "entryPoint": "./lib/index",
       "parameterScope": "heft-parameter-plugin",
       "parameters": [

@@ -2,6 +2,210 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.3.45",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.45",
+      "date": "Tue, 08 Nov 2022 01:20:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.7` to `^0.48.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.44",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.44",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.6` to `^0.48.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.43",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.43",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.5` to `^0.48.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.42",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.42",
+      "date": "Mon, 17 Oct 2022 15:16:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.4` to `^0.48.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.41",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.41",
+      "date": "Fri, 14 Oct 2022 15:26:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.3` to `^0.48.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.40",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.40",
+      "date": "Thu, 13 Oct 2022 00:20:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.2` to `^0.48.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.39",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.39",
+      "date": "Tue, 11 Oct 2022 23:49:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.1` to `^0.48.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.38",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.38",
+      "date": "Mon, 10 Oct 2022 15:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.32.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.0` to `^0.48.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.37",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.37",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.32.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.11` to `^0.48.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.36",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.36",
+      "date": "Tue, 27 Sep 2022 22:17:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.47.10` to `^0.47.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0-dev.1",
       "tag": "@rushstack/heft-jest-plugin_v0.4.0-dev.1",
       "date": "Fri, 13 Sep 2022 18:22:20 GMT",
@@ -131,7 +335,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.3.31",
       "date": "Fri, 02 Sep 2022 17:48:43 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.30.0`"
@@ -162,7 +365,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.3.29",
       "date": "Wed, 31 Aug 2022 00:42:46 GMT",
       "comments": {
-        
         "patch": [
           {
             "comment": "Disable reading and writing of Jest cache due to unexpected caching behavior"
@@ -595,7 +797,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.3.8",
       "date": "Fri, 17 Jun 2022 09:17:54 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.6`"
@@ -620,6 +821,11 @@
       "tag": "@rushstack/heft-jest-plugin_v0.3.7",
       "date": "Fri, 17 Jun 2022 00:16:18 GMT",
       "comments": {
+        "patch": [
+          {
+            "comment": "Fix resolution of \"jest-environment-node\" and \"jest-environment-jsdom\" with strict dependencies."
+          }
+        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.5`"
@@ -638,11 +844,6 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.45.6` to `^0.45.7`"
-          }
-        ],
-        "patch": [
-          {
-            "comment": "Fix resolution of \"jest-environment-node\" and \"jest-environment-jsdom\" with strict dependencies."
           }
         ]
       }
@@ -748,8 +949,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.3.1",
       "date": "Wed, 04 May 2022 23:29:13 GMT",
       "comments": {
-        
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.23.1`"
@@ -768,7 +967,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.3.0",
       "date": "Tue, 26 Apr 2022 00:10:15 GMT",
       "comments": {
-        
         "minor": [
           {
             "comment": "(BREAKING CHANGE) Enable clearMocks: true by default"
@@ -894,7 +1092,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.2.10",
       "date": "Sat, 09 Apr 2022 19:07:48 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.21.2`"
@@ -913,6 +1110,11 @@
       "tag": "@rushstack/heft-jest-plugin_v0.2.9",
       "date": "Sat, 09 Apr 2022 02:24:26 GMT",
       "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          }
+        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.8.1`"
@@ -931,11 +1133,6 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.44.7` to `^0.44.8`"
-          }
-        ],
-        "patch": [
-          {
-            "comment": "Rename the \"master\" branch to \"main\"."
           }
         ]
       }
@@ -1017,7 +1214,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.2.4",
       "date": "Tue, 15 Mar 2022 19:15:53 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.12`"
@@ -1045,7 +1241,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.2.3",
       "date": "Fri, 11 Feb 2022 10:30:25 GMT",
       "comments": {
-        
         "patch": [
           {
             "comment": "Update JSON schema documentation"
@@ -1082,7 +1277,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.2.1",
       "date": "Mon, 27 Dec 2021 16:10:40 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.10`"
@@ -1110,17 +1304,17 @@
       "tag": "@rushstack/heft-jest-plugin_v0.2.0",
       "date": "Tue, 14 Dec 2021 19:27:51 GMT",
       "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade Jest to v27"
+          }
+        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.44.0`"
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.43.2` to `^0.44.0`"
-          }
-        ],
-        "minor": [
-          {
-            "comment": "Upgrade Jest to v27"
           }
         ]
       }
@@ -1322,7 +1516,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.44",
       "date": "Thu, 28 Oct 2021 00:08:22 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.42.0`"
@@ -1338,6 +1531,11 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.43",
       "date": "Wed, 27 Oct 2021 00:08:15 GMT",
       "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.7.4`"
@@ -1356,11 +1554,6 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.7` to `^0.41.8`"
-          }
-        ],
-        "patch": [
-          {
-            "comment": "Update the package.json repository field to include the directory property."
           }
         ]
       }
@@ -1550,7 +1743,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.33",
       "date": "Fri, 24 Sep 2021 00:09:29 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.8`"
@@ -1575,6 +1767,11 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.32",
       "date": "Thu, 23 Sep 2021 00:10:40 GMT",
       "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
+          }
+        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.7`"
@@ -1593,11 +1790,6 @@
           },
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.39.0` to `^0.39.1`"
-          }
-        ],
-        "patch": [
-          {
-            "comment": "Upgrade the `@types/node` dependency to version to version 12."
           }
         ]
       }
@@ -1733,7 +1925,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.24",
       "date": "Wed, 08 Sep 2021 00:08:03 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.37.1`"
@@ -1749,7 +1940,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.23",
       "date": "Fri, 03 Sep 2021 00:09:09 GMT",
       "comments": {
-        
         "patch": [
           {
             "comment": "Use package name as Jest 'displayName' by default and always log a test duration."
@@ -1999,7 +2189,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.9",
       "date": "Thu, 01 Jul 2021 15:08:27 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.17.1`"
@@ -2018,7 +2207,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.8",
       "date": "Wed, 30 Jun 2021 19:16:19 GMT",
       "comments": {
-        
         "patch": [
           {
             "comment": "Fix Jest configuration merging of \"transform\" and \"moduleNameMapper\" fields"
@@ -2031,7 +2219,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.7",
       "date": "Wed, 30 Jun 2021 15:06:54 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.17.0`"
@@ -2050,6 +2237,11 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.6",
       "date": "Wed, 30 Jun 2021 01:37:17 GMT",
       "comments": {
+        "patch": [
+          {
+            "comment": "Improve resolution logic to match closer to default Jest functionality and add \"<configDir>\" and \"<packageDir:...>\" tokens to improve flexibility when using extended configuration files"
+          }
+        ],
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.0`"
@@ -2060,11 +2252,6 @@
           {
             "comment": "Updating dependency \"@rushstack/heft\" from `^0.34.0` to `^0.34.1`"
           }
-        ],
-        "patch": [
-          {
-            "comment": "Improve resolution logic to match closer to default Jest functionality and add \"<configDir>\" and \"<packageDir:...>\" tokens to improve flexibility when using extended configuration files"
-          }
         ]
       }
     },
@@ -2073,7 +2260,6 @@
       "tag": "@rushstack/heft-jest-plugin_v0.1.5",
       "date": "Fri, 25 Jun 2021 00:08:28 GMT",
       "comments": {
-        
         "dependency": [
           {
             "comment": "Updating dependency \"@rushstack/heft\" to `0.34.0`"

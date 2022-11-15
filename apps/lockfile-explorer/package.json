@@ -1,0 +1,55 @@
+{
+  "name": "@rushstack/lockfile-explorer",
+  "version": "0.0.3",
+  "description": "Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo",
+  "keywords": [
+    "conflict",
+    "dependency",
+    "doppelganger",
+    "interactive",
+    "lockfile",
+    "monorepo",
+    "package",
+    "phantom",
+    "tool",
+    "version",
+    "visualization",
+    "visualize",
+    "visualizer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/lockfile-explorer"
+  },
+  "license": "MIT",
+  "bin": {
+    "lockfile-explorer": "./bin/lockfile-explorer"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft serve-watch",
+    "serve": "node ./lib/start.js --debug",
+    "test": "heft test",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/lockfile-explorer-web": "workspace:*",
+    "@types/express": "4.17.13",
+    "@types/heft-jest": "1.0.1",
+    "@types/js-yaml": "3.12.1",
+    "@types/node": "12.20.24",
+    "@types/cors": "~2.8.12"
+  },
+  "dependencies": {
+    "@types/express": "4.17.13",
+    "express": "4.18.1",
+    "js-yaml": "~3.13.1",
+    "open": "~8.4.0",
+    "cors": "~2.8.5"
+  }
+}

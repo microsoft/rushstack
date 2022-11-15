@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -203,6 +203,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/typeOf3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 3,
             "endIndex": 5
@@ -252,6 +253,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/typeOf3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 3,
             "endIndex": 5
@@ -297,6 +299,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/typeOf3/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 4

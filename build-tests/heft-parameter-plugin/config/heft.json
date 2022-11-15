@@ -6,6 +6,7 @@
 
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "sourcePath": "lib" }],
       "tasksByName": {
         "typescript": {
           "taskPlugin": {

@@ -23,7 +23,7 @@
     }
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.48.0-dev.0",
+    "@rushstack/heft": "^0.48.0-dev.1",
     "@types/webpack": "^4",
     "webpack": "~4.44.2"
   },

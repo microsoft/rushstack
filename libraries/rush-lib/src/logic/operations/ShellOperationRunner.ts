@@ -23,22 +23,23 @@ import {
   PrintUtilities
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
-
-import type { RushConfiguration } from '../../api/RushConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
-import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
-import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import type { IPhase } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../RushConstants';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { OperationStateFile } from './OperationStateFile';
+
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { IPhase } from '../../api/CommandLineConfiguration';
 
 export interface IProjectDeps {
   files: { [filePath: string]: string };
@@ -273,6 +274,8 @@ export class ShellOperationRunner implements IOperationRunner {
           await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
 
         if (restoreFromCacheSuccess) {
+          // Restore the original state of the operation without cache
+          await context._operationStateFile?.tryRestoreAsync();
           return OperationStatus.FromCache;
         }
       }
@@ -370,6 +373,12 @@ export class ShellOperationRunner implements IOperationRunner {
           ensureFolderExists: true
         });
 
+        // If the operation without cache was successful, we can save the state to disk
+        const { duration: durationInSeconds } = context.stopwatch;
+        await context._operationStateFile?.writeAsync({
+          nonCachedDurationMs: durationInSeconds * 1000
+        });
+
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
         const setCacheEntryPromise: Promise<boolean> | undefined = this.isCacheWriteAllowed
@@ -432,9 +441,13 @@ export class ShellOperationRunner implements IOperationRunner {
             } else {
               const projectOutputFolderNames: ReadonlyArray<string> =
                 operationSettings.outputFolderNames || [];
+              const additionalProjectOutputFilePaths: ReadonlyArray<string> = [
+                OperationStateFile.getFilenameRelativeToProjectRoot(this._phase)
+              ];
               this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
                 projectConfiguration,
                 projectOutputFolderNames,
+                additionalProjectOutputFilePaths,
                 buildCacheConfiguration: this._buildCacheConfiguration,
                 terminal,
                 command: this._commandToRun,

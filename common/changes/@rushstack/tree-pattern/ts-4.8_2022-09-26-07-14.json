@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/tree-pattern",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/tree-pattern"
+}

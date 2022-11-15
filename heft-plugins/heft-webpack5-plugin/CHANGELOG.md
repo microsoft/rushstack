@@ -1,6 +1,63 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Fri, 13 Sep 2022 18:22:20 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Nov 2022 01:20:56 GMT and should not be manually modified.
+
+## 0.5.61
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 0.5.60
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 0.5.59
+Tue, 25 Oct 2022 00:20:44 GMT
+
+### Patches
+
+- Set WebSocket port to match http port.
+
+## 0.5.58
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 0.5.57
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 0.5.56
+Fri, 14 Oct 2022 15:26:32 GMT
+
+_Version update only_
+
+## 0.5.55
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 0.5.54
+Tue, 11 Oct 2022 23:49:12 GMT
+
+_Version update only_
+
+## 0.5.53
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 0.5.52
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 0.5.51
+Tue, 27 Sep 2022 22:17:20 GMT
+
+_Version update only_
 
 ## 0.6.0-dev.1
 Fri, 13 Sep 2022 18:22:20 GMT

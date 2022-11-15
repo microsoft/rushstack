@@ -66,6 +66,11 @@ export interface ITelemetryOperationResult {
    * If the operation was blocked, will be `undefined`.
    */
   endTimestampMs?: number;
+
+  /**
+   * Duration in milliseconds when the operation does not hit cache
+   */
+  nonCachedDurationMs?: number;
 }
 
 /**

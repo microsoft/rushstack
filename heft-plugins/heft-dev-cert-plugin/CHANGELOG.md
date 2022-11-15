@@ -1,6 +1,75 @@
 # Change Log - @rushstack/heft-dev-cert-plugin
 
-This log was last generated on Fri, 13 Sep 2022 18:22:20 GMT and should not be manually modified.
+This log was last generated on Sat, 12 Nov 2022 00:16:31 GMT and should not be manually modified.
+
+## 0.2.4
+Sat, 12 Nov 2022 00:16:31 GMT
+
+### Patches
+
+- Serve the CA certificate alongside the TLS certificate.
+
+## 0.2.3
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 0.2.2
+Fri, 04 Nov 2022 00:15:59 GMT
+
+_Version update only_
+
+## 0.2.1
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 0.2.0
+Tue, 25 Oct 2022 00:20:44 GMT
+
+### Minor changes
+
+- Set allowedHosts from the subjectAltNames of the TLS certificate.
+
+## 0.1.73
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 0.1.72
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 0.1.71
+Fri, 14 Oct 2022 15:26:32 GMT
+
+_Version update only_
+
+## 0.1.70
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 0.1.69
+Tue, 11 Oct 2022 23:49:12 GMT
+
+_Version update only_
+
+## 0.1.68
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 0.1.67
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 0.1.66
+Tue, 27 Sep 2022 22:17:20 GMT
+
+_Version update only_
 
 ## 0.2.0-dev.1
 Fri, 13 Sep 2022 18:22:20 GMT

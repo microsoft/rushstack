@@ -10,7 +10,7 @@ export interface IExamplePlugin01Accessor {
   exampleHook: SyncHook;
 }
 
-export const PLUGIN_NAME: 'ExamplePlugin01' = 'ExamplePlugin01';
+export const PLUGIN_NAME: 'example-plugin-01' = 'example-plugin-01';
 
 export default class ExamplePlugin01 implements IHeftTaskPlugin {
   private _accessor: IExamplePlugin01Accessor = {

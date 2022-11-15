@@ -1,6 +1,25 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 21 Sep 2022 20:21:10 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Oct 2022 00:20:15 GMT and should not be manually modified.
+
+## 3.53.2
+Thu, 13 Oct 2022 00:20:15 GMT
+
+### Patches
+
+- Fix a bug where `Sort.isSorted` and `Sort.isSortedBy` unexpectedly compared the first element against `undefined`. Optimize `Sort.sortMapKeys` to run the check for already being sorted against the original Map instead of a derived array.
+
+## 3.53.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 3.53.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Add a Path.convertToPlatformDefault API to convert a path to use the platform-default slashes.
 
 ## 3.52.0
 Wed, 21 Sep 2022 20:21:10 GMT

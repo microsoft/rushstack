@@ -1,0 +1,148 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/rushstack/main/libraries/rush-lib/src/schemas/pnpm-config.schema.json",
+
+  "strictPeerDependencies": true,
+
+  "useWorkspaces": true,
+
+  "preventManualShrinkwrapChanges": true,
+
+  "globalPackageExtensions": {
+    "@emotion/core": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@emotion/styled": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@emotion/styled-base": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@emotion/theming": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@storybook/addons": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@storybook/api": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@storybook/router": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "emotion-theming": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "react-router": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "react-router-dom": {
+      "peerDependencies": {
+        "@types/react": ">=16"
+      }
+    },
+
+    "@jest/reporters": {
+      "dependencies": {
+        "@types/istanbul-lib-coverage": "2.0.4"
+      }
+    },
+
+    "@serverless-stack/resources": {
+      "dependencies": {
+        "esbuild": "*"
+      }
+    },
+
+    "@storybook/react": {
+      "peerDependencies": {
+        "@types/node": ">=12",
+        "@types/react": ">=16"
+      }
+    },
+
+    "@storybook/theming": {
+      "dependencies": {
+        "@emotion/serialize": "*",
+        "@emotion/utils": "*"
+      }
+    },
+
+    "@types/webpack": {
+      "dependencies": {
+        "anymatch": "^3"
+      }
+    },
+
+    "@typescript-eslint/types": {
+      "peerDependencies": {
+        "typescript": "*"
+      }
+    },
+
+    "collect-v8-coverage": {
+      "peerDependencies": {
+        "@types/node": ">=12"
+      }
+    },
+
+    "http-proxy-middleware": {
+      "dependencies": {
+        "@types/express": "*"
+      }
+    },
+
+    "webpack-dev-middleware": {
+      "peerDependencies": {
+        "@types/webpack": "^4"
+      },
+      "peerDependenciesMeta": {
+        "@types/webpack": {
+          "optional": true
+        }
+      }
+    },
+
+    "webpack-dev-server": {
+      "dependencies": {
+        "@types/express-serve-static-core": "*",
+        "@types/serve-static": "*",
+        "anymatch": "^3"
+      },
+      "peerDependencies": {
+        "@types/webpack": "^4"
+      },
+      "peerDependenciesMeta": {
+        "@types/webpack": {
+          "optional": true
+        }
+      }
+    }
+  }
+}

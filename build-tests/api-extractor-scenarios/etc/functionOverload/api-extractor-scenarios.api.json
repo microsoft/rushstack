@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -206,6 +206,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/functionOverload/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -266,6 +267,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/functionOverload/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -326,6 +328,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/functionOverload/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -362,6 +365,7 @@
               "text": "export declare class Combiner "
             }
           ],
+          "fileUrlPath": "src/functionOverload/index.ts",
           "releaseTag": "Public",
           "name": "Combiner",
           "preserveMemberOrder": false,

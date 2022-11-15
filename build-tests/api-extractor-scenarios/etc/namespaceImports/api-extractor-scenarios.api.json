@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -177,6 +177,7 @@
           "canonicalReference": "api-extractor-scenarios!i1:namespace",
           "docComment": "",
           "excerptTokens": [],
+          "fileUrlPath": "src/namespaceImports/index.ts",
           "releaseTag": "None",
           "name": "i1",
           "preserveMemberOrder": false,
@@ -186,6 +187,7 @@
               "canonicalReference": "api-extractor-scenarios!i1.internal:namespace",
               "docComment": "",
               "excerptTokens": [],
+              "fileUrlPath": "src/namespaceImports/intermediate1.ts",
               "releaseTag": "None",
               "name": "internal",
               "preserveMemberOrder": false,
@@ -200,6 +202,7 @@
                       "text": "export declare class SomeClass "
                     }
                   ],
+                  "fileUrlPath": "src/namespaceImports/internal.ts",
                   "releaseTag": "Public",
                   "name": "SomeClass",
                   "preserveMemberOrder": false,
@@ -215,6 +218,7 @@
           "canonicalReference": "api-extractor-scenarios!i2:namespace",
           "docComment": "",
           "excerptTokens": [],
+          "fileUrlPath": "src/namespaceImports/index.ts",
           "releaseTag": "None",
           "name": "i2",
           "preserveMemberOrder": false,
@@ -224,6 +228,7 @@
               "canonicalReference": "api-extractor-scenarios!i2.internal:namespace",
               "docComment": "",
               "excerptTokens": [],
+              "fileUrlPath": "src/namespaceImports/intermediate1.ts",
               "releaseTag": "None",
               "name": "internal",
               "preserveMemberOrder": false,
@@ -238,6 +243,7 @@
                       "text": "export declare class SomeClass "
                     }
                   ],
+                  "fileUrlPath": "src/namespaceImports/internal.ts",
                   "releaseTag": "Public",
                   "name": "SomeClass",
                   "preserveMemberOrder": false,
@@ -267,6 +273,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/namespaceImports/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

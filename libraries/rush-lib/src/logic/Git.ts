@@ -204,14 +204,14 @@ export class Git {
 
   /**
    * Get information about the current Git working tree.
-   * Returns undefined if the current path is not under a Git working tree.
+   * Returns undefined if rush.json is not under a Git working tree.
    */
   public getGitInfo(): Readonly<gitInfo.GitRepoInfo> | undefined {
     if (!this._checkedGitInfo) {
       let repoInfo: gitInfo.GitRepoInfo | undefined;
       try {
         // gitInfo() shouldn't usually throw, but wrapping in a try/catch just in case
-        repoInfo = gitInfo();
+        repoInfo = gitInfo(this._rushConfiguration.rushJsonFolder);
       } catch (ex) {
         // if there's an error, assume we're not in a Git working tree
       }
@@ -230,16 +230,26 @@ export class Git {
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
-      '--no-optional-locks',
-      'merge-base',
-      '--',
-      'HEAD',
-      targetBranch
-    ]);
-    const result: string = output.trim();
+    try {
+      const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+        '--no-optional-locks',
+        'merge-base',
+        '--',
+        'HEAD',
+        targetBranch
+      ]);
+      const result: string = output.trim();
 
-    return result;
+      return result;
+    } catch (e) {
+      terminal.writeErrorLine(
+        `Unable to determine merge base for branch "${targetBranch}". ` +
+          'This can occur if the current clone is a shallow clone. If this clone is running in a CI ' +
+          'pipeline, check your pipeline settings to ensure that the clone depth includes ' +
+          'the expected merge base. If this clone is running locally, consider running "git fetch --deepen=<depth>".'
+      );
+      throw new AlreadyReportedError();
+    }
   }
 
   public getBlobContent({ blobSpec, repositoryRoot }: IGetBlobOptions): string {

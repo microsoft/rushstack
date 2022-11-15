@@ -1,0 +1,34 @@
+.FileContents {
+  height: calc(25vh - 35px);
+  overflow: scroll;
+}
+
+@mixin SpecWrapper {
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: white;
+}
+
+.AddedSpec {
+  background-color: #107c10;
+  @include SpecWrapper;
+}
+
+.DeletedSpec {
+  background-color: red;
+  @include SpecWrapper;
+}
+
+.ChangedSpec {
+  background-color: darkgoldenrod;
+  @include SpecWrapper;
+}
+
+.PackageSpecWrapper {
+  h5 {
+    margin-bottom: 12px;
+  }
+  & > * + * {
+    margin-top: 8px;
+  }
+}
