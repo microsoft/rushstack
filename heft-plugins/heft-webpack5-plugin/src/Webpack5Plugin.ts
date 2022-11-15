@@ -43,7 +43,7 @@ const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
  */
 export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
   private _accessor: IWebpackPluginAccessor | undefined;
-  private _serve: boolean = false;
+  private _isServeMode: boolean = false;
   private _webpack: typeof TWebpack | undefined;
   private _webpackCompiler: ExtendedCompiler | ExtendedMultiCompiler | undefined;
   private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED = UNINITIALIZED;
@@ -61,7 +61,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           onEmitStats: new AsyncParallelHook(['webpackStats'])
         },
         parameters: {
-          serve: this._serve
+          isServeMode: this._isServeMode
         }
       };
     }
@@ -73,8 +73,8 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions
   ): void {
-    this._serve = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
-    if (!taskSession.parameters.watch && this._serve) {
+    this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
+    if (!taskSession.parameters.watch && this._isServeMode) {
       throw new Error(
         `The ${JSON.stringify(
           SERVE_PARAMETER_LONG_NAME
@@ -112,7 +112,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
         const configurationLoader: WebpackConfigurationLoader = new WebpackConfigurationLoader(
           taskSession.logger,
           taskSession.parameters.production,
-          taskSession.parameters.watch && this._serve
+          taskSession.parameters.watch && this._isServeMode
         );
         webpackConfiguration = await configurationLoader.tryLoadWebpackConfigurationAsync({
           ...options,
@@ -174,7 +174,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     options: IWebpackPluginOptions
   ): Promise<void> {
     this._validateEnvironmentVariable(taskSession);
-    if (taskSession.parameters.watch || this._serve) {
+    if (taskSession.parameters.watch || this._isServeMode) {
       // Should never happen, but just in case
       throw new InternalError('Cannot run Webpack in compilation mode when watch mode is enabled');
     }
@@ -261,7 +261,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
 
       // Determine how we will run the compiler. When serving, we will run the compiler
       // via the webpack-dev-server. Otherwise, we will run the compiler directly.
-      if (this._serve) {
+      if (this._isServeMode) {
         const defaultDevServerOptions: TWebpackDevServer.Configuration = {
           host: 'localhost',
           devMiddleware: {
@@ -392,7 +392,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   }
 
   private _validateEnvironmentVariable(taskSession: IHeftTaskSession): void {
-    if (!this._serve && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
+    if (!this._isServeMode && process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
       taskSession.logger.emitWarning(
         new Error(
           `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
