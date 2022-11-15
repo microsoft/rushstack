@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-dev-cert-plugin",
-  "version": "0.2.0-dev.1",
+  "version": "0.2.4",
   "description": "A Heft plugin for generating and using local development certificates",
   "repository": {
     "type": "git",
