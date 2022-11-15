@@ -247,14 +247,31 @@ export function applyWorkingTreeState(
 }
 
 /**
+ * Parse the list of all git submodule paths from the output of "git submodule status"
+ *
+ * @param output - The raw output from Git
+ * @internal
+ */
+export function _parseGitSubmoduleStatus(output: string): string[] {
+  const submodulePaths: string[] = [];
+
+  // <hash> <path> (heads/main)\n
+  output.split('\n').forEach((line) => {
+    if (line) {
+      const [, submodulePath] = line.trim().split(' ');
+      submodulePaths.push(submodulePath);
+    }
+  });
+  return submodulePaths;
+}
+
+/**
  * Get the list of all git submodule paths
  * @param rootDirectory - The root directory of the Git repository
  * @param gitPath - The path to the Git executable
  * @internal
  */
 function getSubmodulePaths(rootDirectory: string, gitPath?: string): string[] {
-  const submodulePaths: string[] = [];
-
   const submoduleStatusResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
     gitPath || 'git',
     ['submodule', 'status'],
@@ -272,13 +289,45 @@ function getSubmodulePaths(rootDirectory: string, gitPath?: string): string[] {
   }
 
   // <hash> <path> (heads/main)\n
-  submoduleStatusResult.stdout.split('\n').forEach((line) => {
+  return _parseGitSubmoduleStatus(submoduleStatusResult.stdout);
+}
+
+/**
+ * Parse the state of all git submodule from the output of "git submodule foreach git --no-optional-locks ls-tree -r --full-name HEAD --"
+ *
+ * @param output - The raw output from Git
+ * @internal
+ */
+export function _parseGitSubmoduleForEachGitLsTree(output: string): Record<string, Record<string, string>> {
+  const stateBySubmodulePath: Record<string, Record<string, string>> = {};
+
+  let currentSubmodulePath: string = '';
+
+  // Note: Entering maybe translated to other languages by Git
+  // Entering '<submoduleFolder>'\n
+  // <mode> <type> <newhash>\t<path>\n
+  output.split('\n').forEach((line) => {
     if (line) {
-      const [, submodulePath] = line.trim().split(' ');
-      submodulePaths.push(submodulePath);
+      line = line.trim();
+      const submodulePath: string | undefined = line.match(/'(.*)'/)?.[1];
+      if (submodulePath) {
+        currentSubmodulePath = submodulePath;
+        stateBySubmodulePath[currentSubmodulePath] = {};
+      } else {
+        const tabIndex: number = line.indexOf('\t');
+        const filePath: string = line.slice(tabIndex + 1);
+
+        // The newHash will be all zeros if the file is deleted, or a hash if it exists
+        const hash: string = line.slice(tabIndex - 40, tabIndex);
+        if (stateBySubmodulePath[currentSubmodulePath] === undefined) {
+          stateBySubmodulePath[currentSubmodulePath] = {};
+        }
+        stateBySubmodulePath[currentSubmodulePath][filePath] = hash;
+      }
     }
   });
-  return submodulePaths;
+
+  return stateBySubmodulePath;
 }
 
 /**
@@ -311,32 +360,9 @@ function applySubmodulesTreeState(rootDirectory: string, state: Map<string, stri
     );
   }
 
-  const stateBySubmodulePath: Record<string, Record<string, string>> = {};
-
-  let currentSubmodulePath: string = '';
-
-  // Entering '<submoduleFolder>'\n
-  // <mode> <type> <newhash>\t<path>\n
-  submoduleLsTreeResult.stdout.split('\n').forEach((line) => {
-    if (line) {
-      line = line.trim();
-      const submodulePath: string | undefined = line.match(/'(.*)'/)?.[1];
-      if (submodulePath) {
-        currentSubmodulePath = submodulePath;
-        stateBySubmodulePath[currentSubmodulePath] = {};
-      } else {
-        const tabIndex: number = line.indexOf('\t');
-        const filePath: string = line.slice(tabIndex + 1);
-
-        // The newHash will be all zeros if the file is deleted, or a hash if it exists
-        const hash: string = line.slice(tabIndex - 40, tabIndex);
-        if (stateBySubmodulePath[currentSubmodulePath] === undefined) {
-          stateBySubmodulePath[currentSubmodulePath] = {};
-        }
-        stateBySubmodulePath[currentSubmodulePath][filePath] = hash;
-      }
-    }
-  });
+  const stateBySubmodulePath: Record<string, Record<string, string>> = _parseGitSubmoduleForEachGitLsTree(
+    submoduleLsTreeResult.stdout
+  );
 
   for (const submodulePath of submodulePaths) {
     for (const [filePath, hash] of Object.entries(stateBySubmodulePath[submodulePath])) {
