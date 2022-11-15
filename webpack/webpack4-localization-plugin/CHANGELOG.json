@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "entries": [
     {
+      "version": "0.15.36",
+      "tag": "@rushstack/webpack4-localization-plugin_v0.15.36",
+      "date": "Mon, 14 Nov 2022 05:15:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating webpack/loader-utils to resolve github advisory CVE-2022-37601. https://github.com/advisories/GHSA-76p3-8jx3-jpfq"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.35",
       "tag": "@rushstack/webpack4-localization-plugin_v0.15.35",
       "date": "Tue, 08 Nov 2022 01:20:56 GMT",

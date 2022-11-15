@@ -2,6 +2,42 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.83.3",
+      "tag": "@microsoft/rush_v5.83.3",
+      "date": "Tue, 15 Nov 2022 18:43:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where Git submodules were not handled correctly by the build cache (GitHub #1711)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.83.2",
+      "tag": "@microsoft/rush_v5.83.2",
+      "date": "Mon, 14 Nov 2022 05:15:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Ensure autoinstaller lockfiles are not leftover after an error"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.83.1",
+      "tag": "@microsoft/rush_v5.83.1",
+      "date": "Sat, 12 Nov 2022 04:40:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the \"rush init\" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.83.0",
       "tag": "@microsoft/rush_v5.83.0",
       "date": "Fri, 11 Nov 2022 03:51:49 GMT",

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/loader-raw-script",
-  "version": "1.3.269",
+  "version": "1.3.270",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "loader-utils": "~1.1.0"
+    "loader-utils": "1.4.2"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
