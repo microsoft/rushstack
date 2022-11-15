@@ -247,7 +247,7 @@ export function applyWorkingTreeState(
 }
 
 /**
- * Get the list of all git submodules path
+ * Get the list of all git submodule paths
  * @param rootDirectory - The root directory of the Git repository
  * @param gitPath - The path to the Git executable
  * @internal

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/package-deps-hash",
-      "comment": "get file hashs under git submodule paths when getting repo state",
+      "comment": "Get file hashes under git submodule paths when analyzing repo state",
       "type": "patch"
     }
   ],
