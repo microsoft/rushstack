@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 14 Nov 2022 05:15:22 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Nov 2022 18:43:51 GMT and should not be manually modified.
+
+## 5.83.3
+Tue, 15 Nov 2022 18:43:51 GMT
+
+### Patches
+
+- Fix an issue where Git submodules were not handled correctly by the build cache (GitHub #1711)
 
 ## 5.83.2
 Mon, 14 Nov 2022 05:15:22 GMT
