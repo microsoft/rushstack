@@ -262,7 +262,7 @@ export class ProjectWatcher {
         state._tryGetProjectDependenciesAsync(project, this._terminal)
       ]);
 
-      if (ProjectWatcher._haveProjectDepsChanged(previous!, current!)) {
+      if (ProjectWatcher._haveProjectDepsChanged(previous, current)) {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json
         changedProjects.add(project);
       }
@@ -286,7 +286,18 @@ export class ProjectWatcher {
    *
    * @returns `true` if the maps are different, `false` otherwise
    */
-  private static _haveProjectDepsChanged(prev: Map<string, string>, next: Map<string, string>): boolean {
+  private static _haveProjectDepsChanged(
+    prev: Map<string, string> | undefined,
+    next: Map<string, string> | undefined
+  ): boolean {
+    if (!prev && !next) {
+      return false;
+    }
+
+    if (!prev || !next) {
+      return true;
+    }
+
     if (prev.size !== next.size) {
       return true;
     }

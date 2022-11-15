@@ -14,11 +14,11 @@ const deployManagerModule: typeof deployManagerTypes = Import.lazy(
 );
 
 export class DeployAction extends BaseRushAction {
-  private _scenario!: CommandLineStringParameter;
-  private _project!: CommandLineStringParameter;
-  private _overwrite!: CommandLineFlagParameter;
-  private _targetFolder!: CommandLineStringParameter;
-  private _createArchivePath!: CommandLineStringParameter;
+  private readonly _scenario: CommandLineStringParameter;
+  private readonly _project: CommandLineStringParameter;
+  private readonly _overwrite: CommandLineFlagParameter;
+  private readonly _targetFolder: CommandLineStringParameter;
+  private readonly _createArchivePath: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -37,9 +37,7 @@ export class DeployAction extends BaseRushAction {
       // to different target folders.
       safeForSimultaneousRushProcesses: true
     });
-  }
 
-  protected onDefineParameters(): void {
     this._project = this.defineStringParameter({
       parameterLongName: '--project',
       parameterShortName: '-p',

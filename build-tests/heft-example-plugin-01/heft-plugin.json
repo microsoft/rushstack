@@ -3,7 +3,7 @@
 
   "taskPlugins": [
     {
-      "pluginName": "ExamplePlugin01",
+      "pluginName": "example-plugin-01",
       "entryPoint": "./lib/index"
     }
   ]

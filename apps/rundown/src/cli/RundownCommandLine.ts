@@ -18,6 +18,4 @@ export class RundownCommandLine extends CommandLineParser {
     this.addAction(new SnapshotAction());
     this.addAction(new InspectAction());
   }
-
-  protected onDefineParameters(): void {}
 }

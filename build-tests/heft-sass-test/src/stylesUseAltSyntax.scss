@@ -1,0 +1,46 @@
+/**
+ * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ */
+
+// Testing sass built-in module using use syntax
+@use 'sass:color';
+@use 'sass:list';
+
+// Testing Sass imports using use syntax
+@use 'forwardSyntaxStyles';
+
+// Testing node_modules using use and with syntax
+@use 'utilities/configurableModule' as configuration;
+
+:root {
+  --list-margin-top: calc(1.25 * 1rem);
+}
+
+.label {
+  display: block;
+  color: color.adjust(configuration.$list-foreground-color, $blue: 90);
+}
+
+.exampleList {
+  list-style-type: circle;
+  margin-top: var(--list-margin-top);
+
+  $colors: deepskyblue, dodgerblue, darkslateblue;
+
+  @each $color in $colors {
+    $i: list.index($colors, $color);
+
+    &Item#{$i} {
+      @if $i == 1 {
+        color: $color;
+      } @else if $i == 2 {
+        background-color: $color;
+        color: color.invert($color);
+      } @else {
+        background-color: color.invert($color);
+        color: $color;
+      }
+    }
+  }
+}

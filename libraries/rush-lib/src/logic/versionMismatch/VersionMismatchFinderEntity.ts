@@ -30,5 +30,6 @@ export abstract class VersionMismatchFinderEntity {
     newVersion: string,
     dependencyType: DependencyType
   ): void;
+  public abstract removeDependency(packageName: string, dependencyType: DependencyType): void;
   public abstract saveIfModified(): boolean;
 }

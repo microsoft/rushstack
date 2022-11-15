@@ -189,16 +189,11 @@ export interface IJsonPathsMetadata {
 /**
  * @beta
  */
-export interface IConfigurationFileOptions<TConfigurationFile> {
+export interface IConfigurationFileOptionsBase<TConfigurationFile> {
   /**
    * A project root-relative path to the configuration file that should be loaded.
    */
   projectRelativeFilePath: string;
-
-  /**
-   * The path to the schema for the configuration file.
-   */
-  jsonSchemaPath: string;
 
   /**
    * Use this property to specify how JSON nodes are postprocessed.
@@ -217,6 +212,37 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
    */
   propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
 }
+
+/**
+ * @beta
+ */
+export interface IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile>
+  extends IConfigurationFileOptionsBase<TConfigurationFile> {
+  /**
+   * The path to the schema for the configuration file.
+   */
+  jsonSchemaPath: string;
+  jsonSchemaObject?: never;
+}
+
+/**
+ * @beta
+ */
+export interface IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile>
+  extends IConfigurationFileOptionsBase<TConfigurationFile> {
+  /**
+   * The schema for the configuration file.
+   */
+  jsonSchemaObject: object;
+  jsonSchemaPath?: never;
+}
+
+/**
+ * @beta
+ */
+export type IConfigurationFileOptions<TConfigurationFile> =
+  | IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile>
+  | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile>;
 
 interface IJsonPathCallbackObject {
   path: string;
@@ -237,9 +263,9 @@ export interface IOriginalValueOptions<TParentProperty> {
  * @beta
  */
 export class ConfigurationFile<TConfigurationFile> {
-  private readonly _schemaPath: string;
+  private readonly _getSchema: () => JsonSchema;
 
-  /** {@inheritDoc IConfigurationFileOptions.projectRelativeFilePath} */
+  /** {@inheritDoc IConfigurationFileOptionsBase.projectRelativeFilePath} */
   public readonly projectRelativeFilePath: string;
 
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
@@ -248,7 +274,7 @@ export class ConfigurationFile<TConfigurationFile> {
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
-      this.__schema = JsonSchema.fromFile(this._schemaPath);
+      this.__schema = this._getSchema();
     }
 
     return this.__schema;
@@ -259,7 +285,13 @@ export class ConfigurationFile<TConfigurationFile> {
 
   public constructor(options: IConfigurationFileOptions<TConfigurationFile>) {
     this.projectRelativeFilePath = options.projectRelativeFilePath;
-    this._schemaPath = options.jsonSchemaPath;
+
+    if (options.jsonSchemaObject) {
+      this._getSchema = () => JsonSchema.fromLoadedObject(options.jsonSchemaObject);
+    } else {
+      this._getSchema = () => JsonSchema.fromFile(options.jsonSchemaPath);
+    }
+
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritance || {};
     this._defaultPropertyInheritance = options.propertyInheritanceDefaults || {};

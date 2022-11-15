@@ -7,7 +7,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanAdditionalFiles": [
+      "cleanFiles": [
         {
           "sourcePath": "out-all"
         },

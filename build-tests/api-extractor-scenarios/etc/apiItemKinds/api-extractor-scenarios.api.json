@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -182,6 +182,7 @@
               "text": "export declare abstract class AbstractClass "
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
           "name": "AbstractClass",
           "preserveMemberOrder": false,
@@ -229,6 +230,7 @@
               "text": "export declare class ClassWithTypeParameter<T> "
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
           "typeParameters": [
             {
@@ -262,6 +264,7 @@
               "text": "string"
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/variables.ts",
           "isReadonly": true,
           "releaseTag": "Public",
           "name": "CONST_VARIABLE",
@@ -280,6 +283,7 @@
               "text": "export declare const enum ConstEnum "
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/enums.ts",
           "releaseTag": "Public",
           "name": "ConstEnum",
           "preserveMemberOrder": false,
@@ -381,6 +385,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
           "name": "ExtendsClassWithTypeParameter",
           "preserveMemberOrder": false,
@@ -401,6 +406,7 @@
               "text": "export interface IInterface "
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/interfaces.ts",
           "releaseTag": "Public",
           "name": "IInterface",
           "preserveMemberOrder": false,
@@ -445,6 +451,7 @@
               "text": "export declare namespace n1 "
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/namespaces.ts",
           "releaseTag": "Public",
           "name": "n1",
           "preserveMemberOrder": false,
@@ -558,6 +565,7 @@
               "text": "string"
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/variables.ts",
           "isReadonly": false,
           "releaseTag": "Public",
           "name": "nonConstVariable",
@@ -576,6 +584,7 @@
               "text": "export declare enum RegularEnum "
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/enums.ts",
           "releaseTag": "Public",
           "name": "RegularEnum",
           "preserveMemberOrder": false,
@@ -655,6 +664,7 @@
               "text": "export declare class SimpleClass "
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
           "name": "SimpleClass",
           "preserveMemberOrder": false,
@@ -877,6 +887,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/functions.ts",
           "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -904,6 +915,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/typeAliases.ts",
           "releaseTag": "Public",
           "name": "SomeType",
           "typeTokenRange": {
@@ -925,6 +937,7 @@
               "text": "\"hello\""
             }
           ],
+          "fileUrlPath": "src/apiItemKinds/variables.ts",
           "initializerTokenRange": {
             "startIndex": 1,
             "endIndex": 2

@@ -372,6 +372,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 // @alpha
 export interface IOperationExecutionResult {
     readonly error: Error | undefined;
+    readonly nonCachedDurationMs: number | undefined;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
@@ -399,8 +400,25 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
+    // @internal
+    _operationStateFile?: _OperationStateFile;
     quietMode: boolean;
     stdioSummarizer: StdioSummarizer;
+    stopwatch: IStopwatchResult;
+}
+
+// @internal (undocumented)
+export interface _IOperationStateFileOptions {
+    // (undocumented)
+    phase: IPhase;
+    // (undocumented)
+    rushProject: RushConfigurationProject;
+}
+
+// @internal (undocumented)
+export interface _IOperationStateJson {
+    // (undocumented)
+    nonCachedDurationMs: number;
 }
 
 // @public
@@ -430,9 +448,17 @@ export interface IPhasedCommand extends IRushCommand {
 
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    globalAllowedDeprecatedVersions?: Record<string, string>;
+    globalNeverBuiltDependencies?: string[];
+    globalOverrides?: Record<string, string>;
+    // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtension" needs to be exported by the entry point index.d.ts
+    globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
+    // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
+    globalPeerDependencyRules?: IPnpmPeerDependencyRules;
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
+    unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
 }
 
@@ -463,7 +489,7 @@ export interface IRushSessionOptions {
     terminalProvider: ITerminalProvider;
 }
 
-// @alpha
+// @beta
 export interface IStopwatchResult {
     get duration(): number;
     get endTime(): number | undefined;
@@ -500,6 +526,7 @@ export interface ITelemetryMachineInfo {
 export interface ITelemetryOperationResult {
     dependencies: string[];
     endTimestampMs?: number;
+    nonCachedDurationMs?: number;
     result: string;
     startTimestampMs?: number;
 }
@@ -518,7 +545,7 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 // @internal
 export class _LastInstallFlag {
     constructor(folderPath: string, state?: JsonObject);
-    checkValidAndReportStoreIssues(): boolean;
+    checkValidAndReportStoreIssues(rushVerb: string): boolean;
     clear(): void;
     create(): void;
     protected get flagName(): string;
@@ -574,6 +601,19 @@ export class Operation {
     weight: number;
 }
 
+// @internal
+export class _OperationStateFile {
+    constructor(options: _IOperationStateFileOptions);
+    get filename(): string;
+    static getFilenameRelativeToProjectRoot(phase: IPhase): string;
+    // (undocumented)
+    get state(): _IOperationStateJson | undefined;
+    // (undocumented)
+    tryRestoreAsync(): Promise<_IOperationStateJson | undefined>;
+    // (undocumented)
+    writeAsync(json: _IOperationStateJson): Promise<void>;
+}
+
 // @beta
 export enum OperationStatus {
     Blocked = "BLOCKED",
@@ -614,6 +654,8 @@ export class PackageJsonEditor {
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
     get name(): string;
+    // (undocumented)
+    removeDependency(packageName: string, dependencyType: DependencyType): void;
     get resolutionsList(): ReadonlyArray<PackageJsonDependency>;
     // (undocumented)
     saveIfModified(): boolean;
@@ -656,12 +698,20 @@ export class PhasedCommandHooks {
 
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
-    // @internal
-    constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
+    readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
+    readonly globalNeverBuiltDependencies: string[] | undefined;
+    readonly globalOverrides: Record<string, string> | undefined;
+    readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
+    readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
+    // @internal (undocumented)
+    static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
+    // @internal (undocumented)
+    static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
     readonly strictPeerDependencies: boolean;
+    readonly unsupportedPackageJsonSettings: unknown | undefined;
     readonly useWorkspaces: boolean;
 }
 
@@ -736,6 +786,7 @@ export class RushConfiguration {
     getRepoState(variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(variant?: string | undefined): string;
     get gitAllowedEmailRegExps(): string[];
+    get gitChangefilesCommitMessage(): string | undefined;
     get gitChangeLogUpdateCommitMessage(): string | undefined;
     get gitSampleEmail(): string;
     get gitTagSeparator(): string | undefined;
@@ -858,6 +909,7 @@ export class RushConstants {
     static readonly phaseNamePrefix: '_phase:';
     // @deprecated
     static readonly pinnedVersionsFilename: string;
+    static readonly pnpmConfigFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
     static readonly pnpmV3ShrinkwrapFilename: string;

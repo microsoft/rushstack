@@ -7,6 +7,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }],
       "tasksByName": {
         "typescript": {
           "taskPlugin": {
@@ -17,6 +18,17 @@
           "taskDependencies": ["typescript"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-lint-plugin"
+          }
+        }
+      }
+    },
+
+    "serve": {
+      "phaseDependencies": ["build"],
+      "tasksByName": {
+        "fastify": {
+          "taskEvent": {
+            "eventKind": "nodeService"
           }
         }
       }

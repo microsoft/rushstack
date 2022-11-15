@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -208,6 +208,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/bundledPackages/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 5,
             "endIndex": 6
@@ -253,6 +254,7 @@
               "text": " "
             }
           ],
+          "fileUrlPath": "../api-extractor-lib1-test/lib/index.d.ts",
           "releaseTag": "Public",
           "name": "Lib1Class",
           "preserveMemberOrder": false,

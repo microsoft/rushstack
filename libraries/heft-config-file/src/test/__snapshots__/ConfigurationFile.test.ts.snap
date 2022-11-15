@@ -180,6 +180,66 @@ Object {
 }
 `;
 
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly loads the config file 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the config file 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with a JSON schema object Correctly resolves paths relative to the project root 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly loads the config file 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the config file 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with a JSON schema path Correctly resolves paths relative to the project root 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
 exports[`ConfigurationFile a complex file with inheritance type annotations Correctly loads a complex config file with a single inheritance type annotation 1`] = `
 Object {
   "debug": "",

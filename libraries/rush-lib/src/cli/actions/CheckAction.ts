@@ -10,9 +10,9 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
-  private _variant!: CommandLineStringParameter;
-  private _jsonFlag!: CommandLineFlagParameter;
-  private _verboseFlag!: CommandLineFlagParameter;
+  private readonly _variant: CommandLineStringParameter;
+  private readonly _jsonFlag: CommandLineFlagParameter;
+  private readonly _verboseFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -26,9 +26,7 @@ export class CheckAction extends BaseRushAction {
       safeForSimultaneousRushProcesses: true,
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',

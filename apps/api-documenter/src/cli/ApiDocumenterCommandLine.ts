@@ -17,11 +17,6 @@ export class ApiDocumenterCommandLine extends CommandLineParser {
     this._populateActions();
   }
 
-  protected onDefineParameters(): void {
-    // override
-    // No parameters
-  }
-
   private _populateActions(): void {
     this.addAction(new MarkdownAction(this));
     this.addAction(new YamlAction(this));

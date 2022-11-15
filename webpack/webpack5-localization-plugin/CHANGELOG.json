@@ -2,6 +2,201 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.1.36",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.36",
+      "date": "Tue, 08 Nov 2022 01:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.35",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.35",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.34",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.34",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.33",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.33",
+      "date": "Mon, 17 Oct 2022 15:16:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.32",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.32",
+      "date": "Fri, 14 Oct 2022 15:26:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.31",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.31",
+      "date": "Thu, 13 Oct 2022 00:20:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.30",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.30",
+      "date": "Tue, 11 Oct 2022 23:49:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.29",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.29",
+      "date": "Mon, 10 Oct 2022 15:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.28",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.28",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.27",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.27",
+      "date": "Tue, 27 Sep 2022 22:17:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.26",
       "tag": "@rushstack/webpack5-localization-plugin_v0.1.26",
       "date": "Wed, 21 Sep 2022 20:21:10 GMT",

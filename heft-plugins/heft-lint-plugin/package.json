@@ -16,7 +16,7 @@
     "_phase:test": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged test --no-build"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.48.0-dev.0"
+    "@rushstack/heft": "^0.48.0-dev.1"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",

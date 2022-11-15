@@ -8,6 +8,7 @@ type MessageIds = 'expected-typedef' | 'expected-typedef-named';
 type Options = [];
 
 const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
+  defaultOptions: [],
   meta: {
     type: 'problem',
     messages: {

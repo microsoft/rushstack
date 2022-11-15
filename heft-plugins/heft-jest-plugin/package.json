@@ -17,7 +17,7 @@
     "postinstall": "node ./includes/jestScriptTransformerPatch.js"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.48.0-dev.0",
+    "@rushstack/heft": "^0.48.0-dev.1",
     "@rushstack/heft-typescript-plugin": "^0.1.0-dev.0"
   },
   "peerDependenciesMeta": {

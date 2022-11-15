@@ -73,7 +73,7 @@ The basic design can be summarized in 5 rules:
     import { MessageType } from ".";
 
     // Error: Files under a packlet folder must not import from their own index.ts file (@rushstack/packlets/mechanics)
-    import { MessageType} from "./index";
+    import { MessageType } from "./index";
     ```
 
 
@@ -192,7 +192,7 @@ module.exports = {
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/main/stack/eslint-plugin-packlets/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/eslint/eslint-plugin-packlets/CHANGELOG.md) - Find
   out what's new in the latest version
 - [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) documentation
 

@@ -65,19 +65,33 @@ export function someFunction5(): SomeEnum.A;
 export function someFunction6(): typeof SomeClass1.staticProp;
 
 // @public
-export function someFunction7({ then: then2 }: Promise<void>): typeof Date.prototype.getDate;
+export function someFunction7({ then }: Promise<void>): typeof Date.prototype.getDate;
 
 // @public
-export function someFunction8({ prop: prop2 }: Lib2Class): void;
+export function someFunction8({ prop }: Lib2Class): void;
 
 // @public
-export function someFunction9({ prop: prop2 }: SomeInterface1): void;
+export function someFunction9({ prop }: SomeInterface1): void;
 
 // @public (undocumented)
 export interface SomeInterface1 {
     // (undocumented)
     prop: number;
 }
+
+// @public
+export interface SomeInterface1 {
+    // (undocumented)
+    [SomeSymbol1]: () => string;
+    // (undocumented)
+    [SomeVar1]: () => string;
+}
+
+// @public (undocumented)
+export const SomeSymbol1: unique symbol;
+
+// @public (undocumented)
+export const SomeVar1 = "ThisIsSomeVar1";
 
 // (No @packageDocumentation comment for this package)
 
