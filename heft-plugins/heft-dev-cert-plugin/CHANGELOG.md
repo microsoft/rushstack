@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-dev-cert-plugin
 
-This log was last generated on Sat, 12 Nov 2022 00:16:31 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Nov 2022 23:31:49 GMT and should not be manually modified.
+
+## 0.2.5
+Tue, 15 Nov 2022 23:31:49 GMT
+
+### Patches
+
+- Fix Webpack auto-refresh issues caused by mismatched hostname
 
 ## 0.2.4
 Sat, 12 Nov 2022 00:16:31 GMT

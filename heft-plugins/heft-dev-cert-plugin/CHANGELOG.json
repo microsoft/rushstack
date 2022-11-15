@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.2.5",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.5",
+      "date": "Tue, 15 Nov 2022 23:31:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Webpack auto-refresh issues caused by mismatched hostname"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.4",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.2.4",
       "date": "Sat, 12 Nov 2022 00:16:31 GMT",
