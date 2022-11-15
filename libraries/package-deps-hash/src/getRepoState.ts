@@ -252,7 +252,7 @@ export function applyWorkingTreeState(
  * @param gitPath - The path to the Git executable
  * @internal
  */
-export function getSubmodulePaths(rootDirectory: string, gitPath?: string): string[] {
+function getSubmodulePaths(rootDirectory: string, gitPath?: string): string[] {
   const submodulePaths: string[] = [];
 
   const submoduleStatusResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
@@ -288,11 +288,7 @@ export function getSubmodulePaths(rootDirectory: string, gitPath?: string): stri
  * @param gitPath - The path to the Git executable
  * @internal
  */
-export function applySubmodulesTreeState(
-  rootDirectory: string,
-  state: Map<string, string>,
-  gitPath?: string
-): void {
+function applySubmodulesTreeState(rootDirectory: string, state: Map<string, string>, gitPath?: string): void {
   const submodulePaths: string[] = getSubmodulePaths(rootDirectory, gitPath);
 
   if (submodulePaths.length === 0) {
