@@ -91,7 +91,7 @@ export interface IWebpackPluginAccessorParameters {
   /**
    * Whether or not serve mode was enabled by passing the `--serve` flag.
    */
-  serve: boolean;
+  readonly isServeMode: boolean;
 }
 
 /**
@@ -101,9 +101,9 @@ export interface IWebpackPluginAccessor {
   /**
    * Hooks that are called at various points in the Webpack plugin lifecycle.
    */
-  hooks: IWebpackPluginAccessorHooks;
+  readonly hooks: IWebpackPluginAccessorHooks;
   /**
    * Parameters that are provided by the Webpack plugin.
    */
-  parameters: IWebpackPluginAccessorParameters;
+  readonly parameters: IWebpackPluginAccessorParameters;
 }
