@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Supports git submodule in build cache",
+      "comment": "Fix an issue where Git submodules were not handled correctly by the build cache (GitHub #1711)",
       "type": "patch"
     }
   ],
