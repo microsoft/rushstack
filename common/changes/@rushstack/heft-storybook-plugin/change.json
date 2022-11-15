@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "General fixes and improvements, in preparation for a general release.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin"
+}
