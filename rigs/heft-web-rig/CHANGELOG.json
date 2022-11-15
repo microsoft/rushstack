@@ -2,6 +2,44 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.13.0-rc.0",
+      "tag": "@rushstack/heft-web-rig_v0.13.0",
+      "date": "Tue, 15 Nov 2022 22:59:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "General fixes and improvements, in preparation for a general release."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.1.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.4.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.1.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.8.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.1.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.6.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.0-dev.1` to `^0.49.0-rc.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.11",
       "tag": "@rushstack/heft-web-rig_v0.12.11",
       "date": "Tue, 08 Nov 2022 01:20:56 GMT",
