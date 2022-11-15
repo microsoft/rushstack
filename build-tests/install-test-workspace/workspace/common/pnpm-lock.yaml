@@ -1826,7 +1826,7 @@ packages:
     name: '@rushstack/heft-lint-plugin'
     version: 0.1.0
     peerDependencies:
-      '@rushstack/heft': ^0.48.7
+      '@rushstack/heft': ^0.48.8
     dependencies:
       '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.48.8.tgz
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.53.2.tgz
@@ -1839,7 +1839,7 @@ packages:
     name: '@rushstack/heft-typescript-plugin'
     version: 0.1.0
     peerDependencies:
-      '@rushstack/heft': ^0.48.7
+      '@rushstack/heft': ^0.48.8
     dependencies:
       '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.48.8.tgz
       '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.3.tgz
