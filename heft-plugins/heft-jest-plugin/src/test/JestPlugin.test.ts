@@ -23,12 +23,14 @@ describe('JestPlugin', () => {
     function mockGetParameter<T extends CommandLineParameter>(parameterLongName: string): T {
       requestedParameters.add(parameterLongName);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return undefined as any as T;
+      return { value: undefined, values: undefined } as any as T;
     }
     const mockTaskSession: IHeftTaskSession = {
       hooks: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        run: { tapPromise: () => {} } as any
+        run: { tapPromise: () => {} } as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        runIncremental: { tapPromise: () => {} } as any
       },
       parameters: {
         getChoiceParameter: mockGetParameter,
