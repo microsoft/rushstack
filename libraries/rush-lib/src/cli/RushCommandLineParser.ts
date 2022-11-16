@@ -395,6 +395,7 @@ export class RushCommandLineParser extends CommandLineParser {
         disableBuildCache: command.disableBuildCache || false,
 
         initialPhases: command.phases,
+        originalPhases: command.originalPhases,
         watchPhases: command.watchPhases,
         watchDebounceMs: command.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs,
         phases: commandLineConfiguration.phases,

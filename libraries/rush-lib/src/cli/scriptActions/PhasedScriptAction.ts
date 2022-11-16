@@ -47,6 +47,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   incremental: boolean;
   disableBuildCache: boolean;
 
+  originalPhases: Set<IPhase>;
   initialPhases: Set<IPhase>;
   watchPhases: Set<IPhase>;
   phases: Map<string, IPhase>;
@@ -103,6 +104,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _disableBuildCache: boolean;
+  private readonly _originalPhases: ReadonlySet<IPhase>;
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _watchDebounceMs: number;
@@ -125,6 +127,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._enableParallelism = options.enableParallelism;
     this._isIncrementalBuildAllowed = options.incremental;
     this._disableBuildCache = options.disableBuildCache;
+    this._originalPhases = options.originalPhases;
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._watchDebounceMs = options.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs;
@@ -331,6 +334,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       isInitial: true,
       isWatch,
       rushConfiguration: this.rushConfiguration,
+      phaseOriginal: new Set(this._originalPhases),
       phaseSelection: new Set(this._initialPhases),
       projectChangeAnalyzer,
       projectSelection,

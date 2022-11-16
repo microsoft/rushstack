@@ -96,6 +96,10 @@ export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, I
   isSynthetic: boolean;
   disableBuildCache?: boolean;
 
+  originalPhases: Set<IPhase>;
+  /**
+   * Include upstream and self phases.
+   */
   phases: Set<IPhase>;
 
   /**
@@ -297,6 +301,7 @@ export class CommandLineConfiguration {
 
     const commandsJson: ICommandLineJson['commands'] = commandLineJson?.commands;
     let buildCommandPhases: IPhasedCommandConfig['phases'] | undefined;
+    let buildCommandOriginalPhases: IPhasedCommandConfig['phases'] | undefined;
     if (commandsJson) {
       for (const command of commandsJson) {
         if (this.commands.has(command.name)) {
@@ -309,6 +314,7 @@ export class CommandLineConfiguration {
         let normalizedCommand: Command;
         switch (command.commandKind) {
           case RushConstants.phasedCommandKind: {
+            const originalPhases: Set<IPhase> = new Set();
             const commandPhases: Set<IPhase> = new Set();
             const watchPhases: Set<IPhase> = new Set();
 
@@ -316,6 +322,7 @@ export class CommandLineConfiguration {
               ...command,
               isSynthetic: false,
               associatedParameters: new Set<IParameterJson>(),
+              originalPhases,
               phases: commandPhases,
               watchPhases,
               alwaysWatch: false,
@@ -331,6 +338,7 @@ export class CommandLineConfiguration {
                 );
               }
 
+              originalPhases.add(phase);
               commandPhases.add(phase);
             }
 
@@ -407,6 +415,7 @@ export class CommandLineConfiguration {
           } else if (normalizedCommand.name === RushConstants.buildCommandName) {
             // Record the build command phases in case we need to construct a synthetic "rebuild" command
             buildCommandPhases = normalizedCommand.phases;
+            buildCommandOriginalPhases = normalizedCommand.originalPhases;
           }
         }
 
@@ -421,12 +430,13 @@ export class CommandLineConfiguration {
         buildCommand = this._translateBulkCommandToPhasedCommand(DEFAULT_BUILD_COMMAND_JSON);
         buildCommand.disableBuildCache = DEFAULT_BUILD_COMMAND_JSON.disableBuildCache;
         buildCommandPhases = buildCommand.phases;
+        buildCommandOriginalPhases = buildCommand.originalPhases;
         this.commands.set(buildCommand.name, buildCommand);
       }
 
       if (!this.commands.has(RushConstants.rebuildCommandName)) {
         // If a rebuild command was not specified in the config file, add the default rebuild command
-        if (!buildCommandPhases) {
+        if (!buildCommandPhases || !buildCommandOriginalPhases) {
           throw new Error(`Phases for the "${RushConstants.buildCommandName}" were not found.`);
         }
 
@@ -437,6 +447,7 @@ export class CommandLineConfiguration {
           phases: buildCommandPhases,
           disableBuildCache: DEFAULT_REBUILD_COMMAND_JSON.disableBuildCache,
           associatedParameters: buildCommand.associatedParameters, // rebuild should share build's parameters in this case,
+          originalPhases: buildCommandOriginalPhases,
           watchPhases: new Set(),
           alwaysWatch: false,
           alwaysInstall: undefined
@@ -689,6 +700,7 @@ export class CommandLineConfiguration {
       isSynthetic: true,
       associatedParameters: new Set<IParameterJson>(),
       phases,
+      originalPhases: phases,
       // Bulk commands used the same phases for watch as for regular execution. Preserve behavior.
       watchPhases: command.watchForChanges ? phases : new Set(),
       alwaysWatch: !!command.watchForChanges,

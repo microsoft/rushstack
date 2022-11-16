@@ -53,6 +53,10 @@ export interface ICreateOperationsContext {
    */
   readonly isWatch: boolean;
   /**
+   * The set of phases original for the current command execution.
+   */
+  readonly phaseOriginal: ReadonlySet<IPhase>;
+  /**
    * The set of phases selected for the current command execution.
    */
   readonly phaseSelection: ReadonlySet<IPhase>;
