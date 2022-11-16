@@ -135,6 +135,9 @@ export class ChangelogGenerator {
           if (individualChange.commit) {
             changeLogComment.commit = individualChange.commit;
           }
+          if (individualChange.customFields) {
+            changeLogComment.customFields = individualChange.customFields;
+          }
           comments.push(changeLogComment);
         }
       });

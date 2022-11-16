@@ -28,6 +28,15 @@
             "type": "string",
             "description": "The change type associated with the change.",
             "enum": ["none", "dependency", "hotfix", "patch", "minor", "major"]
+          },
+          "customFields": {
+            "type": "object",
+            "description": "An optional dictionary of custom string fields.",
+            "patternProperties": {
+              "^.*$": {
+                "type": "string"
+              }
+            }
           }
         }
       }

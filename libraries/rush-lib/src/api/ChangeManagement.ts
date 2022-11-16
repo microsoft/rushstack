@@ -61,6 +61,11 @@ export interface IChangeInfo {
   comment?: string;
 
   /**
+   * An optional dictionary of custom string fields.
+   */
+  customFields?: Record<string, string>;
+
+  /**
    * The email of the user who provided the comment. Pulled from the Git log.
    */
   author?: string;
