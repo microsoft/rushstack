@@ -2,6 +2,29 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.3.0-rc.0",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.3.0-rc.0",
+      "date": "Tue, 15 Nov 2022 22:59:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "General fixes and improvements, in preparation for a general release."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.0-rc.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.0-dev.1` to `^0.49.0-rc.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.5",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.2.5",
       "date": "Tue, 15 Nov 2022 23:31:49 GMT",
