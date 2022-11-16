@@ -32,8 +32,8 @@ export interface IWebpackConfigurationWithDevServer extends TWebpack.Configurati
 
 // @public (undocumented)
 export interface IWebpackPluginAccessor {
-    hooks: IWebpackPluginAccessorHooks;
-    parameters: IWebpackPluginAccessorParameters;
+    readonly hooks: IWebpackPluginAccessorHooks;
+    readonly parameters: IWebpackPluginAccessorParameters;
 }
 
 // @public (undocumented)
@@ -46,7 +46,7 @@ export interface IWebpackPluginAccessorHooks {
 
 // @public (undocumented)
 export interface IWebpackPluginAccessorParameters {
-    serve: boolean;
+    readonly isServeMode: boolean;
 }
 
 // @public (undocumented)
