@@ -139,12 +139,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
       detectOpenHandles: detectOpenHandlesParameter.value || pluginOptions?.detectOpenHandles,
       disableCodeCoverage: disableCodeCoverageParameter.value || pluginOptions?.disableCodeCoverage,
-      findRelatedTests: findRelatedTestsParameter.values
+      findRelatedTests: findRelatedTestsParameter.values.length
         ? Array.from(findRelatedTestsParameter.values)
         : pluginOptions?.findRelatedTests,
-      // Setting maxWorkers to 1 will ensure that Jest runs tests in-band. Running in-band can be more
-      // efficent than using multiple Jest worker processes due to overhead
-      maxWorkers: maxWorkersParameter.value || pluginOptions?.maxWorkers || '1',
+      maxWorkers: maxWorkersParameter.value || pluginOptions?.maxWorkers,
       // Default to true and always pass with no tests
       passWithNoTests: true,
       silent: silentParameter.value || pluginOptions?.silent,
@@ -293,7 +291,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       silent: options.silent || false,
       testNamePattern: options.testNamePattern,
-      testPathPattern: options.testPathPattern ? [...options.testPathPattern] : undefined,
+      testPathPattern: options.testPathPattern ? [options.testPathPattern] : undefined,
       testTimeout: options.testTimeout,
       maxWorkers: options.maxWorkers,
 
