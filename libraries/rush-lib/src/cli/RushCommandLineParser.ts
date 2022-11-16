@@ -42,6 +42,7 @@ import { UpdateAction } from './actions/UpdateAction';
 import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
+import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
 
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
@@ -71,9 +72,9 @@ export class RushCommandLineParser extends CommandLineParser {
   public readonly rushSession: RushSession;
   public readonly pluginManager: PluginManager;
 
-  private _debugParameter!: CommandLineFlagParameter;
-  private _quietParameter!: CommandLineFlagParameter;
-  private _restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
+  private readonly _debugParameter: CommandLineFlagParameter;
+  private readonly _quietParameter: CommandLineFlagParameter;
+  private readonly _restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
   private readonly _rushOptions: IRushCommandLineParserOptions;
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
@@ -91,6 +92,18 @@ export class RushCommandLineParser extends CommandLineParser {
         ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,' +
         ' Rush is for you.',
       enableTabCompletionAction: true
+    });
+
+    this._debugParameter = this.defineFlagParameter({
+      parameterLongName: '--debug',
+      parameterShortName: '-d',
+      description: 'Show the full call stack if an error occurs while executing the tool'
+    });
+
+    this._quietParameter = this.defineFlagParameter({
+      parameterLongName: '--quiet',
+      parameterShortName: '-q',
+      description: 'Hide rush startup information'
     });
 
     this._terminalProvider = new ConsoleTerminalProvider();
@@ -182,20 +195,6 @@ export class RushCommandLineParser extends CommandLineParser {
     return await super.execute(args);
   }
 
-  protected onDefineParameters(): void {
-    this._debugParameter = this.defineFlagParameter({
-      parameterLongName: '--debug',
-      parameterShortName: '-d',
-      description: 'Show the full call stack if an error occurs while executing the tool'
-    });
-
-    this._quietParameter = this.defineFlagParameter({
-      parameterLongName: '--quiet',
-      parameterShortName: '-q',
-      description: 'Hide rush startup information'
-    });
-  }
-
   protected async onExecute(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
@@ -262,6 +261,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpdateAction(this));
       this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
+      this.addAction(new UpgradeInteractiveAction(this));
       this.addAction(new VersionAction(this));
 
       this._populateScriptActions();

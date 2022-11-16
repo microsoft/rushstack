@@ -157,7 +157,9 @@
    *
    * PNPM documentation: https://pnpm.io/package_json#pnpmneverbuiltdependencies
    */
-  "globalNeverBuiltDependencies": [/*[LINE "HYPOTHETICAL"]*/ "fsevents"],
+  "globalNeverBuiltDependencies": [
+    /*[LINE "HYPOTHETICAL"]*/ "fsevents"
+  ],
 
   /**
    * The `globalAllowedDeprecatedVersions` setting suppresses installation warnings for package

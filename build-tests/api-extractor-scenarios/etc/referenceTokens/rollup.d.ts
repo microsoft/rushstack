@@ -86,4 +86,19 @@ export declare interface SomeInterface1 {
     prop: number;
 }
 
+/**
+ * References to computed properties.
+ * @public
+ */
+export declare interface SomeInterface1 {
+    [SomeVar1]: () => string;
+    [SomeSymbol1]: () => string;
+}
+
+/** @public */
+export declare const SomeSymbol1: unique symbol;
+
+/** @public */
+export declare const SomeVar1 = "ThisIsSomeVar1";
+
 export { }

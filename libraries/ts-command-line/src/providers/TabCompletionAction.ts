@@ -18,8 +18,8 @@ const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
 const DEFAULT_POSITION: number = 0;
 
 export class TabCompleteAction extends CommandLineAction {
-  private _wordToCompleteParameter!: CommandLineStringParameter;
-  private _positionParameter!: CommandLineIntegerParameter;
+  private readonly _wordToCompleteParameter: CommandLineStringParameter;
+  private readonly _positionParameter: CommandLineIntegerParameter;
   private readonly _actions: Map<string, Map<string, CommandLineParameter>>;
   private readonly _globalParameters: Map<string, CommandLineParameter>;
 
@@ -55,9 +55,7 @@ export class TabCompleteAction extends CommandLineAction {
         this._globalParameters.set(parameter.shortName, parameter);
       }
     }
-  }
 
-  protected onDefineParameters(): void {
     this._wordToCompleteParameter = this.defineStringParameter({
       parameterLongName: '--word',
       argumentName: 'WORD',

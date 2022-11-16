@@ -16,10 +16,6 @@ export class SnapshotAction extends BaseReportAction {
     });
   }
 
-  protected onDefineParameters(): void {
-    super.onDefineParameters();
-  }
-
   protected async onExecute(): Promise<void> {
     const rundown: Rundown = new Rundown();
     await rundown.invokeAsync(

@@ -1,6 +1,53 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 08 Oct 2022 02:30:30 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Nov 2022 18:43:51 GMT and should not be manually modified.
+
+## 5.83.3
+Tue, 15 Nov 2022 18:43:51 GMT
+
+### Patches
+
+- Fix an issue where Git submodules were not handled correctly by the build cache (GitHub #1711)
+
+## 5.83.2
+Mon, 14 Nov 2022 05:15:22 GMT
+
+### Updates
+
+- Ensure autoinstaller lockfiles are not leftover after an error
+
+## 5.83.1
+Sat, 12 Nov 2022 04:40:57 GMT
+
+### Updates
+
+- Update the "rush init" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds
+
+## 5.83.0
+Fri, 11 Nov 2022 03:51:49 GMT
+
+### Updates
+
+- Add credentialType option for rush setup command
+- Rush "setup" command works even if plugins cannot be installed
+- Add support for integer, integer list, string list, and choice list parameters in plugins.
+- Introduce a `rush upgrade-interactive` action that provides an interactive way to upgrade outdated dependencies.
+- Fix a regression from Rush 5.79.0 where "rush init" did not create the pnpm-config.json file automatically
+
+## 5.82.1
+Wed, 19 Oct 2022 23:44:02 GMT
+
+_Version update only_
+
+## 5.82.0
+Mon, 17 Oct 2022 22:14:39 GMT
+
+### Updates
+
+- Replace Travis with GitHub Actions in the `rush init` template."
+- Handle case in ProjectWatcher where a project contains no git tracked files or status information is or was unavailable.
+- Refactor @rushstack/rush-azure-storage-build-cache-plugin to expose an API for generating and caching Azure credentials for other workloads, in addition to Storage.
+- Validate the change type in changefiles during publishing.
 
 ## 5.81.0
 Sat, 08 Oct 2022 02:30:30 GMT

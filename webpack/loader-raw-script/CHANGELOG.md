@@ -1,6 +1,38 @@
 # Change Log - @rushstack/loader-raw-script
 
-This log was last generated on Thu, 13 Oct 2022 00:20:15 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Nov 2022 05:15:02 GMT and should not be manually modified.
+
+## 1.3.270
+Mon, 14 Nov 2022 05:15:02 GMT
+
+### Patches
+
+- Updating webpack/loader-utils to resolve github advisory CVE-2022-37601. https://github.com/advisories/GHSA-76p3-8jx3-jpfq
+
+## 1.3.269
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 1.3.268
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 1.3.267
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 1.3.266
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 1.3.265
+Fri, 14 Oct 2022 15:26:32 GMT
+
+_Version update only_
 
 ## 1.3.264
 Thu, 13 Oct 2022 00:20:15 GMT

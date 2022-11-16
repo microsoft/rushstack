@@ -35,6 +35,19 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
   const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
 
   let activePort: number | undefined;
+  // The DNS name by which this server can be accessed.
+  // Defaults to 'localhost' but depends on the certificate
+  let activeHostNames: readonly string[] = ['localhost'];
+
+  function logHost(): void {
+    if (activePort !== undefined) {
+      logger.terminal.writeLine(
+        `Content is being served from:\n  ${activeHostNames
+          .map((hostName) => `https://${hostName}:${activePort}/`)
+          .join('\n  ')}`
+      );
+    }
+  }
 
   command.hooks.createOperations.tapPromise(
     {
@@ -91,9 +104,15 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       const fileRoutingRules: Map<string, IRoutingRule> = new Map();
 
+      const wbnRegex: RegExp = /\.wbn$/i;
       function setHeaders(response: express.Response, path?: string, stat?: unknown): void {
         response.set('Access-Control-Allow-Origin', '*');
         response.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        // TODO: Generalize headers and MIME types with an external database or JSON file.
+        if (path && wbnRegex.test(path)) {
+          response.set('X-Content-Type-Options', 'nosniff');
+          response.set('Content-Type', 'application/webbundle');
+        }
       }
 
       for (const rule of routingRules) {
@@ -131,6 +150,7 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       const server: https.Server = https.createServer(
         {
+          ca: certificate.pemCaCertificate,
           cert: certificate.pemCertificate,
           key: certificate.pemKey
         },
@@ -143,7 +163,10 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       const address: AddressInfo | undefined = server.address() as AddressInfo;
       activePort = address?.port;
 
-      logger.terminal.writeLine(`Content is being served from:\n  https://localhost:${activePort}/`);
+      if (certificate.subjectAltNames) {
+        activeHostNames = certificate.subjectAltNames;
+      }
+
       if (portParameter) {
         // Hack the value of the parsed command line parameter to the actual runtime value.
         // This will cause the resolved value to be forwarded to operations that may use it.
@@ -154,7 +177,5 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
     }
   );
 
-  command.hooks.waitingForChanges.tap(PLUGIN_NAME, () => {
-    logger.terminal.writeLine(`Content is being served from:\n  https://localhost:${activePort}/`);
-  });
+  command.hooks.waitingForChanges.tap(PLUGIN_NAME, logHost);
 }

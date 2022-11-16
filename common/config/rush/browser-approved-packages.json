@@ -11,12 +11,36 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@reduxjs/toolkit",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "axios",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "cors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "office-ui-fabric-core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "react-dom",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "react-redux",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "redux",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "tslib",

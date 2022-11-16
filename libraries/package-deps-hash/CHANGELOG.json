@@ -2,6 +2,93 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "3.2.62",
+      "tag": "@rushstack/package-deps-hash_v3.2.62",
+      "date": "Tue, 15 Nov 2022 18:43:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Get file hashes under git submodule paths when analyzing repo state"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.61",
+      "tag": "@rushstack/package-deps-hash_v3.2.61",
+      "date": "Tue, 08 Nov 2022 01:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.60",
+      "tag": "@rushstack/package-deps-hash_v3.2.60",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.59",
+      "tag": "@rushstack/package-deps-hash_v3.2.59",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.58",
+      "tag": "@rushstack/package-deps-hash_v3.2.58",
+      "date": "Mon, 17 Oct 2022 15:16:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.57",
+      "tag": "@rushstack/package-deps-hash_v3.2.57",
+      "date": "Fri, 14 Oct 2022 15:26:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.56",
       "tag": "@rushstack/package-deps-hash_v3.2.56",
       "date": "Thu, 13 Oct 2022 00:20:15 GMT",

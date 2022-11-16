@@ -102,3 +102,16 @@ export function someFunction8({ prop: prop2 }: Lib2Class): void {}
  * @public
  */
 export class SomeClass4 extends SomeClass5 {}
+
+/** @public */
+export const SomeSymbol1 = Symbol('ThisIsSomeSymbol1');
+/** @public */
+export const SomeVar1 = 'ThisIsSomeVar1';
+/**
+ * References to computed properties.
+ * @public
+ */
+export interface SomeInterface1 {
+  [SomeVar1]: () => string;
+  [SomeSymbol1]: () => string;
+}

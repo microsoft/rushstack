@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-azure-storage-build-cache-plugin",
-  "version": "5.81.0",
+  "version": "5.83.3",
   "description": "Rush plugin for Azure storage cloud build cache",
   "repository": {
     "type": "git",

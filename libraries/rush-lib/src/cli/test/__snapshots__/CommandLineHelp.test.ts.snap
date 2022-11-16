@@ -55,6 +55,9 @@ Positional arguments:
     update-cloud-credentials
                         (EXPERIMENTAL) Update the credentials used by the 
                         build cache provider.
+    upgrade-interactive
+                        Provides interactive prompt for upgrading package 
+                        dependencies per project
     version             Manage package versions in the repo.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
@@ -74,7 +77,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
-"usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [--all] [-s]
+"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [-m] [--all]
 
 Adds specified package(s) to the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -88,6 +91,8 @@ packages with the dependency.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
+  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
+                        run after updating the package.json files.
   -p PACKAGE, --package PACKAGE
                         The name of the package which should be added as a 
                         dependency. A SemVer version specifier can be 
@@ -112,8 +117,6 @@ Optional arguments:
                         same version of the dependency.
   --all                 If specified, the dependency will be added to all 
                         projects.
-  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
-                        run after updating the package.json files.
 "
 `;
 
@@ -1044,21 +1047,21 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: remove 1`] = `
-"usage: rush remove [-h] -p PACKAGE [--all] [-s]
+"usage: rush remove [-h] [-s] -p PACKAGE [--all]
 
 Removes specified package(s) from the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\".
 
 Optional arguments:
   -h, --help            Show this help message and exit.
+  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
+                        run after updating the package.json files.
   -p PACKAGE, --package PACKAGE
                         The name of the package which should be removed. To 
                         remove multiple packages, run \\"rush remove --package 
                         foo --package bar\\".
   --all                 If specified, the dependency will be removed from all 
                         projects that declare it.
-  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
-                        run after updating the package.json files.
 "
 `;
 
@@ -1220,6 +1223,28 @@ Optional arguments:
   --credential CREDENTIAL_STRING
                         A static credential, to be cached.
   -d, --delete          If specified, delete stored credentials.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: upgrade-interactive 1`] = `
+"usage: rush upgrade-interactive [-h] [--make-consistent] [-s]
+
+Provide an interactive way to upgrade your dependencies. Running the command 
+will open an interactive prompt that will ask you which projects and which 
+dependencies you would like to upgrade. It will then update your package.json 
+files, and run \\"rush update\\" for you. If you are using 
+ensureConsistentVersions policy, upgrade-interactive will update all packages 
+which use the dependencies that you are upgrading and match their SemVer 
+range if provided. If ensureConsistentVersions is not enabled, 
+upgrade-interactive will only update the dependency in the package you 
+specify. This can be overriden by using the --make-consistent flag.
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  --make-consistent  When upgrading dependencies from a single project, also 
+                     upgrade dependencies from other projects.
+  -s, --skip-update  If specified, the \\"rush update\\" command will not be run 
+                     after updating the package.json files.
 "
 `;
 
