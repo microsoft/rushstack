@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Refactor the logic of getting file hashes under git submodule paths",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash"
+}
