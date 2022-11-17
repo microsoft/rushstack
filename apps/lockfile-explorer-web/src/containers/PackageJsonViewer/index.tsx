@@ -60,8 +60,8 @@ export const PackageJsonViewer = (): JSX.Element => {
   }, [selectedEntry]);
 
   const renderDep =
-    (name: boolean) =>
-    (dependencyDetails: [string, string]): JSX.Element => {
+    (name: boolean): ((dependencyDetails: [string, string]) => JSX.Element) =>
+    (dependencyDetails) => {
       const [dep, version] = dependencyDetails;
       if (specChanges.has(dep)) {
         switch (specChanges.get(dep)?.type) {
