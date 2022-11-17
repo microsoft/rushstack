@@ -8,8 +8,6 @@ import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry'
 import { ReactNull } from '../../types/ReactNull';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
-  forwardStack,
-  popStack,
   pushToStack,
   selectCurrentEntry,
   selectFilteredEntries,

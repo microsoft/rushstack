@@ -36,7 +36,7 @@ export const SelectedEntryPreview = (): JSX.Element => {
     useDispatch(forwardStack());
   }, []);
 
-  const renderButtonRow = () => {
+  const renderButtonRow = (): JSX.Element => {
     return (
       <div className={styles.NavigationButtonRow}>
         <button disabled={entryStack.length <= 1} onClick={pop}>
