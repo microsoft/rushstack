@@ -134,13 +134,13 @@ export const PackageJsonViewer = (): JSX.Element => {
   const renderFile = (): JSX.Element | null => {
     switch (selection) {
       case PackageView.PACKAGE_JSON:
-        if (!packageJSON) return <h5>Please select a Project or Package to view it's package.json</h5>;
+        if (!packageJSON) return <h5>Please select a Project or Package to view it&apos;s package.json</h5>;
         return <pre>{JSON.stringify(packageJSON, null, 2)}</pre>;
       case PackageView.PACKAGE_SPEC:
         if (!pnpmfile) {
           return (
             <h5>
-              Couldn't load the pnpmfile.cjs file - does it exist in the expected location?
+              Couldn&apos;t load the pnpmfile.cjs file - does it exist in the expected location?
               (/common/config/rush/.pnpmfile.cjs)
             </h5>
           );
