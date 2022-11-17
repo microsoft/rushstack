@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/lockfile-explorer",
       "comment": "Fixed issues related to influencer resolution in lockfile explorer; Cleaned up UI & improved UX.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/lockfile-explorer"

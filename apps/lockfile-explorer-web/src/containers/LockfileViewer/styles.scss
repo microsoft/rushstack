@@ -1,6 +1,5 @@
 .ViewWrapper {
-  // Logo is 70px tall
-  height: calc(100% - 82px);
+  height: 100%;
   padding-top: 12px;
 }
 
@@ -73,6 +72,7 @@
 .filterOption {
   display: flex;
   align-items: center;
+  cursor: pointer;
   & > * + * {
     margin-left: 4px;
   }

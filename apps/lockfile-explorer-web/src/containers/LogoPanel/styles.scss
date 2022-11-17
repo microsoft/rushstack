@@ -1,12 +1,11 @@
 .LogoPanel {
   height: 70px;
-}
-
-.LogoPanel a {
-  text-decoration: none;
   display: flex;
   & > * + * {
     margin-left: 12px;
+  }
+  a {
+    text-decoration: none;
   }
 }
 
@@ -23,6 +22,12 @@
 .Title2 {
   padding-top: 5px;
   height: 20px;
+  display: flex;
+  align-content: flex-end;
+  & > div {
+    padding-top: 0;
+    margin-left: 4px;
+  }
 }
 
 .Image {

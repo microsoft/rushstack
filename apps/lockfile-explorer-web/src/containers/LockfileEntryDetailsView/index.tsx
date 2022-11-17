@@ -12,14 +12,14 @@ import { LockfileEntry } from '../../parsing/LockfileEntry';
 import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 
-enum InfluencerTypes {
+enum DependencyType {
   Determinant,
   TransitiveReferrer
 }
 
 interface IInfluencerType {
   entry: LockfileEntry;
-  type: InfluencerTypes;
+  type: DependencyType;
 }
 
 export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
@@ -103,13 +103,13 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         for (const determinant of determinants.values()) {
           influencers.push({
             entry: determinant,
-            type: InfluencerTypes.Determinant
+            type: DependencyType.Determinant
           });
         }
         for (const referrer of transitiveReferrers.values()) {
           influencers.push({
             entry: referrer,
-            type: InfluencerTypes.TransitiveReferrer
+            type: DependencyType.TransitiveReferrer
           });
         }
         setInfluencers(influencers);
@@ -185,7 +185,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
       <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
         <h5>Determinants:</h5>
         {influencers
-          .filter((inf) => inf.type === InfluencerTypes.Determinant)
+          .filter((inf) => inf.type === DependencyType.Determinant)
           .map(({ entry }) => (
             <a
               className={styles.InfluencerEntry}
@@ -197,7 +197,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           ))}
         <h5>Transitive Referencers:</h5>
         {influencers
-          .filter((inf) => inf.type === InfluencerTypes.TransitiveReferrer)
+          .filter((inf) => inf.type === DependencyType.TransitiveReferrer)
           .map(({ entry }) => (
             <a
               className={styles.InfluencerEntry}

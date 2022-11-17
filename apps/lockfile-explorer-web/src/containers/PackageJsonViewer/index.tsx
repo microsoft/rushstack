@@ -58,52 +58,69 @@ export const PackageJsonViewer = (): JSX.Element => {
     }
   }, [selectedEntry]);
 
-  const renderDep = (dependencyDetails: [string, string]): JSX.Element => {
-    const [dep, version] = dependencyDetails;
-    if (specChanges.has(dep)) {
-      switch (specChanges.get(dep)?.type) {
-        case 'add':
-          return (
-            <p key={dep}>
-              <span className={styles.AddedSpec}>
-                {dep}: {version}
-              </span>{' '}
-              {displaySpecChanges(specChanges, dep)}
-            </p>
-          );
-        case 'diff':
-          return (
-            <p key={dep}>
-              <span className={styles.ChangedSpec}>
-                {dep}: {version}
-              </span>{' '}
-              {displaySpecChanges(specChanges, dep)}
-            </p>
-          );
-        case 'remove':
-          return (
-            <p key={dep}>
-              <span className={styles.DeletedSpec}>
-                {dep}: {version}
-              </span>{' '}
-              {displaySpecChanges(specChanges, dep)}
-            </p>
-          );
-        default:
-          return (
-            <p key={dep}>
-              {dep}: {version}
-            </p>
-          );
+  const renderDep =
+    (name: boolean) =>
+    (dependencyDetails: [string, string]): JSX.Element => {
+      const [dep, version] = dependencyDetails;
+      if (specChanges.has(dep)) {
+        switch (specChanges.get(dep)?.type) {
+          case 'add':
+            if (name) {
+              return (
+                <p>
+                  <span className={styles.AddedSpec}>{dep}</span>
+                </p>
+              );
+            } else {
+              return (
+                <p>
+                  {version} {displaySpecChanges(specChanges, dep)}
+                </p>
+              );
+            }
+          case 'diff':
+            if (name) {
+              return (
+                <p key={dep}>
+                  <span className={styles.ChangedSpec}>{dep}</span>
+                </p>
+              );
+            } else {
+              return (
+                <p>
+                  {version} {displaySpecChanges(specChanges, dep)}
+                </p>
+              );
+            }
+          case 'remove':
+            if (name) {
+              return (
+                <p key={dep}>
+                  <span className={styles.DeletedSpec}>{dep}</span>
+                </p>
+              );
+            } else {
+              return (
+                <p>
+                  {version} {displaySpecChanges(specChanges, dep)}
+                </p>
+              );
+            }
+          default:
+            if (name) {
+              return <p key={dep}>{dep}:</p>;
+            } else {
+              return <p key={dep}>{version}</p>;
+            }
+        }
+      } else {
+        if (name) {
+          return <p key={dep}>{dep}:</p>;
+        } else {
+          return <p key={dep}>{version}</p>;
+        }
       }
-    } else {
-      return (
-        <p key={dep}>
-          {dep}: {version}
-        </p>
-      );
-    }
-  };
+    };
 
   const renderFile = (): JSX.Element | null => {
     switch (selection) {
@@ -124,14 +141,34 @@ export const PackageJsonViewer = (): JSX.Element => {
               <h5>Version:</h5>
               <p>{selectedEntry?.entryPackageVersion}</p>
             </div>
-            <h5>Dependencies</h5>
-            {parsedPackageJSON.dependencies && Object.entries(parsedPackageJSON.dependencies).map(renderDep)}
-            <h5>Dev Dependencies</h5>
-            {parsedPackageJSON.devDependencies &&
-              Object.entries(parsedPackageJSON.devDependencies).map(renderDep)}
-            <h5>Peer Dependencies</h5>
-            {parsedPackageJSON.peerDependencies &&
-              Object.entries(parsedPackageJSON.peerDependencies).map(renderDep)}
+            <div className={styles.DependencyRows}>
+              <div>
+                <h5>Dependencies</h5>
+                {parsedPackageJSON.dependencies &&
+                  Object.entries(parsedPackageJSON.dependencies).map(renderDep(true))}
+
+                <h5>Dev Dependencies</h5>
+                {parsedPackageJSON.devDependencies &&
+                  Object.entries(parsedPackageJSON.devDependencies).map(renderDep(true))}
+
+                <h5>Peer Dependencies</h5>
+                {parsedPackageJSON.peerDependencies &&
+                  Object.entries(parsedPackageJSON.peerDependencies).map(renderDep(true))}
+              </div>
+              <div>
+                <h5>&nbsp;</h5>
+                {parsedPackageJSON.dependencies &&
+                  Object.entries(parsedPackageJSON.dependencies).map(renderDep(false))}
+
+                <h5>&nbsp;</h5>
+                {parsedPackageJSON.devDependencies &&
+                  Object.entries(parsedPackageJSON.devDependencies).map(renderDep(false))}
+
+                <h5>&nbsp;</h5>
+                {parsedPackageJSON.peerDependencies &&
+                  Object.entries(parsedPackageJSON.peerDependencies).map(renderDep(false))}
+              </div>
+            </div>
           </div>
         );
       default:

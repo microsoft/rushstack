@@ -129,10 +129,9 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   };
 
   const changeFilter = useCallback(
-    (filter: LockfileEntryFilter) =>
-      (ev: React.ChangeEvent<HTMLInputElement>): void => {
-        dispatch(selectFilter({ filter, state: ev.target.checked }));
-      },
+    (filter: LockfileEntryFilter, enabled: boolean) => (): void => {
+      dispatch(selectFilter({ filter, state: enabled }));
+    },
     []
   );
 
@@ -169,10 +168,10 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
         <div className={styles.LockfileFilterBar}>
           <h5>Filter:</h5>
           <input type="text" value={filter} onChange={updateFilter} />
-          <button disabled={entryStack.length > 1} onClick={pop}>
+          <button disabled={entryStack.length <= 1} onClick={pop}>
             Back
           </button>
-          <button disabled={entryForwardStack.length > 0} onClick={forward}>
+          <button disabled={entryForwardStack.length === 0} onClick={forward}>
             Forward
           </button>
         </div>
@@ -183,20 +182,24 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
         </div>
         <div className={styles.filterSection}>
           <h5>Filters</h5>
-          <div className={styles.filterOption}>
-            <input
-              type="checkbox"
-              checked={activeFilters[LockfileEntryFilter.SideBySide]}
-              onChange={changeFilter(LockfileEntryFilter.SideBySide)}
-            />
+          <div
+            className={styles.filterOption}
+            onClick={changeFilter(
+              LockfileEntryFilter.SideBySide,
+              !activeFilters[LockfileEntryFilter.SideBySide]
+            )}
+          >
+            <input type="checkbox" checked={activeFilters[LockfileEntryFilter.SideBySide]} />
             <h5>Must have side-by-side versions</h5>
           </div>
-          <div className={styles.filterOption}>
-            <input
-              type="checkbox"
-              checked={activeFilters[LockfileEntryFilter.Doppelganger]}
-              onChange={changeFilter(LockfileEntryFilter.Doppelganger)}
-            />
+          <div
+            className={styles.filterOption}
+            onClick={changeFilter(
+              LockfileEntryFilter.Doppelganger,
+              !activeFilters[LockfileEntryFilter.Doppelganger]
+            )}
+          >
+            <input type="checkbox" checked={activeFilters[LockfileEntryFilter.Doppelganger]} />
             <h5>Must have doppelgangers</h5>
           </div>
         </div>

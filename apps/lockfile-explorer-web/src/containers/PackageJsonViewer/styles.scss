@@ -46,3 +46,16 @@
     margin-left: 12px;
   }
 }
+
+.DependencyRows {
+  display: flex;
+  align-items: flex-start;
+  & > * + * {
+    margin-left: 12px;
+  }
+  div {
+    & > * + * {
+      margin-top: 4px;
+    }
+  }
+}

@@ -34,7 +34,6 @@ export const App = (): JSX.Element => {
       <div className="ms-Grid" dir="ltr">
         <div className="ms-Grid-row">
           <div className={`ms-Grid-col ms-sm3 ${styles.BodyContainer}`}>
-            <LogoPanel />
             <LockfileViewer />
           </div>
           <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
@@ -43,6 +42,7 @@ export const App = (): JSX.Element => {
             <LockfileEntryDetailsView />
           </div>
           <div className={`ms-Grid-col ms-sm2 ${styles.BodyContainer}`}>
+            <LogoPanel />
             <BookmarksSidebar />
           </div>
         </div>
