@@ -46,9 +46,13 @@ export const SelectedEntryPreview = (): JSX.Element => {
           Forward
         </button>
         {isBookmarked ? (
-          <button onClick={deleteEntry}>Remove&nbsp;Bookmark</button>
+          <button onClick={deleteEntry} disabled={!selectedEntry}>
+            Remove&nbsp;Bookmark
+          </button>
         ) : (
-          <button onClick={bookmark}>Add&nbsp;Bookmark</button>
+          <button onClick={bookmark} disabled={!selectedEntry}>
+            Add&nbsp;Bookmark
+          </button>
         )}
       </div>
     );
@@ -57,7 +61,10 @@ export const SelectedEntryPreview = (): JSX.Element => {
   if (!selectedEntry) {
     return (
       <div className={styles.SelectedEntryCard}>
-        <h5>No Entry Selected</h5>
+        <div className={styles.SelectedEntryBookmarkRow}>
+          <h5>No Entry Selected</h5>
+          {renderButtonRow()}
+        </div>
       </div>
     );
   }
