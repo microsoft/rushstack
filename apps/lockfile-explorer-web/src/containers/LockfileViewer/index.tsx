@@ -189,7 +189,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
               !activeFilters[LockfileEntryFilter.SideBySide]
             )}
           >
-            <input type="checkbox" checked={activeFilters[LockfileEntryFilter.SideBySide]} />
+            <input type="checkbox" checked={activeFilters[LockfileEntryFilter.SideBySide]} readOnly />
             <h5>Must have side-by-side versions</h5>
           </div>
           <div
@@ -199,7 +199,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
               !activeFilters[LockfileEntryFilter.Doppelganger]
             )}
           >
-            <input type="checkbox" checked={activeFilters[LockfileEntryFilter.Doppelganger]} />
+            <input type="checkbox" checked={activeFilters[LockfileEntryFilter.Doppelganger]} readOnly />
             <h5>Must have doppelgangers</h5>
           </div>
         </div>

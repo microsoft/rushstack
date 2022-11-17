@@ -130,7 +130,6 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     if (!inspectDependency) {
       return ReactNull;
     }
-    console.log('inspect dependency: ', inspectDependency, specChanges.get(inspectDependency.name));
     return (
       <div className={`${appStyles.ContainerCard} ${styles.DependencyDetails}`}>
         <div className={styles.DependencyDetailInfo}>

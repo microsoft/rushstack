@@ -12,6 +12,7 @@ import { compareSpec } from '../../parsing/compareSpec';
 import { FilterBar } from '../../components/FilterBar';
 import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
+import { isEntryModified } from '../../helpers/isEntryModified';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -67,13 +68,13 @@ export const PackageJsonViewer = (): JSX.Element => {
           case 'add':
             if (name) {
               return (
-                <p>
+                <p key={dep}>
                   <span className={styles.AddedSpec}>{dep}</span>
                 </p>
               );
             } else {
               return (
-                <p>
+                <p key={dep}>
                   {version} {displaySpecChanges(specChanges, dep)}
                 </p>
               );
@@ -87,7 +88,7 @@ export const PackageJsonViewer = (): JSX.Element => {
               );
             } else {
               return (
-                <p>
+                <p key={dep}>
                   {version} {displaySpecChanges(specChanges, dep)}
                 </p>
               );
@@ -101,7 +102,7 @@ export const PackageJsonViewer = (): JSX.Element => {
               );
             } else {
               return (
-                <p>
+                <p key={dep}>
                   {version} {displaySpecChanges(specChanges, dep)}
                 </p>
               );
@@ -181,7 +182,7 @@ export const PackageJsonViewer = (): JSX.Element => {
       <FilterBar
         options={[
           {
-            text: 'package spec',
+            text: `package spec ${isEntryModified(selectedEntry, specChanges) ? '*' : ''}`,
             active: selection === PackageView.PARSED_PACKAGE_JSON,
             onClick: cb(PackageView.PARSED_PACKAGE_JSON)
           },
