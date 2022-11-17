@@ -1,5 +1,4 @@
 .LogoPanel {
-  height: 70px;
   display: flex;
   & > * + * {
     margin-left: 12px;
@@ -22,12 +21,6 @@
 .Title2 {
   padding-top: 5px;
   height: 20px;
-  display: flex;
-  align-content: flex-end;
-  & > div {
-    padding-top: 0;
-    margin-left: 4px;
-  }
 }
 
 .Image {

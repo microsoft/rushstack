@@ -21,8 +21,8 @@ export const LogoPanel = (): JSX.Element => {
           </div>
           <div className={styles.Title2}>
             <img className={styles.Image} src={require('./lockfile-explorer-title-2.svg')} />
-            <div className={styles.Detail}>{appPackageVersion}</div>
           </div>
+          <div className={styles.Detail}>{appPackageVersion}</div>
         </a>
         <a href="https://rushstack.io/" target="_blank" rel="noreferrer">
           <div className={styles.Detail}>rushstack.io</div>

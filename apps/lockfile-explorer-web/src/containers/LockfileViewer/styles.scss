@@ -6,7 +6,7 @@
 .ViewContents {
   display: flex;
   flex-direction: column;
-  max-height: calc(100% - 70px - 35px);
+  min-height: calc(100% - 70px - 35px);
 }
 
 .LockfileEntryListViewWrapper {

@@ -58,17 +58,43 @@ const entrySlice = createSlice({
     },
     pushToStack: (state, payload: PayloadAction<LockfileEntry>) => {
       state.selectedEntryStack.push(payload.payload);
+      state.selectedEntryForwardStack = [];
+      if (payload.payload.kind === LockfileEntryFilter.Package) {
+        state.filters[LockfileEntryFilter.Project] = false;
+        state.filters[LockfileEntryFilter.Package] = true;
+      } else {
+        state.filters[LockfileEntryFilter.Project] = true;
+        state.filters[LockfileEntryFilter.Package] = false;
+      }
     },
     popStack: (state) => {
       if (state.selectedEntryStack.length > 1) {
         const poppedEntry = state.selectedEntryStack.pop() as LockfileEntry;
         state.selectedEntryForwardStack.push(poppedEntry);
+
+        if (state.selectedEntryStack.length >= 1) {
+          const currEntry = state.selectedEntryStack[state.selectedEntryStack.length - 1];
+          if (currEntry.kind === LockfileEntryFilter.Package) {
+            state.filters[LockfileEntryFilter.Project] = false;
+            state.filters[LockfileEntryFilter.Package] = true;
+          } else {
+            state.filters[LockfileEntryFilter.Project] = true;
+            state.filters[LockfileEntryFilter.Package] = false;
+          }
+        }
       }
     },
     forwardStack: (state) => {
       if (state.selectedEntryForwardStack.length > 0) {
         const poppedEntry = state.selectedEntryForwardStack.pop() as LockfileEntry;
         state.selectedEntryStack.push(poppedEntry);
+        if (poppedEntry.kind === LockfileEntryFilter.Package) {
+          state.filters[LockfileEntryFilter.Project] = false;
+          state.filters[LockfileEntryFilter.Package] = true;
+        } else {
+          state.filters[LockfileEntryFilter.Project] = true;
+          state.filters[LockfileEntryFilter.Package] = false;
+        }
       }
     },
     addBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
