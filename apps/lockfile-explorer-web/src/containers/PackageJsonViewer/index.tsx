@@ -34,9 +34,17 @@ export const PackageJsonViewer = (): JSX.Element => {
   const cb = useCallback((s: PackageView) => () => setSelection(s), []);
 
   useEffect(() => {
-    async function loadPackageDetails(packageName: string): Promise<void> {
+    async function loadPnpmFile(): Promise<void> {
       const pnpmfile = await readPnpmfile();
       setPnpmfile(pnpmfile);
+    }
+    loadPnpmFile().catch((e) => {
+      console.error(`Failed to load project's pnpm file: ${e}`);
+    });
+  }, []);
+
+  useEffect(() => {
+    async function loadPackageDetails(packageName: string): Promise<void> {
       const packageJSONFile = await readPackageJson(packageName);
       setPackageJSON(packageJSONFile);
       const parsedJSON = await readPackageSpec(packageName);
@@ -126,12 +134,21 @@ export const PackageJsonViewer = (): JSX.Element => {
   const renderFile = (): JSX.Element | null => {
     switch (selection) {
       case PackageView.PACKAGE_JSON:
-        if (!packageJSON) return null;
+        if (!packageJSON) return <h5>Please select a Project or Package to view it's package.json</h5>;
         return <pre>{JSON.stringify(packageJSON, null, 2)}</pre>;
       case PackageView.PACKAGE_SPEC:
+        if (!pnpmfile) {
+          return (
+            <h5>
+              Couldn't load the pnpmfile.cjs file - does it exist in the expected location?
+              (/common/config/rush/.pnpmfile.cjs)
+            </h5>
+          );
+        }
         return <pre>{pnpmfile}</pre>;
       case PackageView.PARSED_PACKAGE_JSON:
-        if (!parsedPackageJSON) return null;
+        if (!parsedPackageJSON)
+          return <h5>Please select a Project or Package to view the parsed package.json</h5>;
         return (
           <div className={styles.PackageSpecWrapper}>
             <div className={styles.PackageSpecEntry}>
