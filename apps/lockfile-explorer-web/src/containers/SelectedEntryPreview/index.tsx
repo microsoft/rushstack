@@ -30,19 +30,25 @@ export const SelectedEntryPreview = (): JSX.Element => {
 
   return (
     <div className={styles.SelectedEntryCard}>
-      <div className={styles.SelectedEntryHeader}>
-        <h5>Selected entry:</h5>
-        <span>{selectedEntry.displayText}</span>
+      <div className={styles.SelectedEntryBookmarkRow}>
+        <div className={styles.SelectedEntryHeader}>
+          <h5>Selected entry:</h5>
+          <span>{selectedEntry.displayText}</span>
+        </div>
+        {isBookmarked ? (
+          <button onClick={deleteEntry} className={styles.BookmarkButton}>
+            Remove&nbsp;Bookmark
+          </button>
+        ) : (
+          <button onClick={bookmark} className={styles.BookmarkButton}>
+            Add&nbsp;Bookmark
+          </button>
+        )}
       </div>
-
-      <p>Package Entry: {selectedEntry.rawEntryId}</p>
-      <p>Package JSON path: {selectedEntry.packageJsonFolderPath}</p>
-
-      {isBookmarked ? (
-        <button onClick={deleteEntry}>Remove Bookmark</button>
-      ) : (
-        <button onClick={bookmark}>Add Bookmark</button>
-      )}
+      <div>
+        <p>Package Entry: {selectedEntry.rawEntryId}</p>
+        <p>Package JSON path: {selectedEntry.packageJsonFolderPath}</p>
+      </div>
     </div>
   );
 };
