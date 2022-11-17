@@ -74,13 +74,21 @@ const multipleVersions = (entries: LockfileEntry[]): boolean => {
 
 export const LockfileViewer = (): JSX.Element | ReactNull => {
   const dispatch = useAppDispatch();
-  const [filter, setFilter] = useState('');
+  const [projectFilter, setProjectFilter] = useState('');
+  const [packageFilter, setPackageFilter] = useState('');
   const entries = useAppSelector(selectFilteredEntries);
   const activeFilters = useAppSelector((state) => state.entry.filters);
-  const updateFilter = useCallback((e) => {
-    setFilter(e.target.value);
-    saveFilterToLocalStorage(e.target.value);
-  }, []);
+  const updateFilter = useCallback(
+    (type: LockfileEntryFilter) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (type === LockfileEntryFilter.Project) {
+        setProjectFilter(e.target.value);
+      } else {
+        setPackageFilter(e.target.value);
+      }
+      saveFilterToLocalStorage(e.target.value, type);
+    },
+    []
+  );
   const pop = useCallback(() => {
     dispatch(popStack());
   }, []);
@@ -89,7 +97,8 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   }, []);
 
   useEffect(() => {
-    setFilter(getFilterFromLocalStorage());
+    setProjectFilter(getFilterFromLocalStorage(LockfileEntryFilter.Project));
+    setPackageFilter(getFilterFromLocalStorage(LockfileEntryFilter.Package));
   }, []);
 
   const entryStack = useAppSelector((state) => state.entry.selectedEntryStack);
@@ -98,11 +107,11 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   if (!entries) return ReactNull;
 
   const getEntriesToShow = (): ILockfileEntryGroup[] => {
-    let filteredEntries: LockfileEntry[] = [];
-    if (filter) {
-      filteredEntries = entries.filter((entry) => entry.entryPackageName.indexOf(filter) !== -1);
-    } else {
-      filteredEntries = entries;
+    let filteredEntries: LockfileEntry[] = entries;
+    if (projectFilter && activeFilters[LockfileEntryFilter.Project]) {
+      filteredEntries = entries.filter((entry) => entry.entryPackageName.indexOf(projectFilter) !== -1);
+    } else if (packageFilter && activeFilters[LockfileEntryFilter.Package]) {
+      filteredEntries = entries.filter((entry) => entry.entryPackageName.indexOf(packageFilter) !== -1);
     }
     const reducedEntries = filteredEntries.reduce((groups: { [key in string]: LockfileEntry[] }, item) => {
       const group = groups[item.entryPackageName] || [];
@@ -167,7 +176,15 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       <div className={`${styles.ViewContents} ${appStyles.ContainerCard}`}>
         <div className={styles.LockfileFilterBar}>
           <h5>Filter:</h5>
-          <input type="text" value={filter} onChange={updateFilter} />
+          <input
+            type="text"
+            value={activeFilters[LockfileEntryFilter.Project] ? projectFilter : packageFilter}
+            onChange={updateFilter(
+              activeFilters[LockfileEntryFilter.Project]
+                ? LockfileEntryFilter.Project
+                : LockfileEntryFilter.Package
+            )}
+          />
           <button disabled={entryStack.length <= 1} onClick={pop}>
             Back
           </button>

@@ -63,7 +63,8 @@
 }
 
 .filterSection {
-  margin-top: 24px;
+  border-top: 1px solid #000;
+  padding-top: 24px;
   & > * + * {
     margin-top: 4px;
   }

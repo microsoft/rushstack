@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LockfileEntry } from '../parsing/LockfileEntry';
+import { LockfileEntry, LockfileEntryFilter } from '../parsing/LockfileEntry';
 
 const BOOKMARK_KEY: string = 'LOCKFILE_EXPLORER_BOOKMARKS';
 
@@ -28,11 +28,20 @@ export const removeBookmarkFromLocalStorage = (entry: LockfileEntry): void => {
   localStorage.setItem(BOOKMARK_KEY, JSON.stringify(currBookmarks));
 };
 
-const FILTER_KEY: string = 'LOCKFILE_EXPLORER_FILTER';
-export const saveFilterToLocalStorage = (filter: string): void => {
-  localStorage.setItem(FILTER_KEY, filter);
+const PROJECT_FILTER_KEY: string = 'LOCKFILE_EXPLORER_PROJECT_FILTER';
+const PACKAGE_FILTER_KEY: string = 'LOCKFILE_EXPLORER_PACKAGE_FILTER';
+export const saveFilterToLocalStorage = (filter: string, type: LockfileEntryFilter): void => {
+  if (type === LockfileEntryFilter.Project) {
+    localStorage.setItem(PROJECT_FILTER_KEY, filter);
+  } else {
+    localStorage.setItem(PACKAGE_FILTER_KEY, filter);
+  }
 };
 
-export const getFilterFromLocalStorage = (): string => {
-  return localStorage.getItem(FILTER_KEY) || '';
+export const getFilterFromLocalStorage = (type: LockfileEntryFilter): string => {
+  if (type === LockfileEntryFilter.Project) {
+    return localStorage.getItem(PROJECT_FILTER_KEY) || '';
+  } else {
+    return localStorage.getItem(PACKAGE_FILTER_KEY) || '';
+  }
 };
