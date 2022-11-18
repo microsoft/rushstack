@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Autoinstaller logout respects --quiet parameter",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
