@@ -11,19 +11,23 @@ export const LogoPanel = (): JSX.Element => {
 
   return (
     <div className={styles.LogoPanel}>
-      <a href="https://www.npmjs.com/package/@rushstack/lockfile-explorer" target="_blank" rel="noreferrer">
-        <div className={styles.Icon}>
-          <img className={styles.Image} src={require('./lockfile-explorer-icon.svg')} />
-        </div>
-        <div className={styles.Title1}>
-          <img className={styles.Image} src={require('./lockfile-explorer-title-1.svg')} />
-        </div>
-        <div className={styles.Title2}>
-          <img className={styles.Image} src={require('./lockfile-explorer-title-2.svg')} />
-        </div>
-        <div className={styles.Detail}>{appPackageVersion}</div>
-        <div className={styles.Detail}>rushstack.io</div>
-      </a>
+      <div className={styles.Icon}>
+        <img className={styles.Image} src={require('./lockfile-explorer-icon.svg')} />
+      </div>
+      <div>
+        <a href="https://www.npmjs.com/package/@rushstack/lockfile-explorer" target="_blank" rel="noreferrer">
+          <div className={styles.Title1}>
+            <img className={styles.Image} src={require('./lockfile-explorer-title-1.svg')} />
+          </div>
+          <div className={styles.Title2}>
+            <img className={styles.Image} src={require('./lockfile-explorer-title-2.svg')} />
+          </div>
+          <div className={styles.Detail}>{appPackageVersion}</div>
+        </a>
+        <a href="https://rushstack.io/" target="_blank" rel="noreferrer">
+          <div className={styles.Detail}>rushstack.io</div>
+        </a>
+      </div>
     </div>
   );
 };

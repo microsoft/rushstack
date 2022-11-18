@@ -28,6 +28,11 @@ module.exports = function createConfig(env, argv) {
         port: 8096,
         static: {
           directory: path.join(__dirname, 'dist')
+        },
+        client: {
+          webSocketURL: {
+            port: 8096
+          }
         }
       }
     }
