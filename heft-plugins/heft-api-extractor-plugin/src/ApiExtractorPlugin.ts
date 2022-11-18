@@ -62,6 +62,11 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
         );
       }
     });
+
+    taskSession.hooks.runIncremental.tapPromise(PLUGIN_NAME, async () => {
+      // Warn since don't need to run API Extractor when in watch mode.
+      taskSession.logger.terminal.writeWarningLine("API Extractor isn't currently supported in watch mode.");
+    });
   }
 
   private async _getApiExtractorConfigurationFilePathAsync(
