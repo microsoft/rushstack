@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 15 Nov 2022 22:59:35 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Nov 2022 02:50:10 GMT and should not be manually modified.
+
+## 0.49.0-rc.1
+Fri, 18 Nov 2022 02:34:26 GMT
+
+### Prerelease Changes
+
+- Fix incremental TypeScript compilation.
 
 ## 0.49.0-rc.0
 Tue, 15 Nov 2022 22:59:35 GMT
