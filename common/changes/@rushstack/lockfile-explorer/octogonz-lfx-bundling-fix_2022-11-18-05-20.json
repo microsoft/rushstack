@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Fix an issue where some assets were not packaged in the production release",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}
