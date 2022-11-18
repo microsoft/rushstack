@@ -173,21 +173,23 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
     const pointer: number = this._selected;
     let lastValidIndex: number = pointer;
 
-    // if delta is greater than 0, we are moving down in list w/ selected index
+    // if delta is less than 0, we are moving up in list w/ selected index
     if (delta < 0) {
       for (let i: number = pointer - 1; i >= 0; i--) {
         const choice: Choice<Answers> = choices[i] as Choice<Answers>;
         if (isValidChoice(choice)) {
           ++delta;
           lastValidIndex = i;
-          // if delta is 0, we have found the next valid choice that has an index greater than the selected index
+          // if delta is 0, we have found the next valid choice that has an index less than the selected index
           if (delta === 0) {
             break;
           }
         }
       }
     } else {
-      // if delta is less than 0, we are moving up in list w/ selected index
+      // if delta is greater than 0, we are moving down in list w/ selected index
+      // Also, if delta is exactly 0, the request is to adjust to the first
+      // displayed choice that has an index >= the current selected choice.
       ++delta;
       for (let i: number = pointer, len: number = choices.length; i < len; i++) {
         const choice: Choice<Answers> = choices[i] as Choice<Answers>;
