@@ -2,8 +2,20 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.1.0-rc.1",
+      "tag": "@rushstack/heft-lint-plugin_v0.1.0-rc.1",
+      "date": "Fri, 18 Nov 2022 02:34:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix incremental TypeScript compilation."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0-rc.0",
-      "tag": "@rushstack/heft-lint-plugin_v0.1.0",
+      "tag": "@rushstack/heft-lint-plugin_v0.1.0-rc.0",
       "date": "Tue, 15 Nov 2022 22:59:35 GMT",
       "comments": {
         "minor": [
