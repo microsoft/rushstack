@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "0.1.0",
+      "tag": "@rushstack/lockfile-explorer_v0.1.0",
+      "date": "Fri, 18 Nov 2022 00:55:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fixed issues related to influencer resolution in lockfile explorer; Cleaned up UI & improved UX."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.3",
       "tag": "@rushstack/lockfile-explorer_v0.0.3",
       "date": "Tue, 08 Nov 2022 01:20:56 GMT",

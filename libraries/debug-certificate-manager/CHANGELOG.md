@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Sat, 12 Nov 2022 00:16:31 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Nov 2022 00:55:17 GMT and should not be manually modified.
+
+## 1.2.5
+Fri, 18 Nov 2022 00:55:17 GMT
+
+### Patches
+
+- Reduce default certificate validity period to 365 days. Check certificate validity period as part of validating the existing certificate.
 
 ## 1.2.4
 Sat, 12 Nov 2022 00:16:31 GMT
