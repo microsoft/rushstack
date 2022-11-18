@@ -15,7 +15,7 @@ import {
   Async,
   FileError
 } from '@rushstack/node-core-library';
-import type { IScopedLogger } from '@rushstack/heft';
+import type { IChangedFileState, IScopedLogger } from '@rushstack/heft';
 
 import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';
 import { EmitFilesPatch, type ICachedEmitModuleKind } from './EmitFilesPatch';
@@ -111,6 +111,17 @@ const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 4;
 const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 8;
 
+interface ITypeScriptTool {
+  ts: ExtendedTypeScript;
+  measureSync: PerformanceMeasurer;
+  measureAsync: PerformanceMeasurerAsync;
+
+  sourceFileCache: Map<string, TTypescript.SourceFile>;
+
+  oldBuilderProgram: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram | undefined;
+  oldProgram: TTypescript.Program | undefined;
+}
+
 export class TypeScriptBuilder {
   private readonly _configuration: ITypeScriptBuilderConfiguration;
   private readonly _typescriptLogger: IScopedLogger;
@@ -124,9 +135,11 @@ export class TypeScriptBuilder {
 
   private _moduleKindsToEmit!: ICachedEmitModuleKind[];
 
-  private __tsCacheFilePath: string | undefined;
+  private __tsCacheFilePath: string | undefined = undefined;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
   private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
+
+  private _tool: ITypeScriptTool | undefined = undefined;
 
   private get _tsCacheFilePath(): string {
     if (!this.__tsCacheFilePath) {
@@ -159,117 +172,142 @@ export class TypeScriptBuilder {
     this._typescriptTerminal = configuration.scopedLogger.terminal;
   }
 
-  public async invokeAsync(): Promise<void> {
-    // Determine the compiler version
-    const compilerPackageJsonFilename: string = path.join(
-      this._configuration.typeScriptToolPath,
-      'package.json'
-    );
-    const packageJson: IPackageJson = await JsonFile.loadAsync(compilerPackageJsonFilename);
-    this._typescriptVersion = packageJson.version;
-    const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
-    if (!parsedVersion) {
-      throw new Error(
-        `Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ` +
-          compilerPackageJsonFilename
+  public async invokeAsync(changedFiles?: ReadonlyMap<string, IChangedFileState> | undefined): Promise<void> {
+    if (!this._tool) {
+      // Determine the compiler version
+      const compilerPackageJsonFilename: string = path.join(
+        this._configuration.typeScriptToolPath,
+        'package.json'
       );
-    }
-    this._typescriptParsedVersion = parsedVersion;
+      const packageJson: IPackageJson = await JsonFile.loadAsync(compilerPackageJsonFilename);
+      this._typescriptVersion = packageJson.version;
+      const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
+      if (!parsedVersion) {
+        throw new Error(
+          `Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ` +
+            compilerPackageJsonFilename
+        );
+      }
+      this._typescriptParsedVersion = parsedVersion;
 
-    // Detect what features this compiler supports.  Note that manually comparing major/minor numbers
-    // loosens the matching to accept prereleases such as "3.6.0-dev.20190530"
-    this._capabilities = {
-      incrementalProgram: false,
-      solutionBuilder: this._typescriptParsedVersion.major >= 3
-    };
-
-    if (
-      this._typescriptParsedVersion.major > 3 ||
-      (this._typescriptParsedVersion.major === 3 && this._typescriptParsedVersion.minor >= 6)
-    ) {
-      this._capabilities.incrementalProgram = true;
-    }
-
-    this._useSolutionBuilder = !!this._configuration.buildProjectReferences;
-    if (this._useSolutionBuilder && !this._capabilities.solutionBuilder) {
-      throw new Error(
-        `Building project references requires TypeScript@>=3.0, but the current version is ${this._typescriptVersion}`
-      );
-    }
-
-    // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
-    // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
-    // would be required to deal with that.  We won't do that work unless someone requests it.
-    if (
-      this._typescriptParsedVersion.major < OLDEST_SUPPORTED_TS_MAJOR_VERSION ||
-      (this._typescriptParsedVersion.major === OLDEST_SUPPORTED_TS_MAJOR_VERSION &&
-        this._typescriptParsedVersion.minor < OLDEST_SUPPORTED_TS_MINOR_VERSION)
-    ) {
-      // We don't use writeWarningLine() here because, if the person wants to take their chances with
-      // a seemingly unsupported compiler, their build should be allowed to succeed.
-      this._typescriptTerminal.writeLine(
-        `The TypeScript compiler version ${this._typescriptVersion} is very old` +
-          ` and has not been tested with Heft; it may not work correctly.`
-      );
-    } else if (
-      this._typescriptParsedVersion.major > NEWEST_SUPPORTED_TS_MAJOR_VERSION ||
-      (this._typescriptParsedVersion.major === NEWEST_SUPPORTED_TS_MAJOR_VERSION &&
-        this._typescriptParsedVersion.minor > NEWEST_SUPPORTED_TS_MINOR_VERSION)
-    ) {
-      this._typescriptTerminal.writeLine(
-        `The TypeScript compiler version ${this._typescriptVersion} is newer` +
-          ' than the latest version that was tested with Heft ' +
-          `(${NEWEST_SUPPORTED_TS_MAJOR_VERSION}.${NEWEST_SUPPORTED_TS_MINOR_VERSION}); it may not work correctly.`
-      );
-    }
-
-    const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
-
-    ts.performance.enable();
-
-    const measureTsPerformance: PerformanceMeasurer = <TResult extends object | void>(
-      measurementName: string,
-      fn: () => TResult
-    ) => {
-      const beforeName: string = `before${measurementName}`;
-      ts.performance.mark(beforeName);
-      const result: TResult = fn();
-      const afterName: string = `after${measurementName}`;
-      ts.performance.mark(afterName);
-      ts.performance.measure(measurementName, beforeName, afterName);
-      return {
-        ...result,
-        duration: ts.performance.getDuration(measurementName),
-        count: ts.performance.getCount(beforeName)
+      // Detect what features this compiler supports.  Note that manually comparing major/minor numbers
+      // loosens the matching to accept prereleases such as "3.6.0-dev.20190530"
+      this._capabilities = {
+        incrementalProgram: false,
+        solutionBuilder: this._typescriptParsedVersion.major >= 3
       };
-    };
 
-    const measureTsPerformanceAsync: PerformanceMeasurerAsync = async <TResult extends object | void>(
-      measurementName: string,
-      fn: () => Promise<TResult>
-    ) => {
-      const beforeName: string = `before${measurementName}`;
-      ts.performance.mark(beforeName);
-      const resultPromise: Promise<TResult> = fn();
-      const result: TResult = await resultPromise;
-      const afterName: string = `after${measurementName}`;
-      ts.performance.mark(afterName);
-      ts.performance.measure(measurementName, beforeName, afterName);
-      return {
-        ...result,
-        duration: ts.performance.getDuration(measurementName)
+      if (
+        this._typescriptParsedVersion.major > 3 ||
+        (this._typescriptParsedVersion.major === 3 && this._typescriptParsedVersion.minor >= 6)
+      ) {
+        this._capabilities.incrementalProgram = true;
+      }
+
+      this._useSolutionBuilder = !!this._configuration.buildProjectReferences;
+      if (this._useSolutionBuilder && !this._capabilities.solutionBuilder) {
+        throw new Error(
+          `Building project references requires TypeScript@>=3.0, but the current version is ${this._typescriptVersion}`
+        );
+      }
+
+      // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
+      // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
+      // would be required to deal with that.  We won't do that work unless someone requests it.
+      if (
+        this._typescriptParsedVersion.major < OLDEST_SUPPORTED_TS_MAJOR_VERSION ||
+        (this._typescriptParsedVersion.major === OLDEST_SUPPORTED_TS_MAJOR_VERSION &&
+          this._typescriptParsedVersion.minor < OLDEST_SUPPORTED_TS_MINOR_VERSION)
+      ) {
+        // We don't use writeWarningLine() here because, if the person wants to take their chances with
+        // a seemingly unsupported compiler, their build should be allowed to succeed.
+        this._typescriptTerminal.writeLine(
+          `The TypeScript compiler version ${this._typescriptVersion} is very old` +
+            ` and has not been tested with Heft; it may not work correctly.`
+        );
+      } else if (
+        this._typescriptParsedVersion.major > NEWEST_SUPPORTED_TS_MAJOR_VERSION ||
+        (this._typescriptParsedVersion.major === NEWEST_SUPPORTED_TS_MAJOR_VERSION &&
+          this._typescriptParsedVersion.minor > NEWEST_SUPPORTED_TS_MINOR_VERSION)
+      ) {
+        this._typescriptTerminal.writeLine(
+          `The TypeScript compiler version ${this._typescriptVersion} is newer` +
+            ' than the latest version that was tested with Heft ' +
+            `(${NEWEST_SUPPORTED_TS_MAJOR_VERSION}.${NEWEST_SUPPORTED_TS_MINOR_VERSION}); it may not work correctly.`
+        );
+      }
+
+      const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
+
+      const measureTsPerformance: PerformanceMeasurer = <TResult extends object | void>(
+        measurementName: string,
+        fn: () => TResult
+      ) => {
+        const beforeName: string = `before${measurementName}`;
+        ts.performance.mark(beforeName);
+        const result: TResult = fn();
+        const afterName: string = `after${measurementName}`;
+        ts.performance.mark(afterName);
+        ts.performance.measure(measurementName, beforeName, afterName);
+        return {
+          ...result,
+          duration: ts.performance.getDuration(measurementName),
+          count: ts.performance.getCount(beforeName)
+        };
       };
-    };
 
-    this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
+      const measureTsPerformanceAsync: PerformanceMeasurerAsync = async <TResult extends object | void>(
+        measurementName: string,
+        fn: () => Promise<TResult>
+      ) => {
+        const beforeName: string = `before${measurementName}`;
+        ts.performance.mark(beforeName);
+        const resultPromise: Promise<TResult> = fn();
+        const result: TResult = await resultPromise;
+        const afterName: string = `after${measurementName}`;
+        ts.performance.mark(afterName);
+        ts.performance.measure(measurementName, beforeName, afterName);
+        return {
+          ...result,
+          duration: ts.performance.getDuration(measurementName)
+        };
+      };
+
+      this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
+
+      this._tool = {
+        ts,
+
+        measureSync: measureTsPerformance,
+        measureAsync: measureTsPerformanceAsync,
+
+        sourceFileCache: new Map(),
+
+        oldBuilderProgram: undefined,
+        oldProgram: undefined
+      };
+    }
+
+    const { performance } = this._tool.ts;
+    // Reset the performance counters to 0 to avoid contamination from previous runs
+    performance.disable();
+    performance.enable();
+
+    if (changedFiles) {
+      const { sourceFileCache } = this._tool;
+      for (const file of changedFiles.keys()) {
+        // There might need to be a transform to the format of `file` here.
+        sourceFileCache.delete(file);
+      }
+    }
 
     // if (this._configuration.watchMode) {
     //   await this._runWatch(ts, measureTsPerformance);
     // } else if (this._useSolutionBuilder) {
     if (this._useSolutionBuilder) {
-      this._runSolutionBuild(ts, measureTsPerformance);
+      this._runSolutionBuild(this._tool);
     } else {
-      await this._runBuildAsync(ts, measureTsPerformance, measureTsPerformanceAsync);
+      await this._runBuildAsync(this._tool);
     }
   }
 
@@ -303,11 +341,9 @@ export class TypeScriptBuilder {
   //   });
   // }
 
-  public async _runBuildAsync(
-    ts: ExtendedTypeScript,
-    measureTsPerformance: PerformanceMeasurer,
-    measureTsPerformanceAsync: PerformanceMeasurerAsync
-  ): Promise<void> {
+  public async _runBuildAsync(tool: ITypeScriptTool): Promise<void> {
+    const { ts, measureSync: measureTsPerformance, measureAsync: measureTsPerformanceAsync } = tool;
+
     //#region CONFIGURE
     const {
       duration: configureDurationMs,
@@ -318,7 +354,7 @@ export class TypeScriptBuilder {
       const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
       this._validateTsconfig(ts, _tsconfig);
 
-      const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(ts, _tsconfig);
+      const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(tool, _tsconfig);
 
       return {
         tsconfig: _tsconfig,
@@ -330,17 +366,23 @@ export class TypeScriptBuilder {
 
     //#region PROGRAM
     // There will be only one program here; emit will get a bit abused if we produce multiple outputs
-    let builderProgram: TTypescript.BuilderProgram | undefined = undefined;
+    let builderProgram: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram | undefined = undefined;
     let tsProgram: TTypescript.Program;
 
     if (tsconfig.options.incremental) {
-      builderProgram = ts.createIncrementalProgram({
-        rootNames: tsconfig.fileNames,
-        options: tsconfig.options,
-        projectReferences: tsconfig.projectReferences,
-        host: compilerHost,
-        configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
-      });
+      if (!tool.oldBuilderProgram) {
+        tool.oldBuilderProgram = ts.readBuilderProgram(tsconfig.options, compilerHost);
+      }
+
+      builderProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram(
+        tsconfig.fileNames,
+        tsconfig.options,
+        compilerHost,
+        tool.oldBuilderProgram,
+        ts.getConfigFileParsingDiagnostics(tsconfig),
+        tsconfig.projectReferences
+      );
+      tool.oldBuilderProgram = builderProgram;
       tsProgram = builderProgram.getProgram();
     } else {
       tsProgram = ts.createProgram({
@@ -348,8 +390,10 @@ export class TypeScriptBuilder {
         options: tsconfig.options,
         projectReferences: tsconfig.projectReferences,
         host: compilerHost,
+        oldProgram: tool.oldProgram,
         configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
       });
+      tool.oldProgram = tsProgram;
     }
 
     // Prefer the builder program, since it is what gives us incremental builds
@@ -405,69 +449,76 @@ export class TypeScriptBuilder {
     );
 
     this._logDiagnostics(ts, rawDiagnostics);
+    // Reset performance counters in case any are used in the callback
+    ts.performance.disable();
+    ts.performance.enable();
     this._configuration.emitChangedFilesCallback(tsProgram, emitResult.changedSourceFiles);
   }
 
-  public _runSolutionBuild(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): void {
+  public _runSolutionBuild(tool: ITypeScriptTool): void {
     this._typescriptTerminal.writeVerboseLine(`Using solution mode`);
 
-    //#region CONFIGURE
-    const {
-      duration: configureDurationMs,
-      rawDiagnostics,
-      solutionBuilderHost
-    } = measureTsPerformance('Configure', () => {
-      this._overrideTypeScriptReadJson(ts);
-      const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
-      this._validateTsconfig(ts, _tsconfig);
+    const { ts, measureSync } = tool;
 
-      const _rawDiagnostics: TTypescript.Diagnostic[] = [];
-      const reportDiagnostic: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic) => {
-        _rawDiagnostics.push(diagnostic);
-      };
+    try {
+      //#region CONFIGURE
+      const {
+        duration: configureDurationMs,
+        rawDiagnostics,
+        solutionBuilderHost
+      } = measureSync('Configure', () => {
+        this._overrideTypeScriptReadJson(ts);
+        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+        this._validateTsconfig(ts, _tsconfig);
 
-      // TypeScript doesn't have a
-      EmitFilesPatch.install(ts, _tsconfig, this._moduleKindsToEmit);
+        const _rawDiagnostics: TTypescript.Diagnostic[] = [];
+        const reportDiagnostic: TTypescript.DiagnosticReporter = (diagnostic: TTypescript.Diagnostic) => {
+          _rawDiagnostics.push(diagnostic);
+        };
 
-      const _solutionBuilderHost: TSolutionHost = this._buildSolutionBuilderHost(ts, reportDiagnostic);
+        // TypeScript doesn't have a way to find out when a given program starts emitting in solution mode
+        EmitFilesPatch.install(ts, _tsconfig, this._moduleKindsToEmit);
 
-      _solutionBuilderHost.afterProgramEmitAndDiagnostics = (
-        program: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
-      ) => {
-        const tsProgram: TTypescript.Program | undefined = program.getProgram();
-        if (tsProgram) {
-          this._configuration.emitChangedFilesCallback(tsProgram);
-        }
-      };
+        const _solutionBuilderHost: TSolutionHost = this._buildSolutionBuilderHost(ts, reportDiagnostic);
 
-      return {
-        rawDiagnostics: _rawDiagnostics,
-        solutionBuilderHost: _solutionBuilderHost
-      };
-    });
-    this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
-    //#endregion
+        _solutionBuilderHost.afterProgramEmitAndDiagnostics = (
+          program: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
+        ) => {
+          const tsProgram: TTypescript.Program | undefined = program.getProgram();
+          if (tsProgram) {
+            this._configuration.emitChangedFilesCallback(tsProgram);
+          }
+        };
 
-    const solutionBuilder: TTypescript.SolutionBuilder<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
-      ts.createSolutionBuilder(solutionBuilderHost, [this._configuration.tsconfigPath], {});
+        return {
+          rawDiagnostics: _rawDiagnostics,
+          solutionBuilderHost: _solutionBuilderHost
+        };
+      });
+      this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
+      //#endregion
 
-    //#region EMIT
-    // Ignoring the exit status because we only care about presence of diagnostics
-    solutionBuilder.build();
-    //#endregion
+      const solutionBuilder: TTypescript.SolutionBuilder<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> =
+        ts.createSolutionBuilder(solutionBuilderHost, [this._configuration.tsconfigPath], {});
 
-    this._logReadPerformance(ts);
-    this._logEmitPerformance(ts);
-    // Use the native metric since we aren't overwriting the writer
-    this._typescriptTerminal.writeVerboseLine(
-      `I/O Write: ${ts.performance.getDuration('I/O Write')}ms (${ts.performance.getCount(
-        'beforeIOWrite'
-      )} files)`
-    );
+      //#region EMIT
+      // Ignoring the exit status because we only care about presence of diagnostics
+      solutionBuilder.build();
+      //#endregion
 
-    this._logDiagnostics(ts, rawDiagnostics);
+      this._logReadPerformance(ts);
+      this._logEmitPerformance(ts);
+      // Use the native metric since we aren't overwriting the writer
+      this._typescriptTerminal.writeVerboseLine(
+        `I/O Write: ${ts.performance.getDuration('I/O Write')}ms (${ts.performance.getCount(
+          'beforeIOWrite'
+        )} files)`
+      );
 
-    EmitFilesPatch.uninstall(ts);
+      this._logDiagnostics(ts, rawDiagnostics);
+    } finally {
+      EmitFilesPatch.uninstall(ts);
+    }
   }
 
   private _logDiagnostics(ts: ExtendedTypeScript, rawDiagnostics: readonly TTypescript.Diagnostic[]): void {
@@ -610,18 +661,20 @@ export class TypeScriptBuilder {
       filesToWrite.push({ filePath, data });
     };
 
-    const result: TTypescript.EmitResult = genericProgram.emit(
-      undefined, // Target source file
-      writeFileCallback
-    );
+    try {
+      const result: TTypescript.EmitResult = genericProgram.emit(
+        undefined, // Target source file
+        writeFileCallback
+      );
 
-    EmitFilesPatch.uninstall(ts);
-
-    return {
-      ...result,
-      changedSourceFiles: changedFiles,
-      filesToWrite
-    };
+      return {
+        ...result,
+        changedSourceFiles: changedFiles,
+        filesToWrite
+      };
+    } finally {
+      EmitFilesPatch.uninstall(ts);
+    }
   }
 
   private _validateTsconfig(ts: ExtendedTypeScript, tsconfig: TTypescript.ParsedCommandLine): void {
@@ -874,14 +927,52 @@ export class TypeScriptBuilder {
   }
 
   private _buildIncrementalCompilerHost(
-    ts: ExtendedTypeScript,
+    tool: ITypeScriptTool,
     tsconfig: TTypescript.ParsedCommandLine
   ): TTypescript.CompilerHost {
+    const { ts, sourceFileCache } = tool;
+
+    let compilerHost: TTypescript.CompilerHost | undefined;
+
     if (tsconfig.options.incremental) {
-      return ts.createIncrementalCompilerHost(tsconfig.options, this._getCachingTypeScriptSystem(ts));
+      compilerHost = ts.createIncrementalCompilerHost(tsconfig.options, this._getCachingTypeScriptSystem(ts));
     } else {
-      return ts.createCompilerHost(tsconfig.options);
+      compilerHost = ts.createCompilerHost(tsconfig.options);
     }
+
+    const { getSourceFile: innerGetSourceFile } = compilerHost;
+
+    // Enable source file persistence
+    const getSourceFile: typeof innerGetSourceFile = (
+      fileName: string,
+      languageVersionOrOptions: TTypescript.ScriptTarget | TTypescript.CreateSourceFileOptions,
+      onError?: ((message: string) => void) | undefined,
+      shouldCreateNewSourceFile?: boolean | undefined
+    ): TTypescript.SourceFile | undefined => {
+      if (!shouldCreateNewSourceFile) {
+        const cachedSourceFile: TTypescript.SourceFile | undefined = sourceFileCache.get(fileName);
+        if (cachedSourceFile) {
+          return cachedSourceFile;
+        }
+      }
+
+      const result: TTypescript.SourceFile | undefined = innerGetSourceFile(
+        fileName,
+        languageVersionOrOptions,
+        onError,
+        shouldCreateNewSourceFile
+      );
+      if (result) {
+        sourceFileCache.set(fileName, result);
+      } else {
+        sourceFileCache.delete(fileName);
+      }
+      return result;
+    };
+
+    compilerHost.getSourceFile = getSourceFile;
+
+    return compilerHost;
   }
 
   private _getCachingTypeScriptSystem(ts: ExtendedTypeScript): TTypescript.System {
