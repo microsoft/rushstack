@@ -300,9 +300,9 @@ export function getRepoState(currentWorkingDirectory: string, gitPath?: string):
   const state: Map<string, string> = files;
 
   // Existence check for the .gitmodules file
-  const hasSubmodules: boolean = FileSystem.exists(`${rootDirectory}/.gitmodules`);
+  const hasSubmodules: boolean = submodules.size > 0 && FileSystem.exists(`${rootDirectory}/.gitmodules`);
 
-  if (hasSubmodules && submodules.size > 0) {
+  if (hasSubmodules) {
     for (const submodulePath of submodules.keys()) {
       const submoduleState: Map<string, string> = getRepoState(`${rootDirectory}/${submodulePath}`, gitPath);
       for (const [filePath, hash] of submoduleState) {
