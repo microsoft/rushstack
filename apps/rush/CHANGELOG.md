@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 15 Nov 2022 18:43:51 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Nov 2022 04:02:43 GMT and should not be manually modified.
+
+## 5.83.4
+Fri, 18 Nov 2022 04:02:43 GMT
+
+### Patches
+
+- Fix performance regression from supporting git submodules
+
+### Updates
+
+- Change files and change logs can store custom fields.
 
 ## 5.83.3
 Tue, 15 Nov 2022 18:43:51 GMT
