@@ -62,6 +62,14 @@
             "locateApiKey": {
               "description": "Overrides the message that normally says: \"Click 'Edit Profile' on the JFrog website.  Click the 'Generate API Key' button if you haven't already done so previously.\"",
               "type": "string"
+            },
+            "userNamePrompt": {
+              "description": "Overrides the message that normally prompts: \"What is your Artifactory user name?\"",
+              "type": "string"
+            },
+            "apiKeyPrompt": {
+              "description": "Overrides the message that normally prompts: \"What is your Artifactory API key?\"",
+              "type": "string"
             }
           },
 
