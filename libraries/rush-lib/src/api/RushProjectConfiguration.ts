@@ -147,8 +147,8 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
                 mergedOperationSettings = {
                   ...mergedOperationSettings,
                   ...childOperationSettings,
-                  outputFolderNames,
-                  dependsOnEnvVars
+                  ...(outputFolderNames ? { outputFolderNames } : {}),
+                  ...(dependsOnEnvVars ? { dependsOnEnvVars } : {})
                 };
                 resultOperationSettingsByOperationName.set(operationName, mergedOperationSettings);
               } else {
