@@ -9,7 +9,8 @@ import type {
   HeftConfiguration,
   IHeftTaskSession,
   IHeftTaskPlugin,
-  IHeftTaskRunHookOptions
+  IHeftTaskRunHookOptions,
+  IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
@@ -236,13 +237,40 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runTypeScriptAsync(taskSession, heftConfiguration);
+      const builder: TypeScriptBuilder | false = await this._getTypeScriptBuilderAsync(
+        taskSession,
+        heftConfiguration
+      );
+      if (builder) {
+        await builder.invokeAsync();
+      }
       // TODO: We should consider maybe only doing one copy of static assets and pointing
       // all source files to this set of static assets. This would allow us to avoid
       // having to copy the static assets multiple times, increasing build times and
       // package size.
       await this._updateStaticAssetsToCopy(taskSession, heftConfiguration, runOptions);
     });
+
+    let incrementalBuilder: TypeScriptBuilder | undefined | false;
+    taskSession.hooks.runIncremental.tapPromise(
+      PLUGIN_NAME,
+      async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
+        if (incrementalBuilder === undefined) {
+          // eslint-disable-next-line require-atomic-updates
+          incrementalBuilder = await this._getTypeScriptBuilderAsync(taskSession, heftConfiguration);
+        }
+
+        if (incrementalBuilder) {
+          await incrementalBuilder.invokeAsync(runIncrementalOptions.changedFiles);
+        }
+
+        // TODO: We should consider maybe only doing one copy of static assets and pointing
+        // all source files to this set of static assets. This would allow us to avoid
+        // having to copy the static assets multiple times, increasing build times and
+        // package size.
+        await this._updateStaticAssetsToCopy(taskSession, heftConfiguration, runIncrementalOptions);
+      }
+    );
   }
 
   private async _updateStaticAssetsToCopy(
@@ -286,16 +314,11 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     }
   }
 
-  private async _runTypeScriptAsync(
+  private async _getTypeScriptBuilderAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
-  ): Promise<void> {
+  ): Promise<TypeScriptBuilder | false> {
     const terminal: ITerminal = taskSession.logger.terminal;
-
-    const typeScriptToolPath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
-      'typescript',
-      terminal
-    );
 
     const typeScriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
       await loadTypeScriptConfigurationFileAsync(heftConfiguration, terminal);
@@ -308,8 +331,14 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
 
     if (!partialTsconfigFile) {
       // There is no tsconfig file, we can exit early
-      return;
+      // This check may need watch mode to break on tsconfig addition/deletion
+      return false;
     }
+
+    const typeScriptToolPath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+      'typescript',
+      terminal
+    );
 
     // Build out the configuration
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
@@ -342,7 +371,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
 
     // Run the builder
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(typeScriptBuilderConfiguration);
-    await typeScriptBuilder.invokeAsync();
+    return typeScriptBuilder;
   }
 
   private async _getTsconfigOutDirAsync(
