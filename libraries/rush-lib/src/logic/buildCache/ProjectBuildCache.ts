@@ -449,7 +449,7 @@ export class ProjectBuildCache {
     hash.update(options.command);
     hash.update(RushConstants.hashDelimiter);
     if (options.additionalContext) {
-      for (const key of Object.keys(options.additionalContext)) {
+      for (const key of Object.keys(options.additionalContext).sort()) {
         // Add additional context keys and values.
         //
         // This choice (to modiy the hash for every key regardless of whether a value is set) implies
