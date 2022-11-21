@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Autoinstaller logout respects --quiet parameter",
+      "comment": "Make autoinstaller logging respect the `--quiet` parameter.",
       "type": "none"
     }
   ],
