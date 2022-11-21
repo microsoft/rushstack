@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add dependsOnEnvVars configuration in rush-project.json",
+      "comment": "Add a \"dependsOnEnvVars\" configuration option to operations in rush-project.json. The variables specified in this option are included in the cache key hash calculation.",
       "type": "none"
     }
   ],
