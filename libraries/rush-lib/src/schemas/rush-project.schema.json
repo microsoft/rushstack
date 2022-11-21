@@ -51,6 +51,15 @@
             "uniqueItems": true
           },
 
+          "dependsOnEnvVars": {
+            "type": "array",
+            "description": "Specify a list of environment variables that affect the output of this operation. If provided, the values of these variables will become part of the hash when reading and writing from cache.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+
           "disableBuildCacheForOperation": {
             "description": "Disable caching for this operation. The operation will never be restored from cache. This may be useful if this operation affects state outside of its folder.",
             "type": "boolean"
