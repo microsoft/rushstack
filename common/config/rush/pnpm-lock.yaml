@@ -2001,6 +2001,7 @@ importers:
       builtin-modules: ~3.1.0
       cli-table: ~0.3.1
       colors: ~1.2.1
+      figures: 3.0.0
       git-repo-info: ~2.1.0
       glob: ~7.0.5
       glob-escape: ~0.0.2
@@ -2016,6 +2017,7 @@ importers:
       npm-packlist: ~2.1.2
       read-package-tree: ~5.1.5
       resolve: ~1.17.0
+      rxjs: ~6.6.7
       semver: ~7.3.0
       ssri: ~8.0.0
       strict-uri-encode: ~2.0.0
@@ -2036,6 +2038,7 @@ importers:
       builtin-modules: 3.1.0
       cli-table: 0.3.11
       colors: 1.2.5
+      figures: 3.0.0
       git-repo-info: 2.1.1
       glob: 7.0.6
       glob-escape: 0.0.2
@@ -2051,6 +2054,7 @@ importers:
       npm-packlist: 2.1.5
       read-package-tree: 5.1.6
       resolve: 1.17.0
+      rxjs: 6.6.7
       semver: 7.3.8
       ssri: 8.0.1
       strict-uri-encode: 2.0.0
@@ -12559,8 +12563,8 @@ packages:
       object-assign: 4.1.1
     dev: false
 
-  /figures/3.2.0:
-    resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
+  /figures/3.0.0:
+    resolution: {integrity: sha512-HKri+WoWoUgr83pehn/SIgLOMZ9nAWC6dcGj26RY2R4F50u4+RTUz0RCrUlOV3nKRAICW1UGzyb+kcX2qK1S/g==}
     engines: {node: '>=8'}
     dependencies:
       escape-string-regexp: 1.0.5
@@ -13976,7 +13980,7 @@ packages:
       cli-cursor: 3.1.0
       cli-width: 3.0.0
       external-editor: 3.1.0
-      figures: 3.2.0
+      figures: 3.0.0
       lodash: 4.17.21
       mute-stream: 0.0.8
       run-async: 2.4.1

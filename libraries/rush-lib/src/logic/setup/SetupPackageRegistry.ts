@@ -29,6 +29,8 @@ interface IArtifactoryCustomizableMessages {
   visitWebsite: string;
   locateUserName: string;
   locateApiKey: string;
+  userNamePrompt: string;
+  apiKeyPrompt: string;
 }
 
 const defaultMessages: IArtifactoryCustomizableMessages = {
@@ -39,7 +41,9 @@ const defaultMessages: IArtifactoryCustomizableMessages = {
   locateUserName: 'Your user name appears in the upper-right corner of the JFrog website.',
   locateApiKey:
     'Click "Edit Profile" on the JFrog website.  Click the "Generate API Key"' +
-    " button if you haven't already done so previously."
+    " button if you haven't already done so previously.",
+  userNamePrompt: 'What is your Artifactory user name?',
+  apiKeyPrompt: 'What is your Artifactory API key?'
 };
 
 export interface ISetupPackageRegistryOptions {
@@ -243,7 +247,7 @@ export class SetupPackageRegistry {
     this._writeInstructionBlock(this._messages.locateUserName);
 
     let artifactoryUser: string = await TerminalInput.promptLine({
-      message: 'What is your Artifactory user name?'
+      message: this._messages.userNamePrompt
     });
     this._terminal.writeLine();
 
@@ -257,7 +261,7 @@ export class SetupPackageRegistry {
     this._writeInstructionBlock(this._messages.locateApiKey);
 
     let artifactoryKey: string = await TerminalInput.promptPasswordLine({
-      message: 'What is your Artifactory API key?'
+      message: this._messages.apiKeyPrompt
     });
     this._terminal.writeLine();
 

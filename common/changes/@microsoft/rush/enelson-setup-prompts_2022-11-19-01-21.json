@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "The \"rush change\" user prompts can now be customized.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

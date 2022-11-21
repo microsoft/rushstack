@@ -2,6 +2,23 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.83.4",
+      "tag": "@microsoft/rush_v5.83.4",
+      "date": "Fri, 18 Nov 2022 04:02:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Change files and change logs can store custom fields."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix performance regression from supporting git submodules"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.83.3",
       "tag": "@microsoft/rush_v5.83.3",
       "date": "Tue, 15 Nov 2022 18:43:51 GMT",
