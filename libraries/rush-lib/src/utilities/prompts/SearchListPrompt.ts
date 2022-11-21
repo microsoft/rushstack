@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import type { Interface } from 'readline';
-import _ from 'lodash';
 import colors from 'colors/safe';
+import { Import } from '@rushstack/node-core-library';
 
 // Modified from the choice list prompt in inquirer:
 // https://github.com/SBoudrias/Inquirer.js/blob/inquirer%407.3.3/packages/inquirer/lib/prompts/list.js
@@ -19,6 +19,8 @@ import type Choices from 'inquirer/lib/objects/choices';
 import figures from 'figures';
 
 import { map, takeUntil } from 'rxjs/operators';
+
+const _: typeof import('lodash') = Import.lazy('lodash', require);
 
 interface IKeyPressEvent {
   key: { name: string; ctrl: boolean; sequence?: string };
