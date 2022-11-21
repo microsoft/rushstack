@@ -6,10 +6,12 @@
 // Extended to use one type of text table
 
 import inquirer from 'inquirer';
-import _ from 'lodash';
 import colors from 'colors/safe';
 import CliTable from 'cli-table';
 import Separator from 'inquirer/lib/objects/separator';
+import { Import } from '@rushstack/node-core-library';
+
+const _: typeof import('lodash') = Import.lazy('lodash', require);
 
 export interface IUIGroup {
   title: string;
