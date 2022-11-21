@@ -35,6 +35,7 @@
     "builtin-modules": "~3.1.0",
     "cli-table": "~0.3.1",
     "colors": "~1.2.1",
+    "figures": "3.0.0",
     "git-repo-info": "~2.1.0",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.2",
@@ -45,17 +46,18 @@
     "jszip": "~3.7.1",
     "lodash": "~4.17.15",
     "node-fetch": "2.6.7",
+    "npm-check": "~5.9.2",
     "npm-package-arg": "~6.1.0",
     "npm-packlist": "~2.1.2",
     "read-package-tree": "~5.1.5",
     "resolve": "~1.17.0",
+    "rxjs": "~6.6.7",
     "semver": "~7.3.0",
     "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
     "tar": "~6.1.11",
-    "true-case-path": "~2.2.1",
-    "npm-check": "~5.9.2"
+    "true-case-path": "~2.2.1"
   },
   "devDependencies": {
     "@pnpm/logger": "4.0.0",

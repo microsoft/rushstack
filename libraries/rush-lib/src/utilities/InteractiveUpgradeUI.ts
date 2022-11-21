@@ -1,3 +1,10 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+// UI Code, Table creation, and choice layout leveraged from npm-check
+// https://github.com/dylang/npm-check/blob/master/lib/out/interactive-update.js
+// Extended to use one type of text table
+
 import inquirer from 'inquirer';
 import _ from 'lodash';
 import colors from 'colors/safe';

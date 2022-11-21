@@ -407,6 +407,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "figures",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "file-loader",
       "allowedCategories": [ "tests" ]
     },
