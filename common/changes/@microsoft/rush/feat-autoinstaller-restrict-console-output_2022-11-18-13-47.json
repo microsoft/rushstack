@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Make autoinstaller logging respect the `--quiet` parameter.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
