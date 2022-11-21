@@ -164,9 +164,9 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       />
       <div className={`${styles.ViewContents} ${appStyles.ContainerCard}`}>
         <div className={styles.LockfileFilterBar}>
-          <h5>Filter:</h5>
           <input
-            type="text"
+            type="search"
+            placeholder="Filter..."
             value={activeFilters[LockfileEntryFilter.Project] ? projectFilter : packageFilter}
             onChange={updateFilter(
               activeFilters[LockfileEntryFilter.Project]
