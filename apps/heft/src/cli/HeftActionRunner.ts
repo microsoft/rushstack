@@ -46,7 +46,7 @@ import { CancellationToken, CancellationTokenSource } from '../pluginFramework/C
 import { FileEventListener } from '../utilities/FileEventListener';
 import { Constants } from '../utilities/Constants';
 import { StaticFileSystemAdapter } from '../pluginFramework/StaticFileSystemAdapter';
-import type { GlobChangedFilesFn, IGlobChangedFilesOptions } from '../pluginFramework/HeftTaskSession';
+import type { GlobSyncFn, IPartialGlobOptions } from '../plugins/FileGlobSpecifier';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;
@@ -450,10 +450,7 @@ export class HeftActionRunner {
     const git: GitUtilities = new GitUtilities(this._heftConfiguration.buildFolderPath);
     const changedFiles: Map<string, IChangedFileState> = new Map();
     const staticFileSystemAdapter: StaticFileSystemAdapter = new StaticFileSystemAdapter();
-    const globChangedFilesFn: GlobChangedFilesFn = (
-      pattern: string | string[],
-      options?: IGlobChangedFilesOptions
-    ) => {
+    const globChangedFilesFn: GlobSyncFn = (pattern: string | string[], options?: IPartialGlobOptions) => {
       return glob.sync(pattern, {
         fs: staticFileSystemAdapter,
         cwd: options?.cwd,
@@ -543,7 +540,7 @@ export class HeftActionRunner {
   private async _executeOnceAsync(
     cancellationToken?: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
-    globChangedFilesFn?: GlobChangedFilesFn,
+    globChangedFilesFn?: GlobSyncFn,
     fileEventListener?: FileEventListener
   ): Promise<void> {
     const startTime: number = performance.now();
@@ -633,7 +630,7 @@ export class HeftActionRunner {
   private _generateOperations(
     cancellationToken: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
-    globChangedFilesFn?: GlobChangedFilesFn,
+    globChangedFilesFn?: GlobSyncFn,
     fileEventListener?: FileEventListener
   ): Set<Operation> {
     const { selectedPhases } = this._action;
@@ -768,7 +765,7 @@ export class HeftActionRunner {
     operations: Map<string, Operation>,
     cancellationToken: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
-    globChangedFilesFn?: GlobChangedFilesFn,
+    globChangedFilesFn?: GlobSyncFn,
     fileEventListener?: FileEventListener
   ): Operation {
     const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;

@@ -10,7 +10,9 @@ import type {
   IHeftTaskSession,
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
-  IHeftTaskRunIncrementalHookOptions
+  IHeftTaskRunIncrementalHookOptions,
+  ICopyOperation,
+  IIncrementalCopyOperation
 } from '@rushstack/heft';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
@@ -248,7 +250,12 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       // all source files to this set of static assets. This would allow us to avoid
       // having to copy the static assets multiple times, increasing build times and
       // package size.
-      await this._updateStaticAssetsToCopy(taskSession, heftConfiguration, runOptions);
+      const copyOperations: ICopyOperation[] = await this._getStaticAssetCopyOperations(
+        taskSession,
+        heftConfiguration,
+        runOptions
+      );
+      runOptions.addCopyOperations(...copyOperations);
     });
 
     let incrementalBuilder: TypeScriptBuilder | undefined | false;
@@ -268,20 +275,31 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         // all source files to this set of static assets. This would allow us to avoid
         // having to copy the static assets multiple times, increasing build times and
         // package size.
-        await this._updateStaticAssetsToCopy(taskSession, heftConfiguration, runIncrementalOptions);
+        const copyOperations: ICopyOperation[] = await this._getStaticAssetCopyOperations(
+          taskSession,
+          heftConfiguration,
+          runIncrementalOptions
+        );
+        const incrementalCopyOperations: IIncrementalCopyOperation[] =
+          copyOperations as IIncrementalCopyOperation[];
+        for (const incrementalCopyOperation of incrementalCopyOperations) {
+          incrementalCopyOperation.onlyIfChanged = true;
+        }
+        runIncrementalOptions.addCopyOperations(...incrementalCopyOperations);
       }
     );
   }
 
-  private async _updateStaticAssetsToCopy(
+  private async _getStaticAssetCopyOperations(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     runOptions: IHeftTaskRunHookOptions
-  ): Promise<void> {
+  ): Promise<ICopyOperation[]> {
     const typeScriptConfiguration: ITypeScriptConfigurationJson | undefined =
       await loadTypeScriptConfigurationFileAsync(heftConfiguration, taskSession.logger.terminal);
 
     // We only care about the copy if static assets were specified.
+    const copyOperations: ICopyOperation[] = [];
     if (
       typeScriptConfiguration?.staticAssetsToCopy?.fileExtensions?.length ||
       typeScriptConfiguration?.staticAssetsToCopy?.includeGlobs?.length ||
@@ -302,7 +320,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         destinationFolderPaths.add(`${heftConfiguration.buildFolderPath}/${emitModule.outFolderName}`);
       }
 
-      runOptions.addCopyOperations({
+      copyOperations.push({
         ...typeScriptConfiguration?.staticAssetsToCopy,
 
         // For now - these may need to be revised later
@@ -312,6 +330,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         hardlink: false
       });
     }
+    return copyOperations;
   }
 
   private async _getTypeScriptBuilderAsync(

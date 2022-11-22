@@ -13,6 +13,7 @@ import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { CancellationToken } from './CancellationToken';
+import type { GlobSyncFn } from '../plugins/FileGlobSpecifier';
 
 /**
  * The task session is responsible for providing session-specific information to Heft task plugins.
@@ -164,48 +165,17 @@ export interface IChangedFileState {
 }
 
 /**
- * Options that are used when globbing the set of changed files.
+ * Used to specify a selection of files to copy from a specific source folder to one
+ * or more destination folders.
  *
  * @public
  */
-export interface IGlobChangedFilesOptions {
+export interface IIncrementalCopyOperation extends ICopyOperation {
   /**
-   * Current working directory that the glob pattern will be applied to.
+   * If true, the file will be copied only if the source file has changed since it was last copied.
    */
-  cwd?: string;
-
-  /**
-   * Whether or not the returned file paths should be absolute.
-   *
-   * @defaultValue false
-   */
-  absolute?: boolean;
-
-  /**
-   * Patterns to ignore when globbing.
-   */
-  ignore?: string[];
-
-  /**
-   * Whether or not to include dot files when globbing.
-   *
-   * @defaultValue false
-   */
-  dot?: boolean;
+  onlyIfChanged?: boolean;
 }
-
-/**
- * Glob the set of changed files and return a list of absolute paths that match the provided patterns.
- *
- * @param patterns - Glob patterns to match against.
- * @param options - Options that are used when globbing the set of changed files.
- *
- * @public
- */
-export type GlobChangedFilesFn = (
-  patterns: string | string[],
-  options?: IGlobChangedFilesOptions
-) => string[];
 
 /**
  * Options provided to the 'runIncremental' hook.
@@ -213,6 +183,15 @@ export type GlobChangedFilesFn = (
  * @public
  */
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+  /**
+   * Add copy operations to be performed during the `runIncremental` hook. These operations will
+   * be performed after the task `runIncremental` hook has completed. If the `onlyIfChanged` option
+   * is provided, the file will be copied only if the source file has changed since it was last copied.
+   *
+   * @public
+   */
+  readonly addCopyOperations: (...copyOperations: IIncrementalCopyOperation[]) => void;
+
   /**
    * A map of changed files to the corresponding change state. This can be used to track which
    * files have been changed during an incremental build.
@@ -223,7 +202,7 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
    * Glob the map of changed files and return the subset of changed files that match the provided
    * globs.
    */
-  readonly globChangedFiles: GlobChangedFilesFn;
+  readonly globChangedFiles: GlobSyncFn;
 
   /**
    * A cancellation token that is used to signal that the incremental build is cancelled. This

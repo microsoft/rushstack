@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import glob from 'fast-glob';
 import { FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
@@ -36,7 +37,7 @@ async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperatio
         pathsToDelete.add(deleteOperation.sourcePath);
       } else {
         // Glob the files under the source path and add them to the set of files to delete
-        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation);
+        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation, glob);
         for (const sourceFilePath of sourceFilePaths) {
           pathsToDelete.add(sourceFilePath);
         }

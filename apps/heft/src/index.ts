@@ -33,8 +33,7 @@ export {
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions,
   IChangedFileState,
-  IGlobChangedFilesOptions,
-  GlobChangedFilesFn
+  IIncrementalCopyOperation
 } from './pluginFramework/HeftTaskSession';
 
 export { ICopyOperation } from './plugins/CopyFilesPlugin';
@@ -43,7 +42,12 @@ export { IDeleteOperation } from './plugins/DeleteFilesPlugin';
 
 export { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
 
-export { IFileSelectionSpecifier } from './plugins/FileGlobSpecifier';
+export {
+  IFileSelectionSpecifier,
+  IPartialGlobOptions,
+  GlobFn,
+  GlobSyncFn
+} from './plugins/FileGlobSpecifier';
 
 export {
   IHeftRecordMetricsHookOptions,
