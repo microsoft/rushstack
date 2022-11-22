@@ -35,13 +35,69 @@ export interface IFileSelectionSpecifier {
   includeGlobs?: string[];
 }
 
-export async function getFilePathsAsync(fileGlobSpecifier: IFileSelectionSpecifier): Promise<Set<string>> {
+/**
+ * A supported subset of options used when globbing files.
+ *
+ * @public
+ */
+export interface IPartialGlobOptions {
+  /**
+   * Current working directory that the glob pattern will be applied to.
+   */
+  cwd?: string;
+
+  /**
+   * Whether or not the returned file paths should be absolute.
+   *
+   * @defaultValue false
+   */
+  absolute?: boolean;
+
+  /**
+   * Patterns to ignore when globbing.
+   */
+  ignore?: string[];
+
+  /**
+   * Whether or not to include dot files when globbing.
+   *
+   * @defaultValue false
+   */
+  dot?: boolean;
+}
+
+/**
+ * Glob a set of files and return a list of paths that match the provided patterns.
+ *
+ * @param patterns - Glob patterns to match against.
+ * @param options - Options that are used when globbing the set of files.
+ *
+ * @public
+ */
+export type GlobFn = (
+  pattern: string | string[],
+  options?: IPartialGlobOptions | undefined
+) => Promise<string[]>;
+
+/**
+ * Glob a set of files and return a list of paths that match the provided patterns.
+ *
+ * @param patterns - Glob patterns to match against.
+ * @param options - Options that are used when globbing the set of files.
+ *
+ * @public
+ */
+export type GlobSyncFn = (pattern: string | string[], options?: IPartialGlobOptions | undefined) => string[];
+
+export async function getFilePathsAsync(
+  fileGlobSpecifier: IFileSelectionSpecifier,
+  globFn: GlobFn | GlobSyncFn
+): Promise<Set<string>> {
   return new Set<string>(
-    await glob(getIncludedGlobPatterns(fileGlobSpecifier), {
+    await globFn(getIncludedGlobPatterns(fileGlobSpecifier), {
       cwd: fileGlobSpecifier.sourcePath,
       ignore: fileGlobSpecifier.excludeGlobs,
       dot: true,
-      onlyFiles: true,
       absolute: true
     })
   );

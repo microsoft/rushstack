@@ -8,12 +8,16 @@ import { AlreadyReportedError, InternalError, LockFile } from '@rushstack/node-c
 import { OperationStatus } from '../OperationStatus';
 import { FileEventListener } from '../../utilities/FileEventListener';
 import { HeftTask } from '../../pluginFramework/HeftTask';
-import { copyFilesAsync, type ICopyOperation } from '../../plugins/CopyFilesPlugin';
+import {
+  copyFilesAsync,
+  copyIncrementalFilesAsync,
+  type ICopyOperation
+} from '../../plugins/CopyFilesPlugin';
 import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type {
   HeftTaskSession,
-  GlobChangedFilesFn,
+  IIncrementalCopyOperation,
   IChangedFileState,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions
@@ -21,13 +25,14 @@ import type {
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import type { CancellationToken } from '../../pluginFramework/CancellationToken';
+import type { GlobSyncFn, IPartialGlobOptions } from '../../plugins/FileGlobSpecifier';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
   task: HeftTask;
   cancellationToken: CancellationToken;
   changedFiles?: Map<string, IChangedFileState>;
-  globChangedFilesFn?: GlobChangedFilesFn;
+  globChangedFilesFn?: GlobSyncFn;
   fileEventListener?: FileEventListener;
 }
 
@@ -54,7 +59,7 @@ export class TaskOperationRunner implements IOperationRunner {
   }
 
   private async _executeTaskAsync(taskSession: HeftTaskSession): Promise<OperationStatus> {
-    const { cancellationToken, changedFiles, fileEventListener } = this._options;
+    const { cancellationToken, changedFiles, globChangedFilesFn, fileEventListener } = this._options;
     const {
       hooks,
       logger: { terminal }
@@ -82,6 +87,7 @@ export class TaskOperationRunner implements IOperationRunner {
 
     // Create the options and provide a utility method to obtain paths to copy
     const copyOperations: ICopyOperation[] = [];
+    const incrementalCopyOperations: IIncrementalCopyOperation[] = [];
     const deleteOperations: IDeleteOperation[] = [];
     const runHookOptions: IHeftTaskRunHookOptions = {
       addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
@@ -95,7 +101,16 @@ export class TaskOperationRunner implements IOperationRunner {
       if (shouldRunIncremental) {
         const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
           ...runHookOptions,
-          globChangedFiles: this._options.globChangedFilesFn!,
+          addCopyOperations: (...incrementalCopyOperationsToAdd: IIncrementalCopyOperation[]) => {
+            for (const incrementalCopyOperation of incrementalCopyOperationsToAdd) {
+              if (incrementalCopyOperation.onlyIfChanged) {
+                incrementalCopyOperations.push(incrementalCopyOperation);
+              } else {
+                copyOperations.push(incrementalCopyOperation);
+              }
+            }
+          },
+          globChangedFiles: globChangedFilesFn!,
           changedFiles: changedFiles!,
           cancellationToken: cancellationToken!
         };
@@ -111,17 +126,50 @@ export class TaskOperationRunner implements IOperationRunner {
       return OperationStatus.Failure;
     }
 
+    const fileOperationPromises: Promise<void>[] = [];
+
+    const globExistingChangedFilesFn: GlobSyncFn = (
+      pattern: string | string[],
+      options?: IPartialGlobOptions
+    ) => {
+      // We expect specific options to be passed. If they aren't the provided options, we may not
+      // find the changed files in the changedFiles map.
+      if (!options?.absolute) {
+        throw new InternalError('Options provided to globExistingChangedFilesFn were not expected.');
+      }
+
+      const globbedChangedFiles: string[] = globChangedFilesFn!(pattern, options);
+
+      // Filter out deletes, since we can't copy or delete an already deleted file
+      return globbedChangedFiles.filter((changedFile: string) => {
+        const changedFileState: IChangedFileState | undefined = changedFiles!.get(changedFile);
+        return changedFileState && changedFileState.version !== undefined;
+      });
+    };
+
     // Copy the files if any were specified. Avoid checking the cancellation token here
     // since plugins may be tracking state changes and would have already considered
     // added copy operations as "processed" during hook execution.
     if (copyOperations.length) {
-      await copyFilesAsync(copyOperations, taskSession.logger);
+      fileOperationPromises.push(copyFilesAsync(copyOperations, taskSession.logger));
+    }
+
+    // Also incrementally copy files if any were specified. We know that globChangedFilesFn must
+    // exist because incremental copy operations are only available in incremental mode.
+    if (incrementalCopyOperations.length) {
+      fileOperationPromises.push(
+        copyIncrementalFilesAsync(incrementalCopyOperations, globExistingChangedFilesFn, taskSession.logger)
+      );
     }
 
     // Delete the files if any were specified. Avoid checking the cancellation token here
     // for the same reasons as above.
     if (deleteOperations.length) {
-      await deleteFilesAsync(deleteOperations, taskSession.logger);
+      fileOperationPromises.push(deleteFilesAsync(deleteOperations, taskSession.logger));
+    }
+
+    if (fileOperationPromises.length) {
+      await Promise.all(fileOperationPromises);
     }
 
     if (taskSession.parameters.watch) {

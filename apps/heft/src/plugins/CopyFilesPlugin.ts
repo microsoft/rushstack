@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import glob from 'fast-glob';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
+import { getFilePathsAsync, GlobFn, GlobSyncFn, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type {
@@ -58,11 +59,26 @@ interface ICopyDescriptor {
 }
 
 export async function copyFilesAsync(copyOperations: ICopyOperation[], logger: IScopedLogger): Promise<void> {
-  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(copyOperations);
+  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(copyOperations, glob);
   await _copyFilesInnerAsync(copyDescriptors, logger);
 }
 
-async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): Promise<ICopyDescriptor[]> {
+export async function copyIncrementalFilesAsync(
+  copyOperations: ICopyOperation[],
+  globChangedFilesFn: GlobFn | GlobSyncFn,
+  logger: IScopedLogger
+): Promise<void> {
+  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
+    copyOperations,
+    globChangedFilesFn
+  );
+  await _copyFilesInnerAsync(copyDescriptors, logger);
+}
+
+async function _getCopyDescriptorsAsync(
+  copyConfigurations: ICopyOperation[],
+  globFn: GlobFn | GlobSyncFn
+): Promise<ICopyDescriptor[]> {
   const processedCopyDescriptors: ICopyDescriptor[] = [];
 
   // Create a map to deduplicate and prevent double-writes
@@ -84,11 +100,14 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
           // Specify a glob to match all files in the folder, since folders cannot be hardlinked.
           // Perform globbing from one folder up, so that we create the folder in the destination.
           try {
-            sourceFilePaths = await getFilePathsAsync({
-              ...copyConfiguration,
-              sourcePath: sourceFolder,
-              includeGlobs: [`${path.basename(copyConfiguration.sourcePath)}/**/*`]
-            });
+            sourceFilePaths = await getFilePathsAsync(
+              {
+                ...copyConfiguration,
+                sourcePath: sourceFolder,
+                includeGlobs: [`${path.basename(copyConfiguration.sourcePath)}/**/*`]
+              },
+              globFn
+            );
           } catch (error) {
             if (FileSystem.isNotDirectoryError(error)) {
               // The source path is a file, not a folder. Handled below.
@@ -105,7 +124,7 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
       } else {
         // Assume the source path is a folder
         sourceFolder = copyConfiguration.sourcePath;
-        sourceFilePaths = await getFilePathsAsync(copyConfiguration);
+        sourceFilePaths = await getFilePathsAsync(copyConfiguration, globFn);
       }
 
       // Dedupe and throw if a double-write is detected
@@ -238,7 +257,8 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
         // TODO: Allow the copy descriptors to be resolved from a static list of files so
         // that we don't have to query the file system for each copy operation
         const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
-          pluginOptions.copyOperations
+          pluginOptions.copyOperations,
+          runIncrementalOptions.globChangedFiles
         );
         const incrementalCopyDescriptors: ICopyDescriptor[] = [];
 

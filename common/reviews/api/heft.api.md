@@ -54,7 +54,10 @@ export { CommandLineStringListParameter }
 export { CommandLineStringParameter }
 
 // @public
-export type GlobChangedFilesFn = (patterns: string | string[], options?: IGlobChangedFilesOptions) => string[];
+export type GlobFn = (pattern: string | string[], options?: IPartialGlobOptions | undefined) => Promise<string[]>;
+
+// @public
+export type GlobSyncFn = (pattern: string | string[], options?: IPartialGlobOptions | undefined) => string[];
 
 // @public (undocumented)
 export class HeftConfiguration {
@@ -108,14 +111,6 @@ export interface IFileSelectionSpecifier {
     fileExtensions?: string[];
     includeGlobs?: string[];
     sourcePath: string;
-}
-
-// @public
-export interface IGlobChangedFilesOptions {
-    absolute?: boolean;
-    cwd?: string;
-    dot?: boolean;
-    ignore?: string[];
 }
 
 // @internal (undocumented)
@@ -214,10 +209,11 @@ export interface IHeftTaskRunHookOptions {
 
 // @public
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+    readonly addCopyOperations: (...copyOperations: IIncrementalCopyOperation[]) => void;
     // @beta
     readonly cancellationToken: CancellationToken;
     readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
-    readonly globChangedFiles: GlobChangedFilesFn;
+    readonly globChangedFiles: GlobSyncFn;
 }
 
 // @public
@@ -231,6 +227,11 @@ export interface IHeftTaskSession {
     readonly tempFolderPath: string;
 }
 
+// @public
+export interface IIncrementalCopyOperation extends ICopyOperation {
+    onlyIfChanged?: boolean;
+}
+
 // @public (undocumented)
 export interface IMetricsData {
     command: string;
@@ -242,6 +243,14 @@ export interface IMetricsData {
     machineProcessor: string;
     machineTotalMemoryMB: number;
     taskTotalExecutionMs: number;
+}
+
+// @public
+export interface IPartialGlobOptions {
+    absolute?: boolean;
+    cwd?: string;
+    dot?: boolean;
+    ignore?: string[];
 }
 
 // @internal (undocumented)
