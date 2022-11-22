@@ -69,8 +69,11 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
  * home directory.
  *
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities.copyAndTrimNpmrcFile()
+ *
+ * @returns
+ * The text of the the .npmrc.
  */
-function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetNpmrcPath: string): void {
+function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetNpmrcPath: string): string {
   logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
   logger.info(`  --> "${targetNpmrcPath}"`);
   let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
@@ -114,7 +117,10 @@ function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetN
     }
   }
 
-  fs.writeFileSync(targetNpmrcPath, resultLines.join(os.EOL));
+  const combinedNpmrc: string = resultLines.join(os.EOL);
+  fs.writeFileSync(targetNpmrcPath, combinedNpmrc);
+
+  return combinedNpmrc;
 }
 
 /**
@@ -122,13 +128,16 @@ function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetN
  * If the source .npmrc file not exist, then syncNpmrc() will delete an .npmrc that is found in the target folder.
  *
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
+ *
+ * @returns
+ * The text of the the synced .npmrc, if one exists. If one does not exist, then undefined is returned.
  */
 function _syncNpmrc(
   logger: ILogger,
   sourceNpmrcFolder: string,
   targetNpmrcFolder: string,
   useNpmrcPublish?: boolean
-): void {
+): string | undefined {
   const sourceNpmrcPath: string = path.join(
     sourceNpmrcFolder,
     !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
@@ -136,7 +145,7 @@ function _syncNpmrc(
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
     if (fs.existsSync(sourceNpmrcPath)) {
-      _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath);
+      return _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath);
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
       logger.info(`Deleting ${targetNpmrcPath}`); // Verbose

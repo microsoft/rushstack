@@ -228,6 +228,14 @@ export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationB
     pluginPackageFolder: string;
 }
 
+// @internal (undocumented)
+export interface _ICheckNpmrcOptions {
+    // (undocumented)
+    rushVerb?: string;
+    // (undocumented)
+    statePropertiesToIgnore?: string[];
+}
+
 // @beta (undocumented)
 export interface ICloudBuildCacheProvider {
     // (undocumented)
@@ -298,6 +306,7 @@ export interface IExecutionResult {
 // @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
+    cleanInstallAfterNpmrcChanges?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
@@ -545,11 +554,13 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 // @internal
 export class _LastInstallFlag {
     constructor(folderPath: string, state?: JsonObject);
-    checkValidAndReportStoreIssues(rushVerb: string): boolean;
+    checkValidAndReportStoreIssues(options: _ICheckNpmrcOptions & {
+        rushVerb: string;
+    }): boolean;
     clear(): void;
     create(): void;
     protected get flagName(): string;
-    isValid(): boolean;
+    isValid(options?: _ICheckNpmrcOptions): boolean;
     get path(): string;
 }
 
