@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Supports custom remainder for commands and phases",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
