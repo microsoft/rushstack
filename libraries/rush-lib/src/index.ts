@@ -70,7 +70,7 @@ export { ChangeManager } from './api/ChangeManager';
 
 export {
   LastInstallFlag as _LastInstallFlag,
-  ICheckNpmrcOptions as _ICheckNpmrcOptions
+  ILockfileValidityCheckOptions as _ILockfileValidityCheckOptions
 } from './api/LastInstallFlag';
 
 export {

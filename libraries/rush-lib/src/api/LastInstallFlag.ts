@@ -15,7 +15,7 @@ export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 /**
  * @internal
  */
-export interface ICheckNpmrcOptions {
+export interface ILockfileValidityCheckOptions {
   statePropertiesToIgnore?: string[];
   rushVerb?: string;
 }
@@ -44,7 +44,7 @@ export class LastInstallFlag {
   /**
    * Returns true if the file exists and the contents match the current state.
    */
-  public isValid(options?: ICheckNpmrcOptions): boolean {
+  public isValid(options?: ILockfileValidityCheckOptions): boolean {
     return this._isValid(false, options);
   }
 
@@ -54,18 +54,20 @@ export class LastInstallFlag {
    *
    * @internal
    */
-  public checkValidAndReportStoreIssues(options: ICheckNpmrcOptions & { rushVerb: string }): boolean {
+  public checkValidAndReportStoreIssues(
+    options: ILockfileValidityCheckOptions & { rushVerb: string }
+  ): boolean {
     return this._isValid(true, options);
   }
 
-  private _isValid(checkValidAndReportStoreIssues: false, options?: ICheckNpmrcOptions): boolean;
+  private _isValid(checkValidAndReportStoreIssues: false, options?: ILockfileValidityCheckOptions): boolean;
   private _isValid(
     checkValidAndReportStoreIssues: true,
-    options: ICheckNpmrcOptions & { rushVerb: string }
+    options: ILockfileValidityCheckOptions & { rushVerb: string }
   ): boolean;
   private _isValid(
     checkValidAndReportStoreIssues: boolean,
-    { rushVerb = 'update', statePropertiesToIgnore }: ICheckNpmrcOptions = {}
+    { rushVerb = 'update', statePropertiesToIgnore }: ILockfileValidityCheckOptions = {}
   ): boolean {
     let oldState: JsonObject;
     try {
