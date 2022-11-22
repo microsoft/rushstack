@@ -255,6 +255,25 @@ export interface IChoiceListParameterJson extends IBaseParameterJson {
   alternatives: IChoiceParameterAlternativeJson[];
 }
 
+/**
+ * A custom remainder which stores arguments after the recognized portion
+ * @public
+ */
+export interface IRemainderJson {
+  /**
+   * Denotes that this is a remainder parameter.
+   */
+  description: string;
+  /**
+   * A list of custom commands and/or built-in Rush commands that this parameter may be used with, by name.
+   */
+  associatedCommands?: string[];
+  /**
+   * A list of the names of the phases that this command-line parameter should be provided to.
+   */
+  associatedPhases?: string[];
+}
+
 export type ParameterJson =
   | IFlagParameterJson
   | IChoiceParameterJson
@@ -271,4 +290,5 @@ export interface ICommandLineJson {
   commands?: CommandJson[];
   phases?: IPhaseJson[];
   parameters?: ParameterJson[];
+  remainders?: IRemainderJson[];
 }

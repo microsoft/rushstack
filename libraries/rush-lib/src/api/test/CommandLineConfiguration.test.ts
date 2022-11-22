@@ -3,6 +3,7 @@
 
 import { RushConstants } from '../../logic/RushConstants';
 import { Command, CommandLineConfiguration, IParameterJson, IPhase } from '../CommandLineConfiguration';
+import { IRemainderJson } from '../CommandLineJson';
 
 describe(CommandLineConfiguration.name, () => {
   it('Forbids a misnamed phase', () => {
@@ -260,6 +261,102 @@ describe(CommandLineConfiguration.name, () => {
       expect(phase).toBeDefined();
       const phaseParametersArray: unknown[] = Array.from(phase!.associatedParameters);
       expect(phaseParametersArray).toHaveLength(0);
+    });
+  });
+
+  describe('remainders', () => {
+    it('correctly populates the associatedRemainder object for a remainder associated with a custom bulk command', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'bulk',
+            name: 'custom-bulk',
+            summary: 'custom-bulk',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false
+          }
+        ],
+        remainders: [
+          {
+            description: 'custom-bulk-remainder',
+            associatedCommands: ['custom-bulk']
+          }
+        ]
+      });
+
+      const command: Command | undefined = commandLineConfiguration.commands.get('custom-bulk');
+      expect(command).toBeDefined();
+      const remainder: IRemainderJson | undefined = command!.associatedRemainder;
+      expect(remainder).toBeDefined();
+      expect(remainder?.description).toEqual('custom-bulk-remainder');
+    });
+
+    it("correctly populates the associatedRemainder object for a remainder associated with a custom phased command's phase", () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'custom-phased',
+            summary: 'custom-phased',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            phases: ['_phase:a']
+          }
+        ],
+        phases: [
+          {
+            name: '_phase:a'
+          }
+        ],
+        remainders: [
+          {
+            associatedCommands: ['custom-phased'],
+            description: 'custom-phased-a-remainder'
+          }
+        ]
+      });
+
+      const command: Command | undefined = commandLineConfiguration.commands.get('custom-phased');
+      expect(command).toBeDefined();
+      const remainder: IRemainderJson | undefined = command!.associatedRemainder;
+      expect(remainder).toBeDefined();
+      expect(remainder?.description).toEqual('custom-phased-a-remainder');
+    });
+
+    it('allows a remainder to only be associated with phased commands but not have any associated phases', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'custom-phased',
+            summary: 'custom-phased',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            phases: ['_phase:a']
+          }
+        ],
+        phases: [
+          {
+            name: '_phase:a'
+          }
+        ],
+        remainders: [
+          {
+            associatedCommands: ['custom-phased'],
+            description: 'custom-phased-remainder'
+          }
+        ]
+      });
+
+      const command: Command | undefined = commandLineConfiguration.commands.get('custom-phased');
+      expect(command).toBeDefined();
+      const remainder: IRemainderJson | undefined = command!.associatedRemainder;
+      expect(remainder).toBeDefined();
+      expect(remainder?.description).toEqual('custom-phased-remainder');
+      const phase: IPhase | undefined = commandLineConfiguration.phases.get('_phase:a');
+      expect(phase).toBeDefined();
+      const phaseRemainder: IRemainderJson | undefined = phase!.associatedRemainder;
+      expect(phaseRemainder).toBeUndefined();
     });
   });
 });

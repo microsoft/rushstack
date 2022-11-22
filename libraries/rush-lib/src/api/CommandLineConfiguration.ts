@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
-import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import type { CommandLineParameter, CommandLineRemainder } from '@rushstack/ts-command-line';
 
 import { RushConstants } from '../logic/RushConstants';
 import type {
@@ -18,7 +18,8 @@ import type {
   IStringListParameterJson,
   IIntegerListParameterJson,
   IChoiceListParameterJson,
-  IPhasedCommandWithoutPhasesJson
+  IPhasedCommandWithoutPhasesJson,
+  IRemainderJson
 } from './CommandLineJson';
 
 export interface IShellCommandTokenContext {
@@ -54,6 +55,11 @@ export interface IPhase {
   associatedParameters: Set<CommandLineParameter>;
 
   /**
+   * The custom remainder that are relevant to this phase.
+   */
+  associatedRemainder: CommandLineRemainder | undefined;
+
+  /**
    * The resolved dependencies of the phase
    */
   dependencies: {
@@ -76,7 +82,14 @@ export interface ICommandWithParameters {
   associatedParameters: Set<IParameterJson>;
 }
 
-export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, ICommandWithParameters {
+export interface ICommandWithRemainder {
+  associatedRemainder: IRemainderJson | undefined;
+}
+
+export interface IPhasedCommandConfig
+  extends IPhasedCommandWithoutPhasesJson,
+    ICommandWithParameters,
+    ICommandWithRemainder {
   /**
    * If set to `true`, then this phased command was generated from a bulk command, and
    * was not explicitly defined in the command-line.json file.
@@ -106,7 +119,10 @@ export interface IPhasedCommandConfig extends IPhasedCommandWithoutPhasesJson, I
   alwaysInstall: boolean | undefined;
 }
 
-export interface IGlobalCommandConfig extends IGlobalCommandJson, ICommandWithParameters {}
+export interface IGlobalCommandConfig
+  extends IGlobalCommandJson,
+    ICommandWithParameters,
+    ICommandWithRemainder {}
 
 export type Command = IGlobalCommandConfig | IPhasedCommandConfig;
 
@@ -176,6 +192,7 @@ export class CommandLineConfiguration {
   public readonly commands: Map<string, Command> = new Map();
   public readonly phases: Map<string, IPhase> = new Map();
   public readonly parameters: IParameterJson[] = [];
+  public readonly remainders: IRemainderJson[] = [];
 
   /**
    * shellCommand from plugin custom command line configuration needs to be expanded with tokens
@@ -231,6 +248,7 @@ export class CommandLineConfiguration {
           isSynthetic: false,
           logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name),
           associatedParameters: new Set(),
+          associatedRemainder: undefined,
           dependencies: {
             self: new Set(),
             upstream: new Set()
@@ -306,6 +324,7 @@ export class CommandLineConfiguration {
               ...command,
               isSynthetic: false,
               associatedParameters: new Set<IParameterJson>(),
+              associatedRemainder: undefined,
               phases: commandPhases,
               watchPhases,
               alwaysWatch: false,
@@ -367,7 +386,8 @@ export class CommandLineConfiguration {
           case RushConstants.globalCommandKind: {
             normalizedCommand = {
               ...command,
-              associatedParameters: new Set<IParameterJson>()
+              associatedParameters: new Set<IParameterJson>(),
+              associatedRemainder: undefined
             };
             break;
           }
@@ -427,6 +447,7 @@ export class CommandLineConfiguration {
           phases: buildCommandPhases,
           disableBuildCache: DEFAULT_REBUILD_COMMAND_JSON.disableBuildCache,
           associatedParameters: buildCommand.associatedParameters, // rebuild should share build's parameters in this case,
+          associatedRemainder: buildCommand.associatedRemainder,
           watchPhases: new Set(),
           alwaysWatch: false,
           alwaysInstall: undefined
@@ -512,6 +533,66 @@ export class CommandLineConfiguration {
 
         // In the presence of plugins, there is utility to defining parameters that are associated with a phased
         // command but no phases. Don't enforce that a parameter is associated with at least one phase.
+      }
+    }
+
+    const remaindersJson: ICommandLineJson['remainders'] = commandLineJson?.remainders;
+    if (remaindersJson) {
+      for (const remainder of remaindersJson) {
+        const normalizedRemainder: IRemainderJson = {
+          ...remainder,
+          associatedPhases: remainder.associatedPhases ? [...remainder.associatedPhases] : [],
+          associatedCommands: remainder.associatedCommands ? [...remainder.associatedCommands] : []
+        };
+
+        this.remainders.push(normalizedRemainder);
+
+        let remainderHasAssociatedCommands: boolean = false;
+        if (normalizedRemainder.associatedCommands) {
+          for (const associatedCommandName of normalizedRemainder.associatedCommands) {
+            const syntheticPhase: IPhase | undefined =
+              this._syntheticPhasesByTranslatedBulkCommandName.get(associatedCommandName);
+            if (syntheticPhase) {
+              // If this parameter was associated with a bulk command, include the association
+              // with the synthetic phase
+              normalizedRemainder.associatedPhases!.push(syntheticPhase.name);
+            }
+
+            const associatedCommand: Command | undefined = this.commands.get(associatedCommandName);
+            if (!associatedCommand) {
+              throw new Error(
+                `${RushConstants.commandLineFilename} defines a remainder that is associated with a command` +
+                  ` "${associatedCommandName}" that does not exist or does not support custom remainder.`
+              );
+            } else if (associatedCommand.associatedRemainder) {
+              throw new Error(
+                `The command "${associatedCommandName}" already has an associated remainder.` +
+                  ` Please keep this command associates only one remainder.`
+              );
+            } else {
+              associatedCommand.associatedRemainder = normalizedRemainder;
+              remainderHasAssociatedCommands = true;
+            }
+          }
+
+          if (normalizedRemainder.associatedPhases) {
+            for (const associatedPhaseName of normalizedRemainder.associatedPhases) {
+              const associatedPhase: IPhase | undefined = this.phases.get(associatedPhaseName);
+              if (!associatedPhase) {
+                throw new Error(
+                  `${RushConstants.commandLineFilename} defines a remainder that is associated with a phase` +
+                    ` "${associatedPhaseName}" that does not exist.`
+                );
+              }
+            }
+          }
+
+          if (!remainderHasAssociatedCommands) {
+            throw new Error(
+              `${RushConstants.commandLineFilename} defines a remainder that lists no associated commands.`
+            );
+          }
+        }
       }
     }
   }
@@ -659,6 +740,7 @@ export class CommandLineConfiguration {
       isSynthetic: true,
       logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name),
       associatedParameters: new Set(),
+      associatedRemainder: undefined,
       dependencies: {
         self: new Set(),
         upstream: new Set()
@@ -681,6 +763,7 @@ export class CommandLineConfiguration {
       commandKind: 'phased',
       isSynthetic: true,
       associatedParameters: new Set<IParameterJson>(),
+      associatedRemainder: undefined,
       phases,
       // Bulk commands used the same phases for watch as for regular execution. Preserve behavior.
       watchPhases: command.watchForChanges ? phases : new Set(),
