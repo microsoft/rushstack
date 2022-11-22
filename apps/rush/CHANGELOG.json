@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.84.0",
+      "tag": "@microsoft/rush_v5.84.0",
+      "date": "Tue, 22 Nov 2022 23:24:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"dependsOnEnvVars\" configuration option to operations in rush-project.json. The variables specified in this option are included in the cache key hash calculation."
+          },
+          {
+            "comment": "The \"rush change\" user prompts can now be customized."
+          },
+          {
+            "comment": "Make autoinstaller logging respect the `--quiet` parameter."
+          },
+          {
+            "comment": "Add project filtering to the upgrade-interactive UI prompt. Also increases the default page size for project lists in UI to 12."
+          },
+          {
+            "comment": "Add a feature (behind the \"cleanInstallAfterNpmrcChanges\" experiment) that will cause a clean install to be performed if the common/temp/.npmrc file has changed since the last install."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.83.4",
       "tag": "@microsoft/rush_v5.83.4",
       "date": "Fri, 18 Nov 2022 04:02:43 GMT",

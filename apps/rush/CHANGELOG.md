@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 18 Nov 2022 04:02:43 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Nov 2022 23:24:56 GMT and should not be manually modified.
+
+## 5.84.0
+Tue, 22 Nov 2022 23:24:56 GMT
+
+### Updates
+
+- Add a "dependsOnEnvVars" configuration option to operations in rush-project.json. The variables specified in this option are included in the cache key hash calculation.
+- The "rush change" user prompts can now be customized.
+- Make autoinstaller logging respect the `--quiet` parameter.
+- Add project filtering to the upgrade-interactive UI prompt. Also increases the default page size for project lists in UI to 12.
+- Add a feature (behind the "cleanInstallAfterNpmrcChanges" experiment) that will cause a clean install to be performed if the common/temp/.npmrc file has changed since the last install.
 
 ## 5.83.4
 Fri, 18 Nov 2022 04:02:43 GMT
