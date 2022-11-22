@@ -13,6 +13,14 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
 /**
+ * @internal
+ */
+export interface ICheckNpmrcOptions {
+  statePropertiesToIgnore?: string[];
+  rushVerb?: string;
+}
+
+/**
  * A helper class for managing last-install flags, which are persistent and
  * indicate that something installed in the folder was successfully completed.
  * It also compares state, so that if something like the Node.js version has changed,
@@ -36,8 +44,8 @@ export class LastInstallFlag {
   /**
    * Returns true if the file exists and the contents match the current state.
    */
-  public isValid(): boolean {
-    return this._isValid(false);
+  public isValid(options?: ICheckNpmrcOptions): boolean {
+    return this._isValid(false, options);
   }
 
   /**
@@ -46,13 +54,19 @@ export class LastInstallFlag {
    *
    * @internal
    */
-  public checkValidAndReportStoreIssues(rushVerb: string): boolean {
-    return this._isValid(true, rushVerb);
+  public checkValidAndReportStoreIssues(options: ICheckNpmrcOptions & { rushVerb: string }): boolean {
+    return this._isValid(true, options);
   }
 
-  private _isValid(checkValidAndReportStoreIssues: false, rushVerb?: string): boolean;
-  private _isValid(checkValidAndReportStoreIssues: true, rushVerb: string): boolean;
-  private _isValid(checkValidAndReportStoreIssues: boolean, rushVerb: string = 'update'): boolean {
+  private _isValid(checkValidAndReportStoreIssues: false, options?: ICheckNpmrcOptions): boolean;
+  private _isValid(
+    checkValidAndReportStoreIssues: true,
+    options: ICheckNpmrcOptions & { rushVerb: string }
+  ): boolean;
+  private _isValid(
+    checkValidAndReportStoreIssues: boolean,
+    { rushVerb = 'update', statePropertiesToIgnore }: ICheckNpmrcOptions = {}
+  ): boolean {
     let oldState: JsonObject;
     try {
       oldState = JsonFile.load(this._path);
@@ -60,11 +74,18 @@ export class LastInstallFlag {
       return false;
     }
 
-    const newState: JsonObject = this._state;
+    const newState: JsonObject = { ...this._state };
+
+    if (statePropertiesToIgnore) {
+      for (const optionToIgnore of statePropertiesToIgnore) {
+        delete newState[optionToIgnore];
+        delete oldState[optionToIgnore];
+      }
+    }
 
     if (!lodash.isEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
-        const pkgManager: PackageManagerName = newState.packageManager;
+        const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {
           if (
             // Only throw an error if the package manager hasn't changed from PNPM
@@ -141,12 +162,16 @@ export class LastInstallFlagFactory {
    *
    * @internal
    */
-  public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastInstallFlag {
+  public static getCommonTempFlag(
+    rushConfiguration: RushConfiguration,
+    extraState: Record<string, string> = {}
+  ): LastInstallFlag {
     const currentState: JsonObject = {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
-      rushJsonFolder: rushConfiguration.rushJsonFolder
+      rushJsonFolder: rushConfiguration.rushJsonFolder,
+      ...extraState
     };
 
     if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {

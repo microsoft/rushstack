@@ -5,6 +5,7 @@ import colors from 'colors/safe';
 import * as fetch from 'node-fetch';
 import * as os from 'os';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import * as semver from 'semver';
 import {
   FileSystem,
@@ -126,15 +127,14 @@ export interface IInstallManagerOptions {
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
-  private _rushConfiguration: RushConfiguration;
-  private _rushGlobalFolder: RushGlobalFolder;
-  private _commonTempInstallFlag: LastInstallFlag;
-  private _commonTempLinkFlag: LastLinkFlag;
-  private _installRecycler: AsyncRecycler;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _rushGlobalFolder: RushGlobalFolder;
+  private readonly _commonTempLinkFlag: LastLinkFlag;
+  private readonly _installRecycler: AsyncRecycler;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
 
-  private _options: IInstallManagerOptions;
+  private readonly _options: IInstallManagerOptions;
 
   private readonly _terminalProvider: ITerminalProvider;
   private readonly _terminal: Terminal;
@@ -150,7 +150,6 @@ export abstract class BaseInstallManager {
     this._installRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
-    this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
 
     this._terminalProvider = new ConsoleTerminalProvider();
@@ -202,7 +201,7 @@ export abstract class BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
+    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync();
 
     if (this.options.checkOnly) {
       return;
@@ -216,16 +215,25 @@ export abstract class BaseInstallManager {
     // Always perform a clean install if filter flags were provided. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
+    const commonTempInstallFlag: LastInstallFlag = LastInstallFlagFactory.getCommonTempFlag(
+      this.rushConfiguration,
+      { npmrcHash: npmrcHash || '<NO NPMRC>' }
+    );
+    const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
+      .configuration.cleanInstallAfterNpmrcChanges
+      ? ['npmrcHash'] // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
+      : undefined;
     const cleanInstall: boolean =
       isFilteredInstall ||
-      !this._commonTempInstallFlag.checkValidAndReportStoreIssues(
-        this.options.allowShrinkwrapUpdates ? 'update' : 'install'
-      );
+      !commonTempInstallFlag.checkValidAndReportStoreIssues({
+        rushVerb: this.options.allowShrinkwrapUpdates ? 'update' : 'install',
+        statePropertiesToIgnore: optionsToIgnore
+      });
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
       // Based on timestamps, can we skip this install entirely?
-      const outputStats: FileSystemStats = FileSystem.getStatistics(this._commonTempInstallFlag.path);
+      const outputStats: FileSystemStats = FileSystem.getStatistics(commonTempInstallFlag.path);
       return this.canSkipInstall(outputStats.mtime);
     };
 
@@ -248,7 +256,7 @@ export abstract class BaseInstallManager {
       }
 
       // Delete the successful install file to indicate the install transaction has started
-      this._commonTempInstallFlag.clear();
+      commonTempInstallFlag.clear();
 
       // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
       // this ensures that a full "rush link" is required next time
@@ -282,13 +290,13 @@ export abstract class BaseInstallManager {
           );
         }
       }
-
-      // Create the marker file to indicate a successful install if it's not a filtered install
-      if (!isFilteredInstall) {
-        this._commonTempInstallFlag.create();
-      }
     } else {
       console.log('Installation is already up-to-date.');
+    }
+
+    // Create the marker file to indicate a successful install if it's not a filtered install
+    if (!isFilteredInstall) {
+      commonTempInstallFlag.create();
     }
 
     // Perform any post-install work the install manager requires
@@ -334,7 +342,11 @@ export abstract class BaseInstallManager {
     return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
   }
 
-  protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
+  protected async prepareAsync(): Promise<{
+    variantIsUpToDate: boolean;
+    shrinkwrapIsUpToDate: boolean;
+    npmrcHash: string | undefined;
+  }> {
     // Check the policies
     PolicyValidator.validatePolicy(this._rushConfiguration, this.options);
 
@@ -413,11 +425,15 @@ export abstract class BaseInstallManager {
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
-    Utilities.syncNpmrc(
+    const npmrcText: string | undefined = Utilities.syncNpmrc(
       this._rushConfiguration.commonRushConfigFolder,
       this._rushConfiguration.commonTempFolder
     );
     this._syncNpmrcAlreadyCalled = true;
+
+    const npmrcHash: string | undefined = npmrcText
+      ? crypto.createHash('sha1').update(npmrcText).digest('hex')
+      : undefined;
 
     // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
     // Additionally when in workspaces, the shim implements support for common versions.
@@ -462,7 +478,7 @@ export abstract class BaseInstallManager {
       }
     }
 
-    return { shrinkwrapIsUpToDate, variantIsUpToDate };
+    return { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash };
   }
 
   /**
