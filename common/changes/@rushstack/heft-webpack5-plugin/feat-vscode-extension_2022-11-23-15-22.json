@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "comment": "Make webpack accessible in custom webpack configuration function",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack5-plugin"
+}
