@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for a `credentialMetadata` property in the CredentialCache.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

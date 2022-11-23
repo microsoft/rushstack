@@ -60,7 +60,9 @@ export abstract class AzureAuthenticationBase {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        credentialsCache.setCacheEntry(this._credentialCacheId, credential);
+        credentialsCache.setCacheEntry(this._credentialCacheId, {
+          credential
+        });
         await credentialsCache.saveIfModifiedAsync();
       }
     );
@@ -95,11 +97,10 @@ export abstract class AzureAuthenticationBase {
         }
 
         const credential: ICredentialResult = await this._getCredentialAsync(terminal);
-        credentialsCache.setCacheEntry(
-          this._credentialCacheId,
-          credential.credentialString,
-          credential.expiresOn
-        );
+        credentialsCache.setCacheEntry(this._credentialCacheId, {
+          credential: credential.credentialString,
+          expires: credential.expiresOn
+        });
         await credentialsCache.saveIfModifiedAsync();
       }
     );
