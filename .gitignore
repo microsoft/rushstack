@@ -85,3 +85,8 @@ lib-commonjs
 dist
 *.scss.ts
 *.sass.ts
+
+# Visual Studio Code
+.vscode/**
+!.vscode/launch.json
+!.vscode/tasks.json

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+  "eventActions": [
+    {
+      "actionKind": "copyFiles",
+      "heftEvent": "pre-compile",
+      "actionId": "copy-webview",
+      "copyOperations": [
+        {
+          "sourceFolder": "node_modules/@rushstack/vsce-rush-command-webview/dist",
+          "destinationFolders": ["webview/rush-command-webview"],
+          "includeGlobs": ["*.{html,js}"]
+        }
+      ]
+    }
+  ]
+}

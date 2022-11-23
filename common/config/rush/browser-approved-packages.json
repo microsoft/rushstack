@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@fluentui/react",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vsce" ]
     },
     {
       "name": "@lifaon/path",
@@ -12,7 +12,11 @@
     },
     {
       "name": "@reduxjs/toolkit",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vsce" ]
+    },
+    {
+      "name": "@rushstack/vsce-rush-command-webview",
+      "allowedCategories": [ "vsce" ]
     },
     {
       "name": "axios",
@@ -28,19 +32,23 @@
     },
     {
       "name": "react",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vsce" ]
     },
     {
       "name": "react-dom",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vsce" ]
+    },
+    {
+      "name": "react-hook-form",
+      "allowedCategories": [ "vsce" ]
     },
     {
       "name": "react-redux",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vsce" ]
     },
     {
       "name": "redux",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vsce" ]
     },
     {
       "name": "rxjs",

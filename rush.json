@@ -130,6 +130,7 @@
      * or you could just have a single category called "default".
      */
     "reviewCategories": [
+      "vsce", // VSCode Extension
       "libraries", // library projects that ship
       "tests" // non-shipping test projects
     ],
@@ -1001,6 +1002,18 @@
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+
+    // "vsce" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/vsce-rush-command-webview",
+      "projectFolder": "vsce/rush-command-webview",
+      "reviewCategory": "vsce"
+    },
+    {
+      "packageName": "rushstack",
+      "projectFolder": "vsce/vscode-extension",
+      "reviewCategory": "vsce"
     },
 
     // "webpack" folder (alphabetical order)

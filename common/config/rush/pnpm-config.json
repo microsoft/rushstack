@@ -143,6 +143,14 @@
           "optional": true
         }
       }
+    },
+
+    "html-webpack-plugin": {
+      "peerDependenciesMeta": {
+        "webpack": {
+          "optional": true
+        }
+      }
     }
   }
 }
