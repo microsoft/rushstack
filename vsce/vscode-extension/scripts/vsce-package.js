@@ -1,14 +1,18 @@
+/* eslint-env es6 */
+
 Error.stackTraceLimit = 500;
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const packageJson = require('../package.json');
+// const packageJson = require('../package.json');
 
-const newPackageJson = { ...packageJson };
-delete newPackageJson.dependencies;
-delete newPackageJson.devDependencies;
+// const newPackageJson = { ...packageJson };
+// vsce package throws error if dependencies and devDependencies are present in package.json
+// So, delete them here and use a new package.json for packaging
+// delete newPackageJson.dependencies;
+// delete newPackageJson.devDependencies;
 const vscePath = path.resolve(__dirname, '../node_modules/.bin/vsce');
-const packageJsonPath = path.resolve(__dirname, '../package.json');
+// const packageJsonPath = path.resolve(__dirname, '../package.json');
 
 const PACKAGE_NAME = 'rushstack';
 
@@ -28,23 +32,23 @@ const disposes = [];
 
 if (!fs.existsSync(vscePath)) {
   console.error('vsce not found');
-  return;
+  process.exit(1);
 }
 
 // backup current package.json
-const backupPackageJsonPath = path.resolve(__dirname, '../package.json.backup');
-const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8');
-fs.writeFileSync(backupPackageJsonPath, packageJsonContent);
+// const backupPackageJsonPath = path.resolve(__dirname, '../package.json.backup');
+// const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8');
+// fs.writeFileSync(backupPackageJsonPath, packageJsonContent);
 
 console.log('packaging...');
 // mimic package.json for vsce
-fs.writeFileSync(packageJsonPath, JSON.stringify(newPackageJson, null, 2) + '\n');
-console.log('package.json for vsce ready');
+// fs.writeFileSync(packageJsonPath, JSON.stringify(newPackageJson, null, 2) + '\n');
+// console.log('package.json for vsce ready');
 
-disposes.push(() => {
-  fs.writeFileSync(packageJsonPath, packageJsonContent);
-  fs.unlinkSync(backupPackageJsonPath);
-});
+// disposes.push(() => {
+//   fs.writeFileSync(packageJsonPath, packageJsonContent);
+//   fs.unlinkSync(backupPackageJsonPath);
+// });
 
 // node_modules back and forth
 // const nodeModulesPath = path.resolve(__dirname, '../node_modules');
@@ -55,9 +59,11 @@ disposes.push(() => {
 //   fs.renameSync(nodeModulesBackupPath, nodeModulesPath);
 // });
 
+const outFilename = `${PACKAGE_NAME}-${PACKAGE_VERSION}.vsix`;
+
 try {
-  execSync(`${vscePath} package --out ${PACKAGE_NAME}-${PACKAGE_VERSION}.vsix`, {
-    stdio: ['inherit']
+  execSync(`${vscePath} package --no-dependencies --out ${outFilename}`, {
+    stdio: 'inherit'
   });
   console.log('vsce package successfully');
 } catch (err) {

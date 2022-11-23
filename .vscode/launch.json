@@ -54,7 +54,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/vsce/vscode-extension"
 			],
 			"outFiles": [
-				"${workspaceFolder}/vsce/vscode-extension/out/**/*.js"
+				"${workspaceFolder}/vsce/vscode-extension/dist/**/*.js"
 			],
 			"preLaunchTask": "npm: build:watch - vsce/vscode-extension"
 		}

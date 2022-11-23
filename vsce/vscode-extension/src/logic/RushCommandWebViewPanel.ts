@@ -114,9 +114,9 @@ export class RushCommandWebViewPanel {
     let html: string = FileSystem.readFile(
       path.join(this._extensionPath, 'webview/rush-command-webview/index.html')
     );
-    const scriptSrc: vscode.Uri = vscode.Uri.file(
-      path.join(this._extensionPath, 'webview/rush-command-webview/bundle.js')
-    ).with({ scheme: 'vscode-resource' });
+    const scriptSrc: vscode.Uri = this._panel!.webview.asWebviewUri(
+      vscode.Uri.file(path.join(this._extensionPath, 'webview/rush-command-webview/bundle.js'))
+    );
 
     // replace bundled js with the correct path
     html = html.replace('bundle.js', scriptSrc.toString());

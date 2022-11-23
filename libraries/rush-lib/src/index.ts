@@ -126,3 +126,5 @@ export {
   IOperationStateFileOptions as _IOperationStateFileOptions,
   IOperationStateJson as _IOperationStateJson
 } from './logic/operations/OperationStateFile';
+
+export { RushCommandLineParser } from './cli/RushCommandLineParser';

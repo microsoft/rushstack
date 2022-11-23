@@ -11,24 +11,31 @@
   "license": "MIT",
   "author": "Cheng Liu<chengcyber@outlook.com>",
   "publisher": "Microsoft",
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "scripts": {
-    "copy-webview": "node scripts/copy-webview.js",
     "build": "heft build --clean",
     "build:watch": "heft build --watch",
+    "copy-webview": "node scripts/copy-webview.js",
+    "vscode:prepublish": "heft build --clean --production",
+    "package": "vsce package --no-dependencies",
     "start": "heft start",
     "pretest": "npm run build",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./dist/test/runTest.js"
   },
   "contributes": {
     "commands": [
+      {
+        "command": "rushstack.openSettings",
+        "category": "RushStack",
+        "title": "Open Settings"
+      },
       {
         "command": "rushstack.selectWorkspace",
         "category": "RushStack",
         "title": "Select workspace"
       },
       {
-        "command": "rushstack.rushCommands.refreshEntry",
+        "command": "rushstack.refresh",
         "category": "RushStack",
         "title": "Refresh",
         "icon": "$(refresh)"
@@ -42,12 +49,6 @@
         "command": "rushstack.rushCommands.runRushCommand",
         "category": "RushStack",
         "title": "Run Rush Command"
-      },
-      {
-        "command": "rushstack.rushProjects.refreshEntry",
-        "category": "RushStack",
-        "title": "Refresh",
-        "icon": "$(refresh)"
       },
       {
         "command": "rushstack.rushProjects.revealInExplorer",
@@ -79,8 +80,8 @@
     "menus": {
       "view/title": [
         {
-          "command": "rushstack.rushProjects.refreshEntry",
-          "when": "view == rushProjects",
+          "command": "rushstack.refresh",
+          "when": "view == rushProjects || view == rushCommands",
           "group": "navigation"
         }
       ],
@@ -177,24 +178,28 @@
     ]
   },
   "activationEvents": [
-    "onStartupFinished"
+    "onView:rushProjects",
+    "onView:rushCommands"
   ],
   "dependencies": {
-    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/vsce-rush-command-webview": "workspace:*",
-    "vsce": "~2.3.0"
+    "vsce": "~2.14.0"
   },
   "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/heft-jest": "1.0.1",
     "@types/mocha": "^9.0.0",
     "@types/node": "12.20.24",
     "@types/vscode": "^1.63.0",
+    "@types/webpack-env": "1.13.0",
     "@typescript-eslint/eslint-plugin": "~5.38.0",
     "@typescript-eslint/parser": "~5.38.0",
     "@vscode/test-electron": "^1.6.2",

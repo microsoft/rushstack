@@ -29,6 +29,7 @@ declare const global: NodeJS.Global &
   typeof globalThis & {
     ___rush___rushLibModule?: RushLibModuleType;
     ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
+    ___rush___workingDirectory?: string;
   };
 
 function _require<TResult>(moduleName: string): TResult {
@@ -93,7 +94,9 @@ if (rushLibModule === undefined) {
 // In this case, we can use install-run-rush.js to obtain the appropriate rush-lib version for the monorepo.
 if (rushLibModule === undefined) {
   try {
-    const rushJsonPath: string | undefined = tryFindRushJsonLocation(process.cwd());
+    const rushJsonPath: string | undefined = tryFindRushJsonLocation(
+      global.___rush___workingDirectory || process.cwd()
+    );
     if (!rushJsonPath) {
       throw new Error(
         'Unable to find rush.json in the current folder or its parent folders.\n' +

@@ -2,11 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
-import type * as webpack from 'webpack';
+import { FileSystem, Import } from '@rushstack/node-core-library';
+import type { Configuration } from 'webpack';
 import type { IBuildStageProperties, ScopedLogger } from '@rushstack/heft';
 
 import { IWebpackConfiguration } from './shared';
+
+const webpack: typeof import('webpack') = Import.lazy('webpack', require);
 
 /**
  * See https://webpack.js.org/api/cli/#environment-options
@@ -14,14 +16,15 @@ import { IWebpackConfiguration } from './shared';
 interface IWebpackConfigFunctionEnv {
   prod: boolean;
   production: boolean;
+  webpack: typeof webpack;
 }
 type IWebpackConfigJsExport =
-  | webpack.Configuration
-  | webpack.Configuration[]
-  | Promise<webpack.Configuration>
-  | Promise<webpack.Configuration[]>
-  | ((env: IWebpackConfigFunctionEnv) => webpack.Configuration | webpack.Configuration[])
-  | ((env: IWebpackConfigFunctionEnv) => Promise<webpack.Configuration | webpack.Configuration[]>);
+  | Configuration
+  | Configuration[]
+  | Promise<Configuration>
+  | Promise<Configuration[]>
+  | ((env: IWebpackConfigFunctionEnv) => Configuration | Configuration[])
+  | ((env: IWebpackConfigFunctionEnv) => Promise<Configuration | Configuration[]>);
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
 const WEBPACK_CONFIG_FILENAME: string = 'webpack.config.js';
@@ -67,7 +70,11 @@ export class WebpackConfigurationLoader {
         (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
 
       if (typeof webpackConfig === 'function') {
-        return webpackConfig({ prod: buildProperties.production, production: buildProperties.production });
+        return webpackConfig({
+          prod: buildProperties.production,
+          production: buildProperties.production,
+          webpack
+        });
       } else {
         return webpackConfig;
       }

@@ -2385,14 +2385,17 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rush-sdk': workspace:*
       '@rushstack/vsce-rush-command-webview': workspace:*
+      '@rushstack/webpack-preserve-dynamic-require-plugin': workspace:*
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/mocha': ^9.0.0
       '@types/node': 12.20.24
       '@types/vscode': ^1.63.0
+      '@types/webpack-env': 1.13.0
       '@typescript-eslint/eslint-plugin': ~5.38.0
       '@typescript-eslint/parser': ~5.38.0
       '@vscode/test-electron': ^1.6.2
@@ -2400,22 +2403,25 @@ importers:
       glob: ~7.0.5
       mocha: ^9.1.3
       typescript: ~4.8.4
-      vsce: ~2.3.0
+      vsce: ~2.14.0
     dependencies:
-      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rush-sdk': link:../../libraries/rush-sdk
       '@rushstack/vsce-rush-command-webview': link:../rush-command-webview
-      vsce: 2.3.0
+      vsce: 2.14.0
     devDependencies:
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/webpack-preserve-dynamic-require-plugin': link:../../webpack/preserve-dynamic-require-plugin
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/mocha': 9.1.1
       '@types/node': 12.20.24
       '@types/vscode': 1.73.1
+      '@types/webpack-env': 1.13.0
       '@typescript-eslint/eslint-plugin': 5.38.1_dgdlt47nc666rkw3n5usybcqsa
       '@typescript-eslint/parser': 5.38.1_esueefhpt5ql6xiqdj4wcgwfzi
       '@vscode/test-electron': 1.6.2
@@ -11247,8 +11253,8 @@ packages:
       ansi-colors: 4.1.3
     dev: true
 
-  /entities/2.0.3:
-    resolution: {integrity: sha512-MyoZ0jgnLvB2X3Lg5HqpFmn1kybDiIfEQmKzTb5apr51Rb+T3KdmMiqa70T+bhGnyv7bQ6WMj2QMHpGMmlrUYQ==}
+  /entities/2.1.0:
+    resolution: {integrity: sha512-hCx1oky9PFrJ611mf0ifBLBRW8lUUVRlFolb5gWRfIELabBlbp9xZvrqZLZAs+NxFnbfQoeGd8wDkygjg7U85w==}
     dev: false
 
   /entities/2.2.0:
@@ -15616,8 +15622,8 @@ packages:
   /lines-and-columns/1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  /linkify-it/2.2.0:
-    resolution: {integrity: sha512-GnAl/knGn+i1U/wjBz3akz2stz+HrHLsxMwHQGofCDfPvlf+gDKN58UtfmUquTY4/MXeE2x7k19KQmeoZi94Iw==}
+  /linkify-it/3.0.3:
+    resolution: {integrity: sha512-ynTsyrFSdE5oZ/O9GEf00kPngmOfVwazR5GKDq6EYfhlpFug3J2zybX56a2PRRpc9P+FuSoGNAwjlbDs9jJBPQ==}
     dependencies:
       uc.micro: 1.0.6
     dev: false
@@ -15939,13 +15945,13 @@ packages:
     resolution: {integrity: sha512-8z4efJYk43E0upd0NbVXwgSTQs6cT3T06etieCMEg7dRbzCbxUCK/GHlX8mhHRDcp+OLlHkPKsvqQTCvsRl2cg==}
     dev: true
 
-  /markdown-it/10.0.0:
-    resolution: {integrity: sha512-YWOP1j7UbDNz+TumYP1kpwnP0aEa711cJjrAQrzd0UXlbJfc5aAq0F/PZHjiioqDC1NKgvIMX+o+9Bk7yuM2dg==}
+  /markdown-it/12.3.2:
+    resolution: {integrity: sha512-TchMembfxfNVpHkbtriWltGWc+m3xszaRD0CZup7GFFhzIgQqxIfn3eGj1yZpfuflzPvfkt611B2Q/Bsk1YnGg==}
     hasBin: true
     dependencies:
-      argparse: 1.0.10
-      entities: 2.0.3
-      linkify-it: 2.2.0
+      argparse: 2.0.1
+      entities: 2.1.0
+      linkify-it: 3.0.3
       mdurl: 1.0.1
       uc.micro: 1.0.6
     dev: false
@@ -21188,8 +21194,8 @@ packages:
       acorn-walk: 8.2.0
     dev: true
 
-  /vsce/2.3.0:
-    resolution: {integrity: sha512-nmbczr1rC+lRikX1NYMoTFX6CqPlfk11f7LbRgdjpa6zkLNndlTtnpvOawj7NYkw5jmy+5bGHMGt4DIimZXZmg==}
+  /vsce/2.14.0:
+    resolution: {integrity: sha512-LH0j++sHjcFNT++SYcJ86Zyw49GvyoTRfzYJGmaCgfzTyL7MyMhZeVEnj9K9qKh/m1N3/sdWWNxP+PFS/AvWiA==}
     engines: {node: '>= 14'}
     hasBin: true
     dependencies:
@@ -21201,7 +21207,7 @@ packages:
       hosted-git-info: 4.1.0
       keytar: 7.9.0
       leven: 3.1.0
-      markdown-it: 10.0.0
+      markdown-it: 12.3.2
       mime: 1.6.0
       minimatch: 3.0.8
       parse-semver: 1.1.1

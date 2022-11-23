@@ -1,3 +1,8 @@
 {
-  "projectOutputFolderNames": ["dist", "lib"]
+  "operationSettings": [
+    {
+      "operationName": "build",
+      "outputFolderNames": ["lib", "dist"]
+    }
+  ]
 }

@@ -9,10 +9,15 @@ import { RushTaskProvider } from './providers/TaskProvider';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext): void {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   context.subscriptions.push(
     vscode.commands.registerCommand('rushstack.selectWorkspace', async () => {
       await RushWorkspace.selectWorkspace();
+    })
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand('rushstack.openSettings', async () => {
+      await vscode.commands.executeCommand('workbench.action.openSettings', 'rushstack');
     })
   );
 
@@ -28,18 +33,27 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const workspaceFolderPaths: string[] = vscode.workspace.workspaceFolders?.map((x) => x.uri.fsPath) || [];
   const rushWorkspace: RushWorkspace | undefined =
-    RushWorkspace.initializeFromWorkspaceFolderPaths(workspaceFolderPaths);
+    await RushWorkspace.initializeFromWorkspaceFolderPathsAsync(workspaceFolderPaths);
   if (rushWorkspace) {
+    const rushProjectsProvider: RushProjectsProvider = new RushProjectsProvider(context);
     // Projects Tree View
     vscode.window.createTreeView('rushProjects', {
-      treeDataProvider: new RushProjectsProvider(context)
+      treeDataProvider: rushProjectsProvider
     });
     vscode.tasks.registerTaskProvider('rushstack', RushTaskProvider.getInstance());
 
+    const rushCommandsProvider: RushCommandsProvider = new RushCommandsProvider(context);
     // Rush Commands TreeView
     vscode.window.createTreeView('rushCommands', {
-      treeDataProvider: new RushCommandsProvider(context)
+      treeDataProvider: rushCommandsProvider
     });
+    context.subscriptions.push(
+      vscode.commands.registerCommand('rushstack.refresh', async () => {
+        const workspaceFolderPaths: string[] =
+          vscode.workspace.workspaceFolders?.map((x) => x.uri.fsPath) || [];
+        await RushWorkspace.initializeFromWorkspaceFolderPathsAsync(workspaceFolderPaths);
+      })
+    );
   }
 }
 

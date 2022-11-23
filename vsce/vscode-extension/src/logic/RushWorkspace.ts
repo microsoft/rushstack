@@ -1,18 +1,29 @@
 import * as vscode from 'vscode';
-import { RushConfiguration } from '@microsoft/rush-lib';
-import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
 import { terminal } from './logger';
 
 import type { CommandLineAction } from '@rushstack/vsce-rush-command-webview';
+import type * as RushLib from '@rushstack/rush-sdk';
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+declare let ___DEV___: boolean;
+declare const global: NodeJS.Global &
+  typeof globalThis & {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    ___rush___workingDirectory?: string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    ___rush___rushLibModule?: typeof RushLib;
+  };
 
 export interface IRushWorkspace {
-  rushConfiguration: RushConfiguration;
-  rushCommandLineParser: RushCommandLineParser;
+  rushLib: typeof RushLib;
+  startingFolder: string;
 }
 
 export class RushWorkspace {
-  private _rushConfiguration: RushConfiguration;
-  private _rushCommandLineParser: RushCommandLineParser;
+  private _rushLib: typeof RushLib | undefined;
+  private _startingFolderPath: string;
+  private _rushConfiguration: RushLib.RushConfiguration;
+  private _rushCommandLineParser: RushLib.RushCommandLineParser | undefined;
   private static _rushWorkspace: RushWorkspace | undefined;
 
   private static readonly _onDidChangeWorkspace: vscode.EventEmitter<RushWorkspace> =
@@ -20,9 +31,32 @@ export class RushWorkspace {
   public static readonly onDidChangeWorkspace: vscode.Event<RushWorkspace> =
     RushWorkspace._onDidChangeWorkspace.event;
 
-  private constructor({ rushConfiguration, rushCommandLineParser }: IRushWorkspace) {
+  private constructor({ rushLib, startingFolder }: IRushWorkspace) {
+    this._rushLib = rushLib;
+    this._startingFolderPath = startingFolder;
+    const { RushConfiguration, RushCommandLineParser } = rushLib;
+    // existence check for API
+    if (!RushConfiguration) {
+      throw new Error('load RushConfiguration from rush-sdk failed');
+    }
+    const rushConfiguration: RushLib.RushConfiguration | undefined =
+      RushConfiguration.loadFromDefaultLocation({
+        startingFolder
+      });
+    if (!rushConfiguration) {
+      throw new Error('RushConfiguration not found');
+    }
+    terminal.writeDebugLine(`rushConfiguration loaded from: ${startingFolder}`);
     this._rushConfiguration = rushConfiguration;
-    this._rushCommandLineParser = rushCommandLineParser;
+
+    if (RushCommandLineParser) {
+      this._rushCommandLineParser = new RushCommandLineParser({
+        cwd: startingFolder
+      });
+    } else {
+      terminal.writeWarningLine(`load RushCommandLineParser from rush-sdk failed`);
+    }
+
     RushWorkspace._rushWorkspace = this;
     RushWorkspace._onDidChangeWorkspace.fire(this);
   }
@@ -34,23 +68,41 @@ export class RushWorkspace {
     return RushWorkspace._rushWorkspace;
   }
 
-  public static initializeFromWorkspaceFolderPaths(
+  public static async initializeFromWorkspaceFolderPathsAsync(
     workspaceFolderPaths: string[]
-  ): RushWorkspace | undefined {
+  ): Promise<RushWorkspace | undefined> {
     terminal.writeDebugLine(`initialize from workspaceFolderPaths: ${JSON.stringify(workspaceFolderPaths)}`);
-    for (const folderPath of workspaceFolderPaths) {
-      const rushConfiguration: RushConfiguration | undefined = RushConfiguration.loadFromDefaultLocation({
-        startingFolder: folderPath
-      });
-      terminal.writeDebugLine(`rushConfiguration loaded from: ${folderPath}`);
-      if (rushConfiguration) {
-        const rushCommandLineParser: RushCommandLineParser = new RushCommandLineParser({
-          cwd: folderPath
-        });
-        return new RushWorkspace({ rushConfiguration, rushCommandLineParser });
+
+    if (___DEV___) {
+      try {
+        terminal.writeLine('[DEV MODE] try to load @microsoft/rush-lib instead of @rushstack/rush-sdk');
+        global.___rush___rushLibModule = (await import('@microsoft/rush-lib')) as unknown as typeof RushLib;
+      } catch (e) {
+        terminal.writeErrorLine(`Failed to load dev rush lib @microsoft/rush-lib`);
       }
     }
-    terminal.writeWarningLine(`No rush configuration found in workspace folders`);
+
+    terminal.writeDebugLine(`current workspaceFolderPaths: ${workspaceFolderPaths.join(',')}`);
+
+    for (const folderPath of workspaceFolderPaths) {
+      let rushLib: typeof RushLib | undefined;
+      try {
+        global.___rush___workingDirectory = folderPath;
+        rushLib = await import('@rushstack/rush-sdk');
+        if (!rushLib) {
+          continue;
+        }
+      } catch (e) {
+        continue;
+      }
+      try {
+        return new RushWorkspace({ rushLib, startingFolder: folderPath });
+      } catch (e) {
+        terminal.writeDebugLine(`Failed to initialize workspace from ${folderPath}: ${e}`);
+        continue;
+      }
+    }
+    terminal.writeWarningLine(`RushWorkspace has not been ininitialized from current workspace folders`);
     return undefined;
   }
 
@@ -62,12 +114,12 @@ export class RushWorkspace {
       openLabel: 'Select workspace folder'
     });
     if (Uris && Uris[0]) {
-      return RushWorkspace.initializeFromWorkspaceFolderPaths([Uris[0].fsPath]);
+      return await RushWorkspace.initializeFromWorkspaceFolderPathsAsync([Uris[0].fsPath]);
     }
     return undefined;
   }
 
-  public get rushConfiguration(): RushConfiguration {
+  public get rushConfiguration(): RushLib.RushConfiguration {
     return this._rushConfiguration;
   }
 
@@ -76,6 +128,6 @@ export class RushWorkspace {
   }
 
   public get commandLineActions(): CommandLineAction[] {
-    return this._rushCommandLineParser.actions.slice() as unknown as CommandLineAction[];
+    return (this._rushCommandLineParser?.actions || []).slice() as unknown as CommandLineAction[];
   }
 }

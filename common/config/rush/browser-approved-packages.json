@@ -19,6 +19,10 @@
       "allowedCategories": [ "vsce" ]
     },
     {
+      "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "allowedCategories": [ "vsce" ]
+    },
+    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },

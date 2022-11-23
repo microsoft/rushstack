@@ -43,8 +43,7 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
     });
     this._commandLineActions = rushWorkspace.commandLineActions;
 
-    const commandNames: readonly ['refreshEntry', 'openParameterViewPanel', 'runRushCommand'] = [
-      'refreshEntry',
+    const commandNames: readonly ['openParameterViewPanel', 'runRushCommand'] = [
       'openParameterViewPanel',
       'runRushCommand'
     ] as const;

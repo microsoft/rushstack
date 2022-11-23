@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { JsonFile, JsonObject } from '@rushstack/node-core-library';
-import { RushConfiguration, RushConfigurationProject } from '@microsoft/rush-lib';
 import { RushTaskProvider } from './TaskProvider';
 import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
+
+import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
 
 interface IRushProjectParams {
   label: string;
@@ -77,8 +78,7 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
     });
     this._rushConfiguration = rushWorkspace.rushConfiguration;
 
-    const commandNames: readonly ['refreshEntry', 'revealInExplorer', 'runProjectScript'] = [
-      'refreshEntry',
+    const commandNames: readonly ['revealInExplorer', 'runProjectScript'] = [
       'revealInExplorer',
       'runProjectScript'
     ] as const;
