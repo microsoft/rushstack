@@ -3,7 +3,8 @@
 
 import { DeviceCodeCredential, type DeviceCodeInfo, AzureAuthorityHosts } from '@azure/identity';
 import type { ITerminal } from '@rushstack/node-core-library';
-import { CredentialCache, type ICredentialCacheEntry } from '@rushstack/rush-sdk';
+import { CredentialCache } from '@rushstack/rush-sdk';
+import type { ICredentialCacheEntry } from '@rushstack/rush-sdk'; // Use a separate import line so the .d.ts file ends up with an `import type { ... }`
 import { PrintUtilities } from '@rushstack/terminal';
 
 /**
@@ -22,7 +23,8 @@ export interface IAzureAuthenticationBaseOptions {
  * @public
  */ export interface ICredentialResult {
   credentialString: string;
-  expiresOn: Date | undefined;
+  expiresOn?: Date;
+  credentialMetadata?: object;
 }
 
 /**
@@ -99,7 +101,8 @@ export abstract class AzureAuthenticationBase {
         const credential: ICredentialResult = await this._getCredentialAsync(terminal);
         credentialsCache.setCacheEntry(this._credentialCacheId, {
           credential: credential.credentialString,
-          expires: credential.expiresOn
+          expires: credential.expiresOn,
+          credentialMetadata: credential.credentialMetadata
         });
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -118,7 +121,9 @@ export abstract class AzureAuthenticationBase {
     );
   }
 
-  public async tryGetCachedCredentialAsync(doNotThrowIfExpired?: boolean): Promise<string | undefined> {
+  public async tryGetCachedCredentialAsync(
+    doNotThrowIfExpired?: boolean
+  ): Promise<ICredentialCacheEntry | undefined> {
     let cacheEntry: ICredentialCacheEntry | undefined;
     await CredentialCache.usingAsync(
       {
@@ -142,7 +147,7 @@ export abstract class AzureAuthenticationBase {
         return undefined;
       }
     } else {
-      return cacheEntry?.credential;
+      return cacheEntry;
     }
   }
 

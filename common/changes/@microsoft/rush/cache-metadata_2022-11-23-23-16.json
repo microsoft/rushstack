@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING API CHANGE) Change the return type of `AzureAuthenticationBase.tryGetCachedCredentialAsync` (and, therefore, `AzureStorageAuthentication.tryGetCachedCredentialAsync`) from `string | undefined` to `ICredentialCacheEntry | undefined` to include the credentialMetadata.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
