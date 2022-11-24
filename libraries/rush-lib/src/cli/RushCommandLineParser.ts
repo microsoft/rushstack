@@ -65,6 +65,9 @@ export interface IRushCommandLineParserOptions {
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
 }
 
+/**
+ * @beta
+ */
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushGlobalFolder!: RushGlobalFolder;

@@ -765,7 +765,7 @@ export class Rush {
     static get version(): string;
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export class RushCommandLineParser extends CommandLineParser {
     // Warning: (ae-forgotten-export) The symbol "IRushCommandLineParserOptions" needs to be exported by the entry point index.d.ts
     constructor(options?: Partial<IRushCommandLineParserOptions>);
@@ -785,12 +785,10 @@ export class RushCommandLineParser extends CommandLineParser {
     readonly pluginManager: PluginManager;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
-    // Warning: (ae-incompatible-release-tags) The symbol "rushGlobalFolder" is marked as @public, but its signature references "_RushGlobalFolder" which is marked as @internal
+    // Warning: (ae-incompatible-release-tags) The symbol "rushGlobalFolder" is marked as @beta, but its signature references "_RushGlobalFolder" which is marked as @internal
     //
     // (undocumented)
     rushGlobalFolder: _RushGlobalFolder;
-    // Warning: (ae-incompatible-release-tags) The symbol "rushSession" is marked as @public, but its signature references "RushSession" which is marked as @beta
-    //
     // (undocumented)
     readonly rushSession: RushSession;
     static shouldRestrictConsoleOutput(): boolean;

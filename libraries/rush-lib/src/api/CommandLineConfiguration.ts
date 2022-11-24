@@ -519,9 +519,9 @@ export class CommandLineConfiguration {
   /**
    * Performs a depth-first search to detect cycles in the directed graph of phase "self" dependencies.
    *
-   * @param phase The phase node currently being checked
-   * @param phasesInPath The current path from the start node to `phase`
-   * @param cycleFreePhases Phases that have already been fully walked and confirmed to not be in any cycles
+   * @param phase - The phase node currently being checked
+   * @param phasesInPath - The current path from the start node to `phase`
+   * @param cycleFreePhases - Phases that have already been fully walked and confirmed to not be in any cycles
    */
   private _checkForPhaseSelfCycles(
     phase: IPhase,
@@ -557,7 +557,7 @@ export class CommandLineConfiguration {
    * Load the command-line.json configuration file from the specified path. Note that this
    * does not include the default build settings. This option is intended to be used to load
    * command-line.json files from plugins. To load a common/config/rush/command-line.json file,
-   * use {@see loadFromFileOrDefault} instead.
+   * use @see {@link CommandLineConfiguration.loadFromFileOrDefault} instead.
    *
    * If the file does not exist, this function returns `undefined`
    */
