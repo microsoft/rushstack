@@ -118,7 +118,7 @@ export class CredentialCache {
     // (undocumented)
     saveIfModifiedAsync(): Promise<void>;
     // (undocumented)
-    setCacheEntry(cacheId: string, credential: string, expires?: Date): void;
+    setCacheEntry(cacheId: string, entry: ICredentialCacheEntry): void;
     // (undocumented)
     trimExpiredEntries(): void;
     // (undocumented)
@@ -273,6 +273,8 @@ export interface ICreateOperationsContext {
 export interface ICredentialCacheEntry {
     // (undocumented)
     credential: string;
+    // (undocumented)
+    credentialMetadata?: object;
     // (undocumented)
     expires?: Date;
 }
