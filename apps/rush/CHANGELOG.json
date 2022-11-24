@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.85.0",
+      "tag": "@microsoft/rush_v5.85.0",
+      "date": "Thu, 24 Nov 2022 03:57:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for a `credentialMetadata` property in the CredentialCache."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Change the signature of `CredentialCache.setCacheEntry` to take the credential ID and an object describing the credential instead of a credential string and an expiration date. The second argument's type now matches the return value of `CredentialCache.tryGetCacheEntry`"
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Change the return type of `AzureAuthenticationBase.tryGetCachedCredentialAsync` (and, therefore, `AzureStorageAuthentication.tryGetCachedCredentialAsync`) from `string | undefined` to `ICredentialCacheEntry | undefined` to include the credentialMetadata."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.84.0",
       "tag": "@microsoft/rush_v5.84.0",
       "date": "Tue, 22 Nov 2022 23:24:56 GMT",
