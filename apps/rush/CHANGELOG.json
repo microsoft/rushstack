@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.85.1",
+      "tag": "@microsoft/rush_v5.85.1",
+      "date": "Fri, 25 Nov 2022 21:51:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an intermittent issue when writing tar log files"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.85.0",
       "tag": "@microsoft/rush_v5.85.0",
       "date": "Thu, 24 Nov 2022 03:57:19 GMT",

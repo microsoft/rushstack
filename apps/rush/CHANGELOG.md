@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 24 Nov 2022 03:57:19 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Nov 2022 21:51:32 GMT and should not be manually modified.
+
+## 5.85.1
+Fri, 25 Nov 2022 21:51:32 GMT
+
+### Updates
+
+- Fix an intermittent issue when writing tar log files
 
 ## 5.85.0
 Thu, 24 Nov 2022 03:57:19 GMT
