@@ -41,7 +41,7 @@
             "comment": "Add a \"dependsOnEnvVars\" configuration option to operations in rush-project.json. The variables specified in this option are included in the cache key hash calculation."
           },
           {
-            "comment": "The \"rush change\" user prompts can now be customized."
+            "comment": "The \"rush setup\" user prompts can now be customized."
           },
           {
             "comment": "Make autoinstaller logging respect the `--quiet` parameter."
