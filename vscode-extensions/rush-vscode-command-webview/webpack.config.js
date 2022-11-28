@@ -24,8 +24,6 @@ function createWebpackConfig({ production }) {
     },
     devServer: {
       host: 'localhost',
-      publicPath: '/',
-      clientLogLevel: 'info',
       port: 8080
     },
     devtool: production ? undefined : 'source-map',

@@ -154,8 +154,8 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
-| [/vsce/rush-command-webview](./vsce/rush-command-webview/) | Webview to run rush command in VSCode Extension |
-| [/vsce/vscode-extension](./vsce/vscode-extension/) | Integrates RushStack into VS Code |
+| [/vscode-extensions/rush-command-webview](./vscode-extensions/rush-command-webview/) | Webview to run rush command in VSCode Extension |
+| [/vscode-extensions/vscode-extension](./vscode-extensions/vscode-extension/) | Integrates RushStack into VS Code |
 <!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice

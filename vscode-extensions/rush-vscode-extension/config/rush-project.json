@@ -2,7 +2,7 @@
   "operationSettings": [
     {
       "operationName": "build",
-      "outputFolderNames": ["lib", "dist"]
+      "outputFolderNames": ["webview", "lib", "dist"]
     }
   ]
 }

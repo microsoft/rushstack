@@ -4,16 +4,16 @@
 		{
 			"type": "npm",
 			"script": "build",
-			"path": "vsce/vscode-extension/",
+			"path": "vscode-extensions/rush-vscode-extension/",
 			"group": "build",
 			"problemMatcher": [],
-			"label": "npm: build - vsce/vscode-extension",
+			"label": "npm: build - vscode-extensions/rush-vscode-extension",
 			"detail": "heft build --clean"
 		},
 		{
 			"type": "npm",
 			"script": "build:watch",
-			"path": "vsce/vscode-extension/",
+			"path": "vscode-extensions/rush-vscode-extension/",
 			"group": "build",
 			"isBackground": true,
 			"presentation": {
@@ -38,7 +38,7 @@
 					}
 				}
 			],
-			"label": "npm: build:watch - vsce/vscode-extension",
+			"label": "npm: build:watch - vscode-extensions/rush-vscode-extension",
 			"detail": "heft build --watch"
 		}
 	]

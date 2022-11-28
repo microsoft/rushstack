@@ -7,7 +7,7 @@
       "actionId": "copy-webview",
       "copyOperations": [
         {
-          "sourceFolder": "node_modules/@rushstack/vsce-rush-command-webview/dist",
+          "sourceFolder": "node_modules/rush-vscode-command-webview/dist",
           "destinationFolders": ["webview/rush-command-webview"],
           "includeGlobs": ["*.{html,js}"]
         }

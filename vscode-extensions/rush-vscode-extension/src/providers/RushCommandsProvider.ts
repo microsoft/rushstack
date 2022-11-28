@@ -3,7 +3,7 @@ import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
 import { RushCommandWebViewPanel } from '../logic/RushCommandWebViewPanel';
 
-import type { CommandLineAction } from '@rushstack/vsce-rush-command-webview';
+import type { CommandLineAction } from 'rush-vscode-command-webview';
 
 interface IRushCommandParams {
   label: string;

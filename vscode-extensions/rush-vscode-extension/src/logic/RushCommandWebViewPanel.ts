@@ -12,7 +12,7 @@ import type {
   IRootState,
   ICommandLineParameter,
   IToExtensionMessage
-} from '@rushstack/vsce-rush-command-webview';
+} from 'rush-vscode-command-webview';
 
 export class RushCommandWebViewPanel {
   private static _instance: RushCommandWebViewPanel | undefined;

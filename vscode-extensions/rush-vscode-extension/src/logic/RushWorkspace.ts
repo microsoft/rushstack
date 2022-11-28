@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { terminal } from './logger';
 
-import type { CommandLineAction } from '@rushstack/vsce-rush-command-webview';
+import type { CommandLineAction } from 'rush-vscode-command-webview';
 import type * as RushLib from '@rushstack/rush-sdk';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention

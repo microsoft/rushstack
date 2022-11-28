@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const rushCommandViewPackageJsonPath = require.resolve('@rushstack/vsce-rush-command-webview/package.json');
+const rushCommandViewPackageJsonPath = require.resolve('rush-vscode-command-webview/package.json');
 
 const rushCommandViewPackageFolder = path.dirname(rushCommandViewPackageJsonPath);
 

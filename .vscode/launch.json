@@ -49,14 +49,14 @@
 			"name": "Launch Rush Extension",
 			"type": "extensionHost",
 			"request": "launch",
-			"cwd": "${workspaceFolder}/vsce/vscode-extension",
+			"cwd": "${workspaceFolder}/vscode-extensions/rush-vscode-extension",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}/vsce/vscode-extension"
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/rush-vscode-extension"
 			],
 			"outFiles": [
-				"${workspaceFolder}/vsce/vscode-extension/dist/**/*.js"
+				"${workspaceFolder}/vscode-extensions/rush-vscode-extension/dist/**/*.js"
 			],
-			"preLaunchTask": "npm: build:watch - vsce/vscode-extension"
+			"preLaunchTask": "npm: build:watch - vscode-extensions/rush-vscode-extension"
 		}
 	]
 }

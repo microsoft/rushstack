@@ -6,7 +6,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "vsce/vscode-extension"
+    "directory": "vscode-extensions/rush-vscode-extension"
   },
   "license": "MIT",
   "author": "Cheng Liu<chengcyber@outlook.com>",
@@ -20,7 +20,9 @@
     "package": "vsce package --no-dependencies",
     "start": "heft start",
     "pretest": "npm run build",
-    "test": "node ./dist/test/runTest.js"
+    "test": "node ./lib/test/runTest.js",
+    "_phase:build": "heft build --clean",
+    "_phase:test": ""
   },
   "contributes": {
     "commands": [
@@ -184,7 +186,7 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
-    "@rushstack/vsce-rush-command-webview": "workspace:*",
+    "rush-vscode-command-webview": "workspace:*",
     "vsce": "~2.14.0"
   },
   "devDependencies": {
