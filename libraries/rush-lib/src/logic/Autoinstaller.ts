@@ -198,7 +198,7 @@ export class Autoinstaller {
       );
     }
 
-    this._logIfConsoleOutputIsNotRestricted();
+    this._logIfConsoleOutputIsNotRestricted('');
 
     Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this.folderFullPath);
 
@@ -220,7 +220,7 @@ export class Autoinstaller {
         keepEnvironment: true
       });
       this._logIfConsoleOutputIsNotRestricted('"npm shrinkwrap" completed');
-      this._logIfConsoleOutputIsNotRestricted();
+      this._logIfConsoleOutputIsNotRestricted('');
     }
 
     if (!FileSystem.exists(this.shrinkwrapFilePath)) {
