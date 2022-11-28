@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "The \"rush update-autoinstaller\" command now supports multiple --name parameters, or a new --all flag.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

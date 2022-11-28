@@ -8,8 +8,8 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export class UpdateAutoinstallerAction extends BaseRushAction {
-  private readonly _names: CommandLineStringListParameter;
-  private readonly _allFlag: CommandLineFlagParameter;
+  private readonly _namesParameter: CommandLineStringListParameter;
+  private readonly _allParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -19,7 +19,7 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
       parser
     });
 
-    this._names = this.defineStringListParameter({
+    this._namesParameter = this.defineStringListParameter({
       parameterLongName: '--name',
       argumentName: 'AUTOINSTALLER_NAME',
       description:
@@ -27,7 +27,7 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
         ' option more than once to update multiple autoinstallers. Required unless --all is specified.'
     });
 
-    this._allFlag = this.defineFlagParameter({
+    this._allParameter = this.defineFlagParameter({
       parameterLongName: '--all',
       description:
         'If this flag is provided, all existing autoinstallers in the autoinstallers folder will be detected and updated. Not compatible with --name parameter.'
@@ -37,16 +37,20 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     let autoinstallerNames: string[] | undefined = [];
 
-    if (this._names.values.length > 0) {
-      if (this._allFlag.value) {
-        throw new Error(`${this._allFlag.longName} is not compatible with ${this._names.longName}`);
+    if (this._namesParameter.values.length > 0) {
+      if (this._allParameter.value) {
+        throw new Error(
+          `${this._allParameter.longName} is not compatible with ${this._namesParameter.longName}`
+        );
       }
-      autoinstallerNames.push(...this._names.values);
-    } else if (this._allFlag.value) {
+      autoinstallerNames.push(...this._namesParameter.values);
+    } else if (this._allParameter.value) {
       autoinstallerNames = undefined;
     } else {
       console.log(this.renderHelpText() + '\n');
-      throw new Error(`Specify ${this._names.longName} parameter or the ${this._allFlag.longName} flag.`);
+      throw new Error(
+        `Specify ${this._namesParameter.longName} parameter or the ${this._allParameter.longName} flag.`
+      );
     }
 
     Autoinstaller.updateAutoinstallers(this.rushConfiguration, autoinstallerNames);

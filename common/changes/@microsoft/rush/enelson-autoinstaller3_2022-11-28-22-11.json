@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "The \"rush install\" and \"rush update\" commands now support \"--autoinstallers\" flag, to apply the installs or updates to your existing autoinstaller folders.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
