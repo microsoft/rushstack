@@ -65,7 +65,7 @@ export class PhaseOperationRunner implements IOperationRunner {
 
       // Delete the files if any were specified
       if (deleteOperations.length) {
-        await deleteFilesAsync(deleteOperations, cleanLogger);
+        await deleteFilesAsync(deleteOperations, cleanLogger.terminal);
       }
 
       cleanLogger.terminal.writeVerboseLine(`Finished clean (${performance.now() - startTime}ms)`);

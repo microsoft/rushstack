@@ -37,7 +37,7 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
     this._actionRunner.defineParameters();
   }
 
-  public get selectedPhases(): Set<HeftPhase> {
+  public get selectedPhases(): ReadonlySet<HeftPhase> {
     if (!this._selectedPhases) {
       this._selectedPhases = Selection.recursiveExpand(
         [this._phase],

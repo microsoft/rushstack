@@ -290,6 +290,102 @@ async function* _waitForSourceChangesAsync(
   }
 }
 
+export function initializeHeft(
+  heftConfiguration: HeftConfiguration,
+  terminal: ITerminal,
+  isVerbose: boolean
+): void {
+  // Ensure that verbose is enabled on the terminal if requested. terminalProvider.verboseEnabled
+  // should already be `true` if the `--debug` flag was provided. This is set in HeftCommandLineParser
+  if (heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
+    heftConfiguration.terminalProvider.verboseEnabled =
+      heftConfiguration.terminalProvider.verboseEnabled || isVerbose;
+  }
+
+  // Log some information about the execution
+  const projectPackageJson: IPackageJson = heftConfiguration.projectPackageJson;
+  terminal.writeVerboseLine(`Project: ${projectPackageJson.name}@${projectPackageJson.version}`);
+  terminal.writeVerboseLine(`Project build folder: ${heftConfiguration.buildFolderPath}`);
+  if (heftConfiguration.rigConfig.rigFound) {
+    terminal.writeVerboseLine(`Rig package: ${heftConfiguration.rigConfig.rigPackageName}`);
+    terminal.writeVerboseLine(`Rig profile: ${heftConfiguration.rigConfig.rigProfile}`);
+  }
+  terminal.writeVerboseLine(`Heft version: ${heftConfiguration.heftPackageJson.version}`);
+  terminal.writeVerboseLine(`Node version: ${process.version}`);
+  terminal.writeVerboseLine('');
+}
+
+export async function runWithLoggingAsync(
+  fn: () => Promise<void>,
+  action: IHeftAction,
+  loggingManager: LoggingManager,
+  terminal: ITerminal,
+  metricsCollector: MetricsCollector,
+  cancellationToken: CancellationToken
+): Promise<void> {
+  const startTime: number = performance.now();
+  loggingManager.resetScopedLoggerErrorsAndWarnings();
+
+  // Execute the action operations
+  let encounteredError: boolean = false;
+  try {
+    await fn();
+  } catch (e) {
+    encounteredError = true;
+    throw e;
+  } finally {
+    const warningStrings: string[] = loggingManager.getWarningStrings();
+    const errorStrings: string[] = loggingManager.getErrorStrings();
+
+    const wasCancelled: boolean = cancellationToken.isCancelled;
+    const encounteredWarnings: boolean = warningStrings.length > 0 || wasCancelled;
+    encounteredError = encounteredError || errorStrings.length > 0;
+
+    await metricsCollector.recordAsync(
+      action.actionName,
+      {
+        encounteredError
+      },
+      action.getParameterStringMap()
+    );
+
+    const duration: number = performance.now() - startTime;
+    const finishedLoggingWord: string = encounteredError ? 'Failed' : wasCancelled ? 'Cancelled' : 'Finished';
+    const finishedLoggingLine: string = `-------------------- ${finishedLoggingWord} (${
+      Math.round(duration) / 1000
+    }s) --------------------`;
+    terminal.writeLine(
+      Colors.bold(
+        (encounteredError ? Colors.red : encounteredWarnings ? Colors.yellow : Colors.green)(
+          finishedLoggingLine
+        )
+      )
+    );
+
+    if (warningStrings.length > 0) {
+      terminal.writeWarningLine(
+        `Encountered ${warningStrings.length} warning${warningStrings.length === 1 ? '' : 's'}`
+      );
+      for (const warningString of warningStrings) {
+        terminal.writeWarningLine(`  ${warningString}`);
+      }
+    }
+
+    if (errorStrings.length > 0) {
+      terminal.writeErrorLine(
+        `Encountered ${errorStrings.length} error${errorStrings.length === 1 ? '' : 's'}`
+      );
+      for (const errorString of errorStrings) {
+        terminal.writeErrorLine(`  ${errorString}`);
+      }
+    }
+  }
+
+  if (encounteredError) {
+    throw new AlreadyReportedError();
+  }
+}
+
 export class HeftActionRunner {
   private readonly _action: IHeftAction;
   private readonly _terminal: ITerminal;
@@ -391,25 +487,7 @@ export class HeftActionRunner {
     // executed, and the session should be populated with the executing parameters.
     this._internalHeftSession.parameterManager = this.parameterManager;
 
-    // Ensure that verbose is enabled on the terminal if requested. terminalProvider.verboseEnabled
-    // should already be `true` if the `--debug` flag was provided. This is set in HeftCommandLineParser
-    if (this._heftConfiguration.terminalProvider instanceof ConsoleTerminalProvider) {
-      this._heftConfiguration.terminalProvider.verboseEnabled =
-        this._heftConfiguration.terminalProvider.verboseEnabled ||
-        this.parameterManager.defaultParameters.verbose;
-    }
-
-    // Log some information about the execution
-    const projectPackageJson: IPackageJson = this._heftConfiguration.projectPackageJson;
-    this._terminal.writeVerboseLine(`Project: ${projectPackageJson.name}@${projectPackageJson.version}`);
-    this._terminal.writeVerboseLine(`Project build folder: ${this._heftConfiguration.buildFolderPath}`);
-    if (this._heftConfiguration.rigConfig.rigFound) {
-      this._terminal.writeVerboseLine(`Rig package: ${this._heftConfiguration.rigConfig.rigPackageName}`);
-      this._terminal.writeVerboseLine(`Rig profile: ${this._heftConfiguration.rigConfig.rigProfile}`);
-    }
-    this._terminal.writeVerboseLine(`Heft version: ${this._heftConfiguration.heftPackageJson.version}`);
-    this._terminal.writeVerboseLine(`Node version: ${process.version}`);
-    this._terminal.writeVerboseLine('');
+    initializeHeft(this._heftConfiguration, this._terminal, this.parameterManager.defaultParameters.verbose);
 
     if (this._action.watch) {
       await this._executeWatchAsync();
@@ -543,88 +621,33 @@ export class HeftActionRunner {
     globChangedFilesFn?: GlobSyncFn,
     fileEventListener?: FileEventListener
   ): Promise<void> {
-    const startTime: number = performance.now();
     cancellationToken = cancellationToken || new CancellationToken();
-    this._loggingManager.resetScopedLoggerErrorsAndWarnings();
-
-    // Execute the action operations
-    let encounteredError: boolean = false;
     const operations: Set<Operation> = this._generateOperations(
       cancellationToken,
       changedFiles,
       globChangedFilesFn,
       fileEventListener
     );
-    try {
-      const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
-        loggingManager: this._loggingManager,
-        terminal: this._terminal,
-        // TODO: Allow for running non-parallelized operations.
-        parallelism: undefined
-      };
-      const executionManager: OperationExecutionManager = new OperationExecutionManager(
-        operations,
-        operationExecutionManagerOptions
-      );
-      await executionManager.executeAsync();
-    } catch (e) {
-      encounteredError = true;
-      throw e;
-    } finally {
-      const warningStrings: string[] = this._loggingManager.getWarningStrings();
-      const errorStrings: string[] = this._loggingManager.getErrorStrings();
+    const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
+      loggingManager: this._loggingManager,
+      terminal: this._terminal,
+      // TODO: Allow for running non-parallelized operations.
+      parallelism: undefined
+    };
+    const executionManager: OperationExecutionManager = new OperationExecutionManager(
+      operations,
+      operationExecutionManagerOptions
+    );
 
-      const wasCancelled: boolean = cancellationToken.isCancelled;
-      const encounteredWarnings: boolean = warningStrings.length > 0 || wasCancelled;
-      encounteredError = encounteredError || errorStrings.length > 0;
-
-      await this._metricsCollector.recordAsync(
-        this._action.actionName,
-        {
-          encounteredError
-        },
-        this._action.getParameterStringMap()
-      );
-
-      const duration: number = performance.now() - startTime;
-      const finishedLoggingWord: string = encounteredError
-        ? 'Failed'
-        : wasCancelled
-        ? 'Cancelled'
-        : 'Finished';
-      const finishedLoggingLine: string = `-------------------- ${finishedLoggingWord} (${
-        Math.round(duration) / 1000
-      }s) --------------------`;
-      this._terminal.writeLine(
-        Colors.bold(
-          (encounteredError ? Colors.red : encounteredWarnings ? Colors.yellow : Colors.green)(
-            finishedLoggingLine
-          )
-        )
-      );
-
-      if (warningStrings.length > 0) {
-        this._terminal.writeWarningLine(
-          `Encountered ${warningStrings.length} warning${warningStrings.length === 1 ? '' : 's'}`
-        );
-        for (const warningString of warningStrings) {
-          this._terminal.writeWarningLine(`  ${warningString}`);
-        }
-      }
-
-      if (errorStrings.length > 0) {
-        this._terminal.writeErrorLine(
-          `Encountered ${errorStrings.length} error${errorStrings.length === 1 ? '' : 's'}`
-        );
-        for (const errorString of errorStrings) {
-          this._terminal.writeErrorLine(`  ${errorString}`);
-        }
-      }
-    }
-
-    if (encounteredError) {
-      throw new AlreadyReportedError();
-    }
+    // Execute the action operations
+    await runWithLoggingAsync(
+      executionManager.executeAsync.bind(executionManager),
+      this._action,
+      this._loggingManager,
+      this._terminal,
+      this._metricsCollector,
+      cancellationToken
+    );
   }
 
   private _generateOperations(
