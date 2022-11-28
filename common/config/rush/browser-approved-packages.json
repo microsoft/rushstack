@@ -64,7 +64,7 @@
     },
     {
       "name": "tslib",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     }
   ]
 }
