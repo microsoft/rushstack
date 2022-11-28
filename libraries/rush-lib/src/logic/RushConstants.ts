@@ -93,7 +93,7 @@ export class RushConstants {
 
   /**
    * The folder name used to store patch files for pnpm
-   * Example: `C:\MyRepo\common\config\pnpm\patches`
+   * Example: `C:\MyRepo\common\config\pnpm-patches`
    * Example: `C:\MyRepo\common\temp\patches`
    */
   public static readonly pnpmPatchesFolderName: string = 'patches';

@@ -381,8 +381,8 @@ export class RushPnpmCommandLineParser {
 
         if (!lodash.isEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
-          const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm/${RushConstants.pnpmPatchesFolderName}`;
-          // Copy (or delete) common\temp\patches\ --> common\pnpm\patches\
+          const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
+          // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
           if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
             FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
             console.log(`Copying ${commonTempPnpmPatchesFolder}`);

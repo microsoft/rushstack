@@ -183,7 +183,7 @@ export abstract class BaseInstallManager {
       console.log(
         colors.red(
           'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
-          'command again without specifying these arguments.'
+            'command again without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
@@ -195,7 +195,7 @@ export abstract class BaseInstallManager {
       console.log(
         colors.red(
           'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
-          'without specifying these arguments.'
+            'without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
@@ -438,7 +438,7 @@ export abstract class BaseInstallManager {
     // Copy the committed patches folder if using pnpm
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
-      const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm/${RushConstants.pnpmPatchesFolderName}`;
+      const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
       if (FileSystem.exists(rushPnpmPatchesFolder)) {
         FileSystem.copyFiles({
           sourcePath: rushPnpmPatchesFolder,
@@ -654,9 +654,9 @@ export abstract class BaseInstallManager {
       ) {
         this._terminal.writeWarningLine(
           'Warning: Your rush.json specifies a pnpmVersion with a known issue ' +
-          'that may cause unintended version selections.' +
-          " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
-          'For details see: https://rushjs.io/link/pnpm-issue-5132'
+            'that may cause unintended version selections.' +
+            " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
+            'For details see: https://rushjs.io/link/pnpm-issue-5132'
         );
       }
       if (
