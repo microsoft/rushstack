@@ -165,7 +165,7 @@ export class TaskOperationRunner implements IOperationRunner {
     // Delete the files if any were specified. Avoid checking the cancellation token here
     // for the same reasons as above.
     if (deleteOperations.length) {
-      fileOperationPromises.push(deleteFilesAsync(deleteOperations, taskSession.logger));
+      fileOperationPromises.push(deleteFilesAsync(deleteOperations, taskSession.logger.terminal));
     }
 
     if (fileOperationPromises.length) {

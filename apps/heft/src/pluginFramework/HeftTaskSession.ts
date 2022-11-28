@@ -8,7 +8,7 @@ import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { IScopedLogger } from './logging/ScopedLogger';
 import type { HeftTask } from './HeftTask';
 import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
-import type { IHeftParameters } from './HeftParameterManager';
+import type { HeftParameterManager, IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
@@ -216,34 +216,43 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
 
 export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
   task: HeftTask;
-  taskParameters: IHeftParameters;
   pluginHost: HeftPluginHost;
 }
 
 export class HeftTaskSession implements IHeftTaskSession {
-  private _pluginHost: HeftPluginHost;
-
   public readonly taskName: string;
   public readonly hooks: IHeftTaskHooks;
-  public readonly parameters: IHeftParameters;
   public readonly cacheFolderPath: string;
   public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
+
+  private readonly _options: IHeftTaskSessionOptions;
+  private _parameters: IHeftParameters | undefined;
 
   /**
    * @internal
    */
   public readonly metricsCollector: MetricsCollector;
 
+  public get parameters(): IHeftParameters {
+    // Delay loading the parameters for the task until they're actually needed
+    if (!this._parameters) {
+      const parameterManager: HeftParameterManager = this._options.internalHeftSession.parameterManager;
+      const task: HeftTask = this._options.task;
+      this._parameters = parameterManager.getParametersForPlugin(task.pluginDefinition);
+    }
+    return this._parameters;
+  }
+
   public constructor(options: IHeftTaskSessionOptions) {
     const {
-      heftConfiguration: { cacheFolderPath: cacheFolder, tempFolderPath: tempFolder },
-      loggingManager,
-      metricsCollector,
+      internalHeftSession: {
+        heftConfiguration: { cacheFolderPath: cacheFolder, tempFolderPath: tempFolder },
+        loggingManager,
+        metricsCollector
+      },
       phase,
-      task,
-      taskParameters,
-      pluginHost
+      task
     } = options;
 
     this.logger = loggingManager.requestScopedLogger(`${phase.phaseName}:${task.taskName}`);
@@ -253,8 +262,6 @@ export class HeftTaskSession implements IHeftTaskSession {
       run: new AsyncParallelHook(['runHookOptions']),
       runIncremental: new AsyncParallelHook(['runIncrementalHookOptions'])
     };
-
-    this.parameters = taskParameters;
 
     // Guranteed to be unique since phases are uniquely named, tasks are uniquely named within
     // phases, and neither can have '.' in their names. We will also use the phase name and
@@ -269,7 +276,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolderPath = path.join(tempFolder, uniqueTaskFolderName);
 
-    this._pluginHost = pluginHost;
+    this._options = options;
   }
 
   public requestAccessToPluginByName<T extends object>(
@@ -277,7 +284,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     pluginToAccessName: string,
     pluginApply: (pluginAccessor: T) => void
   ): void {
-    this._pluginHost.requestAccessToPluginByName(
+    this._options.pluginHost.requestAccessToPluginByName(
       this.taskName,
       pluginToAccessPackage,
       pluginToAccessName,

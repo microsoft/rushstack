@@ -1,0 +1,133 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import {
+  CommandLineAction,
+  type CommandLineFlagParameter,
+  type CommandLineStringListParameter
+} from '@rushstack/ts-command-line';
+import type { ITerminal } from '@rushstack/node-core-library';
+
+import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
+import type { HeftPhase } from '../../pluginFramework/HeftPhase';
+import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
+import type { MetricsCollector } from '../../metrics/MetricsCollector';
+import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
+import type { HeftTaskSession } from '../../pluginFramework/HeftTaskSession';
+import { Constants } from '../../utilities/Constants';
+import { expandPhases } from './RunAction';
+import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
+import { initializeHeft, runWithLoggingAsync } from '../HeftActionRunner';
+import { CancellationToken } from '../../pluginFramework/CancellationToken';
+
+export class CleanAction extends CommandLineAction implements IHeftAction {
+  public readonly watch: boolean = false;
+  private readonly _internalHeftSession: InternalHeftSession;
+  private readonly _terminal: ITerminal;
+  private readonly _metricsCollector: MetricsCollector;
+  private readonly _verboseFlag: CommandLineFlagParameter;
+  private readonly _toParameter: CommandLineStringListParameter;
+  private readonly _toExceptParameter: CommandLineStringListParameter;
+  private readonly _onlyParameter: CommandLineStringListParameter;
+  private readonly _cleanCacheFlag: CommandLineFlagParameter;
+  private _selectedPhases: ReadonlySet<HeftPhase> | undefined;
+
+  public constructor(options: IHeftActionOptions) {
+    super({
+      actionName: 'clean',
+      documentation: 'Clean the project, removing temporary task folders and specified clean paths.',
+      summary: 'Clean the project, removing temporary task folders and specified clean paths.'
+    });
+
+    this._terminal = options.terminal;
+    this._metricsCollector = options.metricsCollector;
+    this._internalHeftSession = options.internalHeftSession;
+
+    this._verboseFlag = this.defineFlagParameter({
+      parameterLongName: Constants.verboseParameterLongName,
+      parameterShortName: Constants.verboseParameterShortName,
+      description: 'If specified, log information useful for debugging.'
+    });
+    this._toParameter = this.defineStringListParameter({
+      parameterLongName: Constants.toParameterLongName,
+      parameterShortName: Constants.toParameterShortName,
+      description: 'The phase to clean to, including all transitive dependencies.',
+      argumentName: 'PHASE'
+    });
+    this._toExceptParameter = this.defineStringListParameter({
+      parameterLongName: Constants.toExceptParameterLongName,
+      parameterShortName: Constants.toExceptParameterShortName,
+      description: 'The phase to clean to (but not include), including all transitive dependencies.',
+      argumentName: 'PHASE'
+    });
+    this._onlyParameter = this.defineStringListParameter({
+      parameterLongName: Constants.onlyParameterLongName,
+      parameterShortName: Constants.onlyParameterShortName,
+      description: 'The phase to clean.',
+      argumentName: 'PHASE'
+    });
+    this._cleanCacheFlag = this.defineFlagParameter({
+      parameterLongName: Constants.cleanCacheParameterLongName,
+      description:
+        'If specified, clean the cache directories in addition to the temp directories and provided ' +
+        'clean operations.'
+    });
+  }
+
+  public get selectedPhases(): ReadonlySet<HeftPhase> {
+    if (!this._selectedPhases) {
+      if (
+        this._onlyParameter.values.length ||
+        this._toParameter.values.length ||
+        this._toExceptParameter.values.length
+      ) {
+        this._selectedPhases = expandPhases(
+          this._onlyParameter,
+          this._toParameter,
+          this._toExceptParameter,
+          this._internalHeftSession,
+          this._terminal
+        );
+      } else {
+        // No selected phases, clean everything
+        this._selectedPhases = this._internalHeftSession.phases;
+      }
+    }
+    return this._selectedPhases;
+  }
+
+  protected async onExecute(): Promise<void> {
+    const { heftConfiguration } = this._internalHeftSession;
+    const cancellationToken: CancellationToken = new CancellationToken();
+
+    initializeHeft(heftConfiguration, this._terminal, this._verboseFlag.value);
+    await runWithLoggingAsync(
+      this._cleanFilesAsync.bind(this),
+      this,
+      this._internalHeftSession.loggingManager,
+      this._terminal,
+      this._metricsCollector,
+      cancellationToken
+    );
+  }
+
+  private async _cleanFilesAsync(): Promise<void> {
+    const deleteOperations: IDeleteOperation[] = [];
+    for (const phase of this.selectedPhases) {
+      // Add the temp folder and cache folder (if requested) for each task
+      const phaseSession: HeftPhaseSession = this._internalHeftSession.getSessionForPhase(phase);
+      for (const task of phase.tasks) {
+        const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
+        deleteOperations.push({ sourcePath: taskSession.tempFolderPath });
+        if (this._cleanCacheFlag.value) {
+          deleteOperations.push({ sourcePath: taskSession.cacheFolderPath });
+        }
+      }
+      // Add the manually specified clean operations
+      deleteOperations.push(...phase.cleanFiles);
+    }
+
+    // Delete the files
+    await deleteFilesAsync(deleteOperations, this._terminal);
+  }
+}

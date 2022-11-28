@@ -132,14 +132,7 @@ export class InternalHeftSession {
   public getSessionForPhase(phase: HeftPhase): HeftPhaseSession {
     let phaseSession: HeftPhaseSession | undefined = this._phaseSessionsByPhase.get(phase);
     if (!phaseSession) {
-      phaseSession = new HeftPhaseSession({
-        debug: this.debug,
-        heftConfiguration: this.heftConfiguration,
-        loggingManager: this.loggingManager,
-        metricsCollector: this.metricsCollector,
-        parameterManager: this.parameterManager,
-        phase
-      });
+      phaseSession = new HeftPhaseSession({ internalHeftSession: this, phase });
       this._phaseSessionsByPhase.set(phase, phaseSession);
     }
     return phaseSession;
