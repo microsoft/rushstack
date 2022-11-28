@@ -435,6 +435,18 @@ export abstract class BaseInstallManager {
       ? crypto.createHash('sha1').update(npmrcText).digest('hex')
       : undefined;
 
+    // Copy the committed patches folder if using pnpm
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+      const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
+      if (FileSystem.exists(rushPnpmPatchesFolder)) {
+        FileSystem.copyFiles({
+          sourcePath: rushPnpmPatchesFolder,
+          destinationPath: commonTempPnpmPatchesFolder
+        });
+      }
+    }
+
     // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
     // Additionally when in workspaces, the shim implements support for common versions.
     if (this.rushConfiguration.packageManager === 'pnpm') {

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add new commands \"rush-pnpm patch\" and \"rush-pnpm patch-commit\" for patching NPM packages when using the PNPM package manager (GitHub #3554)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

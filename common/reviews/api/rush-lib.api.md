@@ -464,6 +464,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalOverrides?: Record<string, string>;
     // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtension" needs to be exported by the entry point index.d.ts
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
+    globalPatchedDependencies?: Record<string, string>;
     // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
     pnpmStore?: PnpmStoreOptions;
@@ -715,7 +716,10 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalNeverBuiltDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
+    get globalPatchedDependencies(): Record<string, string> | undefined;
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
+    // (undocumented)
+    get jsonFilename(): string | undefined;
     // @internal (undocumented)
     static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
@@ -725,6 +729,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly preventManualShrinkwrapChanges: boolean;
     readonly strictPeerDependencies: boolean;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
+    updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
 }
 
@@ -925,6 +930,7 @@ export class RushConstants {
     static readonly pnpmConfigFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
+    static readonly pnpmPatchesFolderName: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
     static readonly projectRushFolderName: string;
     static readonly projectShrinkwrapFilename: string;
