@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "rush-pnpm accepts patch and patch-commit",
+      "comment": "Add new commands \"rush-pnpm patch\" and \"rush-pnpm patch-commit\" for patching NPM packages when using the PNPM package manager (GitHub #3554)",
       "type": "none"
     }
   ],
