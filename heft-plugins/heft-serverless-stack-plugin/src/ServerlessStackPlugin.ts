@@ -206,7 +206,7 @@ export class ServerlessStackPlugin implements IHeftPlugin<IServerlessStackPlugin
     }
 
     throw new Error(
-      `The ${TASK_NAME} task cannot start because the entry point was not found:\n${sstCliEntryPoint}`
+      `The ${TASK_NAME} task cannot start because the entry point was not found: ${sstCliEntryPoint}`
     );
   }
 
