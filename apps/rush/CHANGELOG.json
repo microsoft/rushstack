@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.86.0",
+      "tag": "@microsoft/rush_v5.86.0",
+      "date": "Tue, 29 Nov 2022 00:10:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new commands \"rush-pnpm patch\" and \"rush-pnpm patch-commit\" for patching NPM packages when using the PNPM package manager (GitHub #3554)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.85.1",
       "tag": "@microsoft/rush_v5.85.1",
       "date": "Fri, 25 Nov 2022 21:51:32 GMT",

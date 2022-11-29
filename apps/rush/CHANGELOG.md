@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 25 Nov 2022 21:51:32 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Nov 2022 00:10:20 GMT and should not be manually modified.
+
+## 5.86.0
+Tue, 29 Nov 2022 00:10:20 GMT
+
+### Updates
+
+- Add new commands "rush-pnpm patch" and "rush-pnpm patch-commit" for patching NPM packages when using the PNPM package manager (GitHub #3554)
 
 ## 5.85.1
 Fri, 25 Nov 2022 21:51:32 GMT
@@ -24,7 +31,7 @@ Tue, 22 Nov 2022 23:24:56 GMT
 ### Updates
 
 - Add a "dependsOnEnvVars" configuration option to operations in rush-project.json. The variables specified in this option are included in the cache key hash calculation.
-- The "rush change" user prompts can now be customized.
+- The "rush setup" user prompts can now be customized.
 - Make autoinstaller logging respect the `--quiet` parameter.
 - Add project filtering to the upgrade-interactive UI prompt. Also increases the default page size for project lists in UI to 12.
 - Add a feature (behind the "cleanInstallAfterNpmrcChanges" experiment) that will cause a clean install to be performed if the common/temp/.npmrc file has changed since the last install.
