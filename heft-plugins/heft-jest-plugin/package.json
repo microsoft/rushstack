@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-jest-plugin",
-  "version": "0.3.45",
+  "version": "0.4.0",
   "description": "Heft plugin for Jest",
   "repository": {
     "type": "git",
