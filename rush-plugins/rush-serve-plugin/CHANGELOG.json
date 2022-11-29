@@ -2,6 +2,21 @@
   "name": "@rushstack/rush-serve-plugin",
   "entries": [
     {
+      "version": "0.3.6",
+      "tag": "@rushstack/rush-serve-plugin_v0.3.6",
+      "date": "Tue, 29 Nov 2022 01:16:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.5",
       "tag": "@rushstack/rush-serve-plugin_v0.3.5",
       "date": "Fri, 18 Nov 2022 00:55:17 GMT",
