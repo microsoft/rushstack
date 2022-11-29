@@ -331,6 +331,14 @@ export class RushPnpmCommandLineParser {
             );
             throw new AlreadyReportedError();
           }
+          // patch-commit internally calls installation under cwd instead of the common/temp folder
+          // It throws missing package.json error, so in this case, we need to set the dir to the common/temp folder here
+          if (pnpmArgs.indexOf('--dir') < 0 && pnpmArgs.indexOf('-C') < 0) {
+            if (!FileSystem.exists(`${process.cwd()}/package.json`)) {
+              pnpmArgs.push('--dir');
+              pnpmArgs.push(this._rushConfiguration.commonTempFolder);
+            }
+          }
           break;
         }
 
