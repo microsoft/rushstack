@@ -71,12 +71,7 @@ export class ServerlessStackPlugin implements IHeftPlugin<IServerlessStackPlugin
       );
     }
 
-    const sstCliEntryPoint: string = path.join(sstCliPackagePath, 'bin/scripts.js');
-    if (!FileSystem.exists(sstCliEntryPoint)) {
-      throw new Error(
-        `The ${TASK_NAME} task cannot start because the entry point was not found:\n` + sstCliEntryPoint
-      );
-    }
+    const sstCliEntryPoint: string = this._getSstCliEntryPoint(sstCliPackagePath);
 
     this._logger.terminal.writeVerboseLine('Found SST package in' + sstCliPackagePath);
 
@@ -195,6 +190,24 @@ export class ServerlessStackPlugin implements IHeftPlugin<IServerlessStackPlugin
     if (lastLine !== '') {
       write(lastLine);
     }
+  }
+
+  private _getSstCliEntryPoint(sstCliPackagePath: string): string {
+    // Entry point for SST prior to v1.2.0
+    let sstCliEntryPoint: string = path.join(sstCliPackagePath, 'bin/scripts.js');
+    if (FileSystem.exists(sstCliEntryPoint)) {
+      return sstCliEntryPoint;
+    }
+
+    // Entry point for SST v1.2.0 and later
+    sstCliEntryPoint = path.join(sstCliPackagePath, 'bin/scripts.mjs');
+    if (FileSystem.exists(sstCliEntryPoint)) {
+      return sstCliEntryPoint;
+    }
+
+    throw new Error(
+      `The ${TASK_NAME} task cannot start because the entry point was not found:\n${sstCliEntryPoint}`
+    );
   }
 
   // The SST CLI emits a script "<project folder>/.build/run.js" with a bunch of phantom dependencies
