@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-serverless-stack-plugin",
+      "comment": "Add support for Serverless-Stack 1.2.0 and later versions",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-serverless-stack-plugin"
+}
