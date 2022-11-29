@@ -183,6 +183,86 @@
       "preserveMemberOrder": false,
       "members": [
         {
+          "kind": "Class",
+          "canonicalReference": "api-documenter-test!AbstractClass:class",
+          "docComment": "/**\n * Some abstract class with abstract members.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare abstract class AbstractClass "
+            }
+          ],
+          "fileUrlPath": "src/AbstractClass.ts",
+          "releaseTag": "Public",
+          "isAbstract": true,
+          "name": "AbstractClass",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "Method",
+              "canonicalReference": "api-documenter-test!AbstractClass#method:member(1)",
+              "docComment": "/**\n * Some abstract method.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "abstract method(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "isProtected": false,
+              "overloadIndex": 1,
+              "parameters": [],
+              "isOptional": false,
+              "isAbstract": true,
+              "name": "method"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "api-documenter-test!AbstractClass#property:member",
+              "docComment": "/**\n * Some abstract property.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "protected abstract property: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "property",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": true,
+              "isAbstract": true
+            }
+          ],
+          "implementsTokenRanges": []
+        },
+        {
           "kind": "Interface",
           "canonicalReference": "api-documenter-test!Constraint:interface",
           "docComment": "/**\n * Type parameter constraint used by test case below.\n *\n * @public\n */\n",

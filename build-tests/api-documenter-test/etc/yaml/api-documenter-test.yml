@@ -18,6 +18,7 @@ interfaces:
   - 'api-documenter-test!IDocInterface6:interface'
   - 'api-documenter-test!IDocInterface7:interface'
 classes:
+  - 'api-documenter-test!AbstractClass:class'
   - 'api-documenter-test!DecoratorExample:class'
   - 'api-documenter-test!DocBaseClass:class'
   - 'api-documenter-test!DocClass1:class'
