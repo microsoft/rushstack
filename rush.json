@@ -130,6 +130,7 @@
      * or you could just have a single category called "default".
      */
     "reviewCategories": [
+      "vscode-extensions", // projects used in the VSCode Extension
       "libraries", // library projects that ship
       "tests" // non-shipping test projects
     ],
@@ -1001,6 +1002,18 @@
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+
+    // "vscode-extensions" folder (alphabetical order)
+    {
+      "packageName": "rush-vscode-command-webview",
+      "projectFolder": "vscode-extensions/rush-vscode-command-webview",
+      "reviewCategory": "vscode-extensions"
+    },
+    {
+      "packageName": "rushstack",
+      "projectFolder": "vscode-extensions/rush-vscode-extension",
+      "reviewCategory": "vscode-extensions"
     },
 
     // "webpack" folder (alphabetical order)

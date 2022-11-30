@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@fluentui/react",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@lifaon/path",
@@ -12,7 +12,15 @@
     },
     {
       "name": "@reduxjs/toolkit",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/vscode-extensions-rush-command-webview",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "axios",
@@ -28,19 +36,27 @@
     },
     {
       "name": "react",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "react-dom",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "react-hook-form",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "react-redux",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "redux",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "rush-vscode-command-webview",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "rxjs",
@@ -48,7 +64,7 @@
     },
     {
       "name": "tslib",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     }
   ]
 }

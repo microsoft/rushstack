@@ -1,0 +1,45 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"path": "vscode-extensions/rush-vscode-extension/",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build - vscode-extensions/rush-vscode-extension",
+			"detail": "heft build --clean"
+		},
+		{
+			"type": "npm",
+			"script": "build:watch",
+			"path": "vscode-extensions/rush-vscode-extension/",
+			"group": "build",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "never",
+			},
+			"problemMatcher": [
+				{
+					"owner": "heft",
+					"fileLocation": ["relative", "${workspaceFolder}"],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": "File change detected\\. Starting incremental compilation\\.\\.\\.",
+						"endsPattern": "Found\\s+\\d+\\s+errors\\. Watching for file changes\\."
+					},
+					"pattern": {
+						"regexp": "^(Error):\\s+(.*):(\\d+):(\\d+)\\s+-\\s+(.*)$",
+						"file": 2,
+						"line": 3,
+						"column": 4,
+						"severity": 1,
+						"message": 5,
+					}
+				}
+			],
+			"label": "npm: build:watch - vscode-extensions/rush-vscode-extension",
+			"detail": "heft build --watch"
+		}
+	]
+}

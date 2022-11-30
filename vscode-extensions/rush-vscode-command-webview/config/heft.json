@@ -1,0 +1,14 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+
+  "eventActions": [
+    {
+      "actionKind": "deleteGlobs",
+      "actionId": "clean-folders",
+      "heftEvent": "clean",
+      "globsToDelete": ["dist", "lib"]
+    }
+  ],
+
+  "heftPlugins": [{ "plugin": "@rushstack/heft-webpack5-plugin" }]
+}
