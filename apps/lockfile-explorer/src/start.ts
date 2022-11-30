@@ -49,6 +49,10 @@ app.get('/', (req: express.Request, res: express.Response) => {
   res.send(doc);
 });
 
+app.get('/api/health', (req: express.Request, res: express.Response) => {
+  res.status(200).send();
+});
+
 app.post(
   '/api/package-json',
   (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {

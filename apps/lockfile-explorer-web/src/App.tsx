@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './App.scss';
 import { readLockfile } from './parsing/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';
@@ -12,6 +12,8 @@ import { LockfileEntryDetailsView } from './containers/LockfileEntryDetailsView'
 import { BookmarksSidebar } from './containers/BookmarksSidebar';
 import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
 import { LogoPanel } from './containers/LogoPanel';
+import { checkAlive } from './parsing/getPackageFiles';
+import { ConnectionModal } from './components/ConnectionModal';
 
 /**
  * This React component renders the application page.
@@ -30,23 +32,26 @@ export const App = (): JSX.Element => {
   }, []);
 
   return (
-    <div className={styles.AppContainer}>
-      <div className="ms-Grid" dir="ltr">
-        <div className="ms-Grid-row">
-          <div className={`ms-Grid-col ms-sm3 ${styles.BodyContainer}`}>
-            <LockfileViewer />
-          </div>
-          <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
-            <SelectedEntryPreview />
-            <PackageJsonViewer />
-            <LockfileEntryDetailsView />
-          </div>
-          <div className={`ms-Grid-col ms-sm2 ${styles.BodyContainer}`}>
-            <LogoPanel />
-            <BookmarksSidebar />
+    <>
+      <ConnectionModal />
+      <div className={styles.AppContainer}>
+        <div className="ms-Grid" dir="ltr">
+          <div className="ms-Grid-row">
+            <div className={`ms-Grid-col ms-sm3 ${styles.BodyContainer}`}>
+              <LockfileViewer />
+            </div>
+            <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
+              <SelectedEntryPreview />
+              <PackageJsonViewer />
+              <LockfileEntryDetailsView />
+            </div>
+            <div className={`ms-Grid-col ms-sm2 ${styles.BodyContainer}`}>
+              <LogoPanel />
+              <BookmarksSidebar />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
