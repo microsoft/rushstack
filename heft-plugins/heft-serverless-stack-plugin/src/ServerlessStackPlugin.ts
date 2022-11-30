@@ -97,17 +97,7 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
       return;
     }
 
-    const sstCliEntryPoint: string = path.join(sstCliPackagePath, 'bin/scripts.js');
-    const sstCliEntryPointExists: boolean = await FileSystem.existsAsync(sstCliEntryPoint);
-    if (!sstCliEntryPointExists) {
-      this._logger.emitError(
-        new Error(
-          `The ${options.taskSession.taskName} task cannot start because the entry point was not found` +
-            `at "${sstCliEntryPoint}".`
-        )
-      );
-      return;
-    }
+    const sstCliEntryPoint: string = this._getSstCliEntryPoint(sstCliPackagePath);
 
     this._logger.terminal.writeVerboseLine('Found SST package in' + sstCliPackagePath);
 
@@ -186,6 +176,24 @@ export default class ServerlessStackPlugin implements IHeftTaskPlugin {
     if (lastLine !== '') {
       write(lastLine);
     }
+  }
+
+  private _getSstCliEntryPoint(sstCliPackagePath: string): string {
+    // Entry point for SST prior to v1.2.0
+    let sstCliEntryPoint: string = path.join(sstCliPackagePath, 'bin/scripts.js');
+    if (FileSystem.exists(sstCliEntryPoint)) {
+      return sstCliEntryPoint;
+    }
+
+    // Entry point for SST v1.2.0 and later
+    sstCliEntryPoint = path.join(sstCliPackagePath, 'bin/scripts.mjs');
+    if (FileSystem.exists(sstCliEntryPoint)) {
+      return sstCliEntryPoint;
+    }
+
+    throw new Error(
+      `${PLUGIN_NAME} task cannot start because the entry point was not found: ${sstCliEntryPoint}`
+    );
   }
 
   // The SST CLI emits a script "<project folder>/.build/run.js" with a bunch of phantom dependencies

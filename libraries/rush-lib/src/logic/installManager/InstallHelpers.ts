@@ -64,6 +64,9 @@ export class InstallHelpers {
           pnpmOptions.globalAllowedDeprecatedVersions
         );
       }
+      if (pnpmOptions.globalPatchedDependencies) {
+        lodash.set(commonPackageJson, 'pnpm.patchedDependencies', pnpmOptions.globalPatchedDependencies);
+      }
       if (pnpmOptions.unsupportedPackageJsonSettings) {
         lodash.merge(commonPackageJson, pnpmOptions.unsupportedPackageJsonSettings);
       }

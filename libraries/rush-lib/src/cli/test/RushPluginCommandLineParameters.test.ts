@@ -3,7 +3,7 @@
 import './mockRushCommandLineParser';
 
 import path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, LockFile } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
@@ -35,6 +35,14 @@ describe('PluginCommandLineParameters', () => {
       });
     }
   };
+
+  beforeAll(() => {
+    // Ignore issues with parallel Rush processes
+    jest.spyOn(LockFile, 'tryAcquire').mockImplementation(() => {
+      return {} as LockFile;
+    });
+  });
+
   beforeEach(() => {
     // ts-command-line calls process.exit() which interferes with Jest
     jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
@@ -56,6 +64,7 @@ describe('PluginCommandLineParameters', () => {
 
   afterAll(() => {
     FileSystem.deleteFolder(path.resolve(autoinstallerRootPath, 'node_modules'));
+    jest.restoreAllMocks();
   });
 
   it('should parse string parameters correctly', async () => {
@@ -69,6 +78,7 @@ describe('PluginCommandLineParameters', () => {
 
     expect(action?.getStringParameter('--mystring').value).toStrictEqual('123');
   });
+
   it('should parse integer parameters correctly', async () => {
     mockAutoInstallerInstallation();
     mockProcessArgv(['fake-node', 'fake-rush', 'cmd-parameters-test', '--myinteger', '1']);
@@ -80,6 +90,7 @@ describe('PluginCommandLineParameters', () => {
 
     expect(action?.getIntegerParameter('--myinteger').value).toStrictEqual(1);
   });
+
   it('should parse flag parameters correctly', async () => {
     mockAutoInstallerInstallation();
     mockProcessArgv(['fake-node', 'fake-rush', 'cmd-parameters-test', '--myflag']);
@@ -91,6 +102,7 @@ describe('PluginCommandLineParameters', () => {
 
     expect(action?.getFlagParameter('--myflag').value).toStrictEqual(true);
   });
+
   it('should parse choice parameters correctly', async () => {
     mockAutoInstallerInstallation();
     mockProcessArgv(['fake-node', 'fake-rush', 'cmd-parameters-test', '--mychoice', 'a']);
@@ -102,6 +114,7 @@ describe('PluginCommandLineParameters', () => {
 
     expect(action?.getChoiceParameter('--mychoice').value).toStrictEqual('a');
   });
+
   it('should parse string list parameters correctly', async () => {
     mockAutoInstallerInstallation();
     mockProcessArgv([
@@ -121,6 +134,7 @@ describe('PluginCommandLineParameters', () => {
 
     expect(action?.getStringListParameter('--mystringlist').values).toStrictEqual(['str1', 'str2']);
   });
+
   it('should parse integer list parameters correctly', async () => {
     mockAutoInstallerInstallation();
     mockProcessArgv([
@@ -139,6 +153,7 @@ describe('PluginCommandLineParameters', () => {
     const action = parser.actions.find((ac) => ac.actionName === 'cmd-parameters-test');
     expect(action?.getIntegerListParameter('--myintegerlist').values).toStrictEqual([1, 2]);
   });
+
   it('should parse choice list parameters correctly', async () => {
     mockAutoInstallerInstallation();
     mockProcessArgv([

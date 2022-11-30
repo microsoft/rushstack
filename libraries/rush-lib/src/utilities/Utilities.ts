@@ -487,8 +487,11 @@ export class Utilities {
    * home directory.
    *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
+   *
+   * @returns
+   * The text of the the .npmrc.
    */
-  public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
+  public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): string {
     console.log(`Transforming ${sourceNpmrcPath}`); // Verbose
     console.log(`  --> "${targetNpmrcPath}"`);
     let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
@@ -532,7 +535,10 @@ export class Utilities {
       }
     }
 
-    FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+    const combinedNpmrc: string = resultLines.join(os.EOL);
+    FileSystem.writeFile(targetNpmrcPath, combinedNpmrc);
+
+    return combinedNpmrc;
   }
 
   /**
@@ -558,12 +564,15 @@ export class Utilities {
    * If the source .npmrc file not exist, then syncNpmrc() will delete an .npmrc that is found in the target folder.
    *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
+   *
+   * @returns
+   * The text of the the synced .npmrc, if one exists. If one does not exist, then undefined is returned.
    */
   public static syncNpmrc(
     sourceNpmrcFolder: string,
     targetNpmrcFolder: string,
     useNpmrcPublish?: boolean
-  ): void {
+  ): string | undefined {
     const sourceNpmrcPath: string = path.join(
       sourceNpmrcFolder,
       !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
@@ -571,7 +580,7 @@ export class Utilities {
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
       if (FileSystem.exists(sourceNpmrcPath)) {
-        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
+        return Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
       } else if (FileSystem.exists(targetNpmrcPath)) {
         // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
         console.log(`Deleting ${targetNpmrcPath}`); // Verbose

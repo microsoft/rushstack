@@ -68,7 +68,10 @@ export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
 
-export { LastInstallFlag as _LastInstallFlag } from './api/LastInstallFlag';
+export {
+  LastInstallFlag as _LastInstallFlag,
+  ILockfileValidityCheckOptions as _ILockfileValidityCheckOptions
+} from './api/LastInstallFlag';
 
 export {
   VersionPolicyDefinitionName,

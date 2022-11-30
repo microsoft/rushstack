@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/heft-jest-plugin_v0.4.0",
+      "date": "Tue, 29 Nov 2022 01:16:49 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove a postinstall step that patches Jest in-place. This is better achieved with a PNPM patch. See https://github.com/microsoft/rushstack/pull/3790 for more information."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.45",
       "tag": "@rushstack/heft-jest-plugin_v0.3.45",
       "date": "Tue, 08 Nov 2022 01:20:55 GMT",

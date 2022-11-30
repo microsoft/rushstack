@@ -1,6 +1,11 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Fri, 18 Nov 2022 00:55:17 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Nov 2022 01:16:49 GMT and should not be manually modified.
+
+## 1.2.6
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
 
 ## 1.2.5
 Fri, 18 Nov 2022 00:55:17 GMT

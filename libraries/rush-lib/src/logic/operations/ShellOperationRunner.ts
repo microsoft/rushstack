@@ -444,10 +444,17 @@ export class ShellOperationRunner implements IOperationRunner {
               const additionalProjectOutputFilePaths: ReadonlyArray<string> = [
                 OperationStateFile.getFilenameRelativeToProjectRoot(this._phase)
               ];
+              const additionalContext: Record<string, string> = {};
+              if (operationSettings.dependsOnEnvVars) {
+                for (const varName of operationSettings.dependsOnEnvVars) {
+                  additionalContext['$' + varName] = process.env[varName] || '';
+                }
+              }
               this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
                 projectConfiguration,
                 projectOutputFolderNames,
                 additionalProjectOutputFilePaths,
+                additionalContext,
                 buildCacheConfiguration: this._buildCacheConfiguration,
                 terminal,
                 command: this._commandToRun,

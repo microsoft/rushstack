@@ -3,14 +3,18 @@
 exports[`AzureStorageBuildCacheProvider Has an expected cached credential name (write allowed) 1`] = `
 Array [
   "azure-blob-storage|AzurePublicCloud|storage-account|container-name|cacheWriteAllowed",
-  "credential",
+  Object {
+    "credential": "credential",
+  },
 ]
 `;
 
 exports[`AzureStorageBuildCacheProvider Has an expected cached credential name (write not allowed) 1`] = `
 Array [
   "azure-blob-storage|AzurePublicCloud|storage-account|container-name",
-  "credential",
+  Object {
+    "credential": "credential",
+  },
 ]
 `;
 
