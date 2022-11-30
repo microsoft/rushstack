@@ -34,7 +34,7 @@ import {
   type IOperationExecutionManagerOptions
 } from '../operations/OperationExecutionManager';
 import { Operation } from '../operations/Operation';
-import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
+import { TaskOperationRunner, runAndMeasureAsync } from '../operations/runners/TaskOperationRunner';
 import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
 import { LifecycleOperationRunner } from '../operations/runners/LifecycleOperationRunner';
 import type { HeftPhase } from '../pluginFramework/HeftPhase';
@@ -82,14 +82,17 @@ async function* _waitForSourceChangesAsync(
 
   async function ingestFileChangesAsync(
     filePaths: Iterable<string>,
-    ignoreForbidden: boolean = false
+    ignoreForbidden: boolean = false,
+    skipIgnoreCheck: boolean = false
   ): Promise<void> {
     // We can short-circuit the call to git if we already know all files have been seen.
     const unseenFilePaths: Set<string> = Selection.difference(filePaths, seenFilePaths);
     if (unseenFilePaths.size) {
       // Determine which files are ignored or otherwise and stash them away for later.
       // We can perform this check in one call to git to save time.
-      const unseenIgnoredFilePaths: Set<string> = await git.checkIgnore(unseenFilePaths);
+      const unseenIgnoredFilePaths: Set<string> = skipIgnoreCheck
+        ? new Set()
+        : await git.checkIgnore(unseenFilePaths);
       const unseenSourceFilePaths: Set<string> = Selection.difference(
         unseenFilePaths,
         unseenIgnoredFilePaths
@@ -191,30 +194,11 @@ async function* _waitForSourceChangesAsync(
     });
   }
 
-  // Before we enter the main loop, hydrate initial state and yield the changes.
-  const initialFilePaths: Set<string> = new Set();
-  const watchedDirectories: Map<string, string[]> = new Map(Object.entries(watcher.getWatched()));
-  for (const [directory, childNames] of watchedDirectories) {
-    // Avoid directories above the watch path, since we only care about the immediate children.
-    if (directory.startsWith('..')) {
-      continue;
-    }
-
-    // Resolve absolute paths to the files
-    const isRootDirectory: boolean = directory === '.';
-    for (const childName of childNames) {
-      const childRelativePath: string = isRootDirectory ? childName : `${directory}${path.sep}${childName}`;
-      if (!watchedDirectories.has(childRelativePath)) {
-        // This is a file, not a directory. Add it to the initial file paths.
-        const childAbsolutePath: string = `${watcher.options.cwd!}${path.sep}${childRelativePath}`;
-        initialFilePaths.add(childAbsolutePath);
-      }
-    }
-  }
-
   // Ingest the initial files and set their state. We want to ignore forbidden files
-  // since they aren't being "changed", they're just being watched.
-  await ingestFileChangesAsync(initialFilePaths, /*ignoreForbidden:*/ true);
+  // since they aren't being "changed", they're just being watched. We can also skip
+  // the gitignore check, since we know that all initial files are unignored.
+  const initialFilePaths: Set<string> = await git.getUnignoredFilesAsync();
+  await ingestFileChangesAsync(initialFilePaths, /*ignoreForbidden:*/ true, /*skipIgnoreCheck:*/ true);
   for (const filePath of initialFilePaths) {
     const state: IChangedFileState = {
       ...generateChangeState(filePath),
@@ -497,34 +481,39 @@ export class HeftActionRunner {
   }
 
   private async _executeWatchAsync(): Promise<void> {
-    const chokidarPkg: typeof chokidar = await this._ensureChokidarLoadedAsync();
+    const terminal: ITerminal = this._terminal;
+    const watcherCwd: string = this._heftConfiguration.buildFolderPath;
 
-    // Create a watcher for the build folder which will return the initial state
-    const watcherReadyPromise: Promise<chokidar.FSWatcher> = new Promise(
-      (resolve: (watcher: chokidar.FSWatcher) => void, reject: (error: Error) => void) => {
-        const watcher: chokidar.FSWatcher = chokidarPkg.watch(this._heftConfiguration.buildFolderPath, {
-          persistent: true,
-          // All watcher-returned file paths will be relative to the build folder. Chokidar on Windows
-          // has some issues with watching when not using a cwd, causing the 'ready' event to never be
-          // emitted, so we will have to manually resolve the absolute paths in the change handler.
-          cwd: this._heftConfiguration.buildFolderPath,
-          // Ignore "node_modules" files and known-unimportant files
-          ignored: ['node_modules/**'],
-          // We will use the initial state to build a list of all watched files
-          ignoreInitial: false,
-          // Debounce file write events within 100 ms of each other
-          awaitWriteFinish: {
-            stabilityThreshold: 100
+    const watcher: chokidar.FSWatcher = await runAndMeasureAsync(
+      async () => {
+        const chokidarPkg: typeof chokidar = await this._ensureChokidarLoadedAsync();
+        const watcherReadyPromise: Promise<chokidar.FSWatcher> = new Promise(
+          (resolve: (watcher: chokidar.FSWatcher) => void, reject: (error: Error) => void) => {
+            const watcher: chokidar.FSWatcher = chokidarPkg.watch(this._heftConfiguration.buildFolderPath, {
+              persistent: true,
+              // All watcher-returned file paths will be relative to the build folder. Chokidar on Windows
+              // has some issues with watching when not using a cwd, causing the 'ready' event to never be
+              // emitted, so we will have to manually resolve the absolute paths in the change handler.
+              cwd: watcherCwd,
+              // Ignore "node_modules" files and known-unimportant files
+              ignored: ['node_modules/**'],
+              // Debounce file write events within 100 ms of each other
+              awaitWriteFinish: {
+                stabilityThreshold: 100
+              }
+            });
+            // Remove all listeners once the initial state is returned
+            watcher.on('ready', () => resolve(watcher.removeAllListeners()));
+            watcher.on('error', (error: Error) => reject(error));
           }
-        });
-        // Remove all listeners once the initial state is returned
-        watcher.on('ready', () => resolve(watcher.removeAllListeners()));
-        watcher.on('error', (error: Error) => reject(error));
-      }
+        );
+        return await watcherReadyPromise;
+      },
+      () => `Starting watcher at path "${watcherCwd}"`,
+      () => 'Finished starting watcher',
+      terminal.writeVerboseLine.bind(terminal)
     );
 
-    const terminal: ITerminal = this._terminal;
-    const watcher: chokidar.FSWatcher = await watcherReadyPromise;
     const git: GitUtilities = new GitUtilities(this._heftConfiguration.buildFolderPath);
     const changedFiles: Map<string, IChangedFileState> = new Map();
     const staticFileSystemAdapter: StaticFileSystemAdapter = new StaticFileSystemAdapter();
@@ -541,16 +530,24 @@ export class HeftActionRunner {
     // Create the async iterator. This will yield void when a changed source file is encountered, giving
     // us a chance to kill the current build and start a new one. Await the first iteration, since the
     // first iteration should be for the initial state.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const iterator: AsyncIterator<void> = _waitForSourceChangesAsync({
-      terminal,
-      watcher,
-      git,
-      changedFiles,
-      staticFileSystemAdapter,
-      watchOptions: this._internalHeftSession.watchOptions
-    });
-    await iterator.next();
+    const iterator: AsyncIterator<void> = await runAndMeasureAsync(
+      async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const iterator: AsyncIterator<void> = _waitForSourceChangesAsync({
+          terminal,
+          watcher,
+          git,
+          changedFiles,
+          staticFileSystemAdapter,
+          watchOptions: this._internalHeftSession.watchOptions
+        });
+        await iterator.next();
+        return iterator;
+      },
+      () => 'Initializing watcher state',
+      () => 'Finished initializing watcher state',
+      terminal.writeVerboseLine.bind(terminal)
+    );
 
     // The file event listener is used to allow task operations to wait for a file change before
     // progressing to the next task.

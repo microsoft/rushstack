@@ -36,6 +36,20 @@ export interface ITaskOperationRunnerOptions {
   fileEventListener?: FileEventListener;
 }
 
+export async function runAndMeasureAsync<T = void>(
+  fn: () => Promise<T>,
+  startMessageFn: () => string,
+  endMessageFn: () => string,
+  logFn: (message: string) => void
+): Promise<T> {
+  logFn(startMessageFn());
+  const startTime: number = performance.now();
+  const result: T = await fn();
+  const endTime: number = performance.now();
+  logFn(`${endMessageFn()} (${endTime - startTime}ms)`);
+  return result;
+}
+
 export class TaskOperationRunner implements IOperationRunner {
   private readonly _options: ITaskOperationRunnerOptions;
 
@@ -82,135 +96,140 @@ export class TaskOperationRunner implements IOperationRunner {
       return OperationStatus.NoOp;
     }
 
-    const startTime: number = performance.now();
-    terminal.writeVerboseLine(`Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`);
-
-    // Create the options and provide a utility method to obtain paths to copy
-    const copyOperations: ICopyOperation[] = [];
-    const incrementalCopyOperations: IIncrementalCopyOperation[] = [];
-    const deleteOperations: IDeleteOperation[] = [];
-    const runHookOptions: IHeftTaskRunHookOptions = {
-      addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
-        copyOperations.push(...copyOperationsToAdd),
-      addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
-        deleteOperations.push(...deleteOperationsToAdd)
-    };
-
-    // Run the plugin run hook
-    try {
-      if (shouldRunIncremental) {
-        const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
-          ...runHookOptions,
-          addCopyOperations: (...incrementalCopyOperationsToAdd: IIncrementalCopyOperation[]) => {
-            for (const incrementalCopyOperation of incrementalCopyOperationsToAdd) {
-              if (incrementalCopyOperation.onlyIfChanged) {
-                incrementalCopyOperations.push(incrementalCopyOperation);
-              } else {
-                copyOperations.push(incrementalCopyOperation);
-              }
-            }
-          },
-          globChangedFiles: globChangedFilesFn!,
-          changedFiles: changedFiles!,
-          cancellationToken: cancellationToken!
+    await runAndMeasureAsync(
+      async () => {
+        // Create the options and provide a utility method to obtain paths to copy
+        const copyOperations: ICopyOperation[] = [];
+        const incrementalCopyOperations: IIncrementalCopyOperation[] = [];
+        const deleteOperations: IDeleteOperation[] = [];
+        const runHookOptions: IHeftTaskRunHookOptions = {
+          addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
+            copyOperations.push(...copyOperationsToAdd),
+          addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
+            deleteOperations.push(...deleteOperationsToAdd)
         };
-        await hooks.runIncremental.promise(runIncrementalHookOptions);
-      } else {
-        await hooks.run.promise(runHookOptions);
-      }
-    } catch (e) {
-      // Log out using the task logger, and return an error status
-      if (!(e instanceof AlreadyReportedError)) {
-        taskSession.logger.emitError(e as Error);
-      }
-      return OperationStatus.Failure;
-    }
 
-    const fileOperationPromises: Promise<void>[] = [];
+        // Run the plugin run hook
+        try {
+          if (shouldRunIncremental) {
+            const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
+              ...runHookOptions,
+              addCopyOperations: (...incrementalCopyOperationsToAdd: IIncrementalCopyOperation[]) => {
+                for (const incrementalCopyOperation of incrementalCopyOperationsToAdd) {
+                  if (incrementalCopyOperation.onlyIfChanged) {
+                    incrementalCopyOperations.push(incrementalCopyOperation);
+                  } else {
+                    copyOperations.push(incrementalCopyOperation);
+                  }
+                }
+              },
+              globChangedFiles: globChangedFilesFn!,
+              changedFiles: changedFiles!,
+              cancellationToken: cancellationToken!
+            };
+            await hooks.runIncremental.promise(runIncrementalHookOptions);
+          } else {
+            await hooks.run.promise(runHookOptions);
+          }
+        } catch (e) {
+          // Log out using the task logger, and return an error status
+          if (!(e instanceof AlreadyReportedError)) {
+            taskSession.logger.emitError(e as Error);
+          }
+          return OperationStatus.Failure;
+        }
 
-    const globExistingChangedFilesFn: GlobSyncFn = (
-      pattern: string | string[],
-      options?: IPartialGlobOptions
-    ) => {
-      // We expect specific options to be passed. If they aren't the provided options, we may not
-      // find the changed files in the changedFiles map.
-      if (!options?.absolute) {
-        throw new InternalError('Options provided to globExistingChangedFilesFn were not expected.');
-      }
+        const fileOperationPromises: Promise<void>[] = [];
 
-      const globbedChangedFiles: string[] = globChangedFilesFn!(pattern, options);
+        const globExistingChangedFilesFn: GlobSyncFn = (
+          pattern: string | string[],
+          options?: IPartialGlobOptions
+        ) => {
+          // We expect specific options to be passed. If they aren't the provided options, we may not
+          // find the changed files in the changedFiles map.
+          if (!options?.absolute) {
+            throw new InternalError('Options provided to globExistingChangedFilesFn were not expected.');
+          }
 
-      // Filter out deletes, since we can't copy or delete an already deleted file
-      return globbedChangedFiles.filter((changedFile: string) => {
-        const changedFileState: IChangedFileState | undefined = changedFiles!.get(changedFile);
-        return changedFileState && changedFileState.version !== undefined;
-      });
-    };
+          const globbedChangedFiles: string[] = globChangedFilesFn!(pattern, options);
 
-    // Copy the files if any were specified. Avoid checking the cancellation token here
-    // since plugins may be tracking state changes and would have already considered
-    // added copy operations as "processed" during hook execution.
-    if (copyOperations.length) {
-      fileOperationPromises.push(copyFilesAsync(copyOperations, taskSession.logger));
-    }
+          // Filter out deletes, since we can't copy or delete an already deleted file
+          return globbedChangedFiles.filter((changedFile: string) => {
+            const changedFileState: IChangedFileState | undefined = changedFiles!.get(changedFile);
+            return changedFileState && changedFileState.version !== undefined;
+          });
+        };
 
-    // Also incrementally copy files if any were specified. We know that globChangedFilesFn must
-    // exist because incremental copy operations are only available in incremental mode.
-    if (incrementalCopyOperations.length) {
-      fileOperationPromises.push(
-        copyIncrementalFilesAsync(incrementalCopyOperations, globExistingChangedFilesFn, taskSession.logger)
-      );
-    }
+        // Copy the files if any were specified. Avoid checking the cancellation token here
+        // since plugins may be tracking state changes and would have already considered
+        // added copy operations as "processed" during hook execution.
+        if (copyOperations.length) {
+          fileOperationPromises.push(copyFilesAsync(copyOperations, taskSession.logger));
+        }
 
-    // Delete the files if any were specified. Avoid checking the cancellation token here
-    // for the same reasons as above.
-    if (deleteOperations.length) {
-      fileOperationPromises.push(deleteFilesAsync(deleteOperations, taskSession.logger.terminal));
-    }
+        // Also incrementally copy files if any were specified. We know that globChangedFilesFn must
+        // exist because incremental copy operations are only available in incremental mode.
+        if (incrementalCopyOperations.length) {
+          fileOperationPromises.push(
+            copyIncrementalFilesAsync(
+              incrementalCopyOperations,
+              globExistingChangedFilesFn,
+              taskSession.logger
+            )
+          );
+        }
 
-    if (fileOperationPromises.length) {
-      await Promise.all(fileOperationPromises);
-    }
+        // Delete the files if any were specified. Avoid checking the cancellation token here
+        // for the same reasons as above.
+        if (deleteOperations.length) {
+          fileOperationPromises.push(deleteFilesAsync(deleteOperations, taskSession.logger.terminal));
+        }
 
-    if (taskSession.parameters.watch) {
-      if (!fileEventListener) {
-        // The file event listener is used to watch for changes to the lockfile. Without it, watch mode could
-        // go out of sync.
-        throw new InternalError('fileEventListener must be provided when watch is true');
-      }
+        if (fileOperationPromises.length) {
+          await Promise.all(fileOperationPromises);
+        }
 
-      // The task temp folder is a unique and relevant name, so re-use it for the lock file name
-      const lockFileName: string = path.basename(taskSession.tempFolderPath);
+        if (taskSession.parameters.watch) {
+          if (!fileEventListener) {
+            // The file event listener is used to watch for changes to the lockfile. Without it, watch mode could
+            // go out of sync.
+            throw new InternalError('fileEventListener must be provided when watch is true');
+          }
 
-      // Create a lockfile and wait for it to appear in the watcher. This is done to ensure that all watched
-      // files created by the task are ingested and available before running subsequent tasks. This can
-      // appear as a create or a change, depending on if the lockfile is dirty.
-      terminal.writeVerboseLine(`Synchronizing watcher using lock file ${JSON.stringify(lockFileName)}`);
-      const lockFilePath: string = LockFile.getLockFilePath(taskSession.tempFolderPath, lockFileName);
-      const lockfileChangePromise: Promise<void> = Promise.race([
-        fileEventListener!.waitForChangeAsync(lockFilePath),
-        fileEventListener!.waitForCreateAsync(lockFilePath)
-      ]);
-      const taskOperationLockFile: LockFile | undefined = LockFile.tryAcquire(
-        taskSession.tempFolderPath,
-        lockFileName
-      );
-      if (!taskOperationLockFile) {
-        throw new InternalError(
-          `Failed to acquire lock file ${JSON.stringify(lockFileName)}. Are multiple instances of ` +
-            'Heft running?'
-        );
-      }
-      await lockfileChangePromise;
+          // The task temp folder is a unique and relevant name, so re-use it for the lock file name
+          const lockFileName: string = path.basename(taskSession.tempFolderPath);
 
-      // We can save some time by avoiding deleting the lockfile
-      taskOperationLockFile.release(/*deleteFile:*/ false);
-    }
+          // Create a lockfile and wait for it to appear in the watcher. This is done to ensure that all watched
+          // files created by the task are ingested and available before running subsequent tasks. This can
+          // appear as a create or a change, depending on if the lockfile is dirty.
+          terminal.writeVerboseLine(`Synchronizing watcher using lock file ${JSON.stringify(lockFileName)}`);
+          const lockFilePath: string = LockFile.getLockFilePath(taskSession.tempFolderPath, lockFileName);
+          const lockfileChangePromise: Promise<void> = Promise.race([
+            fileEventListener!.waitForChangeAsync(lockFilePath),
+            fileEventListener!.waitForCreateAsync(lockFilePath)
+          ]);
+          const taskOperationLockFile: LockFile | undefined = LockFile.tryAcquire(
+            taskSession.tempFolderPath,
+            lockFileName
+          );
+          if (!taskOperationLockFile) {
+            throw new InternalError(
+              `Failed to acquire lock file ${JSON.stringify(lockFileName)}. Are multiple instances of ` +
+                'Heft running?'
+            );
+          }
+          await lockfileChangePromise;
 
-    const finishedWord: string = cancellationToken.isCancelled ? 'Cancelled' : 'Finished';
-    terminal.writeVerboseLine(
-      `${finishedWord} ${shouldRunIncremental ? 'incremental ' : ''}task execution ` +
-        `(${performance.now() - startTime}ms)`
+          // We can save some time by avoiding deleting the lockfile
+          taskOperationLockFile.release(/*deleteFile:*/ false);
+        }
+      },
+      () => `Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`,
+      () => {
+        const finishedWord: string = cancellationToken.isCancelled ? 'Cancelled' : 'Finished';
+        return `${finishedWord} ${shouldRunIncremental ? 'incremental ' : ''}task execution`;
+      },
+      terminal.writeVerboseLine.bind(terminal)
     );
 
     // Even if the entire process has completed, we should mark the operation as cancelled if
