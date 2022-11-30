@@ -257,4 +257,11 @@ export class RushConstants {
    * The expected prefix for phase names in "common/config/rush/command-line.json"
    */
   public static readonly phaseNamePrefix: '_phase:' = '_phase:';
+
+  /**
+   * The default debounce value for Rush multi-project watch mode. When watching, controls
+   * how long to wait after the last encountered file system event before execution. If another
+   * file system event occurs in this interval, the timeout will reset.
+   */
+  public static readonly defaultWatchDebounceMs: number = 1000;
 }
