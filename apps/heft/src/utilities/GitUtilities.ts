@@ -109,6 +109,26 @@ export class GitUtilities {
     }
   }
 
+  public async getUnignoredFilesAsync(): Promise<Set<string>> {
+    this._ensureGitMinimumVersion({ major: 2, minor: 22, patch: 0 });
+    this._ensurePathIsUnderGitWorkingTree();
+
+    const result: IExecuteGitCommandResult = await this._executeGitCommandAndCaptureOutputAsync({
+      command: 'ls-files',
+      args: ['--cached', '--modified', '--others', '--deduplicate', '--exclude-standard']
+    });
+
+    if (result.exitCode !== 0) {
+      throw new Error(
+        `The "git ls-files" command failed with status ${result.exitCode}: ` + result.errorLines.join('\n')
+      );
+    }
+
+    // Return the set of unignored files. The output is relative to the working directory, so join
+    // them to make an absolute path.
+    return new Set(result.outputLines.map((line: string) => path.join(this._workingDirectory, line)));
+  }
+
   /**
    * Runs the `git check-ignore` command and returns the result.
    */
