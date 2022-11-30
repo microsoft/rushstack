@@ -239,8 +239,13 @@ export class ProjectBuildCache {
     const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
       const finalLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+
       // Derive the temp file from the destination path to ensure they are on the same volume
-      const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}.temp`;
+      // In the case of a shared network drive containing the build cache, we also need to make
+      // sure the the temp path won't be shared by two parallel rush builds.
+      const randomSuffix: string = crypto.randomBytes(8).toString('hex');
+      const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
+
       const logFilePath: string = this._getTarLogFilePath();
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
         archivePath: tempLocalCacheEntryPath,
