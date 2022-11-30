@@ -1,6 +1,18 @@
 # Change Log - @rushstack/webpack4-localization-plugin
 
-This log was last generated on Tue, 08 Nov 2022 01:20:56 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Nov 2022 01:16:49 GMT and should not be manually modified.
+
+## 0.15.37
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
+
+## 0.15.36
+Mon, 14 Nov 2022 05:15:02 GMT
+
+### Patches
+
+- Updating webpack/loader-utils to resolve github advisory CVE-2022-37601. https://github.com/advisories/GHSA-76p3-8jx3-jpfq
 
 ## 0.15.35
 Tue, 08 Nov 2022 01:20:56 GMT

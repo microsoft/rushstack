@@ -2,6 +2,62 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.2.7",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.7",
+      "date": "Tue, 29 Nov 2022 01:16:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.6",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.6",
+      "date": "Fri, 18 Nov 2022 00:55:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.5",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.5",
+      "date": "Tue, 15 Nov 2022 23:31:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Webpack auto-refresh issues caused by mismatched hostname"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.4",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.4",
+      "date": "Sat, 12 Nov 2022 00:16:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Serve the CA certificate alongside the TLS certificate."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.3",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.2.3",
       "date": "Tue, 08 Nov 2022 01:20:56 GMT",

@@ -65,6 +65,16 @@ export interface IOperationSettings {
    * the build scripts to be compatible with caching.
    */
   disableBuildCacheForOperation?: boolean;
+
+  /**
+   * An optional list of environment variables that can affect this operation. The values of
+   * these environment variables will become part of the hash when reading and writing the build cache.
+   *
+   * Note: generally speaking, all environment variables available to Rush are also available to any
+   * operations performed -- Rush assumes that environment variables do not affect build outputs unless
+   * you list them here.
+   */
+  dependsOnEnvVars?: string[];
 }
 
 interface IOldRushProjectJson {
@@ -89,7 +99,7 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
           } else if (!parent) {
             return child;
           } else {
-            // Merge the outputFolderNames arrays
+            // Merge any properties that need to be merged
             const resultOperationSettingsByOperationName: Map<string, IOperationSettings> = new Map();
             for (const parentOperationSettings of parent) {
               resultOperationSettingsByOperationName.set(
@@ -117,7 +127,7 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
               let mergedOperationSettings: IOperationSettings | undefined =
                 resultOperationSettingsByOperationName.get(operationName);
               if (mergedOperationSettings) {
-                // The parent operation settings object already exists, so append to the outputFolderNames
+                // The parent operation settings object already exists
                 const outputFolderNames: string[] | undefined =
                   mergedOperationSettings.outputFolderNames && childOperationSettings.outputFolderNames
                     ? [
@@ -126,10 +136,19 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
                       ]
                     : mergedOperationSettings.outputFolderNames || childOperationSettings.outputFolderNames;
 
+                const dependsOnEnvVars: string[] | undefined =
+                  mergedOperationSettings.dependsOnEnvVars && childOperationSettings.dependsOnEnvVars
+                    ? [
+                        ...mergedOperationSettings.dependsOnEnvVars,
+                        ...childOperationSettings.dependsOnEnvVars
+                      ]
+                    : mergedOperationSettings.dependsOnEnvVars || childOperationSettings.dependsOnEnvVars;
+
                 mergedOperationSettings = {
                   ...mergedOperationSettings,
                   ...childOperationSettings,
-                  outputFolderNames
+                  ...(outputFolderNames ? { outputFolderNames } : {}),
+                  ...(dependsOnEnvVars ? { dependsOnEnvVars } : {})
                 };
                 resultOperationSettingsByOperationName.set(operationName, mergedOperationSettings);
               } else {

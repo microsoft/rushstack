@@ -133,7 +133,7 @@ export class CredentialCache {
     // (undocumented)
     saveIfModifiedAsync(): Promise<void>;
     // (undocumented)
-    setCacheEntry(cacheId: string, credential: string, expires?: Date): void;
+    setCacheEntry(cacheId: string, entry: ICredentialCacheEntry): void;
     // (undocumented)
     trimExpiredEntries(): void;
     // (undocumented)
@@ -289,6 +289,8 @@ export interface ICredentialCacheEntry {
     // (undocumented)
     credential: string;
     // (undocumented)
+    credentialMetadata?: object;
+    // (undocumented)
     expires?: Date;
 }
 
@@ -313,6 +315,7 @@ export interface IExecutionResult {
 // @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
+    cleanInstallAfterNpmrcChanges?: boolean;
     deferredInstallationScripts?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
@@ -352,6 +355,8 @@ export interface IGlobalCommand extends IRushCommand {
 
 // @internal
 export interface _ILastInstallFlagJson {
+    // (undocumented)
+    [key: string]: unknown;
     ignoreScripts?: true;
     node: string;
     packageJson?: IPackageJson;
@@ -370,6 +375,14 @@ export interface ILaunchOptions {
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
     terminalProvider?: ITerminalProvider;
+}
+
+// @internal (undocumented)
+export interface _ILockfileValidityCheckOptions {
+    // (undocumented)
+    rushVerb?: string;
+    // (undocumented)
+    statePropertiesToIgnore?: string[];
 }
 
 // @beta (undocumented)
@@ -482,6 +495,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalOverrides?: Record<string, string>;
     // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtension" needs to be exported by the entry point index.d.ts
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
+    globalPatchedDependencies?: Record<string, string>;
     // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
     pnpmStore?: PnpmStoreOptions;
@@ -573,10 +587,12 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @internal
 export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
-    checkValidAndReportStoreIssues(rushVerb: string): boolean;
+    checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
+        rushVerb: string;
+    }): boolean;
     protected get flagName(): string;
     // @override
-    isValid(): boolean;
+    isValid(options?: _ILockfileValidityCheckOptions): boolean;
 }
 
 // @public
@@ -728,7 +744,10 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalNeverBuiltDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
+    get globalPatchedDependencies(): Record<string, string> | undefined;
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
+    // (undocumented)
+    get jsonFilename(): string | undefined;
     // @internal (undocumented)
     static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
@@ -738,6 +757,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly preventManualShrinkwrapChanges: boolean;
     readonly strictPeerDependencies: boolean;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
+    updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
 }
 
@@ -950,6 +970,7 @@ export class RushConstants {
     static readonly pnpmConfigFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
+    static readonly pnpmPatchesFolderName: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
     static readonly projectRushFolderName: string;
     static readonly projectShrinkwrapFilename: string;

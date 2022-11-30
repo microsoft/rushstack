@@ -1,5 +1,13 @@
 .ViewWrapper {
-  height: calc(95vh - 96px);
+  height: calc(100% - 12px);
+  padding-top: 12px;
+}
+
+.ViewContents {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100% - 70px - 35px);
+  max-height: calc(100% - 70px - 35px);
 }
 
 .LockfileEntryListViewWrapper {
@@ -16,6 +24,13 @@
   display: flex;
   align-items: center;
   margin-bottom: 12px;
+
+  input {
+    border: solid 1px #666;
+    border-radius: 4px;
+    padding: 0.4em;
+    width: 100%;
+  }
 
   & > * + * {
     margin-left: 12px;
@@ -44,15 +59,16 @@
 }
 
 .lockfileEntriesWrapper {
-  height: calc(95vh - 220px);
   overflow: scroll;
+  flex: 1;
   & > * + * {
     margin-top: 12px;
   }
 }
 
 .filterSection {
-  margin-top: 24px;
+  border-top: 1px solid #000;
+  padding-top: 24px;
   & > * + * {
     margin-top: 4px;
   }
@@ -61,6 +77,7 @@
 .filterOption {
   display: flex;
   align-items: center;
+  cursor: pointer;
   & > * + * {
     margin-left: 4px;
   }

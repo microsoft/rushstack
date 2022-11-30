@@ -5,33 +5,46 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { readPnpmfile, readPackageSpec, readPackageJson } from '../../parsing/getPackageFiles';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
 import { IPackageJson } from '../../types/IPackageJson';
-import { compareSpec, ISpecChange } from '../../parsing/compareSpec';
+import { compareSpec } from '../../parsing/compareSpec';
 import { FilterBar } from '../../components/FilterBar';
+import { loadSpecChanges } from '../../store/slices/workspaceSlice';
+import { displaySpecChanges } from '../../helpers/displaySpecChanges';
+import { isEntryModified } from '../../helpers/isEntryModified';
 
 enum PackageView {
   PACKAGE_JSON,
-  CJS,
+  PACKAGE_SPEC,
   PARSED_PACKAGE_JSON
 }
 
 export const PackageJsonViewer = (): JSX.Element => {
+  const dispatch = useAppDispatch();
   const [packageJSON, setPackageJSON] = useState<IPackageJson | undefined>(undefined);
   const [parsedPackageJSON, setParsedPackageJSON] = useState<IPackageJson | undefined>(undefined);
-  const [specChanges, setSpecChanges] = useState<Map<string, ISpecChange>>(new Map());
-  const [cjs, setCjs] = useState('');
+  const [pnpmfile, setPnpmfile] = useState('');
   const selectedEntry = useAppSelector(selectCurrentEntry);
+
+  const specChanges = useAppSelector((state) => state.workspace.specChanges);
 
   const [selection, setSelection] = useState<PackageView>(PackageView.PARSED_PACKAGE_JSON);
 
   const cb = useCallback((s: PackageView) => () => setSelection(s), []);
 
   useEffect(() => {
+    async function loadPnpmFile(): Promise<void> {
+      const pnpmfile = await readPnpmfile();
+      setPnpmfile(pnpmfile);
+    }
+    loadPnpmFile().catch((e) => {
+      console.error(`Failed to load project's pnpm file: ${e}`);
+    });
+  }, []);
+
+  useEffect(() => {
     async function loadPackageDetails(packageName: string): Promise<void> {
-      const cjsFile = await readPnpmfile();
-      setCjs(cjsFile);
       const packageJSONFile = await readPackageJson(packageName);
       setPackageJSON(packageJSONFile);
       const parsedJSON = await readPackageSpec(packageName);
@@ -39,7 +52,7 @@ export const PackageJsonViewer = (): JSX.Element => {
 
       if (packageJSONFile && parsedJSON) {
         const diffDeps = compareSpec(packageJSONFile, parsedJSON);
-        setSpecChanges(diffDeps);
+        dispatch(loadSpecChanges(diffDeps));
       }
     }
     if (selectedEntry) {
@@ -54,72 +67,126 @@ export const PackageJsonViewer = (): JSX.Element => {
     }
   }, [selectedEntry]);
 
-  const renderDep = (dependencyDetails: [string, string]): JSX.Element => {
-    const [dep, version] = dependencyDetails;
-    if (specChanges.has(dep)) {
-      switch (specChanges.get(dep)?.type) {
-        case 'add':
-          return (
-            <p key={dep}>
-              <span className={styles.AddedSpec}>
-                {dep}: {version}
-              </span>{' '}
-              [Added by .pnpmfile.cjs]
-            </p>
-          );
-        case 'diff':
-          return (
-            <p key={dep}>
-              <span className={styles.ChangedSpec}>
-                {dep}: {version}
-              </span>{' '}
-              [Changed from {specChanges.get(dep)?.from}]
-            </p>
-          );
-        case 'remove':
-          return (
-            <p key={dep}>
-              <span className={styles.DeletedSpec}>
-                {dep}: {version}
-              </span>{' '}
-              [Deleted by .pnpmfile.cjs]
-            </p>
-          );
-        default:
-          return (
-            <p key={dep}>
-              {dep}: {version}
-            </p>
-          );
+  const renderDep =
+    (name: boolean): ((dependencyDetails: [string, string]) => JSX.Element) =>
+    (dependencyDetails) => {
+      const [dep, version] = dependencyDetails;
+      if (specChanges.has(dep)) {
+        switch (specChanges.get(dep)?.type) {
+          case 'add':
+            if (name) {
+              return (
+                <p key={dep}>
+                  <span className={styles.AddedSpec}>{dep}</span>
+                </p>
+              );
+            } else {
+              return (
+                <p key={dep}>
+                  {version} {displaySpecChanges(specChanges, dep)}
+                </p>
+              );
+            }
+          case 'diff':
+            if (name) {
+              return (
+                <p key={dep}>
+                  <span className={styles.ChangedSpec}>{dep}</span>
+                </p>
+              );
+            } else {
+              return (
+                <p key={dep}>
+                  {version} {displaySpecChanges(specChanges, dep)}
+                </p>
+              );
+            }
+          case 'remove':
+            if (name) {
+              return (
+                <p key={dep}>
+                  <span className={styles.DeletedSpec}>{dep}</span>
+                </p>
+              );
+            } else {
+              return (
+                <p key={dep}>
+                  {version} {displaySpecChanges(specChanges, dep)}
+                </p>
+              );
+            }
+          default:
+            if (name) {
+              return <p key={dep}>{dep}:</p>;
+            } else {
+              return <p key={dep}>{version}</p>;
+            }
+        }
+      } else {
+        if (name) {
+          return <p key={dep}>{dep}:</p>;
+        } else {
+          return <p key={dep}>{version}</p>;
+        }
       }
-    } else {
-      return (
-        <p key={dep}>
-          {dep}: {version}
-        </p>
-      );
-    }
-  };
+    };
 
   const renderFile = (): JSX.Element | null => {
     switch (selection) {
       case PackageView.PACKAGE_JSON:
-        if (!packageJSON) return null;
+        if (!packageJSON) return <h5>Please select a Project or Package to view it&apos;s package.json</h5>;
         return <pre>{JSON.stringify(packageJSON, null, 2)}</pre>;
-      case PackageView.CJS:
-        return <pre>{cjs}</pre>;
+      case PackageView.PACKAGE_SPEC:
+        if (!pnpmfile) {
+          return (
+            <h5>
+              Couldn&apos;t load the pnpmfile.cjs file - does it exist in the expected location?
+              (/common/config/rush/.pnpmfile.cjs)
+            </h5>
+          );
+        }
+        return <pre>{pnpmfile}</pre>;
       case PackageView.PARSED_PACKAGE_JSON:
-        if (!parsedPackageJSON) return null;
+        if (!parsedPackageJSON)
+          return <h5>Please select a Project or Package to view the parsed package.json</h5>;
         return (
           <div className={styles.PackageSpecWrapper}>
-            <h5>Dependencies</h5>
-            {parsedPackageJSON.dependencies && Object.entries(parsedPackageJSON.dependencies).map(renderDep)}
-            <h5>Dev Dependencies</h5>
-            {parsedPackageJSON.devDependencies &&
-              Object.entries(parsedPackageJSON.devDependencies).map(renderDep)}
-            <h5>Peer Dependencies</h5>
-            {parsedPackageJSON.peerDependencies &&
-              Object.entries(parsedPackageJSON.peerDependencies).map(renderDep)}
+            <div className={styles.PackageSpecEntry}>
+              <h5>Package Name:</h5>
+              <p>{selectedEntry?.displayText}</p>
+            </div>
+            <div className={styles.PackageSpecEntry}>
+              <h5>Version:</h5>
+              <p>{selectedEntry?.entryPackageVersion}</p>
+            </div>
+            <div className={styles.DependencyRows}>
+              <div>
+                <h5>Dependencies</h5>
+                {parsedPackageJSON.dependencies &&
+                  Object.entries(parsedPackageJSON.dependencies).map(renderDep(true))}
+
+                <h5>Dev Dependencies</h5>
+                {parsedPackageJSON.devDependencies &&
+                  Object.entries(parsedPackageJSON.devDependencies).map(renderDep(true))}
+
+                <h5>Peer Dependencies</h5>
+                {parsedPackageJSON.peerDependencies &&
+                  Object.entries(parsedPackageJSON.peerDependencies).map(renderDep(true))}
+              </div>
+              <div>
+                <h5>&nbsp;</h5>
+                {parsedPackageJSON.dependencies &&
+                  Object.entries(parsedPackageJSON.dependencies).map(renderDep(false))}
+
+                <h5>&nbsp;</h5>
+                {parsedPackageJSON.devDependencies &&
+                  Object.entries(parsedPackageJSON.devDependencies).map(renderDep(false))}
+
+                <h5>&nbsp;</h5>
+                {parsedPackageJSON.peerDependencies &&
+                  Object.entries(parsedPackageJSON.peerDependencies).map(renderDep(false))}
+              </div>
+            </div>
           </div>
         );
       default:
@@ -128,11 +195,11 @@ export const PackageJsonViewer = (): JSX.Element => {
   };
 
   return (
-    <div>
+    <div className={styles.PackageJsonWrapper}>
       <FilterBar
         options={[
           {
-            text: 'package spec',
+            text: `package spec ${isEntryModified(selectedEntry, specChanges) ? '*' : ''}`,
             active: selection === PackageView.PARSED_PACKAGE_JSON,
             onClick: cb(PackageView.PARSED_PACKAGE_JSON)
           },
@@ -141,7 +208,11 @@ export const PackageJsonViewer = (): JSX.Element => {
             active: selection === PackageView.PACKAGE_JSON,
             onClick: cb(PackageView.PACKAGE_JSON)
           },
-          { text: '.pnpmfile.cjs', active: selection === PackageView.CJS, onClick: cb(PackageView.CJS) }
+          {
+            text: '.pnpmfile.cjs',
+            active: selection === PackageView.PACKAGE_SPEC,
+            onClick: cb(PackageView.PACKAGE_SPEC)
+          }
         ]}
       />
       <div className={appStyles.ContainerCard}>

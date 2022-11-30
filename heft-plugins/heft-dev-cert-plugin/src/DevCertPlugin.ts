@@ -101,12 +101,12 @@ export class DevCertPlugin implements IHeftPlugin {
       const { devServer: originalDevServer } = webpackConfiguration;
       const hostname: string | undefined = certificate.subjectAltNames?.[0];
       if (webpackDevServerMajorVersion && webpackDevServerMajorVersion === 4) {
-        let client: WebpackDevServerConfig['client'] = originalDevServer?.client;
+        const client: WebpackDevServerConfig['client'] = originalDevServer?.client;
         if (hostname) {
           if (typeof client === 'object') {
             const { webSocketURL } = client;
             if (typeof webSocketURL === 'object') {
-              client = {
+              originalDevServer!.client = {
                 ...client,
                 webSocketURL: {
                   ...webSocketURL,
@@ -124,7 +124,8 @@ export class DevCertPlugin implements IHeftPlugin {
             options: {
               minVersion: 'TLSv1.3',
               key: certificate.pemKey,
-              cert: certificate.pemCertificate
+              cert: certificate.pemCertificate,
+              ca: certificate.pemCaCertificate
             }
           }
         };
@@ -133,7 +134,8 @@ export class DevCertPlugin implements IHeftPlugin {
           ...originalDevServer,
           https: {
             key: certificate.pemKey,
-            cert: certificate.pemCertificate
+            cert: certificate.pemCertificate,
+            ca: certificate.pemCaCertificate
           }
         };
       }

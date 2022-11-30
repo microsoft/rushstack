@@ -133,7 +133,7 @@
         {
           "sourceFolder": "node_modules/@rushstack/lockfile-explorer-web/dist",
           "destinationFolders": ["dist"],
-          "fileExtensions": [".js", ".html", ".svg"]
+          "fileExtensions": [".js", ".html", ".svg", ".css", ".txt"]
         },
         {
           "sourceFolder": "assets",

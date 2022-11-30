@@ -52,6 +52,12 @@ export interface IExperimentsJson {
    * and run install lifecycle scripts by pnpm rebuild --pending after pnpm install successfully.
    */
   deferredInstallationScripts?: boolean;
+
+  /**
+   * If true, perform a clean install after when running `rush install` or `rush update` if the
+   * `.npmrc` file has changed since the last install.
+   */
+  cleanInstallAfterNpmrcChanges?: boolean;
 }
 
 /**

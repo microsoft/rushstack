@@ -1,9 +1,11 @@
 .BookmarksWrapper {
-  height: calc(100vh - 96px);
+  flex: 1;
+  margin: 12px 0;
 }
 
 .BookmarkEntry {
-  padding: 4px 8px;
+  padding: 4px 0;
+  margin-top: 8px;
   cursor: pointer;
   &:hover {
     background: #dff6dd;

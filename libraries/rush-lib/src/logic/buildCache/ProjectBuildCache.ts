@@ -20,6 +20,7 @@ export interface IProjectBuildCacheOptions {
   projectConfiguration: RushProjectConfiguration;
   projectOutputFolderNames: ReadonlyArray<string>;
   additionalProjectOutputFilePaths?: ReadonlyArray<string>;
+  additionalContext?: Record<string, string>;
   command: string;
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
@@ -447,6 +448,18 @@ export class ProjectBuildCache {
     hash.update(RushConstants.hashDelimiter);
     hash.update(options.command);
     hash.update(RushConstants.hashDelimiter);
+    if (options.additionalContext) {
+      for (const key of Object.keys(options.additionalContext).sort()) {
+        // Add additional context keys and values.
+        //
+        // This choice (to modiy the hash for every key regardless of whether a value is set) implies
+        // that just _adding_ an env var to the list of dependsOnEnvVars will modify its hash. This
+        // seems appropriate, because this behavior is consistent whether or not the env var happens
+        // to have a value.
+        hash.update(`${key}=${options.additionalContext[key]}`);
+        hash.update(RushConstants.hashDelimiter);
+      }
+    }
     for (const projectHash of sortedProjectStates) {
       hash.update(projectHash);
       hash.update(RushConstants.hashDelimiter);

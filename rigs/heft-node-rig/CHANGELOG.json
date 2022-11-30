@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.11.9",
+      "tag": "@rushstack/heft-node-rig_v1.11.9",
+      "date": "Tue, 29 Nov 2022 01:16:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.11.8",
       "tag": "@rushstack/heft-node-rig_v1.11.8",
       "date": "Tue, 08 Nov 2022 01:20:56 GMT",

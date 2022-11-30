@@ -1,10 +1,11 @@
 .LogoPanel {
-  width: 70px;
-  padding-left: 5px;
-}
-
-.LogoPanel a {
-  text-decoration: none;
+  display: flex;
+  & > * + * {
+    margin-left: 12px;
+  }
+  a {
+    text-decoration: none;
+  }
 }
 
 .Icon {
@@ -19,7 +20,6 @@
 
 .Title2 {
   padding-top: 5px;
-  padding-bottom: 10px;
   height: 20px;
 }
 
@@ -32,5 +32,5 @@
   color: #ab9e8e;
   font-family: Tahoma, sans-serif;
   font-size: 14px;
-  padding-bottom: 3px;
+  padding-top: 4px;
 }

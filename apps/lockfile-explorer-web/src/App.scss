@@ -4,7 +4,6 @@
   box-shadow: $ms-depth-shadow-8;
   background-color: $ms-color-gray10;
   padding: 24px;
-  width: calc(100% - 48px);
 }
 
 .ContainerCard {
@@ -15,7 +14,9 @@
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  padding: 24px;
+  & > * {
+    width: 100%;
+  }
 }
 
 .AppGrid {
@@ -23,7 +24,8 @@
 }
 
 .BodyContainer {
-  & > * + * {
-    margin-top: 24px;
-  }
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
 }

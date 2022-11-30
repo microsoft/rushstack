@@ -37,6 +37,15 @@
         "commit": {
           "description": "The commit, if applicable, including the change request.",
           "type": "string"
+        },
+        "customFields": {
+          "type": "object",
+          "description": "An optional dictionary of custom string fields.",
+          "patternProperties": {
+            "^.*$": {
+              "type": "string"
+            }
+          }
         }
       },
       "required": [

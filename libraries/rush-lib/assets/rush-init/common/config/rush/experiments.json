@@ -46,5 +46,11 @@
    * If true, rush install or rush update implicitly specify --ignore-scripts during pnpm install,
    * and run install lifecycle scripts by pnpm rebuild --pending after pnpm install successfully.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "deferredInstallationScripts": true
+  /*[LINE "HYPOTHETICAL"]*/ "deferredInstallationScripts": true,
+
+  /**
+   * If true, perform a clean install after when running `rush install` or `rush update` if the
+   * `.npmrc` file has changed since the last install.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "cleanInstallAfterNpmrcChanges": true
 }

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as child_process from 'child_process';
-import { Executable } from '@rushstack/node-core-library';
+import { Executable, FileSystem } from '@rushstack/node-core-library';
 
 export interface IGitVersion {
   major: number;
@@ -16,12 +16,18 @@ const MINIMUM_GIT_VERSION: IGitVersion = {
   patch: 0
 };
 
+interface IGitTreeState {
+  files: Map<string, string>; // type "blob"
+  submodules: Map<string, string>; // type "commit"
+}
+
 /**
  * Parses the output of the "git ls-tree -r -z" command
  * @internal
  */
-export function parseGitLsTree(output: string): Map<string, string> {
-  const result: Map<string, string> = new Map();
+export function parseGitLsTree(output: string): IGitTreeState {
+  const files: Map<string, string> = new Map();
+  const submodules: Map<string, string> = new Map();
 
   // Parse the output
   // With the -z modifier, paths are delimited by nulls
@@ -39,13 +45,31 @@ export function parseGitLsTree(output: string): Map<string, string> {
 
     // The newHash will be all zeros if the file is deleted, or a hash if it exists
     const hash: string = item.slice(tabIndex - 40, tabIndex);
-    result.set(filePath, hash);
+
+    const spaceIndex: number = item.lastIndexOf(' ', tabIndex - 42);
+
+    const type: string = item.slice(spaceIndex + 1, tabIndex - 41);
+
+    switch (type) {
+      case 'commit': {
+        submodules.set(filePath, hash);
+        break;
+      }
+      case 'blob':
+      default: {
+        files.set(filePath, hash);
+        break;
+      }
+    }
 
     last = index + 1;
     index = output.indexOf('\0', last);
   }
 
-  return result;
+  return {
+    files,
+    submodules
+  };
 }
 
 /**
@@ -186,7 +210,7 @@ export function applyWorkingTreeState(
 ): void {
   const statusResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
     gitPath || 'git',
-    ['--no-optional-locks', 'status', '-z', '-u', '--no-renames', '--'],
+    ['--no-optional-locks', 'status', '-z', '-u', '--no-renames', '--ignore-submodules', '--'],
     {
       currentWorkingDirectory: rootDirectory
     }
@@ -269,9 +293,23 @@ export function getRepoState(currentWorkingDirectory: string, gitPath?: string):
     throw new Error(`git ls-tree exited with status ${lsTreeResult.status}: ${lsTreeResult.stderr}`);
   }
 
-  const state: Map<string, string> = parseGitLsTree(lsTreeResult.stdout);
+  const { files, submodules } = parseGitLsTree(lsTreeResult.stdout);
 
-  applyWorkingTreeState(rootDirectory, state, gitPath);
+  applyWorkingTreeState(rootDirectory, files, gitPath);
+
+  const state: Map<string, string> = files;
+
+  // Existence check for the .gitmodules file
+  const hasSubmodules: boolean = submodules.size > 0 && FileSystem.exists(`${rootDirectory}/.gitmodules`);
+
+  if (hasSubmodules) {
+    for (const submodulePath of submodules.keys()) {
+      const submoduleState: Map<string, string> = getRepoState(`${rootDirectory}/${submodulePath}`, gitPath);
+      for (const [filePath, hash] of submoduleState) {
+        state.set(`${submodulePath}/${filePath}`, hash);
+      }
+    }
+  }
 
   return state;
 }

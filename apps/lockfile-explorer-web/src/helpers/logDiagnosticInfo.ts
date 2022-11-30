@@ -3,7 +3,8 @@
 
 // Used to log diagnostics that may be useful when troubleshooting
 // problems with the algorithm.
-// TODO: Only print these messages in a production release
 export const logDiagnosticInfo = (...args: string[]): void => {
-  console.log('Diagnostic: ', ...args);
+  if (window.appContext.debugMode) {
+    console.log('Diagnostic: ', ...args);
+  }
 };

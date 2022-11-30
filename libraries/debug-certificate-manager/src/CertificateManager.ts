@@ -111,11 +111,16 @@ export class CertificateManager {
     const optionsWithDefaults: Required<ICertificateGenerationOptions> =
       applyDefaultOptions(generationOptions);
 
-    if (this._certificateStore.certificateData && this._certificateStore.keyData) {
+    const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
+
+    if (existingCert && existingKey) {
       const messages: string[] = [];
 
-      const altNamesExtension: ISubjectAltNameExtension | undefined =
-        await this._getCertificateSubjectAltNameAsync();
+      const forge: typeof import('node-forge') = await import('node-forge');
+      const certificate: pki.Certificate = forge.pki.certificateFromPem(existingCert);
+      const altNamesExtension: ISubjectAltNameExtension | undefined = certificate.getExtension(
+        'subjectAltName'
+      ) as ISubjectAltNameExtension;
       if (!altNamesExtension) {
         messages.push(
           'The existing development certificate is missing the subjectAltName ' +
@@ -123,8 +128,23 @@ export class CertificateManager {
         );
       }
 
-      const hasCA: boolean = !!this._certificateStore.caCertificateData;
-      if (!hasCA) {
+      const { notBefore, notAfter } = certificate.validity;
+      const now: Date = new Date();
+      if (now < notBefore) {
+        messages.push(
+          `The existing development certificate's validity period does not start until ${notBefore}. It is currently ${now}.`
+        );
+      }
+
+      if (now > notAfter) {
+        messages.push(
+          `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
+        );
+      }
+
+      const { caCertificateData } = this._certificateStore;
+
+      if (!caCertificateData) {
         messages.push(
           'The existing development certificate is missing a separate CA cert as the root ' +
             'of trust and will not work with the latest versions of some browsers.'
@@ -136,7 +156,7 @@ export class CertificateManager {
         messages.push('The existing development certificate is not currently trusted by your system.');
       }
 
-      if (!altNamesExtension || !isTrusted || !hasCA) {
+      if (messages.length > 0) {
         if (canGenerateNewCertificate) {
           messages.push('Attempting to untrust the certificate and generate a new one.');
           terminal.writeWarningLine(messages.join(' '));
@@ -151,9 +171,9 @@ export class CertificateManager {
         }
       } else {
         return {
-          pemCaCertificate: this._certificateStore.caCertificateData,
-          pemCertificate: this._certificateStore.certificateData,
-          pemKey: this._certificateStore.keyData,
+          pemCaCertificate: caCertificateData,
+          pemCertificate: existingCert,
+          pemKey: existingKey,
           subjectAltNames: altNamesExtension.altNames.map((entry) => entry.value)
         };
       }
@@ -295,7 +315,7 @@ export class CertificateManager {
       {
         name: 'issuerAltName',
         altNames,
-        critical: true
+        critical: false
       },
       {
         name: 'keyUsage',
@@ -380,7 +400,7 @@ export class CertificateManager {
       {
         name: 'issuerAltName',
         altNames: issuerAltNames,
-        critical: true
+        critical: false
       },
       {
         name: 'keyUsage',
@@ -420,7 +440,7 @@ export class CertificateManager {
     switch (process.platform) {
       case 'win32':
         terminal.writeLine(
-          'Attempting to trust a development certificate. This self-signed certificate only points to rushstack.localhost ' +
+          'Attempting to trust a development certificate. This self-signed certificate only points to localhost ' +
             'and will be stored in your local user profile to be used by other instances of ' +
             'debug-certificate-manager. If you do not consent to trust this certificate, click "NO" in the dialog.'
         );
@@ -666,16 +686,6 @@ export class CertificateManager {
     };
   }
 
-  private async _getCertificateSubjectAltNameAsync(): Promise<ISubjectAltNameExtension | undefined> {
-    const certificateData: string | undefined = this._certificateStore.certificateData;
-    if (!certificateData) {
-      return;
-    }
-    const forge: typeof import('node-forge') = await import('node-forge');
-    const certificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
-    return certificate.getExtension('subjectAltName') as ISubjectAltNameExtension;
-  }
-
   private _parseMacOsMatchingCertificateHash(findCertificateOuput: string): string | undefined {
     let shaHash: string | undefined = undefined;
     for (const line of findCertificateOuput.split(EOL)) {
@@ -699,6 +709,6 @@ function applyDefaultOptions(
   const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
   return {
     subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
-    validityInDays: options?.validityInDays ?? 365 * 3
+    validityInDays: options?.validityInDays ?? 365
   };
 }
