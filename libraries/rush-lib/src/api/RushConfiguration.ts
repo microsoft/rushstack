@@ -162,6 +162,7 @@ export interface IRushConfigurationJson {
   rushVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
+  nodeSupportedVersionInstructions?: string;
   suppressNodeLtsWarning?: boolean;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
@@ -306,10 +307,15 @@ export class RushConfiguration {
         );
       }
       if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
-        const message: string =
+        let message: string =
           `Your dev environment is running Node.js version ${process.version} which does` +
           ` not meet the requirements for building this repository.  (The rush.json configuration` +
           ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
+
+        if (rushConfigurationJson.nodeSupportedVersionInstructions) {
+          message += '\n\n' + rushConfigurationJson.nodeSupportedVersionInstructions;
+        }
+
         if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
           console.warn(message);
         } else {
