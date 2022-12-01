@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
 import { checkAlive } from '../../parsing/getPackageFiles';
+import { ReactNull } from '../../types/ReactNull';
 
-export const ConnectionModal = () => {
+export const ConnectionModal = (): JSX.Element | ReactNull => {
   const [isAlive, setIsAlive] = useState(true);
   const [checking, setChecking] = useState(false);
   const [manualChecked, setManualChecked] = useState(false);

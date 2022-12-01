@@ -155,12 +155,14 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/js-yaml': 3.12.1
       '@types/node': 12.20.24
+      chalk: ~4.1.2
       cors: ~2.8.5
       express: 4.18.1
       js-yaml: ~3.13.1
       open: ~8.4.0
     dependencies:
       '@types/express': 4.17.13
+      chalk: 4.1.2
       cors: 2.8.5
       express: 4.18.1
       js-yaml: 3.13.1
@@ -15326,14 +15328,6 @@ packages:
       json5: 0.5.1
     dev: false
 
-  /loader-utils/1.4.0:
-    resolution: {integrity: sha512-qH0WSMBtn/oHuwjy/NucEgbx5dbxxnxup9s4PVXJUDHZBQY+s0NWA9rJf53RBnQZxfch7euUui7hpoAPvALZdA==}
-    engines: {node: '>=4.0.0'}
-    dependencies:
-      big.js: 5.2.2
-      emojis-list: 3.0.0
-      json5: 1.0.1
-
   /loader-utils/1.4.2:
     resolution: {integrity: sha512-I5d00Pd/jwMD2QCduo657+YM/6L3KZu++pmX9VFncxaxvHcru9jx1lBaFft+r4Mt2jK0Yhp41XlRAihzPxHNCg==}
     engines: {node: '>=4.0.0'}
@@ -20008,7 +20002,7 @@ packages:
     dependencies:
       chalk: 2.4.2
       enhanced-resolve: 4.5.0
-      loader-utils: 1.1.0
+      loader-utils: 1.4.2
       micromatch: 4.0.5
       semver: 6.3.0
       typescript: 4.8.4
@@ -21080,7 +21074,7 @@ packages:
       eslint-scope: 4.0.3
       json-parse-better-errors: 1.0.2
       loader-runner: 2.4.0
-      loader-utils: 1.4.0
+      loader-utils: 1.4.2
       memory-fs: 0.4.1
       micromatch: 3.1.10
       mkdirp: 0.5.6
@@ -21117,7 +21111,7 @@ packages:
       eslint-scope: 4.0.3
       json-parse-better-errors: 1.0.2
       loader-runner: 2.4.0
-      loader-utils: 1.4.0
+      loader-utils: 1.4.2
       memory-fs: 0.4.1
       micromatch: 3.1.10
       mkdirp: 0.5.6

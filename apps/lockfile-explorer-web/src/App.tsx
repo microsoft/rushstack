@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styles from './App.scss';
 import { readLockfile } from './parsing/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';
@@ -12,7 +12,6 @@ import { LockfileEntryDetailsView } from './containers/LockfileEntryDetailsView'
 import { BookmarksSidebar } from './containers/BookmarksSidebar';
 import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
 import { LogoPanel } from './containers/LogoPanel';
-import { checkAlive } from './parsing/getPackageFiles';
 import { ConnectionModal } from './components/ConnectionModal';
 
 /**
