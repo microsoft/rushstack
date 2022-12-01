@@ -35,30 +35,40 @@ export default class LintPlugin implements IHeftTaskPlugin {
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     // Use the changed files hook to kick off linting asynchronously
-    taskSession.requestAccessToPluginByName(
-      '@rushstack/heft-typescript-plugin',
-      TYPESCRIPT_PLUGIN_NAME,
-      (accessor: ITypeScriptPluginAccessor) => {
-        // Hook into the changed files hook to kick off linting, which will be awaited in the run hook
-        accessor.onChangedFilesHook.tap(PLUGIN_NAME, (changedFilesHookOptions: IChangedFilesHookOptions) => {
-          const lintingPromise: Promise<void> = this._lintAsync(
-            taskSession,
-            heftConfiguration,
-            changedFilesHookOptions.program as IExtendedProgram,
-            changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
+    if (!taskSession.parameters.watch) {
+      taskSession.requestAccessToPluginByName(
+        '@rushstack/heft-typescript-plugin',
+        TYPESCRIPT_PLUGIN_NAME,
+        (accessor: ITypeScriptPluginAccessor) => {
+          // Hook into the changed files hook to kick off linting, which will be awaited in the run hook
+          accessor.onChangedFilesHook.tap(
+            PLUGIN_NAME,
+            (changedFilesHookOptions: IChangedFilesHookOptions) => {
+              const lintingPromise: Promise<void> = this._lintAsync(
+                taskSession,
+                heftConfiguration,
+                changedFilesHookOptions.program as IExtendedProgram,
+                changedFilesHookOptions.changedFiles as ReadonlySet<IExtendedSourceFile>
+              );
+              lintingPromise.catch(() => {
+                // Suppress unhandled promise rejection error
+              });
+              // Hold on to the original promise, which will throw in the run hook if it unexpectedly fails
+              this._lintingPromises.push(lintingPromise);
+            }
           );
-          lintingPromise.catch(() => {
-            // Suppress unhandled promise rejection error
-          });
-          // Hold on to the original promise, which will throw in the run hook if it unexpectedly fails
-          this._lintingPromises.push(lintingPromise);
-        });
-      }
-    );
+        }
+      );
+    }
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
       // Run the linters to completion. Linters emit errors and warnings to the logger.
-      await Promise.all(this._lintingPromises);
+      if (taskSession.parameters.watch) {
+        // Warn since don't need to run the linters when in watch mode.
+        taskSession.logger.terminal.writeWarningLine("Linting isn't currently supported in watch mode.");
+      } else {
+        await Promise.all(this._lintingPromises);
+      }
     });
   }
 
