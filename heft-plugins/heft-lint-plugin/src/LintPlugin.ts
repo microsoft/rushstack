@@ -34,8 +34,10 @@ export default class LintPlugin implements IHeftTaskPlugin {
   private _tslintConfigFilePath: string | undefined;
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    // Use the changed files hook to kick off linting asynchronously
+    // Disable linting in watch mode. Some lint rules require the context of multiple files, which
+    // may not be available in watch mode.
     if (!taskSession.parameters.watch) {
+      // Use the changed files hook to kick off linting asynchronously
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-typescript-plugin',
         TYPESCRIPT_PLUGIN_NAME,
