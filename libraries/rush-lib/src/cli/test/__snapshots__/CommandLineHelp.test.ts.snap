@@ -78,6 +78,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
 "usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [-m] [--all]
+                [--ignore-hooks]
+                
 
 Adds specified package(s) to the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -117,6 +119,9 @@ Optional arguments:
                         same version of the dependency.
   --all                 If specified, the dependency will be added to all 
                         projects.
+  --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
+                        in rush.json. Make sure you know what you are 
+                        skipping.
 "
 `;
 
@@ -1047,7 +1052,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: remove 1`] = `
-"usage: rush remove [-h] [-s] -p PACKAGE [--all]
+"usage: rush remove [-h] [-s] -p PACKAGE [--all] [--ignore-hooks]
 
 Removes specified package(s) from the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\".
@@ -1062,6 +1067,9 @@ Optional arguments:
                         foo --package bar\\".
   --all                 If specified, the dependency will be removed from all 
                         projects that declare it.
+  --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
+                        in rush.json. Make sure you know what you are 
+                        skipping.
 "
 `;
 
