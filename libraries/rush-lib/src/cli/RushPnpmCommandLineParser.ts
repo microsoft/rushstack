@@ -28,7 +28,6 @@ import { PurgeManager } from '../logic/PurgeManager';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
-import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import { Utilities } from '../utilities/Utilities';
 import type { Subspace } from '../api/Subspace';
 
@@ -459,43 +458,41 @@ export class RushPnpmCommandLineParser {
         const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
         const newGlobalPatchedDependencies: Record<string, string> | undefined =
           commonPackageJson?.pnpm?.patchedDependencies;
-        const currentGlobalPatchedDependencies: Record<string, string> | undefined =
-          this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
+        // const currentGlobalPatchedDependencies: Record<string, string> | undefined =
+        //   this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
 
-        if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
-          const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
-          const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
-          // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
-          if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
-            FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
+        const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+        const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
+        // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
+        if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
+          FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
+          // eslint-disable-next-line no-console
+          console.log(`Copying ${commonTempPnpmPatchesFolder}`);
+          // eslint-disable-next-line no-console
+          console.log(`  --> ${rushPnpmPatchesFolder}`);
+          FileSystem.copyFiles({
+            sourcePath: commonTempPnpmPatchesFolder,
+            destinationPath: rushPnpmPatchesFolder
+          });
+        } else {
+          if (FileSystem.exists(rushPnpmPatchesFolder)) {
             // eslint-disable-next-line no-console
-            console.log(`Copying ${commonTempPnpmPatchesFolder}`);
-            // eslint-disable-next-line no-console
-            console.log(`  --> ${rushPnpmPatchesFolder}`);
-            FileSystem.copyFiles({
-              sourcePath: commonTempPnpmPatchesFolder,
-              destinationPath: rushPnpmPatchesFolder
-            });
-          } else {
-            if (FileSystem.exists(rushPnpmPatchesFolder)) {
-              // eslint-disable-next-line no-console
-              console.log(`Deleting ${rushPnpmPatchesFolder}`);
-              FileSystem.deleteFolder(rushPnpmPatchesFolder);
-            }
+            console.log(`Deleting ${rushPnpmPatchesFolder}`);
+            FileSystem.deleteFolder(rushPnpmPatchesFolder);
           }
-
-          // Update patchedDependencies to pnpm configuration file
-          this._rushConfiguration.pnpmOptions.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
-
-          // Rerun installation to update
-          await this._doRushUpdateAsync();
-
-          this._terminal.writeWarningLine(
-            `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the ` +
-              `"${RushConstants.commonFolderName}/${RushConstants.pnpmPatchesCommonFolderName}" folder.\n` +
-              '  Please commit this change to Git.'
-          );
         }
+
+        // Update patchedDependencies to pnpm configuration file
+        this._rushConfiguration.pnpmOptions.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
+
+        // Rerun installation to update
+        await this._doRushUpdateAsync();
+
+        this._terminal.writeWarningLine(
+          `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the ` +
+            `"${RushConstants.commonFolderName}/${RushConstants.pnpmPatchesCommonFolderName}" folder.\n` +
+            '  Please commit this change to Git.'
+        );
         break;
       }
     }
