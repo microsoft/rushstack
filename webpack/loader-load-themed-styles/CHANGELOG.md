@@ -1,6 +1,18 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Nov 2022 01:16:49 GMT and should not be manually modified.
+
+## 2.0.13
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
+
+## 2.0.12
+Mon, 14 Nov 2022 05:15:01 GMT
+
+### Patches
+
+- Updating webpack/loader-utils to resolve github advisory CVE-2022-37601. https://github.com/advisories/GHSA-76p3-8jx3-jpfq
 
 ## 2.0.11
 Tue, 08 Nov 2022 01:20:55 GMT

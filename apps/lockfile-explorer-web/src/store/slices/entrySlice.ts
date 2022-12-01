@@ -4,6 +4,11 @@
 import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
 import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { RootState } from '../index';
+import {
+  getBookmarksFromStorage,
+  removeBookmarkFromLocalStorage,
+  saveBookmarkToLocalStorage
+} from '../../helpers/localStorage';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type EntryState = {
@@ -12,6 +17,7 @@ type EntryState = {
     [key in LockfileEntryFilter]: boolean;
   };
   selectedEntryStack: LockfileEntry[];
+  selectedEntryForwardStack: LockfileEntry[];
   bookmarkedEntries: LockfileEntry[];
 };
 
@@ -24,6 +30,7 @@ const initialState: EntryState = {
     [LockfileEntryFilter.Doppelganger]: false
   },
   selectedEntryStack: [],
+  selectedEntryForwardStack: [],
   bookmarkedEntries: []
 };
 
@@ -34,30 +41,73 @@ const entrySlice = createSlice({
   reducers: {
     loadEntries: (state, payload: PayloadAction<LockfileEntry[]>) => {
       state.allEntries = payload.payload;
+      // Hydrate the bookmarks state
+      const bookmarkSet = getBookmarksFromStorage();
+      for (const entry of payload.payload) {
+        if (bookmarkSet.has(entry.rawEntryId)) {
+          state.bookmarkedEntries.push(entry);
+        }
+      }
     },
     setFilter: (state, payload: PayloadAction<{ filter: LockfileEntryFilter; state: boolean }>) => {
       state.filters[payload.payload.filter] = payload.payload.state;
     },
     clearStackAndPush: (state, payload: PayloadAction<LockfileEntry>) => {
       state.selectedEntryStack = [payload.payload];
+      state.selectedEntryForwardStack = [];
     },
     pushToStack: (state, payload: PayloadAction<LockfileEntry>) => {
       state.selectedEntryStack.push(payload.payload);
+      state.selectedEntryForwardStack = [];
+      if (payload.payload.kind === LockfileEntryFilter.Package) {
+        state.filters[LockfileEntryFilter.Project] = false;
+        state.filters[LockfileEntryFilter.Package] = true;
+      } else {
+        state.filters[LockfileEntryFilter.Project] = true;
+        state.filters[LockfileEntryFilter.Package] = false;
+      }
     },
     popStack: (state) => {
       if (state.selectedEntryStack.length > 1) {
-        state.selectedEntryStack.pop();
+        const poppedEntry = state.selectedEntryStack.pop() as LockfileEntry;
+        state.selectedEntryForwardStack.push(poppedEntry);
+
+        if (state.selectedEntryStack.length >= 1) {
+          const currEntry = state.selectedEntryStack[state.selectedEntryStack.length - 1];
+          if (currEntry.kind === LockfileEntryFilter.Package) {
+            state.filters[LockfileEntryFilter.Project] = false;
+            state.filters[LockfileEntryFilter.Package] = true;
+          } else {
+            state.filters[LockfileEntryFilter.Project] = true;
+            state.filters[LockfileEntryFilter.Package] = false;
+          }
+        }
+      }
+    },
+    forwardStack: (state) => {
+      if (state.selectedEntryForwardStack.length > 0) {
+        const poppedEntry = state.selectedEntryForwardStack.pop() as LockfileEntry;
+        state.selectedEntryStack.push(poppedEntry);
+        if (poppedEntry.kind === LockfileEntryFilter.Package) {
+          state.filters[LockfileEntryFilter.Project] = false;
+          state.filters[LockfileEntryFilter.Package] = true;
+        } else {
+          state.filters[LockfileEntryFilter.Project] = true;
+          state.filters[LockfileEntryFilter.Package] = false;
+        }
       }
     },
     addBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
       if (!state.bookmarkedEntries.includes(payload.payload)) {
         state.bookmarkedEntries.push(payload.payload);
+        saveBookmarkToLocalStorage(payload.payload);
       }
     },
     removeBookmark: (state, payload: PayloadAction<LockfileEntry>) => {
       state.bookmarkedEntries = state.bookmarkedEntries.filter(
         (entry: LockfileEntry) => entry.rawEntryId !== payload.payload.rawEntryId
       );
+      removeBookmarkFromLocalStorage(payload.payload);
     }
   }
 });
@@ -90,6 +140,7 @@ export const {
   clearStackAndPush,
   pushToStack,
   popStack,
+  forwardStack,
   addBookmark,
   removeBookmark
 } = entrySlice.actions;

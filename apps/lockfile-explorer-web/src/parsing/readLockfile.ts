@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
+import { IDependencyType } from './LockfileDependency';
 
 const serviceUrl: string = window.appContext.serviceUrl;
 
@@ -95,6 +96,8 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
   // Construct the graph
   for (const entry of allEntries) {
     for (const dependency of entry.dependencies) {
+      // Peer dependencies do not have a matching entry
+      if (dependency.dependencyType === IDependencyType.PEER_DEPENDENCY) continue;
       const matchedEntry = allEntriesById[dependency.entryId];
       if (matchedEntry) {
         // Create a two-way link between the dependency and the entry

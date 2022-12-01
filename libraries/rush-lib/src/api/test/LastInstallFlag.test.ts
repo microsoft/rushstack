@@ -82,7 +82,7 @@ describe(LastInstallFlag.name, () => {
 
     flag1.create();
     expect(() => {
-      flag2.checkValidAndReportStoreIssues('install');
+      flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' });
     }).toThrowError(/PNPM store path/);
   });
 
@@ -97,8 +97,25 @@ describe(LastInstallFlag.name, () => {
 
     flag1.create();
     expect(() => {
-      flag2.checkValidAndReportStoreIssues('install');
+      flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' });
     }).not.toThrow();
-    expect(flag2.checkValidAndReportStoreIssues('install')).toEqual(false);
+    expect(flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' })).toEqual(false);
+  });
+
+  it("ignores a specified option that doesn't match", () => {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      option1: 'a',
+      option2: 'b'
+    });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      option1: 'a',
+      option2: 'c'
+    });
+
+    flag1.create();
+    expect(() => {
+      flag2.isValid({ statePropertiesToIgnore: ['option2'] });
+    }).not.toThrow();
+    expect(flag2.isValid({ statePropertiesToIgnore: ['option2'] })).toEqual(true);
   });
 });

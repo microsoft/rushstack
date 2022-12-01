@@ -5,6 +5,7 @@ import colors from 'colors/safe';
 import * as fetch from 'node-fetch';
 import * as os from 'os';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import * as semver from 'semver';
 import {
   FileSystem,
@@ -151,15 +152,14 @@ export interface IInstallManagerOptions {
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
-  private _rushConfiguration: RushConfiguration;
-  private _rushGlobalFolder: RushGlobalFolder;
-  private _commonTempInstallFlag: LastInstallFlag;
-  private _commonTempLinkFlag: LastLinkFlag;
-  private _commonTempSplitInstallFlag: LastInstallFlag | undefined;
-  private _installRecycler: AsyncRecycler;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _rushGlobalFolder: RushGlobalFolder;
+  private readonly _commonTempLinkFlag: LastLinkFlag;
+  private readonly _commonTempInstallFlag: LastInstallFlag;
+  private readonly _commonTempSplitInstallFlag: LastInstallFlag | undefined;
+  private readonly _installRecycler: AsyncRecycler;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
-
   /**
    * If deferredInstallationScripts, installation will be divided into two stages:
    * Stage 1: rush implicitly adds "--ignore-scripts" for "pnpm install"
@@ -169,7 +169,7 @@ export abstract class BaseInstallManager {
    */
   private _deferredInstallationScripts: boolean = false;
 
-  private _options: IInstallManagerOptions;
+  private readonly _options: IInstallManagerOptions;
 
   private readonly _terminalProvider: ITerminalProvider;
   private readonly _terminal: Terminal;
@@ -185,8 +185,10 @@ export abstract class BaseInstallManager {
     this._installRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
-    this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
+
+    // FIXME: This line does not respect clean install after npmrc changes feature.
+    this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
 
     if (options.includeSplitWorkspace && rushConfiguration.hasSplitWorkspaceProject) {
       this._commonTempSplitInstallFlag = LastInstallFlagFactory.getCommonTempSplitFlag(rushConfiguration);
@@ -267,7 +269,7 @@ export abstract class BaseInstallManager {
       }
     }
 
-    const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
+    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync();
 
     if (this.options.checkOnly) {
       return;
@@ -298,10 +300,10 @@ export abstract class BaseInstallManager {
       }
     }
     if (this._deferredInstallationScripts || this.options.ignoreScripts) {
-      this.commonTempInstallFlag.mergeFromObject({
+      this._commonTempInstallFlag.mergeFromObject({
         ignoreScripts: true
       });
-      this.commonTempSplitInstallFlag?.mergeFromObject({
+      this._commonTempSplitInstallFlag?.mergeFromObject({
         ignoreScripts: true
       });
     }
@@ -310,15 +312,21 @@ export abstract class BaseInstallManager {
     // perform a clean install if selected projects are not matched. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
+    const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
+      .configuration.cleanInstallAfterNpmrcChanges
+      ? ['npmrcHash'] // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
+      : undefined;
     const cleanInstall: boolean =
-      !this._commonTempInstallFlag.checkValidAndReportStoreIssues(
-        this.options.allowShrinkwrapUpdates ? 'update' : 'install'
-      ) ||
+      !this._commonTempInstallFlag.checkValidAndReportStoreIssues({
+        rushVerb: this.options.allowShrinkwrapUpdates ? 'update' : 'install',
+        statePropertiesToIgnore: optionsToIgnore
+      }) ||
       (this.options.includeSplitWorkspace &&
         !!this._commonTempSplitInstallFlag &&
-        !this._commonTempSplitInstallFlag.checkValidAndReportStoreIssues(
-          this.options.allowShrinkwrapUpdates ? 'update' : 'install'
-        ));
+        !this._commonTempSplitInstallFlag.checkValidAndReportStoreIssues({
+          rushVerb: this.options.allowShrinkwrapUpdates ? 'update' : 'install',
+          statePropertiesToIgnore: optionsToIgnore
+        }));
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -452,7 +460,11 @@ export abstract class BaseInstallManager {
     return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
   }
 
-  protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
+  protected async prepareAsync(): Promise<{
+    variantIsUpToDate: boolean;
+    shrinkwrapIsUpToDate: boolean;
+    npmrcHash: string | undefined;
+  }> {
     // Check the policies
     PolicyValidator.validatePolicy(this._rushConfiguration, this.options);
 
@@ -556,7 +568,7 @@ export abstract class BaseInstallManager {
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
-    Utilities.syncNpmrc(
+    const npmrcText: string | undefined = Utilities.syncNpmrc(
       this._rushConfiguration.commonRushConfigFolder,
       this._rushConfiguration.commonTempFolder
     );
@@ -593,6 +605,22 @@ export abstract class BaseInstallManager {
     // Delete commonTempSplitFolder if no split workspace projects to avoid confusion
     if (!this.rushConfiguration.hasSplitWorkspaceProject) {
       FileSystem.deleteFolder(this.rushConfiguration.commonTempSplitFolder);
+    }
+
+    const npmrcHash: string | undefined = npmrcText
+      ? crypto.createHash('sha1').update(npmrcText).digest('hex')
+      : undefined;
+
+    // Copy the committed patches folder if using pnpm
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+      const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
+      if (FileSystem.exists(rushPnpmPatchesFolder)) {
+        FileSystem.copyFiles({
+          sourcePath: rushPnpmPatchesFolder,
+          destinationPath: commonTempPnpmPatchesFolder
+        });
+      }
     }
 
     // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
@@ -651,7 +679,7 @@ export abstract class BaseInstallManager {
       }
     }
 
-    return { shrinkwrapIsUpToDate, variantIsUpToDate };
+    return { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash };
   }
 
   /**

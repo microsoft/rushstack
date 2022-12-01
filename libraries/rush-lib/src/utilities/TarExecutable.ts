@@ -160,7 +160,8 @@ export class TarExecutable {
       childProcess.stdin!.end();
     }
 
-    const [tarExitCode] = await events.once(childProcess, 'exit');
+    // Wait for process to exit and all streams to close
+    const [tarExitCode] = await events.once(childProcess, 'close');
 
     fileWriter.write(
       ['======== END PROCESS OUTPUT ========', '', `Exited with code "${tarExitCode}"`].join('\n')

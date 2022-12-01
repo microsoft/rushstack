@@ -1,6 +1,25 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Tue, 08 Nov 2022 01:20:56 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Nov 2022 01:16:49 GMT and should not be manually modified.
+
+## 3.2.64
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
+
+## 3.2.63
+Fri, 18 Nov 2022 04:02:22 GMT
+
+### Patches
+
+- Refactor the logic of getting file hashes under git submodule paths
+
+## 3.2.62
+Tue, 15 Nov 2022 18:43:30 GMT
+
+### Patches
+
+- Get file hashes under git submodule paths when analyzing repo state
 
 ## 3.2.61
 Tue, 08 Nov 2022 01:20:56 GMT
