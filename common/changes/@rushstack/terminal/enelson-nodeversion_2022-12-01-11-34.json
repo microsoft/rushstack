@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "The wrapWords method now respects existing spaces and newlines in a pre-formatted message.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
