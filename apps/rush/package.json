@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.83.0-pr3481.9",
+  "version": "5.86.0-pr3481.10",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -36,7 +36,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/rush-lib": "workspace:5.83.0-pr3481.9",
+    "@microsoft/rush-lib": "workspace:5.86.0-pr3481.10",
     "@rushstack/node-core-library": "workspace:*",
     "colors": "~1.2.1",
     "semver": "~7.3.0"
@@ -45,8 +45,8 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
-    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:5.83.0-pr3481.9",
-    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:5.83.0-pr3481.9",
+    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:5.86.0-pr3481.10",
+    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:5.86.0-pr3481.10",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@types/semver": "7.3.5"
