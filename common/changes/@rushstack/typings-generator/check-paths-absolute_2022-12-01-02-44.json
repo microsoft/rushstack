@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Add a check to ensure that relative paths passed to generateTypingsAsync and getOutputFilePaths are actually relative.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}
