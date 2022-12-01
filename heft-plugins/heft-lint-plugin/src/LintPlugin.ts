@@ -61,12 +61,17 @@ export default class LintPlugin implements IHeftTaskPlugin {
           );
         }
       );
-
-      taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
-        // Run the linters to completion. Linters emit errors and warnings to the logger.
-        await Promise.all(this._lintingPromises);
-      });
     }
+
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
+      // Run the linters to completion. Linters emit errors and warnings to the logger.
+      if (taskSession.parameters.watch) {
+        // Warn since don't need to run the linters when in watch mode.
+        taskSession.logger.terminal.writeWarningLine("Linting isn't currently supported in watch mode.");
+      } else {
+        await Promise.all(this._lintingPromises);
+      }
+    });
   }
 
   private async _ensureInitializedAsync(
