@@ -92,7 +92,7 @@ async function* _waitForSourceChangesAsync(
       // We can perform this check in one call to git to save time.
       const unseenIgnoredFilePaths: Set<string> = skipIgnoreCheck
         ? new Set()
-        : await git.checkIgnore(unseenFilePaths);
+        : await git.checkIgnoreAsync(unseenFilePaths);
       const unseenSourceFilePaths: Set<string> = Selection.difference(
         unseenFilePaths,
         unseenIgnoredFilePaths
