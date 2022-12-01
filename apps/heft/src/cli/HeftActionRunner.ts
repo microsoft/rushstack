@@ -497,6 +497,9 @@ export class HeftActionRunner {
               cwd: watcherCwd,
               // Ignore "node_modules" files and known-unimportant files
               ignored: ['node_modules/**'],
+              // Ignore the initial scan of the build folder. We manually obtain the state of non-ignored
+              // files using "git ls-files" due to the overhead of the initial scan.
+              ignoreInitial: true,
               // Debounce file write events within 100 ms of each other
               awaitWriteFinish: {
                 stabilityThreshold: 100
@@ -511,7 +514,7 @@ export class HeftActionRunner {
       },
       () => `Starting watcher at path "${watcherCwd}"`,
       () => 'Finished starting watcher',
-      terminal.writeVerboseLine.bind(terminal)
+      terminal.writeLine.bind(terminal)
     );
 
     const git: GitUtilities = new GitUtilities(this._heftConfiguration.buildFolderPath);
@@ -566,7 +569,15 @@ export class HeftActionRunner {
         changedFiles,
         globChangedFilesFn,
         fileEventListener
-      ).then(() => false);
+      ).then(
+        () => false,
+        (error: unknown) => {
+          // Re-throw the error so that it doesn't get swallowed. This way we can ensure that the list of
+          // changed files is not cleared, since we will want to resurface the error on future incremental
+          // builds.
+          throw error;
+        }
+      );
 
       try {
         // Whichever promise settles first will be the result of the race.
