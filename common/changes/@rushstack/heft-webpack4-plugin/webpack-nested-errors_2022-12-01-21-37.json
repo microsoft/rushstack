@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "comment": "Log errors and warnings from nested compilations.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin"
+}
