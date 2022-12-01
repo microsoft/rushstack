@@ -269,7 +269,7 @@ export abstract class BaseInstallManager {
       }
     }
 
-    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync();
+    const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
 
     if (this.options.checkOnly) {
       return;
