@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { Path } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -30,14 +29,25 @@ export default class SassPlugin implements IHeftPlugin {
    * Generate typings for Sass files before TypeScript compilation.
    */
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
+    const slashNormalizedBuildFolderPath: string = Path.convertToSlashes(heftConfiguration.buildFolderPath);
+
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration);
+      await this._runSassTypingsGeneratorAsync(
+        taskSession,
+        heftConfiguration,
+        slashNormalizedBuildFolderPath
+      );
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runSassTypingsGeneratorAsync(taskSession, heftConfiguration, runIncrementalOptions);
+        await this._runSassTypingsGeneratorAsync(
+          taskSession,
+          heftConfiguration,
+          slashNormalizedBuildFolderPath,
+          runIncrementalOptions
+        );
       }
     );
   }
@@ -45,59 +55,60 @@ export default class SassPlugin implements IHeftPlugin {
   private async _runSassTypingsGeneratorAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
+    slashNormalizedBuildFolderPath: string,
     runIncrementalOptions?: IHeftTaskRunIncrementalHookOptions
   ): Promise<void> {
     taskSession.logger.terminal.writeVerboseLine('Starting sass typings generation...');
     const sassProcessor: SassProcessor = await this._loadSassProcessorAsync(
       heftConfiguration,
+      slashNormalizedBuildFolderPath,
       taskSession.logger
     );
     // If we have the incremental options, use them to determine which files to process.
     // Otherwise, process all files. The typings generator also provides the file paths
     // as relative paths from the sourceFolderPath.
-    let changedFilePaths: string[] | undefined;
+    let changedRelativeFilePaths: string[] | undefined;
     if (runIncrementalOptions) {
-      changedFilePaths = [];
-      const filePaths: string[] = runIncrementalOptions.globChangedFiles(sassProcessor.inputFileGlob, {
-        cwd: sassProcessor.sourceFolderPath,
-        ignore: Array.from(sassProcessor.ignoredFileGlobs)
-      });
-      const deleteFilePromises: Promise<void>[] = [];
-      for (const filePath of filePaths) {
-        // Filter out and delete any files that are removed and all their output files
-        const absoluteFilePath: string = path.join(sassProcessor.sourceFolderPath, filePath);
-        if (runIncrementalOptions.changedFiles.get(absoluteFilePath)!.version === undefined) {
-          const deletePromises: Promise<void>[] = sassProcessor
-            .getOutputFilePaths(filePath)
-            .map(async (outputFilePath) => {
-              await FileSystem.deleteFileAsync(outputFilePath);
-            });
-          for (const deletePromise of deletePromises) {
-            deleteFilePromises.push(deletePromise);
-          }
-        } else {
-          changedFilePaths.push(filePath);
+      changedRelativeFilePaths = [];
+      const relativeFilePaths: string[] = runIncrementalOptions.globChangedFiles(
+        sassProcessor.inputFileGlob,
+        {
+          cwd: sassProcessor.sourceFolderPath,
+          ignore: Array.from(sassProcessor.ignoredFileGlobs),
+          absolute: false
+        }
+      );
+      for (const relativeFilePath of relativeFilePaths) {
+        // We only care about modified files, not deleted files.
+        const absoluteFilePath: string = `${sassProcessor.sourceFolderPath}/${relativeFilePath}`;
+        if (runIncrementalOptions.changedFiles.get(absoluteFilePath)?.version !== undefined) {
+          changedRelativeFilePaths.push(relativeFilePath);
         }
       }
-      await Promise.all(deleteFilePromises);
+      if (changedRelativeFilePaths.length === 0) {
+        return;
+      }
     }
 
-    await sassProcessor.generateTypingsAsync(changedFilePaths);
+    taskSession.logger.terminal.writeLine('Generating sass typings...');
+    await sassProcessor.generateTypingsAsync(changedRelativeFilePaths);
     taskSession.logger.terminal.writeLine('Generated sass typings');
   }
 
   private async _loadSassProcessorAsync(
     heftConfiguration: HeftConfiguration,
+    slashNormalizedBuildFolderPath: string,
     logger: IScopedLogger
   ): Promise<SassProcessor> {
     if (!this._sassProcessor) {
       const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
         heftConfiguration,
+        slashNormalizedBuildFolderPath,
         logger
       );
       this._sassProcessor = new SassProcessor({
         sassConfiguration,
-        buildFolder: heftConfiguration.buildFolderPath
+        buildFolder: slashNormalizedBuildFolderPath
       });
     }
     return this._sassProcessor;
@@ -105,10 +116,10 @@ export default class SassPlugin implements IHeftPlugin {
 
   private async _loadSassConfigurationAsync(
     heftConfiguration: HeftConfiguration,
+    slashNormalizedBuildFolderPath: string,
     logger: IScopedLogger
   ): Promise<ISassConfiguration> {
     if (!this._sassConfiguration) {
-      const { buildFolderPath } = heftConfiguration;
       if (!SassPlugin._sassConfigurationLoader) {
         SassPlugin._sassConfigurationLoader = new ConfigurationFile<ISassConfigurationJson>({
           projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
@@ -119,25 +130,22 @@ export default class SassPlugin implements IHeftPlugin {
       const sassConfigurationJson: ISassConfigurationJson | undefined =
         await SassPlugin._sassConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
           logger.terminal,
-          buildFolderPath,
+          slashNormalizedBuildFolderPath,
           heftConfiguration.rigConfig
         );
       if (sassConfigurationJson) {
         if (sassConfigurationJson.srcFolder) {
-          sassConfigurationJson.srcFolder = path.resolve(buildFolderPath, sassConfigurationJson.srcFolder);
+          sassConfigurationJson.srcFolder = `${slashNormalizedBuildFolderPath}/${sassConfigurationJson.srcFolder}`;
         }
 
         if (sassConfigurationJson.generatedTsFolder) {
-          sassConfigurationJson.generatedTsFolder = path.resolve(
-            buildFolderPath,
-            sassConfigurationJson.generatedTsFolder
-          );
+          sassConfigurationJson.generatedTsFolder = `${slashNormalizedBuildFolderPath}/${sassConfigurationJson.generatedTsFolder}`;
         }
 
         function resolveFolderArray(folders: string[] | undefined): void {
           if (folders) {
             for (let i: number = 0; i < folders.length; i++) {
-              folders[i] = path.resolve(buildFolderPath, folders[i]);
+              folders[i] = `${slashNormalizedBuildFolderPath}/${folders[i]}`;
             }
           }
         }
@@ -148,11 +156,14 @@ export default class SassPlugin implements IHeftPlugin {
 
       // Set defaults if no configuration file or option was found
       this._sassConfiguration = {
-        srcFolder: `${buildFolderPath}/src`,
-        generatedTsFolder: `${buildFolderPath}/temp/sass-ts`,
+        srcFolder: `${slashNormalizedBuildFolderPath}/src`,
+        generatedTsFolder: `${slashNormalizedBuildFolderPath}/temp/sass-ts`,
         exportAsDefault: true,
         fileExtensions: ['.sass', '.scss', '.css'],
-        importIncludePaths: [`${buildFolderPath}/node_modules`, `${buildFolderPath}/src`],
+        importIncludePaths: [
+          `${slashNormalizedBuildFolderPath}/node_modules`,
+          `${slashNormalizedBuildFolderPath}/src`
+        ],
         ...sassConfigurationJson
       };
     }
