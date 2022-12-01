@@ -46,7 +46,7 @@
     "jszip": "~3.7.1",
     "lodash": "~4.17.15",
     "node-fetch": "2.6.7",
-    "npm-check": "~5.9.2",
+    "npm-check": "~6.0.1",
     "npm-package-arg": "~6.1.0",
     "npm-packlist": "~2.1.2",
     "read-package-tree": "~5.1.5",

@@ -127,7 +127,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._disableBuildCache = options.disableBuildCache;
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
-    this._watchDebounceMs = options.watchDebounceMs ?? 1000;
+    this._watchDebounceMs = options.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs;
     this._alwaysWatch = options.alwaysWatch;
     this._alwaysInstall = options.alwaysInstall;
     this._knownPhases = options.phases;

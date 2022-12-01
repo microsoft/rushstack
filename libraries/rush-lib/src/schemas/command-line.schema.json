@@ -202,7 +202,7 @@
                 },
                 "debounceMs": {
                   "title": "Debounce Timeout in Milliseconds",
-                  "description": "When watching, how long to wait after the last encountered file system event before execution. If another file system event occurs in this interval, the timeout will reset.",
+                  "description": "When watching, how long to wait after the last encountered file system event before execution. If another file system event occurs in this interval, the timeout will reset. Defaults to 1000ms (1 second).",
                   "type": "number"
                 },
                 "watchPhases": {

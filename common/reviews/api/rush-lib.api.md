@@ -917,6 +917,7 @@ export class RushConstants {
     static readonly commonFolderName: string;
     static readonly commonVersionsFilename: string;
     static readonly defaultMaxInstallAttempts: number;
+    static readonly defaultWatchDebounceMs: number;
     static readonly experimentsFilename: string;
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: string;
