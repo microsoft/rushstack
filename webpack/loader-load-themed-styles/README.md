@@ -28,7 +28,6 @@ var css = require("@microsoft/loader-load-themed-styles!css!./file.css");
           {
             loader: "@microsoft/loader-load-themed-styles",  // creates style nodes from JS strings
             options: {
-              namedExport: 'default',
               async: false
             }
           },
@@ -59,22 +58,6 @@ var css = require("@microsoft/loader-load-themed-styles!css!./file.css");
 ```
 
 ## Options
-
-### `namedExport` (string, defaults to `undefined`)
-
-By default, css modules will be exported as a commonjs export:
-
-```js
-module.exports = { ... };
-```
-
-To override this, you may provide a named export to export to a specifically named thing. This
-is useful in exporting as the default in es6 module import scenarios. For example, providing
-"default" for the named export will output this:
-
-```js
-module.exports.default = { ... };
-```
 
 ### `async` (boolean, defaults to `false`)
 

@@ -14,6 +14,7 @@ import { InstallHelpers } from './installManager/InstallHelpers';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConstants } from './RushConstants';
 import { LastInstallFlag } from '../api/LastInstallFlag';
+import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 
 interface IAutoinstallerOptions {
   autoinstallerName: string;
@@ -30,7 +31,8 @@ export class Autoinstaller {
   public constructor(options: IAutoinstallerOptions) {
     this.name = options.autoinstallerName;
     this._rushConfiguration = options.rushConfiguration;
-    this._restrictConsoleOutput = options.restrictConsoleOutput || false;
+    this._restrictConsoleOutput =
+      options.restrictConsoleOutput ?? RushCommandLineParser.shouldRestrictConsoleOutput();
 
     Autoinstaller.validateName(this.name);
   }
@@ -91,54 +93,66 @@ export class Autoinstaller {
 
     const lock: LockFile = await LockFile.acquire(autoinstallerFullPath, 'autoinstaller');
 
-    // Example: .../common/autoinstallers/my-task/.rush/temp
-    const lastInstallFlagPath: string = path.join(
-      autoinstallerFullPath,
-      RushConstants.projectRushFolderName,
-      'temp'
-    );
+    try {
+      // Example: .../common/autoinstallers/my-task/.rush/temp
+      const lastInstallFlagPath: string = path.join(
+        autoinstallerFullPath,
+        RushConstants.projectRushFolderName,
+        'temp'
+      );
 
-    const packageJsonPath: string = path.join(autoinstallerFullPath, 'package.json');
-    const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
+      const packageJsonPath: string = path.join(autoinstallerFullPath, 'package.json');
+      const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
 
-    const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
-      nodeVersion: process.versions.node,
-      packageManager: this._rushConfiguration.packageManager,
-      packageManagerVersion: this._rushConfiguration.packageManagerToolVersion,
-      autoinstallerPackageJson: packageJson,
-      rushJsonFolder: this._rushConfiguration.rushJsonFolder
-    });
-
-    if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
-      // Example: ../common/autoinstallers/my-task/node_modules
-      const nodeModulesFolder: string = path.join(autoinstallerFullPath, 'node_modules');
-
-      if (FileSystem.exists(nodeModulesFolder)) {
-        this._logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
-        FileSystem.ensureEmptyFolder(nodeModulesFolder);
-      }
-
-      // Copy: .../common/autoinstallers/my-task/.npmrc
-      Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, autoinstallerFullPath);
-
-      this._logIfConsoleOutputIsNotRestricted(`Installing dependencies under ${autoinstallerFullPath}...\n`);
-
-      Utilities.executeCommand({
-        command: this._rushConfiguration.packageManagerToolFilename,
-        args: ['install', '--frozen-lockfile'],
-        workingDirectory: autoinstallerFullPath,
-        keepEnvironment: true
+      const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
+        nodeVersion: process.versions.node,
+        packageManager: this._rushConfiguration.packageManager,
+        packageManagerVersion: this._rushConfiguration.packageManagerToolVersion,
+        autoinstallerPackageJson: packageJson,
+        rushJsonFolder: this._rushConfiguration.rushJsonFolder
       });
 
-      // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
-      lastInstallFlag.create();
+      // Example: ../common/autoinstallers/my-task/node_modules
+      const nodeModulesFolder: string = `${autoinstallerFullPath}/${RushConstants.nodeModulesFolderName}`;
+      const flagPath: string = `${nodeModulesFolder}/rush-autoinstaller.flag`;
+      const isLastInstallFlagDirty: boolean = !lastInstallFlag.isValid() || !FileSystem.exists(flagPath);
 
-      this._logIfConsoleOutputIsNotRestricted('Auto install completed successfully\n');
-    } else {
-      this._logIfConsoleOutputIsNotRestricted('Autoinstaller folder is already up to date\n');
+      if (isLastInstallFlagDirty || lock.dirtyWhenAcquired) {
+        if (FileSystem.exists(nodeModulesFolder)) {
+          this._logIfConsoleOutputIsNotRestricted('Deleting old files from ' + nodeModulesFolder);
+          FileSystem.ensureEmptyFolder(nodeModulesFolder);
+        }
+
+        // Copy: .../common/autoinstallers/my-task/.npmrc
+        Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, autoinstallerFullPath);
+
+        this._logIfConsoleOutputIsNotRestricted(
+          `Installing dependencies under ${autoinstallerFullPath}...\n`
+        );
+
+        Utilities.executeCommand({
+          command: this._rushConfiguration.packageManagerToolFilename,
+          args: ['install', '--frozen-lockfile'],
+          workingDirectory: autoinstallerFullPath,
+          keepEnvironment: true
+        });
+
+        // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
+        lastInstallFlag.create();
+
+        FileSystem.writeFile(
+          flagPath,
+          'If this file is deleted, Rush will assume that the node_modules folder has been cleaned and will reinstall it.'
+        );
+
+        this._logIfConsoleOutputIsNotRestricted('Auto install completed successfully\n');
+      } else {
+        this._logIfConsoleOutputIsNotRestricted('Autoinstaller folder is already up to date\n');
+      }
+    } finally {
+      // Ensure the lockfile is released when we are finished.
+      lock.release();
     }
-
-    lock.release();
   }
 
   public update(): void {

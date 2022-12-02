@@ -1,6 +1,124 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+
+## 7.33.6
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 7.33.5
+Wed, 26 Oct 2022 00:16:16 GMT
+
+### Patches
+
+- Update the @microsoft/tsdoc dependency version to 0.14.2.
+
+## 7.33.4
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 7.33.3
+Mon, 17 Oct 2022 15:16:00 GMT
+
+### Patches
+
+- Fix a regression where the "fileUrlPath" property would contain a malformed path when API Extractor is run on Windows.
+
+## 7.33.2
+Fri, 14 Oct 2022 15:26:31 GMT
+
+### Patches
+
+- Fix references from computed properties #3629
+
+## 7.33.1
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 7.33.0
+Tue, 11 Oct 2022 23:49:12 GMT
+
+### Minor changes
+
+- Extract the original source file path for relevant API items and add a new projectFolderUrl setting to the api-extractor.json config that allows one to specify what URL their project folder can be found at.
+
+## 7.32.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 7.32.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Update parser to TypeScript 4.8.
+
+## 7.31.2
+Wed, 21 Sep 2022 20:21:10 GMT
+
+_Version update only_
+
+## 7.31.1
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 7.31.0
+Tue, 13 Sep 2022 00:16:55 GMT
+
+### Minor changes
+
+- Fix an issue where aliased classes sometimes had incorrect canonical references in *.api.json (GitHub  #3593)
+
+## 7.30.1
+Mon, 12 Sep 2022 22:27:48 GMT
+
+### Patches
+
+- Fix a recent regression where items exported from both the entry point and from an exported namespace appeared only once in the API doc model (GitHub #3619)
+
+## 7.30.0
+Fri, 02 Sep 2022 17:48:42 GMT
+
+### Minor changes
+
+- Add new "apiReport.includeForgottenExports" and "docModel.includeForgottenExports" properties to control whether forgotten exports are included in the API report and doc model files.
+- Fix incorrect declaration references for symbols not exported from the package's entry point.
+
+## 7.29.5
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 7.29.4
+Wed, 24 Aug 2022 00:14:38 GMT
+
+### Patches
+
+- Remove use of LegacyAdapters.sortStable
+
+## 7.29.3
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 7.29.2
+Wed, 10 Aug 2022 09:52:12 GMT
+
+### Patches
+
+- Fix incorrect declaration references for local symbols within namespaces
+
+## 7.29.1
+Wed, 10 Aug 2022 08:12:16 GMT
+
+### Patches
+
+- Fix a regression where .api.json excerpts were sometimes missing tokens (GitHub #3561), and generally improve the quality of excerpt generation
 
 ## 7.29.0
 Wed, 03 Aug 2022 18:40:35 GMT

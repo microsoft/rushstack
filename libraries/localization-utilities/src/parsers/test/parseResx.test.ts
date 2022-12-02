@@ -56,7 +56,8 @@ describe(parseResx.name, () => {
       | 'resxWithSchema'
       | 'stringWithoutComment'
       | 'stringWithQuotemarks'
-      | 'withNewlines',
+      | 'withNewlines'
+      | 'resxWithDuplicateEntry',
     optionsOverride: Partial<IParseResxOptions> = {}
   ): Promise<void> {
     const content: string = await FileSystem.readFileAsync(`${__dirname}/testResxFiles/${filename}.resx`);
@@ -133,5 +134,9 @@ describe(parseResx.name, () => {
         resxNewlineNormalization: NewlineKind.Lf
       });
     });
+  });
+
+  it('fails to parse a RESX file with a duplicate string', async () => {
+    await testResxAsync('resxWithDuplicateEntry');
   });
 });

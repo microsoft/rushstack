@@ -18,6 +18,11 @@ import {
   IApiTypeParameterListMixinJson
 } from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
+import {
+  IApiExportedMixinJson,
+  IApiExportedMixinOptions,
+  ApiExportedMixin
+} from '../mixins/ApiExportedMixin';
 
 /**
  * Constructor options for {@link ApiTypeAlias}.
@@ -27,11 +32,15 @@ export interface IApiTypeAliasOptions
   extends IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiDeclaredItemOptions,
-    IApiTypeParameterListMixinOptions {
+    IApiTypeParameterListMixinOptions,
+    IApiExportedMixinOptions {
   typeTokenRange: IExcerptTokenRange;
 }
 
-export interface IApiTypeAliasJson extends IApiDeclaredItemJson, IApiTypeParameterListMixinJson {
+export interface IApiTypeAliasJson
+  extends IApiDeclaredItemJson,
+    IApiTypeParameterListMixinJson,
+    IApiExportedMixinJson {
   typeTokenRange: IExcerptTokenRange;
 }
 
@@ -62,7 +71,7 @@ export interface IApiTypeAliasJson extends IApiDeclaredItemJson, IApiTypeParamet
  * @public
  */
 export class ApiTypeAlias extends ApiTypeParameterListMixin(
-  ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))
+  ApiNameMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem)))
 ) {
   /**
    * An {@link Excerpt} that describes the type of the alias.
@@ -118,8 +127,9 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Exports, nameComponent)
+      .addNavigationStep(navigation, nameComponent)
       .withMeaning(Meaning.TypeAlias);
   }
 }

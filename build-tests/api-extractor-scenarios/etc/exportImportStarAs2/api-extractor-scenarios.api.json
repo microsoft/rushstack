@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -177,6 +177,7 @@
           "canonicalReference": "api-extractor-scenarios!ns:namespace",
           "docComment": "",
           "excerptTokens": [],
+          "fileUrlPath": "src/exportImportStarAs2/index.ts",
           "releaseTag": "None",
           "name": "ns",
           "preserveMemberOrder": false,
@@ -191,22 +192,19 @@
                   "text": "export declare function exportedApi(): "
                 },
                 {
-                  "kind": "Content",
-                  "text": "forgottenNs."
-                },
-                {
                   "kind": "Reference",
-                  "text": "ForgottenClass",
-                  "canonicalReference": "api-extractor-scenarios!ForgottenClass:class"
+                  "text": "forgottenNs.ForgottenClass",
+                  "canonicalReference": "api-extractor-scenarios!~ForgottenClass:class"
                 },
                 {
                   "kind": "Content",
                   "text": ";"
                 }
               ],
+              "fileUrlPath": "src/exportImportStarAs2/ns.ts",
               "returnTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 3
+                "endIndex": 2
               },
               "releaseTag": "Public",
               "overloadIndex": 1,

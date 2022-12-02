@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -177,6 +177,7 @@
           "canonicalReference": "api-extractor-scenarios!calculator:namespace",
           "docComment": "",
           "excerptTokens": [],
+          "fileUrlPath": "src/exportImportStarAs/index.ts",
           "releaseTag": "None",
           "name": "calculator",
           "preserveMemberOrder": false,
@@ -215,6 +216,7 @@
                   "text": ";"
                 }
               ],
+              "fileUrlPath": "src/exportImportStarAs/calculator.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -243,21 +245,22 @@
             },
             {
               "kind": "Variable",
-              "canonicalReference": "api-extractor-scenarios!calculator.calucatorVersion:var",
+              "canonicalReference": "api-extractor-scenarios!calculator.calculatorVersion:var",
               "docComment": "/**\n * Returns the version of the calculator.\n *\n * @public\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "calucatorVersion: "
+                  "text": "calculatorVersion: "
                 },
                 {
                   "kind": "Content",
                   "text": "string"
                 }
               ],
+              "fileUrlPath": "src/exportImportStarAs/common.ts",
               "isReadonly": true,
               "releaseTag": "Public",
-              "name": "calucatorVersion",
+              "name": "calculatorVersion",
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -297,6 +300,7 @@
                   "text": ";"
                 }
               ],
+              "fileUrlPath": "src/exportImportStarAs/calculator.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -330,6 +334,7 @@
           "canonicalReference": "api-extractor-scenarios!calculator2:namespace",
           "docComment": "",
           "excerptTokens": [],
+          "fileUrlPath": "src/exportImportStarAs/index.ts",
           "releaseTag": "None",
           "name": "calculator2",
           "preserveMemberOrder": false,
@@ -368,6 +373,7 @@
                   "text": ";"
                 }
               ],
+              "fileUrlPath": "src/exportImportStarAs/calculator2.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -396,21 +402,22 @@
             },
             {
               "kind": "Variable",
-              "canonicalReference": "api-extractor-scenarios!calculator2.calucatorVersion:var",
+              "canonicalReference": "api-extractor-scenarios!calculator2.calculatorVersion:var",
               "docComment": "/**\n * Returns the version of the calculator.\n *\n * @public\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "calucatorVersion: "
+                  "text": "calculatorVersion: "
                 },
                 {
                   "kind": "Content",
                   "text": "string"
                 }
               ],
+              "fileUrlPath": "src/exportImportStarAs/common.ts",
               "isReadonly": true,
               "releaseTag": "Public",
-              "name": "calucatorVersion",
+              "name": "calculatorVersion",
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -450,6 +457,7 @@
                   "text": ";"
                 }
               ],
+              "fileUrlPath": "src/exportImportStarAs/calculator2.ts",
               "returnTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6

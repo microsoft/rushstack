@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as os from 'os';
 import * as path from 'path';
 import { FileSystem, FileSystemStats, JsonFile } from '@rushstack/node-core-library';
 
@@ -11,39 +12,121 @@ import { RushSession } from '../pluginFramework/RushSession';
 /**
  * @beta
  */
+export interface ITelemetryMachineInfo {
+  /**
+   * The CPU architecture
+   * @example `"AMD64"`
+   */
+  machineArchitecture: string;
+
+  /**
+   * The CPU model
+   * * @example `"AMD Ryzen 7 3700X 8-Core Processor"`
+   */
+  machineCpu: string;
+
+  /**
+   * The number of logical CPU cores.
+   */
+  machineCores: number;
+
+  /**
+   * The total amount of RAM on the machine, in MiB.
+   */
+  machineTotalMemoryMiB: number;
+
+  /**
+   * The amount of free RAM on the machine at the end of execution, in MiB.
+   */
+  machineFreeMemoryMiB: number;
+}
+
+/**
+ * @beta
+ */
+export interface ITelemetryOperationResult {
+  /**
+   * The names of operations that this operation depends on.
+   */
+  dependencies: string[];
+
+  /**
+   * The status code for the operation.
+   */
+  result: string;
+
+  /**
+   * A timestamp in milliseconds (from `performance.now()`) when the operation started.
+   * If the operation was blocked, will be `undefined`.
+   */
+  startTimestampMs?: number;
+
+  /**
+   * A timestamp in milliseconds (from `performance.now()`) when the operation finished.
+   * If the operation was blocked, will be `undefined`.
+   */
+  endTimestampMs?: number;
+
+  /**
+   * Duration in milliseconds when the operation does not hit cache
+   */
+  nonCachedDurationMs?: number;
+}
+
+/**
+ * @beta
+ */
 export interface ITelemetryData {
   /**
    * Command name
-   * @example 'build'
+   * @example `"build"`
    */
   readonly name: string;
+
   /**
    * Duration in seconds
    */
   readonly durationInSeconds: number;
+
   /**
    * The result of the command
    */
   readonly result: 'Succeeded' | 'Failed';
+
   /**
-   * The timestamp of the telemetry logging
+   * The millisecond-resolution timestamp of the telemetry logging
    * @example 1648001893024
    */
-  readonly timestamp?: number;
+  readonly timestampMs?: number;
+
   /**
-   * The platform the command was executed on, reads from process.platform
-   * @example darwin, win32, linux...
+   * The platform the command was executed on, based on the Node.js `process.platform()` API
+   * @example `"darwin"`, `"win32"`, `"linux"`
    */
   readonly platform?: string;
+
   /**
-   * The rush version
-   * @example 5.63.0
+   * The Rush version
+   * @example `5.63.0`
    */
   readonly rushVersion?: string;
+
+  /**
+   * Detailed information about the host machine.
+   */
+  readonly machineInfo?: ITelemetryMachineInfo;
+
+  /**
+   * Only applicable to phased commands. Provides detailed results by operation.
+   * Keys are operation names, values contain result, timing information, and dependencies.
+   */
+  readonly operationResults?: Record<string, ITelemetryOperationResult>;
+
   readonly extraData?: { [key: string]: string | number | boolean };
 }
 
 const MAX_FILE_COUNT: number = 100;
+const ONE_MEGABYTE_IN_BYTES: 1048576 = 1048576;
 
 export class Telemetry {
   private _enabled: boolean;
@@ -69,7 +152,16 @@ export class Telemetry {
     }
     const data: ITelemetryData = {
       ...telemetryData,
-      timestamp: telemetryData.timestamp || new Date().getTime(),
+      machineInfo: telemetryData.machineInfo || {
+        machineArchitecture: os.arch(),
+        // The Node.js model is sometimes padded, for example:
+        // "AMD Ryzen 7 3700X 8-Core Processor             "
+        machineCpu: os.cpus()[0].model.trim(),
+        machineCores: os.cpus().length,
+        machineTotalMemoryMiB: Math.round(os.totalmem() / ONE_MEGABYTE_IN_BYTES),
+        machineFreeMemoryMiB: Math.round(os.freemem() / ONE_MEGABYTE_IN_BYTES)
+      },
+      timestampMs: telemetryData.timestampMs || new Date().getTime(),
       platform: telemetryData.platform || process.platform,
       rushVersion: telemetryData.rushVersion || Rush.version
     };

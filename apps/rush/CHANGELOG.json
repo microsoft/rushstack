@@ -2,6 +2,361 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.86.0",
+      "tag": "@microsoft/rush_v5.86.0",
+      "date": "Tue, 29 Nov 2022 00:10:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new commands \"rush-pnpm patch\" and \"rush-pnpm patch-commit\" for patching NPM packages when using the PNPM package manager (GitHub #3554)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.85.1",
+      "tag": "@microsoft/rush_v5.85.1",
+      "date": "Fri, 25 Nov 2022 21:51:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an intermittent issue when writing tar log files"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.85.0",
+      "tag": "@microsoft/rush_v5.85.0",
+      "date": "Thu, 24 Nov 2022 03:57:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for a `credentialMetadata` property in the CredentialCache."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Change the signature of `CredentialCache.setCacheEntry` to take the credential ID and an object describing the credential instead of a credential string and an expiration date. The second argument's type now matches the return value of `CredentialCache.tryGetCacheEntry`"
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Change the return type of `AzureAuthenticationBase.tryGetCachedCredentialAsync` (and, therefore, `AzureStorageAuthentication.tryGetCachedCredentialAsync`) from `string | undefined` to `ICredentialCacheEntry | undefined` to include the credentialMetadata."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.84.0",
+      "tag": "@microsoft/rush_v5.84.0",
+      "date": "Tue, 22 Nov 2022 23:24:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"dependsOnEnvVars\" configuration option to operations in rush-project.json. The variables specified in this option are included in the cache key hash calculation."
+          },
+          {
+            "comment": "The \"rush setup\" user prompts can now be customized."
+          },
+          {
+            "comment": "Make autoinstaller logging respect the `--quiet` parameter."
+          },
+          {
+            "comment": "Add project filtering to the upgrade-interactive UI prompt. Also increases the default page size for project lists in UI to 12."
+          },
+          {
+            "comment": "Add a feature (behind the \"cleanInstallAfterNpmrcChanges\" experiment) that will cause a clean install to be performed if the common/temp/.npmrc file has changed since the last install."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.83.4",
+      "tag": "@microsoft/rush_v5.83.4",
+      "date": "Fri, 18 Nov 2022 04:02:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Change files and change logs can store custom fields."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix performance regression from supporting git submodules"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.83.3",
+      "tag": "@microsoft/rush_v5.83.3",
+      "date": "Tue, 15 Nov 2022 18:43:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where Git submodules were not handled correctly by the build cache (GitHub #1711)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.83.2",
+      "tag": "@microsoft/rush_v5.83.2",
+      "date": "Mon, 14 Nov 2022 05:15:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Ensure autoinstaller lockfiles are not leftover after an error"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.83.1",
+      "tag": "@microsoft/rush_v5.83.1",
+      "date": "Sat, 12 Nov 2022 04:40:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the \"rush init\" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.83.0",
+      "tag": "@microsoft/rush_v5.83.0",
+      "date": "Fri, 11 Nov 2022 03:51:49 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add credentialType option for rush setup command"
+          },
+          {
+            "comment": "Rush \"setup\" command works even if plugins cannot be installed"
+          },
+          {
+            "comment": "Add support for integer, integer list, string list, and choice list parameters in plugins."
+          },
+          {
+            "comment": "Introduce a `rush upgrade-interactive` action that provides an interactive way to upgrade outdated dependencies."
+          },
+          {
+            "comment": "Fix a regression from Rush 5.79.0 where \"rush init\" did not create the pnpm-config.json file automatically"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.82.1",
+      "tag": "@microsoft/rush_v5.82.1",
+      "date": "Wed, 19 Oct 2022 23:44:02 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.82.0",
+      "tag": "@microsoft/rush_v5.82.0",
+      "date": "Mon, 17 Oct 2022 22:14:39 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Replace Travis with GitHub Actions in the `rush init` template.\""
+          },
+          {
+            "comment": "Handle case in ProjectWatcher where a project contains no git tracked files or status information is or was unavailable."
+          },
+          {
+            "comment": "Refactor @rushstack/rush-azure-storage-build-cache-plugin to expose an API for generating and caching Azure credentials for other workloads, in addition to Storage."
+          },
+          {
+            "comment": "Validate the change type in changefiles during publishing."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.81.0",
+      "tag": "@microsoft/rush_v5.81.0",
+      "date": "Sat, 08 Oct 2022 02:30:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a `rush remove` command that removes one or more dependencies from a project."
+          },
+          {
+            "comment": "Support passing a lockfile to \"install-run.js\" and \"install-run-rush.js\" to ensure stable installation on CI."
+          },
+          {
+            "comment": "Add missing \"environmentVariables\" property to \"pnpm-config.json\" schema to restore feature parity with \"rush.json\" \"pnpmOptions\" field."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.80.1",
+      "tag": "@microsoft/rush_v5.80.1",
+      "date": "Mon, 03 Oct 2022 23:11:35 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a more useful error message in cases when a merge base for `rush change` cannot be determined."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.80.0",
+      "tag": "@microsoft/rush_v5.80.0",
+      "date": "Thu, 29 Sep 2022 07:13:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Include the operation duration in the telemetry data that was recorded during the non-cached run when a cache hit occurs."
+          },
+          {
+            "comment": "Fix an error message that always says to run \"rush update --purge\" even if the user only needs to run \"rush install --purge.\""
+          },
+          {
+            "comment": "Fix an issue where a \"Current PNPM store path does not match the last one used.\" error will erroneously get thrown on Windows with an unchanged path, but with a forward slash instead of a backslash."
+          },
+          {
+            "comment": "Remove fallback from tar binary to npm 'tar' package. The npm 'tar' package would sometimes produce invalid output if the cache entry was corrupt."
+          },
+          {
+            "comment": "Remove gender from the git config example in rush.json"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.79.0",
+      "tag": "@microsoft/rush_v5.79.0",
+      "date": "Sat, 24 Sep 2022 17:37:03 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `common/config/pnpm-config.json`, which is used to specify fields like `overrides`, `packageExtensions`, and `neverBuiltDependencies` that would otherwise be placed in a PNPM workspace repo's root-level `package.json`'s `pnpm` field."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Add a `--commit` and `--commit-message` flag to `rush change` that commits the change files automatically."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.78.1",
+      "tag": "@microsoft/rush_v5.78.1",
+      "date": "Fri, 23 Sep 2022 02:54:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix Git detection when the current working directory is unrelated to the Rush workspace."
+          },
+          {
+            "comment": "Fix an error that ocurred if an autoinstaller's  \"node_modules\" folder was manually deleted (GitHub #2987)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.78.0",
+      "tag": "@microsoft/rush_v5.78.0",
+      "date": "Sat, 17 Sep 2022 00:56:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"beforeInstall\" hook to the plugin API, for plugins to examine the environment immediately before \"rush install\" or \"rush update\" invoke the package manager."
+          },
+          {
+            "comment": "Fix \"--parallelism XX%\" parsing to return a finite number of CPU cores."
+          },
+          {
+            "comment": "Update the \"rush init\" template to include .gitignore patterns for IntellJ IDEA"
+          },
+          {
+            "comment": "Upgrade the @azure/identity and @azure/storage-blob packages to eliminate a deprecation message during installation."
+          },
+          {
+            "comment": "Define an environment variable RUSH_PNPM_VERIFY_STORE_INTEGRITY that can be used to enable or disable PNPM's store integrity verification during installation for performance."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.77.3",
+      "tag": "@microsoft/rush_v5.77.3",
+      "date": "Fri, 02 Sep 2022 17:49:09 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.77.2",
+      "tag": "@microsoft/rush_v5.77.2",
+      "date": "Wed, 31 Aug 2022 00:43:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush add\" sometimes did not work correctly if a project is nested under another project's folder"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.77.1",
+      "tag": "@microsoft/rush_v5.77.1",
+      "date": "Tue, 30 Aug 2022 17:26:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed an issue where \"rush add\" was not updating common-versions.json when using \"--make-consistent\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.77.0",
+      "tag": "@microsoft/rush_v5.77.0",
+      "date": "Mon, 29 Aug 2022 21:09:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add machine architecture information, dependency graph information, and individual build times and statuses to the telemetry file."
+          },
+          {
+            "comment": "Add schema validation for change files."
+          },
+          {
+            "comment": "Fix a minor issue with the \"--rush-example-repo\" template"
+          },
+          {
+            "comment": "Update CLI docs for \"rush add\""
+          },
+          {
+            "comment": "Improve some config file documentation"
+          },
+          {
+            "comment": "Make the project tag name syntax more strict to avoid error-prone names such as \"tag:$PATH\" or \"tag://\""
+          },
+          {
+            "comment": "Add validation to ensure package.json files are strict JSON and the \"version\" field is strict SemVer"
+          },
+          {
+            "comment": "Add a new setting \"watchOptions.debounceMs\" in command-line.json"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.76.1",
+      "tag": "@microsoft/rush_v5.76.1",
+      "date": "Mon, 08 Aug 2022 07:32:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent regression where \"rush install\" would sometimes fail with \"Unknown option: 'ignore-compatibility-db'\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.76.0",
       "tag": "@microsoft/rush_v5.76.0",
       "date": "Sat, 06 Aug 2022 05:35:19 GMT",
@@ -2252,12 +2607,10 @@
       "tag": "@microsoft/rush_v5.17.1",
       "date": "Thu, 21 Nov 2019 00:50:15 GMT",
       "comments": {
-        "undefined": [
+        "patch": [
           {
             "comment": "Remove an error thrown when the --registry and --pack arguments are used on rush publish, because --registry might be required to check if a package has already been published against a custom registry."
-          }
-        ],
-        "none": [
+          },
           {
             "comment": "Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies."
           }

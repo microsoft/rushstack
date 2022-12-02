@@ -26,28 +26,36 @@ export enum CommandLineParameterKind {
 }
 
 /**
+ * Matches kebab-case formatted strings prefixed with double dashes.
+ * Example: "--do-something"
+ */
+const LONG_NAME_REGEXP: RegExp = /^-(-[a-z0-9]+)+$/;
+
+/**
+ * Matches a single upper-case or lower-case letter prefixed with a dash.
+ * Example: "-d"
+ */
+const SHORT_NAME_REGEXP: RegExp = /^-[a-zA-Z]$/;
+
+/**
+ * Matches kebab-case formatted strings
+ * Example: "my-scope"
+ */
+const SCOPE_REGEXP: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/**
+ * "Environment variable names used by the utilities in the Shell and Utilities volume of
+ * IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
+ * from the characters defined in Portable Character Set and do not begin with a digit."
+ * Example: "THE_SETTING"
+ */
+const ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^[A-Z_][A-Z0-9_]*$/;
+
+/**
  * The base class for the various command-line parameter types.
  * @public
  */
 export abstract class CommandLineParameter {
-  // Matches kebab-case formatted strings prefixed with double dashes.
-  // Example: "--do-something"
-  private static _longNameRegExp: RegExp = /^-(-[a-z0-9]+)+$/;
-
-  // Matches a single upper-case or lower-case letter prefixed with a dash.
-  // Example: "-d"
-  private static _shortNameRegExp: RegExp = /^-[a-zA-Z]$/;
-
-  // Matches kebab-case formatted strings
-  // Example: "my-scope"
-  private static _scopeRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-
-  // "Environment variable names used by the utilities in the Shell and Utilities volume of
-  // IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
-  // from the characters defined in Portable Character Set and do not begin with a digit."
-  // Example: "THE_SETTING"
-  private static _environmentVariableRegExp: RegExp = /^[A-Z_][A-Z0-9_]*$/;
-
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
    * @internal
@@ -95,7 +103,7 @@ export abstract class CommandLineParameter {
     this.environmentVariable = definition.environmentVariable;
     this.undocumentedSynonyms = definition.undocumentedSynonyms;
 
-    if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
+    if (!LONG_NAME_REGEXP.test(this.longName)) {
       throw new Error(
         `Invalid name: "${this.longName}". The parameter long name must be` +
           ` lower-case and use dash delimiters (e.g. "--do-a-thing")`
@@ -103,7 +111,7 @@ export abstract class CommandLineParameter {
     }
 
     if (this.shortName) {
-      if (!CommandLineParameter._shortNameRegExp.test(this.shortName)) {
+      if (!SHORT_NAME_REGEXP.test(this.shortName)) {
         throw new Error(
           `Invalid name: "${this.shortName}". The parameter short name must be` +
             ` a dash followed by a single upper-case or lower-case letter (e.g. "-a")`
@@ -112,13 +120,13 @@ export abstract class CommandLineParameter {
     }
 
     if (this.parameterScope) {
-      if (!CommandLineParameter._scopeRegExp.test(this.parameterScope)) {
+      if (!SCOPE_REGEXP.test(this.parameterScope)) {
         throw new Error(
           `Invalid scope: "${this.parameterScope}". The parameter scope name must be` +
             ` lower-case and use dash delimiters (e.g. "my-scope")`
         );
       }
-      // Parameter long name is guranteed to start with '--' since this is validated above
+      // Parameter long name is guaranteed to start with '--' since this is validated above
       const unprefixedLongName: string = this.longName.slice(2);
       this.scopedLongName = `--${this.parameterScope}:${unprefixedLongName}`;
     }
@@ -133,7 +141,7 @@ export abstract class CommandLineParameter {
         );
       }
 
-      if (!CommandLineParameter._environmentVariableRegExp.test(this.environmentVariable)) {
+      if (!ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)) {
         throw new Error(
           `Invalid environment variable name: "${this.environmentVariable}". The name must` +
             ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`
@@ -148,7 +156,7 @@ export abstract class CommandLineParameter {
             `Invalid name: "${undocumentedSynonym}". Undocumented synonyms must not be the same` +
               ` as the the long name.`
           );
-        } else if (!CommandLineParameter._longNameRegExp.test(undocumentedSynonym)) {
+        } else if (!LONG_NAME_REGEXP.test(undocumentedSynonym)) {
           throw new Error(
             `Invalid name: "${undocumentedSynonym}". All undocumented synonyms name must be lower-case and ` +
               'use dash delimiters (e.g. "--do-a-thing")'

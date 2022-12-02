@@ -4,7 +4,7 @@
 import colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { Sort, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
+import { Sort, InternalError } from '@rushstack/node-core-library';
 
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { AstSymbol } from '../analyzer/AstSymbol';
@@ -16,7 +16,7 @@ import {
 } from '../api/ExtractorMessage';
 import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
 import { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile';
-import { SourceMapper } from './SourceMapper';
+import { ISourceLocation, SourceMapper } from './SourceMapper';
 import { ExtractorLogLevel } from '../api/ExtractorLogLevel';
 import { ConsoleMessageId } from '../api/ConsoleMessageId';
 
@@ -32,6 +32,7 @@ export interface IMessageRouterOptions {
   showVerboseMessages: boolean;
   showDiagnostics: boolean;
   tsdocConfiguration: tsdoc.TSDocConfiguration;
+  sourceMapper: SourceMapper;
 }
 
 export interface IBuildJsonDumpObjectOptions {
@@ -89,7 +90,7 @@ export class MessageRouter {
 
     this._messages = [];
     this._associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
-    this._sourceMapper = new SourceMapper();
+    this._sourceMapper = options.sourceMapper;
     this._tsdocConfiguration = options.tsdocConfiguration;
 
     // showDiagnostics implies showVerboseMessages
@@ -200,18 +201,19 @@ export class MessageRouter {
     };
 
     if (diagnostic.file) {
+      // NOTE: Since compiler errors pertain to issues specific to the .d.ts files,
+      // we do not apply source mappings for them.
       const sourceFile: ts.SourceFile = diagnostic.file;
-      const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(
-        diagnostic.start || 0
-      );
-
-      options.sourceFilePath = sourceFile.fileName;
-      options.sourceFileLine = lineAndCharacter.line + 1;
-      options.sourceFileColumn = lineAndCharacter.character + 1;
+      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
+        sourceFile,
+        pos: diagnostic.start || 0,
+        useDtsLocation: true
+      });
+      options.sourceFilePath = sourceLocation.sourceFilePath;
+      options.sourceFileLine = sourceLocation.sourceFileLine;
+      options.sourceFileColumn = sourceLocation.sourceFileColumn;
     }
 
-    // NOTE: Since compiler errors pertain to issues specific to the .d.ts files,
-    // we do not apply source mappings for them.
     this._messages.push(new ExtractorMessage(options));
   }
 
@@ -252,20 +254,20 @@ export class MessageRouter {
     astDeclaration?: AstDeclaration
   ): void {
     for (const message of parserContext.log.messages) {
-      const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(
-        message.textRange.pos
-      );
-
       const options: IExtractorMessageOptions = {
         category: ExtractorMessageCategory.TSDoc,
         messageId: message.messageId,
-        text: message.unformattedText,
-        sourceFilePath: sourceFile.fileName,
-        sourceFileLine: lineAndCharacter.line + 1,
-        sourceFileColumn: lineAndCharacter.character + 1
+        text: message.unformattedText
       };
 
-      this._sourceMapper.updateExtractorMessageOptions(options);
+      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
+        sourceFile,
+        pos: message.textRange.pos
+      });
+      options.sourceFilePath = sourceLocation.sourceFilePath;
+      options.sourceFileLine = sourceLocation.sourceFileLine;
+      options.sourceFileColumn = sourceLocation.sourceFileColumn;
+
       const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
 
       if (astDeclaration) {
@@ -369,19 +371,21 @@ export class MessageRouter {
     pos: number,
     properties?: IExtractorMessageProperties
   ): ExtractorMessage {
-    const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(pos);
-
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Extractor,
       messageId,
       text: messageText,
-      sourceFilePath: sourceFile.fileName,
-      sourceFileLine: lineAndCharacter.line + 1,
-      sourceFileColumn: lineAndCharacter.character + 1,
       properties
     };
 
-    this._sourceMapper.updateExtractorMessageOptions(options);
+    const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
+      sourceFile,
+      pos
+    });
+    options.sourceFilePath = sourceLocation.sourceFilePath;
+    options.sourceFileLine = sourceLocation.sourceFileLine;
+    options.sourceFileColumn = sourceLocation.sourceFileColumn;
+
     const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
 
     this._messages.push(extractorMessage);
@@ -635,7 +639,7 @@ export class MessageRouter {
    * Sorts an array of messages according to a reasonable ordering
    */
   private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
-    LegacyAdapters.sortStable(messages, (a, b) => {
+    messages.sort((a, b) => {
       let diff: number;
       // First sort by file name
       diff = Sort.compareByValue(a.sourceFilePath, b.sourceFilePath);

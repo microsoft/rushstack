@@ -92,6 +92,13 @@ export class RushConstants {
   public static readonly pnpmfileV6Filename: string = '.pnpmfile.cjs';
 
   /**
+   * The folder name used to store patch files for pnpm
+   * Example: `C:\MyRepo\common\config\pnpm-patches`
+   * Example: `C:\MyRepo\common\temp\patches`
+   */
+  public static readonly pnpmPatchesFolderName: string = 'patches';
+
+  /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm
    */
   public static readonly yarnShrinkwrapFilename: string = 'yarn.lock';
@@ -143,6 +150,11 @@ export class RushConstants {
    * Experiments configuration file.
    */
   public static readonly experimentsFilename: string = 'experiments.json';
+
+  /**
+   * Pnpm configuration file
+   */
+  public static readonly pnpmConfigFilename: string = 'pnpm-config.json';
 
   /**
    * Rush plugins configuration file name.
@@ -245,4 +257,11 @@ export class RushConstants {
    * The expected prefix for phase names in "common/config/rush/command-line.json"
    */
   public static readonly phaseNamePrefix: '_phase:' = '_phase:';
+
+  /**
+   * The default debounce value for Rush multi-project watch mode. When watching, controls
+   * how long to wait after the last encountered file system event before execution. If another
+   * file system event occurs in this interval, the timeout will reset.
+   */
+  public static readonly defaultWatchDebounceMs: number = 1000;
 }

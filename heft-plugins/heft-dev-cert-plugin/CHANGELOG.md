@@ -1,6 +1,152 @@
 # Change Log - @rushstack/heft-dev-cert-plugin
 
-This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Nov 2022 01:16:49 GMT and should not be manually modified.
+
+## 0.2.7
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
+
+## 0.2.6
+Fri, 18 Nov 2022 00:55:17 GMT
+
+_Version update only_
+
+## 0.2.5
+Tue, 15 Nov 2022 23:31:49 GMT
+
+### Patches
+
+- Fix Webpack auto-refresh issues caused by mismatched hostname
+
+## 0.2.4
+Sat, 12 Nov 2022 00:16:31 GMT
+
+### Patches
+
+- Serve the CA certificate alongside the TLS certificate.
+
+## 0.2.3
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 0.2.2
+Fri, 04 Nov 2022 00:15:59 GMT
+
+_Version update only_
+
+## 0.2.1
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 0.2.0
+Tue, 25 Oct 2022 00:20:44 GMT
+
+### Minor changes
+
+- Set allowedHosts from the subjectAltNames of the TLS certificate.
+
+## 0.1.73
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 0.1.72
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 0.1.71
+Fri, 14 Oct 2022 15:26:32 GMT
+
+_Version update only_
+
+## 0.1.70
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 0.1.69
+Tue, 11 Oct 2022 23:49:12 GMT
+
+_Version update only_
+
+## 0.1.68
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 0.1.67
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 0.1.66
+Tue, 27 Sep 2022 22:17:20 GMT
+
+_Version update only_
+
+## 0.1.65
+Wed, 21 Sep 2022 20:21:10 GMT
+
+_Version update only_
+
+## 0.1.64
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 0.1.63
+Tue, 13 Sep 2022 00:16:55 GMT
+
+_Version update only_
+
+## 0.1.62
+Mon, 12 Sep 2022 22:27:48 GMT
+
+_Version update only_
+
+## 0.1.61
+Fri, 02 Sep 2022 17:48:43 GMT
+
+_Version update only_
+
+## 0.1.60
+Wed, 31 Aug 2022 01:45:06 GMT
+
+_Version update only_
+
+## 0.1.59
+Wed, 31 Aug 2022 00:42:46 GMT
+
+_Version update only_
+
+## 0.1.58
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 0.1.57
+Wed, 24 Aug 2022 00:14:38 GMT
+
+_Version update only_
+
+## 0.1.56
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 0.1.55
+Wed, 10 Aug 2022 09:52:12 GMT
+
+_Version update only_
+
+## 0.1.54
+Wed, 10 Aug 2022 08:12:16 GMT
+
+_Version update only_
 
 ## 0.1.53
 Wed, 03 Aug 2022 18:40:35 GMT

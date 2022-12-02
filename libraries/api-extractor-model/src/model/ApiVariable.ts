@@ -15,6 +15,11 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
 import { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
 import { DeserializerContext } from './DeserializerContext';
+import {
+  IApiExportedMixinJson,
+  IApiExportedMixinOptions,
+  ApiExportedMixin
+} from '../mixins/ApiExportedMixin';
 
 /**
  * Constructor options for {@link ApiVariable}.
@@ -25,11 +30,12 @@ export interface IApiVariableOptions
     IApiReleaseTagMixinOptions,
     IApiReadonlyMixinOptions,
     IApiDeclaredItemOptions,
-    IApiInitializerMixinOptions {
+    IApiInitializerMixinOptions,
+    IApiExportedMixinOptions {
   variableTypeTokenRange: IExcerptTokenRange;
 }
 
-export interface IApiVariableJson extends IApiDeclaredItemJson {
+export interface IApiVariableJson extends IApiDeclaredItemJson, IApiExportedMixinJson {
   variableTypeTokenRange: IExcerptTokenRange;
 }
 
@@ -54,7 +60,7 @@ export interface IApiVariableJson extends IApiDeclaredItemJson {
  * @public
  */
 export class ApiVariable extends ApiNameMixin(
-  ApiReleaseTagMixin(ApiReadonlyMixin(ApiInitializerMixin(ApiDeclaredItem)))
+  ApiReleaseTagMixin(ApiReadonlyMixin(ApiInitializerMixin(ApiExportedMixin(ApiDeclaredItem))))
 ) {
   /**
    * An {@link Excerpt} that describes the type of the variable.
@@ -102,8 +108,9 @@ export class ApiVariable extends ApiNameMixin(
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
+    const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Exports, nameComponent)
+      .addNavigationStep(navigation, nameComponent)
       .withMeaning(Meaning.Variable);
   }
 }

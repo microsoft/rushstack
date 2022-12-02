@@ -64,7 +64,20 @@ export class TypingsGenerator {
 
   protected _options: ITypingsGeneratorOptions;
 
-  private readonly _fileGlob: string;
+  /**
+   * The folder path that contains all input source files.
+   */
+  public readonly sourceFolderPath: string;
+
+  /**
+   * The glob pattern used to find input files to process.
+   */
+  public readonly inputFileGlob: string;
+
+  /**
+   * The glob patterns that should be ignored when finding input files to process.
+   */
+  public readonly ignoredFileGlobs: readonly string[];
 
   public constructor(options: ITypingsGeneratorOptions) {
     this._options = {
@@ -82,6 +95,7 @@ export class TypingsGenerator {
     if (!this._options.srcFolder) {
       throw new Error('srcFolder must be provided');
     }
+    this.sourceFolderPath = this._options.srcFolder;
 
     if (Path.isUnder(this._options.srcFolder, this._options.generatedTsFolder)) {
       throw new Error('srcFolder must not be under generatedTsFolder');
@@ -95,9 +109,7 @@ export class TypingsGenerator {
       throw new Error('At least one file extension must be provided.');
     }
 
-    if (!this._options.globsToIgnore) {
-      this._options.globsToIgnore = [];
-    }
+    this.ignoredFileGlobs = this._options.globsToIgnore || [];
 
     if (!this._options.terminal) {
       this._options.terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: true }));
@@ -109,30 +121,37 @@ export class TypingsGenerator {
     this._consumersOfFile = new Map();
     this._relativePaths = new Map();
 
-    this._fileGlob = `**/*+(${this._options.fileExtensions.join('|')})`;
+    this.inputFileGlob = `**/*+(${this._options.fileExtensions.join('|')})`;
   }
 
-  public async generateTypingsAsync(): Promise<void> {
-    await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
+  /**
+   * Generate typings for the provided input files.
+   *
+   * @param relativeFilePaths - The input files to process, relative to the source folder. If not provided,
+   * all input files will be processed.
+   */
+  public async generateTypingsAsync(relativeFilePaths?: string[]): Promise<void> {
+    let checkFilePaths: boolean = true;
+    if (!relativeFilePaths?.length) {
+      checkFilePaths = false; // Don't check file paths if we generate them
+      relativeFilePaths = await LegacyAdapters.convertCallbackToPromise(glob, this.inputFileGlob, {
+        cwd: this.sourceFolderPath,
+        ignore: this.ignoredFileGlobs,
+        nosort: true,
+        nodir: true
+      });
+    }
 
-    const filePaths: string[] = await LegacyAdapters.convertCallbackToPromise(glob, this._fileGlob, {
-      cwd: this._options.srcFolder,
-      absolute: true,
-      nosort: true,
-      nodir: true,
-      ignore: this._options.globsToIgnore
-    });
-
-    await this._reprocessFiles(filePaths);
+    await this._reprocessFiles(relativeFilePaths, checkFilePaths);
   }
 
   public async runWatcherAsync(): Promise<void> {
     await FileSystem.ensureFolderAsync(this._options.generatedTsFolder);
 
     await new Promise((resolve, reject): void => {
-      const watcher: chokidar.FSWatcher = chokidar.watch(this._fileGlob, {
-        cwd: this._options.srcFolder,
-        ignored: this._options.globsToIgnore
+      const watcher: chokidar.FSWatcher = chokidar.watch(this.inputFileGlob, {
+        cwd: this.sourceFolderPath,
+        ignored: this.ignoredFileGlobs
       });
 
       const queue: Set<string> = new Set();
@@ -145,7 +164,7 @@ export class TypingsGenerator {
 
         const toProcess: string[] = Array.from(queue);
         queue.clear();
-        this._reprocessFiles(toProcess)
+        this._reprocessFiles(toProcess, false)
           .then(() => {
             processing = false;
             // If the timeout was invoked again, immediately reexecute with the changed files.
@@ -182,7 +201,7 @@ export class TypingsGenerator {
       watcher.on('change', onChange);
       watcher.on('unlink', async (relativePath) => {
         await Promise.all(
-          this.getOutputFilePaths(relativePath).map(async (outputFile: string) => {
+          this._getOutputFilePathsWithoutCheck(relativePath).map(async (outputFile: string) => {
             await FileSystem.deleteFileAsync(outputFile);
           })
         );
@@ -217,15 +236,27 @@ export class TypingsGenerator {
   }
 
   public getOutputFilePaths(relativePath: string): string[] {
+    if (path.isAbsolute(relativePath)) {
+      throw new Error(`"${relativePath}" must be relative`);
+    }
+
+    return this._getOutputFilePathsWithoutCheck(relativePath);
+  }
+
+  private _getOutputFilePathsWithoutCheck(relativePath: string): string[] {
     const typingsFilePaths: Iterable<string> = this._getTypingsFilePaths(relativePath);
     const additionalPaths: string[] | undefined = this._options.getAdditionalOutputFiles?.(relativePath);
     return additionalPaths ? [...typingsFilePaths, ...additionalPaths] : Array.from(typingsFilePaths);
   }
 
-  private async _reprocessFiles(relativePaths: Iterable<string>): Promise<void> {
+  private async _reprocessFiles(relativePaths: Iterable<string>, checkFilePaths: boolean): Promise<void> {
     // Build a queue of resolved paths
     const toProcess: Set<string> = new Set();
     for (const rawPath of relativePaths) {
+      if (checkFilePaths && path.isAbsolute(rawPath)) {
+        throw new Error(`"${rawPath}" must be relative`);
+      }
+
       const relativePath: string = Path.convertToSlashes(rawPath);
       const resolvedPath: string = path.resolve(this._options.srcFolder, rawPath);
       this._relativePaths.set(resolvedPath, relativePath);

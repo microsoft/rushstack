@@ -163,7 +163,10 @@ export class WebpackPlugin implements IHeftPlugin {
           }
         },
         client: {
-          logging: 'info'
+          logging: 'info',
+          webSocketURL: {
+            port: 8080
+          }
         },
         port: 8080
       };
@@ -265,14 +268,33 @@ export class WebpackPlugin implements IHeftPlugin {
 
   private _emitErrors(logger: ScopedLogger, stats: WebpackStats | WebpackCompilation.MultiStats): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
-      const serializedStats: WebpackStats.ToJsonOutput = stats.toJson('errors-warnings');
+      const serializedStats: WebpackStats.ToJsonOutput[] = [stats.toJson('errors-warnings')];
 
-      for (const warning of serializedStats.warnings as (string | Error)[]) {
-        logger.emitWarning(warning instanceof Error ? warning : new Error(warning));
+      const warnings: Error[] = [];
+      const errors: Error[] = [];
+
+      for (const compilationStats of serializedStats) {
+        for (const warning of compilationStats.warnings as (string | Error)[]) {
+          warnings.push(warning instanceof Error ? warning : new Error(warning));
+        }
+
+        for (const error of compilationStats.errors as (string | Error)[]) {
+          errors.push(error instanceof Error ? error : new Error(error));
+        }
+
+        if (compilationStats.children) {
+          for (const child of compilationStats.children) {
+            serializedStats.push(child);
+          }
+        }
       }
 
-      for (const error of serializedStats.errors as (string | Error)[]) {
-        logger.emitError(error instanceof Error ? error : new Error(error));
+      for (const warning of warnings) {
+        logger.emitWarning(warning);
+      }
+
+      for (const error of errors) {
+        logger.emitError(error);
       }
     }
   }

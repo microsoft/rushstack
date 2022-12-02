@@ -120,6 +120,72 @@ describe(ChangelogGenerator.updateIndividualChangelog.name, () => {
     expect(actualResult).toEqual(expectedResult);
   });
 
+  it('translates custom fields from change files to change log', () => {
+    const actualResult: IChangelog = ChangelogGenerator.updateIndividualChangelog(
+      {
+        packageName: 'a',
+        newVersion: '1.0.0',
+        changeType: ChangeType.major,
+        changes: [
+          {
+            packageName: 'a',
+            type: 'major',
+            changeType: ChangeType.major,
+            comment: 'Patching a',
+            customFields: {
+              issueTicket: 'A-1053',
+              vendorTag: 'AAAAA'
+            }
+          }
+        ]
+      },
+      `${__dirname}/exampleChangelog`,
+      false,
+      rushConfiguration
+    )!;
+
+    const expectedResult: IChangelog = {
+      name: 'a',
+      entries: [
+        {
+          version: '1.0.0',
+          tag: 'a_v1.0.0',
+          date: '',
+          comments: {
+            major: [
+              {
+                author: undefined,
+                comment: 'Patching a',
+                commit: undefined,
+                customFields: {
+                  issueTicket: 'A-1053',
+                  vendorTag: 'AAAAA'
+                }
+              }
+            ]
+          }
+        },
+        {
+          version: '0.0.1',
+          tag: 'a_v0.0.1',
+          date: 'Wed, 30 Nov 2016 18:37:45 GMT',
+          comments: {
+            patch: [
+              {
+                comment: 'Patching a'
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+    // Ignore comparing date.
+    expectedResult.entries[0].date = actualResult.entries[0].date;
+
+    expect(actualResult).toEqual(expectedResult);
+  });
+
   it('can avoid adding duplicate entries', () => {
     const actualResult: IChangelog = ChangelogGenerator.updateIndividualChangelog(
       {
@@ -249,6 +315,39 @@ describe(ChangelogGenerator.updateIndividualChangelog.name, () => {
     actualResult.entries[0].date = undefined;
 
     expect(actualResult).toEqual(expectedResult);
+  });
+
+  it('can throw right error when given valid file', () => {
+    const generateUpdateInvoke =
+      (projectPath: string): (() => void) =>
+      () => {
+        ChangelogGenerator.updateIndividualChangelog(
+          {
+            packageName: 'a',
+            newVersion: '0.0.2',
+            changeType: ChangeType.none,
+            changes: [
+              {
+                packageName: 'a',
+                type: 'none',
+                changeType: ChangeType.none,
+                comment: ''
+              }
+            ]
+          },
+          projectPath,
+          false,
+          rushConfiguration
+        );
+      };
+
+    const emptyFileInvoke = generateUpdateInvoke(`${__dirname}/exampleInvalidChangelog/emptyFile`);
+    expect(emptyFileInvoke).toThrow(Error);
+    expect(emptyFileInvoke).toThrow(/No data, empty input at 1:1/);
+
+    const emptyObjectFileInvoke = generateUpdateInvoke(`${__dirname}/exampleInvalidChangelog/emptyObject`);
+    expect(emptyObjectFileInvoke).toThrow(Error);
+    expect(emptyObjectFileInvoke).toThrow(/Missing required property: name/);
   });
 });
 

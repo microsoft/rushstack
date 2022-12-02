@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+/// <reference lib="dom" />
 
 import * as path from 'path';
-import { render, Result, SassError } from 'node-sass';
+import { URL, pathToFileURL, fileURLToPath } from 'url';
+import { CompileResult, Syntax, Exception, compileString } from 'sass';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, Sort } from '@rushstack/node-core-library';
 import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
@@ -42,12 +44,20 @@ export interface ISassConfiguration {
 
   /**
    * Files with these extensions will pass through the Sass transpiler for typings generation.
+   * They will be treated as SCSS modules.
    * Defaults to [".sass", ".scss", ".css"]
    */
   fileExtensions?: string[];
 
   /**
-   * A list of paths used when resolving Sass imports.
+   * Files with these extensions will pass through the Sass transpiler for typings generation.
+   * They will be treated as non-module SCSS.
+   * Defaults to [".global.sass", ".global.scss", ".global.css"]
+   */
+  nonModuleFileExtensions?: string[];
+
+  /**
+   * A list of paths used when resolving Sass `@imports` and `@use`.
    * The paths should be relative to the project root.
    * Defaults to ["node_modules", "src"]
    */
@@ -83,13 +93,14 @@ export class SassProcessor extends StringValuesTypingsGenerator {
    */
   public constructor(options: ISassTypingsGeneratorOptions) {
     const { buildFolder, sassConfiguration } = options;
-    const srcFolder: string = sassConfiguration.srcFolder || path.join(buildFolder, 'src');
-    const generatedTsFolder: string =
-      sassConfiguration.generatedTsFolder || path.join(buildFolder, 'temp', 'sass-ts');
+    const srcFolder: string = sassConfiguration.srcFolder || `${buildFolder}/src`;
+    const generatedTsFolder: string = sassConfiguration.generatedTsFolder || `${buildFolder}/temp/sass-ts`;
     const exportAsDefault: boolean =
       sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
     const exportAsDefaultInterfaceName: string = 'IExportStyles';
-    const fileExtensions: string[] = sassConfiguration.fileExtensions || ['.sass', '.scss', '.css'];
+
+    const { allFileExtensions, isFileModule } = buildExtensionClassifier(sassConfiguration);
+
     const { cssOutputFolders } = sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
@@ -106,7 +117,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
       generatedTsFolder,
       exportAsDefault,
       exportAsDefaultInterfaceName,
-      fileExtensions,
+      fileExtensions: allFileExtensions,
       filesToIgnore: sassConfiguration.excludeFiles,
       secondaryGeneratedTsFolders: sassConfiguration.secondaryGeneratedTsFolders,
 
@@ -119,6 +130,8 @@ export class SassProcessor extends StringValuesTypingsGenerator {
           return;
         }
 
+        const isModule: boolean = isFileModule(relativePath);
+
         const css: string = await this._transpileSassAsync(
           fileContents,
           filePath,
@@ -127,16 +140,20 @@ export class SassProcessor extends StringValuesTypingsGenerator {
         );
 
         let classMap: IClassMap = {};
-        const cssModulesClassMapPlugin: postcss.Plugin = cssModules({
-          getJSON: (cssFileName: string, json: IClassMap) => {
-            // This callback will be invoked durint the promise evaluation of the postcss process() function.
-            classMap = json;
-          },
-          // Avoid unnecessary name hashing.
-          generateScopedName: (name: string) => name
-        });
 
-        await postcss.default([cssModulesClassMapPlugin]).process(css, { from: filePath });
+        if (isModule) {
+          // Not all input files are SCSS modules
+          const cssModulesClassMapPlugin: postcss.Plugin = cssModules({
+            getJSON: (cssFileName: string, json: IClassMap) => {
+              // This callback will be invoked during the promise evaluation of the postcss process() function.
+              classMap = json;
+            },
+            // Avoid unnecessary name hashing.
+            generateScopedName: (name: string) => name
+          });
+
+          await postcss.default([cssModulesClassMapPlugin]).process(css, { from: filePath });
+        }
 
         if (getCssPaths) {
           await Promise.all(
@@ -179,43 +196,122 @@ export class SassProcessor extends StringValuesTypingsGenerator {
     buildFolder: string,
     importIncludePaths: string[] | undefined
   ): Promise<string> {
-    const result: Result = await new Promise(
-      (resolve: (result: Result) => void, reject: (err: Error) => void) => {
-        render(
+    let result: CompileResult;
+    const nodeModulesUrl: URL = pathToFileURL(`${buildFolder}/node_modules/`);
+    try {
+      result = compileString(fileContents, {
+        importers: [
           {
-            data: fileContents,
-            file: filePath,
-            importer: (url: string) => ({ file: this._patchSassUrl(url) }),
-            includePaths: importIncludePaths
-              ? importIncludePaths
-              : [path.join(buildFolder, 'node_modules'), path.join(buildFolder, 'src')],
-            indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
-          },
-          (err: SassError, result: Result) => {
-            if (err) {
-              // Extract location information and format into the error message until we have a concept
-              // of location-aware diagnostics in Heft.
-              return reject(new Error(`${err.file}(${err.column},${err.line}): ${err.message}`));
+            findFileUrl: (url: string): URL | null => {
+              return this._patchSassUrl(url, nodeModulesUrl);
             }
-            resolve(result);
           }
-        );
-      }
-    );
+        ],
+        url: pathToFileURL(filePath),
+        loadPaths: importIncludePaths
+          ? importIncludePaths
+          : [`${buildFolder}/node_modules`, `${buildFolder}/src`],
+        syntax: determineSyntaxFromFilePath(filePath)
+      });
+    } catch (err) {
+      const typedError: Exception = err;
+      const { span } = typedError;
 
-    // Register any @import files as dependencies.
-    for (const dependency of result.stats.includedFiles) {
-      this.registerDependency(filePath, dependency);
+      // Extract location information and format into the error message until we have a concept
+      // of location-aware diagnostics in Heft.
+      throw new Error(`${typedError}(${span.start.column},${span.start.line}): ${typedError.message}`);
+    }
+
+    // Register any @import, @use files as dependencies.
+    for (const dependency of result.loadedUrls) {
+      this.registerDependency(filePath, fileURLToPath(dependency as URL));
     }
 
     return result.css.toString();
   }
 
-  private _patchSassUrl(url: string): string {
-    if (url[0] === '~') {
-      return 'node_modules/' + url.slice(1);
+  private _patchSassUrl(url: string, nodeModulesUrl: URL): URL | null {
+    if (url[0] !== '~') {
+      return null;
     }
 
-    return url;
+    return new URL(url.slice(1), nodeModulesUrl);
+  }
+}
+
+interface IExtensionClassifierResult {
+  allFileExtensions: string[];
+  isFileModule: (relativePath: string) => boolean;
+}
+
+function buildExtensionClassifier(sassConfiguration: ISassConfiguration): IExtensionClassifierResult {
+  const {
+    fileExtensions: moduleFileExtensions = ['.sass', '.scss', '.css'],
+    nonModuleFileExtensions = ['.global.sass', '.global.scss', '.global.css']
+  } = sassConfiguration;
+
+  const hasModules: boolean = moduleFileExtensions.length > 0;
+  const hasNonModules: boolean = nonModuleFileExtensions.length > 0;
+
+  if (!hasModules) {
+    return {
+      allFileExtensions: nonModuleFileExtensions,
+      isFileModule: (relativePath: string) => false
+    };
+  }
+  if (!hasNonModules) {
+    return {
+      allFileExtensions: moduleFileExtensions,
+      isFileModule: (relativePath: string) => true
+    };
+  }
+
+  const extensionClassifier: Map<string, boolean> = new Map();
+  for (const extension of moduleFileExtensions) {
+    const normalizedExtension: string = extension.startsWith('.') ? extension : `.${extension}`;
+    extensionClassifier.set(normalizedExtension, true);
+  }
+
+  for (const extension of nonModuleFileExtensions) {
+    const normalizedExtension: string = extension.startsWith('.') ? extension : `.${extension}`;
+    const existingClassification: boolean | undefined = extensionClassifier.get(normalizedExtension);
+    if (existingClassification === true) {
+      throw new Error(
+        `File extension "${normalizedExtension}" is declared as both a SCSS module and not an SCSS module.`
+      );
+    }
+    extensionClassifier.set(normalizedExtension, false);
+  }
+
+  Sort.sortMapKeys(extensionClassifier, (key1, key2) => {
+    // Order by length, descending, so the longest gets tested first.
+    return key2.length - key1.length;
+  });
+
+  const isFileModule: (relativePath: string) => boolean = (relativePath: string) => {
+    // Naive comparison algorithm. O(E), where E is the number of extensions
+    // If performance becomes an issue, switch to using LookupByPath with a reverse iteration order using `.` as the delimiter
+    for (const [extension, isExtensionModule] of extensionClassifier) {
+      if (relativePath.endsWith(extension)) {
+        return isExtensionModule;
+      }
+    }
+    throw new Error(`Could not classify ${relativePath} as a SCSS module / not an SCSS module`);
+  };
+
+  return {
+    allFileExtensions: [...extensionClassifier.keys()],
+    isFileModule
+  };
+}
+
+function determineSyntaxFromFilePath(path: string): Syntax {
+  switch (path.substring(path.lastIndexOf('.'))) {
+    case '.sass':
+      return 'indented';
+    case '.scss':
+      return 'scss';
+    default:
+      return 'css';
   }
 }

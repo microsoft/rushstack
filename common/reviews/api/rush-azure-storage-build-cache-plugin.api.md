@@ -4,58 +4,87 @@
 
 ```ts
 
+import { AzureAuthorityHosts } from '@azure/identity';
+import { DeviceCodeCredential } from '@azure/identity';
+import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { ITerminal } from '@rushstack/node-core-library';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
 
 // @public (undocumented)
-export enum AzureAuthorityHosts {
+export abstract class AzureAuthenticationBase {
+    constructor(options: IAzureAuthenticationBaseOptions);
     // (undocumented)
-    AzureChina = "https://login.chinacloudapi.cn",
+    protected readonly _azureEnvironment: AzureEnvironmentName;
     // (undocumented)
-    AzureGermany = "https://login.microsoftonline.de",
+    protected abstract readonly _credentialKindForLogging: string;
     // (undocumented)
-    AzureGovernment = "https://login.microsoftonline.us",
+    protected abstract readonly _credentialNameForCache: string;
     // (undocumented)
-    AzurePublicCloud = "https://login.microsoftonline.com"
-}
-
-// @public (undocumented)
-export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
-
-// @public (undocumented)
-export class AzureStorageAuthentication {
-    constructor(options: IAzureStorageAuthenticationOptions);
-    // (undocumented)
-    protected readonly _azureEnvironment: AzureEnvironmentNames;
+    protected abstract readonly _credentialUpdateCommandForLogging: string | undefined;
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
+    protected abstract _getCacheIdParts(): string[];
     // (undocumented)
-    protected readonly _isCacheWriteAllowedByConfiguration: boolean;
+    protected abstract _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
     // (undocumented)
-    protected readonly _storageAccountName: string;
-    // (undocumented)
-    protected get _storageAccountUrl(): string;
-    // (undocumented)
-    protected readonly _storageContainerName: string;
-    // (undocumented)
-    tryGetCachedCredentialAsync(): Promise<string | undefined>;
+    tryGetCachedCredentialAsync(doNotThrowIfExpired?: boolean): Promise<ICredentialCacheEntry | undefined>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
     updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void>;
 }
 
 // @public (undocumented)
-export interface IAzureStorageAuthenticationOptions {
+export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
+
+// @public (undocumented)
+export class AzureStorageAuthentication extends AzureAuthenticationBase {
+    constructor(options: IAzureStorageAuthenticationOptions);
     // (undocumented)
-    azureEnvironment?: AzureEnvironmentNames;
+    protected readonly _credentialKindForLogging: string;
+    // (undocumented)
+    protected readonly _credentialNameForCache: string;
+    // (undocumented)
+    protected readonly _credentialUpdateCommandForLogging: string;
+    // (undocumented)
+    protected _getCacheIdParts(): string[];
+    // (undocumented)
+    protected _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
+    // (undocumented)
+    protected readonly _isCacheWriteAllowedByConfiguration: boolean;
+    // (undocumented)
+    protected readonly _storageAccountName: string;
+    // (undocumented)
+    protected readonly _storageAccountUrl: string;
+    // (undocumented)
+    protected readonly _storageContainerName: string;
+}
+
+// @public (undocumented)
+export interface IAzureAuthenticationBaseOptions {
+    // (undocumented)
+    azureEnvironment?: AzureEnvironmentName;
+}
+
+// @public (undocumented)
+export interface IAzureStorageAuthenticationOptions extends IAzureAuthenticationBaseOptions {
     // (undocumented)
     isCacheWriteAllowed: boolean;
     // (undocumented)
     storageAccountName: string;
     // (undocumented)
     storageContainerName: string;
+}
+
+// @public (undocumented)
+export interface ICredentialResult {
+    // (undocumented)
+    credentialMetadata?: object;
+    // (undocumented)
+    credentialString: string;
+    // (undocumented)
+    expiresOn?: Date;
 }
 
 // @public (undocumented)

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import, IPackageJson } from '@rushstack/node-core-library';
-import { BaseFlag } from './base/BaseFlag';
+import { JsonFile, JsonObject, Import, Path, IPackageJson } from '@rushstack/node-core-library';
 
+import { BaseFlag } from './base/BaseFlag';
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
-import { RushConfigurationProject } from './RushConfigurationProject';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
@@ -51,6 +51,10 @@ export interface ILastInstallFlagJson {
    */
   pnpmStorePath?: string;
   /**
+   * @deprecated Use `pnpmStorePath` instead
+   */
+  storePath?: string;
+  /**
    * True when "useWorkspaces" is true in rush.json
    */
   useWorkspaces?: true;
@@ -58,6 +62,23 @@ export interface ILastInstallFlagJson {
    * installed projects information indexed by packageName
    */
   installProjects?: Record<string, IInstallProject>;
+  /**
+   * The hash of .npmrc file
+   */
+  npmrcHash?: string;
+}
+
+/**
+ * @internal
+ */
+export type ILastInstallStateProperty = keyof ILastInstallFlagJson;
+
+/**
+ * @internal
+ */
+export interface ILockfileValidityCheckOptions {
+  statePropertiesToIgnore?: ILastInstallStateProperty[];
+  rushVerb?: string;
 }
 
 /**
@@ -73,11 +94,14 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
    * @internal
    */
   public isSelectedProjectInstalled(): boolean {
-    const oldState: ILastInstallFlagJson | undefined = this.oldState;
-    if (oldState === undefined) {
+    let oldState: ILastInstallFlagJson;
+    try {
+      oldState = JsonFile.load(this._path);
+    } catch (err) {
       return false;
     }
-    const newState: ILastInstallFlagJson = this._state;
+
+    const newState: ILastInstallFlagJson = { ...this._state };
 
     if (oldState.installProjects && newState.installProjects) {
       const newInstallProjectList: IInstallProject[] = Object.values(newState.installProjects);
@@ -105,8 +129,8 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
    * @override
    * Returns true if the file exists and the contents match the current state.
    */
-  public isValid(): boolean {
-    return this._isValid(false);
+  public isValid(options?: ILockfileValidityCheckOptions): boolean {
+    return this._isValid(false, options);
   }
 
   /**
@@ -115,39 +139,60 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
    *
    * @internal
    */
-  public checkValidAndReportStoreIssues(): boolean {
-    return this._isValid(true);
+  public checkValidAndReportStoreIssues(
+    options: ILockfileValidityCheckOptions & { rushVerb: string }
+  ): boolean {
+    return this._isValid(true, options);
   }
 
-  private _isValid(checkValidAndReportStoreIssues: boolean): boolean {
-    const oldState: ILastInstallFlagJson | undefined = this.oldState;
-    if (undefined === oldState) {
+  private _isValid(checkValidAndReportStoreIssues: false, options?: ILockfileValidityCheckOptions): boolean;
+  private _isValid(
+    checkValidAndReportStoreIssues: true,
+    options: ILockfileValidityCheckOptions & { rushVerb: string }
+  ): boolean;
+  private _isValid(
+    checkValidAndReportStoreIssues: boolean,
+    { rushVerb = 'update', statePropertiesToIgnore }: ILockfileValidityCheckOptions = {}
+  ): boolean {
+    let oldState: ILastInstallFlagJson;
+    try {
+      oldState = JsonFile.load(this._path);
+    } catch (err) {
       return false;
     }
 
-    const newState: ILastInstallFlagJson = this._state;
+    const newState: ILastInstallFlagJson = { ...this._state };
 
-    const omitProperties: (keyof ILastInstallFlagJson)[] = ['installProjects'];
+    const omitProperties: (keyof ILastInstallFlagJson)[] = statePropertiesToIgnore || [];
 
     if (!lodash.isEqual(lodash.omit(oldState, omitProperties), lodash.omit(newState, omitProperties))) {
       if (checkValidAndReportStoreIssues) {
-        const pkgManager: PackageManagerName = newState.packageManager;
+        const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {
           if (
             // Only throw an error if the package manager hasn't changed from PNPM
-            oldState.packageManager === pkgManager &&
-            // Throw if the store path changed
-            oldState.pnpmStorePath !== newState.pnpmStorePath
+            oldState.packageManager === pkgManager
           ) {
-            const oldStorePath: string = oldState.pnpmStorePath || '<global>';
-            const newStorePath: string = newState.pnpmStorePath || '<global>';
-
-            throw new Error(
-              'Current PNPM store path does not match the last one used. This may cause inconsistency in your builds.\n\n' +
-                'If you wish to install with the new store path, please run "rush update --purge"\n\n' +
-                `Old Path: ${oldStorePath}\n` +
-                `New Path: ${newStorePath}`
-            );
+            // storePath is the legacy name for pnpmStorePath
+            const normalizedOldStorePath: string = oldState.pnpmStorePath
+              ? Path.convertToPlatformDefault(oldState.pnpmStorePath)
+              : oldState.storePath
+              ? Path.convertToPlatformDefault(oldState.storePath)
+              : '<global>';
+            const normalizedNewStorePath: string = newState.pnpmStorePath
+              ? Path.convertToPlatformDefault(newState.pnpmStorePath)
+              : '<global>';
+            if (
+              // Throw if the store path changed
+              normalizedOldStorePath !== normalizedNewStorePath
+            ) {
+              throw new Error(
+                'Current PNPM store path does not match the last one used. This may cause inconsistency in your builds.\n\n' +
+                  `If you wish to install with the new store path, please run "rush ${rushVerb} --purge"\n\n` +
+                  `Old Path: ${normalizedOldStorePath}\n` +
+                  `New Path: ${normalizedNewStorePath}`
+              );
+            }
           }
         }
       }
@@ -178,12 +223,16 @@ export class LastInstallFlagFactory {
    *
    * @internal
    */
-  public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastInstallFlag {
-    const currentState: ILastInstallFlagJson = {
+  public static getCommonTempFlag(
+    rushConfiguration: RushConfiguration,
+    extraState: Partial<ILastInstallFlagJson> = {}
+  ): LastInstallFlag {
+    const currentState: JsonObject = {
       nodeVersion: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
-      rushJsonFolder: rushConfiguration.rushJsonFolder
+      rushJsonFolder: rushConfiguration.rushJsonFolder,
+      ...extraState
     };
 
     if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {

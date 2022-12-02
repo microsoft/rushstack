@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -182,6 +182,7 @@
               "text": "export declare class Item "
             }
           ],
+          "fileUrlPath": "src/dynamicImportType/Item.ts",
           "releaseTag": "Public",
           "name": "Item",
           "preserveMemberOrder": false,
@@ -304,7 +305,7 @@
                 {
                   "kind": "Reference",
                   "text": "Options",
-                  "canonicalReference": "api-extractor-scenarios!Options:interface"
+                  "canonicalReference": "api-extractor-scenarios!~Options:interface"
                 },
                 {
                   "kind": "Content",

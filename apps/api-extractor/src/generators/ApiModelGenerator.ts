@@ -3,6 +3,7 @@
 
 /* eslint-disable no-bitwise */
 
+import * as path from 'path';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import {
@@ -33,8 +34,10 @@ import {
   IApiTypeParameterOptions,
   EnumMemberOrder
 } from '@microsoft/api-extractor-model';
+import { Path } from '@rushstack/node-core-library';
 
 import { Collector } from '../collector/Collector';
+import { ISourceLocation } from '../collector/SourceMapper';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
@@ -46,6 +49,12 @@ import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule } from '../analyzer/AstModule';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 
+interface IProcessAstEntityContext {
+  name: string;
+  isExported: boolean;
+  parentApiItem: ApiItemContainerMixin;
+}
+
 export class ApiModelGenerator {
   private readonly _collector: Collector;
   private readonly _apiModel: ApiModel;
@@ -54,13 +63,7 @@ export class ApiModelGenerator {
   public constructor(collector: Collector) {
     this._collector = collector;
     this._apiModel = new ApiModel();
-    this._referenceGenerator = new DeclarationReferenceGenerator(
-      collector.packageJsonLookup,
-      collector.workingPackage.name,
-      collector.program,
-      collector.typeChecker,
-      collector.bundledPackageNames
-    );
+    this._referenceGenerator = new DeclarationReferenceGenerator(collector);
   }
 
   public get apiModel(): ApiModel {
@@ -73,32 +76,35 @@ export class ApiModelGenerator {
     const apiPackage: ApiPackage = new ApiPackage({
       name: this._collector.workingPackage.name,
       docComment: packageDocComment,
-      tsdocConfiguration: this._collector.extractorConfig.tsdocConfiguration
+      tsdocConfiguration: this._collector.extractorConfig.tsdocConfiguration,
+      projectFolderUrl: this._collector.extractorConfig.projectFolderUrl
     });
     this._apiModel.addMember(apiPackage);
 
     const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: '' });
     apiPackage.addMember(apiEntryPoint);
 
-    // Create a CollectorEntity for each top-level export
     for (const entity of this._collector.entities) {
-      if (entity.exported) {
-        this._processAstEntity(entity.astEntity, entity.nameForEmit, apiEntryPoint);
+      // Only process entities that are exported from the entry point. Entities that are exported from
+      // `AstNamespaceImport` entities will be processed by `_processAstNamespaceImport`. However, if
+      // we are including forgotten exports, then process everything.
+      if (entity.exportedFromEntryPoint || this._collector.extractorConfig.docModelIncludeForgottenExports) {
+        this._processAstEntity(entity.astEntity, {
+          name: entity.nameForEmit!,
+          isExported: entity.exportedFromEntryPoint,
+          parentApiItem: apiEntryPoint
+        });
       }
     }
 
     return apiPackage;
   }
 
-  private _processAstEntity(
-    astEntity: AstEntity,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
+  private _processAstEntity(astEntity: AstEntity, context: IProcessAstEntityContext): void {
     if (astEntity instanceof AstSymbol) {
       // Skip ancillary declarations; we will process them with the main declaration
       for (const astDeclaration of this._collector.getNonAncillaryDeclarations(astEntity)) {
-        this._processDeclaration(astDeclaration, exportedName, parentApiItem);
+        this._processDeclaration(astDeclaration, context);
       }
       return;
     }
@@ -114,11 +120,11 @@ export class ApiModelGenerator {
       //   export { example1, example2 }
       //
       // The current logic does not try to associate "thing()" with a specific parent.  Instead
-      // the API documentation will show duplicated entries for example1.thing() and example2.thing()./
+      // the API documentation will show duplicated entries for example1.thing() and example2.thing().
       //
       // This could be improved in the future, but it requires a stable mechanism for choosing an associated parent.
       // For thoughts about this:  https://github.com/microsoft/rushstack/issues/1308
-      this._processAstModule(astEntity.astModule, exportedName, parentApiItem);
+      this._processAstNamespaceImport(astEntity, context);
       return;
     }
 
@@ -127,13 +133,14 @@ export class ApiModelGenerator {
     // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
   }
 
-  private _processAstModule(
-    astModule: AstModule,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
+  private _processAstNamespaceImport(
+    astNamespaceImport: AstNamespaceImport,
+    context: IProcessAstEntityContext
   ): void {
-    const name: string = exportedName ? exportedName : astModule.moduleSymbol.name;
+    const astModule: AstModule = astNamespaceImport.astModule;
+    const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiNamespace.getContainerKey(name);
+    const fileUrlPath: string = this._getFileUrlPath(astNamespaceImport.declaration);
 
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(
       containerKey
@@ -144,23 +151,25 @@ export class ApiModelGenerator {
         name,
         docComment: undefined,
         releaseTag: ReleaseTag.None,
-        excerptTokens: []
+        excerptTokens: [],
+        isExported,
+        fileUrlPath
       });
       parentApiItem.addMember(apiNamespace);
     }
 
     astModule.astModuleExportInfo!.exportedLocalEntities.forEach(
       (exportedEntity: AstEntity, exportedName: string) => {
-        this._processAstEntity(exportedEntity, exportedName, apiNamespace!);
+        this._processAstEntity(exportedEntity, {
+          name: exportedName,
+          isExported: true,
+          parentApiItem: apiNamespace!
+        });
       }
     );
   }
 
-  private _processDeclaration(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
+  private _processDeclaration(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) {
       return; // trim out private declarations
     }
@@ -173,75 +182,75 @@ export class ApiModelGenerator {
 
     switch (astDeclaration.declaration.kind) {
       case ts.SyntaxKind.CallSignature:
-        this._processApiCallSignature(astDeclaration, exportedName, parentApiItem);
+        this._processApiCallSignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.Constructor:
-        this._processApiConstructor(astDeclaration, exportedName, parentApiItem);
+        this._processApiConstructor(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.ConstructSignature:
-        this._processApiConstructSignature(astDeclaration, exportedName, parentApiItem);
+        this._processApiConstructSignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.ClassDeclaration:
-        this._processApiClass(astDeclaration, exportedName, parentApiItem);
+        this._processApiClass(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.EnumDeclaration:
-        this._processApiEnum(astDeclaration, exportedName, parentApiItem);
+        this._processApiEnum(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.EnumMember:
-        this._processApiEnumMember(astDeclaration, exportedName, parentApiItem);
+        this._processApiEnumMember(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.FunctionDeclaration:
-        this._processApiFunction(astDeclaration, exportedName, parentApiItem);
+        this._processApiFunction(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.GetAccessor:
-        this._processApiProperty(astDeclaration, exportedName, parentApiItem);
+        this._processApiProperty(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.SetAccessor:
-        this._processApiProperty(astDeclaration, exportedName, parentApiItem);
+        this._processApiProperty(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.IndexSignature:
-        this._processApiIndexSignature(astDeclaration, exportedName, parentApiItem);
+        this._processApiIndexSignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.InterfaceDeclaration:
-        this._processApiInterface(astDeclaration, exportedName, parentApiItem);
+        this._processApiInterface(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.MethodDeclaration:
-        this._processApiMethod(astDeclaration, exportedName, parentApiItem);
+        this._processApiMethod(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.MethodSignature:
-        this._processApiMethodSignature(astDeclaration, exportedName, parentApiItem);
+        this._processApiMethodSignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.ModuleDeclaration:
-        this._processApiNamespace(astDeclaration, exportedName, parentApiItem);
+        this._processApiNamespace(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.PropertyDeclaration:
-        this._processApiProperty(astDeclaration, exportedName, parentApiItem);
+        this._processApiProperty(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.PropertySignature:
-        this._processApiPropertySignature(astDeclaration, exportedName, parentApiItem);
+        this._processApiPropertySignature(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.TypeAliasDeclaration:
-        this._processApiTypeAlias(astDeclaration, exportedName, parentApiItem);
+        this._processApiTypeAlias(astDeclaration, context);
         break;
 
       case ts.SyntaxKind.VariableDeclaration:
-        this._processApiVariable(astDeclaration, exportedName, parentApiItem);
+        this._processApiVariable(astDeclaration, context);
         break;
 
       default:
@@ -249,21 +258,17 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processChildDeclarations(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
+  private _processChildDeclarations(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
     for (const childDeclaration of astDeclaration.children) {
-      this._processDeclaration(childDeclaration, undefined, parentApiItem);
+      this._processDeclaration(childDeclaration, {
+        ...context,
+        name: childDeclaration.astSymbol.localName
+      });
     }
   }
 
-  private _processApiCallSignature(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
+  private _processApiCallSignature(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { parentApiItem } = context;
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiCallSignature.getContainerKey(overloadIndex);
 
@@ -294,6 +299,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const fileUrlPath: string = this._getFileUrlPath(callSignature);
 
       apiCallSignature = new ApiCallSignature({
         docComment,
@@ -302,18 +308,16 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiCallSignature);
     }
   }
 
-  private _processApiConstructor(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
+  private _processApiConstructor(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { parentApiItem } = context;
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiConstructor.getContainerKey(overloadIndex);
 
@@ -337,6 +341,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
+      const fileUrlPath: string = this._getFileUrlPath(constructorDeclaration);
 
       apiConstructor = new ApiConstructor({
         docComment,
@@ -344,19 +349,16 @@ export class ApiModelGenerator {
         isProtected,
         parameters,
         overloadIndex,
-        excerptTokens
+        excerptTokens,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiConstructor);
     }
   }
 
-  private _processApiClass(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+  private _processApiClass(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiClass.getContainerKey(name);
 
     let apiClass: ApiClass | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiClass;
@@ -393,6 +395,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const fileUrlPath: string = this._getFileUrlPath(classDeclaration);
 
       apiClass = new ApiClass({
         name,
@@ -401,20 +404,25 @@ export class ApiModelGenerator {
         excerptTokens,
         typeParameters,
         extendsTokenRange,
-        implementsTokenRanges
+        implementsTokenRanges,
+        isExported,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiClass);
     }
 
-    this._processChildDeclarations(astDeclaration, exportedName, apiClass);
+    this._processChildDeclarations(astDeclaration, {
+      ...context,
+      parentApiItem: apiClass
+    });
   }
 
   private _processApiConstructSignature(
     astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
+    context: IProcessAstEntityContext
   ): void {
+    const { parentApiItem } = context;
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiConstructSignature.getContainerKey(overloadIndex);
 
@@ -445,6 +453,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const fileUrlPath: string = this._getFileUrlPath(constructSignature);
 
       apiConstructSignature = new ApiConstructSignature({
         docComment,
@@ -453,19 +462,16 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiConstructSignature);
     }
   }
 
-  private _processApiEnum(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+  private _processApiEnum(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiEnum.getContainerKey(name);
 
     let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiEnum;
@@ -477,20 +483,28 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const preserveMemberOrder: boolean =
         this._collector.extractorConfig.enumMemberOrder === EnumMemberOrder.Preserve;
+      const fileUrlPath: string = this._getFileUrlPath(astDeclaration.declaration);
 
-      apiEnum = new ApiEnum({ name, docComment, releaseTag, excerptTokens, preserveMemberOrder });
+      apiEnum = new ApiEnum({
+        name,
+        docComment,
+        releaseTag,
+        excerptTokens,
+        preserveMemberOrder,
+        isExported,
+        fileUrlPath
+      });
       parentApiItem.addMember(apiEnum);
     }
 
-    this._processChildDeclarations(astDeclaration, exportedName, apiEnum);
+    this._processChildDeclarations(astDeclaration, {
+      ...context,
+      parentApiItem: apiEnum
+    });
   }
 
-  private _processApiEnumMember(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+  private _processApiEnumMember(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, parentApiItem } = context;
     const containerKey: string = ApiEnumMember.getContainerKey(name);
 
     let apiEnumMember: ApiEnumMember | undefined = parentApiItem.tryGetMemberByKey(
@@ -512,25 +526,23 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const fileUrlPath: string = this._getFileUrlPath(enumMember);
 
       apiEnumMember = new ApiEnumMember({
         name,
         docComment,
         releaseTag,
         excerptTokens,
-        initializerTokenRange
+        initializerTokenRange,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiEnumMember);
     }
   }
 
-  private _processApiFunction(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+  private _processApiFunction(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, isExported, parentApiItem } = context;
 
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiFunction.getContainerKey(name, overloadIndex);
@@ -560,9 +572,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-      if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
-        return; // trim out items marked as "@internal" or "@alpha"
-      }
+      const fileUrlPath: string = this._getFileUrlPath(functionDeclaration);
 
       apiFunction = new ApiFunction({
         name,
@@ -572,18 +582,17 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        isExported,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiFunction);
     }
   }
 
-  private _processApiIndexSignature(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
+  private _processApiIndexSignature(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { parentApiItem } = context;
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiIndexSignature.getContainerKey(overloadIndex);
 
@@ -610,6 +619,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(indexSignature);
 
       apiIndexSignature = new ApiIndexSignature({
         docComment,
@@ -618,19 +628,16 @@ export class ApiModelGenerator {
         overloadIndex,
         excerptTokens,
         returnTypeTokenRange,
-        isReadonly
+        isReadonly,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiIndexSignature);
     }
   }
 
-  private _processApiInterface(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+  private _processApiInterface(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiInterface.getContainerKey(name);
 
     let apiInterface: ApiInterface | undefined = parentApiItem.tryGetMemberByKey(
@@ -664,6 +671,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const fileUrlPath: string = this._getFileUrlPath(interfaceDeclaration);
 
       apiInterface = new ApiInterface({
         name,
@@ -671,22 +679,22 @@ export class ApiModelGenerator {
         releaseTag,
         excerptTokens,
         typeParameters,
-        extendsTokenRanges
+        extendsTokenRanges,
+        isExported,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiInterface);
     }
 
-    this._processChildDeclarations(astDeclaration, exportedName, apiInterface);
+    this._processChildDeclarations(astDeclaration, {
+      ...context,
+      parentApiItem: apiInterface
+    });
   }
 
-  private _processApiMethod(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
-
+  private _processApiMethod(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, parentApiItem } = context;
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiMethod.getContainerKey(name, isStatic, overloadIndex);
@@ -721,6 +729,7 @@ export class ApiModelGenerator {
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
+      const fileUrlPath: string = this._getFileUrlPath(methodDeclaration);
 
       apiMethod = new ApiMethod({
         name,
@@ -733,7 +742,8 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiMethod);
@@ -742,11 +752,9 @@ export class ApiModelGenerator {
 
   private _processApiMethodSignature(
     astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
+    context: IProcessAstEntityContext
   ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
-
+    const { name, parentApiItem } = context;
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
     const containerKey: string = ApiMethodSignature.getContainerKey(name, overloadIndex);
 
@@ -778,6 +786,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+      const fileUrlPath: string = this._getFileUrlPath(methodSignature);
 
       apiMethodSignature = new ApiMethodSignature({
         name,
@@ -788,19 +797,16 @@ export class ApiModelGenerator {
         parameters,
         overloadIndex,
         excerptTokens,
-        returnTypeTokenRange
+        returnTypeTokenRange,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiMethodSignature);
     }
   }
 
-  private _processApiNamespace(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+  private _processApiNamespace(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, isExported, parentApiItem } = context;
     const containerKey: string = ApiNamespace.getContainerKey(name);
 
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(
@@ -812,23 +818,28 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const fileUrlPath: string = this._getFileUrlPath(astDeclaration.declaration);
 
-      apiNamespace = new ApiNamespace({ name, docComment, releaseTag, excerptTokens });
+      apiNamespace = new ApiNamespace({
+        name,
+        docComment,
+        releaseTag,
+        excerptTokens,
+        isExported,
+        fileUrlPath
+      });
       parentApiItem.addMember(apiNamespace);
     }
 
-    this._processChildDeclarations(astDeclaration, exportedName, apiNamespace);
+    this._processChildDeclarations(astDeclaration, {
+      ...context,
+      parentApiItem: apiNamespace
+    });
   }
 
-  private _processApiProperty(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
-
+  private _processApiProperty(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, parentApiItem } = context;
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
-
     const containerKey: string = ApiProperty.getContainerKey(name, isStatic);
 
     let apiProperty: ApiProperty | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiProperty;
@@ -865,6 +876,7 @@ export class ApiModelGenerator {
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(declaration);
 
       apiProperty = new ApiProperty({
         name,
@@ -876,7 +888,8 @@ export class ApiModelGenerator {
         isReadonly,
         excerptTokens,
         propertyTypeTokenRange,
-        initializerTokenRange
+        initializerTokenRange,
+        fileUrlPath
       });
       parentApiItem.addMember(apiProperty);
     } else {
@@ -887,10 +900,9 @@ export class ApiModelGenerator {
 
   private _processApiPropertySignature(
     astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
+    context: IProcessAstEntityContext
   ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const { name, parentApiItem } = context;
     const containerKey: string = ApiPropertySignature.getContainerKey(name);
 
     let apiPropertySignature: ApiPropertySignature | undefined = parentApiItem.tryGetMemberByKey(
@@ -912,6 +924,7 @@ export class ApiModelGenerator {
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(propertySignature);
 
       apiPropertySignature = new ApiPropertySignature({
         name,
@@ -920,7 +933,8 @@ export class ApiModelGenerator {
         isOptional,
         excerptTokens,
         propertyTypeTokenRange,
-        isReadonly
+        isReadonly,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiPropertySignature);
@@ -930,12 +944,8 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiTypeAlias(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+  private _processApiTypeAlias(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, isExported, parentApiItem } = context;
 
     const containerKey: string = ApiTypeAlias.getContainerKey(name);
 
@@ -961,6 +971,7 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const fileUrlPath: string = this._getFileUrlPath(typeAliasDeclaration);
 
       apiTypeAlias = new ApiTypeAlias({
         name,
@@ -968,19 +979,17 @@ export class ApiModelGenerator {
         typeParameters,
         releaseTag,
         excerptTokens,
-        typeTokenRange
+        typeTokenRange,
+        isExported,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiTypeAlias);
     }
   }
 
-  private _processApiVariable(
-    astDeclaration: AstDeclaration,
-    exportedName: string | undefined,
-    parentApiItem: ApiItemContainerMixin
-  ): void {
-    const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
+  private _processApiVariable(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+    const { name, isExported, parentApiItem } = context;
 
     const containerKey: string = ApiVariable.getContainerKey(name);
 
@@ -1006,6 +1015,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
+      const fileUrlPath: string = this._getFileUrlPath(variableDeclaration);
 
       apiVariable = new ApiVariable({
         name,
@@ -1014,7 +1024,9 @@ export class ApiModelGenerator {
         excerptTokens,
         variableTypeTokenRange,
         initializerTokenRange,
-        isReadonly
+        isReadonly,
+        isExported,
+        fileUrlPath
       });
 
       parentApiItem.addMember(apiVariable);
@@ -1118,5 +1130,20 @@ export class ApiModelGenerator {
         return false;
       }
     }
+  }
+
+  private _getFileUrlPath(declaration: ts.Declaration): string {
+    const sourceFile: ts.SourceFile = declaration.getSourceFile();
+    const sourceLocation: ISourceLocation = this._collector.sourceMapper.getSourceLocation({
+      sourceFile,
+      pos: declaration.pos
+    });
+
+    let result: string = path.relative(
+      this._collector.extractorConfig.projectFolder,
+      sourceLocation.sourceFilePath
+    );
+    result = Path.convertToSlashes(result);
+    return result;
   }
 }

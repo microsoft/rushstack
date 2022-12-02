@@ -6,15 +6,13 @@ import {
   ICloudBuildCacheProvider,
   EnvironmentVariableNames,
   RushConstants,
-  EnvironmentConfiguration
+  EnvironmentConfiguration,
+  ICredentialCacheEntry
 } from '@rushstack/rush-sdk';
 import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient } from '@azure/storage-blob';
+import { AzureAuthorityHosts } from '@azure/identity';
 
-import {
-  AzureAuthorityHosts,
-  AzureStorageAuthentication,
-  IAzureStorageAuthenticationOptions
-} from './AzureStorageAuthentication';
+import { AzureStorageAuthentication, IAzureStorageAuthenticationOptions } from './AzureStorageAuthentication';
 
 export interface IAzureStorageBuildCacheProviderOptions extends IAzureStorageAuthenticationOptions {
   blobPrefix?: string;
@@ -187,7 +185,8 @@ export class AzureStorageBuildCacheProvider
     if (!this._containerClient) {
       let sasString: string | undefined = this._environmentCredential;
       if (!sasString) {
-        sasString = await this.tryGetCachedCredentialAsync();
+        const credentialEntry: ICredentialCacheEntry | undefined = await this.tryGetCachedCredentialAsync();
+        sasString = credentialEntry?.credential;
       }
 
       let blobServiceClient: BlobServiceClient;

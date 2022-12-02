@@ -1,0 +1,16 @@
+.BookmarksWrapper {
+  flex: 1;
+  margin: 12px 0;
+}
+
+.BookmarkEntry {
+  padding: 4px 0;
+  margin-top: 8px;
+  cursor: pointer;
+  &:hover {
+    background: #dff6dd;
+  }
+  & > * + * {
+    margin-top: 8px;
+  }
+}

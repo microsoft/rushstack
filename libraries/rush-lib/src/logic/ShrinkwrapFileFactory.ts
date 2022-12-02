@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { PackageManagerName } from '../api/packageManager/PackageManager';
+import { PackageManagerOptionsConfigurationBase } from './base/BasePackageManagerOptionsConfiguration';
 import { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
 import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile';
-import { PackageManagerOptionsConfigurationBase } from '../api/RushConfiguration';
 
 export class ShrinkwrapFileFactory {
   public static getShrinkwrapFile(

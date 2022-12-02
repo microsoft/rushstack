@@ -19,12 +19,6 @@ const loadedThemedStylesPath: string = require.resolve('@microsoft/load-themed-s
  */
 export interface ILoadThemedStylesLoaderOptions {
   /**
-   * If this parameter is specified, override the name of the value exported from this loader. This is useful in
-   *  exporting as the default in es6 module import scenarios. See the README for more information.
-   */
-  namedExport?: string;
-
-  /**
    * If this parameter is set to "true," the "loadAsync" parameter is set to true in the call to loadStyles.
    * Defaults to false.
    */
@@ -63,12 +57,12 @@ export class LoadThemedStylesLoader {
   }
 
   public static pitch(this: loader.LoaderContext, remainingRequest: string): string {
-    const { namedExport, async = false }: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
-
-    let exportName: string = 'module.exports';
-    if (namedExport) {
-      exportName += `.${namedExport}`;
+    const options: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
+    if ((options as Record<string, unknown>).namedExport) {
+      throw new Error('The "namedExport" option has been removed.');
     }
+
+    const { async = false } = options;
 
     return [
       `var content = require(${loaderUtils.stringifyRequest(this, '!!' + remainingRequest)});`,
@@ -79,7 +73,7 @@ export class LoadThemedStylesLoader {
       '// add the styles to the DOM',
       `for (var i = 0; i < content.length; i++) loader.loadStyles(content[i][1], ${async === true});`,
       '',
-      `if(content.locals) ${exportName} = content.locals;`
+      'if(content.locals) module.exports = content.locals;'
     ].join('\n');
   }
 }

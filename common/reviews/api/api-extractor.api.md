@@ -49,11 +49,13 @@ export class ExtractorConfig {
     readonly alphaTrimmedFilePath: string;
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
+    readonly apiReportIncludeForgottenExports: boolean;
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
+    readonly docModelIncludeForgottenExports: boolean;
     readonly enumMemberOrder: EnumMemberOrder;
-    static readonly FILENAME: string;
+    static readonly FILENAME: 'api-extractor.json';
     getDiagnosticDump(): string;
     // @internal
     _getShortFilePath(absolutePath: string): string;
@@ -70,6 +72,7 @@ export class ExtractorConfig {
     readonly packageJson: INodePackageJson | undefined;
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
     readonly projectFolder: string;
+    readonly projectFolderUrl: string | undefined;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
     readonly reportTempFilePath: string;
@@ -168,6 +171,7 @@ export interface ICompilerStateCreateOptions {
 // @public
 export interface IConfigApiReport {
     enabled: boolean;
+    includeForgottenExports?: boolean;
     reportFileName?: string;
     reportFolder?: string;
     reportTempFolder?: string;
@@ -184,6 +188,8 @@ export interface IConfigCompiler {
 export interface IConfigDocModel {
     apiJsonFilePath?: string;
     enabled: boolean;
+    includeForgottenExports?: boolean;
+    projectFolderUrl?: string;
 }
 
 // @public

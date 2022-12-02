@@ -158,8 +158,11 @@ interface IExtractorConfigParameters {
   apiReportEnabled: boolean;
   reportFilePath: string;
   reportTempFilePath: string;
+  apiReportIncludeForgottenExports: boolean;
   docModelEnabled: boolean;
   apiJsonFilePath: string;
+  docModelIncludeForgottenExports: boolean;
+  projectFolderUrl: string | undefined;
   rollupEnabled: boolean;
   untrimmedFilePath: string;
   alphaTrimmedFilePath: string;
@@ -191,7 +194,7 @@ export class ExtractorConfig {
   /**
    * The config file name "api-extractor.json".
    */
-  public static readonly FILENAME: string = 'api-extractor.json';
+  public static readonly FILENAME: 'api-extractor.json' = 'api-extractor.json';
 
   /**
    * The full path to `extends/tsdoc-base.json` which contains the standard TSDoc configuration
@@ -246,11 +249,17 @@ export class ExtractorConfig {
   public readonly reportFilePath: string;
   /** The `reportTempFolder` path combined with the `reportFileName`. */
   public readonly reportTempFilePath: string;
+  /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
+  public readonly apiReportIncludeForgottenExports: boolean;
 
   /** {@inheritDoc IConfigDocModel.enabled} */
   public readonly docModelEnabled: boolean;
   /** {@inheritDoc IConfigDocModel.apiJsonFilePath} */
   public readonly apiJsonFilePath: string;
+  /** {@inheritDoc IConfigDocModel.includeForgottenExports} */
+  public readonly docModelIncludeForgottenExports: boolean;
+  /** {@inheritDoc IConfigDocModel.projectFolderUrl} */
+  public readonly projectFolderUrl: string | undefined;
 
   /** {@inheritDoc IConfigDtsRollup.enabled} */
   public readonly rollupEnabled: boolean;
@@ -307,8 +316,11 @@ export class ExtractorConfig {
     this.apiReportEnabled = parameters.apiReportEnabled;
     this.reportFilePath = parameters.reportFilePath;
     this.reportTempFilePath = parameters.reportTempFilePath;
+    this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
+    this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
+    this.projectFolderUrl = parameters.projectFolderUrl;
     this.rollupEnabled = parameters.rollupEnabled;
     this.untrimmedFilePath = parameters.untrimmedFilePath;
     this.alphaTrimmedFilePath = parameters.alphaTrimmedFilePath;
@@ -848,6 +860,7 @@ export class ExtractorConfig {
       let apiReportEnabled: boolean = false;
       let reportFilePath: string = '';
       let reportTempFilePath: string = '';
+      let apiReportIncludeForgottenExports: boolean = false;
       if (configObject.apiReport) {
         apiReportEnabled = !!configObject.apiReport.enabled;
 
@@ -879,10 +892,13 @@ export class ExtractorConfig {
 
         reportFilePath = path.join(reportFolder, reportFilename);
         reportTempFilePath = path.join(reportTempFolder, reportFilename);
+        apiReportIncludeForgottenExports = !!configObject.apiReport.includeForgottenExports;
       }
 
       let docModelEnabled: boolean = false;
       let apiJsonFilePath: string = '';
+      let docModelIncludeForgottenExports: boolean = false;
+      let projectFolderUrl: string | undefined;
       if (configObject.docModel) {
         docModelEnabled = !!configObject.docModel.enabled;
         apiJsonFilePath = ExtractorConfig._resolvePathWithTokens(
@@ -890,6 +906,8 @@ export class ExtractorConfig {
           configObject.docModel.apiJsonFilePath,
           tokenContext
         );
+        docModelIncludeForgottenExports = !!configObject.docModel.includeForgottenExports;
+        projectFolderUrl = configObject.docModel.projectFolderUrl;
       }
 
       let tsdocMetadataEnabled: boolean = false;
@@ -993,8 +1011,11 @@ export class ExtractorConfig {
         apiReportEnabled,
         reportFilePath,
         reportTempFilePath,
+        apiReportIncludeForgottenExports,
         docModelEnabled,
         apiJsonFilePath,
+        docModelIncludeForgottenExports,
+        projectFolderUrl,
         rollupEnabled,
         untrimmedFilePath,
         alphaTrimmedFilePath,

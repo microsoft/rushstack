@@ -8,9 +8,9 @@ import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class UpdateAction extends BaseInstallAction {
-  private _fullParameter!: CommandLineFlagParameter;
-  private _recheckParameter!: CommandLineFlagParameter;
-  private _ignoreScriptsParameter!: CommandLineFlagParameter;
+  private readonly _fullParameter: CommandLineFlagParameter;
+  private readonly _recheckParameter: CommandLineFlagParameter;
+  private readonly _ignoreScriptsParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -31,10 +31,6 @@ export class UpdateAction extends BaseInstallAction {
         ' -- for details, see the command help for "rush install".',
       parser
     });
-  }
-
-  protected onDefineParameters(): void {
-    super.onDefineParameters();
 
     this._fullParameter = this.defineFlagParameter({
       parameterLongName: '--full',
@@ -93,7 +89,9 @@ export class UpdateAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       pnpmFilterArguments: [],
-      checkOnly: false
+      checkOnly: false,
+
+      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };
   }
 }

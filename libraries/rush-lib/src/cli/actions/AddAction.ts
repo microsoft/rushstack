@@ -3,23 +3,23 @@
 
 import * as os from 'os';
 import * as semver from 'semver';
-import { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseRushAction } from './BaseRushAction';
+import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { DependencySpecifier } from '../../logic/DependencySpecifier';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
+import { SemVerStyle } from '../../logic/PackageJsonUpdater';
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 
-export class AddAction extends BaseRushAction {
-  private _allFlag!: CommandLineFlagParameter;
-  private _exactFlag!: CommandLineFlagParameter;
-  private _caretFlag!: CommandLineFlagParameter;
-  private _devDependencyFlag!: CommandLineFlagParameter;
-  private _makeConsistentFlag!: CommandLineFlagParameter;
-  private _skipUpdateFlag!: CommandLineFlagParameter;
-  private _packageNameList!: CommandLineStringListParameter;
+export class AddAction extends BaseAddAndRemoveAction {
+  protected readonly _allFlag: CommandLineFlagParameter;
+  protected readonly _packageNameList: CommandLineStringListParameter;
+  private readonly _exactFlag: CommandLineFlagParameter;
+  private readonly _caretFlag: CommandLineFlagParameter;
+  private readonly _devDependencyFlag: CommandLineFlagParameter;
+  private readonly _makeConsistentFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -37,16 +37,14 @@ export class AddAction extends BaseRushAction {
       safeForSimultaneousRushProcesses: false,
       parser
     });
-  }
 
-  public onDefineParameters(): void {
     this._packageNameList = this.defineStringListParameter({
       parameterLongName: '--package',
       parameterShortName: '-p',
       required: true,
       argumentName: 'PACKAGE',
       description:
-        '(Required) The name of the package which should be added as a dependency.' +
+        'The name of the package which should be added as a dependency.' +
         ' A SemVer version specifier can be appended after an "@" sign.  WARNING: Symbol characters' +
         " are usually interpreted by your shell, so it's recommended to use quotes." +
         ' For example, write "rush add --package "example@^1.2.3"" instead of "rush add --package example@^1.2.3".' +
@@ -76,35 +74,14 @@ export class AddAction extends BaseRushAction {
         'If specified, other packages with this dependency will have their package.json' +
         ' files updated to use the same version of the dependency.'
     });
-    this._skipUpdateFlag = this.defineFlagParameter({
-      parameterLongName: '--skip-update',
-      parameterShortName: '-s',
-      description:
-        'If specified, the "rush update" command will not be run after updating the package.json files.'
-    });
     this._allFlag = this.defineFlagParameter({
       parameterLongName: '--all',
       description: 'If specified, the dependency will be added to all projects.'
     });
   }
 
-  public async runAsync(): Promise<void> {
-    let projects: RushConfigurationProject[];
-    if (this._allFlag.value) {
-      projects = this.rushConfiguration.projects;
-    } else {
-      const currentProject: RushConfigurationProject | undefined =
-        this.rushConfiguration.tryGetProjectForPath(process.cwd());
-
-      if (!currentProject) {
-        throw new Error(
-          'The "rush add" command must be invoked under a project' +
-            ` folder that is registered in rush.json unless the ${this._allFlag.longName} is used.`
-        );
-      }
-
-      projects = [currentProject];
-    }
+  public getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushAddOptions {
+    const projects: RushConfigurationProject[] = super.getProjects();
 
     if (this._caretFlag.value && this._exactFlag.value) {
       throw new Error(
@@ -112,12 +89,9 @@ export class AddAction extends BaseRushAction {
       );
     }
 
-    const packageJsonUpdater: typeof PackageJsonUpdaterType = await import('../../logic/PackageJsonUpdater');
-
-    const specifiedPackageNameList: ReadonlyArray<string> = this._packageNameList.values!;
     const packagesToAdd: PackageJsonUpdaterType.IPackageForRushAdd[] = [];
 
-    for (const specifiedPackageName of specifiedPackageNameList) {
+    for (const specifiedPackageName of this.specifiedPackageNameList) {
       /**
        * Name & Version
        */
@@ -157,30 +131,25 @@ export class AddAction extends BaseRushAction {
           );
         }
 
-        rangeStyle = packageJsonUpdater.SemVerStyle.Passthrough;
+        rangeStyle = SemVerStyle.Passthrough;
       } else {
         rangeStyle = this._caretFlag.value
-          ? packageJsonUpdater.SemVerStyle.Caret
+          ? SemVerStyle.Caret
           : this._exactFlag.value
-          ? packageJsonUpdater.SemVerStyle.Exact
-          : packageJsonUpdater.SemVerStyle.Tilde;
+          ? SemVerStyle.Exact
+          : SemVerStyle.Tilde;
       }
 
       packagesToAdd.push({ packageName, version, rangeStyle });
     }
-
-    const updater: PackageJsonUpdaterType.PackageJsonUpdater = new packageJsonUpdater.PackageJsonUpdater(
-      this.rushConfiguration,
-      this.rushGlobalFolder
-    );
-
-    await updater.doRushAddAsync({
+    return {
       projects: projects,
-      packagesToAdd,
+      packagesToUpdate: packagesToAdd,
       devDependency: this._devDependencyFlag.value,
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
-      debugInstall: this.parser.isDebug
-    });
+      debugInstall: this.parser.isDebug,
+      actionName: this.actionName
+    };
   }
 }

@@ -2,10 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema, LockFile, Import } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { RushUserConfiguration } from '../api/RushUserConfiguration';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 const CACHE_FILENAME: string = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
@@ -20,6 +22,7 @@ interface ICredentialCacheJson {
 interface ICacheEntryJson {
   expires: number;
   credential: string;
+  credentialMetadata?: object;
 }
 
 /**
@@ -28,6 +31,7 @@ interface ICacheEntryJson {
 export interface ICredentialCacheEntry {
   expires?: Date;
   credential: string;
+  credentialMetadata?: object;
 }
 
 /**
@@ -65,7 +69,7 @@ export class CredentialCache /* implements IDisposable */ {
 
   public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
     const rushUserFolderPath: string = RushUserConfiguration.getRushUserFolderPath();
-    const cacheFilePath: string = path.join(rushUserFolderPath, CACHE_FILENAME);
+    const cacheFilePath: string = `${rushUserFolderPath}/${CACHE_FILENAME}`;
     const jsonSchema: JsonSchema = JsonSchema.fromFile(
       path.resolve(__dirname, '..', 'schemas', 'credentials.schema.json')
     );
@@ -95,19 +99,22 @@ export class CredentialCache /* implements IDisposable */ {
     await Utilities.usingAsync(async () => await CredentialCache.initializeAsync(options), doActionAsync);
   }
 
-  public setCacheEntry(cacheId: string, credential: string, expires?: Date): void {
+  public setCacheEntry(cacheId: string, entry: ICredentialCacheEntry): void {
     this._validate(true);
 
+    const { expires, credential, credentialMetadata } = entry;
     const expiresMilliseconds: number = expires?.getTime() || 0;
     const existingCacheEntry: ICacheEntryJson | undefined = this._cacheEntries.get(cacheId);
     if (
       existingCacheEntry?.credential !== credential ||
-      existingCacheEntry?.expires !== expiresMilliseconds
+      existingCacheEntry?.expires !== expiresMilliseconds ||
+      !lodash.isEqual(existingCacheEntry?.credentialMetadata, credentialMetadata)
     ) {
       this._modified = true;
       this._cacheEntries.set(cacheId, {
         expires: expiresMilliseconds,
-        credential
+        credential,
+        credentialMetadata
       });
     }
   }
@@ -119,7 +126,8 @@ export class CredentialCache /* implements IDisposable */ {
     if (cacheEntry) {
       const result: ICredentialCacheEntry = {
         expires: cacheEntry.expires ? new Date(cacheEntry.expires) : undefined,
-        credential: cacheEntry.credential
+        credential: cacheEntry.credential,
+        credentialMetadata: cacheEntry.credentialMetadata
       };
 
       return result;
@@ -164,7 +172,8 @@ export class CredentialCache /* implements IDisposable */ {
       };
       await JsonFile.saveAsync(newJson, this._cacheFilePath, {
         ensureFolderExists: true,
-        updateExistingFile: true
+        updateExistingFile: true,
+        ignoreUndefinedValues: true
       });
 
       this._modified = false;

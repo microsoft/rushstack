@@ -1,0 +1,8 @@
+{
+  "name": "plugins",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "rush-command-parameters-plugin": "file: ../../../rush-command-parameters-plugin"
+  }
+}

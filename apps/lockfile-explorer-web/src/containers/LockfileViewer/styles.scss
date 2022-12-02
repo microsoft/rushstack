@@ -1,0 +1,84 @@
+.ViewWrapper {
+  height: calc(100% - 12px);
+  padding-top: 12px;
+}
+
+.ViewContents {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100% - 70px - 35px);
+  max-height: calc(100% - 70px - 35px);
+}
+
+.LockfileEntryListViewWrapper {
+  cursor: pointer;
+  border: 1px solid #fff;
+  padding: 4px 8px;
+
+  &:hover {
+    border: 1px solid black;
+  }
+}
+
+.LockfileFilterBar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+
+  input {
+    border: solid 1px #666;
+    border-radius: 4px;
+    padding: 0.4em;
+    width: 100%;
+  }
+
+  & > * + * {
+    margin-left: 12px;
+  }
+}
+
+.packageGroup {
+  h5 {
+    margin: 0;
+  }
+  & > * + * {
+    margin-top: 4px;
+  }
+}
+
+.lockfileEntries {
+  cursor: pointer;
+  padding: 4px 8px;
+  &:hover {
+    background: #dff6dd;
+  }
+}
+
+.lockfileSelectedEntry {
+  background-color: #dff6dd;
+}
+
+.lockfileEntriesWrapper {
+  overflow: scroll;
+  flex: 1;
+  & > * + * {
+    margin-top: 12px;
+  }
+}
+
+.filterSection {
+  border-top: 1px solid #000;
+  padding-top: 24px;
+  & > * + * {
+    margin-top: 4px;
+  }
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  & > * + * {
+    margin-left: 4px;
+  }
+}

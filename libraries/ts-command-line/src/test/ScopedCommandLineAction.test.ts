@@ -66,10 +66,6 @@ class TestCommandLine extends CommandLineParser {
 
     this.addAction(new TestScopedAction());
   }
-
-  protected onDefineParameters(): void {
-    // no parameters
-  }
 }
 
 describe(CommandLineParser.name, () => {

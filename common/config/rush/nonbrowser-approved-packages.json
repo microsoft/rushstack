@@ -151,6 +151,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/lockfile-explorer-web",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/module-minifier",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -403,6 +407,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "figures",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "file-loader",
       "allowedCategories": [ "tests" ]
     },
@@ -567,11 +575,19 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "npm-check",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "npm-package-arg",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "npm-packlist",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "open",
       "allowedCategories": [ "libraries" ]
     },
     {

@@ -7,16 +7,16 @@
 // @public (undocumented)
 class DefaultClass {
 }
-
 export default DefaultClass;
 
 // @public (undocumented)
 export class Lib2Class {
+    // (undocumented)
+    prop: number;
 }
 
 // @alpha (undocumented)
 export interface Lib2Interface {
 }
-
 
 ```

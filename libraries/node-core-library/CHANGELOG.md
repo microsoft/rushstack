@@ -1,6 +1,59 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Oct 2022 00:20:15 GMT and should not be manually modified.
+
+## 3.53.2
+Thu, 13 Oct 2022 00:20:15 GMT
+
+### Patches
+
+- Fix a bug where `Sort.isSorted` and `Sort.isSortedBy` unexpectedly compared the first element against `undefined`. Optimize `Sort.sortMapKeys` to run the check for already being sorted against the original Map instead of a derived array.
+
+## 3.53.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 3.53.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Add a Path.convertToPlatformDefault API to convert a path to use the platform-default slashes.
+
+## 3.52.0
+Wed, 21 Sep 2022 20:21:10 GMT
+
+### Minor changes
+
+- Add a "FileSystem.isNotDirectoryError" function that returns `true` if the passed-in error object is an ENOTDIR error.
+- Add a parameter to the `LockFile.release` function to optionally delete the lockfile.
+
+## 3.51.2
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 3.51.1
+Wed, 24 Aug 2022 03:01:22 GMT
+
+### Patches
+
+- Introduce JsonSyntax option for JsonFile.load() and related APIs
+
+## 3.51.0
+Wed, 24 Aug 2022 00:14:38 GMT
+
+### Minor changes
+
+- Deprecate LegacyAdapters.sortStable and remove support for NodeJS < 11. If you are using NodeJS < 11, this is a breaking change.
+
+## 3.50.2
+Fri, 19 Aug 2022 00:17:19 GMT
+
+### Patches
+
+- Update `PackageJsonLookup` to only resolve to `package.json` files that contain a `"name"` field. See GitHub issue #2070
 
 ## 3.50.1
 Wed, 03 Aug 2022 18:40:35 GMT

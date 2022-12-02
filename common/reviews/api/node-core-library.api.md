@@ -248,6 +248,7 @@ export class FileSystem {
     static isExistError(error: Error): boolean;
     static isFileDoesNotExistError(error: Error): boolean;
     static isFolderDoesNotExistError(error: Error): boolean;
+    static isNotDirectoryError(error: Error): boolean;
     static isNotExistError(error: Error): boolean;
     static isUnlinkNotPermittedError(error: Error): boolean;
     static move(options: IFileSystemMoveOptions): void;
@@ -461,6 +462,15 @@ export interface IImportResolvePackageOptions extends IImportResolveOptions {
 }
 
 // @public
+export interface IJsonFileLoadAndValidateOptions extends IJsonFileParseOptions, IJsonSchemaValidateOptions {
+}
+
+// @public
+export interface IJsonFileParseOptions {
+    jsonSyntax?: JsonSyntax;
+}
+
+// @public
 export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
     ensureFolderExists?: boolean;
     onlyIfChanged?: boolean;
@@ -649,13 +659,13 @@ export interface ITerminalProvider {
 export class JsonFile {
     // @internal (undocumented)
     static _formatPathForError: (path: string) => string;
-    static load(jsonFilename: string): JsonObject;
-    static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): JsonObject;
-    static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): Promise<JsonObject>;
-    static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): JsonObject;
-    static loadAndValidateWithCallbackAsync(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): Promise<JsonObject>;
-    static loadAsync(jsonFilename: string): Promise<JsonObject>;
-    static parseString(jsonContents: string): JsonObject;
+    static load(jsonFilename: string, options?: IJsonFileParseOptions): JsonObject;
+    static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonFileLoadAndValidateOptions): JsonObject;
+    static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonFileLoadAndValidateOptions): Promise<JsonObject>;
+    static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void, options?: IJsonFileLoadAndValidateOptions): JsonObject;
+    static loadAndValidateWithCallbackAsync(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void, options?: IJsonFileLoadAndValidateOptions): Promise<JsonObject>;
+    static loadAsync(jsonFilename: string, options?: IJsonFileParseOptions): Promise<JsonObject>;
+    static parseString(jsonContents: string, options?: IJsonFileParseOptions): JsonObject;
     static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
     static saveAsync(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): Promise<boolean>;
     static stringify(jsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
@@ -680,6 +690,13 @@ export class JsonSchema {
 }
 
 // @public
+export enum JsonSyntax {
+    Json5 = "json5",
+    JsonWithComments = "jsonWithComments",
+    Strict = "strict"
+}
+
+// @public
 export class LegacyAdapters {
     static convertCallbackToPromise<TResult, TError>(fn: (cb: LegacyCallback<TResult, TError>) => void): Promise<TResult>;
     // (undocumented)
@@ -691,6 +708,7 @@ export class LegacyAdapters {
     // (undocumented)
     static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
+    // @deprecated
     static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void;
 }
 
@@ -704,7 +722,7 @@ export class LockFile {
     get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
     get isReleased(): boolean;
-    release(): void;
+    release(deleteFile?: boolean): void;
     static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
 }
 
@@ -763,6 +781,7 @@ export class PackageNameParser {
 // @public
 export class Path {
     static convertToBackslashes(inputPath: string): string;
+    static convertToPlatformDefault(inputPath: string): string;
     static convertToSlashes(inputPath: string): string;
     static formatConcisely(options: IPathFormatConciselyOptions): string;
     static formatFileLocation(options: IPathFormatFileLocationOptions): string;
@@ -805,8 +824,8 @@ export class ProtectableMap<K, V> {
 // @public
 export class Sort {
     static compareByValue(x: any, y: any): number;
-    static isSorted<T>(array: T[], comparer?: (x: any, y: any) => number): boolean;
-    static isSortedBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): boolean;
+    static isSorted<T>(collection: Iterable<T>, comparer?: (x: any, y: any) => number): boolean;
+    static isSortedBy<T>(collection: Iterable<T>, keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): boolean;
     static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): void;
     static sortMapKeys<K, V>(map: Map<K, V>, keyComparer?: (x: K, y: K) => number): void;
     static sortSet<T>(set: Set<T>, comparer?: (x: T, y: T) => number): void;

@@ -7,7 +7,7 @@ import { RushConfiguration } from '@microsoft/rush-lib';
 import { CommandLineAction, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 export class RecordVersionsAction extends CommandLineAction {
-  private _outFilePath!: CommandLineStringParameter;
+  private readonly _outFilePath: CommandLineStringParameter;
 
   public constructor() {
     super({
@@ -15,9 +15,7 @@ export class RecordVersionsAction extends CommandLineAction {
       summary: 'Generates a JSON file recording the version numbers of all published packages.',
       documentation: ''
     });
-  }
 
-  protected onDefineParameters(): void {
     this._outFilePath = this.defineStringParameter({
       parameterLongName: '--out-file',
       parameterShortName: '-o',

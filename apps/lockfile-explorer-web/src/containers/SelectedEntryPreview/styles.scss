@@ -1,0 +1,39 @@
+@import 'office-ui-fabric-core/dist/sass/References';
+
+.SelectedEntryCard {
+  margin-top: 12px;
+  box-shadow: $ms-depth-shadow-8;
+  background-color: $ms-color-gray10;
+  padding: 12px 24px;
+  height: 8%;
+  overflow: scroll;
+  p {
+    font-size: 12px;
+  }
+  & > * + * {
+    margin-top: 8px;
+  }
+}
+
+.SelectedEntryBookmarkRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.SelectedEntryHeader {
+  display: flex;
+  align-items: center;
+  & > * + * {
+    margin-left: 8px;
+  }
+}
+
+.NavigationButtonRow {
+  display: flex;
+  & > * {
+    height: 21px;
+  }
+  & > * + * {
+    margin-left: 8px;
+  }
+}

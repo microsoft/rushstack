@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -184,13 +184,14 @@
             {
               "kind": "Reference",
               "text": "Base",
-              "canonicalReference": "api-extractor-lib2-test!~DefaultClass:class"
+              "canonicalReference": "api-extractor-lib2-test!DefaultClass:class"
             },
             {
               "kind": "Content",
               "text": " "
             }
           ],
+          "fileUrlPath": "src/exportImportedExternalDefault/index.ts",
           "releaseTag": "Public",
           "name": "Child",
           "preserveMemberOrder": false,

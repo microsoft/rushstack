@@ -39,6 +39,7 @@ export { IApiNameMixinOptions, ApiNameMixin } from './mixins/ApiNameMixin';
 export { IApiOptionalMixinOptions, ApiOptionalMixin } from './mixins/ApiOptionalMixin';
 export { IApiReadonlyMixinOptions, ApiReadonlyMixin } from './mixins/ApiReadonlyMixin';
 export { IApiInitializerMixinOptions, ApiInitializerMixin } from './mixins/ApiInitializerMixin';
+export { IApiExportedMixinOptions, ApiExportedMixin } from './mixins/ApiExportedMixin';
 export {
   IFindApiItemsResult,
   IFindApiItemsMessage,
@@ -72,3 +73,4 @@ export { ITypeParameterOptions, TypeParameter } from './model/TypeParameter';
 export { IApiVariableOptions, ApiVariable } from './model/ApiVariable';
 export { IResolveDeclarationReferenceResult } from './model/ModelReferenceResolver';
 export { HeritageType } from './model/HeritageType';
+export { ISourceLocationOptions, SourceLocation } from './model/SourceLocation';

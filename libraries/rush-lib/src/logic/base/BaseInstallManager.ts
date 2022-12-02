@@ -5,6 +5,7 @@ import colors from 'colors/safe';
 import * as fetch from 'node-fetch';
 import * as os from 'os';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import * as semver from 'semver';
 import {
   FileSystem,
@@ -25,7 +26,12 @@ import { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
-import { IInstallProject, LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
+import {
+  IInstallProject,
+  ILastInstallStateProperty,
+  LastInstallFlag,
+  LastInstallFlagFactory
+} from '../../api/LastInstallFlag';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { PurgeManager } from '../PurgeManager';
@@ -42,6 +48,11 @@ import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+
+/**
+ * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
+ */
+export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompatibilityDb';
 
 export interface IInstallManagerOptions {
   /**
@@ -125,17 +136,22 @@ export interface IInstallManagerOptions {
    * If undefined, that means a full install.
    */
   partialInstallSelectedProjects?: Set<RushConfigurationProject>;
+
+  /**
+   * Callback to invoke between preparing the common/temp folder and running installation.
+   */
+  beforeInstallAsync?: () => Promise<void>;
 }
 
 /**
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
-  private _rushConfiguration: RushConfiguration;
-  private _rushGlobalFolder: RushGlobalFolder;
-  private _commonTempInstallFlag: LastInstallFlag;
-  private _commonTempLinkFlag: LastLinkFlag;
-  private _installRecycler: AsyncRecycler;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _rushGlobalFolder: RushGlobalFolder;
+  private readonly _commonTempLinkFlag: LastLinkFlag;
+  private readonly _commonTempInstallFlag: LastInstallFlag;
+  private readonly _installRecycler: AsyncRecycler;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
   private _selectedProjects: RushConfigurationProject[] = [];
@@ -149,7 +165,7 @@ export abstract class BaseInstallManager {
    */
   private _deferredInstallationScripts: boolean = false;
 
-  private _options: IInstallManagerOptions;
+  private readonly _options: IInstallManagerOptions;
 
   private readonly _terminalProvider: ITerminalProvider;
   private readonly _terminal: Terminal;
@@ -165,8 +181,8 @@ export abstract class BaseInstallManager {
     this._installRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
-    this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
+    this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
 
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
@@ -221,7 +237,7 @@ export abstract class BaseInstallManager {
       console.log(
         colors.red(
           'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
-          'command again without specifying these arguments.'
+            'command again without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
@@ -245,13 +261,13 @@ export abstract class BaseInstallManager {
       console.log(
         colors.red(
           'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
-          'without specifying these arguments.'
+            'without specifying these arguments.'
         )
       );
       throw new AlreadyReportedError();
     }
 
-    const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
+    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync();
 
     if (this.options.checkOnly) {
       return;
@@ -281,9 +297,21 @@ export abstract class BaseInstallManager {
     // perform a clean install if selected projects are not matched. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
+    this._commonTempInstallFlag.mergeFromObject({
+      npmrcHash: npmrcHash || '<NO NPMRC>'
+    });
+
+    const optionsToIgnore: ILastInstallStateProperty[] = ['installProjects'];
+    // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
+    if (!this.rushConfiguration.experimentsConfiguration.configuration.cleanInstallAfterNpmrcChanges) {
+      optionsToIgnore?.push('npmrcHash');
+    }
+
     const cleanInstall: boolean =
-      !this._commonTempInstallFlag.checkValidAndReportStoreIssues() ||
-      !this.commonTempInstallFlag.isSelectedProjectInstalled();
+      !this._commonTempInstallFlag.checkValidAndReportStoreIssues({
+        rushVerb: this.options.allowShrinkwrapUpdates ? 'update' : 'install',
+        statePropertiesToIgnore: optionsToIgnore
+      }) || !this._commonTempInstallFlag.isSelectedProjectInstalled();
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -317,6 +345,11 @@ export abstract class BaseInstallManager {
       // this ensures that a full "rush link" is required next time
       this._commonTempLinkFlag.clear();
 
+      // Give plugins an opportunity to act before invoking the installation process
+      if (this.options.beforeInstallAsync !== undefined) {
+        await this.options.beforeInstallAsync();
+      }
+
       // Perform the actual install
       await this.installAsync(cleanInstall);
 
@@ -340,11 +373,13 @@ export abstract class BaseInstallManager {
           );
         }
       }
-
-      // Create the marker file to indicate a successful install
-      this._commonTempInstallFlag.create();
     } else {
       console.log('Installation is already up-to-date.');
+    }
+
+    // Create the marker file to indicate a successful install if it's not a filtered install
+    if (!isFilteredInstall) {
+      this._commonTempInstallFlag.create();
     }
 
     // Perform any post-install work the install manager requires
@@ -390,7 +425,11 @@ export abstract class BaseInstallManager {
     return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
   }
 
-  protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
+  protected async prepareAsync(): Promise<{
+    variantIsUpToDate: boolean;
+    shrinkwrapIsUpToDate: boolean;
+    npmrcHash: string | undefined;
+  }> {
     // Check the policies
     PolicyValidator.validatePolicy(this._rushConfiguration, this.options);
 
@@ -469,11 +508,27 @@ export abstract class BaseInstallManager {
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
-    Utilities.syncNpmrc(
+    const npmrcText: string | undefined = Utilities.syncNpmrc(
       this._rushConfiguration.commonRushConfigFolder,
       this._rushConfiguration.commonTempFolder
     );
     this._syncNpmrcAlreadyCalled = true;
+
+    const npmrcHash: string | undefined = npmrcText
+      ? crypto.createHash('sha1').update(npmrcText).digest('hex')
+      : undefined;
+
+    // Copy the committed patches folder if using pnpm
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+      const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
+      if (FileSystem.exists(rushPnpmPatchesFolder)) {
+        FileSystem.copyFiles({
+          sourcePath: rushPnpmPatchesFolder,
+          destinationPath: commonTempPnpmPatchesFolder
+        });
+      }
+    }
 
     // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
     // Additionally when in workspaces, the shim implements support for common versions.
@@ -518,7 +573,7 @@ export abstract class BaseInstallManager {
       }
     }
 
-    return { shrinkwrapIsUpToDate, variantIsUpToDate };
+    return { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash };
   }
 
   /**
@@ -636,6 +691,11 @@ export abstract class BaseInstallManager {
         args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
       }
 
+      const { pnpmVerifyStoreIntegrity } = EnvironmentConfiguration;
+      if (pnpmVerifyStoreIntegrity !== undefined) {
+        args.push(`--verify-store-integrity`, `${pnpmVerifyStoreIntegrity}`);
+      }
+
       const { configuration: experiments } = this._rushConfiguration.experimentsConfiguration;
 
       if (experiments.usePnpmFrozenLockfileForRushInstall && !this._options.allowShrinkwrapUpdates) {
@@ -677,16 +737,16 @@ export abstract class BaseInstallManager {
       ) {
         this._terminal.writeWarningLine(
           'Warning: Your rush.json specifies a pnpmVersion with a known issue ' +
-          'that may cause unintended version selections.' +
-          " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
-          'For details see: https://rushjs.io/link/pnpm-issue-5132'
+            'that may cause unintended version selections.' +
+            " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
+            'For details see: https://rushjs.io/link/pnpm-issue-5132'
         );
       }
       if (
         semver.gte(this._rushConfiguration.packageManagerToolVersion, '7.9.0') ||
-        semver.gte(this._rushConfiguration.packageManagerToolVersion, '6.34.0')
+        semver.satisfies(this._rushConfiguration.packageManagerToolVersion, '^6.34.0')
       ) {
-        args.push('--ignore-compatibility-db');
+        args.push(pnpmIgnoreCompatibilityDbParameter);
       }
 
       if (this._deferredInstallationScripts || this.options.ignoreScripts) {

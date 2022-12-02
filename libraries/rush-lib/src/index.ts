@@ -8,21 +8,27 @@
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
+export { RushConfiguration, ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
+
 export {
-  RushConfiguration,
-  ITryFindRushJsonLocationOptions,
   IPackageManagerOptionsJsonBase,
   IConfigurationEnvironment,
   IConfigurationEnvironmentVariable,
+  PackageManagerOptionsConfigurationBase
+} from './logic/base/BasePackageManagerOptionsConfiguration';
+export {
   INpmOptionsJson as _INpmOptionsJson,
-  IPnpmOptionsJson as _IPnpmOptionsJson,
+  NpmOptionsConfiguration
+} from './logic/npm/NpmOptionsConfiguration';
+export {
   IYarnOptionsJson as _IYarnOptionsJson,
-  PnpmStoreOptions,
-  PackageManagerOptionsConfigurationBase,
-  PnpmOptionsConfiguration,
-  NpmOptionsConfiguration,
   YarnOptionsConfiguration
-} from './api/RushConfiguration';
+} from './logic/yarn/YarnOptionsConfiguration';
+export {
+  IPnpmOptionsJson as _IPnpmOptionsJson,
+  PnpmStoreOptions,
+  PnpmOptionsConfiguration
+} from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
 export { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from './logic/buildCache/CacheEntryId';
@@ -65,7 +71,8 @@ export { ChangeManager } from './api/ChangeManager';
 export {
   LastInstallFlag as _LastInstallFlag,
   ILastInstallFlagJson as _ILastInstallFlagJson,
-  IInstallProject as _IInstallProject
+  IInstallProject as _IInstallProject,
+  ILockfileValidityCheckOptions as _ILockfileValidityCheckOptions
 } from './api/LastInstallFlag';
 export { BaseFlag as _BaseFlag } from './api/base/BaseFlag';
 
@@ -114,6 +121,11 @@ export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCachePro
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 
-export { ITelemetryData } from './logic/Telemetry';
+export type { ITelemetryData, ITelemetryMachineInfo, ITelemetryOperationResult } from './logic/Telemetry';
 
 export { IStopwatchResult } from './utilities/Stopwatch';
+export {
+  OperationStateFile as _OperationStateFile,
+  IOperationStateFileOptions as _IOperationStateFileOptions,
+  IOperationStateJson as _IOperationStateJson
+} from './logic/operations/OperationStateFile';

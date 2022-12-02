@@ -4,6 +4,7 @@
 import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
+import { performance } from 'perf_hooks';
 import {
   JsonFile,
   IPackageJson,
@@ -147,8 +148,7 @@ export class Utilities {
    * Node.js equivalent of performance.now().
    */
   public static getTimeInMs(): number {
-    const [seconds, nanoseconds] = process.hrtime();
-    return seconds * 1000 + nanoseconds / 1000000;
+    return performance.now();
   }
 
   /**
@@ -156,11 +156,7 @@ export class Utilities {
    */
   public static getSetAsArray<T>(set: Set<T>): T[] {
     // When ES6 is supported, we can use Array.from() instead.
-    const result: T[] = [];
-    set.forEach((value: T) => {
-      result.push(value);
-    });
-    return result;
+    return Array.from(set);
   }
 
   /**
@@ -491,8 +487,11 @@ export class Utilities {
    * home directory.
    *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
+   *
+   * @returns
+   * The text of the the .npmrc.
    */
-  public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
+  public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): string {
     console.log(`Transforming ${sourceNpmrcPath}`); // Verbose
     console.log(`  --> "${targetNpmrcPath}"`);
     let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
@@ -536,7 +535,10 @@ export class Utilities {
       }
     }
 
-    FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+    const combinedNpmrc: string = resultLines.join(os.EOL);
+    FileSystem.writeFile(targetNpmrcPath, combinedNpmrc);
+
+    return combinedNpmrc;
   }
 
   /**
@@ -562,12 +564,15 @@ export class Utilities {
    * If the source .npmrc file not exist, then syncNpmrc() will delete an .npmrc that is found in the target folder.
    *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
+   *
+   * @returns
+   * The text of the the synced .npmrc, if one exists. If one does not exist, then undefined is returned.
    */
   public static syncNpmrc(
     sourceNpmrcFolder: string,
     targetNpmrcFolder: string,
     useNpmrcPublish?: boolean
-  ): void {
+  ): string | undefined {
     const sourceNpmrcPath: string = path.join(
       sourceNpmrcFolder,
       !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
@@ -575,7 +580,7 @@ export class Utilities {
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
       if (FileSystem.exists(sourceNpmrcPath)) {
-        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
+        return Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
       } else if (FileSystem.exists(targetNpmrcPath)) {
         // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
         console.log(`Deleting ${targetNpmrcPath}`); // Verbose

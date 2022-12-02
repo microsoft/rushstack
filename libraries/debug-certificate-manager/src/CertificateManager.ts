@@ -4,17 +4,23 @@
 import type { pki } from 'node-forge';
 import * as path from 'path';
 import { EOL } from 'os';
-import { FileSystem, ITerminal, Import } from '@rushstack/node-core-library';
+import { FileSystem, ITerminal } from '@rushstack/node-core-library';
 
 import { runSudoAsync, IRunResult, runAsync } from './runCommand';
 import { CertificateStore } from './CertificateStore';
 
-const forge: typeof import('node-forge') = Import.lazy('node-forge', require);
-
-const SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
+const CA_SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
+const TLS_SERIAL_NUMBER: string = '731c321744e34650a202e3ef00000001';
 const FRIENDLY_NAME: string = 'debug-certificate-manager Development Certificate';
 const MAC_KEYCHAIN: string = '/Library/Keychains/System.keychain';
 const CERTUTIL_EXE_NAME: string = 'certutil';
+const CA_ALT_NAME: string = 'rushstack-certificate-manager.localhost';
+
+/**
+ * The set of names the certificate should be generated for, by default.
+ * @public
+ */
+export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = ['localhost'];
 
 /**
  * The interface for a debug certificate instance
@@ -23,14 +29,60 @@ const CERTUTIL_EXE_NAME: string = 'certutil';
  */
 export interface ICertificate {
   /**
-   * Generated pem certificate contents
+   * Generated pem Certificate Authority certificate contents
+   */
+  pemCaCertificate: string | undefined;
+
+  /**
+   * Generated pem TLS Server certificate contents
    */
   pemCertificate: string | undefined;
 
   /**
-   * Private key used to sign the pem certificate
+   * Private key for the TLS server certificate, used to sign TLS communications
    */
   pemKey: string | undefined;
+
+  /**
+   * The subject names the TLS server certificate is valid for
+   */
+  subjectAltNames: readonly string[] | undefined;
+}
+
+interface ICaCertificate {
+  /**
+   * Certificate
+   */
+  certificate: pki.Certificate;
+
+  /**
+   * Private key for the CA cert. Delete after signing the TLS cert.
+   */
+  privateKey: pki.PrivateKey;
+}
+
+interface ISubjectAltNameExtension {
+  altNames: readonly IAltName[];
+}
+
+interface IAltName {
+  type: 2;
+  value: string;
+}
+
+/**
+ * Options to use if needing to generate a new certificate
+ * @public
+ */
+export interface ICertificateGenerationOptions {
+  /**
+   * The DNS Subject names to issue the certificate for.
+   */
+  subjectAltNames?: ReadonlyArray<string>;
+  /**
+   * How many days the certificate should be valid for.
+   */
+  validityInDays?: number;
 }
 
 /**
@@ -53,31 +105,63 @@ export class CertificateManager {
    */
   public async ensureCertificateAsync(
     canGenerateNewCertificate: boolean,
-    terminal: ITerminal
+    terminal: ITerminal,
+    generationOptions?: ICertificateGenerationOptions
   ): Promise<ICertificate> {
-    if (this._certificateStore.certificateData && this._certificateStore.keyData) {
-      let invalidCertificate: boolean = false;
+    const optionsWithDefaults: Required<ICertificateGenerationOptions> =
+      applyDefaultOptions(generationOptions);
+
+    const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
+
+    if (existingCert && existingKey) {
       const messages: string[] = [];
 
-      if (!this._certificateHasSubjectAltName()) {
-        invalidCertificate = true;
+      const forge: typeof import('node-forge') = await import('node-forge');
+      const certificate: pki.Certificate = forge.pki.certificateFromPem(existingCert);
+      const altNamesExtension: ISubjectAltNameExtension | undefined = certificate.getExtension(
+        'subjectAltName'
+      ) as ISubjectAltNameExtension;
+      if (!altNamesExtension) {
         messages.push(
           'The existing development certificate is missing the subjectAltName ' +
             'property and will not work with the latest versions of some browsers.'
         );
       }
 
-      if (!(await this._detectIfCertificateIsTrustedAsync(terminal))) {
-        invalidCertificate = true;
+      const { notBefore, notAfter } = certificate.validity;
+      const now: Date = new Date();
+      if (now < notBefore) {
+        messages.push(
+          `The existing development certificate's validity period does not start until ${notBefore}. It is currently ${now}.`
+        );
+      }
+
+      if (now > notAfter) {
+        messages.push(
+          `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
+        );
+      }
+
+      const { caCertificateData } = this._certificateStore;
+
+      if (!caCertificateData) {
+        messages.push(
+          'The existing development certificate is missing a separate CA cert as the root ' +
+            'of trust and will not work with the latest versions of some browsers.'
+        );
+      }
+
+      const isTrusted: boolean = await this._detectIfCertificateIsTrustedAsync(terminal);
+      if (!isTrusted) {
         messages.push('The existing development certificate is not currently trusted by your system.');
       }
 
-      if (invalidCertificate) {
+      if (messages.length > 0) {
         if (canGenerateNewCertificate) {
           messages.push('Attempting to untrust the certificate and generate a new one.');
           terminal.writeWarningLine(messages.join(' '));
           await this.untrustCertificateAsync(terminal);
-          await this._ensureCertificateInternalAsync(terminal);
+          return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
         } else {
           messages.push(
             'Untrust the certificate and generate a new one, or set the ' +
@@ -85,20 +169,22 @@ export class CertificateManager {
           );
           throw new Error(messages.join(' '));
         }
+      } else {
+        return {
+          pemCaCertificate: caCertificateData,
+          pemCertificate: existingCert,
+          pemKey: existingKey,
+          subjectAltNames: altNamesExtension.altNames.map((entry) => entry.value)
+        };
       }
     } else if (canGenerateNewCertificate) {
-      await this._ensureCertificateInternalAsync(terminal);
+      return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
     } else {
       throw new Error(
         'No development certificate found. Generate a new certificate manually, or set the ' +
           '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
       );
     }
-
-    return {
-      pemCertificate: this._certificateStore.certificateData,
-      pemKey: this._certificateStore.keyData
-    };
   }
 
   /**
@@ -116,7 +202,7 @@ export class CertificateManager {
           '-user',
           '-delstore',
           'root',
-          SERIAL_NUMBER
+          CA_SERIAL_NUMBER
         ]);
 
         if (winUntrustResult.code !== 0) {
@@ -177,53 +263,69 @@ export class CertificateManager {
           'Automatic certificate untrust is only implemented for debug-certificate-manager on Windows ' +
             'and macOS. To untrust the development certificate, remove this certificate from your trusted ' +
             `root certification authorities: "${this._certificateStore.certificatePath}". The ` +
-            `certificate has serial number "${SERIAL_NUMBER}".`
+            `certificate has serial number "${CA_SERIAL_NUMBER}".`
         );
         return false;
     }
   }
 
-  private _createDevelopmentCertificate(): ICertificate {
+  private async _createCACertificateAsync(
+    validityInDays: number,
+    forge: typeof import('node-forge')
+  ): Promise<ICaCertificate> {
     const keys: pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
     const certificate: pki.Certificate = forge.pki.createCertificate();
     certificate.publicKey = keys.publicKey;
 
-    certificate.serialNumber = SERIAL_NUMBER;
+    certificate.serialNumber = CA_SERIAL_NUMBER;
 
     const now: Date = new Date();
     certificate.validity.notBefore = now;
-    // Valid for 3 years
-    certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 3);
+    certificate.validity.notAfter.setUTCDate(certificate.validity.notBefore.getUTCDate() + validityInDays);
 
     const attrs: pki.CertificateField[] = [
       {
         name: 'commonName',
-        value: 'localhost'
+        value: CA_ALT_NAME
       }
     ];
 
     certificate.setSubject(attrs);
     certificate.setIssuer(attrs);
 
+    const altNames: readonly IAltName[] = [
+      {
+        type: 2, // DNS
+        value: CA_ALT_NAME
+      }
+    ];
+
     certificate.setExtensions([
       {
+        name: 'basicConstraints',
+        cA: true,
+        pathLenConstraint: 0,
+        critical: true
+      },
+      {
         name: 'subjectAltName',
-        altNames: [
-          {
-            type: 2, // DNS
-            value: 'localhost'
-          }
-        ]
+        altNames,
+        critical: true
+      },
+      {
+        name: 'issuerAltName',
+        altNames,
+        critical: false
       },
       {
         name: 'keyUsage',
-        digitalSignature: true,
-        keyEncipherment: true,
-        dataEncipherment: true
+        keyCertSign: true,
+        critical: true
       },
       {
         name: 'extKeyUsage',
-        serverAuth: true
+        serverAuth: true,
+        critical: true
       },
       {
         name: 'friendlyName',
@@ -234,13 +336,103 @@ export class CertificateManager {
     // self-sign certificate
     certificate.sign(keys.privateKey, forge.md.sha256.create());
 
+    return {
+      certificate,
+      privateKey: keys.privateKey
+    };
+  }
+
+  private async _createDevelopmentCertificateAsync(
+    options: Required<ICertificateGenerationOptions>
+  ): Promise<ICertificate> {
+    const forge: typeof import('node-forge') = await import('node-forge');
+    const keys: pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
+    const certificate: pki.Certificate = forge.pki.createCertificate();
+
+    certificate.publicKey = keys.publicKey;
+    certificate.serialNumber = TLS_SERIAL_NUMBER;
+
+    const { subjectAltNames: subjectNames, validityInDays } = options;
+
+    const { certificate: caCertificate, privateKey: caPrivateKey } = await this._createCACertificateAsync(
+      validityInDays,
+      forge
+    );
+
+    const now: Date = new Date();
+    certificate.validity.notBefore = now;
+    certificate.validity.notAfter.setUTCDate(certificate.validity.notBefore.getUTCDate() + validityInDays);
+
+    const subjectAttrs: pki.CertificateField[] = [
+      {
+        name: 'commonName',
+        value: subjectNames[0]
+      }
+    ];
+    const issuerAttrs: pki.CertificateField[] = caCertificate.subject.attributes;
+
+    certificate.setSubject(subjectAttrs);
+    certificate.setIssuer(issuerAttrs);
+
+    const subjectAltNames: readonly IAltName[] = subjectNames.map((subjectName) => ({
+      type: 2, // DNS
+      value: subjectName
+    }));
+
+    const issuerAltNames: readonly IAltName[] = [
+      {
+        type: 2, // DNS
+        value: CA_ALT_NAME
+      }
+    ];
+
+    certificate.setExtensions([
+      {
+        name: 'basicConstraints',
+        cA: false,
+        critical: true
+      },
+      {
+        name: 'subjectAltName',
+        altNames: subjectAltNames,
+        critical: true
+      },
+      {
+        name: 'issuerAltName',
+        altNames: issuerAltNames,
+        critical: false
+      },
+      {
+        name: 'keyUsage',
+        digitalSignature: true,
+        keyEncipherment: true,
+        dataEncipherment: true,
+        critical: true
+      },
+      {
+        name: 'extKeyUsage',
+        serverAuth: true,
+        critical: true
+      },
+      {
+        name: 'friendlyName',
+        value: FRIENDLY_NAME
+      }
+    ]);
+
+    // Sign certificate with CA
+    certificate.sign(caPrivateKey, forge.md.sha256.create());
+
     // convert a Forge certificate to PEM
+    const caPem: string = forge.pki.certificateToPem(caCertificate);
     const pem: string = forge.pki.certificateToPem(certificate);
     const pemKey: string = forge.pki.privateKeyToPem(keys.privateKey);
 
     return {
+      pemCaCertificate: caPem,
       pemCertificate: pem,
-      pemKey: pemKey
+      pemKey: pemKey,
+      subjectAltNames: options.subjectAltNames
     };
   }
 
@@ -341,7 +533,7 @@ export class CertificateManager {
           '-user',
           '-verifystore',
           'root',
-          SERIAL_NUMBER
+          CA_SERIAL_NUMBER
         ]);
 
         if (winVerifyStoreResult.code !== 0) {
@@ -399,7 +591,7 @@ export class CertificateManager {
           'Automatic certificate trust validation is only implemented for debug-certificate-manager on Windows ' +
             'and macOS. Manually verify this development certificate is present in your trusted ' +
             `root certification authorities: "${this._certificateStore.certificatePath}". ` +
-            `The certificate has serial number "${SERIAL_NUMBER}".`
+            `The certificate has serial number "${CA_SERIAL_NUMBER}".`
         );
         // Always return true on Linux to prevent breaking flow.
         return true;
@@ -426,7 +618,7 @@ export class CertificateManager {
         '-repairstore',
         '-user',
         'root',
-        SERIAL_NUMBER,
+        CA_SERIAL_NUMBER,
         friendlyNamePath
       ]);
 
@@ -443,16 +635,18 @@ export class CertificateManager {
     }
   }
 
-  private async _ensureCertificateInternalAsync(terminal: ITerminal): Promise<void> {
+  private async _ensureCertificateInternalAsync(
+    options: Required<ICertificateGenerationOptions>,
+    terminal: ITerminal
+  ): Promise<ICertificate> {
     const certificateStore: CertificateStore = this._certificateStore;
-    const generatedCertificate: ICertificate = this._createDevelopmentCertificate();
+    const generatedCertificate: ICertificate = await this._createDevelopmentCertificateAsync(options);
 
-    const now: Date = new Date();
-    const certificateName: string = now.getTime().toString();
+    const certificateName: string = Date.now().toString();
     const tempDirName: string = path.join(__dirname, '..', 'temp');
 
     const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.pem`);
-    const pemFileContents: string | undefined = generatedCertificate.pemCertificate;
+    const pemFileContents: string | undefined = generatedCertificate.pemCaCertificate;
     if (pemFileContents) {
       await FileSystem.writeFileAsync(tempCertificatePath, pemFileContents, {
         ensureFolderExists: true
@@ -463,9 +657,13 @@ export class CertificateManager {
       tempCertificatePath,
       terminal
     );
+
+    let subjectAltNames: readonly string[] | undefined;
     if (trustCertificateResult) {
+      certificateStore.caCertificateData = generatedCertificate.pemCaCertificate;
       certificateStore.certificateData = generatedCertificate.pemCertificate;
       certificateStore.keyData = generatedCertificate.pemKey;
+      subjectAltNames = generatedCertificate.subjectAltNames;
 
       // Try to set the friendly name, and warn if we can't
       if (!this._trySetFriendlyNameAsync(tempCertificatePath, terminal)) {
@@ -473,20 +671,19 @@ export class CertificateManager {
       }
     } else {
       // Clear out the existing store data, if any exists
+      certificateStore.caCertificateData = undefined;
       certificateStore.certificateData = undefined;
       certificateStore.keyData = undefined;
     }
 
     await FileSystem.deleteFileAsync(tempCertificatePath);
-  }
 
-  private _certificateHasSubjectAltName(): boolean {
-    const certificateData: string | undefined = this._certificateStore.certificateData;
-    if (!certificateData) {
-      return false;
-    }
-    const certificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
-    return !!certificate.getExtension('subjectAltName');
+    return {
+      pemCaCertificate: certificateStore.caCertificateData,
+      pemCertificate: certificateStore.certificateData,
+      pemKey: certificateStore.keyData,
+      subjectAltNames
+    };
   }
 
   private _parseMacOsMatchingCertificateHash(findCertificateOuput: string): string | undefined {
@@ -499,9 +696,19 @@ export class CertificateManager {
       }
 
       const snbrMatch: string[] | null = line.match(/^\s*"snbr"<blob>=0x([^\s]+).+$/);
-      if (snbrMatch && (snbrMatch[1] || '').toLowerCase() === SERIAL_NUMBER) {
+      if (snbrMatch && (snbrMatch[1] || '').toLowerCase() === CA_SERIAL_NUMBER) {
         return shaHash;
       }
     }
   }
+}
+
+function applyDefaultOptions(
+  options: ICertificateGenerationOptions | undefined
+): Required<ICertificateGenerationOptions> {
+  const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
+  return {
+    subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
+    validityInDays: options?.validityInDays ?? 365
+  };
 }

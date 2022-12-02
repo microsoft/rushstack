@@ -1,6 +1,195 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 06 Aug 2022 05:35:19 GMT and should not be manually modified.
+This log was last generated on Tue, 29 Nov 2022 00:10:20 GMT and should not be manually modified.
+
+## 5.86.0
+Tue, 29 Nov 2022 00:10:20 GMT
+
+### Updates
+
+- Add new commands "rush-pnpm patch" and "rush-pnpm patch-commit" for patching NPM packages when using the PNPM package manager (GitHub #3554)
+
+## 5.85.1
+Fri, 25 Nov 2022 21:51:32 GMT
+
+### Updates
+
+- Fix an intermittent issue when writing tar log files
+
+## 5.85.0
+Thu, 24 Nov 2022 03:57:19 GMT
+
+### Updates
+
+- Add support for a `credentialMetadata` property in the CredentialCache.
+- (BREAKING API CHANGE) Change the signature of `CredentialCache.setCacheEntry` to take the credential ID and an object describing the credential instead of a credential string and an expiration date. The second argument's type now matches the return value of `CredentialCache.tryGetCacheEntry`
+- (BREAKING API CHANGE) Change the return type of `AzureAuthenticationBase.tryGetCachedCredentialAsync` (and, therefore, `AzureStorageAuthentication.tryGetCachedCredentialAsync`) from `string | undefined` to `ICredentialCacheEntry | undefined` to include the credentialMetadata.
+
+## 5.84.0
+Tue, 22 Nov 2022 23:24:56 GMT
+
+### Updates
+
+- Add a "dependsOnEnvVars" configuration option to operations in rush-project.json. The variables specified in this option are included in the cache key hash calculation.
+- The "rush setup" user prompts can now be customized.
+- Make autoinstaller logging respect the `--quiet` parameter.
+- Add project filtering to the upgrade-interactive UI prompt. Also increases the default page size for project lists in UI to 12.
+- Add a feature (behind the "cleanInstallAfterNpmrcChanges" experiment) that will cause a clean install to be performed if the common/temp/.npmrc file has changed since the last install.
+
+## 5.83.4
+Fri, 18 Nov 2022 04:02:43 GMT
+
+### Patches
+
+- Fix performance regression from supporting git submodules
+
+### Updates
+
+- Change files and change logs can store custom fields.
+
+## 5.83.3
+Tue, 15 Nov 2022 18:43:51 GMT
+
+### Patches
+
+- Fix an issue where Git submodules were not handled correctly by the build cache (GitHub #1711)
+
+## 5.83.2
+Mon, 14 Nov 2022 05:15:22 GMT
+
+### Updates
+
+- Ensure autoinstaller lockfiles are not leftover after an error
+
+## 5.83.1
+Sat, 12 Nov 2022 04:40:57 GMT
+
+### Updates
+
+- Update the "rush init" template for command-line.json to add usage examples for integer, integer list, string list, choice list parameter kinds
+
+## 5.83.0
+Fri, 11 Nov 2022 03:51:49 GMT
+
+### Updates
+
+- Add credentialType option for rush setup command
+- Rush "setup" command works even if plugins cannot be installed
+- Add support for integer, integer list, string list, and choice list parameters in plugins.
+- Introduce a `rush upgrade-interactive` action that provides an interactive way to upgrade outdated dependencies.
+- Fix a regression from Rush 5.79.0 where "rush init" did not create the pnpm-config.json file automatically
+
+## 5.82.1
+Wed, 19 Oct 2022 23:44:02 GMT
+
+_Version update only_
+
+## 5.82.0
+Mon, 17 Oct 2022 22:14:39 GMT
+
+### Updates
+
+- Replace Travis with GitHub Actions in the `rush init` template."
+- Handle case in ProjectWatcher where a project contains no git tracked files or status information is or was unavailable.
+- Refactor @rushstack/rush-azure-storage-build-cache-plugin to expose an API for generating and caching Azure credentials for other workloads, in addition to Storage.
+- Validate the change type in changefiles during publishing.
+
+## 5.81.0
+Sat, 08 Oct 2022 02:30:30 GMT
+
+### Updates
+
+- Add a `rush remove` command that removes one or more dependencies from a project.
+- Support passing a lockfile to "install-run.js" and "install-run-rush.js" to ensure stable installation on CI.
+- Add missing "environmentVariables" property to "pnpm-config.json" schema to restore feature parity with "rush.json" "pnpmOptions" field.
+
+## 5.80.1
+Mon, 03 Oct 2022 23:11:35 GMT
+
+### Updates
+
+- Add a more useful error message in cases when a merge base for `rush change` cannot be determined.
+
+## 5.80.0
+Thu, 29 Sep 2022 07:13:24 GMT
+
+### Updates
+
+- Include the operation duration in the telemetry data that was recorded during the non-cached run when a cache hit occurs.
+- Fix an error message that always says to run "rush update --purge" even if the user only needs to run "rush install --purge."
+- Fix an issue where a "Current PNPM store path does not match the last one used." error will erroneously get thrown on Windows with an unchanged path, but with a forward slash instead of a backslash.
+- Remove fallback from tar binary to npm 'tar' package. The npm 'tar' package would sometimes produce invalid output if the cache entry was corrupt.
+- Remove gender from the git config example in rush.json
+
+## 5.79.0
+Sat, 24 Sep 2022 17:37:03 GMT
+
+### Minor changes
+
+- Add a `common/config/pnpm-config.json`, which is used to specify fields like `overrides`, `packageExtensions`, and `neverBuiltDependencies` that would otherwise be placed in a PNPM workspace repo's root-level `package.json`'s `pnpm` field.
+
+### Updates
+
+- Add a `--commit` and `--commit-message` flag to `rush change` that commits the change files automatically.
+
+## 5.78.1
+Fri, 23 Sep 2022 02:54:44 GMT
+
+### Updates
+
+- Fix Git detection when the current working directory is unrelated to the Rush workspace.
+- Fix an error that ocurred if an autoinstaller's  "node_modules" folder was manually deleted (GitHub #2987)
+
+## 5.78.0
+Sat, 17 Sep 2022 00:56:37 GMT
+
+### Updates
+
+- Add a "beforeInstall" hook to the plugin API, for plugins to examine the environment immediately before "rush install" or "rush update" invoke the package manager.
+- Fix "--parallelism XX%" parsing to return a finite number of CPU cores.
+- Update the "rush init" template to include .gitignore patterns for IntellJ IDEA
+- Upgrade the @azure/identity and @azure/storage-blob packages to eliminate a deprecation message during installation.
+- Define an environment variable RUSH_PNPM_VERIFY_STORE_INTEGRITY that can be used to enable or disable PNPM's store integrity verification during installation for performance.
+
+## 5.77.3
+Fri, 02 Sep 2022 17:49:09 GMT
+
+_Version update only_
+
+## 5.77.2
+Wed, 31 Aug 2022 00:43:07 GMT
+
+### Updates
+
+- Fix an issue where "rush add" sometimes did not work correctly if a project is nested under another project's folder
+
+## 5.77.1
+Tue, 30 Aug 2022 17:26:42 GMT
+
+### Updates
+
+- Fixed an issue where "rush add" was not updating common-versions.json when using "--make-consistent"
+
+## 5.77.0
+Mon, 29 Aug 2022 21:09:31 GMT
+
+### Updates
+
+- Add machine architecture information, dependency graph information, and individual build times and statuses to the telemetry file.
+- Add schema validation for change files.
+- Fix a minor issue with the "--rush-example-repo" template
+- Update CLI docs for "rush add"
+- Improve some config file documentation
+- Make the project tag name syntax more strict to avoid error-prone names such as "tag:$PATH" or "tag://"
+- Add validation to ensure package.json files are strict JSON and the "version" field is strict SemVer
+- Add a new setting "watchOptions.debounceMs" in command-line.json
+
+## 5.76.1
+Mon, 08 Aug 2022 07:32:36 GMT
+
+### Updates
+
+- Fix a recent regression where "rush install" would sometimes fail with "Unknown option: 'ignore-compatibility-db'"
 
 ## 5.76.0
 Sat, 06 Aug 2022 05:35:19 GMT
@@ -1174,8 +1363,9 @@ Tue, 26 Nov 2019 00:53:52 GMT
 ## 5.17.1
 Thu, 21 Nov 2019 00:50:15 GMT
 
-### Updates
+### Patches
 
+- Remove an error thrown when the --registry and --pack arguments are used on rush publish, because --registry might be required to check if a package has already been published against a custom registry.
 - Fix an issue with Rush add, where Rush was unable to add unpublished local projects as dependencies.
 
 ## 5.17.0

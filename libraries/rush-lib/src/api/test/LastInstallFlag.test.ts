@@ -82,7 +82,7 @@ describe(LastInstallFlag.name, () => {
 
     flag1.create();
     expect(() => {
-      flag2.checkValidAndReportStoreIssues();
+      flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' });
     }).toThrowError(/PNPM store path/);
   });
 
@@ -97,9 +97,26 @@ describe(LastInstallFlag.name, () => {
 
     flag1.create();
     expect(() => {
-      flag2.checkValidAndReportStoreIssues();
+      flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' });
     }).not.toThrow();
-    expect(flag2.checkValidAndReportStoreIssues()).toEqual(false);
+    expect(flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' })).toEqual(false);
+  });
+
+  it("ignores a specified option that doesn't match", () => {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      nodeVersion: 'a',
+      npmrcHash: 'b'
+    });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      nodeVersion: 'a',
+      npmrcHash: 'c'
+    });
+
+    flag1.create();
+    expect(() => {
+      flag2.isValid({ statePropertiesToIgnore: ['npmrcHash'] });
+    }).not.toThrow();
+    expect(flag2.isValid({ statePropertiesToIgnore: ['npmrcHash'] })).toEqual(true);
   });
 
   it('can detect selected project installed', () => {

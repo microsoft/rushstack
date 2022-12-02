@@ -2,6 +2,66 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.13.1",
+      "tag": "@rushstack/ts-command-line_v4.13.1",
+      "date": "Tue, 08 Nov 2022 01:20:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make ScopedCommandLineAction.onDefineUnscopedParameters optional to match CommandLineAciton.onDefineParameters"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.13.0",
+      "tag": "@rushstack/ts-command-line_v4.13.0",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Make the onDefineParameters function optional for `CommandLineAction`s and `CommandLineParser`s that either don't have parameters or that define their parameters in their constructor."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.12.5",
+      "tag": "@rushstack/ts-command-line_v4.12.5",
+      "date": "Mon, 10 Oct 2022 15:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.12.4",
+      "tag": "@rushstack/ts-command-line_v4.12.4",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.12.3",
+      "tag": "@rushstack/ts-command-line_v4.12.3",
+      "date": "Thu, 15 Sep 2022 00:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.12.2",
       "tag": "@rushstack/ts-command-line_v4.12.2",
       "date": "Wed, 03 Aug 2022 18:40:35 GMT",

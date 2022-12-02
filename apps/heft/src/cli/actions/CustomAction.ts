@@ -65,8 +65,8 @@ export interface ICustomActionOptions<TParameters> {
 }
 
 export class CustomAction<TParameters> extends HeftActionBase {
-  private _customActionOptions: ICustomActionOptions<TParameters>;
-  private _parameterValues!: Map<string, () => CustomActionParameterType>;
+  private readonly _customActionOptions: ICustomActionOptions<TParameters>;
+  private readonly _parameterValues: Map<string, () => CustomActionParameterType>;
 
   public constructor(
     customActionOptions: ICustomActionOptions<TParameters>,
@@ -82,10 +82,6 @@ export class CustomAction<TParameters> extends HeftActionBase {
     );
 
     this._customActionOptions = customActionOptions;
-  }
-
-  public onDefineParameters(): void {
-    super.onDefineParameters();
 
     this._parameterValues = new Map<string, () => CustomActionParameterType>();
     for (const [callbackValueName, untypedParameterOption] of Object.entries(

@@ -16,7 +16,7 @@ import { ApiClass } from '../model/ApiClass';
 import { ApiInterface } from '../model/ApiInterface';
 import { ExcerptToken, ExcerptTokenKind } from './Excerpt';
 import { IFindApiItemsResult, IFindApiItemsMessage, FindApiItemsMessageId } from './IFindApiItemsResult';
-import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { HeritageType } from '../model/HeritageType';
 import { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver';
@@ -231,7 +231,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
     /** @override */
     public get members(): ReadonlyArray<ApiItem> {
       if (!this[_membersSorted] && !this[_preserveMemberOrder]) {
-        LegacyAdapters.sortStable(this[_members], (x, y) => x.getSortKey().localeCompare(y.getSortKey()));
+        this[_members].sort((x, y) => x.getSortKey().localeCompare(y.getSortKey()));
         this[_membersSorted] = true;
       }
 
@@ -433,9 +433,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
         //
         // interface FooBar extends Foo, Bar {}
         // ```
-        LegacyAdapters.sortStable(extendedItems, (x: ApiItem, y: ApiItem) =>
-          x.getSortKey().localeCompare(y.getSortKey())
-        );
+        extendedItems.sort((x: ApiItem, y: ApiItem) => x.getSortKey().localeCompare(y.getSortKey()));
 
         toVisit.push(...extendedItems);
         next = toVisit.shift();
@@ -448,9 +446,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       for (const members of membersByKind.values()) {
         items.push(...members);
       }
-      LegacyAdapters.sortStable(items, (x: ApiItem, y: ApiItem) =>
-        x.getSortKey().localeCompare(y.getSortKey())
-      );
+      items.sort((x: ApiItem, y: ApiItem) => x.getSortKey().localeCompare(y.getSortKey()));
 
       return {
         items,

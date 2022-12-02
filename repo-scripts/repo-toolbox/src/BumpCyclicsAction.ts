@@ -15,8 +15,6 @@ export class BumpCyclicsAction extends CommandLineAction {
     });
   }
 
-  protected onDefineParameters(): void {}
-
   protected async onExecute(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({

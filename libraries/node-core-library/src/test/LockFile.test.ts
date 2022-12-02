@@ -11,6 +11,9 @@ function setLockFileGetProcessStartTime(fn: (process: number) => string | undefi
   (LockFile as any)._getStartTime = fn;
 }
 
+// lib/test
+const libTestFolder: string = path.resolve(__dirname, '../../lib/test');
+
 describe(LockFile.name, () => {
   afterEach(() => {
     setLockFileGetProcessStartTime(getProcessStartTime);
@@ -113,7 +116,7 @@ describe(LockFile.name, () => {
 
       test('can acquire and close a clean lockfile', () => {
         // ensure test folder is clean
-        const testFolder: string = path.join(__dirname, '1');
+        const testFolder: string = path.join(libTestFolder, '1');
         FileSystem.ensureEmptyFolder(testFolder);
 
         const resourceName: string = 'test';
@@ -139,7 +142,7 @@ describe(LockFile.name, () => {
 
       test('cannot acquire a lock if another valid lock exists', () => {
         // ensure test folder is clean
-        const testFolder: string = path.join(__dirname, '2');
+        const testFolder: string = path.join(libTestFolder, '2');
         FileSystem.ensureEmptyFolder(testFolder);
 
         const otherPid: number = 999999999;
@@ -169,7 +172,7 @@ describe(LockFile.name, () => {
       });
       test('cannot acquire a lock if another valid lock exists with the same start time', () => {
         // ensure test folder is clean
-        const testFolder: string = path.join(__dirname, '3');
+        const testFolder: string = path.join(libTestFolder, '3');
         FileSystem.ensureEmptyFolder(testFolder);
 
         const otherPid: number = 1; // low pid so the other lock is before us
@@ -214,7 +217,7 @@ describe(LockFile.name, () => {
 
     test('will not acquire if existing lock is there', () => {
       // ensure test folder is clean
-      const testFolder: string = path.join(__dirname, '1');
+      const testFolder: string = path.join(libTestFolder, '1');
       FileSystem.deleteFolder(testFolder);
       FileSystem.ensureFolder(testFolder);
 
@@ -232,9 +235,8 @@ describe(LockFile.name, () => {
 
     test('can acquire and close a dirty lockfile', () => {
       // ensure test folder is clean
-      const testFolder: string = path.join(__dirname, '1');
-      FileSystem.deleteFolder(testFolder);
-      FileSystem.ensureFolder(testFolder);
+      const testFolder: string = path.join(libTestFolder, '1');
+      FileSystem.ensureEmptyFolder(testFolder);
 
       // Create a lockfile that is still hanging around on disk,
       const resourceName: string = 'test';
@@ -256,9 +258,8 @@ describe(LockFile.name, () => {
 
     test('can acquire and close a clean lockfile', () => {
       // ensure test folder is clean
-      const testFolder: string = path.join(__dirname, '1');
-      FileSystem.deleteFolder(testFolder);
-      FileSystem.ensureFolder(testFolder);
+      const testFolder: string = path.join(libTestFolder, '1');
+      FileSystem.ensureEmptyFolder(testFolder);
 
       const resourceName: string = 'test';
       const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);

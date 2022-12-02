@@ -96,6 +96,17 @@ export interface IConfigApiReport {
    * prepend a folder token such as `<projectFolder>`.
    */
   reportTempFolder?: string;
+
+  /**
+   * Whether "forgotten exports" should be included in the API report file.
+   *
+   * @remarks
+   * Forgotten exports are declarations flagged with `ae-forgotten-export` warnings. See
+   * https://api-extractor.com/pages/messages/ae-forgotten-export/ to learn more.
+   *
+   * @defaultValue `false`
+   */
+  includeForgottenExports?: boolean;
 }
 
 /**
@@ -120,6 +131,31 @@ export interface IConfigDocModel {
    * prepend a folder token such as `<projectFolder>`.
    */
   apiJsonFilePath?: string;
+
+  /**
+   * Whether "forgotten exports" should be included in the doc model file.
+   *
+   * @remarks
+   * Forgotten exports are declarations flagged with `ae-forgotten-export` warnings. See
+   * https://api-extractor.com/pages/messages/ae-forgotten-export/ to learn more.
+   *
+   * @defaultValue `false`
+   */
+  includeForgottenExports?: boolean;
+
+  /**
+   * The base URL where the project's source code can be viewed on a website such as GitHub or
+   * Azure DevOps. This URL path corresponds to the `<projectFolder>` path on disk.
+   *
+   * @remarks
+   * This URL is concatenated with the file paths serialized to the doc model to produce URL file paths to individual API items.
+   * For example, if the `projectFolderUrl` is "https://github.com/microsoft/rushstack/tree/main/apps/api-extractor" and an API
+   * item's file path is "api/ExtractorConfig.ts", the full URL file path would be
+   * "https://github.com/microsoft/rushstack/tree/main/apps/api-extractor/api/ExtractorConfig.js".
+   *
+   * Can be omitted if you don't need source code links in your API documentation reference.
+   */
+  projectFolderUrl?: string;
 }
 
 /**
@@ -376,7 +412,7 @@ export interface IConfigFile {
   testMode?: boolean;
 
   /**
-   * Specifies how API Extractor sorts members of an enum when generating api.json.
+   * Specifies how API Extractor sorts members of an enum when generating the .api.json file.
    *
    * @remarks
    * By default, the output files will be sorted alphabetically, which is "by-name".

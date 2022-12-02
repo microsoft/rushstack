@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Document default value for watchDebounceMs",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -1,6 +1,108 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 03 Aug 2022 18:40:35 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+
+## 0.48.8
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 0.48.7
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 0.48.6
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 0.48.5
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 0.48.4
+Fri, 14 Oct 2022 15:26:31 GMT
+
+_Version update only_
+
+## 0.48.3
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 0.48.2
+Tue, 11 Oct 2022 23:49:12 GMT
+
+_Version update only_
+
+## 0.48.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 0.48.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Add support for TypeScript 4.8.
+
+## 0.47.11
+Tue, 27 Sep 2022 22:17:20 GMT
+
+_Version update only_
+
+## 0.47.10
+Wed, 21 Sep 2022 20:21:10 GMT
+
+_Version update only_
+
+## 0.47.9
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 0.47.8
+Tue, 13 Sep 2022 00:16:55 GMT
+
+_Version update only_
+
+## 0.47.7
+Mon, 12 Sep 2022 22:27:48 GMT
+
+_Version update only_
+
+## 0.47.6
+Fri, 02 Sep 2022 17:48:43 GMT
+
+_Version update only_
+
+## 0.47.5
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 0.47.4
+Wed, 24 Aug 2022 00:14:38 GMT
+
+_Version update only_
+
+## 0.47.3
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 0.47.2
+Wed, 10 Aug 2022 09:52:12 GMT
+
+_Version update only_
+
+## 0.47.1
+Wed, 10 Aug 2022 08:12:16 GMT
+
+_Version update only_
 
 ## 0.47.0
 Wed, 03 Aug 2022 18:40:35 GMT

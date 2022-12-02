@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -186,6 +186,7 @@
               "text": "number"
             }
           ],
+          "fileUrlPath": "lib/excerptTokens/index.d.ts",
           "isReadonly": false,
           "releaseTag": "Public",
           "name": "MY_CONSTANT",
@@ -204,6 +205,7 @@
               "text": "export class MyClass "
             }
           ],
+          "fileUrlPath": "lib/excerptTokens/index.d.ts",
           "releaseTag": "Public",
           "name": "MyClass",
           "preserveMemberOrder": false,
@@ -219,27 +221,27 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "number "
+                  "text": "number"
                 },
                 {
                   "kind": "Content",
-                  "text": ", y : "
+                  "text": " , y : "
                 },
                 {
                   "kind": "Content",
-                  "text": "string "
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
-                  "text": ") : "
+                  "text": " ) : "
                 },
                 {
                   "kind": "Content",
-                  "text": "boolean "
+                  "text": "boolean"
                 },
                 {
                   "kind": "Content",
-                  "text": ";"
+                  "text": " ;"
                 }
               ],
               "isStatic": false,

@@ -10,9 +10,9 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 
 export class UpdateCloudCredentialsAction extends BaseRushAction {
-  private _interactiveModeFlag!: CommandLineFlagParameter;
-  private _credentialParameter!: CommandLineStringParameter;
-  private _deleteFlag!: CommandLineFlagParameter;
+  private readonly _interactiveModeFlag: CommandLineFlagParameter;
+  private readonly _credentialParameter: CommandLineStringParameter;
+  private readonly _deleteFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -24,9 +24,7 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
       safeForSimultaneousRushProcesses: false,
       parser
     });
-  }
 
-  protected onDefineParameters(): void {
     this._interactiveModeFlag = this.defineFlagParameter({
       parameterLongName: '--interactive',
       parameterShortName: '-i',

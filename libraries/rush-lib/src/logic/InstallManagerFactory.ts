@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { Import } from '@rushstack/node-core-library';
-import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
 import { WorkspaceInstallManager } from './installManager/WorkspaceInstallManager';
 import { PurgeManager } from './PurgeManager';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+
+import type { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
 
 const rushInstallManagerModule: typeof import('./installManager/RushInstallManager') = Import.lazy(
   './installManager/RushInstallManager',

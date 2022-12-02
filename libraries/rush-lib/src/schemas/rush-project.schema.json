@@ -18,7 +18,7 @@
 
     "incrementalBuildIgnoredGlobs": {
       "type": "array",
-      "description": "The incremental analyzer can skip Rush commands for projects whose input files have not changed since the last build. Normally, every Git-tracked file under the project folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific files, specified as globs relative to the project folder. The list of file globs will be interpreted the same way your .gitignore file is.",
+      "description": "The incremental analyzer can skip Rush commands for projects whose input files have not changed since the last build. Normally, every Git-tracked file under the project folder is assumed to be an input. Use \"incrementalBuildIgnoredGlobs\" to ignore specific files, specified as globs relative to the project folder.  The glob syntax is based on the .gitignore file format.",
       "items": {
         "type": "string"
       }
@@ -39,12 +39,21 @@
         "properties": {
           "operationName": {
             "type": "string",
-            "description": "The name of the operation. This should be a key in the `package.json`'s `scripts` object."
+            "description": "The name of the operation. This should be a key in the \"package.json\" file's \"scripts\" section."
           },
 
           "outputFolderNames": {
             "type": "array",
             "description": "Specify the folders where this operation writes its output files. If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder. These folders should not be tracked by Git. They must not contain symlinks.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+
+          "dependsOnEnvVars": {
+            "type": "array",
+            "description": "Specify a list of environment variables that affect the output of this operation. If provided, the values of these variables will become part of the hash when reading and writing from cache.",
             "items": {
               "type": "string"
             },

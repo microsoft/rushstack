@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as semver from 'semver';
 
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import { IChangeRequests, PublishUtilities } from './PublishUtilities';
 import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
@@ -17,6 +17,13 @@ const CHANGELOG_MD: string = 'CHANGELOG.md';
 const EOL: string = '\n';
 
 export class ChangelogGenerator {
+  /**
+   * The JSON Schema for Changelog file (changelog.schema.json).
+   */
+  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '..', 'schemas', 'changelog.schema.json')
+  );
+
   /**
    * Updates the appropriate changelogs with the given changes.
    */
@@ -128,6 +135,9 @@ export class ChangelogGenerator {
           if (individualChange.commit) {
             changeLogComment.commit = individualChange.commit;
           }
+          if (individualChange.customFields) {
+            changeLogComment.customFields = individualChange.customFields;
+          }
           comments.push(changeLogComment);
         }
       });
@@ -166,7 +176,7 @@ export class ChangelogGenerator {
 
     // Try to read the existing changelog.
     if (FileSystem.exists(changelogFilename)) {
-      changelog = JsonFile.load(changelogFilename);
+      changelog = JsonFile.loadAndValidate(changelogFilename, ChangelogGenerator.jsonSchema);
     }
 
     if (!changelog) {

@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1009,
+    "schemaVersion": 1010,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -197,7 +197,7 @@
             {
               "kind": "Reference",
               "text": "MyPromise",
-              "canonicalReference": "api-extractor-scenarios!Promise:class"
+              "canonicalReference": "api-extractor-scenarios!~Promise_2:class"
             },
             {
               "kind": "Content",
@@ -216,6 +216,7 @@
               "text": ";"
             }
           ],
+          "fileUrlPath": "src/ambientNameConflict/index.ts",
           "returnTypeTokenRange": {
             "startIndex": 7,
             "endIndex": 8
