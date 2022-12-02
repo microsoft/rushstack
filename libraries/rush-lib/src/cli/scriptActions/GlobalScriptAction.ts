@@ -11,6 +11,7 @@ import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError, Text } from '
 import type { IGlobalCommand } from '../../pluginFramework/RushLifeCycle';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
+import { Stopwatch } from '../../utilities/Stopwatch';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { IGlobalCommandConfig, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
 
@@ -147,6 +148,8 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     }
     this._rejectAnyTokensInShellCommand(shellCommand, shellCommandTokenContext);
 
+    const stopwatch: Stopwatch = Stopwatch.start();
+
     const exitCode: number = Utilities.executeLifecycleCommand(shellCommand, {
       rushConfiguration: this.rushConfiguration,
       workingDirectory: this.rushConfiguration.rushJsonFolder,
@@ -159,6 +162,21 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     });
 
     process.exitCode = exitCode;
+
+    stopwatch.stop();
+
+    if (this.parser.telemetry) {
+      this.parser.telemetry.log({
+        name: this.actionName,
+        durationInSeconds: stopwatch.duration,
+        result: exitCode > 0 ? 'Failed' : 'Succeeded',
+        extraData: {
+          customParameterValue: customParameterValues.join(' ')
+        }
+      });
+
+      this.parser.flushTelemetry();
+    }
 
     if (exitCode > 0) {
       console.log(os.EOL + colors.red(`The script failed with exit code ${exitCode}`));
