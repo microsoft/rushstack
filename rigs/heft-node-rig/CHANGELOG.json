@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.12.0-rc.2",
+      "tag": "@rushstack/heft-node-rig_v1.12.0-rc.2",
+      "date": "Fri, 2 Dec 2022 05:28:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve watch mode performance."
+          },
+          {
+            "comment": "Improve logging output."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.12.0-rc.1",
       "tag": "@rushstack/heft-node-rig_v1.12.0-rc.1",
       "date": "Fri, 18 Nov 2022 02:34:26 GMT",
