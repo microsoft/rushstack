@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add telemetry logout for global script actions",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
