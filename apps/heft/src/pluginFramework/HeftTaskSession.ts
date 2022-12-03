@@ -10,10 +10,10 @@ import type { HeftTask } from './HeftTask';
 import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
 import type { HeftParameterManager, IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
-import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
+import type { ICopyOperation, IIncrementalCopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { CancellationToken } from './CancellationToken';
-import type { GlobSyncFn } from '../plugins/FileGlobSpecifier';
+import type { GlobFn } from '../plugins/FileGlobSpecifier';
 
 /**
  * The task session is responsible for providing session-specific information to Heft task plugins.
@@ -121,7 +121,7 @@ export interface IHeftTaskRunHookOptions {
    *
    * @public
    */
-  readonly addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
+  readonly addCopyOperations: (copyOperations: ICopyOperation[]) => void;
 
   /**
    * Add delete operations to be performed during the `run` hook. These operations will be
@@ -129,7 +129,7 @@ export interface IHeftTaskRunHookOptions {
    *
    * @public
    */
-  readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+  readonly addDeleteOperations: (deleteOperations: IDeleteOperation[]) => void;
 }
 
 /**
@@ -165,19 +165,6 @@ export interface IChangedFileState {
 }
 
 /**
- * Used to specify a selection of files to copy from a specific source folder to one
- * or more destination folders.
- *
- * @public
- */
-export interface IIncrementalCopyOperation extends ICopyOperation {
-  /**
-   * If true, the file will be copied only if the source file has changed since it was last copied.
-   */
-  onlyIfChanged?: boolean;
-}
-
-/**
  * Options provided to the 'runIncremental' hook.
  *
  * @public
@@ -185,16 +172,18 @@ export interface IIncrementalCopyOperation extends ICopyOperation {
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
   /**
    * Add copy operations to be performed during the `runIncremental` hook. These operations will
-   * be performed after the task `runIncremental` hook has completed. If the `onlyIfChanged` option
-   * is provided, the file will be copied only if the source file has changed since it was last copied.
+   * be performed after the task `runIncremental` hook has completed.
    *
    * @public
    */
-  readonly addCopyOperations: (...copyOperations: IIncrementalCopyOperation[]) => void;
+  readonly addCopyOperations: (copyOperations: IIncrementalCopyOperation[]) => void;
 
   /**
    * A map of changed files to the corresponding change state. This can be used to track which
-   * files have been changed during an incremental build.
+   * files have been changed during an incremental build. This map is populated with all changed
+   * files, including files that are not source files. When an incremental build completes
+   * successfully, the map is cleared and only files changed after the incremental build will be
+   * included in the map.
    */
   readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
 
@@ -202,7 +191,7 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
    * Glob the map of changed files and return the subset of changed files that match the provided
    * globs.
    */
-  readonly globChangedFiles: GlobSyncFn;
+  readonly globChangedFilesAsync: GlobFn;
 
   /**
    * A cancellation token that is used to signal that the incremental build is cancelled. This

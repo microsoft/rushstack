@@ -255,7 +255,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         heftConfiguration,
         runOptions
       );
-      runOptions.addCopyOperations(...copyOperations);
+      runOptions.addCopyOperations(copyOperations);
     });
 
     let incrementalBuilder: TypeScriptBuilder | undefined | false;
@@ -285,7 +285,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         for (const incrementalCopyOperation of incrementalCopyOperations) {
           incrementalCopyOperation.onlyIfChanged = true;
         }
-        runIncrementalOptions.addCopyOperations(...incrementalCopyOperations);
+        runIncrementalOptions.addCopyOperations(incrementalCopyOperations);
       }
     );
   }

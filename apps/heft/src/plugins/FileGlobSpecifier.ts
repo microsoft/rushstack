@@ -40,7 +40,7 @@ export interface IFileSelectionSpecifier {
  *
  * @public
  */
-export interface IPartialGlobOptions {
+export interface IGlobOptions {
   /**
    * Current working directory that the glob pattern will be applied to.
    */
@@ -74,24 +74,11 @@ export interface IPartialGlobOptions {
  *
  * @public
  */
-export type GlobFn = (
-  pattern: string | string[],
-  options?: IPartialGlobOptions | undefined
-) => Promise<string[]>;
-
-/**
- * Glob a set of files and return a list of paths that match the provided patterns.
- *
- * @param patterns - Glob patterns to match against.
- * @param options - Options that are used when globbing the set of files.
- *
- * @public
- */
-export type GlobSyncFn = (pattern: string | string[], options?: IPartialGlobOptions | undefined) => string[];
+export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<string[]>;
 
 export async function getFilePathsAsync(
   fileGlobSpecifier: IFileSelectionSpecifier,
-  globFn: GlobFn | GlobSyncFn
+  globFn: GlobFn
 ): Promise<Set<string>> {
   return new Set<string>(
     await globFn(getIncludedGlobPatterns(fileGlobSpecifier), {

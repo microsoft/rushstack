@@ -27,7 +27,7 @@ import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import { Selection } from '../utilities/Selection';
-import { GitUtilities } from '../utilities/GitUtilities';
+import { GitignoreFilterAsyncFn, GitUtilities } from '../utilities/GitUtilities';
 import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
 import {
   OperationExecutionManager,
@@ -46,7 +46,7 @@ import { CancellationToken, CancellationTokenSource } from '../pluginFramework/C
 import { FileEventListener } from '../utilities/FileEventListener';
 import { Constants } from '../utilities/Constants';
 import { StaticFileSystemAdapter } from '../pluginFramework/StaticFileSystemAdapter';
-import type { GlobSyncFn, IPartialGlobOptions } from '../plugins/FileGlobSpecifier';
+import type { GlobFn, IGlobOptions } from '../plugins/FileGlobSpecifier';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;
@@ -71,32 +71,38 @@ async function* _waitForSourceChangesAsync(
   options: IWaitForSourceChangesOptions
 ): AsyncIterableIterator<void> {
   const { terminal, watcher, watchOptions, git } = options;
-  const ignoredSourceFileGlobs: string[] = Array.from(watchOptions.ignoredSourceFileGlobs);
   const forbiddenSourceFileGlobs: string[] = Array.from(watchOptions.forbiddenSourceFileGlobs);
   const changedFileStats: Map<string, fs.Stats | undefined> = new Map();
   const seenFilePaths: Set<string> = new Set();
   const seenSourceFilePaths: Set<string> = new Set();
+
+  // Create a gitignore filter to test if a file is ignored by git. If it is, it will be counted
+  // as a non-source file. If it is not, it will be counted as a source file. If git is not present,
+  // all files will be counted as source files and must manually be ignored by providing a glob to
+  // the ignoredSourceFileGlobs option.
+  const isFileUnignoredAsync: GitignoreFilterAsyncFn =
+    (await git.tryCreateGitignoreFilterAsync()) || (async () => true);
+
   let resolveFileChange: () => void;
   let rejectFileChange: (error: Error) => void;
   let fileChangePromise: Promise<void>;
 
   async function ingestFileChangesAsync(
     filePaths: Iterable<string>,
-    ignoreForbidden: boolean = false,
-    skipIgnoreCheck: boolean = false
+    ignoreForbidden: boolean = false
   ): Promise<void> {
-    // We can short-circuit the call to git if we already know all files have been seen.
-    const unseenFilePaths: Set<string> = Selection.difference(filePaths, seenFilePaths);
+    const unseenFilePaths: Set<string> = seenFilePaths.size
+      ? Selection.difference(filePaths, seenFilePaths)
+      : new Set(filePaths);
     if (unseenFilePaths.size) {
       // Determine which files are ignored or otherwise and stash them away for later.
-      // We can perform this check in one call to git to save time.
-      const unseenIgnoredFilePaths: Set<string> = skipIgnoreCheck
-        ? new Set()
-        : await git.checkIgnoreAsync(unseenFilePaths);
-      const unseenSourceFilePaths: Set<string> = Selection.difference(
-        unseenFilePaths,
-        unseenIgnoredFilePaths
-      );
+      const unseenIgnoredFilePaths: Set<string> = new Set();
+      const unseenSourceFilePaths: Set<string> = new Set();
+      for (const filePath of unseenFilePaths) {
+        const isFileUnignored: boolean = await isFileUnignoredAsync(filePath);
+        (isFileUnignored ? unseenSourceFilePaths : unseenIgnoredFilePaths).add(filePath);
+      }
+
       if (unseenSourceFilePaths.size) {
         // Use a StaticFileSystemAdapter containing only the unseen source files to determine which files
         // are forbidden or ignored, allowing us to use in-memory globbing.
@@ -129,18 +135,6 @@ async function* _waitForSourceChangesAsync(
             `Changes to the file at path "${forbiddenFilePaths[0]}" are forbidden while running ` +
               `in watch mode.`
           );
-        }
-
-        // If the unseen source file is ignored, remove it from the set of unseenSourceFiles. This file
-        // will then be treated as a non-source file and will not trigger rebuilds. We need to convert
-        // slashes from the globber if on Windows, since the globber will return the paths with forward
-        // slashes.
-        let ignoredFilePaths: string[] = glob.sync(ignoredSourceFileGlobs, unseenSourceFileGlobOptions);
-        if (IS_WINDOWS) {
-          ignoredFilePaths = ignoredFilePaths.map(Path.convertToBackslashes);
-        }
-        for (const ignoredFilePath of ignoredFilePaths) {
-          unseenSourceFilePaths.delete(ignoredFilePath);
         }
       }
 
@@ -194,11 +188,30 @@ async function* _waitForSourceChangesAsync(
     });
   }
 
+  // Before we enter the main loop, hydrate initial state and yield the changes.
+  const initialFilePaths: Set<string> = new Set();
+  const watchedDirectories: Map<string, string[]> = new Map(Object.entries(watcher.getWatched()));
+  for (const [directory, childNames] of watchedDirectories) {
+    // Avoid directories above the watch path, since we only care about the immediate children.
+    if (directory.startsWith('..')) {
+      continue;
+    }
+
+    // Resolve absolute paths to the files
+    const isRootDirectory: boolean = directory === '.';
+    for (const childName of childNames) {
+      const childRelativePath: string = isRootDirectory ? childName : `${directory}${path.sep}${childName}`;
+      if (!watchedDirectories.has(childRelativePath)) {
+        // This is a file, not a directory. Add it to the initial file paths.
+        const childAbsolutePath: string = `${watcher.options.cwd!}${path.sep}${childRelativePath}`;
+        initialFilePaths.add(childAbsolutePath);
+      }
+    }
+  }
+
   // Ingest the initial files and set their state. We want to ignore forbidden files
-  // since they aren't being "changed", they're just being watched. We can also skip
-  // the gitignore check, since we know that all initial files are unignored.
-  const initialFilePaths: Set<string> = await git.getUnignoredFilesAsync();
-  await ingestFileChangesAsync(initialFilePaths, /*ignoreForbidden:*/ true, /*skipIgnoreCheck:*/ true);
+  // since they aren't being "changed", they're just being watched.
+  await ingestFileChangesAsync(initialFilePaths, /*ignoreForbidden:*/ true);
   for (const filePath of initialFilePaths) {
     const state: IChangedFileState = {
       ...generateChangeState(filePath),
@@ -487,6 +500,10 @@ export class HeftActionRunner {
     const watcher: chokidar.FSWatcher = await runAndMeasureAsync(
       async () => {
         const chokidarPkg: typeof chokidar = await this._ensureChokidarLoadedAsync();
+        const ignoreGlobs: string[] = ['node_modules'].concat(
+          this._internalHeftSession.watchOptions.ignoredSourceFileGlobs
+        );
+
         const watcherReadyPromise: Promise<chokidar.FSWatcher> = new Promise(
           (resolve: (watcher: chokidar.FSWatcher) => void, reject: (error: Error) => void) => {
             const watcher: chokidar.FSWatcher = chokidarPkg.watch(this._heftConfiguration.buildFolderPath, {
@@ -495,10 +512,9 @@ export class HeftActionRunner {
               // has some issues with watching when not using a cwd, causing the 'ready' event to never be
               // emitted, so we will have to manually resolve the absolute paths in the change handler.
               cwd: watcherCwd,
-              // Ignore "node_modules" files and known-unimportant files
-              ignored: ['node_modules/**'],
-              // Ignore the initial scan of the build folder. We manually obtain the state of non-ignored
-              // files using "git ls-files" due to the overhead of the initial scan.
+              ignored: ignoreGlobs,
+              // Prevent add/addDir events from firing during the initial crawl. We will still use the
+              // initial state, but we will manually crawl watcher.getWatched() to get it.
               ignoreInitial: true,
               // Debounce file write events within 100 ms of each other
               awaitWriteFinish: {
@@ -520,14 +536,18 @@ export class HeftActionRunner {
     const git: GitUtilities = new GitUtilities(this._heftConfiguration.buildFolderPath);
     const changedFiles: Map<string, IChangedFileState> = new Map();
     const staticFileSystemAdapter: StaticFileSystemAdapter = new StaticFileSystemAdapter();
-    const globChangedFilesFn: GlobSyncFn = (pattern: string | string[], options?: IPartialGlobOptions) => {
-      return glob.sync(pattern, {
-        fs: staticFileSystemAdapter,
-        cwd: options?.cwd,
-        absolute: options?.absolute,
-        ignore: options?.ignore,
-        dot: options?.dot
-      });
+    const globChangedFilesAsyncFn: GlobFn = async (pattern: string | string[], options?: IGlobOptions) => {
+      // Use the sync method. Since the static file system adapter operations are all done in memory,
+      // there is no need to use the async method and we can avoid the overhead going async.
+      return Promise.resolve(
+        glob.sync(pattern, {
+          fs: staticFileSystemAdapter,
+          cwd: options?.cwd,
+          absolute: options?.absolute,
+          ignore: options?.ignore,
+          dot: options?.dot
+        })
+      );
     };
 
     // Create the async iterator. This will yield void when a changed source file is encountered, giving
@@ -567,7 +587,7 @@ export class HeftActionRunner {
       const executePromise: Promise<false> = this._executeOnceAsync(
         cancellationToken,
         changedFiles,
-        globChangedFilesFn,
+        globChangedFilesAsyncFn,
         fileEventListener
       ).then(
         () => false,
@@ -626,14 +646,14 @@ export class HeftActionRunner {
   private async _executeOnceAsync(
     cancellationToken?: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
-    globChangedFilesFn?: GlobSyncFn,
+    globChangedFilesAsyncFn?: GlobFn,
     fileEventListener?: FileEventListener
   ): Promise<void> {
     cancellationToken = cancellationToken || new CancellationToken();
     const operations: Set<Operation> = this._generateOperations(
       cancellationToken,
       changedFiles,
-      globChangedFilesFn,
+      globChangedFilesAsyncFn,
       fileEventListener
     );
     const operationExecutionManagerOptions: IOperationExecutionManagerOptions = {
@@ -661,7 +681,7 @@ export class HeftActionRunner {
   private _generateOperations(
     cancellationToken: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
-    globChangedFilesFn?: GlobSyncFn,
+    globChangedFilesAsyncFn?: GlobFn,
     fileEventListener?: FileEventListener
   ): Set<Operation> {
     const { selectedPhases } = this._action;
@@ -715,7 +735,7 @@ export class HeftActionRunner {
           operations,
           cancellationToken,
           changedFiles,
-          globChangedFilesFn,
+          globChangedFilesAsyncFn,
           fileEventListener
         );
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
@@ -735,7 +755,7 @@ export class HeftActionRunner {
               operations,
               cancellationToken,
               changedFiles,
-              globChangedFilesFn,
+              globChangedFilesAsyncFn,
               fileEventListener
             )
           );
@@ -796,7 +816,7 @@ export class HeftActionRunner {
     operations: Map<string, Operation>,
     cancellationToken: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
-    globChangedFilesFn?: GlobSyncFn,
+    globChangedFilesAsyncFn?: GlobFn,
     fileEventListener?: FileEventListener
   ): Operation {
     const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
@@ -810,7 +830,7 @@ export class HeftActionRunner {
           task,
           cancellationToken,
           changedFiles,
-          globChangedFilesFn,
+          globChangedFilesAsyncFn,
           fileEventListener
         })
       });
