@@ -50,7 +50,7 @@
    * additional instructions that will display below the warning, if there's a specific
    * tool or script you'd like the user to use to get in line with the expected version.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "nodeSupportedVersionInstructions": "Run 'nvm use' to switch to the expected node version.",
+  /*[LINE "HYPOTHETICAL"]*/ "nodeSupportedVersionInstructions": "Run 'nvs use' to switch to the expected node version.",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
