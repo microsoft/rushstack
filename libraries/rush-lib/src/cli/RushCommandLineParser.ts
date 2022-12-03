@@ -408,7 +408,15 @@ export class RushCommandLineParser extends CommandLineParser {
   private _reportErrorAndSetExitCode(error: Error): void {
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
-      console.error(os.EOL + colors.red(PrintUtilities.wrapWords(prefix + error.message)));
+
+      // The colors package will eat multi-newlines, which could break formatting
+      // in user-specified messages and instructions, so we prefer to color each
+      // line individually.
+      const message: string = PrintUtilities.wrapWords(prefix + error.message)
+        .split(/\r?\n/)
+        .map((line) => colors.red(line))
+        .join('\n');
+      console.error(os.EOL + message);
     }
 
     if (this._debugParameter.value) {

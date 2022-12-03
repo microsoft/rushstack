@@ -41,8 +41,21 @@ export class PrintUtilities {
       maxLineLength = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
     }
 
-    const wrap: (textToWrap: string) => string = wordwrap(indent, maxLineLength, { mode: 'soft' });
-    return wrap(text);
+    // Apply word wrapping and the provided indent, while also respecting existing newlines
+    // and prefix spaces that may exist in the text string already.
+    const lines: string[] = text.split(/\r?\n/);
+    const wrappedLines: string[] = lines.map((line) => {
+      const startingSpace: RegExpMatchArray | null = line.match(/^ +/);
+      const addlIndent: number = startingSpace?.[0]?.length || 0;
+
+      if (addlIndent > 0) {
+        line = line.replace(/^ +/, '');
+      }
+
+      return wordwrap(indent! + addlIndent, maxLineLength! - indent! - addlIndent, { mode: 'soft' })(line);
+    });
+
+    return wrappedLines.join('\n');
   }
 
   /**

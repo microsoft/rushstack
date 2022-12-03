@@ -10,7 +10,7 @@ import colors from 'colors/safe';
 
 import { Terminal } from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
-import { MockWritable } from '@rushstack/terminal';
+import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 
 import { OperationExecutionManager, IOperationExecutionManagerOptions } from '../OperationExecutionManager';
 import { _printOperationStatus } from '../OperationResultSummarizerPlugin';
@@ -65,6 +65,7 @@ describe(OperationExecutionManager.name, () => {
   });
 
   beforeEach(() => {
+    jest.spyOn(PrintUtilities, 'getConsoleWidth').mockReturnValue(90);
     mockWritable.reset();
   });
 
