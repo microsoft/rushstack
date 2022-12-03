@@ -426,6 +426,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/vscode-extension",
+      "projectFolder": "apps/rushstack-vscode-extension",
+      "reviewCategory": "libraries"
+    },
+    {
       "packageName": "@rushstack/lockfile-explorer-web",
       "projectFolder": "apps/lockfile-explorer-web",
       "reviewCategory": "libraries"

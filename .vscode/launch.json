@@ -22,6 +22,29 @@
 			"sourceMaps": true
 		},
 		{
+			"name": "Run Rushstack VSCode Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceRoot}/apps/rushstack-vscode-extension"
+			],
+			"outFiles": [
+				"${workspaceRoot}/apps/rushstack-vscode-extension/lib/**/*.js"
+			]
+		},
+		{
+			"name": "Rushstack VSCode Extension Tests",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceRoot}/apps/rushstack-vscode-extension",
+				"--extensionTestsPath=${workspaceRoot}/apps/rushstack-vscode-extension/lib/test/suite/index"
+			],
+			"outFiles": [
+				"${workspaceRoot}/apps/rushstack-vscode-extension/lib/test/**/*.js"
+			]
+		},
+		{
 			"type": "node",
 			"request": "launch",
 			"name": "Debug Selected Test File (Heft)",

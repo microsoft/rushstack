@@ -1,0 +1,43 @@
+{
+  "name": "@rushstack/vscode-extension",
+  "displayName": "rushstack-vscode-extension",
+  "description": "VS Code Extension for Microsoft's Rushstack Tooling Collection ",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:rushstack-vscode-extension.helloWorld"
+  ],
+  "main": "./lib/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "rushstack-vscode-extension.helloWorld",
+        "title": "Hello World"
+      },
+      {
+        "command": "rushstack-vscode-extension.rushCd",
+        "title": "Rush CD to Project"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "heft build --clean"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/vscode": "^1.73.0",
+    "@types/node": "12.20.24",
+    "eslint": "~8.7.0",
+    "@vscode/test-electron": "^2.2.0"
+  }
+}

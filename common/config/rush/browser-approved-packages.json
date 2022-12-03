@@ -15,6 +15,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@vscode/test-electron",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },
