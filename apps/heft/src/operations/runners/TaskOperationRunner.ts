@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { performance } from 'perf_hooks';
-import { AlreadyReportedError, InternalError, LockFile } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError, LockFile, type ITerminal } from '@rushstack/node-core-library';
 
 import { OperationStatus } from '../OperationStatus';
 import { FileEventListener } from '../../utilities/FileEventListener';
@@ -11,13 +11,13 @@ import { HeftTask } from '../../pluginFramework/HeftTask';
 import {
   copyFilesAsync,
   copyIncrementalFilesAsync,
-  type ICopyOperation
+  type ICopyOperation,
+  type IIncrementalCopyOperation
 } from '../../plugins/CopyFilesPlugin';
 import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type {
   HeftTaskSession,
-  IIncrementalCopyOperation,
   IChangedFileState,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions
@@ -25,17 +25,20 @@ import type {
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import type { CancellationToken } from '../../pluginFramework/CancellationToken';
-import type { GlobSyncFn, IPartialGlobOptions } from '../../plugins/FileGlobSpecifier';
+import type { GlobFn, IGlobOptions } from '../../plugins/FileGlobSpecifier';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
   task: HeftTask;
   cancellationToken: CancellationToken;
   changedFiles?: Map<string, IChangedFileState>;
-  globChangedFilesFn?: GlobSyncFn;
+  globChangedFilesAsyncFn?: GlobFn;
   fileEventListener?: FileEventListener;
 }
 
+/**
+ * Log out a start message, run a provided function, and log out an end message
+ */
 export async function runAndMeasureAsync<T = void>(
   fn: () => Promise<T>,
   startMessageFn: () => string,
@@ -44,10 +47,42 @@ export async function runAndMeasureAsync<T = void>(
 ): Promise<T> {
   logFn(startMessageFn());
   const startTime: number = performance.now();
-  const result: T = await fn();
-  const endTime: number = performance.now();
-  logFn(`${endMessageFn()} (${endTime - startTime}ms)`);
-  return result;
+  try {
+    return await fn();
+  } finally {
+    const endTime: number = performance.now();
+    logFn(`${endMessageFn()} (${endTime - startTime}ms)`);
+  }
+}
+
+/**
+ * Create a lockfile and wait for it to appear in the watcher. This is done to ensure that all watched
+ * files created prior to the creation of the lockfile are ingested and available before running
+ * subsequent tasks. This can appear as a create or a change, depending on if the lockfile is dirty.
+ */
+async function waitForLockFile(
+  lockFileFolder: string,
+  lockFileName: string,
+  fileEventListener: FileEventListener,
+  terminal: ITerminal
+): Promise<void> {
+  terminal.writeVerboseLine(`Synchronizing watcher using lock file ${JSON.stringify(lockFileName)}`);
+  const lockFilePath: string = LockFile.getLockFilePath(lockFileFolder, lockFileName);
+  const lockfileChangePromise: Promise<void> = Promise.race([
+    fileEventListener!.waitForChangeAsync(lockFilePath),
+    fileEventListener!.waitForCreateAsync(lockFilePath)
+  ]);
+  const taskOperationLockFile: LockFile | undefined = LockFile.tryAcquire(lockFileFolder, lockFileName);
+  if (!taskOperationLockFile) {
+    throw new InternalError(
+      `Failed to acquire lock file ${JSON.stringify(lockFileName)}. Are multiple instances of ` +
+        'Heft running?'
+    );
+  }
+  await lockfileChangePromise;
+
+  // We can save some time by avoiding deleting the lockfile
+  taskOperationLockFile.release(/*deleteFile:*/ false);
 }
 
 export class TaskOperationRunner implements IOperationRunner {
@@ -73,7 +108,7 @@ export class TaskOperationRunner implements IOperationRunner {
   }
 
   private async _executeTaskAsync(taskSession: HeftTaskSession): Promise<OperationStatus> {
-    const { cancellationToken, changedFiles, globChangedFilesFn, fileEventListener } = this._options;
+    const { cancellationToken, changedFiles, globChangedFilesAsyncFn, fileEventListener } = this._options;
     const {
       hooks,
       logger: { terminal }
@@ -102,11 +137,18 @@ export class TaskOperationRunner implements IOperationRunner {
         const copyOperations: ICopyOperation[] = [];
         const incrementalCopyOperations: IIncrementalCopyOperation[] = [];
         const deleteOperations: IDeleteOperation[] = [];
+
         const runHookOptions: IHeftTaskRunHookOptions = {
-          addCopyOperations: (...copyOperationsToAdd: ICopyOperation[]) =>
-            copyOperations.push(...copyOperationsToAdd),
-          addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
-            deleteOperations.push(...deleteOperationsToAdd)
+          addCopyOperations: (copyOperationsToAdd: ICopyOperation[]) => {
+            for (const copyOperation of copyOperationsToAdd) {
+              copyOperations.push(copyOperation);
+            }
+          },
+          addDeleteOperations: (deleteOperationsToAdd: IDeleteOperation[]) => {
+            for (const deleteOperation of deleteOperationsToAdd) {
+              deleteOperations.push(deleteOperation);
+            }
+          }
         };
 
         // Run the plugin run hook
@@ -114,7 +156,7 @@ export class TaskOperationRunner implements IOperationRunner {
           if (shouldRunIncremental) {
             const runIncrementalHookOptions: IHeftTaskRunIncrementalHookOptions = {
               ...runHookOptions,
-              addCopyOperations: (...incrementalCopyOperationsToAdd: IIncrementalCopyOperation[]) => {
+              addCopyOperations: (incrementalCopyOperationsToAdd: IIncrementalCopyOperation[]) => {
                 for (const incrementalCopyOperation of incrementalCopyOperationsToAdd) {
                   if (incrementalCopyOperation.onlyIfChanged) {
                     incrementalCopyOperations.push(incrementalCopyOperation);
@@ -123,7 +165,7 @@ export class TaskOperationRunner implements IOperationRunner {
                   }
                 }
               },
-              globChangedFiles: globChangedFilesFn!,
+              globChangedFilesAsync: globChangedFilesAsyncFn!,
               changedFiles: changedFiles!,
               cancellationToken: cancellationToken!
             };
@@ -141,9 +183,9 @@ export class TaskOperationRunner implements IOperationRunner {
 
         const fileOperationPromises: Promise<void>[] = [];
 
-        const globExistingChangedFilesFn: GlobSyncFn = (
+        const globExistingChangedFilesFn: GlobFn = async (
           pattern: string | string[],
-          options?: IPartialGlobOptions
+          options?: IGlobOptions
         ) => {
           // We expect specific options to be passed. If they aren't the provided options, we may not
           // find the changed files in the changedFiles map.
@@ -151,7 +193,7 @@ export class TaskOperationRunner implements IOperationRunner {
             throw new InternalError('Options provided to globExistingChangedFilesFn were not expected.');
           }
 
-          const globbedChangedFiles: string[] = globChangedFilesFn!(pattern, options);
+          const globbedChangedFiles: string[] = await globChangedFilesAsyncFn!(pattern, options);
 
           // Filter out deletes, since we can't copy or delete an already deleted file
           return globbedChangedFiles.filter((changedFile: string) => {
@@ -167,7 +209,7 @@ export class TaskOperationRunner implements IOperationRunner {
           fileOperationPromises.push(copyFilesAsync(copyOperations, taskSession.logger));
         }
 
-        // Also incrementally copy files if any were specified. We know that globChangedFilesFn must
+        // Also incrementally copy files if any were specified. We know that globChangedFilesAsyncFn must
         // exist because incremental copy operations are only available in incremental mode.
         if (incrementalCopyOperations.length) {
           fileOperationPromises.push(
@@ -195,33 +237,9 @@ export class TaskOperationRunner implements IOperationRunner {
             // go out of sync.
             throw new InternalError('fileEventListener must be provided when watch is true');
           }
-
           // The task temp folder is a unique and relevant name, so re-use it for the lock file name
           const lockFileName: string = path.basename(taskSession.tempFolderPath);
-
-          // Create a lockfile and wait for it to appear in the watcher. This is done to ensure that all watched
-          // files created by the task are ingested and available before running subsequent tasks. This can
-          // appear as a create or a change, depending on if the lockfile is dirty.
-          terminal.writeVerboseLine(`Synchronizing watcher using lock file ${JSON.stringify(lockFileName)}`);
-          const lockFilePath: string = LockFile.getLockFilePath(taskSession.tempFolderPath, lockFileName);
-          const lockfileChangePromise: Promise<void> = Promise.race([
-            fileEventListener!.waitForChangeAsync(lockFilePath),
-            fileEventListener!.waitForCreateAsync(lockFilePath)
-          ]);
-          const taskOperationLockFile: LockFile | undefined = LockFile.tryAcquire(
-            taskSession.tempFolderPath,
-            lockFileName
-          );
-          if (!taskOperationLockFile) {
-            throw new InternalError(
-              `Failed to acquire lock file ${JSON.stringify(lockFileName)}. Are multiple instances of ` +
-                'Heft running?'
-            );
-          }
-          await lockfileChangePromise;
-
-          // We can save some time by avoiding deleting the lockfile
-          taskOperationLockFile.release(/*deleteFile:*/ false);
+          await waitForLockFile(taskSession.tempFolderPath, lockFileName, fileEventListener, terminal);
         }
       },
       () => `Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`,

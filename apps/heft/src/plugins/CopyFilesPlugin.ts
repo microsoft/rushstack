@@ -6,7 +6,7 @@ import glob from 'fast-glob';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getFilePathsAsync, GlobFn, GlobSyncFn, type IFileSelectionSpecifier } from './FileGlobSpecifier';
+import { getFilePathsAsync, type GlobFn, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type {
@@ -48,6 +48,20 @@ export interface ICopyOperation extends IFileSelectionSpecifier {
   hardlink?: boolean;
 }
 
+/**
+ * Used to specify a selection of files to copy from a specific source folder to one
+ * or more destination folders.
+ *
+ * @public
+ */
+export interface IIncrementalCopyOperation extends ICopyOperation {
+  /**
+   * If true, the file will be copied only if the source file is contained in the
+   * IHeftTaskRunIncrementalHookOptions.changedFiles map.
+   */
+  onlyIfChanged?: boolean;
+}
+
 interface ICopyFilesPluginOptions {
   copyOperations: ICopyOperation[];
 }
@@ -65,19 +79,19 @@ export async function copyFilesAsync(copyOperations: ICopyOperation[], logger: I
 
 export async function copyIncrementalFilesAsync(
   copyOperations: ICopyOperation[],
-  globChangedFilesFn: GlobFn | GlobSyncFn,
+  globChangedFilesAsyncFn: GlobFn,
   logger: IScopedLogger
 ): Promise<void> {
   const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
     copyOperations,
-    globChangedFilesFn
+    globChangedFilesAsyncFn
   );
   await _copyFilesInnerAsync(copyDescriptors, logger);
 }
 
 async function _getCopyDescriptorsAsync(
   copyConfigurations: ICopyOperation[],
-  globFn: GlobFn | GlobSyncFn
+  globFn: GlobFn
 ): Promise<ICopyDescriptor[]> {
   const processedCopyDescriptors: ICopyDescriptor[] = [];
 
@@ -258,7 +272,7 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
         // that we don't have to query the file system for each copy operation
         const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
           pluginOptions.copyOperations,
-          runIncrementalOptions.globChangedFiles
+          runIncrementalOptions.globChangedFilesAsync
         );
         const incrementalCopyDescriptors: ICopyDescriptor[] = [];
 

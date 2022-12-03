@@ -3,12 +3,12 @@
 
 import { HeftTaskSession } from './HeftTaskSession';
 import { HeftPluginHost } from './HeftPluginHost';
-import { ScopedLogger } from './logging/ScopedLogger';
+import type { ScopedLogger } from './logging/ScopedLogger';
 import type { InternalHeftSession } from './InternalHeftSession';
 import type { HeftPhase } from './HeftPhase';
 import type { HeftTask } from './HeftTask';
 import type { IHeftTaskPlugin } from './IHeftPlugin';
-import { LoggingManager } from './logging/LoggingManager';
+import type { LoggingManager } from './logging/LoggingManager';
 
 export interface IHeftPhaseSessionOptions {
   internalHeftSession: InternalHeftSession;

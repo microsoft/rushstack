@@ -70,7 +70,7 @@ export default class SassPlugin implements IHeftPlugin {
     let changedRelativeFilePaths: string[] | undefined;
     if (runIncrementalOptions) {
       changedRelativeFilePaths = [];
-      const relativeFilePaths: string[] = runIncrementalOptions.globChangedFiles(
+      const relativeFilePaths: string[] = await runIncrementalOptions.globChangedFilesAsync(
         sassProcessor.inputFileGlob,
         {
           cwd: sassProcessor.sourceFolderPath,
