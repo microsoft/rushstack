@@ -11,6 +11,7 @@ import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
 import { IChangelog, IChangeLogEntry, IChangeLogComment, IChangeLogEntryComments } from '../api/Changelog';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConfiguration } from '../api/RushConfiguration';
+import schemaJson from '../schemas/changelog.schema.json';
 
 const CHANGELOG_JSON: string = 'CHANGELOG.json';
 const CHANGELOG_MD: string = 'CHANGELOG.md';
@@ -20,9 +21,7 @@ export class ChangelogGenerator {
   /**
    * The JSON Schema for Changelog file (changelog.schema.json).
    */
-  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '..', 'schemas', 'changelog.schema.json')
-  );
+  public static readonly jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   /**
    * Updates the appropriate changelogs with the given changes.

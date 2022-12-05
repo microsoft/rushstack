@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { JsonFile, JsonSchema, Import } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
 import { RushConfiguration } from '../api/RushConfiguration';
+import schemaJson from '../schemas/change-file.schema.json';
 
 const glob: typeof import('glob') = Import.lazy('glob', require);
 
@@ -34,9 +34,7 @@ export class ChangeFiles {
     changedPackages: string[],
     rushConfiguration: RushConfiguration
   ): void {
-    const schema: JsonSchema = JsonSchema.fromFile(
-      path.resolve(__dirname, '..', 'schemas', 'change-file.schema.json')
-    );
+    const schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
     const projectsWithChangeDescriptions: Set<string> = new Set<string>();
     newChangeFilePaths.forEach((filePath) => {

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, NewlineKind } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import schemaJson from '../schemas/repo-state.schema.json';
 
 /**
  * This interface represents the raw repo-state.json file
@@ -34,9 +34,7 @@ interface IRepoStateJson {
  * @public
  */
 export class RepoStateFile {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/repo-state.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   private _variant: string | undefined;
   private _pnpmShrinkwrapHash: string | undefined;

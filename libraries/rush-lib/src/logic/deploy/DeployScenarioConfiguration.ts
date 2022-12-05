@@ -4,7 +4,9 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+
 import { RushConfiguration } from '../../api/RushConfiguration';
+import schemaJson from '../../schemas/deploy-scenario.schema.json';
 
 // Describes IDeployScenarioJson.projectSettings
 export interface IDeployScenarioProjectJson {
@@ -31,9 +33,7 @@ export class DeployScenarioConfiguration {
   // Example: "deploy-the-thing123"
   private static _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../../schemas/deploy-scenario.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   public readonly json: IDeployScenarioJson;
 
