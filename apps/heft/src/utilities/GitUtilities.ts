@@ -17,7 +17,7 @@ export interface IGitVersion {
   patch: number;
 }
 
-export type GitignoreFilterAsyncFn = (filePath: string) => Promise<boolean>;
+export type GitignoreFilterFn = (filePath: string) => boolean;
 
 interface IExecuteGitCommandOptions {
   command: string;
@@ -112,16 +112,17 @@ export class GitUtilities {
   /**
    * Returns an asynchronous filter function which can be used to filter out files that are ignored by Git.
    */
-  public async tryCreateGitignoreFilterAsync(): Promise<GitignoreFilterAsyncFn | undefined> {
+  public async tryCreateGitignoreFilterAsync(): Promise<GitignoreFilterFn | undefined> {
     let gitInfo: IGitRepoInfo | undefined;
     if (!this.isGitPresent() || !(gitInfo = this.getGitInfo())?.sha) {
       return;
     }
-    const gitRepoRootPath: string = gitInfo!.root;
+    const gitRepoRootPath: string = gitInfo.root;
+    const ignoreMatcherMap: Map<string, IIgnoreMatcher> = await this._getIgnoreMatchersAsync(gitRepoRootPath);
 
     const matcherFiltersByMatcher: Map<IIgnoreMatcher, (filePath: string) => boolean> = new Map();
-    return async (filePath: string) => {
-      const matcher: IIgnoreMatcher = await this._getIgnoreMatcherAsync(filePath, gitRepoRootPath);
+    return (filePath: string) => {
+      const matcher: IIgnoreMatcher = this._findIgnoreMatcherForFilePath(filePath, ignoreMatcherMap);
       let matcherFilter: ((filePath: string) => boolean) | undefined = matcherFiltersByMatcher.get(matcher);
       if (!matcherFilter) {
         matcherFilter = matcher.createFilter();
@@ -137,7 +138,10 @@ export class GitUtilities {
     };
   }
 
-  private async _getIgnoreMatcherAsync(filePath: string, gitRepoRootPath: string): Promise<IIgnoreMatcher> {
+  private _findIgnoreMatcherForFilePath(
+    filePath: string,
+    ignoreMatcherMap: Map<string, IIgnoreMatcher>
+  ): IIgnoreMatcher {
     if (!path.isAbsolute(filePath)) {
       throw new Error(`The filePath must be an absolute path: "${filePath}"`);
     }
@@ -149,7 +153,7 @@ export class GitUtilities {
     // does not have support for leaf node traversal.
     let longestMatcherPath: string | undefined;
     let foundMatcher: IIgnoreMatcher | undefined;
-    const ignoreMatcherMap: Map<string, IIgnoreMatcher> = await this._getIgnoreMatchersAsync(gitRepoRootPath);
+
     for (const [matcherPath, matcher] of ignoreMatcherMap) {
       if (
         normalizedFilePath.startsWith(matcherPath) &&

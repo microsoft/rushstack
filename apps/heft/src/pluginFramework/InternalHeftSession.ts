@@ -32,7 +32,7 @@ function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
   }
 }
 
-const FORBIDDEN_SOURCE_FILE_GLOBS: string[] = ['package.json', 'config/**/*', '.rush/**/*'];
+const FORBIDDEN_SOURCE_FILE_GLOBS: string[] = ['package.json', '.gitingore', 'config/**/*', '.rush/**/*'];
 
 export class InternalHeftSession {
   private readonly _phaseSessionsByPhase: Map<HeftPhase, HeftPhaseSession> = new Map();

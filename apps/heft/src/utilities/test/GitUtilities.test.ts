@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { GitignoreFilterAsyncFn, GitUtilities } from '../GitUtilities';
+import { GitUtilities, type GitignoreFilterFn } from '../GitUtilities';
 
 describe('GitUtilities', () => {
   describe('checkIgnoreAsync', () => {
@@ -8,7 +8,7 @@ describe('GitUtilities', () => {
     it('returns all files are ignored', async () => {
       const testFolderPath: string = path.join(testFoldersBasePath, 'allIgnored');
       const git = new GitUtilities(testFolderPath);
-      const isUnignoredAsync: GitignoreFilterAsyncFn = (await git.tryCreateGitignoreFilterAsync())!;
+      const isUnignoredAsync: GitignoreFilterFn = (await git.tryCreateGitignoreFilterAsync())!;
       expect(await isUnignoredAsync(path.join(testFolderPath, 'a.txt'))).toEqual(false);
       expect(await isUnignoredAsync(path.join(testFolderPath, 'b.txt'))).toEqual(false);
       expect(await isUnignoredAsync(path.join(testFolderPath, 'c.txt'))).toEqual(false);
@@ -17,7 +17,7 @@ describe('GitUtilities', () => {
     it('returns some files are ignored', async () => {
       const testFolderPath: string = path.join(testFoldersBasePath, 'someIgnored');
       const git = new GitUtilities(testFolderPath);
-      const isUnignoredAsync: GitignoreFilterAsyncFn = (await git.tryCreateGitignoreFilterAsync())!;
+      const isUnignoredAsync: GitignoreFilterFn = (await git.tryCreateGitignoreFilterAsync())!;
       expect(await isUnignoredAsync(path.join(testFolderPath, 'a.txt'))).toEqual(false);
       expect(await isUnignoredAsync(path.join(testFolderPath, 'b', 'c.txt'))).toEqual(false);
       expect(await isUnignoredAsync(path.join(testFolderPath, 'b', 'd.txt'))).toEqual(true);
@@ -28,7 +28,7 @@ describe('GitUtilities', () => {
     it('returns non-negated files are ignored', async () => {
       const testFolderPath: string = path.join(testFoldersBasePath, 'negateIgnore');
       const git = new GitUtilities(testFolderPath);
-      const isUnignoredAsync: GitignoreFilterAsyncFn = (await git.tryCreateGitignoreFilterAsync())!;
+      const isUnignoredAsync: GitignoreFilterFn = (await git.tryCreateGitignoreFilterAsync())!;
       expect(await isUnignoredAsync(path.join(testFolderPath, 'a.txt'))).toEqual(false);
       expect(await isUnignoredAsync(path.join(testFolderPath, 'a', 'c.txt'))).toEqual(false);
       expect(await isUnignoredAsync(path.join(testFolderPath, 'b', 'c.txt'))).toEqual(false);
@@ -39,7 +39,7 @@ describe('GitUtilities', () => {
       // <repoRoot>/apps/heft
       const testFolderPath: string = path.resolve(__dirname, '..', '..', '..');
       const git = new GitUtilities(testFolderPath);
-      const isUnignoredAsync: GitignoreFilterAsyncFn = (await git.tryCreateGitignoreFilterAsync())!;
+      const isUnignoredAsync: GitignoreFilterFn = (await git.tryCreateGitignoreFilterAsync())!;
       expect(await isUnignoredAsync(path.join(testFolderPath, 'lib', 'a.txt'))).toEqual(false);
       expect(await isUnignoredAsync(path.join(testFolderPath, 'temp', 'a.txt'))).toEqual(false);
       expect(await isUnignoredAsync(path.join(testFolderPath, 'dist', 'a.txt'))).toEqual(false);
