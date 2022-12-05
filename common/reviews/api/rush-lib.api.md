@@ -149,6 +149,8 @@ export class EnvironmentConfiguration {
     static get buildCacheCredential(): string | undefined;
     static get buildCacheEnabled(): boolean | undefined;
     static get buildCacheWriteAllowed(): boolean | undefined;
+    static get buildFoldingFooter(): string | undefined;
+    static get buildFoldingHeader(): string | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -173,6 +175,9 @@ export enum EnvironmentVariableNames {
     RUSH_BUILD_CACHE_CREDENTIAL = "RUSH_BUILD_CACHE_CREDENTIAL",
     RUSH_BUILD_CACHE_ENABLED = "RUSH_BUILD_CACHE_ENABLED",
     RUSH_BUILD_CACHE_WRITE_ALLOWED = "RUSH_BUILD_CACHE_WRITE_ALLOWED",
+    // (undocumented)
+    RUSH_BUILD_FOLDING_FOOTER = "RUSH_BUILD_FOLDING_FOOTER",
+    RUSH_BUILD_FOLDING_HEADER = "RUSH_BUILD_FOLDING_HEADER",
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",

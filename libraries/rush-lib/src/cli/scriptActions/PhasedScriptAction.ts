@@ -22,7 +22,7 @@ import {
   OperationExecutionManager
 } from '../../logic/operations/OperationExecutionManager';
 import { RushConstants } from '../../logic/RushConstants';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { EnvironmentVariableNames, EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
@@ -335,7 +335,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism,
-      changedProjectsOnly
+      changedProjectsOnly,
+      projectLogHeader: EnvironmentConfiguration.buildFoldingHeader,
+      projectLogFooter: EnvironmentConfiguration.buildFoldingFooter
     };
 
     const internalOptions: IRunPhasesOptions = {
