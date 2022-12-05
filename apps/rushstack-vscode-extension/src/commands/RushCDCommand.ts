@@ -1,5 +1,14 @@
-import { window, workspace, commands } from 'vscode';
-import { QuickPickItem, Disposable, WorkspaceFolder, Uri, TextDocument } from 'vscode';
+import { window, workspace, commands, QuickInputButton } from 'vscode';
+import {
+  QuickPickItem,
+  Disposable,
+  WorkspaceFolder,
+  Uri,
+  TextDocument,
+  ThemeIcon,
+  QuickPick,
+  Event
+} from 'vscode';
 
 import { RushConfiguration, RushConfigurationProject } from '@microsoft/rush-lib';
 
@@ -33,13 +42,26 @@ const rushCDCommand: Disposable = commands.registerCommand('rushstack-vscode-ext
     };
   });
 
-  const selectedProject: QuickPickItem | undefined = await window.showQuickPick(projectQuickPickItems, {
-    placeHolder: 'Which Rush Project would you like to open?'
+  const projectQuickPick: QuickPick<QuickPickItem> = window.createQuickPick();
+  projectQuickPick.items = projectQuickPickItems;
+  projectQuickPick.title = 'Select a project to open.';
+  projectQuickPick.placeholder = 'Which Rush Project would you like to open?';
+  projectQuickPick.matchOnDescription = true;
+  projectQuickPick.matchOnDetail = true;
+  projectQuickPick.show();
+  projectQuickPick.onDidAccept(async () => {
+    projectQuickPick.selectedItems.forEach(async (selectedProject) => {
+      await openSelectedProjectPackageJson(rushConfiguration, selectedProject?.label);
+    });
   });
+});
 
-  // open package.json file of selected RushConfigurationProject
-  const project: RushConfigurationProject | undefined = projects.find((project) => {
-    return project.packageName === selectedProject?.label;
+async function openSelectedProjectPackageJson(
+  rushConfiguration: RushConfiguration,
+  projectName: string
+): Promise<void> {
+  const project: RushConfigurationProject | undefined = rushConfiguration.projects.find((project) => {
+    return project.packageName === projectName;
   });
 
   if (!project) {
@@ -50,6 +72,6 @@ const rushCDCommand: Disposable = commands.registerCommand('rushstack-vscode-ext
   const packageJsonUri: Uri = Uri.file(packageJsonPath);
   const packageJsonDocument: TextDocument = await workspace.openTextDocument(packageJsonUri);
   await window.showTextDocument(packageJsonDocument);
-});
+}
 
 export default rushCDCommand;
