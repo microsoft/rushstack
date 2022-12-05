@@ -490,6 +490,11 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_TAR_BINARY_PATH: {
+            EnvironmentConfiguration._tarBinaryPath = value;
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_BUILD_FOLDING_HEADER: {
             EnvironmentConfiguration._buildFoldingHeader = value;
             break;
