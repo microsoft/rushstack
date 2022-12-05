@@ -31,10 +31,6 @@ import type { BaseInstallManager, IInstallManagerOptions } from '../logic/base/B
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 const semver: typeof import('semver') = Import.lazy('semver', require);
-const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = Import.lazy(
-  '../logic/InstallManagerFactory',
-  require
-);
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -437,8 +433,11 @@ export class RushPnpmCommandLineParser {
       checkOnly: false
     };
 
+    const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(
+      '../logic/InstallManagerFactory'
+    );
     const installManager: BaseInstallManager =
-      installManagerFactoryModule.InstallManagerFactory.getInstallManager(
+      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
         this._rushConfiguration,
         rushGlobalFolder,
         purgeManager,

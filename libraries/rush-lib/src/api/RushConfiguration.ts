@@ -12,8 +12,7 @@ import {
   Path,
   FileSystem,
   PackageNameParser,
-  FileSystemStats,
-  Import
+  FileSystemStats
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
@@ -41,11 +40,6 @@ import { IYarnOptionsJson, YarnOptionsConfiguration } from '../logic/yarn/YarnOp
 
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
-
-const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = Import.lazy(
-  '../logic/DependencyAnalyzer',
-  require
-);
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -1394,7 +1388,12 @@ export class RushConfiguration {
    *
    * @returns A map of dependency name --\> version specifier for implicitly preferred versions.
    */
-  public getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string> {
+  public async getImplicitlyPreferredVersionsAsync(
+    variant?: string | undefined
+  ): Promise<Map<string, string>> {
+    const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = await import(
+      '../logic/DependencyAnalyzer'
+    );
     const dependencyAnalyzer: DependencyAnalyzerModuleType.DependencyAnalyzer =
       DependencyAnalyzerModule.DependencyAnalyzer.forRushConfiguration(this);
     const dependencyAnalysis: DependencyAnalyzerModuleType.IDependencyAnalysis =

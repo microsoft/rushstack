@@ -29,7 +29,14 @@ export interface IPnpmfileShimOptions {
 export class PnpmfileConfiguration {
   private _context: IPnpmfileContext | undefined;
 
-  public constructor(rushConfiguration: RushConfiguration, pnpmfileShimOptions?: IPnpmfileShimOptions) {
+  public constructor(context: IPnpmfileContext) {
+    this._context = context;
+  }
+
+  public static async initializeAsync(
+    rushConfiguration: RushConfiguration,
+    pnpmfileShimOptions?: IPnpmfileShimOptions
+  ): Promise<PnpmfileConfiguration> {
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
         `PnpmfileConfiguration cannot be used with package manager "${rushConfiguration.packageManager}"`
@@ -37,13 +44,15 @@ export class PnpmfileConfiguration {
     }
 
     // Set the context to swallow log output and store our settings
-    this._context = {
+    const context: IPnpmfileContext = {
       log: (message: string) => {},
-      pnpmfileShimSettings: PnpmfileConfiguration._getPnpmfileShimSettings(
+      pnpmfileShimSettings: await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(
         rushConfiguration,
         pnpmfileShimOptions
       )
     };
+
+    return new PnpmfileConfiguration(context);
   }
 
   public static async writeCommonTempPnpmfileShimAsync(
@@ -68,10 +77,8 @@ export class PnpmfileConfiguration {
       destinationPath: pnpmfilePath
     });
 
-    const pnpmfileShimSettings: IPnpmfileShimSettings = PnpmfileConfiguration._getPnpmfileShimSettings(
-      rushConfiguration,
-      options
-    );
+    const pnpmfileShimSettings: IPnpmfileShimSettings =
+      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, options);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(pnpmfileShimSettings, path.join(targetDir, 'pnpmfileSettings.json'), {
@@ -79,10 +86,10 @@ export class PnpmfileConfiguration {
     });
   }
 
-  private static _getPnpmfileShimSettings(
+  private static async _getPnpmfileShimSettingsAsync(
     rushConfiguration: RushConfiguration,
     options?: IPnpmfileShimOptions
-  ): IPnpmfileShimSettings {
+  ): Promise<IPnpmfileShimSettings> {
     let allPreferredVersions: { [dependencyName: string]: string } = {};
     let allowedAlternativeVersions: { [dependencyName: string]: readonly string[] } = {};
     const workspaceVersions: Record<string, string> = {};
@@ -92,7 +99,10 @@ export class PnpmfileConfiguration {
       const commonVersionsConfiguration: CommonVersionsConfiguration = rushConfiguration.getCommonVersions();
       const preferredVersions: Map<string, string> = new Map();
       MapExtensions.mergeFromMap(preferredVersions, commonVersionsConfiguration.getAllPreferredVersions());
-      MapExtensions.mergeFromMap(preferredVersions, rushConfiguration.getImplicitlyPreferredVersions());
+      MapExtensions.mergeFromMap(
+        preferredVersions,
+        await rushConfiguration.getImplicitlyPreferredVersionsAsync()
+      );
       allPreferredVersions = MapExtensions.toObject(preferredVersions);
       allowedAlternativeVersions = MapExtensions.toObject(
         commonVersionsConfiguration.allowedAlternativeVersions

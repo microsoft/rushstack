@@ -143,7 +143,10 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public abstract isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean;
+  public abstract isWorkspaceProjectModifiedAsync(
+    project: RushConfigurationProject,
+    variant?: string
+  ): Promise<boolean>;
 
   /** @virtual */
   protected abstract serialize(): string;

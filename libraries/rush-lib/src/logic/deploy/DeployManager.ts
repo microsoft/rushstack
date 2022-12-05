@@ -787,7 +787,7 @@ export class DeployManager {
       symlinkAnalyzer: new SymlinkAnalyzer(),
       pnpmfileConfiguration:
         this._rushConfiguration.packageManager === 'pnpm'
-          ? new PnpmfileConfiguration(this._rushConfiguration)
+          ? await PnpmfileConfiguration.initializeAsync(this._rushConfiguration)
           : undefined,
       createArchiveFilePath
     };

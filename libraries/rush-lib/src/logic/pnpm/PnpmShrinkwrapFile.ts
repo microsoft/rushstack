@@ -546,7 +546,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean {
+  public async isWorkspaceProjectModifiedAsync(
+    project: RushConfigurationProject,
+    variant?: string
+  ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
       project.rushConfiguration.commonTempFolder,
       project.projectFolder
@@ -561,7 +564,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Initialize the pnpmfile if it doesn't exist
     if (!this._pnpmfileConfiguration) {
-      this._pnpmfileConfiguration = new PnpmfileConfiguration(project.rushConfiguration, { variant });
+      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(project.rushConfiguration, {
+        variant
+      });
     }
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the

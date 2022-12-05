@@ -277,7 +277,10 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean {
+  public async isWorkspaceProjectModifiedAsync(
+    project: RushConfigurationProject,
+    variant?: string
+  ): Promise<boolean> {
     throw new InternalError('Not implemented');
   }
 }
