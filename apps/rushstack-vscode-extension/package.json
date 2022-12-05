@@ -16,10 +16,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "rushstack-vscode-extension.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "rushstack-vscode-extension.rushCd",
         "title": "Rush CD to Project"
       }
