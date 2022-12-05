@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineHelper } from '@rushstack/ts-command-line';
@@ -416,13 +415,13 @@ export class RushCommandLineParser extends CommandLineParser {
         .split(/\r?\n/)
         .map((line) => colors.red(line))
         .join('\n');
-      console.error(os.EOL + message);
+      console.error(`\n${message}`);
     }
 
     if (this._debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what Node.js
       // would show for an uncaught error
-      console.error(os.EOL + error.stack);
+      console.error(`\n${error.stack}`);
     }
 
     this.flushTelemetry();

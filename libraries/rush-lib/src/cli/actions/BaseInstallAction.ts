@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 
 import { Import } from '@rushstack/node-core-library';
 import type {
@@ -155,7 +154,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
       if (warnAboutScriptUpdate) {
         console.log(
-          os.EOL +
+          '\n' +
             colors.yellow(
               'Rush refreshed some files in the "common/scripts" folder.' +
                 '  Please commit this change to Git.'
@@ -164,7 +163,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       }
 
       console.log(
-        os.EOL + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+        '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
       );
     } catch (error) {
       installSuccessful = false;

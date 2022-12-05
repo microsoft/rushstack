@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
@@ -234,7 +233,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       if (FileSystem.isNotExistError(error as Error)) {
         return undefined; // file does not exist
       }
-      throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${(error as Error).message}`);
+      throw new Error(`Error reading "${shrinkwrapYamlFilename}":\n  ${(error as Error).message}`);
     }
   }
 
@@ -271,7 +270,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           colors.red(
             `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker ` +
               'in the file. You may need to run "rush update" to refresh its contents.'
-          ) + os.EOL
+          ) + '\n'
         );
         throw new AlreadyReportedError();
       }
@@ -284,7 +283,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
             colors.red(
               'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
                 'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
-            ) + os.EOL
+            ) + '\n'
           );
           throw new AlreadyReportedError();
         }
@@ -295,7 +294,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
               'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
                 'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
                 'details.'
-            ) + os.EOL
+            ) + '\n'
           );
           throw new AlreadyReportedError();
         }

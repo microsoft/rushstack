@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as path from 'path';
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
@@ -179,7 +178,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     }
 
     if (exitCode > 0) {
-      console.log(os.EOL + colors.red(`The script failed with exit code ${exitCode}`));
+      console.log('\n' + colors.red(`The script failed with exit code ${exitCode}`));
       throw new AlreadyReportedError();
     }
   }

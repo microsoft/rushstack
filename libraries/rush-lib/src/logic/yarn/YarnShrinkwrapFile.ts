@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { FileSystem, IParsedPackageNameOrError, InternalError, Import } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
@@ -173,7 +172,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       if (FileSystem.isNotExistError(error as Error)) {
         return undefined; // file does not exist
       }
-      throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${(error as Error).message}`);
+      throw new Error(`Error reading "${shrinkwrapFilename}":\n  ${(error as Error).message}`);
     }
   }
 
