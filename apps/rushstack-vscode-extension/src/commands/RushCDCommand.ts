@@ -1,14 +1,5 @@
-import { window, workspace, commands, QuickInputButton } from 'vscode';
-import {
-  QuickPickItem,
-  Disposable,
-  WorkspaceFolder,
-  Uri,
-  TextDocument,
-  ThemeIcon,
-  QuickPick,
-  Event
-} from 'vscode';
+import { window, workspace, commands } from 'vscode';
+import { QuickPickItem, Disposable, WorkspaceFolder, Uri, TextDocument, QuickPick } from 'vscode';
 
 import { RushConfiguration, RushConfigurationProject } from '@microsoft/rush-lib';
 
