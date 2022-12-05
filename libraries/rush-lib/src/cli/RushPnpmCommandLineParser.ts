@@ -458,8 +458,6 @@ export class RushPnpmCommandLineParser {
         const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
         const newGlobalPatchedDependencies: Record<string, string> | undefined =
           commonPackageJson?.pnpm?.patchedDependencies;
-        // const currentGlobalPatchedDependencies: Record<string, string> | undefined =
-        //   this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
 
         const commonTempPnpmPatchesFolder: string = `${subspaceTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
         const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
