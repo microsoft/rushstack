@@ -1,6 +1,5 @@
 import { window, workspace, commands } from 'vscode';
 import { QuickPickItem, Disposable, WorkspaceFolder, Uri, TextDocument, QuickPick } from 'vscode';
-
 import { RushConfiguration, RushConfigurationProject } from '@microsoft/rush-lib';
 
 const rushCDCommand: Disposable = commands.registerCommand('rushstack-vscode-extension.rushCd', async () => {
