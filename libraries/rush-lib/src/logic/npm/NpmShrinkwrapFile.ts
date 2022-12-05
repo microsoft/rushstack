@@ -128,7 +128,9 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public getProjectShrinkwrap(project: RushConfigurationProject): BaseProjectShrinkwrapFile | undefined {
+  public getProjectShrinkwrap(
+    project: RushConfigurationProject
+  ): BaseProjectShrinkwrapFile<NpmShrinkwrapFile> | undefined {
     return undefined;
   }
 

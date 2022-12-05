@@ -38,12 +38,16 @@ export class RepoStateFile {
     path.join(__dirname, '../schemas/repo-state.schema.json')
   );
 
-  private _repoStateFilePath: string;
   private _variant: string | undefined;
   private _pnpmShrinkwrapHash: string | undefined;
   private _preferredVersionsHash: string | undefined;
   private _isValid: boolean;
   private _modified: boolean = false;
+
+  /**
+   * Get the absolute file path of the repo-state.json file.
+   */
+  public readonly filePath: string;
 
   private constructor(
     repoStateJson: IRepoStateJson | undefined,
@@ -51,7 +55,7 @@ export class RepoStateFile {
     filePath: string,
     variant: string | undefined
   ) {
-    this._repoStateFilePath = filePath;
+    this.filePath = filePath;
     this._variant = variant;
     this._isValid = isValid;
 
@@ -59,13 +63,6 @@ export class RepoStateFile {
       this._pnpmShrinkwrapHash = repoStateJson.pnpmShrinkwrapHash;
       this._preferredVersionsHash = repoStateJson.preferredVersionsHash;
     }
-  }
-
-  /**
-   * Get the absolute file path of the repo-state.json file.
-   */
-  public get filePath(): string {
-    return this._repoStateFilePath;
   }
 
   /**
@@ -202,7 +199,7 @@ export class RepoStateFile {
       const content: string =
         '// DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.' +
         `${NewlineKind.Lf}${this._serialize()}`;
-      FileSystem.writeFile(this._repoStateFilePath, content);
+      FileSystem.writeFile(this.filePath, content);
       this._modified = false;
       return true;
     }

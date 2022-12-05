@@ -52,15 +52,19 @@ export class VersionPolicyConfiguration {
     path.join(__dirname, '../schemas/version-policies.schema.json')
   );
 
-  private _versionPolicies: Map<string, VersionPolicy>;
   private _jsonFileName: string;
+
+  /**
+   * Gets all the version policies
+   */
+  public readonly versionPolicies: Map<string, VersionPolicy>;
 
   /**
    * @internal
    */
   public constructor(jsonFileName: string) {
     this._jsonFileName = jsonFileName;
-    this._versionPolicies = new Map<string, VersionPolicy>();
+    this.versionPolicies = new Map<string, VersionPolicy>();
     this._loadFile();
   }
 
@@ -88,18 +92,11 @@ export class VersionPolicyConfiguration {
    * @param policyName - Name of the version policy
    */
   public getVersionPolicy(policyName: string): VersionPolicy {
-    const policy: VersionPolicy | undefined = this._versionPolicies.get(policyName);
+    const policy: VersionPolicy | undefined = this.versionPolicies.get(policyName);
     if (!policy) {
       throw new Error(`Failed to find version policy by name \'${policyName}\'`);
     }
     return policy;
-  }
-
-  /**
-   * Gets all the version policies
-   */
-  public get versionPolicies(): Map<string, VersionPolicy> {
-    return this._versionPolicies;
   }
 
   /**
@@ -163,7 +160,7 @@ export class VersionPolicyConfiguration {
     versionPolicyJson.forEach((policyJson) => {
       const policy: VersionPolicy | undefined = VersionPolicy.load(policyJson);
       if (policy) {
-        this._versionPolicies.set(policy.policyName, policy);
+        this.versionPolicies.set(policy.policyName, policy);
       }
     });
   }

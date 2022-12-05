@@ -185,7 +185,7 @@ export class CommandLineConfiguration {
   /**
    * These path will be prepended to the PATH environment variable
    */
-  private readonly _additionalPathFolders: string[] = [];
+  public readonly additionalPathFolders: Readonly<string[]> = [];
 
   /**
    * A map of bulk command names to their corresponding synthetic phase identifiers
@@ -634,12 +634,8 @@ export class CommandLineConfiguration {
     return new CommandLineConfiguration(commandLineJson, { doNotIncludeDefaultBuildCommands: false });
   }
 
-  public get additionalPathFolders(): Readonly<string[]> {
-    return this._additionalPathFolders;
-  }
-
   public prependAdditionalPathFolder(pathFolder: string): void {
-    this._additionalPathFolders.unshift(pathFolder);
+    (this.additionalPathFolders as string[]).unshift(pathFolder);
   }
 
   /**

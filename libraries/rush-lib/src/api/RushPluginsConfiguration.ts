@@ -25,24 +25,18 @@ export class RushPluginsConfiguration {
     path.join(__dirname, '..', 'schemas', 'rush-plugins.schema.json')
   );
 
-  private _rushPluginsConfigurationJson: IRushPluginsConfigurationJson;
   private _jsonFilename: string;
+
+  public readonly configuration: Readonly<IRushPluginsConfigurationJson>;
 
   public constructor(jsonFilename: string) {
     this._jsonFilename = jsonFilename;
-    this._rushPluginsConfigurationJson = {
+    this.configuration = {
       plugins: []
     };
 
     if (FileSystem.exists(this._jsonFilename)) {
-      this._rushPluginsConfigurationJson = JsonFile.loadAndValidate(
-        this._jsonFilename,
-        RushPluginsConfiguration._jsonSchema
-      );
+      this.configuration = JsonFile.loadAndValidate(this._jsonFilename, RushPluginsConfiguration._jsonSchema);
     }
-  }
-
-  public get configuration(): Readonly<IRushPluginsConfigurationJson> {
-    return this._rushPluginsConfigurationJson;
   }
 }

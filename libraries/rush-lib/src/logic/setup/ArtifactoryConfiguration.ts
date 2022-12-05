@@ -39,8 +39,12 @@ export class ArtifactoryConfiguration {
     path.resolve(__dirname, '..', '..', 'schemas', 'artifactory.schema.json')
   );
 
-  private _setupJson: IArtifactoryJson;
-  private _jsonFileName: string;
+  private readonly _jsonFileName: string;
+
+  /**
+   * Get the artifactory configuration.
+   */
+  public readonly configuration: Readonly<IArtifactoryJson>;
 
   /**
    * @internal
@@ -48,7 +52,7 @@ export class ArtifactoryConfiguration {
   public constructor(jsonFileName: string) {
     this._jsonFileName = jsonFileName;
 
-    this._setupJson = {
+    this.configuration = {
       packageRegistry: {
         enabled: false,
         registryUrl: '',
@@ -57,17 +61,10 @@ export class ArtifactoryConfiguration {
     };
 
     if (FileSystem.exists(this._jsonFileName)) {
-      this._setupJson = JsonFile.loadAndValidate(this._jsonFileName, ArtifactoryConfiguration._jsonSchema);
-      if (!this._setupJson.packageRegistry.credentialType) {
-        this._setupJson.packageRegistry.credentialType = 'password';
+      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, ArtifactoryConfiguration._jsonSchema);
+      if (!this.configuration.packageRegistry.credentialType) {
+        this.configuration.packageRegistry.credentialType = 'password';
       }
     }
-  }
-
-  /**
-   * Get the experiments configuration.
-   */
-  public get configuration(): Readonly<IArtifactoryJson> {
-    return this._setupJson;
   }
 }

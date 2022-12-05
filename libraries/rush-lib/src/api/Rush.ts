@@ -114,7 +114,7 @@ export class Rush {
       this._version = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
     }
 
-    return this._version!;
+    return this._version;
   }
 
   /**
