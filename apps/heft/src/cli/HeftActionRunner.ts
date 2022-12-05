@@ -27,7 +27,7 @@ import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import { Selection } from '../utilities/Selection';
-import { GitignoreFilterAsyncFn, GitUtilities } from '../utilities/GitUtilities';
+import { GitUtilities, type GitignoreFilterFn } from '../utilities/GitUtilities';
 import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
 import {
   OperationExecutionManager,
@@ -80,17 +80,13 @@ async function* _waitForSourceChangesAsync(
   // as a non-source file. If it is not, it will be counted as a source file. If git is not present,
   // all files will be counted as source files and must manually be ignored by providing a glob to
   // the ignoredSourceFileGlobs option.
-  const isFileUnignoredAsync: GitignoreFilterAsyncFn =
-    (await git.tryCreateGitignoreFilterAsync()) || (async () => true);
+  const isFileUnignored: GitignoreFilterFn = (await git.tryCreateGitignoreFilterAsync()) || (() => true);
 
   let resolveFileChange: () => void;
   let rejectFileChange: (error: Error) => void;
   let fileChangePromise: Promise<void>;
 
-  async function ingestFileChangesAsync(
-    filePaths: Iterable<string>,
-    ignoreForbidden: boolean = false
-  ): Promise<void> {
+  function ingestFileChanges(filePaths: Iterable<string>, ignoreForbidden: boolean = false): void {
     const unseenFilePaths: Set<string> = seenFilePaths.size
       ? Selection.difference(filePaths, seenFilePaths)
       : new Set(filePaths);
@@ -99,8 +95,8 @@ async function* _waitForSourceChangesAsync(
       const unseenIgnoredFilePaths: Set<string> = new Set();
       const unseenSourceFilePaths: Set<string> = new Set();
       for (const filePath of unseenFilePaths) {
-        const isFileUnignored: boolean = await isFileUnignoredAsync(filePath);
-        (isFileUnignored ? unseenSourceFilePaths : unseenIgnoredFilePaths).add(filePath);
+        const fileIsUnignored: boolean = isFileUnignored(filePath);
+        (fileIsUnignored ? unseenSourceFilePaths : unseenIgnoredFilePaths).add(filePath);
       }
 
       if (unseenSourceFilePaths.size) {
@@ -211,7 +207,7 @@ async function* _waitForSourceChangesAsync(
 
   // Ingest the initial files and set their state. We want to ignore forbidden files
   // since they aren't being "changed", they're just being watched.
-  await ingestFileChangesAsync(initialFilePaths, /*ignoreForbidden:*/ true);
+  ingestFileChanges(initialFilePaths, /*ignoreForbidden:*/ true);
   for (const filePath of initialFilePaths) {
     const state: IChangedFileState = {
       ...generateChangeState(filePath),
@@ -253,7 +249,7 @@ async function* _waitForSourceChangesAsync(
     fileChangePromise = createFileChangePromise();
 
     // Process the file changes. In
-    await ingestFileChangesAsync(fileChangesToProcess.keys());
+    ingestFileChanges(fileChangesToProcess.keys());
 
     // Update the output map to contain the new file change state
     let containsSourceFiles: boolean = false;
@@ -346,11 +342,10 @@ export async function runWithLoggingAsync(
       action.getParameterStringMap()
     );
 
-    const duration: number = performance.now() - startTime;
     const finishedLoggingWord: string = encounteredError ? 'Failed' : wasCancelled ? 'Cancelled' : 'Finished';
-    const finishedLoggingLine: string = `-------------------- ${finishedLoggingWord} (${
-      Math.round(duration) / 1000
-    }s) --------------------`;
+    const duration: number = performance.now() - startTime;
+    const durationSeconds: number = Math.round(duration) / 1000;
+    const finishedLoggingLine: string = `-------------------- ${finishedLoggingWord} (${durationSeconds}s) --------------------`;
     terminal.writeLine(
       Colors.bold(
         (encounteredError ? Colors.red : encounteredWarnings ? Colors.yellow : Colors.green)(
