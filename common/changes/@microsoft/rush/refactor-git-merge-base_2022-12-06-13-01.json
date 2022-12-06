@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for submodule (such as in gitlab ci)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

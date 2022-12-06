@@ -235,7 +235,7 @@ export class Git {
         'merge-base',
         '--',
         'HEAD',
-        targetBranch
+        `origin/${targetBranch}`
       ]);
       const result: string = output.trim();
 
