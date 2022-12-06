@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
+
+import schemaJson from '../../schemas/artifactory.schema.json';
 
 export interface IArtifactoryPackageRegistryJson {
   enabled: boolean;
@@ -35,9 +36,7 @@ export interface IArtifactoryJson {
  * It configures the "rush setup" command.
  */
 export class ArtifactoryConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.resolve(__dirname, '..', '..', 'schemas', 'artifactory.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   private readonly _jsonFileName: string;
 
