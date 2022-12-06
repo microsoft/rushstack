@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 18 Nov 2022 02:50:10 GMT and should not be manually modified.
+This log was last generated on Fri, 2 Dec 2022 05:28:24 GMT and should not be manually modified.
+
+## 0.49.0-rc.2
+Fri, 2 Dec 2022 05:28:24 GMT
+
+### Prerelease Changes
+
+- Improve watch mode performance.
+- Improve logging output.
 
 ## 0.49.0-rc.1
 Fri, 18 Nov 2022 02:34:26 GMT
