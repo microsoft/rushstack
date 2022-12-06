@@ -23,7 +23,7 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
 
   const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
 
-  const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+  const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
     rushConfiguration,
     rushGlobalFolder,
     purgeManager,

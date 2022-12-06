@@ -4,7 +4,6 @@
 import colors from 'colors/safe';
 import * as os from 'os';
 
-import { Import } from '@rushstack/node-core-library';
 import type {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
@@ -22,11 +21,6 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-
-const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = Import.lazy(
-  '../../logic/InstallManagerFactory',
-  require
-);
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -141,8 +135,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
+    const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = await import(
+      '../../logic/InstallManagerFactory'
+    );
     const installManager: BaseInstallManager =
-      installManagerFactoryModule.InstallManagerFactory.getInstallManager(
+      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
         this.rushConfiguration,
         this.rushGlobalFolder,
         purgeManager,
