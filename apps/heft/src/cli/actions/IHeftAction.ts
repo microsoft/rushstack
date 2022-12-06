@@ -21,5 +21,5 @@ export interface IHeftActionOptions {
 
 export interface IHeftAction extends CommandLineAction {
   readonly watch: boolean;
-  readonly selectedPhases: Set<HeftPhase>;
+  readonly selectedPhases: ReadonlySet<HeftPhase>;
 }

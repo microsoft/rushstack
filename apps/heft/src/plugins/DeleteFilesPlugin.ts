@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Async } from '@rushstack/node-core-library';
+import glob from 'fast-glob';
+import { FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
 import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
-import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
 /**
  * Used to specify a selection of source files to delete from the specified source folder.
@@ -36,7 +36,7 @@ async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperatio
         pathsToDelete.add(deleteOperation.sourcePath);
       } else {
         // Glob the files under the source path and add them to the set of files to delete
-        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation);
+        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation, glob);
         for (const sourceFilePath of sourceFilePaths) {
           pathsToDelete.add(sourceFilePath);
         }
@@ -50,13 +50,13 @@ async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperatio
 
 export async function deleteFilesAsync(
   deleteOperations: IDeleteOperation[],
-  logger: IScopedLogger
+  terminal: ITerminal
 ): Promise<void> {
   const pathsToDelete: Set<string> = await _getPathsToDeleteAsync(deleteOperations);
-  await _deleteFilesInnerAsync(pathsToDelete, logger);
+  await _deleteFilesInnerAsync(pathsToDelete, terminal);
 }
 
-async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScopedLogger): Promise<void> {
+async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, terminal: ITerminal): Promise<void> {
   let deletedFiles: number = 0;
   let deletedFolders: number = 0;
   await Async.forEachAsync(
@@ -64,7 +64,7 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScope
     async (pathToDelete: string) => {
       try {
         await FileSystem.deleteFileAsync(pathToDelete, { throwIfNotExists: true });
-        logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}".`);
+        terminal.writeVerboseLine(`Deleted "${pathToDelete}".`);
         deletedFiles++;
       } catch (error) {
         // If it doesn't exist, we can ignore the error.
@@ -74,7 +74,7 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScope
           // linux throws the EISDIR error.
           if (FileSystem.isUnlinkNotPermittedError(error) || FileSystem.isDirectoryError(error)) {
             await FileSystem.deleteFolderAsync(pathToDelete);
-            logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}".`);
+            terminal.writeVerboseLine(`Deleted folder "${pathToDelete}".`);
             deletedFolders++;
           } else {
             throw error;
@@ -86,7 +86,7 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, logger: IScope
   );
 
   if (deletedFiles > 0 || deletedFolders > 0) {
-    logger.terminal.writeLine(
+    terminal.writeLine(
       `Deleted ${deletedFiles} file${deletedFiles !== 1 ? 's' : ''} ` +
         `and ${deletedFolders} folder${deletedFolders !== 1 ? 's' : ''}`
     );
@@ -116,7 +116,7 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     _resolveDeleteOperationPaths(heftConfiguration, pluginOptions.deleteOperations);
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await deleteFilesAsync(pluginOptions.deleteOperations, taskSession.logger);
+      runOptions.addDeleteOperations(pluginOptions.deleteOperations);
     });
   }
 }

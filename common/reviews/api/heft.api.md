@@ -54,7 +54,7 @@ export { CommandLineStringListParameter }
 export { CommandLineStringParameter }
 
 // @public
-export type GlobChangedFilesFn = (patterns: string | string[], options?: IGlobChangedFilesOptions) => string[];
+export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<string[]>;
 
 // @public (undocumented)
 export class HeftConfiguration {
@@ -111,7 +111,7 @@ export interface IFileSelectionSpecifier {
 }
 
 // @public
-export interface IGlobChangedFilesOptions {
+export interface IGlobOptions {
     absolute?: boolean;
     cwd?: string;
     dot?: boolean;
@@ -208,16 +208,17 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 
 // @public
 export interface IHeftTaskRunHookOptions {
-    readonly addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
-    readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+    readonly addCopyOperations: (copyOperations: ICopyOperation[]) => void;
+    readonly addDeleteOperations: (deleteOperations: IDeleteOperation[]) => void;
 }
 
 // @public
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+    readonly addCopyOperations: (copyOperations: IIncrementalCopyOperation[]) => void;
     // @beta
     readonly cancellationToken: CancellationToken;
     readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
-    readonly globChangedFiles: GlobChangedFilesFn;
+    readonly globChangedFilesAsync: GlobFn;
 }
 
 // @public
@@ -229,6 +230,11 @@ export interface IHeftTaskSession {
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly taskName: string;
     readonly tempFolderPath: string;
+}
+
+// @public
+export interface IIncrementalCopyOperation extends ICopyOperation {
+    onlyIfChanged?: boolean;
 }
 
 // @public (undocumented)

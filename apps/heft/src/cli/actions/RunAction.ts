@@ -15,6 +15,91 @@ import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 import { Constants } from '../../utilities/Constants';
 
+export function expandPhases(
+  onlyParameter: CommandLineStringListParameter,
+  toParameter: CommandLineStringListParameter,
+  toExceptParameter: CommandLineStringListParameter,
+  internalHeftSession: InternalHeftSession,
+  terminal: ITerminal
+): Set<HeftPhase> {
+  const onlyPhases: Set<HeftPhase> = evaluatePhaseParameter(onlyParameter, internalHeftSession, terminal);
+  const toPhases: Set<HeftPhase> = evaluatePhaseParameter(toParameter, internalHeftSession, terminal);
+  const toExceptPhases: Set<HeftPhase> = evaluatePhaseParameter(
+    toExceptParameter,
+    internalHeftSession,
+    terminal
+  );
+
+  const expandFn: (phase: HeftPhase) => ReadonlySet<HeftPhase> = (phase: HeftPhase) => phase.dependencyPhases;
+  const selectedPhases: Set<HeftPhase> = Selection.union(
+    Selection.recursiveExpand(toPhases, expandFn),
+    Selection.recursiveExpand(Selection.directDependenciesOf(toExceptPhases, expandFn), expandFn),
+    onlyPhases
+  );
+  if (selectedPhases.size === 0) {
+    throw new Error(
+      'No phases were selected. Provide at least one phase to the ' +
+        `${JSON.stringify(Constants.toParameterLongName)}, ` +
+        `${JSON.stringify(Constants.toExceptParameterLongName)}, or ` +
+        `${JSON.stringify(Constants.onlyParameterLongName)} parameters.`
+    );
+  }
+  return selectedPhases;
+}
+
+function evaluatePhaseParameter(
+  phaseParameter: CommandLineStringListParameter,
+  internalHeftSession: InternalHeftSession,
+  terminal: ITerminal
+): Set<HeftPhase> {
+  const parameterName: string = phaseParameter.longName;
+  const selection: Set<HeftPhase> = new Set();
+  for (const rawSelector of phaseParameter.values) {
+    const phase: HeftPhase | undefined = internalHeftSession.phasesByName.get(rawSelector);
+    if (!phase) {
+      terminal.writeErrorLine(
+        `The phase name ${JSON.stringify(rawSelector)} passed to ${JSON.stringify(parameterName)} does ` +
+          'not exist in heft.json.'
+      );
+      throw new AlreadyReportedError();
+    }
+    selection.add(phase);
+  }
+  return selection;
+}
+
+export interface IScopingParameters {
+  toParameter: CommandLineStringListParameter;
+  toExceptParameter: CommandLineStringListParameter;
+  onlyParameter: CommandLineStringListParameter;
+}
+
+export function definePhaseScopingParameters(action: IHeftAction): IScopingParameters {
+  return {
+    toParameter: action.defineStringListParameter({
+      parameterLongName: Constants.toParameterLongName,
+      parameterShortName: Constants.toParameterShortName,
+      description: `The phase to ${action.actionName} to, including all transitive dependencies.`,
+      argumentName: 'PHASE',
+      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
+    }),
+    toExceptParameter: action.defineStringListParameter({
+      parameterLongName: Constants.toExceptParameterLongName,
+      parameterShortName: Constants.toExceptParameterShortName,
+      description: `The phase to ${action.actionName} to (but not include), including all transitive dependencies.`,
+      argumentName: 'PHASE',
+      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
+    }),
+    onlyParameter: action.defineStringListParameter({
+      parameterLongName: Constants.onlyParameterLongName,
+      parameterShortName: Constants.onlyParameterShortName,
+      description: `The phase to ${action.actionName}.`,
+      argumentName: 'PHASE',
+      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
+    })
+  };
+}
+
 export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   public readonly watch: boolean;
 
@@ -37,54 +122,23 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     this._terminal = options.terminal;
     this._internalHeftSession = options.internalHeftSession;
 
+    const { toParameter, toExceptParameter, onlyParameter } = definePhaseScopingParameters(this);
+    this._toParameter = toParameter;
+    this._toExceptParameter = toExceptParameter;
+    this._onlyParameter = onlyParameter;
+
     this._actionRunner = new HeftActionRunner({ action: this, ...options });
-    this._toParameter = this.defineStringListParameter({
-      parameterLongName: Constants.toParameterLongName,
-      parameterShortName: Constants.toParameterShortName,
-      description: 'The phase to run to, including all transitive dependencies.',
-      argumentName: 'PHASE',
-      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
-    });
-    this._toExceptParameter = this.defineStringListParameter({
-      parameterLongName: Constants.toExceptParameterLongName,
-      parameterShortName: Constants.toExceptParameterShortName,
-      description: 'The phase to run to (but not include), including all transitive dependencies.',
-      argumentName: 'PHASE',
-      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
-    });
-    this._onlyParameter = this.defineStringListParameter({
-      parameterLongName: Constants.onlyParameterLongName,
-      parameterShortName: Constants.onlyParameterShortName,
-      description: 'The phase to run.',
-      argumentName: 'PHASE',
-      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
-    });
   }
 
-  public get selectedPhases(): Set<HeftPhase> {
+  public get selectedPhases(): ReadonlySet<HeftPhase> {
     if (!this._selectedPhases) {
-      const toPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._toParameter, this._terminal);
-      const toExceptPhases: Set<HeftPhase> = this._evaluatePhaseParameter(
+      this._selectedPhases = expandPhases(
+        this._onlyParameter,
+        this._toParameter,
         this._toExceptParameter,
+        this._internalHeftSession,
         this._terminal
       );
-      const onlyPhases: Set<HeftPhase> = this._evaluatePhaseParameter(this._onlyParameter, this._terminal);
-
-      const expandFn: (phase: HeftPhase) => ReadonlySet<HeftPhase> = (phase: HeftPhase) =>
-        phase.dependencyPhases;
-      this._selectedPhases = Selection.union(
-        Selection.recursiveExpand(toPhases, expandFn),
-        Selection.recursiveExpand(Selection.directDependenciesOf(toExceptPhases, expandFn), expandFn),
-        onlyPhases
-      );
-      if (this._selectedPhases.size === 0) {
-        throw new Error(
-          'No phases were selected. Provide at least one phase to the ' +
-            `${JSON.stringify(Constants.toParameterLongName)}, ` +
-            `${JSON.stringify(Constants.toExceptParameterLongName)}, or ` +
-            `${JSON.stringify(Constants.onlyParameterLongName)} parameters.`
-        );
-      }
     }
     return this._selectedPhases;
   }
@@ -95,25 +149,5 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
 
   protected async onExecute(): Promise<void> {
     await this._actionRunner.executeAsync();
-  }
-
-  private _evaluatePhaseParameter(
-    phaseParameter: CommandLineStringListParameter,
-    terminal: ITerminal
-  ): Set<HeftPhase> {
-    const parameterName: string = phaseParameter.longName;
-    const selection: Set<HeftPhase> = new Set();
-    for (const rawSelector of phaseParameter.values) {
-      const phase: HeftPhase | undefined = this._internalHeftSession.phasesByName.get(rawSelector);
-      if (!phase) {
-        terminal.writeErrorLine(
-          `The phase name ${JSON.stringify(rawSelector)} passed to ${JSON.stringify(parameterName)} does ` +
-            'not exist in heft.json.'
-        );
-        throw new AlreadyReportedError();
-      }
-      selection.add(phase);
-    }
-    return selection;
   }
 }

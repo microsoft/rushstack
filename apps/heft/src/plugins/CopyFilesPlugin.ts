@@ -2,17 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import glob from 'fast-glob';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
+import { getFilePathsAsync, type GlobFn, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type {
   IHeftTaskSession,
   IHeftTaskRunHookOptions,
-  IHeftTaskRunIncrementalHookOptions,
-  IChangedFileState
+  IHeftTaskRunIncrementalHookOptions
 } from '../pluginFramework/HeftTaskSession';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
@@ -47,6 +47,20 @@ export interface ICopyOperation extends IFileSelectionSpecifier {
   hardlink?: boolean;
 }
 
+/**
+ * Used to specify a selection of files to copy from a specific source folder to one
+ * or more destination folders.
+ *
+ * @public
+ */
+export interface IIncrementalCopyOperation extends ICopyOperation {
+  /**
+   * If true, the file will be copied only if the source file is contained in the
+   * IHeftTaskRunIncrementalHookOptions.changedFiles map.
+   */
+  onlyIfChanged?: boolean;
+}
+
 interface ICopyFilesPluginOptions {
   copyOperations: ICopyOperation[];
 }
@@ -58,11 +72,28 @@ interface ICopyDescriptor {
 }
 
 export async function copyFilesAsync(copyOperations: ICopyOperation[], logger: IScopedLogger): Promise<void> {
-  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(copyOperations);
+  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(copyOperations, glob);
   await _copyFilesInnerAsync(copyDescriptors, logger);
 }
 
-async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): Promise<ICopyDescriptor[]> {
+export async function copyIncrementalFilesAsync(
+  copyOperations: ICopyOperation[],
+  globChangedFilesAsyncFn: GlobFn,
+  isFirstRun: boolean,
+  logger: IScopedLogger
+): Promise<void> {
+  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
+    copyOperations,
+    // Use the normal globber if it is the first run, to ensure that non-watched files are copied
+    isFirstRun ? glob : globChangedFilesAsyncFn
+  );
+  await _copyFilesInnerAsync(copyDescriptors, logger);
+}
+
+async function _getCopyDescriptorsAsync(
+  copyConfigurations: ICopyOperation[],
+  globFn: GlobFn
+): Promise<ICopyDescriptor[]> {
   const processedCopyDescriptors: ICopyDescriptor[] = [];
 
   // Create a map to deduplicate and prevent double-writes
@@ -84,11 +115,14 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
           // Specify a glob to match all files in the folder, since folders cannot be hardlinked.
           // Perform globbing from one folder up, so that we create the folder in the destination.
           try {
-            sourceFilePaths = await getFilePathsAsync({
-              ...copyConfiguration,
-              sourcePath: sourceFolder,
-              includeGlobs: [`${path.basename(copyConfiguration.sourcePath)}/**/*`]
-            });
+            sourceFilePaths = await getFilePathsAsync(
+              {
+                ...copyConfiguration,
+                sourcePath: sourceFolder,
+                includeGlobs: [`${path.basename(copyConfiguration.sourcePath)}/**/*`]
+              },
+              globFn
+            );
           } catch (error) {
             if (FileSystem.isNotDirectoryError(error)) {
               // The source path is a file, not a folder. Handled below.
@@ -105,7 +139,7 @@ async function _getCopyDescriptorsAsync(copyConfigurations: ICopyOperation[]): P
       } else {
         // Assume the source path is a folder
         sourceFolder = copyConfiguration.sourcePath;
-        sourceFilePaths = await getFilePathsAsync(copyConfiguration);
+        sourceFilePaths = await getFilePathsAsync(copyConfiguration, globFn);
       }
 
       // Dedupe and throw if a double-write is detected
@@ -228,46 +262,20 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
     _resolveCopyOperationPaths(heftConfiguration, pluginOptions.copyOperations);
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await copyFilesAsync(pluginOptions.copyOperations, taskSession.logger);
+      runOptions.addCopyOperations(pluginOptions.copyOperations);
     });
 
-    const impactedFileStates: Map<string, IChangedFileState> = new Map();
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        // TODO: Allow the copy descriptors to be resolved from a static list of files so
-        // that we don't have to query the file system for each copy operation
-        const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
-          pluginOptions.copyOperations
+        runIncrementalOptions.addCopyOperations(
+          pluginOptions.copyOperations.map((copyOperation) => {
+            return {
+              ...copyOperation,
+              onlyIfChanged: true
+            };
+          })
         );
-        const incrementalCopyDescriptors: ICopyDescriptor[] = [];
-
-        // Cycle through the copy descriptors and check for incremental changes
-        for (const copyDescriptor of copyDescriptors) {
-          const changedFileState: IChangedFileState | undefined = runIncrementalOptions.changedFiles.get(
-            copyDescriptor.sourcePath
-          );
-          // We only care if the file has changed, ignore if not found or deleted
-          if (changedFileState && changedFileState.version) {
-            const impactedFileState: IChangedFileState | undefined = impactedFileStates.get(
-              copyDescriptor.sourcePath
-            );
-            if (!impactedFileState || impactedFileState.version !== changedFileState.version) {
-              // If we haven't seen this file before or it's version has changed, copy it
-              incrementalCopyDescriptors.push(copyDescriptor);
-            }
-          }
-        }
-
-        await _copyFilesInnerAsync(incrementalCopyDescriptors, taskSession.logger);
-
-        // Update the copied file states with the new versions
-        for (const copyDescriptor of incrementalCopyDescriptors) {
-          impactedFileStates.set(
-            copyDescriptor.sourcePath,
-            runIncrementalOptions.changedFiles.get(copyDescriptor.sourcePath)!
-          );
-        }
       }
     );
   }

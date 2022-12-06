@@ -3,23 +3,19 @@
 
 import { HeftTaskSession } from './HeftTaskSession';
 import { HeftPluginHost } from './HeftPluginHost';
-import { ScopedLogger } from './logging/ScopedLogger';
-import type { IInternalHeftSessionOptions } from './InternalHeftSession';
-import type { MetricsCollector } from '../metrics/MetricsCollector';
+import type { ScopedLogger } from './logging/ScopedLogger';
+import type { InternalHeftSession } from './InternalHeftSession';
 import type { HeftPhase } from './HeftPhase';
 import type { HeftTask } from './HeftTask';
 import type { IHeftTaskPlugin } from './IHeftPlugin';
 import type { LoggingManager } from './logging/LoggingManager';
-import type { HeftParameterManager } from './HeftParameterManager';
 
-export interface IHeftPhaseSessionOptions extends IInternalHeftSessionOptions {
+export interface IHeftPhaseSessionOptions {
+  internalHeftSession: InternalHeftSession;
   phase: HeftPhase;
-  parameterManager: HeftParameterManager;
 }
 
 export class HeftPhaseSession extends HeftPluginHost {
-  public readonly loggingManager: LoggingManager;
-  public readonly metricsCollector: MetricsCollector;
   public readonly phaseLogger: ScopedLogger;
   public readonly cleanLogger: ScopedLogger;
 
@@ -29,11 +25,10 @@ export class HeftPhaseSession extends HeftPluginHost {
   public constructor(options: IHeftPhaseSessionOptions) {
     super();
     this._options = options;
-    this.metricsCollector = options.metricsCollector;
-    this.loggingManager = options.loggingManager;
 
-    this.phaseLogger = this.loggingManager.requestScopedLogger(options.phase.phaseName);
-    this.cleanLogger = this.loggingManager.requestScopedLogger(`${options.phase.phaseName}:clean`);
+    const loggingManager: LoggingManager = options.internalHeftSession.loggingManager;
+    this.phaseLogger = loggingManager.requestScopedLogger(options.phase.phaseName);
+    this.cleanLogger = loggingManager.requestScopedLogger(`${options.phase.phaseName}:clean`);
   }
 
   /**
@@ -45,7 +40,6 @@ export class HeftPhaseSession extends HeftPluginHost {
       taskSession = new HeftTaskSession({
         ...this._options,
         task,
-        taskParameters: this._options.parameterManager.getParametersForPlugin(task.pluginDefinition),
         pluginHost: this
       });
       this._taskSessionsByTask.set(task, taskSession);
@@ -58,7 +52,7 @@ export class HeftPhaseSession extends HeftPluginHost {
    */
   protected async applyPluginsInternalAsync(): Promise<void> {
     const {
-      heftConfiguration,
+      internalHeftSession: { heftConfiguration },
       phase: { tasks }
     } = this._options;
 

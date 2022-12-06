@@ -16,6 +16,7 @@ import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { Constants } from '../utilities/Constants';
+import { CleanAction } from './actions/CleanAction';
 import { PhaseAction } from './actions/PhaseAction';
 import { RunAction } from './actions/RunAction';
 import type { IHeftActionOptions } from './actions/IHeftAction';
@@ -113,7 +114,8 @@ export class HeftCommandLineParser extends CommandLineParser {
         heftConfiguration: this._heftConfiguration
       };
 
-      // Add the run action and the individual phase actions
+      // Add the clean action, the run action, and the individual phase actions
+      this.addAction(new CleanAction(actionOptions));
       this.addAction(new RunAction(actionOptions));
       for (const phase of internalHeftSession.phases) {
         this.addAction(new PhaseAction({ ...actionOptions, phase }));

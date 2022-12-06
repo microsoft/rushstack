@@ -8,11 +8,12 @@ import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { IScopedLogger } from './logging/ScopedLogger';
 import type { HeftTask } from './HeftTask';
 import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
-import type { IHeftParameters } from './HeftParameterManager';
+import type { HeftParameterManager, IHeftParameters } from './HeftParameterManager';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
-import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
+import type { ICopyOperation, IIncrementalCopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { CancellationToken } from './CancellationToken';
+import type { GlobFn } from '../plugins/FileGlobSpecifier';
 
 /**
  * The task session is responsible for providing session-specific information to Heft task plugins.
@@ -120,7 +121,7 @@ export interface IHeftTaskRunHookOptions {
    *
    * @public
    */
-  readonly addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
+  readonly addCopyOperations: (copyOperations: ICopyOperation[]) => void;
 
   /**
    * Add delete operations to be performed during the `run` hook. These operations will be
@@ -128,7 +129,7 @@ export interface IHeftTaskRunHookOptions {
    *
    * @public
    */
-  readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+  readonly addDeleteOperations: (deleteOperations: IDeleteOperation[]) => void;
 }
 
 /**
@@ -164,58 +165,25 @@ export interface IChangedFileState {
 }
 
 /**
- * Options that are used when globbing the set of changed files.
- *
- * @public
- */
-export interface IGlobChangedFilesOptions {
-  /**
-   * Current working directory that the glob pattern will be applied to.
-   */
-  cwd?: string;
-
-  /**
-   * Whether or not the returned file paths should be absolute.
-   *
-   * @defaultValue false
-   */
-  absolute?: boolean;
-
-  /**
-   * Patterns to ignore when globbing.
-   */
-  ignore?: string[];
-
-  /**
-   * Whether or not to include dot files when globbing.
-   *
-   * @defaultValue false
-   */
-  dot?: boolean;
-}
-
-/**
- * Glob the set of changed files and return a list of absolute paths that match the provided patterns.
- *
- * @param patterns - Glob patterns to match against.
- * @param options - Options that are used when globbing the set of changed files.
- *
- * @public
- */
-export type GlobChangedFilesFn = (
-  patterns: string | string[],
-  options?: IGlobChangedFilesOptions
-) => string[];
-
-/**
  * Options provided to the 'runIncremental' hook.
  *
  * @public
  */
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
   /**
+   * Add copy operations to be performed during the `runIncremental` hook. These operations will
+   * be performed after the task `runIncremental` hook has completed.
+   *
+   * @public
+   */
+  readonly addCopyOperations: (copyOperations: IIncrementalCopyOperation[]) => void;
+
+  /**
    * A map of changed files to the corresponding change state. This can be used to track which
-   * files have been changed during an incremental build.
+   * files have been changed during an incremental build. This map is populated with all changed
+   * files, including files that are not source files. When an incremental build completes
+   * successfully, the map is cleared and only files changed after the incremental build will be
+   * included in the map.
    */
   readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
 
@@ -223,7 +191,7 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
    * Glob the map of changed files and return the subset of changed files that match the provided
    * globs.
    */
-  readonly globChangedFiles: GlobChangedFilesFn;
+  readonly globChangedFilesAsync: GlobFn;
 
   /**
    * A cancellation token that is used to signal that the incremental build is cancelled. This
@@ -237,34 +205,43 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
 
 export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
   task: HeftTask;
-  taskParameters: IHeftParameters;
   pluginHost: HeftPluginHost;
 }
 
 export class HeftTaskSession implements IHeftTaskSession {
-  private _pluginHost: HeftPluginHost;
-
   public readonly taskName: string;
   public readonly hooks: IHeftTaskHooks;
-  public readonly parameters: IHeftParameters;
   public readonly cacheFolderPath: string;
   public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
+
+  private readonly _options: IHeftTaskSessionOptions;
+  private _parameters: IHeftParameters | undefined;
 
   /**
    * @internal
    */
   public readonly metricsCollector: MetricsCollector;
 
+  public get parameters(): IHeftParameters {
+    // Delay loading the parameters for the task until they're actually needed
+    if (!this._parameters) {
+      const parameterManager: HeftParameterManager = this._options.internalHeftSession.parameterManager;
+      const task: HeftTask = this._options.task;
+      this._parameters = parameterManager.getParametersForPlugin(task.pluginDefinition);
+    }
+    return this._parameters;
+  }
+
   public constructor(options: IHeftTaskSessionOptions) {
     const {
-      heftConfiguration: { cacheFolderPath: cacheFolder, tempFolderPath: tempFolder },
-      loggingManager,
-      metricsCollector,
+      internalHeftSession: {
+        heftConfiguration: { cacheFolderPath: cacheFolder, tempFolderPath: tempFolder },
+        loggingManager,
+        metricsCollector
+      },
       phase,
-      task,
-      taskParameters,
-      pluginHost
+      task
     } = options;
 
     this.logger = loggingManager.requestScopedLogger(`${phase.phaseName}:${task.taskName}`);
@@ -274,8 +251,6 @@ export class HeftTaskSession implements IHeftTaskSession {
       run: new AsyncParallelHook(['runHookOptions']),
       runIncremental: new AsyncParallelHook(['runIncrementalHookOptions'])
     };
-
-    this.parameters = taskParameters;
 
     // Guranteed to be unique since phases are uniquely named, tasks are uniquely named within
     // phases, and neither can have '.' in their names. We will also use the phase name and
@@ -290,7 +265,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolderPath = path.join(tempFolder, uniqueTaskFolderName);
 
-    this._pluginHost = pluginHost;
+    this._options = options;
   }
 
   public requestAccessToPluginByName<T extends object>(
@@ -298,7 +273,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     pluginToAccessName: string,
     pluginApply: (pluginAccessor: T) => void
   ): void {
-    this._pluginHost.requestAccessToPluginByName(
+    this._options.pluginHost.requestAccessToPluginByName(
       this.taskName,
       pluginToAccessPackage,
       pluginToAccessName,
