@@ -22,19 +22,19 @@ interface IAutoinstallerPluginLoaderOptions extends IPluginLoaderOptions<IRushPl
  * @beta
  */
 export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfiguration> {
-  private _autoinstaller: Autoinstaller;
-
   public readonly packageFolder: string;
+
+  public readonly autoinstaller: Autoinstaller;
 
   public constructor(options: IAutoinstallerPluginLoaderOptions) {
     super(options);
-    this._autoinstaller = new Autoinstaller({
+    this.autoinstaller = new Autoinstaller({
       autoinstallerName: options.pluginConfiguration.autoinstallerName,
       rushConfiguration: this._rushConfiguration,
       restrictConsoleOutput: options.restrictConsoleOutput
     });
 
-    this.packageFolder = path.join(this._autoinstaller.folderFullPath, 'node_modules', this.packageName);
+    this.packageFolder = path.join(this.autoinstaller.folderFullPath, 'node_modules', this.packageName);
   }
 
   /**
@@ -87,15 +87,11 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
     }
   }
 
-  public get autoinstaller(): Autoinstaller {
-    return this._autoinstaller;
-  }
-
   protected override _getCommandLineAdditionalPathFolders(): string[] {
     const additionalPathFolders: string[] = super._getCommandLineAdditionalPathFolders();
     additionalPathFolders.push(
       // Example: `common/autoinstaller/plugins/node_modules/.bin`
-      path.join(this._autoinstaller.folderFullPath, 'node_modules', '.bin')
+      path.join(this.autoinstaller.folderFullPath, 'node_modules', '.bin')
     );
     return additionalPathFolders;
   }
@@ -129,7 +125,7 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
 
   protected override _getManifestPath(): string {
     return path.join(
-      AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(this._autoinstaller),
+      AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(this.autoinstaller),
       this.packageName,
       RushConstants.rushPluginManifestFilename
     );
@@ -137,7 +133,7 @@ export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfi
 
   protected override _getCommandLineJsonFilePath(): string {
     return path.join(
-      AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(this._autoinstaller),
+      AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(this.autoinstaller),
       this.packageName,
       this.pluginName,
       RushConstants.commandLineFilename

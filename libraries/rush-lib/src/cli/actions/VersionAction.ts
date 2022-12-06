@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, FileConstants, Import, Enum } from '@rushstack/node-core-library';
+import { IPackageJson, FileConstants, Enum } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
@@ -15,8 +15,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 
-import type * as VersionManagerTypes from '../../logic/VersionManager';
-const versionManagerModule: typeof VersionManagerTypes = Import.lazy('../../logic/VersionManager', require);
+import type * as VersionManagerType from '../../logic/VersionManager';
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Bump versions [skip ci]';
 export const DEFAULT_CHANGELOG_UPDATE_MESSAGE: string = 'Update changelogs [skip ci]';
@@ -100,7 +99,8 @@ export class VersionAction extends BaseRushAction {
     const userEmail: string = git.getGitEmail();
 
     this._validateInput();
-    const versionManager: VersionManagerTypes.VersionManager = new versionManagerModule.VersionManager(
+    const versionManagerModule: typeof VersionManagerType = await import('../../logic/VersionManager');
+    const versionManager: VersionManagerType.VersionManager = new versionManagerModule.VersionManager(
       this.rushConfiguration,
       userEmail,
       this.rushConfiguration.versionPolicyConfiguration

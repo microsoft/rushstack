@@ -117,7 +117,7 @@ function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetN
     }
   }
 
-  const combinedNpmrc: string = resultLines.join(os.EOL);
+  const combinedNpmrc: string = resultLines.join('\n');
   fs.writeFileSync(targetNpmrcPath, combinedNpmrc);
 
   return combinedNpmrc;
@@ -496,7 +496,7 @@ export function installAndRun(
 
   const statusMessage: string = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
   const statusMessageLine: string = new Array(statusMessage.length + 1).join('-');
-  logger.info(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
+  logger.info('\n' + statusMessage + '\n' + statusMessageLine + '\n');
 
   const binPath: string = _getBinPath(packageInstallFolder, packageBinName);
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
@@ -536,7 +536,7 @@ export function runWithErrorAndStatusCode(logger: ILogger, fn: () => number): vo
     const exitCode: number = fn();
     process.exitCode = exitCode;
   } catch (e) {
-    logger.error(os.EOL + os.EOL + (e as Error).toString() + os.EOL + os.EOL);
+    logger.error('\n\n' + (e as Error).toString() + '\n\n');
   }
 }
 

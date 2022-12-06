@@ -409,18 +409,37 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     buildFolderPath: string
   ): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
-      const serializedStats: TWebpack.StatsCompilation = stats.toJson('errors-warnings');
+      const serializedStats: TWebpack.StatsCompilation[] = [stats.toJson('errors-warnings')];
 
-      if (serializedStats.warnings) {
-        for (const warning of serializedStats.warnings) {
-          logger.emitWarning(this._normalizeError(buildFolderPath, warning));
+      const errors: Error[] = [];
+      const warnings: Error[] = [];
+
+      for (const compilationStats of serializedStats) {
+        if (compilationStats.warnings) {
+          for (const warning of compilationStats.warnings) {
+            warnings.push(this._normalizeError(buildFolderPath, warning));
+          }
+        }
+
+        if (compilationStats.errors) {
+          for (const error of compilationStats.errors) {
+            errors.push(this._normalizeError(buildFolderPath, error));
+          }
+        }
+
+        if (compilationStats.children) {
+          for (const child of compilationStats.children) {
+            serializedStats.push(child);
+          }
         }
       }
 
-      if (serializedStats.errors) {
-        for (const error of serializedStats.errors) {
-          logger.emitError(this._normalizeError(buildFolderPath, error));
-        }
+      for (const warning of warnings) {
+        logger.emitWarning(warning);
+      }
+
+      for (const error of errors) {
+        logger.emitError(error);
       }
     }
   }

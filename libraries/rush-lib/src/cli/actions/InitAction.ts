@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -114,9 +113,7 @@ export class InitAction extends BaseConfiglessRushAction {
         colors.red('ERROR: Found an existing configuration in: ' + this.rushConfiguration.rushJsonFile)
       );
       console.log(
-        os.EOL +
-          'The "rush init" command must be run in a new folder without ' +
-          'an existing Rush configuration.'
+        '\nThe "rush init" command must be run in a new folder without an existing Rush configuration.'
       );
       return false;
     }
@@ -134,16 +131,12 @@ export class InitAction extends BaseConfiglessRushAction {
       // or "CONTRIBUTING.md"
       if (stats.isDirectory()) {
         console.error(colors.red(`ERROR: Found a subdirectory: "${itemName}"`));
-        console.log(
-          os.EOL + 'The "rush init" command must be run in a new folder with no projects added yet.'
-        );
+        console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
         return false;
       } else {
         if (itemName.toLowerCase() === 'package.json') {
           console.error(colors.red(`ERROR: Found a package.json file in this folder`));
-          console.log(
-            os.EOL + 'The "rush init" command must be run in a new folder with no projects added yet.'
-          );
+          console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
           return false;
         }
       }
@@ -350,7 +343,7 @@ export class InitAction extends BaseConfiglessRushAction {
     }
 
     // Write the output
-    FileSystem.writeFile(destinationPath, outputLines.join(os.EOL), {
+    FileSystem.writeFile(destinationPath, outputLines.join('\n'), {
       ensureFolderExists: true
     });
   }

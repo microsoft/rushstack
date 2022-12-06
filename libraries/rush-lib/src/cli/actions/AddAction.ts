@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as semver from 'semver';
 import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
@@ -22,18 +21,18 @@ export class AddAction extends BaseAddAndRemoveAction {
   private readonly _makeConsistentFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
-    const documentation: string[] = [
+    const documentation: string = [
       'Adds specified package(s) to the dependencies of the current project (as determined by the current working directory)' +
         ' and then runs "rush update". If no version is specified, a version will be automatically detected (typically' +
         ' either the latest version or a version that won\'t break the "ensureConsistentVersions" policy). If a version' +
         ' range (or a workspace range) is specified, the latest version in the range will be used. The version will be' +
         ' automatically prepended with a tilde, unless the "--exact" or "--caret" flags are used. The "--make-consistent"' +
         ' flag can be used to update all packages with the dependency.'
-    ];
+    ].join('\n');
     super({
       actionName: 'add',
       summary: 'Adds one or more dependencies to the package.json and runs rush update.',
-      documentation: documentation.join(os.EOL),
+      documentation,
       safeForSimultaneousRushProcesses: false,
       parser
     });

@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.8.12",
+      "tag": "@rushstack/typings-generator_v0.8.12",
+      "date": "Thu, 01 Dec 2022 03:22:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add a check to ensure that relative paths passed to generateTypingsAsync and getOutputFilePaths are actually relative."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.11",
       "tag": "@rushstack/typings-generator_v0.8.11",
       "date": "Tue, 29 Nov 2022 01:16:50 GMT",
