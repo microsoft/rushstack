@@ -796,7 +796,7 @@ export class RushConfiguration {
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
-    getImplicitlyPreferredVersionsAsync(variant?: string | undefined): Promise<Map<string, string>>;
+    getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)

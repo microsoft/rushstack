@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "(BREAKING API CHANGE) Rename RushConfiguration.getImplicitlyPreferredVersions to getImplicitlyPreferredVersionsAsync and make it async.",
+      "comment": "",
       "type": "none"
     }
   ],

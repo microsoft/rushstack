@@ -155,7 +155,7 @@ export class RushInstallManager extends BaseInstallManager {
     // dependency name --> version specifier
     const commonDependencies: Map<string, string> = new Map([
       ...allExplicitPreferredVersions,
-      ...(await this.rushConfiguration.getImplicitlyPreferredVersionsAsync(this.options.variant))
+      ...this.rushConfiguration.getImplicitlyPreferredVersions(this.options.variant)
     ]);
 
     // To make the common/package.json file more readable, sort alphabetically
