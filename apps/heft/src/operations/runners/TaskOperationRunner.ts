@@ -58,7 +58,7 @@ export async function runAndMeasureAsync<T = void>(
 /**
  * Create a lockfile and wait for it to appear in the watcher. This is done to ensure that all watched
  * files created prior to the creation of the lockfile are ingested and available before running
- * subsequent tasks. This can appear as a create or a change, depending on if the lockfile is dirty.
+ * subsequent tasks.
  */
 async function waitForLockFile(
   lockFileFolder: string,
@@ -66,12 +66,13 @@ async function waitForLockFile(
   fileEventListener: FileEventListener,
   terminal: ITerminal
 ): Promise<void> {
+  // Acquire the lock file and release it once the watcher has ingested it. Acquiring the lock file will
+  // delete any existing lock file if present and create a new one. The file event listener will listen
+  // for any event on the lock file and resolve the promise once it is seen, indicating that the watcher
+  // has caught up to file events prior to the creation/deletion of the lock file.
   terminal.writeVerboseLine(`Synchronizing watcher using lock file ${JSON.stringify(lockFileName)}`);
   const lockFilePath: string = LockFile.getLockFilePath(lockFileFolder, lockFileName);
-  const lockfileChangePromise: Promise<void> = Promise.race([
-    fileEventListener!.waitForChangeAsync(lockFilePath),
-    fileEventListener!.waitForCreateAsync(lockFilePath)
-  ]);
+  const lockfileChangePromise: Promise<void> = fileEventListener.waitForEventAsync(lockFilePath);
   const taskOperationLockFile: LockFile | undefined = LockFile.tryAcquire(lockFileFolder, lockFileName);
   if (!taskOperationLockFile) {
     throw new InternalError(
@@ -80,9 +81,7 @@ async function waitForLockFile(
     );
   }
   await lockfileChangePromise;
-
-  // We can save some time by avoiding deleting the lockfile
-  taskOperationLockFile.release(/*deleteFile:*/ false);
+  taskOperationLockFile.release();
 }
 
 export class TaskOperationRunner implements IOperationRunner {
