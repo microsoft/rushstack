@@ -12,8 +12,7 @@ import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type {
   IHeftTaskSession,
   IHeftTaskRunHookOptions,
-  IHeftTaskRunIncrementalHookOptions,
-  IChangedFileState
+  IHeftTaskRunIncrementalHookOptions
 } from '../pluginFramework/HeftTaskSession';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
@@ -261,47 +260,20 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
     _resolveCopyOperationPaths(heftConfiguration, pluginOptions.copyOperations);
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await copyFilesAsync(pluginOptions.copyOperations, taskSession.logger);
+      runOptions.addCopyOperations(pluginOptions.copyOperations);
     });
 
-    const impactedFileStates: Map<string, IChangedFileState> = new Map();
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        // TODO: Allow the copy descriptors to be resolved from a static list of files so
-        // that we don't have to query the file system for each copy operation
-        const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
-          pluginOptions.copyOperations,
-          runIncrementalOptions.globChangedFilesAsync
+        runIncrementalOptions.addCopyOperations(
+          pluginOptions.copyOperations.map((copyOperation) => {
+            return {
+              ...copyOperation,
+              onlyIfChanged: true
+            };
+          })
         );
-        const incrementalCopyDescriptors: ICopyDescriptor[] = [];
-
-        // Cycle through the copy descriptors and check for incremental changes
-        for (const copyDescriptor of copyDescriptors) {
-          const changedFileState: IChangedFileState | undefined = runIncrementalOptions.changedFiles.get(
-            copyDescriptor.sourcePath
-          );
-          // We only care if the file has changed, ignore if not found or deleted
-          if (changedFileState && changedFileState.version) {
-            const impactedFileState: IChangedFileState | undefined = impactedFileStates.get(
-              copyDescriptor.sourcePath
-            );
-            if (!impactedFileState || impactedFileState.version !== changedFileState.version) {
-              // If we haven't seen this file before or it's version has changed, copy it
-              incrementalCopyDescriptors.push(copyDescriptor);
-            }
-          }
-        }
-
-        await _copyFilesInnerAsync(incrementalCopyDescriptors, taskSession.logger);
-
-        // Update the copied file states with the new versions
-        for (const copyDescriptor of incrementalCopyDescriptors) {
-          impactedFileStates.set(
-            copyDescriptor.sourcePath,
-            runIncrementalOptions.changedFiles.get(copyDescriptor.sourcePath)!
-          );
-        }
       }
     );
   }

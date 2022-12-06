@@ -116,7 +116,7 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     _resolveDeleteOperationPaths(heftConfiguration, pluginOptions.deleteOperations);
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await deleteFilesAsync(pluginOptions.deleteOperations, taskSession.logger.terminal);
+      runOptions.addDeleteOperations(pluginOptions.deleteOperations);
     });
   }
 }
