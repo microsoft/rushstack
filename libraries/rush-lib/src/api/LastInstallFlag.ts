@@ -28,8 +28,17 @@ export interface ILockfileValidityCheckOptions {
  * @internal
  */
 export class LastInstallFlag {
-  private _path: string;
   private _state: JsonObject;
+
+  /**
+   * Returns the full path to the flag file
+   */
+  public readonly path: string;
+
+  /**
+   * Returns the name of the flag file
+   */
+  protected readonly flagName: string = LAST_INSTALL_FLAG_FILE_NAME;
 
   /**
    * Creates a new LastInstall flag
@@ -37,7 +46,7 @@ export class LastInstallFlag {
    * @param state - optional, the state that should be managed or compared
    */
   public constructor(folderPath: string, state: JsonObject = {}) {
-    this._path = path.join(folderPath, this.flagName);
+    this.path = path.join(folderPath, this.flagName);
     this._state = state;
   }
 
@@ -71,7 +80,7 @@ export class LastInstallFlag {
   ): boolean {
     let oldState: JsonObject;
     try {
-      oldState = JsonFile.load(this._path);
+      oldState = JsonFile.load(this.path);
     } catch (err) {
       return false;
     }
@@ -123,7 +132,7 @@ export class LastInstallFlag {
    * Writes the flag file to disk with the current state
    */
   public create(): void {
-    JsonFile.save(this._state, this._path, {
+    JsonFile.save(this._state, this.path, {
       ensureFolderExists: true
     });
   }
@@ -132,21 +141,7 @@ export class LastInstallFlag {
    * Removes the flag file
    */
   public clear(): void {
-    FileSystem.deleteFile(this._path);
-  }
-
-  /**
-   * Returns the full path to the flag file
-   */
-  public get path(): string {
-    return this._path;
-  }
-
-  /**
-   * Returns the name of the flag file
-   */
-  protected get flagName(): string {
-    return LAST_INSTALL_FLAG_FILE_NAME;
+    FileSystem.deleteFile(this.path);
   }
 }
 

@@ -314,7 +314,7 @@ export class PackageJsonUpdater {
         checkOnly: false
       };
 
-      const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
         this._rushConfiguration,
         this._rushGlobalFolder,
         purgeManager,
@@ -365,7 +365,7 @@ export class PackageJsonUpdater {
         checkOnly: false
       };
 
-      const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
         this._rushConfiguration,
         this._rushGlobalFolder,
         purgeManager,

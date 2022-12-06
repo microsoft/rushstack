@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
@@ -127,7 +126,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._disableBuildCache = options.disableBuildCache;
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
-    this._watchDebounceMs = options.watchDebounceMs ?? 1000;
+    this._watchDebounceMs = options.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs;
     this._alwaysWatch = options.alwaysWatch;
     this._alwaysInstall = options.alwaysInstall;
     this._knownPhases = options.phases;
@@ -248,9 +247,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const useWorkspaces: boolean =
         this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
       if (useWorkspaces) {
-        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush install" or "rush update"?`);
+        throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
       } else {
-        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush link"?`);
+        throw new Error('Link flag invalid.\nDid you run "rush link"?');
       }
     }
 

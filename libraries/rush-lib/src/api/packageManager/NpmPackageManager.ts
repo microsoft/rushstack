@@ -10,8 +10,6 @@ import { PackageManager } from './PackageManager';
 export class NpmPackageManager extends PackageManager {
   /** @internal */
   public constructor(version: string) {
-    super(version, 'npm');
-
-    this._shrinkwrapFilename = RushConstants.npmShrinkwrapFilename;
+    super(version, 'npm', RushConstants.npmShrinkwrapFilename);
   }
 }

@@ -103,7 +103,7 @@
        * Overrides the message that normally prompts:
        * "What is your Artifactory API key?"
        */
-      // "locateApiKey": ""
+      // "apiKeyPrompt": ""
     }
   }
 }

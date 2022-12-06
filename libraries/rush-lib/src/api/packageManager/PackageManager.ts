@@ -22,21 +22,18 @@ export abstract class PackageManager {
    */
   public readonly version: string;
 
-  protected _shrinkwrapFilename!: string;
-
-  /** @internal */
-  protected constructor(version: string, packageManager: PackageManagerName) {
-    this.version = version;
-    this.packageManager = packageManager;
-  }
-
   /**
    * The filename of the shrinkwrap file that is used by the package manager.
    *
    * @remarks
    * Example: `npm-shrinkwrap.json` or `pnpm-lock.yaml`
    */
-  public get shrinkwrapFilename(): string {
-    return this._shrinkwrapFilename;
+  public readonly shrinkwrapFilename: string;
+
+  /** @internal */
+  protected constructor(version: string, packageManager: PackageManagerName, shrinkwrapFilename: string) {
+    this.version = version;
+    this.packageManager = packageManager;
+    this.shrinkwrapFilename = shrinkwrapFilename;
   }
 }

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import { ConsoleTerminalProvider, Terminal, ITerminal } from '@rushstack/node-core-library';
 import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
@@ -18,14 +17,14 @@ export class RemoveAction extends BaseAddAndRemoveAction {
   private _terminal: ITerminal;
 
   public constructor(parser: RushCommandLineParser) {
-    const documentation: string[] = [
+    const documentation: string = [
       'Removes specified package(s) from the dependencies of the current project (as determined by the current working directory)' +
         ' and then runs "rush update".'
-    ];
+    ].join('\n');
     super({
       actionName: 'remove',
       summary: 'Removes one or more dependencies from the package.json and runs rush update.',
-      documentation: documentation.join(os.EOL),
+      documentation,
       safeForSimultaneousRushProcesses: false,
       parser
     });

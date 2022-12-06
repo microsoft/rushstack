@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
@@ -37,29 +36,26 @@ export interface IBaseRushActionOptions extends ICommandLineActionOptions {
  * can be used without a rush.json configuration.
  */
 export abstract class BaseConfiglessRushAction extends CommandLineAction implements IRushCommand {
-  private _parser: RushCommandLineParser;
   private _safeForSimultaneousRushProcesses: boolean;
 
   protected get rushConfiguration(): RushConfiguration | undefined {
-    return this._parser.rushConfiguration;
+    return this.parser.rushConfiguration;
   }
 
   protected get rushSession(): RushSession {
-    return this._parser.rushSession;
+    return this.parser.rushSession;
   }
 
   protected get rushGlobalFolder(): RushGlobalFolder {
-    return this._parser.rushGlobalFolder;
+    return this.parser.rushGlobalFolder;
   }
 
-  protected get parser(): RushCommandLineParser {
-    return this._parser;
-  }
+  protected readonly parser: RushCommandLineParser;
 
   public constructor(options: IBaseRushActionOptions) {
     super(options);
 
-    this._parser = options.parser;
+    this.parser = options.parser;
     this._safeForSimultaneousRushProcesses = !!options.safeForSimultaneousRushProcesses;
   }
 
@@ -76,7 +72,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     }
 
     if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
-      console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+      console.log(`Starting "rush ${this.actionName}"\n`);
     }
     return this.runAsync();
   }

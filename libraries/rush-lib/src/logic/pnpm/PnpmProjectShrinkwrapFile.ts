@@ -12,7 +12,7 @@ import { RushConstants } from '../RushConstants';
 /**
  *
  */
-export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
+export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShrinkwrapFile> {
   /**
    * Generate and write the project shrinkwrap file to <project>/.rush/temp/shrinkwrap-deps.json.
    * @returns True if the project shrinkwrap was created or updated, false otherwise.
@@ -230,12 +230,5 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       file[key] = projectShrinkwrapMap.get(key)!;
     }
     await JsonFile.saveAsync(file, this.projectShrinkwrapFilePath, { ensureFolderExists: true });
-  }
-
-  /**
-   * @override
-   */
-  protected get shrinkwrapFile(): PnpmShrinkwrapFile {
-    return super.shrinkwrapFile as PnpmShrinkwrapFile;
   }
 }

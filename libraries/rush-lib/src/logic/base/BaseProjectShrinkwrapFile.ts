@@ -13,17 +13,20 @@ import { BaseShrinkwrapFile } from './BaseShrinkwrapFile';
  * which tracks the direct and indirect dependencies that a project consumes. This is used
  * to better determine which projects should be rebuilt when dependencies are updated.
  */
-export abstract class BaseProjectShrinkwrapFile {
+export abstract class BaseProjectShrinkwrapFile<TShrinkwrapFile extends BaseShrinkwrapFile> {
   public readonly projectShrinkwrapFilePath: string;
   protected readonly project: RushConfigurationProject;
 
-  private readonly _shrinkwrapFile: BaseShrinkwrapFile;
+  /**
+   * The shrinkwrap file that the project shrinkwrap file is based off of.
+   */
+  protected readonly shrinkwrapFile: TShrinkwrapFile;
 
-  public constructor(shrinkwrapFile: BaseShrinkwrapFile, project: RushConfigurationProject) {
+  public constructor(shrinkwrapFile: TShrinkwrapFile, project: RushConfigurationProject) {
     this.project = project;
     this.projectShrinkwrapFilePath = BaseProjectShrinkwrapFile.getFilePathForProject(this.project);
 
-    this._shrinkwrapFile = shrinkwrapFile;
+    this.shrinkwrapFile = shrinkwrapFile;
   }
 
   /**
@@ -55,11 +58,4 @@ export abstract class BaseProjectShrinkwrapFile {
    * @virtual
    */
   public abstract updateProjectShrinkwrapAsync(): Promise<void>;
-
-  /**
-   * The shrinkwrap file that the project shrinkwrap file is based off of.
-   */
-  protected get shrinkwrapFile(): BaseShrinkwrapFile {
-    return this._shrinkwrapFile;
-  }
 }

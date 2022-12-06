@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as os from 'os';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import {
@@ -31,10 +30,6 @@ import type { BaseInstallManager, IInstallManagerOptions } from '../logic/base/B
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 const semver: typeof import('semver') = Import.lazy('semver', require);
-const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = Import.lazy(
-  '../logic/InstallManagerFactory',
-  require
-);
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -405,8 +400,7 @@ export class RushPnpmCommandLineParser {
           await this._doRushUpdateAsync();
 
           this._terminal.writeWarningLine(
-            `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the "common/pnpm/patches" folder.` +
-              os.EOL +
+            `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the "common/pnpm/patches" folder.\n` +
               '  Please commit this change to Git.'
           );
         }
@@ -437,8 +431,11 @@ export class RushPnpmCommandLineParser {
       checkOnly: false
     };
 
+    const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(
+      '../logic/InstallManagerFactory'
+    );
     const installManager: BaseInstallManager =
-      installManagerFactoryModule.InstallManagerFactory.getInstallManager(
+      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
         this._rushConfiguration,
         rushGlobalFolder,
         purgeManager,

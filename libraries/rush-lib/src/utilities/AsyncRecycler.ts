@@ -15,22 +15,19 @@ import { Utilities } from './Utilities';
  * background process to recursively delete that folder.
  */
 export class AsyncRecycler {
-  private _recyclerFolder: string;
   private _movedFolderCount: number;
   private _deleting: boolean;
-
-  public constructor(recyclerFolder: string) {
-    this._recyclerFolder = path.resolve(recyclerFolder);
-    this._movedFolderCount = 0;
-    this._deleting = false;
-  }
 
   /**
    * The full path of the recycler folder.
    * Example: `C:\MyRepo\common\rush-recycler`
    */
-  public get recyclerFolder(): string {
-    return this._recyclerFolder;
+  public readonly recyclerFolder: string;
+
+  public constructor(recyclerFolder: string) {
+    this.recyclerFolder = path.resolve(recyclerFolder);
+    this._movedFolderCount = 0;
+    this._deleting = false;
   }
 
   /**
@@ -71,10 +68,7 @@ export class AsyncRecycler {
       () => FileSystem.move({ sourcePath: folderPath, destinationPath: newFolderPath }),
       maxWaitTimeMs,
       (e) =>
-        new Error(
-          `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
-            'from a process like the virus scanner.'
-        ),
+        new Error(`Error: ${e}\nOften this is caused by a file lock from a process like the virus scanner.`),
       'recycleFolder'
     );
   }
