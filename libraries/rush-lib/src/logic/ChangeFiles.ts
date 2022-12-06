@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { EOL } from 'os';
 import { JsonFile, JsonSchema, Import } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
@@ -77,7 +76,7 @@ export class ChangeFiles {
           ...projectsMissingChangeDescriptionsArray.map((projectName) => `- ${projectName}`),
           'To resolve this error, run "rush change". This will generate change description files that must be ' +
             'committed to source control.'
-        ].join(EOL)
+        ].join('\n')
       );
     }
   }
@@ -152,9 +151,7 @@ export class ChangeFiles {
 
   private _deleteFiles(files: string[], shouldDelete: boolean): number {
     if (files.length) {
-      console.log(
-        `${EOL}* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`
-      );
+      console.log(`\n* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`);
 
       for (const filePath of files) {
         console.log(` - ${filePath}`);

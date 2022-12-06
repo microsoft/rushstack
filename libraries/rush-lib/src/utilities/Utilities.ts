@@ -221,7 +221,7 @@ export class Utilities {
       maxWaitTimeMs,
       (e) =>
         new Error(
-          `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
+          `Error: ${e}\nOften this is caused by a file lock ` +
             'from a process such as your text editor, command prompt, ' +
             'or a filesystem watcher.'
         ),
@@ -271,7 +271,7 @@ export class Utilities {
       FileSystem.deleteFolder(folderPath);
     } catch (e) {
       throw new Error(
-        `${(e as Error).message}${os.EOL}Often this is caused by a file lock from a process ` +
+        `${(e as Error).message}\nOften this is caused by a file lock from a process ` +
           'such as your text editor, command prompt, or a filesystem watcher'
       );
     }
@@ -365,20 +365,20 @@ export class Utilities {
       try {
         Utilities.executeCommand(options);
       } catch (error) {
-        console.log(os.EOL + 'The command failed:');
+        console.log('\nThe command failed:');
         console.log(` ${options.command} ` + options.args.join(' '));
         console.log(`ERROR: ${(error as Error).toString()}`);
 
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
-          console.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
+          console.log(`Trying again (attempt #${attemptNumber})...\n`);
           if (retryCallback) {
             retryCallback();
           }
 
           continue;
         } else {
-          console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
+          console.error(`Giving up after ${attemptNumber} attempts\n`);
           throw error;
         }
       }
@@ -460,7 +460,7 @@ export class Utilities {
       Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
     }
 
-    console.log(os.EOL + 'Running "npm install" in ' + directory);
+    console.log('\nRunning "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
     Utilities.executeCommandWithRetry(
@@ -535,7 +535,7 @@ export class Utilities {
       }
     }
 
-    const combinedNpmrc: string = resultLines.join(os.EOL);
+    const combinedNpmrc: string = resultLines.join('\n');
     FileSystem.writeFile(targetNpmrcPath, combinedNpmrc);
 
     return combinedNpmrc;
@@ -821,7 +821,7 @@ export class Utilities {
 
   private static _processResult(result: child_process.SpawnSyncReturns<Buffer>): void {
     if (result.error) {
-      result.error.message += os.EOL + (result.stderr ? result.stderr.toString() + os.EOL : '');
+      result.error.message += '\n' + (result.stderr ? result.stderr.toString() + '\n' : '');
       throw result.error;
     }
 
@@ -829,7 +829,7 @@ export class Utilities {
       throw new Error(
         'The command failed with exit code ' +
           result.status +
-          os.EOL +
+          '\n' +
           (result.stderr ? result.stderr.toString() : '')
       );
     }

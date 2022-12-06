@@ -71,10 +71,7 @@ export class AsyncRecycler {
       () => FileSystem.move({ sourcePath: folderPath, destinationPath: newFolderPath }),
       maxWaitTimeMs,
       (e) =>
-        new Error(
-          `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
-            'from a process like the virus scanner.'
-        ),
+        new Error(`Error: ${e}\nOften this is caused by a file lock from a process like the virus scanner.`),
       'recycleFolder'
     );
   }

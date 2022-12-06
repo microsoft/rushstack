@@ -4,8 +4,6 @@
 // The TaskExecutionManager prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
 
-import { EOL } from 'os';
-
 import colors from 'colors/safe';
 
 import { Terminal } from '@rushstack/node-core-library';
@@ -84,8 +82,8 @@ describe(OperationExecutionManager.name, () => {
       executionManager = createExecutionManager(
         executionManagerOptions,
         new MockOperationRunner('stdout+stderr', async (terminal: CollatedTerminal) => {
-          terminal.writeStdoutLine('Build step 1' + EOL);
-          terminal.writeStderrLine('Error: step 1 failed' + EOL);
+          terminal.writeStdoutLine('Build step 1\n');
+          terminal.writeStderrLine('Error: step 1 failed\n');
           return OperationStatus.Failure;
         })
       );
@@ -106,8 +104,8 @@ describe(OperationExecutionManager.name, () => {
       executionManager = createExecutionManager(
         executionManagerOptions,
         new MockOperationRunner('stdout only', async (terminal: CollatedTerminal) => {
-          terminal.writeStdoutLine('Build step 1' + EOL);
-          terminal.writeStdoutLine('Error: step 1 failed' + EOL);
+          terminal.writeStdoutLine('Build step 1\n');
+          terminal.writeStdoutLine('Error: step 1 failed\n');
           return OperationStatus.Failure;
         })
       );
@@ -142,8 +140,8 @@ describe(OperationExecutionManager.name, () => {
         executionManager = createExecutionManager(
           executionManagerOptions,
           new MockOperationRunner('success with warnings (failure)', async (terminal: CollatedTerminal) => {
-            terminal.writeStdoutLine('Build step 1' + EOL);
-            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+            terminal.writeStdoutLine('Build step 1\n');
+            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings\n');
             return OperationStatus.SuccessWithWarning;
           })
         );
@@ -179,8 +177,8 @@ describe(OperationExecutionManager.name, () => {
           new MockOperationRunner(
             'success with warnings (success)',
             async (terminal: CollatedTerminal) => {
-              terminal.writeStdoutLine('Build step 1' + EOL);
-              terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+              terminal.writeStdoutLine('Build step 1\n');
+              terminal.writeStdoutLine('Warning: step 1 succeeded with warnings\n');
               return OperationStatus.SuccessWithWarning;
             },
             /* warningsAreAllowed */ true
@@ -205,8 +203,8 @@ describe(OperationExecutionManager.name, () => {
           new MockOperationRunner(
             'success with warnings (success)',
             async (terminal: CollatedTerminal) => {
-              terminal.writeStdoutLine('Build step 1' + EOL);
-              terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+              terminal.writeStdoutLine('Build step 1\n');
+              terminal.writeStdoutLine('Warning: step 1 succeeded with warnings\n');
               return OperationStatus.SuccessWithWarning;
             },
             /* warningsAreAllowed */ true

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as os from 'os';
 import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
@@ -191,8 +190,7 @@ export class ApprovedPackagesConfiguration {
   private _addItemJson(itemJson: IApprovedPackagesItemJson, jsonFilename: string): void {
     if (this._itemsByName.has(itemJson.name)) {
       throw new Error(
-        `Error loading package review file ${jsonFilename}:` +
-          os.EOL +
+        `Error loading package review file ${jsonFilename}:\n` +
           ` the name "${itemJson.name}" appears more than once`
       );
     }

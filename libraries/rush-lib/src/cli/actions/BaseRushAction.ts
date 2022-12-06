@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
@@ -76,7 +75,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     }
 
     if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
-      console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+      console.log(`Starting "rush ${this.actionName}"\n`);
     }
     return this.runAsync();
   }

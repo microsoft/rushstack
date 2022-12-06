@@ -6,7 +6,6 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
 import { RushConfigurationProject } from './RushConfigurationProject';
-import { EOL } from 'os';
 
 export interface IVersionPolicyJson {
   policyName: string;
@@ -144,9 +143,7 @@ export class VersionPolicyConfiguration {
     const lockStepVersionPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
     const previousVersion: string = lockStepVersionPolicy.version;
     if (lockStepVersionPolicy.update(newVersion)) {
-      console.log(
-        `${EOL}Update version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`
-      );
+      console.log(`\nUpdate version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`);
       this._saveFile(!!shouldCommit);
     }
   }

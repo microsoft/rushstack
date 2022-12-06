@@ -207,9 +207,7 @@ export abstract class BaseInstallManager {
       return;
     }
 
-    console.log(
-      os.EOL + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`)
-    );
+    console.log('\n' + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`));
 
     // This marker file indicates that the last "rush install" completed successfully.
     // Always perform a clean install if filter flags were provided. Additionally, if
@@ -506,7 +504,7 @@ export abstract class BaseInstallManager {
       // Ignore the ".sample" file(s) in this folder.
       const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
       if (hookFilenames.length > 0) {
-        console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
+        console.log('\n' + colors.bold('Found files in the "common/git-hooks" folder.'));
 
         if (!git.isHooksPathDefault()) {
           const color: (str: string) => string = this.options.bypassPolicy ? colors.yellow : colors.red;
@@ -519,7 +517,7 @@ export abstract class BaseInstallManager {
                 ' ',
                 '    git config --unset core.hooksPath',
                 ' '
-              ].join(os.EOL)
+              ].join('\n')
             )
           );
           if (this.options.bypassPolicy) {
@@ -532,7 +530,7 @@ export abstract class BaseInstallManager {
               [
                 '(Or, to temporarily ignore this problem, invoke Rush with the "--bypass-policy" option.)',
                 ' '
-              ].join(os.EOL)
+              ].join('\n')
             )
           );
           throw new AlreadyReportedError();
@@ -558,7 +556,7 @@ export abstract class BaseInstallManager {
         }
 
         console.log(
-          'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL
+          'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + '\n'
         );
       }
     }
