@@ -23,7 +23,9 @@
 
     "module": "commonjs",
     "target": "es2017",
-    "lib": ["es2017"]
+    "lib": ["es2017"],
+
+    "incremental": true
   },
   "include": ["../../../../../src/**/*.ts", "../../../../../src/**/*.tsx"]
 }

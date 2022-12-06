@@ -15,7 +15,7 @@ import type { MetricsCollector } from '../../metrics/MetricsCollector';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { HeftTaskSession } from '../../pluginFramework/HeftTaskSession';
 import { Constants } from '../../utilities/Constants';
-import { expandPhases } from './RunAction';
+import { definePhaseScopingParameters, expandPhases } from './RunAction';
 import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import { initializeHeft, runWithLoggingAsync } from '../HeftActionRunner';
 import { CancellationToken } from '../../pluginFramework/CancellationToken';
@@ -43,28 +43,15 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
     this._metricsCollector = options.metricsCollector;
     this._internalHeftSession = options.internalHeftSession;
 
+    const { toParameter, toExceptParameter, onlyParameter } = definePhaseScopingParameters(this);
+    this._toParameter = toParameter;
+    this._toExceptParameter = toExceptParameter;
+    this._onlyParameter = onlyParameter;
+
     this._verboseFlag = this.defineFlagParameter({
       parameterLongName: Constants.verboseParameterLongName,
       parameterShortName: Constants.verboseParameterShortName,
       description: 'If specified, log information useful for debugging.'
-    });
-    this._toParameter = this.defineStringListParameter({
-      parameterLongName: Constants.toParameterLongName,
-      parameterShortName: Constants.toParameterShortName,
-      description: 'The phase to clean to, including all transitive dependencies.',
-      argumentName: 'PHASE'
-    });
-    this._toExceptParameter = this.defineStringListParameter({
-      parameterLongName: Constants.toExceptParameterLongName,
-      parameterShortName: Constants.toExceptParameterShortName,
-      description: 'The phase to clean to (but not include), including all transitive dependencies.',
-      argumentName: 'PHASE'
-    });
-    this._onlyParameter = this.defineStringListParameter({
-      parameterLongName: Constants.onlyParameterLongName,
-      parameterShortName: Constants.onlyParameterShortName,
-      description: 'The phase to clean.',
-      argumentName: 'PHASE'
     });
     this._cleanCacheFlag = this.defineFlagParameter({
       parameterLongName: Constants.cleanCacheParameterLongName,

@@ -54,10 +54,7 @@ export { CommandLineStringListParameter }
 export { CommandLineStringParameter }
 
 // @public
-export type GlobFn = (pattern: string | string[], options?: IPartialGlobOptions | undefined) => Promise<string[]>;
-
-// @public
-export type GlobSyncFn = (pattern: string | string[], options?: IPartialGlobOptions | undefined) => string[];
+export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<string[]>;
 
 // @public (undocumented)
 export class HeftConfiguration {
@@ -111,6 +108,14 @@ export interface IFileSelectionSpecifier {
     fileExtensions?: string[];
     includeGlobs?: string[];
     sourcePath: string;
+}
+
+// @public
+export interface IGlobOptions {
+    absolute?: boolean;
+    cwd?: string;
+    dot?: boolean;
+    ignore?: string[];
 }
 
 // @internal (undocumented)
@@ -203,17 +208,17 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 
 // @public
 export interface IHeftTaskRunHookOptions {
-    readonly addCopyOperations: (...copyOperations: ICopyOperation[]) => void;
-    readonly addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+    readonly addCopyOperations: (copyOperations: ICopyOperation[]) => void;
+    readonly addDeleteOperations: (deleteOperations: IDeleteOperation[]) => void;
 }
 
 // @public
 export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
-    readonly addCopyOperations: (...copyOperations: IIncrementalCopyOperation[]) => void;
+    readonly addCopyOperations: (copyOperations: IIncrementalCopyOperation[]) => void;
     // @beta
     readonly cancellationToken: CancellationToken;
     readonly changedFiles: ReadonlyMap<string, IChangedFileState>;
-    readonly globChangedFiles: GlobSyncFn;
+    readonly globChangedFilesAsync: GlobFn;
 }
 
 // @public
@@ -243,14 +248,6 @@ export interface IMetricsData {
     machineProcessor: string;
     machineTotalMemoryMB: number;
     taskTotalExecutionMs: number;
-}
-
-// @public
-export interface IPartialGlobOptions {
-    absolute?: boolean;
-    cwd?: string;
-    dot?: boolean;
-    ignore?: string[];
 }
 
 // @internal (undocumented)

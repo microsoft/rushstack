@@ -68,6 +68,38 @@ function evaluatePhaseParameter(
   return selection;
 }
 
+export interface IScopingParameters {
+  toParameter: CommandLineStringListParameter;
+  toExceptParameter: CommandLineStringListParameter;
+  onlyParameter: CommandLineStringListParameter;
+}
+
+export function definePhaseScopingParameters(action: IHeftAction): IScopingParameters {
+  return {
+    toParameter: action.defineStringListParameter({
+      parameterLongName: Constants.toParameterLongName,
+      parameterShortName: Constants.toParameterShortName,
+      description: `The phase to ${action.actionName} to, including all transitive dependencies.`,
+      argumentName: 'PHASE',
+      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
+    }),
+    toExceptParameter: action.defineStringListParameter({
+      parameterLongName: Constants.toExceptParameterLongName,
+      parameterShortName: Constants.toExceptParameterShortName,
+      description: `The phase to ${action.actionName} to (but not include), including all transitive dependencies.`,
+      argumentName: 'PHASE',
+      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
+    }),
+    onlyParameter: action.defineStringListParameter({
+      parameterLongName: Constants.onlyParameterLongName,
+      parameterShortName: Constants.onlyParameterShortName,
+      description: `The phase to ${action.actionName}.`,
+      argumentName: 'PHASE',
+      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
+    })
+  };
+}
+
 export class RunAction extends ScopedCommandLineAction implements IHeftAction {
   public readonly watch: boolean;
 
@@ -90,28 +122,12 @@ export class RunAction extends ScopedCommandLineAction implements IHeftAction {
     this._terminal = options.terminal;
     this._internalHeftSession = options.internalHeftSession;
 
+    const { toParameter, toExceptParameter, onlyParameter } = definePhaseScopingParameters(this);
+    this._toParameter = toParameter;
+    this._toExceptParameter = toExceptParameter;
+    this._onlyParameter = onlyParameter;
+
     this._actionRunner = new HeftActionRunner({ action: this, ...options });
-    this._toParameter = this.defineStringListParameter({
-      parameterLongName: Constants.toParameterLongName,
-      parameterShortName: Constants.toParameterShortName,
-      description: 'The phase to run to, including all transitive dependencies.',
-      argumentName: 'PHASE',
-      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
-    });
-    this._toExceptParameter = this.defineStringListParameter({
-      parameterLongName: Constants.toExceptParameterLongName,
-      parameterShortName: Constants.toExceptParameterShortName,
-      description: 'The phase to run to (but not include), including all transitive dependencies.',
-      argumentName: 'PHASE',
-      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
-    });
-    this._onlyParameter = this.defineStringListParameter({
-      parameterLongName: Constants.onlyParameterLongName,
-      parameterShortName: Constants.onlyParameterShortName,
-      description: 'The phase to run.',
-      argumentName: 'PHASE',
-      parameterGroup: ScopedCommandLineAction.ScopingParameterGroup
-    });
   }
 
   public get selectedPhases(): ReadonlySet<HeftPhase> {
