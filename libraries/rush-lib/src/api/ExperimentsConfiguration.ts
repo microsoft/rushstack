@@ -64,31 +64,25 @@ export class ExperimentsConfiguration {
     path.resolve(__dirname, '..', 'schemas', 'experiments.schema.json')
   );
 
-  private _experimentConfiguration: IExperimentsJson;
   private _jsonFileName: string;
+
+  /**
+   * Get the experiments configuration.
+   * @beta
+   */
+  public readonly configuration: Readonly<IExperimentsJson>;
 
   /**
    * @internal
    */
   public constructor(jsonFileName: string) {
     this._jsonFileName = jsonFileName;
-    this._experimentConfiguration = {};
+    this.configuration = {};
 
     if (!FileSystem.exists(this._jsonFileName)) {
-      this._experimentConfiguration = {};
+      this.configuration = {};
     } else {
-      this._experimentConfiguration = JsonFile.loadAndValidate(
-        this._jsonFileName,
-        ExperimentsConfiguration._jsonSchema
-      );
+      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, ExperimentsConfiguration._jsonSchema);
     }
-  }
-
-  /**
-   * Get the experiments configuration.
-   * @beta
-   */
-  public get configuration(): Readonly<IExperimentsJson> {
-    return this._experimentConfiguration;
   }
 }

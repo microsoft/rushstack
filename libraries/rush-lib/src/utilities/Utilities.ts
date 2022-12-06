@@ -154,7 +154,7 @@ export class Utilities {
   /**
    * Returns the values from a Set<T>
    */
-  public static getSetAsArray<T>(set: Set<T>): T[] {
+  public static getSetAsArray<T>(set: Set<T> | ReadonlySet<T>): T[] {
     // When ES6 is supported, we can use Array.from() instead.
     return Array.from(set);
   }

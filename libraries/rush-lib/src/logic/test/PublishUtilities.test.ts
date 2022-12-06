@@ -284,7 +284,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
   it('returns error when adding hotfix with config disabled', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     // Overload hotfixChangeEnabled function
-    packagesRushConfiguration['_hotfixChangeEnabled'] = false;
+    (packagesRushConfiguration as unknown as Record<string, boolean>).hotfixChangeEnabled = false;
 
     expect(
       PublishUtilities.findChangeRequests.bind(
@@ -722,7 +722,7 @@ describe(PublishUtilities.findChangeRequests.name, () => {
   it('returns error when adding hotfix with config disabled', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     // Overload hotfixChangeEnabled function
-    packagesRushConfiguration['_hotfixChangeEnabled'] = false;
+    (packagesRushConfiguration as unknown as Record<string, boolean>).hotfixChangeEnabled = false;
 
     expect(
       PublishUtilities.findChangeRequests.bind(

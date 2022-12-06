@@ -271,7 +271,9 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public getProjectShrinkwrap(project: RushConfigurationProject): BaseProjectShrinkwrapFile | undefined {
+  public getProjectShrinkwrap(
+    project: RushConfigurationProject
+  ): BaseProjectShrinkwrapFile<YarnShrinkwrapFile> | undefined {
     return undefined;
   }
 
