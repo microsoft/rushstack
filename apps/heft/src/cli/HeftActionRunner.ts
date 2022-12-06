@@ -508,16 +508,21 @@ export class HeftActionRunner {
               // emitted, so we will have to manually resolve the absolute paths in the change handler.
               cwd: watcherCwd,
               ignored: ignoreGlobs,
+              // We use the stats object to generate the change file state, so ensure we have it in all
+              // cases
+              alwaysStat: true,
               // Prevent add/addDir events from firing during the initial crawl. We will still use the
               // initial state, but we will manually crawl watcher.getWatched() to get it.
               ignoreInitial: true,
-              // Debounce file write events within 100 ms of each other
+              // Debounce file events within 100 ms of each other
               awaitWriteFinish: {
-                stabilityThreshold: 100
-              }
+                stabilityThreshold: 100,
+                pollInterval: 100
+              },
+              atomic: 100
             });
             // Remove all listeners once the initial state is returned
-            watcher.on('ready', () => resolve(watcher.removeAllListeners()));
+            watcher.on('ready', () => resolve(watcher));
             watcher.on('error', (error: Error) => reject(error));
           }
         );
@@ -546,8 +551,7 @@ export class HeftActionRunner {
     };
 
     // Create the async iterator. This will yield void when a changed source file is encountered, giving
-    // us a chance to kill the current build and start a new one. Await the first iteration, since the
-    // first iteration should be for the initial state.
+    // us a chance to kill the current build and start a new one.
     const iterator: AsyncIterator<void> = await runAndMeasureAsync(
       async () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -559,6 +563,8 @@ export class HeftActionRunner {
           staticFileSystemAdapter,
           watchOptions: this._internalHeftSession.watchOptions
         });
+        // Await the first iteration, which is used to ingest the initial state. Once we have the initial
+        // state, then we can start listening for changes.
         await iterator.next();
         return iterator;
       },
@@ -584,15 +590,7 @@ export class HeftActionRunner {
         changedFiles,
         globChangedFilesAsyncFn,
         fileEventListener
-      ).then(
-        () => false,
-        (error: unknown) => {
-          // Re-throw the error so that it doesn't get swallowed. This way we can ensure that the list of
-          // changed files is not cleared, since we will want to resurface the error on future incremental
-          // builds.
-          throw error;
-        }
-      );
+      ).then(() => false);
 
       try {
         // Whichever promise settles first will be the result of the race.
