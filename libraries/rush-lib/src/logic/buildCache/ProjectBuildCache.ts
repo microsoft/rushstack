@@ -269,7 +269,7 @@ export class ProjectBuildCache {
           });
         } catch (moveError) {
           try {
-            FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
+            await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
           } catch (deleteError) {
             // Ignored
           }
