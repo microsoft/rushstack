@@ -30,6 +30,7 @@ import type { GlobFn, IGlobOptions } from '../../plugins/FileGlobSpecifier';
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
   task: HeftTask;
+  isFirstRun: boolean;
   cancellationToken: CancellationToken;
   changedFiles?: Map<string, IChangedFileState>;
   globChangedFilesAsyncFn?: GlobFn;
@@ -107,7 +108,8 @@ export class TaskOperationRunner implements IOperationRunner {
   }
 
   private async _executeTaskAsync(taskSession: HeftTaskSession): Promise<OperationStatus> {
-    const { cancellationToken, changedFiles, globChangedFilesAsyncFn, fileEventListener } = this._options;
+    const { cancellationToken, changedFiles, globChangedFilesAsyncFn, fileEventListener, isFirstRun } =
+      this._options;
     const {
       hooks,
       logger: { terminal }
@@ -197,7 +199,7 @@ export class TaskOperationRunner implements IOperationRunner {
           // Filter out deletes, since we can't copy or delete an already deleted file
           return globbedChangedFiles.filter((changedFile: string) => {
             const changedFileState: IChangedFileState | undefined = changedFiles!.get(changedFile);
-            return changedFileState && changedFileState.version !== undefined;
+            return changedFileState?.version !== undefined;
           });
         };
 
@@ -215,6 +217,7 @@ export class TaskOperationRunner implements IOperationRunner {
             copyIncrementalFilesAsync(
               incrementalCopyOperations,
               globExistingChangedFilesFn,
+              isFirstRun,
               taskSession.logger
             )
           );

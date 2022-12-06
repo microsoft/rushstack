@@ -576,6 +576,7 @@ export class HeftActionRunner {
     // The file event listener is used to allow task operations to wait for a file change before
     // progressing to the next task.
     const fileEventListener: FileEventListener = new FileEventListener(watcher);
+    let isFirstRun: boolean = true;
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -586,6 +587,7 @@ export class HeftActionRunner {
       // Start the incremental build and wait for a source file to change
       const sourceChangesPromise: Promise<true> = iterator.next().then(() => true);
       const executePromise: Promise<false> = this._executeOnceAsync(
+        isFirstRun,
         cancellationToken,
         changedFiles,
         globChangedFilesAsyncFn,
@@ -611,6 +613,9 @@ export class HeftActionRunner {
           // Remove all files from the static file system adapter, since we only use it to glob for
           // the existence of files in the changedFiles map.
           staticFileSystemAdapter.removeAllFiles();
+          // Mark the first run as completed, to ensure that copy incremental copy operations are now
+          // enabled.
+          isFirstRun = false;
           this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
           this._terminal.writeLine('');
           await sourceChangesPromise;
@@ -637,6 +642,7 @@ export class HeftActionRunner {
   }
 
   private async _executeOnceAsync(
+    isFirstRun: boolean = true,
     cancellationToken?: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
     globChangedFilesAsyncFn?: GlobFn,
@@ -644,6 +650,7 @@ export class HeftActionRunner {
   ): Promise<void> {
     cancellationToken = cancellationToken || new CancellationToken();
     const operations: Set<Operation> = this._generateOperations(
+      isFirstRun,
       cancellationToken,
       changedFiles,
       globChangedFilesAsyncFn,
@@ -672,6 +679,7 @@ export class HeftActionRunner {
   }
 
   private _generateOperations(
+    isFirstRun: boolean,
     cancellationToken: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
     globChangedFilesAsyncFn?: GlobFn,
@@ -726,6 +734,7 @@ export class HeftActionRunner {
         const taskOperation: Operation = this._getOrCreateTaskOperation(
           task,
           operations,
+          isFirstRun,
           cancellationToken,
           changedFiles,
           globChangedFilesAsyncFn,
@@ -746,6 +755,7 @@ export class HeftActionRunner {
             this._getOrCreateTaskOperation(
               dependencyTask,
               operations,
+              isFirstRun,
               cancellationToken,
               changedFiles,
               globChangedFilesAsyncFn,
@@ -807,6 +817,7 @@ export class HeftActionRunner {
   private _getOrCreateTaskOperation(
     task: HeftTask,
     operations: Map<string, Operation>,
+    isFirstRun: boolean,
     cancellationToken: CancellationToken,
     changedFiles?: Map<string, IChangedFileState>,
     globChangedFilesAsyncFn?: GlobFn,
@@ -821,6 +832,7 @@ export class HeftActionRunner {
         runner: new TaskOperationRunner({
           internalHeftSession: this._internalHeftSession,
           task,
+          isFirstRun,
           cancellationToken,
           changedFiles,
           globChangedFilesAsyncFn,
