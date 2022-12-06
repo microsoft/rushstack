@@ -79,11 +79,13 @@ export async function copyFilesAsync(copyOperations: ICopyOperation[], logger: I
 export async function copyIncrementalFilesAsync(
   copyOperations: ICopyOperation[],
   globChangedFilesAsyncFn: GlobFn,
+  isFirstRun: boolean,
   logger: IScopedLogger
 ): Promise<void> {
   const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
     copyOperations,
-    globChangedFilesAsyncFn
+    // Use the normal globber if it is the first run, to ensure that non-watched files are copied
+    isFirstRun ? glob : globChangedFilesAsyncFn
   );
   await _copyFilesInnerAsync(copyDescriptors, logger);
 }
