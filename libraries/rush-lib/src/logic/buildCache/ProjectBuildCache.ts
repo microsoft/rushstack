@@ -256,10 +256,15 @@ export class ProjectBuildCache {
 
       if (tarExitCode === 0) {
         // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
-        await FileSystem.moveAsync({
-          sourcePath: tempLocalCacheEntryPath,
-          destinationPath: finalLocalCacheEntryPath,
-          overwrite: true
+        await Async.runWithRetriesAsync({
+          action: () =>
+            FileSystem.moveAsync({
+              sourcePath: tempLocalCacheEntryPath,
+              destinationPath: finalLocalCacheEntryPath,
+              overwrite: true
+            }),
+          maxRetries: 2,
+          retryDelayMs: 500
         });
         localCacheEntryPath = finalLocalCacheEntryPath;
       } else {
