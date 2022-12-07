@@ -60,12 +60,11 @@
 ## Impacted documentation
 
 <!--------------------------------------------------------------------------
-👉 STEP 7: Does your PR affect anything that is discussed in the
-     website documentation?
-
-     If you're able to fix the docs (thank you!), paste a URL for that PR.
-     Otherwise, paste the URLs of each affected web page, so we're aware.
-     If no docs are impacted, you can delete this section.
+👉 STEP 7: Does your PR affect anything that is discussed in the website docs?
+     If so, please paste the URL of each affected web page, so we will
+     remember to update the documentation after your PR is merged.
+     (Updating the website is appreciated but not required.)
+     If no docs are impacted, delete the "Impacted documentation" section.
 
      If you modified a JSON schema, remember to update init templates such as:
      rush-lib/assets/rush-init/*.json
