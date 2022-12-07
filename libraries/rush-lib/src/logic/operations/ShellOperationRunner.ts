@@ -29,6 +29,7 @@ import { OperationError } from './OperationError';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
+import { AdditionalFilesHasher } from '../buildCache/AdditionalFilesHasher';
 import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { RushConstants } from '../RushConstants';
@@ -448,6 +449,23 @@ export class ShellOperationRunner implements IOperationRunner {
               if (operationSettings.dependsOnEnvVars) {
                 for (const varName of operationSettings.dependsOnEnvVars) {
                   additionalContext['$' + varName] = process.env[varName] || '';
+                }
+              }
+              if (operationSettings.dependsOnAdditionalFiles) {
+                const additionalFiles: Map<string, string> =
+                  await AdditionalFilesHasher.getFileHashedFilesMap(
+                    operationSettings.dependsOnAdditionalFiles,
+                    this._rushProject.projectFolder
+                  );
+
+                terminal.writeDebugLine(
+                  `Including additional files to calculate build cache hash:\n  ${Array.from(
+                    additionalFiles.keys()
+                  ).join('\n  ')} `
+                );
+
+                for (const [filePath, fileHash] of additionalFiles) {
+                  additionalContext['file://' + filePath] = fileHash;
                 }
               }
               this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({

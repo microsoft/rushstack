@@ -76,6 +76,17 @@ export interface IOperationSettings {
    * you list them here.
    */
   dependsOnEnvVars?: string[];
+
+  /**
+   * An optional list of glob (minimatch) patterns pointing to files that can affect this operation.
+   * The hash values of the contents of these files will become part of the final hash when reading
+   * and writing the build cache.
+   *
+   * Note: if a particular file will be matched by patterns provided by both `incrementalBuildIgnoredGlobs` and
+   * `dependsOnAdditionalFiles` options - `dependsOnAdditionalFiles` will win and the file will be included
+   * calculating final hash value when reading and writing the build cache
+   */
+  dependsOnAdditionalFiles?: string[];
 }
 
 interface IOldRushProjectJson {
