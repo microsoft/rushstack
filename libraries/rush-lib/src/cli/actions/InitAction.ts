@@ -3,9 +3,6 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseConfiglessRushAction } from './BaseRushAction';
 import {
   FileSystem,
   NewlineKind,
@@ -15,7 +12,11 @@ import {
 } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { BaseConfiglessRushAction } from './BaseRushAction';
+
 import { Rush } from '../../api/Rush';
+import { assetsFolderPath } from '../../utilities/PathConstants';
 
 // Matches a well-formed BEGIN macro starting a block section.
 // Example:  /*[BEGIN "DEMO"]*/
@@ -169,7 +170,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'rush.json'
     ];
 
-    const assetsSubfolder: string = path.resolve(__dirname, '../../../assets/rush-init');
+    const assetsSubfolder: string = `${assetsFolderPath}/rush-init`;
 
     for (const templateFilePath of templateFilePaths) {
       const sourcePath: string = path.join(assetsSubfolder, templateFilePath);
