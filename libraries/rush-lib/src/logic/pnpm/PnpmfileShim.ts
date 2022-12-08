@@ -13,7 +13,7 @@ import type * as TSemver from 'semver';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
-import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext } from './IPnpmfile';
+import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext, IPnpmfileHooks } from './IPnpmfile';
 
 let settings: IPnpmfileShimSettings;
 let allPreferredVersions: Map<string, string>;
@@ -94,28 +94,24 @@ function setPreferredVersions(dependencies: { [dependencyName: string]: string }
   }
 }
 
-const pnpmfileShim: IPnpmfile = {
-  hooks: {
-    // Call the original pnpmfile (if it exists)
-    afterAllResolved: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => {
-      context = init(context);
-      return userPnpmfile?.hooks?.afterAllResolved
-        ? userPnpmfile.hooks.afterAllResolved(lockfile, context)
-        : lockfile;
-    },
+export const hooks: IPnpmfileHooks = {
+  // Call the original pnpmfile (if it exists)
+  afterAllResolved: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => {
+    context = init(context);
+    return userPnpmfile?.hooks?.afterAllResolved
+      ? userPnpmfile.hooks.afterAllResolved(lockfile, context)
+      : lockfile;
+  },
 
-    // Set the preferred versions in the package, then call the original pnpmfile (if it exists)
-    readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
-      context = init(context);
-      setPreferredVersions(pkg.dependencies);
-      setPreferredVersions(pkg.devDependencies);
-      setPreferredVersions(pkg.optionalDependencies);
-      return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
-    },
+  // Set the preferred versions in the package, then call the original pnpmfile (if it exists)
+  readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
+    context = init(context);
+    setPreferredVersions(pkg.dependencies);
+    setPreferredVersions(pkg.devDependencies);
+    setPreferredVersions(pkg.optionalDependencies);
+    return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
+  },
 
-    // Call the original pnpmfile (if it exists)
-    filterLog: userPnpmfile?.hooks?.filterLog
-  }
+  // Call the original pnpmfile (if it exists)
+  filterLog: userPnpmfile?.hooks?.filterLog
 };
-
-export = pnpmfileShim;

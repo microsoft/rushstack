@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalProvider, PackageJsonLookup } from '@rushstack/node-core-library';
+import { IPackageJson, ITerminalProvider, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushStartupBanner } from '../cli/RushStartupBanner';
@@ -49,7 +49,7 @@ export interface ILaunchOptions {
  * @public
  */
 export class Rush {
-  private static _version: string | undefined = undefined;
+  private static __rushLibPackageJson: IPackageJson | undefined = undefined;
 
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
@@ -110,11 +110,18 @@ export class Rush {
    * This is the same as the Rush tool version for that release.
    */
   public static get version(): string {
-    if (!this._version) {
-      this._version = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+    return this._rushLibPackageJson.version;
+  }
+
+  /**
+   * @internal
+   */
+  public static get _rushLibPackageJson(): IPackageJson {
+    if (!Rush.__rushLibPackageJson) {
+      Rush.__rushLibPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
     }
 
-    return this._version;
+    return Rush.__rushLibPackageJson;
   }
 
   /**

@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
-import readPackageTree = require('read-package-tree');
+import readPackageTree from 'read-package-tree';
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
