@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Set cacheDir and stateDir to storePath during pnpm install if pnpmStore is local",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
