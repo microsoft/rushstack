@@ -34,6 +34,7 @@ export class LinkAction extends BaseRushAction {
 
   protected async runAsync(): Promise<void> {
     const linkManagerFactoryModule: typeof import('../../logic/LinkManagerFactory') = await import(
+      /* webpackChunkName: 'LinkManagerFactory' */
       '../../logic/LinkManagerFactory'
     );
     const linkManager: BaseLinkManager = linkManagerFactoryModule.LinkManagerFactory.getLinkManager(

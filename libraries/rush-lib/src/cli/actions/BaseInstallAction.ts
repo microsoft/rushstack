@@ -135,6 +135,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
     const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = await import(
+      /* webpackChunkName: 'InstallManagerFactory' */
       '../../logic/InstallManagerFactory'
     );
     const installManager: BaseInstallManager =

@@ -39,7 +39,7 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
   if (!settings) {
     // Initialize the settings from file
     if (!context.pnpmfileShimSettings) {
-      context.pnpmfileShimSettings = require('./pnpmfileSettings.json');
+      context.pnpmfileShimSettings = __non_webpack_require__('./pnpmfileSettings.json');
     }
     settings = context.pnpmfileShimSettings!;
   } else if (!context.pnpmfileShimSettings) {

@@ -432,6 +432,7 @@ export class RushPnpmCommandLineParser {
     };
 
     const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(
+      /* webpackChunkName: 'InstallManagerFactory' */
       '../logic/InstallManagerFactory'
     );
     const installManager: BaseInstallManager =
