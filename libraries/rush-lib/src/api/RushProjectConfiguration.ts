@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { AlreadyReportedError, ITerminal, Path } from '@rushstack/node-core-library';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
@@ -10,6 +9,8 @@ import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
+import schemaJson from '../schemas/rush-project.schema.json';
+import anythingSchemaJson from '../schemas/rush-project.schema.json';
 
 /**
  * Describes the file structure for the "<project root>/config/rush-project.json" config file.
@@ -86,7 +87,7 @@ interface IOldRushProjectJson {
 const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
   new ConfigurationFile<IRushProjectJson>({
     projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
-    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
+    jsonSchemaObject: schemaJson,
     propertyInheritance: {
       operationSettings: {
         inheritanceType: InheritanceType.custom,
@@ -169,7 +170,7 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
 const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IOldRushProjectJson> =
   new ConfigurationFile<IOldRushProjectJson>({
     projectRelativeFilePath: RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath,
-    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'anything.schema.json')
+    jsonSchemaObject: anythingSchemaJson
   });
 
 /**

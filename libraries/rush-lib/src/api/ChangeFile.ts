@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import gitInfo = require('git-repo-info');
+import gitInfo from 'git-repo-info';
 
 import { JsonFile } from '@rushstack/node-core-library';
 
