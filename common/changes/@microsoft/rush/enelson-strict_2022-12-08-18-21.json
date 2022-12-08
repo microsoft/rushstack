@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix strictPeerDependencies in all versions of pnpm 7",
+      "comment": "Fix a problem where the \"strictPeerDependencies\" setting wasn't applied for some versions of PNPM 7 due to unexpected changes of PNPM's default value (GitHub #3828)",
       "type": "none"
     }
   ],
