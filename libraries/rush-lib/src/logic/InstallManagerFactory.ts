@@ -24,6 +24,7 @@ export class InstallManagerFactory {
     }
 
     const rushInstallManagerModule: typeof import('./installManager/RushInstallManager') = await import(
+      /* webpackChunkName: 'RushInstallManager' */
       './installManager/RushInstallManager'
     );
     return new rushInstallManagerModule.RushInstallManager(

@@ -232,7 +232,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
   public async runAsync(): Promise<void> {
     if (this._alwaysInstall || this._installParameter?.value) {
-      const { doBasicInstallAsync } = await import('../../logic/installManager/doBasicInstallAsync');
+      const { doBasicInstallAsync } = await import(
+        /* webpackChunkName: 'doBasicInstallAsync' */
+        '../../logic/installManager/doBasicInstallAsync'
+      );
 
       await doBasicInstallAsync({
         rushConfiguration: this.rushConfiguration,
@@ -267,7 +270,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     const showTimeline: boolean = this._timelineParameter ? this._timelineParameter.value : false;
     if (showTimeline) {
-      const { ConsoleTimelinePlugin } = await import('../../logic/operations/ConsoleTimelinePlugin');
+      const { ConsoleTimelinePlugin } = await import(
+        /* webpackChunkName: 'ConsoleTimelinePlugin' */
+        '../../logic/operations/ConsoleTimelinePlugin'
+      );
       new ConsoleTimelinePlugin(terminal).apply(this.hooks);
     }
     // Enable the standard summary
@@ -400,7 +406,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       initialCreateOperationsContext;
 
     // Use async import so that we don't pay the cost for sync builds
-    const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
+    const { ProjectWatcher } = await import(
+      /* webpackChunkName: 'ProjectWatcher' */
+      '../../logic/ProjectWatcher'
+    );
 
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
       debounceMs: this._watchDebounceMs,
