@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix strictPeerDependencies in all versions of pnpm 7",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
