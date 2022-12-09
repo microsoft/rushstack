@@ -7,9 +7,9 @@
 > If you have questions, see the [Rush Stack Help page](https://rushstack.io/pages/help/support/)
 > for support resources.
 
-The `trace-import` shell command helps you:
+The `trace-import` command line tool helps you:
 
-- Analyzes `import` statement resolution to understand why they aren't resolving correctly
+- Analyze `import`/`require()` statements to understand why they aren't resolving correctly
 - Understand the relationships between package folders in your `node_modules` tree
 - Ensure that `package.json` files correctly export their .js and .d.ts entry points
 
@@ -127,5 +127,6 @@ Target path:             C:\Git\rushstack\common\temp\node_modules\.pnpm\@types+
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/apps/trace-import/CHANGELOG.md) - Find
   out what's new in the latest version
+- [Rush Lockfile Explorer](https://lfx.rushstack.io) - The desktop app for troubleshooting PNPM lockfiles
 
 The `trace-import` tool is part of the [Rush Stack](https://rushstack.io/) family of projects.
