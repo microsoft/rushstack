@@ -21,7 +21,12 @@ export class TraceImportCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'trace-import',
-      toolDescription: ''
+      toolDescription:
+        'This tool analyzes import module paths, to determine the resolved target folder.  ' +
+        'For example, if the "semver" NPM package is installed, "trace-import --path semver/index" will ' +
+        'print output equivalent to the Node.js require.resolve() API.  ' +
+        'If "@types/semver" is installed, then "trace-import --resolution-type ts --path semver/index" will ' +
+        'print the .d.ts file path that would be resolved by a TypeScript import statement.'
     });
 
     this._debugParameter = this.defineFlagParameter({

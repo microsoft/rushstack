@@ -445,7 +445,8 @@
     {
       "packageName": "@rushstack/trace-import",
       "projectFolder": "apps/trace-import",
-      "reviewCategory": "libraries"
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
 
     // "build-tests" folder (alphabetical order)
