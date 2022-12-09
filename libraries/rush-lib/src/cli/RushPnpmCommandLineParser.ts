@@ -325,6 +325,8 @@ export class RushPnpmCommandLineParser {
 
     if (rushConfiguration.pnpmOptions.pnpmStorePath) {
       pnpmEnvironmentMap.set('NPM_CONFIG_STORE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      pnpmEnvironmentMap.set('NPM_CONFIG_CACHE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      pnpmEnvironmentMap.set('NPM_CONFIG_STATE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
     }
 
     if (rushConfiguration.pnpmOptions.environmentVariables) {
@@ -432,6 +434,7 @@ export class RushPnpmCommandLineParser {
     };
 
     const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(
+      /* webpackChunkName: 'InstallManagerFactory' */
       '../logic/InstallManagerFactory'
     );
     const installManager: BaseInstallManager =

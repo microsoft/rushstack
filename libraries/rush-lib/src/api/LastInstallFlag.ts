@@ -36,11 +36,6 @@ export class LastInstallFlag {
   public readonly path: string;
 
   /**
-   * Returns the name of the flag file
-   */
-  protected readonly flagName: string = LAST_INSTALL_FLAG_FILE_NAME;
-
-  /**
    * Creates a new LastInstall flag
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
@@ -142,6 +137,13 @@ export class LastInstallFlag {
    */
   public clear(): void {
     FileSystem.deleteFile(this.path);
+  }
+
+  /**
+   * Returns the name of the flag file
+   */
+  protected get flagName(): string {
+    return LAST_INSTALL_FLAG_FILE_NAME;
   }
 }
 

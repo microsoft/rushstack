@@ -82,7 +82,10 @@ export class DeployAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const deployManagerModule: typeof deployManagerType = await import('../../logic/deploy/DeployManager');
+    const deployManagerModule: typeof deployManagerType = await import(
+      /* webpackChunkName: 'DeployManager' */
+      '../../logic/deploy/DeployManager'
+    );
     const deployManager: deployManagerType.DeployManager = new deployManagerModule.DeployManager(
       this.rushConfiguration
     );

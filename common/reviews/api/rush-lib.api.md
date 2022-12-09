@@ -562,7 +562,7 @@ export class _LastInstallFlag {
     }): boolean;
     clear(): void;
     create(): void;
-    protected readonly flagName: string;
+    protected get flagName(): string;
     isValid(options?: _ILockfileValidityCheckOptions): boolean;
     readonly path: string;
 }
@@ -765,6 +765,8 @@ export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
+    // @internal (undocumented)
+    static get _rushLibPackageJson(): IPackageJson;
     static get version(): string;
 }
 

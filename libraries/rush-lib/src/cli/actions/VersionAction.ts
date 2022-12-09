@@ -99,7 +99,10 @@ export class VersionAction extends BaseRushAction {
     const userEmail: string = git.getGitEmail();
 
     this._validateInput();
-    const versionManagerModule: typeof VersionManagerType = await import('../../logic/VersionManager');
+    const versionManagerModule: typeof VersionManagerType = await import(
+      /* webpackChunkName: 'VersionManager' */
+      '../../logic/VersionManager'
+    );
     const versionManager: VersionManagerType.VersionManager = new versionManagerModule.VersionManager(
       this.rushConfiguration,
       userEmail,

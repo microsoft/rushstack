@@ -1,6 +1,6 @@
 lockfileVersion: 5.4
 
-packageExtensionsChecksum: 4cee63805d63bd8991d4c7a30da2ca02
+packageExtensionsChecksum: 41333d2d0915bdc80c909c31c409a3a2
 
 importers:
 
@@ -1857,12 +1857,14 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/package-deps-hash': workspace:*
       '@rushstack/rig-package': workspace:*
       '@rushstack/stream-collator': workspace:*
       '@rushstack/terminal': workspace:*
       '@rushstack/ts-command-line': workspace:*
+      '@rushstack/webpack-preserve-dynamic-require-plugin': workspace:*
       '@types/cli-table': 0.3.0
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
@@ -1879,6 +1881,7 @@ importers:
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
+      '@types/webpack-env': 1.13.0
       '@yarnpkg/lockfile': ~1.0.2
       builtin-modules: ~3.1.0
       cli-table: ~0.3.1
@@ -1906,6 +1909,7 @@ importers:
       tapable: 2.2.1
       tar: ~6.1.11
       true-case-path: ~2.2.1
+      webpack: ~5.68.0
     dependencies:
       '@pnpm/link-bins': 5.3.25
       '@rushstack/heft-config-file': link:../heft-config-file
@@ -1948,6 +1952,8 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/webpack-preserve-dynamic-require-plugin': link:../../webpack/preserve-dynamic-require-plugin
       '@types/cli-table': 0.3.0
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
@@ -1963,6 +1969,8 @@ importers:
       '@types/ssri': 7.1.1
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
+      '@types/webpack-env': 1.13.0
+      webpack: 5.68.0
 
   ../../libraries/rush-sdk:
     specifiers:
@@ -17391,6 +17399,7 @@ packages:
     resolution: {integrity: sha512-KFJFSvODCBjIH5HbHvITj9EEZKYUU6VX0T5CuB1ayvjUoUaZkKMi6eeby5Tf8DMukyZHlJQOE1+f3vevKUe6eg==}
     dependencies:
       invariant: 2.2.4
+      lodash: 4.17.21
     dev: false
 
   /querystring-es3/0.2.1:
@@ -18439,6 +18448,7 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       invariant: 2.2.4
+      lodash: 4.17.21
     dev: false
 
   /secure-json-parse/2.6.0:

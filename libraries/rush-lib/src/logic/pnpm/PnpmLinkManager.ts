@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
-import uriEncode = require('strict-uri-encode');
+import uriEncode from 'strict-uri-encode';
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
 import colors from 'colors/safe';
