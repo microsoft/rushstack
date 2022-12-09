@@ -562,7 +562,7 @@ export class _LastInstallFlag {
     }): boolean;
     clear(): void;
     create(): void;
-    protected readonly flagName: string;
+    protected get flagName(): string;
     isValid(options?: _ILockfileValidityCheckOptions): boolean;
     readonly path: string;
 }
