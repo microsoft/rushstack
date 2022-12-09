@@ -7,7 +7,7 @@ import { TraceImportCommandLine } from './TraceImportCommandLine';
 const toolVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
 console.log();
-console.log(`Rundown ${toolVersion} - https://rushstack.io`);
+console.log(`trace-import ${toolVersion} - https://rushstack.io`);
 console.log();
 
 const commandLine: TraceImportCommandLine = new TraceImportCommandLine();
