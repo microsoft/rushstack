@@ -1,17 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
-import type * as deployManagerTypes from '../../logic/deploy/DeployManager';
-const deployManagerModule: typeof deployManagerTypes = Import.lazy(
-  '../../logic/deploy/DeployManager',
-  require
-);
+import type * as deployManagerType from '../../logic/deploy/DeployManager';
 
 export class DeployAction extends BaseRushAction {
   private readonly _scenario: CommandLineStringParameter;
@@ -87,7 +82,11 @@ export class DeployAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const deployManager: deployManagerTypes.DeployManager = new deployManagerModule.DeployManager(
+    const deployManagerModule: typeof deployManagerType = await import(
+      /* webpackChunkName: 'DeployManager' */
+      '../../logic/deploy/DeployManager'
+    );
+    const deployManager: deployManagerType.DeployManager = new deployManagerModule.DeployManager(
       this.rushConfiguration
     );
     await deployManager.deployAsync(

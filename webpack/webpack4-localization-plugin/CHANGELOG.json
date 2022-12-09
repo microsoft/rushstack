@@ -2,6 +2,48 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "entries": [
     {
+      "version": "0.15.40",
+      "tag": "@rushstack/webpack4-localization-plugin_v0.15.40",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.82`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.81` to `^3.3.82`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.15.39",
+      "tag": "@rushstack/webpack4-localization-plugin_v0.15.39",
+      "date": "Fri, 02 Dec 2022 01:15:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.81`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.80` to `^3.3.81`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.38",
       "tag": "@rushstack/webpack4-localization-plugin_v0.15.38",
       "date": "Thu, 01 Dec 2022 03:22:36 GMT",

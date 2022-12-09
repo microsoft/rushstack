@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
-import readPackageTree = require('read-package-tree');
+import readPackageTree from 'read-package-tree';
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
@@ -42,7 +41,7 @@ export class NpmLinkManager extends BaseLinkManager {
     commonPackageLookup.loadTree(commonRootPackage);
 
     for (const rushProject of this._rushConfiguration.projects) {
-      console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+      console.log(`\nLINKING: ${rushProject.packageName}`);
       this._linkProject(rushProject, commonRootPackage, commonPackageLookup);
     }
   }

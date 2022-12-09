@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
+import { FileSystem, Import, IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
 
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import * as pnpmfile from './PnpmfileShim';
+import { pnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 
 import type { IPnpmfileContext, IPnpmfileShimSettings } from './IPnpmfile';
 
@@ -29,7 +30,14 @@ export interface IPnpmfileShimOptions {
 export class PnpmfileConfiguration {
   private _context: IPnpmfileContext | undefined;
 
-  public constructor(rushConfiguration: RushConfiguration, pnpmfileShimOptions?: IPnpmfileShimOptions) {
+  public constructor(context: IPnpmfileContext) {
+    this._context = context;
+  }
+
+  public static async initializeAsync(
+    rushConfiguration: RushConfiguration,
+    pnpmfileShimOptions?: IPnpmfileShimOptions
+  ): Promise<PnpmfileConfiguration> {
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
         `PnpmfileConfiguration cannot be used with package manager "${rushConfiguration.packageManager}"`
@@ -37,13 +45,15 @@ export class PnpmfileConfiguration {
     }
 
     // Set the context to swallow log output and store our settings
-    this._context = {
+    const context: IPnpmfileContext = {
       log: (message: string) => {},
-      pnpmfileShimSettings: PnpmfileConfiguration._getPnpmfileShimSettings(
+      pnpmfileShimSettings: await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(
         rushConfiguration,
         pnpmfileShimOptions
       )
     };
+
+    return new PnpmfileConfiguration(context);
   }
 
   public static async writeCommonTempPnpmfileShimAsync(
@@ -64,14 +74,12 @@ export class PnpmfileConfiguration {
 
     // Write the shim itself
     await FileSystem.copyFileAsync({
-      sourcePath: path.join(__dirname, 'PnpmfileShim.js'),
+      sourcePath: `${scriptsFolderPath}/${pnpmfileShimFilename}`,
       destinationPath: pnpmfilePath
     });
 
-    const pnpmfileShimSettings: IPnpmfileShimSettings = PnpmfileConfiguration._getPnpmfileShimSettings(
-      rushConfiguration,
-      options
-    );
+    const pnpmfileShimSettings: IPnpmfileShimSettings =
+      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, options);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(pnpmfileShimSettings, path.join(targetDir, 'pnpmfileSettings.json'), {
@@ -79,10 +87,10 @@ export class PnpmfileConfiguration {
     });
   }
 
-  private static _getPnpmfileShimSettings(
+  private static async _getPnpmfileShimSettingsAsync(
     rushConfiguration: RushConfiguration,
     options?: IPnpmfileShimOptions
-  ): IPnpmfileShimSettings {
+  ): Promise<IPnpmfileShimSettings> {
     let allPreferredVersions: { [dependencyName: string]: string } = {};
     let allowedAlternativeVersions: { [dependencyName: string]: readonly string[] } = {};
     const workspaceVersions: Record<string, string> = {};
@@ -107,7 +115,7 @@ export class PnpmfileConfiguration {
       allPreferredVersions,
       allowedAlternativeVersions,
       workspaceVersions,
-      semverPath: require.resolve('semver')
+      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
     };
 
     // Use the provided path if available. Otherwise, use the default path.
@@ -121,7 +129,7 @@ export class PnpmfileConfiguration {
 
   /**
    * Transform a package.json file using the pnpmfile.js hook.
-   * @returns the tranformed object, or the original input if pnpmfile.js was not found.
+   * @returns the transformed object, or the original input if pnpmfile.js was not found.
    */
   public transform(packageJson: IPackageJson): IPackageJson {
     if (!pnpmfile.hooks?.readPackage || !this._context) {
