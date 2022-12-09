@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Set cacheDir and stateDir to storePath during pnpm install if pnpmStore is local",
+      "comment": "Fix an issue where when the package manager is pnpm@>=6.1.0, and `pnpmStore` is set to `\"local\"`, a global cache was still used.",
       "type": "none"
     }
   ],
