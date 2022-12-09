@@ -22,6 +22,7 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/lockfile-explorer"
   },
+  "homepage": "https://lfx.rushstack.io/",
   "license": "MIT",
   "bin": {
     "lockfile-explorer": "./bin/lockfile-explorer"
