@@ -283,7 +283,7 @@ export class Import {
       const resolvedPath: string = Resolve.sync(packageName, {
         basedir: normalizedRootPath,
         preserveSymlinks: false,
-        packageFilter: (pkg: { main: string }): { main: string } => {
+        packageFilter: (pkg: Resolve.PackageJSON, pkgFile: string, dir: string): Resolve.PackageJSON => {
           // Hardwire "main" to point to a file that is guaranteed to exist.
           // This helps resolve packages such as @types/node that have no entry point.
           // And then we can use path.dirname() below to locate the package folder,
