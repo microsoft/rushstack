@@ -30,7 +30,7 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
     setManualChecked(true);
     keepAlive().catch((e) => {
       // Keep alive cannot fail
-      console.error('Unexpected exception: ', +e.toString());
+      console.error(`Unexpected exception: ${e}`);
     });
   }, []);
 
