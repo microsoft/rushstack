@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/trace-import",
+      "comment": "Initial preview release",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/trace-import"
+}
