@@ -41,9 +41,9 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
   return (
     <div className={styles.DisconnectOverlayBackground}>
       <div className={`${styles.DisconnectOverlay} ${appStyles.ContainerCard}`}>
-        <h5>The Server Has Disconnected!</h5>
+        <h5>The server has disconnected!</h5>
         {manualChecked ? (
-          <p>We were still not able to establish a connection to the server, are you sure it is running?</p>
+          <p>We were still not able to establish a connection to the server. Are you sure it is running?</p>
         ) : (
           <p>Please re-start the local development server to continue using this application.</p>
         )}
