@@ -8,7 +8,7 @@ import {
   JsonFile,
   PackageName
 } from '@rushstack/node-core-library';
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as path from 'path';
 import * as process from 'process';
 import * as Resolve from 'resolve';

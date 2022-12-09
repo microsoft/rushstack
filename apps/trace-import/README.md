@@ -27,6 +27,7 @@ trace-import --help
 
 ## Command line
 
+```
 usage: trace-import [-h] [-d] -p MODULE_PATH [-b FOLDER_PATH] [-r {cjs,es,ts}]
 
 This tool analyzes import module paths, to determine the resolved target
@@ -53,6 +54,7 @@ Optional arguments:
                         The type of module resolution to perform: "cjs" for
                         CommonJS, "es" for ES modules, or "ts" for TypeScript
                         typings. The default value is "cjs".
+```
 
 ## Sample outputs
 
