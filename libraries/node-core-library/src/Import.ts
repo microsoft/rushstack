@@ -278,13 +278,11 @@ export class Import {
       }
     }
 
-    const { error } = PackageName.tryParse(packageName);
-    if (error) {
-      throw new Error(error);
-    }
+    PackageName.parse(packageName); // Ensure the package name is valid and doesn't contain a path
 
     try {
-      const resolvedPath: string = Resolve.sync(packageName, {
+      // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
+      const resolvedPath: string = Resolve.sync(`${packageName}/`, {
         basedir: normalizedRootPath,
         preserveSymlinks: false,
         packageFilter: (pkg: { main: string }): { main: string } => {
@@ -296,13 +294,6 @@ export class Import {
           return pkg;
         }
       });
-
-      if (resolvedPath === packageName) {
-        // This happens when the name of the module is a system module and and didn't resolve
-        // to a package in node_modules.
-        // If `includeSystemModules` was turned on, we would have returned the module name earlier.
-        throw new Error();
-      }
 
       const packagePath: string = path.dirname(resolvedPath);
       return packagePath;
