@@ -43,7 +43,7 @@ function logOutputField(title: string, value: string): void {
   console.log(colors.green(title.padEnd(25)) + value);
 }
 
-function tsResolve(options: {
+function traceTypeScriptPackage(options: {
   importRemainder: string;
   packageFolder: string;
   packageJson: IPackageJson;
@@ -134,7 +134,7 @@ function tsResolve(options: {
   return false;
 }
 
-function traceImport2(options: IExecuteOptions, warnings: string[]): void {
+function traceImportInner(options: IExecuteOptions, warnings: string[]): void {
   let baseFolder: string;
   if (options.baseFolder) {
     baseFolder = path.resolve(options.baseFolder);
@@ -268,7 +268,7 @@ function traceImport2(options: IExecuteOptions, warnings: string[]): void {
         }
 
         if (packageFolder && packageJson) {
-          if (tsResolve({ importRemainder, packageFolder, packageJson, warnings })) {
+          if (traceTypeScriptPackage({ importRemainder, packageFolder, packageJson, warnings })) {
             if (atTypesPackageFolder) {
               warnings.push('An @types package was found but not used.');
             }
@@ -279,7 +279,7 @@ function traceImport2(options: IExecuteOptions, warnings: string[]): void {
 
         if (atTypesPackageFolder && atTypesPackageJson) {
           if (
-            tsResolve({
+            traceTypeScriptPackage({
               importRemainder,
               packageFolder: atTypesPackageFolder,
               packageJson: atTypesPackageJson,
@@ -304,7 +304,7 @@ function traceImport2(options: IExecuteOptions, warnings: string[]): void {
 export function traceImport(options: IExecuteOptions): void {
   const warnings: string[] = [];
   try {
-    traceImport2(options, warnings);
+    traceImportInner(options, warnings);
   } finally {
     if (warnings.length) {
       console.log();
