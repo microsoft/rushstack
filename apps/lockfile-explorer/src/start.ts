@@ -7,7 +7,7 @@ import cors from 'cors';
 import fs from 'fs';
 import process from 'process';
 import path from 'path';
-import chalk from 'chalk';
+import colors from 'colors/safe';
 import open from 'open';
 import { init } from './init';
 
@@ -32,7 +32,7 @@ let isClientConnected: boolean = false;
 let disconnected: boolean = false;
 setInterval(function () {
   if (!isClientConnected && !awaitingFirstConnect && !disconnected) {
-    console.log(chalk.red('The client has disconnected!'));
+    console.log(colors.red('The client has disconnected!'));
     console.log(`Please open a browser window at http://localhost:${PORT}/app`);
     disconnected = true;
   } else if (!awaitingFirstConnect) {
@@ -69,7 +69,7 @@ app.get('/api/health', (req: express.Request, res: express.Response) => {
   isClientConnected = true;
   if (disconnected) {
     disconnected = false;
-    console.log(chalk.green('The client has reconnected!'));
+    console.log(colors.green('The client has reconnected!'));
   }
   res.status(200).send();
 });

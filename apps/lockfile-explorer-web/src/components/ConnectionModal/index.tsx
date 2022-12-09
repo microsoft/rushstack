@@ -30,10 +30,13 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
     setManualChecked(true);
     keepAlive().catch((e) => {
       // Keep alive cannot fail
+      console.error('Unexpected exception: ', +e.toString());
     });
   }, []);
 
-  if (isAlive) return null;
+  if (isAlive) {
+    return null;
+  }
 
   return (
     <div className={styles.DisconnectOverlayBackground}>
@@ -45,7 +48,9 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
           <p>Please re-start the local development server to continue using this application.</p>
         )}
         <div className={styles.DisconnectCheckRow}>
-          <button onClick={checkAliveManual}>Check Again</button>
+          <button disabled={checking} onClick={checkAliveManual}>
+            Check Again
+          </button>
           {checking ? <p>Checking...</p> : null}
         </div>
       </div>

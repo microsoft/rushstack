@@ -19,10 +19,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "chalk",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "cors",
       "allowedCategories": [ "libraries" ]
     },
