@@ -15,9 +15,10 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 export class PurgeManager {
   private _rushConfiguration: RushConfiguration;
   private _rushGlobalFolder: RushGlobalFolder;
-  private _commonTempFolderRecycler: AsyncRecycler;
-  private _commonTempSplitFolderRecycler: AsyncRecycler;
   private _rushUserFolderRecycler: AsyncRecycler;
+
+  public readonly commonTempFolderRecycler: AsyncRecycler;
+  public readonly commonTempSplitFolderRecycler: AsyncRecycler;
 
   public constructor(rushConfiguration: RushConfiguration, rushGlobalFolder: RushGlobalFolder) {
     this._rushConfiguration = rushConfiguration;
@@ -27,13 +28,13 @@ export class PurgeManager {
       this._rushConfiguration.commonTempFolder,
       RushConstants.rushRecyclerFolderName
     );
-    this._commonTempFolderRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
+    this.commonTempFolderRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
 
     const commonSplitAsyncRecyclerPath: string = path.join(
       this._rushConfiguration.commonTempSplitFolder,
       RushConstants.rushRecyclerFolderName
     );
-    this._commonTempSplitFolderRecycler = new AsyncRecycler(commonSplitAsyncRecyclerPath);
+    this.commonTempSplitFolderRecycler = new AsyncRecycler(commonSplitAsyncRecyclerPath);
 
     const rushUserAsyncRecyclerPath: string = path.join(
       this._rushGlobalFolder.path,
@@ -47,13 +48,9 @@ export class PurgeManager {
    * the PurgeManager instance is disposed.
    */
   public deleteAll(): void {
-    this._commonTempFolderRecycler.deleteAll();
-    this._commonTempSplitFolderRecycler.deleteAll();
+    this.commonTempFolderRecycler.deleteAll();
+    this.commonTempSplitFolderRecycler.deleteAll();
     this._rushUserFolderRecycler.deleteAll();
-  }
-
-  public get commonTempFolderRecycler(): AsyncRecycler {
-    return this._commonTempFolderRecycler;
   }
 
   /**
@@ -63,12 +60,12 @@ export class PurgeManager {
     // Delete everything under common\temp except for the recycler folder itself
     console.log('Purging ' + this._rushConfiguration.commonTempFolder);
 
-    this._commonTempFolderRecycler.moveAllItemsInFolder(
+    this.commonTempFolderRecycler.moveAllItemsInFolder(
       this._rushConfiguration.commonTempFolder,
       this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true)
     );
 
-    this._commonTempSplitFolderRecycler.moveAllItemsInFolder(
+    this.commonTempSplitFolderRecycler.moveAllItemsInFolder(
       this._rushConfiguration.commonTempSplitFolder,
       this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true)
     );

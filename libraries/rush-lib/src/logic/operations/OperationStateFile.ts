@@ -28,14 +28,16 @@ export interface IOperationStateJson {
  * @internal
  */
 export class OperationStateFile {
-  private readonly _rushProject: RushConfigurationProject;
-  private readonly _filename: string;
   private _state: IOperationStateJson | undefined;
+
+  /**
+   * Returns the filename of the metadata file.
+   */
+  public readonly filename: string;
 
   public constructor(options: IOperationStateFileOptions) {
     const { rushProject, phase } = options;
-    this._rushProject = rushProject;
-    this._filename = OperationStateFile._getFilename(phase, rushProject);
+    this.filename = OperationStateFile._getFilename(phase, rushProject);
   }
 
   private static _getFilename(phase: IPhase, project: RushConfigurationProject): string {
@@ -53,25 +55,18 @@ export class OperationStateFile {
     return `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${identifier}/state.json`;
   }
 
-  /**
-   * Returns the filename of the metadata file.
-   */
-  public get filename(): string {
-    return this._filename;
-  }
-
   public get state(): IOperationStateJson | undefined {
     return this._state;
   }
 
   public async writeAsync(json: IOperationStateJson): Promise<void> {
-    await JsonFile.saveAsync(json, this._filename, { ensureFolderExists: true, updateExistingFile: true });
+    await JsonFile.saveAsync(json, this.filename, { ensureFolderExists: true, updateExistingFile: true });
     this._state = json;
   }
 
   public async tryRestoreAsync(): Promise<IOperationStateJson | undefined> {
     try {
-      this._state = await JsonFile.loadAsync(this._filename);
+      this._state = await JsonFile.loadAsync(this.filename);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         this._state = undefined;

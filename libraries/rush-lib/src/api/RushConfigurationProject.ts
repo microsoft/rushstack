@@ -57,35 +57,142 @@ export interface IRushConfigurationProjectOptions {
  * @public
  */
 export class RushConfigurationProject {
-  private readonly _packageName: string;
-  private readonly _projectFolder: string;
-  private readonly _projectRelativeFolder: string;
-  private readonly _projectRushConfigFolder: string;
-  private readonly _projectRushTempFolder: string;
-  private readonly _reviewCategory: string | undefined;
-  private readonly _packageJson: IPackageJson;
-  private readonly _packageJsonEditor: PackageJsonEditor;
-  private readonly _tempProjectName: string;
-  private readonly _unscopedTempProjectName: string;
-  private readonly _decoupledLocalDependencies: Set<string>;
-  private readonly _versionPolicyName: string | undefined;
   private readonly _shouldPublish: boolean;
-  private readonly _skipRushCheck: boolean;
-  private readonly _publishFolder: string;
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _tags: Set<string>;
-  private readonly _splitWorkspace: boolean;
 
   private _versionPolicy: VersionPolicy | undefined = undefined;
   private _dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
   private _consumingProjects: Set<RushConfigurationProject> | undefined = undefined;
 
+  /**
+   * The name of the NPM package.  An error is reported if this name is not
+   * identical to packageJson.name.
+   *
+   * Example: `@scope/MyProject`
+   */
+  public readonly packageName: string;
+
+  /**
+   * The full path of the folder that contains the project to be built by Rush.
+   *
+   * Example: `C:\MyRepo\libraries\my-project`
+   */
+  public readonly projectFolder: string;
+
+  /**
+   * The relative path of the folder that contains the project to be built by Rush.
+   *
+   * Example: `libraries/my-project`
+   */
+  public readonly projectRelativeFolder: string;
+
+  /**
+   * The project-specific Rush configuration folder.
+   *
+   * Example: `C:\MyRepo\libraries\my-project\config\rush`
+   */
+  public readonly projectRushConfigFolder: string;
+
+  /**
+   * The project-specific Rush temp folder. This folder is used to store Rush-specific temporary files.
+   *
+   * Example: `C:\MyRepo\libraries\my-project\.rush\temp`
+   */
+  public readonly projectRushTempFolder: string;
+
+  /**
+   * The Rush configuration for the monorepo that the project belongs to.
+   */
+  public readonly rushConfiguration: RushConfiguration;
+
+  /**
+   * The review category name, or undefined if no category was assigned.
+   * This name must be one of the valid choices listed in RushConfiguration.reviewCategories.
+   */
+  public readonly reviewCategory: string | undefined;
+
+  /**
+   * A list of local projects that appear as devDependencies for this project, but cannot be
+   * locally linked because it would create a cyclic dependency; instead, the last published
+   * version will be installed in the Common folder.
+   *
+   * These are package names that would be found by RushConfiguration.getProjectByName().
+   */
+  public readonly decoupledLocalDependencies: Set<string>;
+
+  /**
+   * The parsed NPM "package.json" file from projectFolder.
+   */
+  public readonly packageJson: IPackageJson;
+
+  /**
+   * A useful wrapper around the package.json file for making modifications
+   * @beta
+   */
+  public readonly packageJsonEditor: PackageJsonEditor;
+
+  /**
+   * The unique name for the temporary project that will be generated in the Common folder.
+   * For example, if the project name is `@scope/MyProject`, the temporary project name
+   * might be `@rush-temp/MyProject-2`.
+   *
+   * Example: `@rush-temp/MyProject-2`
+   */
+  public readonly tempProjectName: string;
+
+  /**
+   * The unscoped temporary project name
+   *
+   * Example: `my-project-2`
+   */
+  public readonly unscopedTempProjectName: string;
+
+  /**
+   * If true, then this project will be ignored by the "rush check" command.
+   * The default value is false.
+   */
+  public readonly skipRushCheck: boolean;
+
+  /**
+   * Name of the version policy used by this project.
+   * @beta
+   */
+  public readonly versionPolicyName: string | undefined;
+
+  /**
+   * The full path of the folder that will get published by Rush.
+   *
+   * @remarks
+   * By default this is the same as the project folder, but a custom folder can be specified
+   * using the the "publishFolder" setting in rush.json.
+   *
+   * Example: `C:\MyRepo\libraries\my-project\temp\publish`
+   */
+  public readonly publishFolder: string;
+
+  /**
+   * An optional set of custom tags that can be used to select this project.
+   *
+   * @remarks
+   * For example, adding `my-custom-tag` will allow this project to be selected by the
+   * command `rush list --only tag:my-custom-tag`.  The tag name must be one or more words separated
+   * by hyphens, where a word may contain lowercase letters, digits, and the period character.
+   *
+   * @beta
+   */
+  public readonly tags: ReadonlySet<string>;
+
+  /**
+   * Whether this project is a split workspace project.
+   * @beta
+   */
+  public readonly splitWorkspace: boolean;
+
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
-    this._rushConfiguration = rushConfiguration;
-    this._packageName = projectJson.packageName;
-    this._projectRelativeFolder = projectJson.projectFolder;
+    this.rushConfiguration = rushConfiguration;
+    this.packageName = projectJson.packageName;
+    this.projectRelativeFolder = projectJson.projectFolder;
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
     const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
@@ -104,11 +211,11 @@ export class RushConfigurationProject {
       );
     }
 
-    this._projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
-    const packageJsonFilename: string = path.join(this._projectFolder, FileConstants.PackageJson);
+    this.projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
+    const packageJsonFilename: string = path.join(this.projectFolder, FileConstants.PackageJson);
 
     try {
-      this._packageJson = JsonFile.load(packageJsonFilename, { jsonSyntax: JsonSyntax.Strict });
+      this.packageJson = JsonFile.load(packageJsonFilename, { jsonSyntax: JsonSyntax.Strict });
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(
@@ -118,9 +225,9 @@ export class RushConfigurationProject {
       throw error;
     }
 
-    this._projectRushConfigFolder = path.join(this._projectFolder, 'config', 'rush');
-    this._projectRushTempFolder = path.join(
-      this._projectFolder,
+    this.projectRushConfigFolder = path.join(this.projectFolder, 'config', 'rush');
+    this.projectRushTempFolder = path.join(
+      this.projectFolder,
       RushConstants.projectRushFolderName,
       RushConstants.rushTempFolderName
     );
@@ -141,33 +248,33 @@ export class RushConfigurationProject {
             `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`
         );
       }
-      this._reviewCategory = projectJson.reviewCategory;
+      this.reviewCategory = projectJson.reviewCategory;
     }
 
-    if (this._packageJson.name !== this._packageName) {
+    if (this.packageJson.name !== this.packageName) {
       throw new Error(
-        `The package name "${this._packageName}" specified in rush.json does not` +
-          ` match the name "${this._packageJson.name}" from package.json`
+        `The package name "${this.packageName}" specified in rush.json does not` +
+          ` match the name "${this.packageJson.name}" from package.json`
       );
     }
 
-    if (!semver.valid(this._packageJson.version)) {
+    if (!semver.valid(this.packageJson.version)) {
       throw new Error(
-        `The value "${this._packageJson.version}" is not valid SemVer syntax for the \"version\" field` +
+        `The value "${this.packageJson.version}" is not valid SemVer syntax for the \"version\" field` +
           ` in the file "${packageJsonFilename}"`
       );
     }
 
-    this._packageJsonEditor = PackageJsonEditor.fromObject(this._packageJson, packageJsonFilename);
+    this.packageJsonEditor = PackageJsonEditor.fromObject(this.packageJson, packageJsonFilename);
 
-    this._tempProjectName = tempProjectName;
+    this.tempProjectName = tempProjectName;
 
     // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
     // suffix).  Even after we strip the NPM scope, it will still be unique.
     // Example: "my-project-2"
-    this._unscopedTempProjectName = PackageNameParsers.permissive.getUnscopedName(tempProjectName);
+    this.unscopedTempProjectName = PackageNameParsers.permissive.getUnscopedName(tempProjectName);
 
-    this._decoupledLocalDependencies = new Set<string>();
+    this.decoupledLocalDependencies = new Set<string>();
     if (projectJson.cyclicDependencyProjects || projectJson.decoupledLocalDependencies) {
       if (projectJson.cyclicDependencyProjects && projectJson.decoupledLocalDependencies) {
         throw new Error(
@@ -176,114 +283,42 @@ export class RushConfigurationProject {
       }
       for (const cyclicDependencyProject of projectJson.cyclicDependencyProjects ||
         projectJson.decoupledLocalDependencies) {
-        this._decoupledLocalDependencies.add(cyclicDependencyProject);
+        this.decoupledLocalDependencies.add(cyclicDependencyProject);
       }
     }
     this._shouldPublish = !!projectJson.shouldPublish;
-    this._skipRushCheck = !!projectJson.skipRushCheck;
-    this._versionPolicyName = projectJson.versionPolicyName;
+    this.skipRushCheck = !!projectJson.skipRushCheck;
+    this.versionPolicyName = projectJson.versionPolicyName;
 
-    if (this._shouldPublish && this._packageJson.private) {
+    if (this._shouldPublish && this.packageJson.private) {
       throw new Error(
         `The project "${projectJson.packageName}" specifies "shouldPublish": true, ` +
           `but the package.json file specifies "private": true.`
       );
     }
 
-    this._publishFolder = this._projectFolder;
+    this.publishFolder = this.projectFolder;
     if (projectJson.publishFolder) {
-      this._publishFolder = path.join(this._publishFolder, projectJson.publishFolder);
+      this.publishFolder = path.join(this.publishFolder, projectJson.publishFolder);
     }
 
     if (allowedProjectTags && projectJson.tags) {
-      this._tags = new Set();
+      this.tags = new Set();
       for (const tag of projectJson.tags) {
         if (!allowedProjectTags.has(tag)) {
           throw new Error(
-            `The tag "${tag}" specified for project "${this._packageName}" is not listed in the ` +
+            `The tag "${tag}" specified for project "${this.packageName}" is not listed in the ` +
               `allowedProjectTags field in rush.json.`
           );
         } else {
-          this._tags.add(tag);
+          (this.tags as Set<string>).add(tag);
         }
       }
     } else {
-      this._tags = new Set(projectJson.tags);
+      this.tags = new Set(projectJson.tags);
     }
 
-    this._splitWorkspace = Boolean(projectJson.splitWorkspace);
-  }
-
-  /**
-   * The name of the NPM package.  An error is reported if this name is not
-   * identical to packageJson.name.
-   *
-   * Example: `@scope/MyProject`
-   */
-  public get packageName(): string {
-    return this._packageName;
-  }
-
-  /**
-   * The full path of the folder that contains the project to be built by Rush.
-   *
-   * Example: `C:\MyRepo\libraries\my-project`
-   */
-  public get projectFolder(): string {
-    return this._projectFolder;
-  }
-
-  /**
-   * The relative path of the folder that contains the project to be built by Rush.
-   *
-   * Example: `libraries/my-project`
-   */
-  public get projectRelativeFolder(): string {
-    return this._projectRelativeFolder;
-  }
-
-  /**
-   * The project-specific Rush configuration folder.
-   *
-   * Example: `C:\MyRepo\libraries\my-project\config\rush`
-   */
-  public get projectRushConfigFolder(): string {
-    return this._projectRushConfigFolder;
-  }
-
-  /**
-   * The project-specific Rush temp folder. This folder is used to store Rush-specific temporary files.
-   *
-   * Example: `C:\MyRepo\libraries\my-project\.rush\temp`
-   */
-  public get projectRushTempFolder(): string {
-    return this._projectRushTempFolder;
-  }
-
-  /**
-   * The Rush configuration for the monorepo that the project belongs to.
-   */
-  public get rushConfiguration(): RushConfiguration {
-    return this._rushConfiguration;
-  }
-
-  /**
-   * The review category name, or undefined if no category was assigned.
-   * This name must be one of the valid choices listed in RushConfiguration.reviewCategories.
-   */
-  public get reviewCategory(): string | undefined {
-    return this._reviewCategory;
-  }
-
-  /**
-   * A list of local projects that appear as devDependencies for this project, but cannot be
-   * locally linked because it would create a cyclic dependency; instead, the last published
-   * version will be installed in the Common folder.
-   *
-   * These are package names that would be found by RushConfiguration.getProjectByName().
-   */
-  public get decoupledLocalDependencies(): Set<string> {
-    return this._decoupledLocalDependencies;
+    this.splitWorkspace = Boolean(projectJson.splitWorkspace);
   }
 
   /**
@@ -296,7 +331,7 @@ export class RushConfigurationProject {
    * @deprecated Use `decoupledLocalDependencies` instead, as it better describes the purpose of the data.
    */
   public get cyclicDependencyProjects(): Set<string> {
-    return this._decoupledLocalDependencies;
+    return this.decoupledLocalDependencies;
   }
 
   /**
@@ -338,8 +373,8 @@ export class RushConfigurationProject {
           for (const [dependency, version] of Object.entries(dependencySet)) {
             // Skip if we can't find the local project or it's a cyclic dependency
             const localProject: RushConfigurationProject | undefined =
-              this._rushConfiguration.getProjectByName(dependency);
-            if (localProject && !this._decoupledLocalDependencies.has(dependency)) {
+              this.rushConfiguration.getProjectByName(dependency);
+            if (localProject && !this.decoupledLocalDependencies.has(dependency)) {
               // Set the value if it's a workspace project, or if we have a local project and the semver is satisfied
               const dependencySpecifier: DependencySpecifier = new DependencySpecifier(dependency, version);
               switch (dependencySpecifier.specifierType) {
@@ -376,7 +411,7 @@ export class RushConfigurationProject {
       // Force initialize all dependency relationships
       // This needs to operate on every project in the set because the relationships are only specified
       // in the consuming project
-      const { projects } = this._rushConfiguration;
+      const { projects } = this.rushConfiguration;
 
       for (const project of projects) {
         project._consumingProjects = new Set();
@@ -392,76 +427,12 @@ export class RushConfigurationProject {
   }
 
   /**
-   * The parsed NPM "package.json" file from projectFolder.
-   */
-  public get packageJson(): IPackageJson {
-    return this._packageJson;
-  }
-
-  /**
-   * A useful wrapper around the package.json file for making modifications
-   * @beta
-   */
-  public get packageJsonEditor(): PackageJsonEditor {
-    return this._packageJsonEditor;
-  }
-
-  /**
-   * The unique name for the temporary project that will be generated in the Common folder.
-   * For example, if the project name is `@scope/MyProject`, the temporary project name
-   * might be `@rush-temp/MyProject-2`.
-   *
-   * Example: `@rush-temp/MyProject-2`
-   */
-  public get tempProjectName(): string {
-    return this._tempProjectName;
-  }
-
-  /**
-   * The unscoped temporary project name
-   *
-   * Example: `my-project-2`
-   */
-  public get unscopedTempProjectName(): string {
-    return this._unscopedTempProjectName;
-  }
-
-  /**
    * A flag which indicates whether changes to this project should be published. This controls
    * whether or not the project would show up when running `rush change`, and whether or not it
    * should be published during `rush publish`.
    */
   public get shouldPublish(): boolean {
-    return this._shouldPublish || !!this._versionPolicyName;
-  }
-
-  /**
-   * If true, then this project will be ignored by the "rush check" command.
-   * The default value is false.
-   */
-  public get skipRushCheck(): boolean {
-    return this._skipRushCheck;
-  }
-
-  /**
-   * Name of the version policy used by this project.
-   * @beta
-   */
-  public get versionPolicyName(): string | undefined {
-    return this._versionPolicyName;
-  }
-
-  /**
-   * The full path of the folder that will get published by Rush.
-   *
-   * @remarks
-   * By default this is the same as the project folder, but a custom folder can be specified
-   * using the the "publishFolder" setting in rush.json.
-   *
-   * Example: `C:\MyRepo\libraries\my-project\temp\publish`
-   */
-  public get publishFolder(): string {
-    return this._publishFolder;
+    return this._shouldPublish || !!this.versionPolicyName;
   }
 
   /**
@@ -470,8 +441,8 @@ export class RushConfigurationProject {
    */
   public get versionPolicy(): VersionPolicy | undefined {
     if (!this._versionPolicy) {
-      if (this.versionPolicyName && this._rushConfiguration.versionPolicyConfiguration) {
-        this._versionPolicy = this._rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+      if (this.versionPolicyName && this.rushConfiguration.versionPolicyConfiguration) {
+        this._versionPolicy = this.rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
           this.versionPolicyName
         );
       }
@@ -500,27 +471,5 @@ export class RushConfigurationProject {
       }
     }
     return isMain;
-  }
-
-  /**
-   * An optional set of custom tags that can be used to select this project.
-   *
-   * @remarks
-   * For example, adding `my-custom-tag` will allow this project to be selected by the
-   * command `rush list --only tag:my-custom-tag`.  The tag name must be one or more words separated
-   * by hyphens, where a word may contain lowercase letters, digits, and the period character.
-   *
-   * @beta
-   */
-  public get tags(): ReadonlySet<string> {
-    return this._tags;
-  }
-
-  /**
-   * Whether this project is a split workspace project.
-   * @beta
-   */
-  public get splitWorkspace(): boolean {
-    return this._splitWorkspace;
   }
 }

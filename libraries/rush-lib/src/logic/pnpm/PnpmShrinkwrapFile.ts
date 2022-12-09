@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
@@ -259,7 +258,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       if (FileSystem.isNotExistError(error as Error)) {
         return undefined; // file does not exist
       }
-      throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${(error as Error).message}`);
+      throw new Error(`Error reading "${shrinkwrapYamlFilename}":\n  ${(error as Error).message}`);
     }
   }
 
@@ -311,7 +310,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           colors.red(
             `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker ` +
               'in the file. You may need to run "rush update" to refresh its contents.'
-          ) + os.EOL
+          ) + '\n'
         );
         throw new AlreadyReportedError();
       }
@@ -324,7 +323,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
             colors.red(
               'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
                 'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
-            ) + os.EOL
+            ) + '\n'
           );
           throw new AlreadyReportedError();
         }
@@ -335,7 +334,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
               'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
                 'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
                 'details.'
-            ) + os.EOL
+            ) + '\n'
           );
           throw new AlreadyReportedError();
         }
@@ -623,7 +622,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean {
+  public async isWorkspaceProjectModifiedAsync(
+    project: RushConfigurationProject,
+    variant?: string
+  ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
       project.rushConfiguration.commonTempFolder,
       project.projectFolder
@@ -638,7 +640,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Initialize the pnpmfile if it doesn't exist
     if (!this._pnpmfileConfiguration) {
-      this._pnpmfileConfiguration = new PnpmfileConfiguration(project.rushConfiguration, { variant });
+      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(project.rushConfiguration, {
+        variant
+      });
     }
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
@@ -705,15 +709,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         if (err instanceof SyntaxError) {
           console.error(
             colors.red(
-              `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${individualPnpmfilePath}` +
-                os.EOL
+              `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${individualPnpmfilePath}` + '\n'
             )
           );
         } else {
           console.error(
             colors.red(
               `Error during pnpmfile execution. pnpmfile: "${individualPnpmfilePath}". Error: "${err.message}".` +
-                os.EOL
+                '\n'
             )
           );
         }
@@ -736,7 +739,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         console.error(
           colors.red(
             `Error during readPackage hook execution. pnpmfile: "${individualPnpmfilePath}". Error: "${err.message}".` +
-              os.EOL
+              '\n'
           )
         );
       }

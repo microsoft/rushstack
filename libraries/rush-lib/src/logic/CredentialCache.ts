@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, LockFile, Import } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { RushUserConfiguration } from '../api/RushUserConfiguration';
+import schemaJson from '../schemas/credentials.schema.json';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
@@ -70,9 +70,7 @@ export class CredentialCache /* implements IDisposable */ {
   public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
     const rushUserFolderPath: string = RushUserConfiguration.getRushUserFolderPath();
     const cacheFilePath: string = `${rushUserFolderPath}/${CACHE_FILENAME}`;
-    const jsonSchema: JsonSchema = JsonSchema.fromFile(
-      path.resolve(__dirname, '..', 'schemas', 'credentials.schema.json')
-    );
+    const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
     let loadedJson: ICredentialCacheJson | undefined;
     try {

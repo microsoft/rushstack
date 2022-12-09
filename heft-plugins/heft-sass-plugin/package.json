@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-sass-plugin",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Heft plugin for SASS",
   "repository": {
     "type": "git",

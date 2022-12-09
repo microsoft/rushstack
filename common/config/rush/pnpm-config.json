@@ -143,6 +143,18 @@
           "optional": true
         }
       }
+    },
+
+    "scss-parser": {
+      "dependencies": {
+        "lodash": "~4.17.15"
+      }
+    },
+
+    "query-ast": {
+      "dependencies": {
+        "lodash": "~4.17.15"
+      }
     }
   }
 }

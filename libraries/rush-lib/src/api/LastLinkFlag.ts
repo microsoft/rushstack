@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { InternalError } from '@rushstack/node-core-library';
 import { BaseFlag } from './base/BaseFlag';
 
 import type { RushConfiguration } from './RushConfiguration';
@@ -13,7 +14,19 @@ export const LAST_LINK_FLAG_FILE_NAME: string = 'last-link.flag';
  * @internal
  */
 export class LastLinkFlag extends BaseFlag {
-  protected get flagName(): string {
+  /**
+   * @override
+   */
+  public checkValidAndReportStoreIssues(): boolean {
+    throw new InternalError('Not implemented');
+  }
+
+  /**
+   * Returns Name of the flag file
+   *
+   * @override
+   */
+  public get flagName(): string {
     return LAST_LINK_FLAG_FILE_NAME;
   }
 }

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
@@ -20,6 +19,7 @@ import type {
   IChoiceListParameterJson,
   IPhasedCommandWithoutPhasesJson
 } from './CommandLineJson';
+import schemaJson from '../schemas/command-line.schema.json';
 
 export interface IShellCommandTokenContext {
   packageFolder: string;
@@ -169,9 +169,7 @@ interface ICommandLineConfigurationOptions {
  * Custom Commands and Options for the Rush Command Line
  */
 export class CommandLineConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/command-line.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   public readonly commands: Map<string, Command> = new Map();
   public readonly phases: Map<string, IPhase> = new Map();
@@ -185,7 +183,7 @@ export class CommandLineConfiguration {
   /**
    * These path will be prepended to the PATH environment variable
    */
-  private readonly _additionalPathFolders: string[] = [];
+  public readonly additionalPathFolders: Readonly<string[]> = [];
 
   /**
    * A map of bulk command names to their corresponding synthetic phase identifiers
@@ -634,12 +632,8 @@ export class CommandLineConfiguration {
     return new CommandLineConfiguration(commandLineJson, { doNotIncludeDefaultBuildCommands: false });
   }
 
-  public get additionalPathFolders(): Readonly<string[]> {
-    return this._additionalPathFolders;
-  }
-
   public prependAdditionalPathFolder(pathFolder: string): void {
-    this._additionalPathFolders.unshift(pathFolder);
+    (this.additionalPathFolders as string[]).unshift(pathFolder);
   }
 
   /**

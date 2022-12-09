@@ -18,6 +18,7 @@ import type { IPackageJson } from '@rushstack/node-core-library';
 import type {
   IPnpmfile,
   IPnpmfileContext,
+  IPnpmfileHooks,
   ISplitWorkspacePnpmfileShimSettings,
   IWorkspaceProjectInfo
 } from './IPnpmfile';
@@ -46,7 +47,7 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
   if (!settings) {
     // Initialize the settings from file
     if (!context.splitWorkspacePnpmfileShimSettings) {
-      context.splitWorkspacePnpmfileShimSettings = require('./pnpmfileSettings.json');
+      context.splitWorkspacePnpmfileShimSettings = __non_webpack_require__('./pnpmfileSettings.json');
     }
     settings = context.splitWorkspacePnpmfileShimSettings!;
   } else if (!context.splitWorkspacePnpmfileShimSettings) {
@@ -147,27 +148,23 @@ function rewriteRushProjectVersions(
   }
 }
 
-const splitWorkspaceGlobalPnpmfileShim: IPnpmfile = {
-  hooks: {
-    // Call the original pnpmfile (if it exists)
-    afterAllResolved: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => {
-      context = init(context);
-      return userPnpmfile?.hooks?.afterAllResolved
-        ? userPnpmfile.hooks.afterAllResolved(lockfile, context)
-        : lockfile;
-    },
+export const hooks: IPnpmfileHooks = {
+  // Call the original pnpmfile (if it exists)
+  afterAllResolved: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => {
+    context = init(context);
+    return userPnpmfile?.hooks?.afterAllResolved
+      ? userPnpmfile.hooks.afterAllResolved(lockfile, context)
+      : lockfile;
+  },
 
-    // Rewrite workspace protocol to link protocol for non split workspace projects
-    readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
-      context = init(context);
-      rewriteRushProjectVersions(pkg.name, pkg.dependencies);
-      rewriteRushProjectVersions(pkg.name, pkg.devDependencies);
-      return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
-    },
+  // Rewrite workspace protocol to link protocol for non split workspace projects
+  readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
+    context = init(context);
+    rewriteRushProjectVersions(pkg.name, pkg.dependencies);
+    rewriteRushProjectVersions(pkg.name, pkg.devDependencies);
+    return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
+  },
 
-    // Call the original pnpmfile (if it exists)
-    filterLog: userPnpmfile?.hooks?.filterLog
-  }
+  // Call the original pnpmfile (if it exists)
+  filterLog: userPnpmfile?.hooks?.filterLog
 };
-
-export = splitWorkspaceGlobalPnpmfileShim;

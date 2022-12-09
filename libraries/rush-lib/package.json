@@ -12,7 +12,7 @@
   },
   "engineStrict": true,
   "homepage": "https://rushjs.io",
-  "main": "lib/index.js",
+  "main": "dist/rush-lib.js",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
     "build": "heft build --clean",
@@ -37,8 +37,8 @@
     "colors": "~1.2.1",
     "figures": "3.0.0",
     "git-repo-info": "~2.1.0",
-    "glob": "~7.0.5",
     "glob-escape": "~0.0.2",
+    "glob": "~7.0.5",
     "https-proxy-agent": "~5.0.0",
     "ignore": "~5.1.6",
     "inquirer": "~7.3.3",
@@ -46,7 +46,7 @@
     "jszip": "~3.7.1",
     "lodash": "~4.17.15",
     "node-fetch": "2.6.7",
-    "npm-check": "~5.9.2",
+    "npm-check": "~6.0.1",
     "npm-package-arg": "~6.1.0",
     "npm-packlist": "~2.1.2",
     "read-package-tree": "~5.1.5",
@@ -63,8 +63,10 @@
   "devDependencies": {
     "@pnpm/logger": "4.0.0",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/cli-table": "0.3.0",
     "@types/glob": "7.1.1",
     "@types/heft-jest": "1.0.1",
@@ -80,7 +82,9 @@
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.1",
-    "@types/normalize-path": "~3.0.0"
+    "@types/normalize-path": "~3.0.0",
+    "@types/webpack-env": "1.13.0",
+    "webpack": "~5.68.0"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 
 import {
@@ -190,7 +189,7 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
-    console.log(os.EOL + colors.bold('Linking local projects'));
+    console.log('\n' + colors.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
     await this._linkProjects();
@@ -199,8 +198,8 @@ export abstract class BaseLinkManager {
     LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).create();
 
     stopwatch.stop();
-    console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-    console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
+    console.log('\n' + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+    console.log('\nNext you should probably run "rush build" or "rush rebuild"');
   }
 
   protected abstract _linkProjects(): Promise<void>;

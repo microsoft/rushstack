@@ -187,7 +187,10 @@ export class PackageJsonUpdater {
    */
   public async doRushUpgradeAsync(options: IPackageJsonUpdaterRushUpgradeOptions): Promise<void> {
     const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall, variant } = options;
-    const { DependencyAnalyzer } = await import('./DependencyAnalyzer');
+    const { DependencyAnalyzer } = await import(
+      /* webpackChunkName: 'DependencyAnalyzer' */
+      './DependencyAnalyzer'
+    );
     const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
       this._rushConfiguration
     );
@@ -317,7 +320,7 @@ export class PackageJsonUpdater {
         checkOnly: false
       };
 
-      const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
         this._rushConfiguration,
         this._rushGlobalFolder,
         purgeManager,
@@ -388,7 +391,7 @@ export class PackageJsonUpdater {
         checkOnly: false
       };
 
-      const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
         this._rushConfiguration,
         this._rushGlobalFolder,
         purgeManager,
@@ -410,7 +413,10 @@ export class PackageJsonUpdater {
   ): Promise<IUpdateProjectOptions[]> {
     const { projects, packagesToUpdate, devDependency, updateOtherPackages, variant } = options;
 
-    const { DependencyAnalyzer } = await import('./DependencyAnalyzer');
+    const { DependencyAnalyzer } = await import(
+      /* webpackChunkName: 'DependencyAnalyzer' */
+      './DependencyAnalyzer'
+    );
     const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
       this._rushConfiguration
     );

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
@@ -17,8 +16,7 @@ export class GitEmailPolicy {
       // If Git isn't installed, or this Rush project is not under a Git working folder,
       // then we don't care about the Git email
       console.log(
-        colors.cyan('Ignoring Git validation because the Git binary was not found in the shell path.') +
-          os.EOL
+        colors.cyan('Ignoring Git validation because the Git binary was not found in the shell path.') + '\n'
       );
       return;
     }
@@ -26,7 +24,7 @@ export class GitEmailPolicy {
     if (!git.isPathUnderGitWorkingTree()) {
       // If Git isn't installed, or this Rush project is not under a Git working folder,
       // then we don't care about the Git email
-      console.log(colors.cyan('Ignoring Git validation because this is not a Git working folder.' + os.EOL));
+      console.log(colors.cyan('Ignoring Git validation because this is not a Git working folder.') + '\n');
       return;
     }
 
@@ -56,7 +54,7 @@ export class GitEmailPolicy {
             '',
             ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
             ''
-          ].join(os.EOL)
+          ].join('\n')
         );
         throw new AlreadyReportedError();
       }
@@ -76,7 +74,7 @@ export class GitEmailPolicy {
       return;
     }
 
-    console.log('Checking Git policy for this repository.' + os.EOL);
+    console.log('Checking Git policy for this repository.\n');
 
     // If there is a policy, at least one of the RegExp's must match
     for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
@@ -117,7 +115,7 @@ export class GitEmailPolicy {
         '',
         ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
         ''
-      ].join(os.EOL)
+      ].join('\n')
     );
 
     console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));

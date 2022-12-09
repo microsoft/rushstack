@@ -10,6 +10,7 @@ import { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
 import { RushSession } from './RushSession';
 import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
+import { Rush } from '../api/Rush';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -55,7 +56,7 @@ export class PluginManager {
     // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
     const builtInPluginConfigurations: IBuiltInPluginConfiguration[] = options.builtInPluginConfigurations;
 
-    const ownPackageJsonDependencies: Record<string, string> = require('../../package.json').dependencies;
+    const ownPackageJsonDependencies: Record<string, string> = Rush._rushLibPackageJson.dependencies || {};
     function tryAddBuiltInPlugin(builtInPluginName: string, pluginPackageName?: string): void {
       if (!pluginPackageName) {
         pluginPackageName = `@rushstack/${builtInPluginName}`;

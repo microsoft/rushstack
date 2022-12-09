@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminal } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 import colors from 'colors/safe';
 import { IPhase } from '../../api/CommandLineConfiguration';
 import {
@@ -180,7 +181,7 @@ export function _printTimeline(terminal: ITerminal, result: IExecutionResult): v
   // Do some calculations to determine what size timeline chart we need.
   //
 
-  const maxWidth: number = process.stdout.columns || TIMELINE_WIDTH;
+  const maxWidth: number = PrintUtilities.getConsoleWidth() || TIMELINE_WIDTH;
   const chartWidth: number = maxWidth - longestNameLength - longestDurationLength - 4;
   //
   // Loop through all operations, assembling some statistics about operations and
