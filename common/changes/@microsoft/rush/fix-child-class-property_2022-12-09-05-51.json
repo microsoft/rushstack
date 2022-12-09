@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix LastLinkFlag path",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
