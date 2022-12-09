@@ -4,7 +4,7 @@
 import colors from 'colors/safe';
 
 import { PackageJsonLookup } from '@rushstack/node-core-library';
-import { TraceImportCommandLine } from './TraceImportCommandLine';
+import { TraceImportCommandLineParser } from './TraceImportCommandLineParser';
 
 const toolVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
@@ -12,7 +12,7 @@ console.log();
 console.log(colors.bold(`trace-import ${toolVersion}`) + ' - ' + colors.cyan('https://rushstack.io'));
 console.log();
 
-const commandLine: TraceImportCommandLine = new TraceImportCommandLine();
+const commandLine: TraceImportCommandLineParser = new TraceImportCommandLineParser();
 commandLine.execute().catch((error) => {
   console.error(error);
 });

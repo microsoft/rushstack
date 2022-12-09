@@ -12,7 +12,7 @@ import { InternalError } from '@rushstack/node-core-library';
 
 import { ResolutionType, traceImport } from './traceImport';
 
-export class TraceImportCommandLine extends CommandLineParser {
+export class TraceImportCommandLineParser extends CommandLineParser {
   private readonly _debugParameter: CommandLineFlagParameter;
   private readonly _pathParameter: CommandLineStringParameter;
   private readonly _baseFolderParameter: CommandLineStringParameter;
