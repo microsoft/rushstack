@@ -9,6 +9,7 @@ import nodeModule = require('module');
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { FileSystem } from './FileSystem';
 import { IPackageJson } from './IPackageJson';
+import { PackageName } from './PackageName';
 
 /**
  * Common options shared by {@link IImportResolveModuleOptions} and {@link IImportResolvePackageOptions}
@@ -202,25 +203,25 @@ export class Import {
    * and a system module is found, then its name is returned without any file path.
    */
   public static resolveModule(options: IImportResolveModuleOptions): string {
-    const { modulePath } = options;
+    const { modulePath, baseFolderPath, includeSystemModules, allowSelfReference } = options;
 
     if (path.isAbsolute(modulePath)) {
       return modulePath;
     }
 
-    const normalizedRootPath: string = FileSystem.getRealPath(options.baseFolderPath);
+    const normalizedRootPath: string = FileSystem.getRealPath(baseFolderPath);
 
     if (modulePath.startsWith('.')) {
       // This looks like a conventional relative path
       return path.resolve(normalizedRootPath, modulePath);
     }
 
-    if (options.includeSystemModules === true && Import._builtInModules.has(modulePath)) {
+    if (includeSystemModules === true && Import._builtInModules.has(modulePath)) {
       return modulePath;
     }
 
-    if (options.allowSelfReference === true) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(options.baseFolderPath);
+    if (allowSelfReference === true) {
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
       if (ownPackage && modulePath.startsWith(ownPackage.packageName)) {
         const packagePath: string = modulePath.substr(ownPackage.packageName.length + 1);
         return path.resolve(ownPackage.packageRootPath, packagePath);
@@ -230,9 +231,7 @@ export class Import {
     try {
       return Resolve.sync(
         // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
-        options.includeSystemModules !== true && modulePath.indexOf('/') === -1
-          ? `${modulePath}/`
-          : modulePath,
+        includeSystemModules !== true && modulePath.indexOf('/') === -1 ? `${modulePath}/` : modulePath,
         {
           basedir: normalizedRootPath,
           preserveSymlinks: false
@@ -264,23 +263,26 @@ export class Import {
    * and a system module is found, then its name is returned without any file path.
    */
   public static resolvePackage(options: IImportResolvePackageOptions): string {
-    const { packageName } = options;
+    const { packageName, includeSystemModules, baseFolderPath, allowSelfReference } = options;
 
-    if (options.includeSystemModules && Import._builtInModules.has(packageName)) {
+    if (includeSystemModules && Import._builtInModules.has(packageName)) {
       return packageName;
     }
 
-    const normalizedRootPath: string = FileSystem.getRealPath(options.baseFolderPath);
+    const normalizedRootPath: string = FileSystem.getRealPath(baseFolderPath);
 
-    if (options.allowSelfReference) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(options.baseFolderPath);
+    if (allowSelfReference) {
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
       if (ownPackage && ownPackage.packageName === packageName) {
         return ownPackage.packageRootPath;
       }
     }
 
+    PackageName.parse(packageName); // Ensure the package name is valid and doesn't contain a path
+
     try {
-      const resolvedPath: string = Resolve.sync(packageName, {
+      // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
+      const resolvedPath: string = Resolve.sync(`${packageName}/`, {
         basedir: normalizedRootPath,
         preserveSymlinks: false,
         packageFilter: (pkg: { main: string }): { main: string } => {
@@ -294,16 +296,9 @@ export class Import {
       });
 
       const packagePath: string = path.dirname(resolvedPath);
-      const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
-        path.join(packagePath, 'package.json')
-      );
-      if (packageJson.name === packageName) {
-        return packagePath;
-      } else {
-        throw new Error();
-      }
-    } catch (e) {
-      throw new Error(`Cannot find package "${packageName}" from "${options.baseFolderPath}".`);
+      return packagePath;
+    } catch {
+      throw new Error(`Cannot find package "${packageName}" from "${baseFolderPath}".`);
     }
   }
 
