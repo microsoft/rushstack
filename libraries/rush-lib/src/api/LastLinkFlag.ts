@@ -13,8 +13,6 @@ export const LAST_LINK_FLAG_FILE_NAME: string = 'last-link.flag';
  * @internal
  */
 export class LastLinkFlag extends LastInstallFlag {
-  protected readonly flagName: string = LAST_LINK_FLAG_FILE_NAME;
-
   /**
    * @override
    */
@@ -33,6 +31,15 @@ export class LastLinkFlag extends LastInstallFlag {
    */
   public checkValidAndReportStoreIssues(): boolean {
     throw new InternalError('Not implemented');
+  }
+
+  /**
+   * Returns the name of the flag file
+   *
+   * @override
+   */
+  protected get flagName(): string {
+    return LAST_LINK_FLAG_FILE_NAME;
   }
 }
 
