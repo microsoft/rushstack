@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Fri, 09 Dec 2022 16:18:28 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Dec 2022 23:31:28 GMT and should not be manually modified.
+
+## 0.1.4
+Fri, 09 Dec 2022 23:31:28 GMT
+
+### Patches
+
+- Lockfile Explorer now displays a disconnection message if the client / server is disconnected
 
 ## 0.1.3
 Fri, 09 Dec 2022 16:18:28 GMT
