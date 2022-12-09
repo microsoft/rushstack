@@ -7,6 +7,7 @@ import cors from 'cors';
 import fs from 'fs';
 import process from 'process';
 import path from 'path';
+import colors from 'colors/safe';
 import open from 'open';
 import { init } from './init';
 
@@ -24,6 +25,20 @@ process.chdir(path.join(__dirname, '..'));
 const app: express.Application = express();
 app.use(express.json());
 app.use(cors());
+
+// Variable used to check if the front-end client is still connected
+let awaitingFirstConnect: boolean = true;
+let isClientConnected: boolean = false;
+let disconnected: boolean = false;
+setInterval(function () {
+  if (!isClientConnected && !awaitingFirstConnect && !disconnected) {
+    console.log(colors.red('The client has disconnected!'));
+    console.log(`Please open a browser window at http://localhost:${PORT}/app`);
+    disconnected = true;
+  } else if (!awaitingFirstConnect) {
+    isClientConnected = false;
+  }
+}, 4000);
 
 // This takes precedence over the `/app` static route, which also has an `initappcontext.js` file.
 app.get('/app/initappcontext.js', (req: express.Request, res: express.Response) => {
@@ -47,6 +62,16 @@ app.use('/favicon.ico', express.static(path.resolve(__dirname, '../dist'), { ind
 app.get('/', (req: express.Request, res: express.Response) => {
   const doc = yaml.load(fs.readFileSync(appState.pnpmLockfileLocation).toString());
   res.send(doc);
+});
+
+app.get('/api/health', (req: express.Request, res: express.Response) => {
+  awaitingFirstConnect = false;
+  isClientConnected = true;
+  if (disconnected) {
+    disconnected = false;
+    console.log(colors.green('The client has reconnected!'));
+  }
+  res.status(200).send();
 });
 
 app.post(

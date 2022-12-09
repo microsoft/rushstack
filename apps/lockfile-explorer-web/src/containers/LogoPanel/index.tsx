@@ -15,7 +15,7 @@ export const LogoPanel = (): JSX.Element => {
         <img className={styles.Image} src={require('./lockfile-explorer-icon.svg')} />
       </div>
       <div>
-        <a href="https://www.npmjs.com/package/@rushstack/lockfile-explorer" target="_blank" rel="noreferrer">
+        <a href="https://lfx.rushstack.io/" target="_blank" rel="noreferrer">
           <div className={styles.Title1}>
             <img className={styles.Image} src={require('./lockfile-explorer-title-1.svg')} />
           </div>
