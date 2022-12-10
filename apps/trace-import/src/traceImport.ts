@@ -33,7 +33,7 @@ interface IExecuteOptions {
 //
 //   @scope/my-package
 //   [group 1        ]
-const packageImportPathRegExp: RegExp = /^((?:@[a-z0-9\-_\.]+\/)?[a-z0-9\-_\.]+)(\/.*)?$/i;
+const packageImportPathRegExp: RegExp = /^((?:@[a-z0-9_][a-z0-9\-_\.]*\/)?[a-z0-9_][a-z0-9\-_\.]*)(\/.*)?$/i;
 
 function logInputField(title: string, value: string): void {
   console.log(colors.cyan(title.padEnd(25)) + value);
@@ -44,19 +44,19 @@ function logOutputField(title: string, value: string): void {
 }
 
 function traceTypeScriptPackage(options: {
-  importRemainder: string;
+  packageSubpath: string;
   packageFolder: string;
   packageJson: IPackageJson;
   warnings: string[];
   atTypes?: boolean;
 }): boolean {
-  const { importRemainder, packageFolder, packageJson, atTypes, warnings } = options;
+  const { packageSubpath, packageFolder, packageJson, atTypes, warnings } = options;
 
   // For example, if we started with importFullPath="semver/index",
   // here we may get normalizedImportFullPath="@types/semver/index"
-  const normalizedImportFullPath: string = packageJson.name + importRemainder;
+  const normalizedImportFullPath: string = packageJson.name + packageSubpath;
 
-  // First try to resolve the .js default entry point
+  // First try to resolve the .js main index
   let cjsTargetPath: string | undefined = undefined;
   try {
     cjsTargetPath = Resolve.sync(normalizedImportFullPath, {
@@ -68,14 +68,14 @@ function traceTypeScriptPackage(options: {
     // not found
   }
 
-  const defaultIndexTitle: string = atTypes ? '@types default index:' : 'Default index:';
+  const mainIndexTitle: string = atTypes ? '@types main index:' : 'Main index:';
 
   if (cjsTargetPath) {
     const parsedPath: path.ParsedPath = path.parse(cjsTargetPath);
 
     // Is the resolved .js extension okay?
     if (tsExtensions.indexOf(parsedPath.ext.toLocaleLowerCase()) >= 0) {
-      logOutputField(defaultIndexTitle, '(inferred from .js entry point)');
+      logOutputField(mainIndexTitle, '(inferred from .js main index)');
       console.log();
       logOutputField('Target path:', cjsTargetPath);
       return true;
@@ -84,25 +84,25 @@ function traceTypeScriptPackage(options: {
     // Try to replace the file extension
     const dtsTargetPath: string = path.join(parsedPath.dir, parsedPath.name + '.d.ts');
     if (FileSystem.exists(dtsTargetPath)) {
-      logOutputField(defaultIndexTitle, '(inferred from .js entry point)');
+      logOutputField(mainIndexTitle, '(inferred from .js entry point)');
       console.log();
       logOutputField('Target path:', dtsTargetPath);
       return true;
     }
   }
 
-  if (!importRemainder) {
-    // Try importing the "types"/"typings" default:
+  if (!packageSubpath) {
+    // Try importing the "types"/"typings" main index:
 
     if (packageJson.types) {
-      logOutputField(defaultIndexTitle, `"types": ${JSON.stringify(packageJson.types)}`);
+      logOutputField(mainIndexTitle, `"types": ${JSON.stringify(packageJson.types)}`);
       console.log();
       logOutputField('Target path:', path.join(packageFolder, packageJson.types));
       return true;
     }
 
     if (packageJson.typings) {
-      logOutputField(defaultIndexTitle, `"typings": ${JSON.stringify(packageJson.typings)}`);
+      logOutputField(mainIndexTitle, `"typings": ${JSON.stringify(packageJson.typings)}`);
       console.log();
       logOutputField('Target path:', path.join(packageFolder, packageJson.typings));
       return true;
@@ -152,13 +152,13 @@ function traceImportInner(options: IExecuteOptions, warnings: string[]): void {
 
   if (match) {
     const importPackageName: string = match[1];
-    const importRemainder: string | undefined = match[2];
-    const importRemainderWithoutSlash: string | undefined = importRemainder
-      ? importRemainder.substring(1)
+    const packageSubpath: string | undefined = match[2];
+    const packageSubpathWithoutSlash: string | undefined = packageSubpath
+      ? packageSubpath.substring(1)
       : undefined;
 
     logInputField('Package name:', importPackageName);
-    logInputField('Module path:', importRemainderWithoutSlash || '(not specified)');
+    logInputField('Package subpath:', packageSubpathWithoutSlash || '(not specified)');
 
     console.log('\nResolving...\n');
 
@@ -234,11 +234,11 @@ function traceImportInner(options: IExecuteOptions, warnings: string[]): void {
             throw new Error(`Cannot find package "${importPackageName}" from "${baseFolder}".`);
           }
 
-          if (!importRemainder) {
+          if (!packageSubpath) {
             if (packageJson.main) {
-              logOutputField('Default entry point:', `"main": ${JSON.stringify(packageJson.main)}`);
+              logOutputField('Main index:', `"main": ${JSON.stringify(packageJson.main)}`);
             } else {
-              logOutputField('Default entry point:', '(none)');
+              logOutputField('Main index:', '(none)');
             }
           }
 
@@ -250,11 +250,11 @@ function traceImportInner(options: IExecuteOptions, warnings: string[]): void {
               extensions: jsExtensions
             });
           } catch (error) {
-            // Are we importing the default entry point?
-            if (importRemainder) {
-              throw new Error(`Unable to resolve remainder of import path: ...${importRemainder}`);
+            // Are we importing the main index?
+            if (packageSubpath) {
+              throw new Error(`Unable to resolve the module subpath: ...${packageSubpath}`);
             } else {
-              console.log('\nThis package does not define a default entry point.');
+              console.log('\nThis package does not define a main index.');
               return;
             }
           }
@@ -268,7 +268,7 @@ function traceImportInner(options: IExecuteOptions, warnings: string[]): void {
         }
 
         if (packageFolder && packageJson) {
-          if (traceTypeScriptPackage({ importRemainder, packageFolder, packageJson, warnings })) {
+          if (traceTypeScriptPackage({ packageSubpath, packageFolder, packageJson, warnings })) {
             if (atTypesPackageFolder) {
               warnings.push('An @types package was found but not used.');
             }
@@ -280,7 +280,7 @@ function traceImportInner(options: IExecuteOptions, warnings: string[]): void {
         if (atTypesPackageFolder && atTypesPackageJson) {
           if (
             traceTypeScriptPackage({
-              importRemainder,
+              packageSubpath,
               packageFolder: atTypesPackageFolder,
               packageJson: atTypesPackageJson,
               warnings,
@@ -291,13 +291,27 @@ function traceImportInner(options: IExecuteOptions, warnings: string[]): void {
           }
         }
 
-        throw new Error(`Unable to resolve remainder of import path: ...${importRemainder}`);
+        throw new Error(`Unable to resolve the module subpath: ...${packageSubpath}`);
       default:
         throw new Error(`The "${options.resolutionType}" resolution type is not implemented yet`);
     }
   } else {
-    console.log(`The import path does not appear to reference an NPM package.\n`);
-    logOutputField('Module path:', importFullPath);
+    logInputField('Import path:', importFullPath);
+    console.log(`\nThe import path does not appear to reference an NPM package.`);
+    console.log('Resolving...\n');
+
+    let targetPath: string;
+    try {
+      targetPath = Resolve.sync(importFullPath, {
+        basedir: baseFolder,
+        preserveSymlinks: false,
+        extensions: options.resolutionType === 'ts' ? tsExtensions : jsExtensions
+      });
+    } catch (error) {
+      throw new Error(`Unable to resolve the import path: ${importFullPath}`);
+    }
+
+    logOutputField('Target path:', targetPath);
   }
 }
 

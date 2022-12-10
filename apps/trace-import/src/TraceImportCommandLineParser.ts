@@ -41,7 +41,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
       description:
         'The import module path to be analyzed. For example, ' +
         '"example" in expressions such as: require("example"); require.resolve("example"); import { Thing } from "example";',
-      argumentName: 'MODULE_PATH',
+      argumentName: 'IMPORT_PATH',
       required: true
     });
 
@@ -56,7 +56,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
 
     this._resolutionTypeParameter = this.defineChoiceParameter({
       parameterLongName: '--resolution-type',
-      parameterShortName: '-r',
+      parameterShortName: '-t',
       description:
         'The type of module resolution to perform:  ' +
         '"cjs" for CommonJS, "es" for ES modules, or "ts" for TypeScript typings',
