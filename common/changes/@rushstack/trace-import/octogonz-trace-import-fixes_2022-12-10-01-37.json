@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/trace-import",
+      "comment": "Rename \"-r\" CLI paramater to \"-t\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/trace-import"
+}
