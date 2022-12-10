@@ -14,7 +14,8 @@ export class BaseFlag<T extends object = JsonObject> {
   /**
    * Flag file path
    */
-  protected _path: string;
+  public readonly path: string;
+
   /**
    * Content of the flag
    */
@@ -30,7 +31,10 @@ export class BaseFlag<T extends object = JsonObject> {
    * @param state - optional, the state that should be managed or compared
    */
   public constructor(folderPath: string, state?: Partial<T>) {
-    this._path = path.join(folderPath, this.flagName);
+    if (!this.flagName) {
+      throw new Error('Do not use this class directly, extends this class instead');
+    }
+    this.path = path.join(folderPath, this.flagName);
     this._state = (state || {}) as T;
     this._isModified = true;
   }
@@ -52,7 +56,7 @@ export class BaseFlag<T extends object = JsonObject> {
    * Writes the flag file to disk with the current state
    */
   public create(): void {
-    JsonFile.save(this._state, this._path, {
+    JsonFile.save(this._state, this.path, {
       ensureFolderExists: true
     });
   }
@@ -73,7 +77,7 @@ export class BaseFlag<T extends object = JsonObject> {
    */
   public saveIfModified(): void {
     if (this._isModified) {
-      JsonFile.save(this._state, this._path, {
+      JsonFile.save(this._state, this.path, {
         ensureFolderExists: true
       });
       this._isModified = false;
@@ -84,18 +88,11 @@ export class BaseFlag<T extends object = JsonObject> {
    * Removes the flag file
    */
   public clear(): void {
-    FileSystem.deleteFile(this._path);
+    FileSystem.deleteFile(this.path);
   }
 
   /**
-   * Returns the full path to the flag file
-   */
-  public get path(): string {
-    return this._path;
-  }
-
-  /**
-   * Returns the name of the flag file
+   * Returns Name of the flag file
    */
   protected get flagName(): string {
     throw new Error('Do not use this class directly, extends this class instead');

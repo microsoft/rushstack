@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { LastInstallFlag } from '../LastInstallFlag';
+import { LastInstallFlag, LAST_INSTALL_FLAG_FILE_NAME } from '../LastInstallFlag';
 
 const TEMP_DIR_PATH: string = `${__dirname}/temp`;
 
@@ -14,6 +15,11 @@ describe(LastInstallFlag.name, () => {
 
   afterEach(() => {
     FileSystem.ensureEmptyFolder(TEMP_DIR_PATH);
+  });
+
+  it('can get correct path', () => {
+    const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH);
+    expect(path.basename(flag.path)).toEqual(LAST_INSTALL_FLAG_FILE_NAME);
   });
 
   it('can create and remove a flag in an empty directory', () => {

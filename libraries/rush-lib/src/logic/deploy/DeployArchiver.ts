@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import JSZip = require('jszip');
+import JSZip from 'jszip';
 
 import * as path from 'path';
 import { FileSystem, FileSystemStats, Path } from '@rushstack/node-core-library';

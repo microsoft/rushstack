@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import uriEncode = require('strict-uri-encode');
+import uriEncode from 'strict-uri-encode';
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
 import colors from 'colors/safe';
@@ -87,7 +86,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     project: RushConfigurationProject,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {
-    console.log(os.EOL + 'LINKING: ' + project.packageName);
+    console.log(`\nLINKING: ${project.packageName}`);
 
     // first, read the temp package.json information
     // Example: "project1"

@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import child_process from 'child_process';
-import gitInfo = require('git-repo-info');
-import * as os from 'os';
+import gitInfo from 'git-repo-info';
 import * as path from 'path';
 import * as url from 'url';
 import colors from 'colors/safe';
@@ -117,7 +116,7 @@ export class Git {
           '',
           '    git config user.email',
           ''
-        ].join(os.EOL)
+        ].join('\n')
       );
       throw new AlreadyReportedError();
     }
@@ -131,7 +130,7 @@ export class Git {
           '',
           ...GitEmailPolicy.getEmailExampleLines(this._rushConfiguration),
           ''
-        ].join(os.EOL)
+        ].join('\n')
       );
       throw new AlreadyReportedError();
     }
@@ -174,7 +173,7 @@ export class Git {
           '    git rev-parse --git-path hooks',
           '',
           'Assuming hooks can still be installed in the default location'
-        ].join(os.EOL)
+        ].join('\n')
       );
       return true;
     }

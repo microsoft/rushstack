@@ -211,6 +211,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/webpack4-localization-plugin",
       "allowedCategories": [ "tests" ]
     },

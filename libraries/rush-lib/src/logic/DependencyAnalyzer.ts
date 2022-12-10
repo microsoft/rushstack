@@ -82,6 +82,9 @@ export class DependencyAnalyzer {
     > = commonVersionsConfiguration.allowedAlternativeVersions;
 
     for (const project of this._rushConfiguration.projects) {
+      if (project.splitWorkspace) {
+        continue;
+      }
       const dependencies: PackageJsonDependency[] = [
         ...project.packageJsonEditor.dependencyList,
         ...project.packageJsonEditor.devDependencyList

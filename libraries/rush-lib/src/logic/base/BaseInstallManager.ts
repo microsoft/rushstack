@@ -49,6 +49,8 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
  */
 export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompatibilityDb';
+const pnpmCacheDirParameter: string = '--config.cacheDir';
+const pnpmStateDirParameter: string = '--config.stateDir';
 
 export interface IInstallManagerOptions {
   /**
@@ -152,12 +154,9 @@ export interface IInstallManagerOptions {
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
-  private readonly _rushConfiguration: RushConfiguration;
-  private readonly _rushGlobalFolder: RushGlobalFolder;
   private readonly _commonTempLinkFlag: LastLinkFlag;
   private readonly _commonTempInstallFlag: LastInstallFlag;
   private readonly _commonTempSplitInstallFlag: LastInstallFlag | undefined;
-  private readonly _installRecycler: AsyncRecycler;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
   /**
@@ -169,10 +168,13 @@ export abstract class BaseInstallManager {
    */
   private _deferredInstallationScripts: boolean = false;
 
-  private readonly _options: IInstallManagerOptions;
-
   private readonly _terminalProvider: ITerminalProvider;
   private readonly _terminal: Terminal;
+
+  protected readonly rushConfiguration: RushConfiguration;
+  protected readonly rushGlobalFolder: RushGlobalFolder;
+  protected readonly installRecycler: AsyncRecycler;
+  protected readonly options: IInstallManagerOptions;
 
   public constructor(
     rushConfiguration: RushConfiguration,
@@ -180,10 +182,10 @@ export abstract class BaseInstallManager {
     purgeManager: PurgeManager,
     options: IInstallManagerOptions
   ) {
-    this._rushConfiguration = rushConfiguration;
-    this._rushGlobalFolder = rushGlobalFolder;
-    this._installRecycler = purgeManager.commonTempFolderRecycler;
-    this._options = options;
+    this.rushConfiguration = rushConfiguration;
+    this.rushGlobalFolder = rushGlobalFolder;
+    this.installRecycler = purgeManager.commonTempFolderRecycler;
+    this.options = options;
 
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
 
@@ -196,22 +198,6 @@ export abstract class BaseInstallManager {
 
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
-  }
-
-  protected get rushConfiguration(): RushConfiguration {
-    return this._rushConfiguration;
-  }
-
-  protected get rushGlobalFolder(): RushGlobalFolder {
-    return this._rushGlobalFolder;
-  }
-
-  protected get installRecycler(): AsyncRecycler {
-    return this._installRecycler;
-  }
-
-  protected get options(): IInstallManagerOptions {
-    return this._options;
   }
 
   protected get commonTempInstallFlag(): LastInstallFlag {
@@ -269,15 +255,15 @@ export abstract class BaseInstallManager {
       }
     }
 
-    const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync();
+    // FIXME: bring back npmrcHash check
 
     if (this.options.checkOnly) {
       return;
     }
 
-    console.log(
-      os.EOL + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`)
-    );
+    console.log('\n' + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`));
 
     if (this.options.selectedProjects) {
       if (this.rushConfiguration.hasSplitWorkspaceProject) {
@@ -376,14 +362,14 @@ export abstract class BaseInstallManager {
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(
-          this._rushConfiguration.tempShrinkwrapFilename,
-          this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
+          this.rushConfiguration.tempShrinkwrapFilename,
+          this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
         );
         if (this.options.includeSplitWorkspace) {
           // Copy (or delete) common\temp-split\pnpm-lock.yaml --> common\config\rush\split-workspace-pnpm-lock.yaml
           Utilities.syncFile(
-            this._rushConfiguration.tempSplitWorkspaceShrinkwrapFilename,
-            this._rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename()
+            this.rushConfiguration.tempSplitWorkspaceShrinkwrapFilename,
+            this.rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename()
           );
         }
       } else {
@@ -466,15 +452,15 @@ export abstract class BaseInstallManager {
     npmrcHash: string | undefined;
   }> {
     // Check the policies
-    PolicyValidator.validatePolicy(this._rushConfiguration, this.options);
+    PolicyValidator.validatePolicy(this.rushConfiguration, this.options);
 
     this._installGitHooks();
 
     const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(
-      this._rushConfiguration
+      this.rushConfiguration
     );
     if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
-      if (this._options.allowShrinkwrapUpdates) {
+      if (this.options.allowShrinkwrapUpdates) {
         approvedPackagesChecker.rewriteConfigFiles();
         console.log(
           colors.yellow(
@@ -488,9 +474,9 @@ export abstract class BaseInstallManager {
 
     // Ensure that the package manager is installed
     await InstallHelpers.ensureLocalPackageManager(
-      this._rushConfiguration,
-      this._rushGlobalFolder,
-      this._options.maxInstallAttempts
+      this.rushConfiguration,
+      this.rushGlobalFolder,
+      this.options.maxInstallAttempts
     );
 
     let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
@@ -500,14 +486,14 @@ export abstract class BaseInstallManager {
     if (!this.options.fullUpgrade) {
       try {
         shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
-          this._rushConfiguration.packageManager,
-          this._rushConfiguration.packageManagerOptions,
-          this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
+          this.rushConfiguration.packageManager,
+          this.rushConfiguration.packageManagerOptions,
+          this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
         );
       } catch (ex) {
         console.log();
         console.log(
-          `Unable to load the ${this._rushConfiguration.shrinkwrapFilePhrase}: ${(ex as Error).message}`
+          `Unable to load the ${this.rushConfiguration.shrinkwrapFilePhrase}: ${(ex as Error).message}`
         );
 
         if (!this.options.allowShrinkwrapUpdates) {
@@ -518,17 +504,17 @@ export abstract class BaseInstallManager {
 
         shrinkwrapFile = undefined;
       }
-      if (this.options.includeSplitWorkspace && this._rushConfiguration.hasSplitWorkspaceProject) {
+      if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
         try {
           splitWorkspaceShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
-            this._rushConfiguration.packageManager,
-            this._rushConfiguration.packageManagerOptions,
-            this._rushConfiguration.splitWorkspaceShrinkwrapFilename
+            this.rushConfiguration.packageManager,
+            this.rushConfiguration.packageManagerOptions,
+            this.rushConfiguration.splitWorkspaceShrinkwrapFilename
           );
         } catch (ex) {
           console.log();
           console.log(
-            `Unable to load the ${this._rushConfiguration.splitWorkspaceShrinkwrapFilename}: ${
+            `Unable to load the ${this.rushConfiguration.splitWorkspaceShrinkwrapFilename}: ${
               (ex as Error).message
             }`
           );
@@ -546,7 +532,7 @@ export abstract class BaseInstallManager {
 
     // Write a file indicating which variant is being installed.
     // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
-    const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
+    const currentVariantJsonFilename: string = this.rushConfiguration.currentVariantJsonFilename;
     const currentVariantJson: ICurrentVariantJson = {
       variant: this.options.variant || null
     };
@@ -569,12 +555,12 @@ export abstract class BaseInstallManager {
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
     const npmrcText: string | undefined = Utilities.syncNpmrc(
-      this._rushConfiguration.commonRushConfigFolder,
-      this._rushConfiguration.commonTempFolder
+      this.rushConfiguration.commonRushConfigFolder,
+      this.rushConfiguration.commonTempFolder
     );
-    if (this.options.includeSplitWorkspace && this._rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       const commonRushConfigSplitWorkspaceNpmrcPath: string = path.join(
-        this._rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.commonRushConfigFolder,
         '.npmrc-split-workspace'
       );
       if (!FileSystem.exists(commonRushConfigSplitWorkspaceNpmrcPath)) {
@@ -592,10 +578,10 @@ export abstract class BaseInstallManager {
        * When shared-workspace-lockfiles=false, .npmrc gets resolved with a different CWD for each project folder.
        * With this environment variable, .npmrc can resolve the same global pnpmfile path for all projects.
        */
-      process.env['_RUSH_COMMON_TEMP_SPLIT_FOLDER'] = this._rushConfiguration.commonTempSplitFolder;
+      process.env['_RUSH_COMMON_TEMP_SPLIT_FOLDER'] = this.rushConfiguration.commonTempSplitFolder;
       Utilities.syncNpmrc(
-        this._rushConfiguration.commonRushConfigFolder,
-        this._rushConfiguration.commonTempSplitFolder,
+        this.rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.commonTempSplitFolder,
         false,
         '.npmrc-split-workspace'
       );
@@ -613,8 +599,8 @@ export abstract class BaseInstallManager {
 
     // Copy the committed patches folder if using pnpm
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
-      const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
+      const commonTempPnpmPatchesFolder: string = `${this.rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+      const rushPnpmPatchesFolder: string = `${this.rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
       if (FileSystem.exists(rushPnpmPatchesFolder)) {
         FileSystem.copyFiles({
           sourcePath: rushPnpmPatchesFolder,
@@ -686,7 +672,7 @@ export abstract class BaseInstallManager {
    * Git hooks are only installed if the repo opts in by including files in /common/git-hooks
    */
   private _installGitHooks(): void {
-    const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
+    const hookSource: string = path.join(this.rushConfiguration.commonFolder, 'git-hooks');
     const git: Git = new Git(this.rushConfiguration);
     const hookDestination: string | undefined = git.getHooksFolder();
 
@@ -695,7 +681,7 @@ export abstract class BaseInstallManager {
       // Ignore the ".sample" file(s) in this folder.
       const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
       if (hookFilenames.length > 0) {
-        console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
+        console.log('\n' + colors.bold('Found files in the "common/git-hooks" folder.'));
 
         if (!git.isHooksPathDefault()) {
           const color: (str: string) => string = this.options.bypassPolicy ? colors.yellow : colors.red;
@@ -708,7 +694,7 @@ export abstract class BaseInstallManager {
                 ' ',
                 '    git config --unset core.hooksPath',
                 ' '
-              ].join(os.EOL)
+              ].join('\n')
             )
           );
           if (this.options.bypassPolicy) {
@@ -721,7 +707,7 @@ export abstract class BaseInstallManager {
               [
                 '(Or, to temporarily ignore this problem, invoke Rush with the "--bypass-policy" option.)',
                 ' '
-              ].join(os.EOL)
+              ].join('\n')
             )
           );
           throw new AlreadyReportedError();
@@ -747,7 +733,7 @@ export abstract class BaseInstallManager {
         }
 
         console.log(
-          'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL
+          'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + '\n'
         );
       }
     }
@@ -758,8 +744,8 @@ export abstract class BaseInstallManager {
    * to the command-line.
    */
   protected pushConfigurationArgs(args: string[], options: IInstallManagerOptions): void {
-    if (this._rushConfiguration.packageManager === 'npm') {
-      if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '5.0.0')) {
+    if (this.rushConfiguration.packageManager === 'npm') {
+      if (semver.lt(this.rushConfiguration.packageManagerToolVersion, '5.0.0')) {
         // NOTE:
         //
         // When using an npm version older than v5.0.0, we do NOT install optional dependencies for
@@ -780,21 +766,25 @@ export abstract class BaseInstallManager {
         // For more context, see https://github.com/microsoft/rushstack/issues/761#issuecomment-428689600
         args.push('--no-optional');
       }
-      args.push('--cache', this._rushConfiguration.npmCacheFolder);
-      args.push('--tmp', this._rushConfiguration.npmTmpFolder);
+      args.push('--cache', this.rushConfiguration.npmCacheFolder);
+      args.push('--tmp', this.rushConfiguration.npmTmpFolder);
 
       if (options.collectLogFile) {
         args.push('--verbose');
       }
-    } else if (this._rushConfiguration.packageManager === 'pnpm') {
+    } else if (this.rushConfiguration.packageManager === 'pnpm') {
       // Only explicitly define the store path if `pnpmStore` is using the default, or has been set to
       // 'local'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
       // path.  In all cases, this will be overridden by RUSH_PNPM_STORE_PATH
       if (
-        this._rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
+        this.rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
         EnvironmentConfiguration.pnpmStorePathOverride
       ) {
-        args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
+        args.push('--store', this.rushConfiguration.pnpmOptions.pnpmStorePath);
+        if (semver.gte(this.rushConfiguration.packageManagerToolVersion, '6.10.0')) {
+          args.push(`${pnpmCacheDirParameter}=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
+          args.push(`${pnpmStateDirParameter}=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
+        }
       }
 
       const { pnpmVerifyStoreIntegrity } = EnvironmentConfiguration;
@@ -802,9 +792,9 @@ export abstract class BaseInstallManager {
         args.push(`--verify-store-integrity`, `${pnpmVerifyStoreIntegrity}`);
       }
 
-      const { configuration: experiments } = this._rushConfiguration.experimentsConfiguration;
+      const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
 
-      if (experiments.usePnpmFrozenLockfileForRushInstall && !this._options.allowShrinkwrapUpdates) {
+      if (experiments.usePnpmFrozenLockfileForRushInstall && !this.options.allowShrinkwrapUpdates) {
         args.push('--frozen-lockfile');
       } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
         // In workspaces, we want to avoid unnecessary lockfile churn
@@ -823,16 +813,10 @@ export abstract class BaseInstallManager {
         args.push('--network-concurrency', options.networkConcurrency.toString());
       }
 
-      if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '7.0.0')) {
-        // pnpm >= 7.0.0 handles peer dependencies strict by default
-        if (this._rushConfiguration.pnpmOptions.strictPeerDependencies === false) {
-          args.push('--no-strict-peer-dependencies');
-        }
+      if (this.rushConfiguration.pnpmOptions.strictPeerDependencies === false) {
+        args.push('--no-strict-peer-dependencies');
       } else {
-        // pnpm < 7.0.0 does not handle peer dependencies strict by default
-        if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
-          args.push('--strict-peer-dependencies');
-        }
+        args.push('--strict-peer-dependencies');
       }
 
       if (this._deferredInstallationScripts || this.options.ignoreScripts) {
@@ -841,7 +825,7 @@ export abstract class BaseInstallManager {
 
       if (
         semver.satisfies(
-          this._rushConfiguration.packageManagerToolVersion,
+          this.rushConfiguration.packageManagerToolVersion,
           '6.32.12 - 6.33.x || 7.0.1 - 7.8.x'
         )
       ) {
@@ -853,14 +837,14 @@ export abstract class BaseInstallManager {
         );
       }
       if (
-        semver.gte(this._rushConfiguration.packageManagerToolVersion, '7.9.0') ||
-        semver.satisfies(this._rushConfiguration.packageManagerToolVersion, '^6.34.0')
+        semver.gte(this.rushConfiguration.packageManagerToolVersion, '7.9.0') ||
+        semver.satisfies(this.rushConfiguration.packageManagerToolVersion, '^6.34.0')
       ) {
         args.push(pnpmIgnoreCompatibilityDbParameter);
       }
-    } else if (this._rushConfiguration.packageManager === 'yarn') {
+    } else if (this.rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');
-      args.push('--cache-folder', this._rushConfiguration.yarnCacheFolder);
+      args.push('--cache-folder', this.rushConfiguration.yarnCacheFolder);
 
       // Without this option, Yarn will sometimes stop and ask for user input on STDIN
       // (e.g. "Which command would you like to run?").
@@ -870,7 +854,7 @@ export abstract class BaseInstallManager {
         args.push('--network-concurrency', options.networkConcurrency.toString());
       }
 
-      if (this._rushConfiguration.yarnOptions.ignoreEngines) {
+      if (this.rushConfiguration.yarnOptions.ignoreEngines) {
         args.push('--ignore-engines');
       }
 
@@ -882,7 +866,7 @@ export abstract class BaseInstallManager {
 
   private async _checkIfReleaseIsPublished(): Promise<boolean> {
     const lastCheckFile: string = path.join(
-      this._rushGlobalFolder.nodeSpecificPath,
+      this.rushGlobalFolder.nodeSpecificPath,
       'rush-' + Rush.version,
       'last-check.flag'
     );
@@ -986,11 +970,11 @@ export abstract class BaseInstallManager {
   ): void {
     if (shrinkwrapFile) {
       Utilities.syncFile(
-        this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
+        this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
         this.rushConfiguration.tempShrinkwrapFilename
       );
       Utilities.syncFile(
-        this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
+        this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
         this.rushConfiguration.tempShrinkwrapPreinstallFilename
       );
     } else {
@@ -1018,10 +1002,10 @@ export abstract class BaseInstallManager {
       }
     }
 
-    if (this.options.includeSplitWorkspace && this._rushConfiguration.hasSplitWorkspaceProject) {
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       if (splitWorkspaceShrinkwrapFile) {
         Utilities.syncFile(
-          this._rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename(),
+          this.rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename(),
           this.rushConfiguration.tempSplitWorkspaceShrinkwrapFilename
         );
       } else {

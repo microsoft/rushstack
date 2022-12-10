@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EOL } from 'os';
 import colors from 'colors/safe';
 
 import { RushConstants } from '../logic/RushConstants';
@@ -13,12 +12,10 @@ export class RushStartupBanner {
     const versionSuffix: string = rushVersion ? ' ' + this._formatRushVersion(rushVersion, isManaged) : '';
 
     console.log(
-      EOL +
+      '\n' +
         colors.bold(`Rush Multi-Project Build Tool${versionSuffix}`) +
         colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-        EOL +
-        `Node.js version is ${nodeVersion}` +
-        EOL
+        `\nNode.js version is ${nodeVersion}\n`
     );
   }
 

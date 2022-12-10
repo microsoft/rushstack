@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 13 Oct 2022 00:20:15 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Dec 2022 16:18:27 GMT and should not be manually modified.
+
+## 3.53.3
+Fri, 09 Dec 2022 16:18:27 GMT
+
+### Patches
+
+- Improve performance of `Import.resolvePackage`.
+- Improve the error message emitted when a path inside a package is passed to `Import.resolvePackage`.
 
 ## 3.53.2
 Thu, 13 Oct 2022 00:20:15 GMT

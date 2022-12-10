@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, NewlineKind } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import schemaJson from '../schemas/repo-state.schema.json';
 
 /**
  * This interface represents the raw repo-state.json file
@@ -34,16 +34,18 @@ interface IRepoStateJson {
  * @public
  */
 export class RepoStateFile {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/repo-state.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _repoStateFilePath: string;
   private _variant: string | undefined;
   private _pnpmShrinkwrapHash: string | undefined;
   private _preferredVersionsHash: string | undefined;
   private _isValid: boolean;
   private _modified: boolean = false;
+
+  /**
+   * Get the absolute file path of the repo-state.json file.
+   */
+  public readonly filePath: string;
 
   private constructor(
     repoStateJson: IRepoStateJson | undefined,
@@ -51,7 +53,7 @@ export class RepoStateFile {
     filePath: string,
     variant: string | undefined
   ) {
-    this._repoStateFilePath = filePath;
+    this.filePath = filePath;
     this._variant = variant;
     this._isValid = isValid;
 
@@ -59,13 +61,6 @@ export class RepoStateFile {
       this._pnpmShrinkwrapHash = repoStateJson.pnpmShrinkwrapHash;
       this._preferredVersionsHash = repoStateJson.preferredVersionsHash;
     }
-  }
-
-  /**
-   * Get the absolute file path of the repo-state.json file.
-   */
-  public get filePath(): string {
-    return this._repoStateFilePath;
   }
 
   /**
@@ -202,7 +197,7 @@ export class RepoStateFile {
       const content: string =
         '// DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.' +
         `${NewlineKind.Lf}${this._serialize()}`;
-      FileSystem.writeFile(this._repoStateFilePath, content);
+      FileSystem.writeFile(this.filePath, content);
       this._modified = false;
       return true;
     }

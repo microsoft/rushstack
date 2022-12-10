@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as os from 'os';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import {
@@ -31,10 +30,6 @@ import type { BaseInstallManager, IInstallManagerOptions } from '../logic/base/B
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 const semver: typeof import('semver') = Import.lazy('semver', require);
-const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = Import.lazy(
-  '../logic/InstallManagerFactory',
-  require
-);
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -330,6 +325,8 @@ export class RushPnpmCommandLineParser {
 
     if (rushConfiguration.pnpmOptions.pnpmStorePath) {
       pnpmEnvironmentMap.set('NPM_CONFIG_STORE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      pnpmEnvironmentMap.set('NPM_CONFIG_CACHE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      pnpmEnvironmentMap.set('NPM_CONFIG_STATE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
     }
 
     if (rushConfiguration.pnpmOptions.environmentVariables) {
@@ -405,8 +402,7 @@ export class RushPnpmCommandLineParser {
           await this._doRushUpdateAsync();
 
           this._terminal.writeWarningLine(
-            `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the "common/pnpm/patches" folder.` +
-              os.EOL +
+            `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the "common/pnpm/patches" folder.\n` +
               '  Please commit this change to Git.'
           );
         }
@@ -440,8 +436,12 @@ export class RushPnpmCommandLineParser {
       splitWorkspacePnpmFilterArguments: []
     };
 
+    const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(
+      /* webpackChunkName: 'InstallManagerFactory' */
+      '../logic/InstallManagerFactory'
+    );
     const installManager: BaseInstallManager =
-      installManagerFactoryModule.InstallManagerFactory.getInstallManager(
+      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
         this._rushConfiguration,
         rushGlobalFolder,
         purgeManager,

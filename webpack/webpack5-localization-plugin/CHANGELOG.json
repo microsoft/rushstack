@@ -2,6 +2,39 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.1.39",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.39",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.38",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.1.38",
+      "date": "Thu, 01 Dec 2022 03:22:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.36`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.37",
       "tag": "@rushstack/webpack5-localization-plugin_v0.1.37",
       "date": "Tue, 29 Nov 2022 01:16:49 GMT",

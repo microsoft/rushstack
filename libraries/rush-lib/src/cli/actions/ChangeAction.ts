@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import colors from 'colors/safe';
@@ -61,7 +60,7 @@ export class ChangeAction extends BaseRushAction {
   private _targetBranchName: string | undefined;
 
   public constructor(parser: RushCommandLineParser) {
-    const documentation: string[] = [
+    const documentation: string = [
       'Asks a series of questions and then generates a <branchname>-<timestamp>.json file ' +
         'in the common folder. The `publish` command will consume these files and perform the proper ' +
         'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
@@ -89,13 +88,13 @@ export class ChangeAction extends BaseRushAction {
         'other changes will not be able to increment the version number. ' +
         "Enable this feature by setting 'hotfixChangeEnabled' in your rush.json.",
       ''
-    ];
+    ].join('\n');
     super({
       actionName: 'change',
       summary:
         'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
-      documentation: documentation.join(os.EOL),
+      documentation,
       safeForSimultaneousRushProcesses: true,
       parser
     });
@@ -443,7 +442,7 @@ export class ChangeAction extends BaseRushAction {
     packageName: string,
     existingChangeComments: Map<string, string[]>
   ): Promise<IChangeInfo | undefined> {
-    console.log(`${os.EOL}${packageName}`);
+    console.log(`\n${packageName}`);
     const comments: string[] | undefined = existingChangeComments.get(packageName);
     if (comments) {
       console.log(`Found existing comments:`);
@@ -630,7 +629,7 @@ export class ChangeAction extends BaseRushAction {
     try {
       if (this._git.hasUnstagedChanges()) {
         console.log(
-          os.EOL +
+          '\n' +
             colors.yellow(
               'Warning: You have unstaged changes, which do not trigger prompting for change ' +
                 'descriptions.'

@@ -15,7 +15,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 /**
  *
  */
-export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
+export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShrinkwrapFile> {
   /**
    * When split workspace projects turn off shared-workspace-lockfiles, Pnpm creates individual
    * shrinkwrap files for each project.
@@ -268,12 +268,5 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       file[key] = projectShrinkwrapMap.get(key)!;
     }
     await JsonFile.saveAsync(file, this.projectShrinkwrapFilePath, { ensureFolderExists: true });
-  }
-
-  /**
-   * @override
-   */
-  protected get shrinkwrapFile(): PnpmShrinkwrapFile {
-    return super.shrinkwrapFile as PnpmShrinkwrapFile;
   }
 }
