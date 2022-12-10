@@ -709,7 +709,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         if (err instanceof SyntaxError) {
           console.error(
             colors.red(
-              `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${individualPnpmfilePath}` + '\n'
+              `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${individualPnpmfilePath}\n`
             )
           );
         } else {
