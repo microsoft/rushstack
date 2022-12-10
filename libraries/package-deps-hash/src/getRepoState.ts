@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type * as child_process from 'child_process';
-import { Executable, FileSystem } from '@rushstack/node-core-library';
+import { once } from 'events';
+import { Readable } from 'stream';
+
+import { Executable, FileSystem, IExecutableSpawnOptions } from '@rushstack/node-core-library';
 
 export interface IGitVersion {
   major: number;
@@ -190,7 +193,11 @@ export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): 
       throw new Error(`git rev-parse exited with status ${result.status}: ${result.stderr}`);
     }
 
-    repoRootCache.set(currentWorkingDirectory, (cachedResult = result.stdout.trim()));
+    cachedResult = result.stdout.trim();
+
+    repoRootCache.set(currentWorkingDirectory, cachedResult);
+    // To ensure that calling getRepoRoot on the result is a no-op.
+    repoRootCache.set(cachedResult, cachedResult);
   }
 
   return cachedResult;
@@ -268,6 +275,149 @@ export function applyWorkingTreeState(
       state.set(filePath, hash);
     }
   }
+}
+
+/**
+ * Helper function for async process invocation with optional stdin support.
+ * @param gitPath - Path to the Git executable
+ * @param args - The process arguments
+ * @param currentWorkingDirectory - The working directory. Should be the repository root.
+ * @param stdin - An optional Readable stream to use as stdin to the process.
+ */
+async function spawnGitAsync(
+  gitPath: string | undefined,
+  args: string[],
+  currentWorkingDirectory: string,
+  stdin?: Readable
+): Promise<string> {
+  const spawnOptions: IExecutableSpawnOptions = {
+    currentWorkingDirectory,
+    stdio: ['pipe', 'pipe', 'pipe']
+  };
+
+  let stdout: string = '';
+  let stderr: string = '';
+
+  const proc: child_process.ChildProcess = Executable.spawn(gitPath || 'git', args, spawnOptions);
+  proc.stdout!.setEncoding('utf-8');
+  proc.stderr!.setEncoding('utf-8');
+
+  proc.stdout!.on('data', (chunk: string) => {
+    stdout += chunk.toString();
+  });
+  proc.stderr!.on('data', (chunk: string) => {
+    stderr += chunk.toString();
+  });
+
+  if (stdin) {
+    stdin.pipe(proc.stdin!);
+  }
+
+  const [status] = await once(proc, 'exit');
+  if (status !== 0) {
+    throw new Error(`git ${args[0]} exited with code ${status}: ${stderr}`);
+  }
+
+  return stdout;
+}
+
+/**
+ * Gets the object hashes for all files in the Git repo, combining the current commit with working tree state.
+ * Uses async operations and runs all primary Git calls in parallel.
+ * @param rootDirectory - The root directory of the Git repository
+ * @param additionalRelativePathsToHash - Root-relative file paths to have Git hash and include in the results
+ * @param gitPath - The path to the Git executable
+ * @beta
+ */
+export async function getRepoStateAsync(
+  rootDirectory: string,
+  additionalRelativePathsToHash?: string[],
+  gitPath?: string
+): Promise<Map<string, string>> {
+  const statePromise: Promise<IGitTreeState> = spawnGitAsync(
+    gitPath,
+    ['--no-optional-locks', 'ls-tree', '-r', '-z', '--full-name', 'HEAD', '--'],
+    rootDirectory
+  ).then(parseGitLsTree);
+  const locallyModifiedPromise: Promise<Map<string, boolean>> = spawnGitAsync(
+    gitPath,
+    ['--no-optional-locks', 'status', '-z', '-u', '--no-renames', '--ignore-submodules', '--'],
+    rootDirectory
+  ).then(parseGitStatus);
+
+  const hashPaths: string[] = [];
+  async function* getFilesToHash(): AsyncIterableIterator<string> {
+    if (additionalRelativePathsToHash) {
+      for (const file of additionalRelativePathsToHash) {
+        hashPaths.push(file);
+        yield `${file}\n`;
+      }
+    }
+
+    const [{ files }, locallyModified] = await Promise.all([statePromise, locallyModifiedPromise]);
+
+    for (const [filePath, exists] of locallyModified) {
+      if (exists) {
+        hashPaths.push(filePath);
+        yield `${filePath}\n`;
+      } else {
+        files.delete(filePath);
+      }
+    }
+  }
+
+  const hashObjectPromise: Promise<string> = spawnGitAsync(
+    gitPath,
+    ['--no-optional-locks', 'hash-object', '--stdin-paths'],
+    rootDirectory,
+    Readable.from(getFilesToHash(), {
+      encoding: 'utf-8',
+      objectMode: false,
+      autoDestroy: true
+    })
+  );
+
+  const [{ files, submodules }, hashObject] = await Promise.all([
+    statePromise,
+    hashObjectPromise,
+    locallyModifiedPromise
+  ]);
+
+  // Existence check for the .gitmodules file
+  const hasSubmodules: boolean = submodules.size > 0 && FileSystem.exists(`${rootDirectory}/.gitmodules`);
+
+  if (hasSubmodules) {
+    // Submodules are not the normal critical path. Accept serial performance rather than investing in complexity.
+    // Can revisit if submodules become more commonly used.
+    for (const submodulePath of submodules.keys()) {
+      const submoduleState: Map<string, string> = await getRepoStateAsync(
+        `${rootDirectory}/${submodulePath}`,
+        [],
+        gitPath
+      );
+      for (const [filePath, hash] of submoduleState) {
+        files.set(`${submodulePath}/${filePath}`, hash);
+      }
+    }
+  }
+
+  // The result of "git hash-object" will be a list of file hashes delimited by newlines
+  const hashes: string[] = hashObject.trim().split('\n');
+
+  if (hashes.length !== hashPaths.length) {
+    throw new Error(
+      `Passed ${hashPaths.length} file paths to Git to hash, but received ${hashes.length} hashes.`
+    );
+  }
+
+  const len: number = hashes.length;
+  for (let i: number = 0; i < len; i++) {
+    const hash: string = hashes[i];
+    const filePath: string = hashPaths[i];
+    files.set(filePath, hash);
+  }
+
+  return files;
 }
 
 /**

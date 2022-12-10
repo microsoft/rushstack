@@ -23,6 +23,9 @@ export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): 
 export function getRepoState(currentWorkingDirectory: string, gitPath?: string): Map<string, string>;
 
 // @beta
+export function getRepoStateAsync(rootDirectory: string, additionalRelativePathsToHash?: string[], gitPath?: string): Promise<Map<string, string>>;
+
+// @beta
 export interface IFileDiffStatus {
     // (undocumented)
     mode: string;

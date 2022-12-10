@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Add getRepoStateAsync API for faster repository state calculation.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash"
+}

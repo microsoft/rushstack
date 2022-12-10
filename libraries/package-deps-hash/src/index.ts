@@ -19,5 +19,6 @@ export {
   getRepoChanges,
   getRepoRoot,
   getRepoState,
+  getRepoStateAsync,
   ensureGitMinimumVersion
 } from './getRepoState';
