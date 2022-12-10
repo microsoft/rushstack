@@ -2,6 +2,21 @@
   "name": "@rushstack/trace-import",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/trace-import_v0.1.1",
+      "date": "Sat, 10 Dec 2022 20:40:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename \"-r\" CLI paramater to \"-t\""
+          },
+          {
+            "comment": "Fix some issues with resolution of relative import paths"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/trace-import_v0.1.0",
       "date": "Fri, 09 Dec 2022 18:45:20 GMT",
