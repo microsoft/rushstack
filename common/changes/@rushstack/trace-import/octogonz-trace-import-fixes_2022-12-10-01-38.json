@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/trace-import",
+      "comment": "Fix some issues with resolution of relative import paths",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/trace-import"
+}
