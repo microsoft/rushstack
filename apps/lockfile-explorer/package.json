@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/lockfile-explorer",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo",
   "keywords": [
     "conflict",
@@ -22,6 +22,7 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/lockfile-explorer"
   },
+  "homepage": "https://lfx.rushstack.io/",
   "license": "MIT",
   "bin": {
     "lockfile-explorer": "./bin/lockfile-explorer"
@@ -50,6 +51,7 @@
     "express": "4.18.1",
     "js-yaml": "~3.13.1",
     "open": "~8.4.0",
-    "cors": "~2.8.5"
+    "cors": "~2.8.5",
+    "colors": "~1.2.1"
   }
 }

@@ -49,6 +49,8 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
  */
 export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompatibilityDb';
+const pnpmCacheDirParameter: string = '--config.cacheDir';
+const pnpmStateDirParameter: string = '--config.stateDir';
 
 export interface IInstallManagerOptions {
   /**
@@ -779,6 +781,10 @@ export abstract class BaseInstallManager {
         EnvironmentConfiguration.pnpmStorePathOverride
       ) {
         args.push('--store', this.rushConfiguration.pnpmOptions.pnpmStorePath);
+        if (semver.gte(this.rushConfiguration.packageManagerToolVersion, '6.10.0')) {
+          args.push(`${pnpmCacheDirParameter}=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
+          args.push(`${pnpmStateDirParameter}=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
+        }
       }
 
       const { pnpmVerifyStoreIntegrity } = EnvironmentConfiguration;

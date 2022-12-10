@@ -180,12 +180,14 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
       );
     }
 
+    const determinants = influencers.filter((inf) => inf.type === DependencyType.Determinant);
+    const transitiveReferrers = influencers.filter((inf) => inf.type === DependencyType.TransitiveReferrer);
+
     return (
       <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
         <h5>Determinants:</h5>
-        {influencers
-          .filter((inf) => inf.type === DependencyType.Determinant)
-          .map(({ entry }) => (
+        {determinants.length ? (
+          determinants.map(({ entry }) => (
             <a
               className={styles.InfluencerEntry}
               key={entry.rawEntryId}
@@ -193,11 +195,13 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
             >
               {entry.displayText}
             </a>
-          ))}
-        <h5>Transitive Referencers:</h5>
-        {influencers
-          .filter((inf) => inf.type === DependencyType.TransitiveReferrer)
-          .map(({ entry }) => (
+          ))
+        ) : (
+          <p>(none)</p>
+        )}
+        <h5 className={styles.TransitiveReferencersHeader}>Transitive Referencers:</h5>
+        {transitiveReferrers.length ? (
+          transitiveReferrers.map(({ entry }) => (
             <a
               className={styles.InfluencerEntry}
               key={entry.rawEntryId}
@@ -205,7 +209,10 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
             >
               {entry.displayText}
             </a>
-          ))}
+          ))
+        ) : (
+          <p>(none)</p>
+        )}
       </div>
     );
   };

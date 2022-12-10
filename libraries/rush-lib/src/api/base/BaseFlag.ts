@@ -94,7 +94,7 @@ export class BaseFlag<T extends object = JsonObject> {
   /**
    * Returns Name of the flag file
    */
-  public get flagName(): string {
+  protected get flagName(): string {
     throw new Error('Do not use this class directly, extends this class instead');
   }
 }

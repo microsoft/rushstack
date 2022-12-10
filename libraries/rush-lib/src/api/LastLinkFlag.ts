@@ -22,11 +22,11 @@ export class LastLinkFlag extends BaseFlag {
   }
 
   /**
-   * Returns Name of the flag file
+   * Returns the name of the flag file
    *
    * @override
    */
-  public get flagName(): string {
+  protected get flagName(): string {
     return LAST_LINK_FLAG_FILE_NAME;
   }
 }

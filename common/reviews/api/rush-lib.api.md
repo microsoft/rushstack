@@ -62,7 +62,7 @@ export class _BaseFlag<T extends object = JsonObject> {
     constructor(folderPath: string, state?: Partial<T>);
     clear(): void;
     create(): void;
-    get flagName(): string;
+    protected get flagName(): string;
     protected _isModified: boolean;
     isValid(): boolean;
     mergeFromObject(data: JsonObject): void;
@@ -589,8 +589,7 @@ export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
     checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
         rushVerb: string;
     }): boolean;
-    // @override
-    get flagName(): string;
+    protected get flagName(): string;
     // @override
     isValid(options?: _ILockfileValidityCheckOptions): boolean;
 }

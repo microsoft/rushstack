@@ -176,11 +176,9 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
   }
 
   /**
-   * Name of the flag file
-   *
-   * @override
+   * Returns the name of the flag file
    */
-  public get flagName(): string {
+  protected get flagName(): string {
     return LAST_INSTALL_FLAG_FILE_NAME;
   }
 }

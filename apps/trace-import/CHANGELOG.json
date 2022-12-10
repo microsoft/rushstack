@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/trace-import",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/trace-import_v0.1.0",
+      "date": "Fri, 09 Dec 2022 18:45:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial preview release"
+          }
+        ]
+      }
+    }
+  ]
+}
