@@ -370,9 +370,9 @@ export class OperationExecutionManager {
     }
   }
 
-  private _injectValues(line: string, replacements: Record<string, string>) {
+  private _injectValues(line: string, replacements: Record<string, string>): string {
     for (const key of Object.keys(replacements)) {
-      const searchKey = '[' + key + ']';
+      const searchKey: string = '[' + key + ']';
       while (line.indexOf(searchKey) >= 0) {
         line = line.replace(searchKey, replacements[key]);
       }
