@@ -2,9 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 
-import { Import } from '@rushstack/node-core-library';
 import type {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
@@ -22,11 +20,6 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-
-const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = Import.lazy(
-  '../../logic/InstallManagerFactory',
-  require
-);
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -105,9 +98,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
     SetupChecks.validate(this.rushConfiguration);
     let warnAboutScriptUpdate: boolean = false;
     if (this.actionName === 'update') {
-      warnAboutScriptUpdate = StandardScriptUpdater.update(this.rushConfiguration);
+      warnAboutScriptUpdate = await StandardScriptUpdater.updateAsync(this.rushConfiguration);
     } else {
-      StandardScriptUpdater.validate(this.rushConfiguration);
+      await StandardScriptUpdater.validateAsync(this.rushConfiguration);
     }
 
     this.eventHooksManager.handle(
@@ -141,8 +134,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
+    const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = await import(
+      /* webpackChunkName: 'InstallManagerFactory' */
+      '../../logic/InstallManagerFactory'
+    );
     const installManager: BaseInstallManager =
-      installManagerFactoryModule.InstallManagerFactory.getInstallManager(
+      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
         this.rushConfiguration,
         this.rushGlobalFolder,
         purgeManager,
@@ -155,7 +152,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
       if (warnAboutScriptUpdate) {
         console.log(
-          os.EOL +
+          '\n' +
             colors.yellow(
               'Rush refreshed some files in the "common/scripts" folder.' +
                 '  Please commit this change to Git.'
@@ -164,7 +161,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       }
 
       console.log(
-        os.EOL + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+        '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
       );
     } catch (error) {
       installSuccessful = false;

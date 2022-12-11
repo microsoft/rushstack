@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { FileSystem, FileConstants, AlreadyReportedError, Async } from '@rushstack/node-core-library';
@@ -64,9 +63,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
-    console.log(
-      os.EOL + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder)
-    );
+    console.log('\n' + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder));
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -219,7 +216,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Now validate that the shrinkwrap file matches what is in the package.json
-      if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject, this.options.variant)) {
+      if (await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, this.options.variant)) {
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
         );
@@ -310,23 +307,23 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     this.pushConfigurationArgs(installArgs, this.options);
 
     console.log(
-      os.EOL +
+      '\n' +
         colors.bold(
           `Running "${this.rushConfiguration.packageManager} install" in` +
             ` ${this.rushConfiguration.commonTempFolder}`
         ) +
-        os.EOL
+        '\n'
     );
 
     // If any diagnostic options were specified, then show the full command-line
     if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
       console.log(
-        os.EOL +
+        '\n' +
           colors.green('Invoking package manager: ') +
           FileSystem.getRealPath(packageManagerFilename) +
           ' ' +
           installArgs.join(' ') +
-          os.EOL
+          '\n'
       );
     }
 

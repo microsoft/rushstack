@@ -37,16 +37,21 @@ export type IPnpmLog = LogBase & {
 };
 
 /**
+ * The 'hooks' property of the pnpmfile
+ */
+export interface IPnpmfileHooks {
+  afterAllResolved?: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => IPnpmShrinkwrapYaml;
+  readPackage?: (pkg: IPackageJson, context: IPnpmfileContext) => IPackageJson;
+  /**
+   * @remarks
+   * This function is not supported by PNPM versions before 6.17.0.
+   */
+  filterLog?: (log: IPnpmLog) => boolean;
+}
+
+/**
  * The pnpmfile, as defined by the pnpmfile API contract.
  */
 export interface IPnpmfile {
-  hooks?: {
-    afterAllResolved?: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => IPnpmShrinkwrapYaml;
-    readPackage?: (pkg: IPackageJson, context: IPnpmfileContext) => IPackageJson;
-    /**
-     * @remarks
-     * This function is not supported by PNPM versions before 6.17.0.
-     */
-    filterLog?: (log: IPnpmLog) => boolean;
-  };
+  hooks?: IPnpmfileHooks;
 }

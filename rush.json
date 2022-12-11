@@ -443,10 +443,10 @@
       "versionPolicyName": "rush"
     },
     {
-      "packageName": "@rushstack/rush-sdk",
-      "projectFolder": "libraries/rush-sdk",
+      "packageName": "@rushstack/trace-import",
+      "projectFolder": "apps/trace-import",
       "reviewCategory": "libraries",
-      "versionPolicyName": "rush"
+      "shouldPublish": true
     },
 
     // "build-tests" folder (alphabetical order)
@@ -897,6 +897,12 @@
     {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "libraries/rush-lib",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
+      "packageName": "@rushstack/rush-sdk",
+      "projectFolder": "libraries/rush-sdk",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },

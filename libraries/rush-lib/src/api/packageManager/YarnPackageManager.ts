@@ -10,8 +10,6 @@ import { PackageManager } from './PackageManager';
 export class YarnPackageManager extends PackageManager {
   /** @internal */
   public constructor(version: string) {
-    super(version, 'yarn');
-
-    this._shrinkwrapFilename = RushConstants.yarnShrinkwrapFilename;
+    super(version, 'yarn', RushConstants.yarnShrinkwrapFilename);
   }
 }

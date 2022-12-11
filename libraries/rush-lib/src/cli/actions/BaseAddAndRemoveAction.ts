@@ -70,7 +70,9 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
-    const packageJsonUpdater: typeof PackageJsonUpdaterType = await import('../../logic/PackageJsonUpdater');
+    const packageJsonUpdater: typeof PackageJsonUpdaterType = await import(
+      /* webpackChunkName: 'PackageJsonUpdater' */ '../../logic/PackageJsonUpdater'
+    );
     const updater: PackageJsonUpdaterType.PackageJsonUpdater = new packageJsonUpdater.PackageJsonUpdater(
       this.rushConfiguration,
       this.rushGlobalFolder

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/node-core-library",
-  "version": "3.53.2",
+  "version": "3.53.3",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
@@ -21,7 +21,7 @@
     "fs-extra": "~7.0.1",
     "import-lazy": "~4.0.0",
     "jju": "~1.4.0",
-    "resolve": "~1.17.0",
+    "resolve": "~1.22.1",
     "semver": "~7.3.0",
     "z-schema": "~5.0.2"
   },
@@ -32,7 +32,7 @@
     "@types/fs-extra": "7.0.0",
     "@types/heft-jest": "1.0.1",
     "@types/jju": "1.4.1",
-    "@types/resolve": "1.17.1",
+    "@types/resolve": "1.20.2",
     "@types/semver": "7.3.5"
   }
 }

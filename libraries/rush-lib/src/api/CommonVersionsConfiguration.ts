@@ -11,8 +11,10 @@ import {
   FileSystem,
   Sort
 } from '@rushstack/node-core-library';
+
 import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
+import schemaJson from '../schemas/common-versions.schema.json';
 
 /**
  * Part of the ICommonVersionsJson structure.
@@ -55,30 +57,73 @@ interface ICommonVersionsJson {
  * @public
  */
 export class CommonVersionsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/common-versions.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _filePath: string;
   private _preferredVersions: ProtectableMap<string, string>;
-  private _implicitlyPreferredVersions: boolean | undefined;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
   private _modified: boolean = false;
+
+  /**
+   * Get the absolute file path of the common-versions.json file.
+   */
+  public readonly filePath: string;
+
+  /**
+   * When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions,
+   * except in cases where different projects specify different version ranges for a given dependency.  For older
+   * package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause
+   * trouble for indirect dependencies with incompatible peerDependencies ranges.
+   *
+   * If the value is `undefined`, then the default value is `true`.
+   */
+  public readonly implicitlyPreferredVersions: boolean | undefined;
+
+  /**
+   * A table that specifies a "preferred version" for a given NPM package.  This feature is typically used
+   * to hold back an indirect dependency to a specific older version, or to reduce duplication of indirect dependencies.
+   *
+   * @remarks
+   * The "preferredVersions" value can be any SemVer range specifier (e.g. `~1.2.3`).  Rush injects these values into
+   * the "dependencies" field of the top-level common/temp/package.json, which influences how the package manager
+   * will calculate versions.  The specific effect depends on your package manager.  Generally it will have no
+   * effect on an incompatible or already constrained SemVer range.  If you are using PNPM, similar effects can be
+   * achieved using the pnpmfile.js hook.  See the Rush documentation for more details.
+   *
+   * After modifying this field, it's recommended to run `rush update --full` so that the package manager
+   * will recalculate all version selections.
+   */
+  public readonly preferredVersions: Map<string, string>;
+
+  /**
+   * A table that stores, for a given dependency, a list of SemVer ranges that will be accepted
+   * by "rush check" in addition to the normal version range.
+   *
+   * @remarks
+   * The "rush check" command can be used to enforce that every project in the repo
+   * must specify the same SemVer range for a given dependency.  However, sometimes
+   * exceptions are needed.  The allowedAlternativeVersions table allows you to list
+   * other SemVer ranges that will be accepted by "rush check" for a given dependency.
+   * Note that the normal version range (as inferred by looking at all projects in the repo)
+   * should NOT be included in this list.
+   */
+  public readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
 
   private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
     this._preferredVersions = new ProtectableMap<string, string>({
       onSet: this._onSetPreferredVersions.bind(this)
     });
+    this.preferredVersions = this._preferredVersions.protectedView;
 
     if (commonVersionsJson && commonVersionsJson.implicitlyPreferredVersions !== undefined) {
-      this._implicitlyPreferredVersions = commonVersionsJson.implicitlyPreferredVersions;
+      this.implicitlyPreferredVersions = commonVersionsJson.implicitlyPreferredVersions;
     } else {
-      this._implicitlyPreferredVersions = undefined;
+      this.implicitlyPreferredVersions = undefined;
     }
 
     this._allowedAlternativeVersions = new ProtectableMap<string, string[]>({
       onSet: this._onSetAllowedAlternativeVersions.bind(this)
     });
+    this.allowedAlternativeVersions = this._allowedAlternativeVersions.protectedView;
 
     if (commonVersionsJson) {
       try {
@@ -94,7 +139,7 @@ export class CommonVersionsConfiguration {
         throw new Error(`Error loading "${path.basename(filePath)}": ${(e as Error).message}`);
       }
     }
-    this._filePath = filePath;
+    this.filePath = filePath;
   }
 
   /**
@@ -135,13 +180,6 @@ export class CommonVersionsConfiguration {
   }
 
   /**
-   * Get the absolute file path of the common-versions.json file.
-   */
-  public get filePath(): string {
-    return this._filePath;
-  }
-
-  /**
    * Get a sha1 hash of the preferred versions.
    */
   public getPreferredVersionsHash(): string {
@@ -162,58 +200,12 @@ export class CommonVersionsConfiguration {
    */
   public save(): boolean {
     if (this._modified) {
-      JsonFile.save(this._serialize(), this._filePath, { updateExistingFile: true });
+      JsonFile.save(this._serialize(), this.filePath, { updateExistingFile: true });
       this._modified = false;
       return true;
     }
 
     return false;
-  }
-
-  /**
-   * A table that specifies a "preferred version" for a given NPM package.  This feature is typically used
-   * to hold back an indirect dependency to a specific older version, or to reduce duplication of indirect dependencies.
-   *
-   * @remarks
-   * The "preferredVersions" value can be any SemVer range specifier (e.g. `~1.2.3`).  Rush injects these values into
-   * the "dependencies" field of the top-level common/temp/package.json, which influences how the package manager
-   * will calculate versions.  The specific effect depends on your package manager.  Generally it will have no
-   * effect on an incompatible or already constrained SemVer range.  If you are using PNPM, similar effects can be
-   * achieved using the pnpmfile.js hook.  See the Rush documentation for more details.
-   *
-   * After modifying this field, it's recommended to run `rush update --full` so that the package manager
-   * will recalculate all version selections.
-   */
-  public get preferredVersions(): Map<string, string> {
-    return this._preferredVersions.protectedView;
-  }
-
-  /**
-   * When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions,
-   * except in cases where different projects specify different version ranges for a given dependency.  For older
-   * package managers, this tended to reduce duplication of indirect dependencies.  However, it can sometimes cause
-   * trouble for indirect dependencies with incompatible peerDependencies ranges.
-   *
-   * If the value is `undefined`, then the default value is `true`.
-   */
-  public get implicitlyPreferredVersions(): boolean | undefined {
-    return this._implicitlyPreferredVersions;
-  }
-
-  /**
-   * A table that stores, for a given dependency, a list of SemVer ranges that will be accepted
-   * by "rush check" in addition to the normal version range.
-   *
-   * @remarks
-   * The "rush check" command can be used to enforce that every project in the repo
-   * must specify the same SemVer range for a given dependency.  However, sometimes
-   * exceptions are needed.  The allowedAlternativeVersions table allows you to list
-   * other SemVer ranges that will be accepted by "rush check" for a given dependency.
-   * Note that the normal version range (as inferred by looking at all projects in the repo)
-   * should NOT be included in this list.
-   */
-  public get allowedAlternativeVersions(): Map<string, ReadonlyArray<string>> {
-    return this._allowedAlternativeVersions.protectedView;
   }
 
   /**

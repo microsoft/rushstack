@@ -31,6 +31,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import { matchesWithStar } from './Utils';
+import { scriptsFolderName } from '../../utilities/PathConstants';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -664,7 +665,7 @@ export class DeployManager {
     if (deployState.scenarioConfiguration.json.linkCreation === 'script') {
       console.log('Copying create-links.js');
       FileSystem.copyFile({
-        sourcePath: path.join(__dirname, '../../scripts/create-links.js'),
+        sourcePath: `${scriptsFolderName}/create-links.js`,
         destinationPath: path.join(deployState.targetRootFolder, 'create-links.js'),
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
@@ -787,7 +788,7 @@ export class DeployManager {
       symlinkAnalyzer: new SymlinkAnalyzer(),
       pnpmfileConfiguration:
         this._rushConfiguration.packageManager === 'pnpm'
-          ? new PnpmfileConfiguration(this._rushConfiguration)
+          ? await PnpmfileConfiguration.initializeAsync(this._rushConfiguration)
           : undefined,
       createArchiveFilePath
     };

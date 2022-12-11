@@ -21,20 +21,17 @@ export enum DependencyType {
  * @public
  */
 export class PackageJsonDependency {
-  private _type: DependencyType;
-  private _name: string;
   private _version: string;
   private _onChange: () => void;
 
-  public constructor(name: string, version: string, type: DependencyType, onChange: () => void) {
-    this._name = name;
-    this._version = version;
-    this._type = type;
-    this._onChange = onChange;
-  }
+  public readonly name: string;
+  public readonly dependencyType: DependencyType;
 
-  public get name(): string {
-    return this._name;
+  public constructor(name: string, version: string, type: DependencyType, onChange: () => void) {
+    this.name = name;
+    this._version = version;
+    this.dependencyType = type;
+    this._onChange = onChange;
   }
 
   public get version(): string {
@@ -48,17 +45,12 @@ export class PackageJsonDependency {
     this._version = newVersion;
     this._onChange();
   }
-
-  public get dependencyType(): DependencyType {
-    return this._type;
-  }
 }
 
 /**
  * @public
  */
 export class PackageJsonEditor {
-  private readonly _filePath: string;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
   // NOTE: The "devDependencies" section is tracked separately because sometimes people
   // will specify a specific version for development, while *also* specifying a broader
@@ -72,8 +64,10 @@ export class PackageJsonEditor {
   private _modified: boolean;
   private _sourceData: IPackageJson;
 
+  public readonly filePath: string;
+
   private constructor(filepath: string, data: IPackageJson) {
-    this._filePath = filepath;
+    this.filePath = filepath;
     this._sourceData = data;
     this._modified = false;
 
@@ -183,10 +177,6 @@ export class PackageJsonEditor {
     return this._sourceData.version;
   }
 
-  public get filePath(): string {
-    return this._filePath;
-  }
-
   /**
    * The list of dependencies of type DependencyType.Regular, DependencyType.Optional, or DependencyType.Peer.
    */
@@ -277,7 +267,7 @@ export class PackageJsonEditor {
     if (this._modified) {
       this._modified = false;
       this._sourceData = this._normalize(this._sourceData);
-      JsonFile.save(this._sourceData, this._filePath, { updateExistingFile: true });
+      JsonFile.save(this._sourceData, this.filePath, { updateExistingFile: true });
       return true;
     }
     return false;

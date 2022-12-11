@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { IPolicyValidatorOptions } from './PolicyValidator';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
@@ -18,7 +16,7 @@ export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorO
  */
 export class ShrinkwrapFilePolicy {
   public static validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions): void {
-    console.log('Validating package manager shrinkwrap file.' + os.EOL);
+    console.log('Validating package manager shrinkwrap file.\n');
     const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
       rushConfiguration.packageManager,
       rushConfiguration.packageManagerOptions,
@@ -26,7 +24,7 @@ export class ShrinkwrapFilePolicy {
     );
 
     if (!shrinkwrapFile) {
-      console.log('Shrinkwrap file could not be found, skipping validation.' + os.EOL);
+      console.log('Shrinkwrap file could not be found, skipping validation.\n');
       return;
     }
 
