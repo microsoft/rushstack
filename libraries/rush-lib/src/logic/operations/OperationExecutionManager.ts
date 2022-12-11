@@ -146,7 +146,11 @@ export class OperationExecutionManager {
 
       if (!this._quietMode) {
         if (this._projectLogFooter && this._lastTask) {
-          this._terminal.writeStdoutLine(this._projectLogFooter.replace(/\$\{taskName\}/g, this._lastTask));
+          this._terminal.writeStdoutLine(
+            this._injectValues(this._projectLogFooter, {
+              taskName: this._lastTask
+            })
+          );
         }
       }
 
@@ -156,7 +160,11 @@ export class OperationExecutionManager {
         this._terminal.writeStdoutLine('');
 
         if (this._projectLogHeader) {
-          this._terminal.writeStdoutLine(this._projectLogHeader.replace(/\$\{taskName\}/g, writer.taskName));
+          this._terminal.writeStdoutLine(
+            this._injectValues(this._projectLogHeader, {
+              taskName: writer.taskName
+            })
+          );
         }
       }
 
@@ -222,7 +230,11 @@ export class OperationExecutionManager {
 
     if (!this._quietMode) {
       if (this._projectLogFooter && this._lastTask) {
-        this._terminal.writeStdoutLine(this._projectLogFooter.replace(/\$\{taskName\}/g, this._lastTask));
+        this._terminal.writeStdoutLine(
+          this._injectValues(this._projectLogFooter, {
+            taskName: this._lastTask
+          })
+        );
       }
     }
 
@@ -356,5 +368,16 @@ export class OperationExecutionManager {
       // Remove this operation from the dependencies, to unblock the scheduler
       item.dependencies.delete(record);
     }
+  }
+
+  private _injectValues(line: string, replacements: Record<string, string>) {
+    for (const key of Object.keys(replacements)) {
+      const searchKey = '[' + key + ']';
+      while (line.indexOf(searchKey) >= 0) {
+        line = line.replace(searchKey, replacements[key]);
+      }
+    }
+
+    return line;
   }
 }

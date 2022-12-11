@@ -1,0 +1,36 @@
+/**
+ * This configuration file provides additional logging configuration and
+ * customization options.
+ * More documentation is available on the Rush website: https://rushjs.io
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/logging.schema.json",
+
+  /**
+   * A list of supported log folding styles. To enable log folding, set the RUSH_LOG_FOLDING_STYLE
+   * environment variable to the name of one of the styles defined below.
+   *
+   * The header and footer values offer a small set of injected values, which can be specified
+   * with the following tags:
+   *
+   *   - `[taskName]` - insert the name of the current task
+   *
+   */
+  "logFoldingStyles": [
+    {
+      "name": "github-actions",
+      "header": "::group::[taskName]",
+      "footer": "::endgroup::"
+    },
+    {
+      "name": "azure-devops",
+      "header": "##[group][taskName]",
+      "footer": "##[endgroup]"
+    },
+    {
+      "name": "travis-ci",
+      "header": "travis_fold:start:[taskName]",
+      "footer": "travis_fold:end:[taskName]"
+    }
+  ]
+}
