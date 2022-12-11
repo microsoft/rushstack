@@ -149,13 +149,12 @@ export class EnvironmentConfiguration {
     static get buildCacheCredential(): string | undefined;
     static get buildCacheEnabled(): boolean | undefined;
     static get buildCacheWriteAllowed(): boolean | undefined;
-    static get buildFoldingFooter(): string | undefined;
-    static get buildFoldingHeader(): string | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
     static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
     static get gitBinaryPath(): string | undefined;
+    static get logFoldingStyle(): string | undefined;
     // (undocumented)
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
     static get pnpmStorePathOverride(): string | undefined;
@@ -175,13 +174,11 @@ export enum EnvironmentVariableNames {
     RUSH_BUILD_CACHE_CREDENTIAL = "RUSH_BUILD_CACHE_CREDENTIAL",
     RUSH_BUILD_CACHE_ENABLED = "RUSH_BUILD_CACHE_ENABLED",
     RUSH_BUILD_CACHE_WRITE_ALLOWED = "RUSH_BUILD_CACHE_WRITE_ALLOWED",
-    // (undocumented)
-    RUSH_BUILD_FOLDING_FOOTER = "RUSH_BUILD_FOLDING_FOOTER",
-    RUSH_BUILD_FOLDING_HEADER = "RUSH_BUILD_FOLDING_HEADER",
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
     RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
+    RUSH_LOG_FOLDING_STYLE = "RUSH_LOG_FOLDING_STYLE",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PNPM_VERIFY_STORE_INTEGRITY = "RUSH_PNPM_VERIFY_STORE_INTEGRITY",
@@ -926,6 +923,7 @@ export class RushConstants {
     static readonly experimentsFilename: string;
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: string;
+    static readonly loggingConfigFilename: string;
     static readonly nodeModulesFolderName: string;
     static readonly nonbrowserApprovedPackagesFilename: string;
     static readonly npmShrinkwrapFilename: string;

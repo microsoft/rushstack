@@ -25,6 +25,7 @@ import { EnvironmentVariableNames, EnvironmentConfiguration } from '../../api/En
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import { LoggingConfiguration, ILogFoldingStyle } from '../../api/LoggingConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
 import { Operation } from '../../logic/operations/Operation';
@@ -307,6 +308,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
     }
 
+    const loggingConfiguration: LoggingConfiguration = LoggingConfiguration.load(this.rushConfiguration);
+
     const projectSelection: Set<RushConfigurationProject> =
       await this._selectionParameters.getSelectedProjectsAsync(terminal);
 
@@ -340,10 +343,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism,
-      changedProjectsOnly,
-      projectLogHeader: EnvironmentConfiguration.buildFoldingHeader,
-      projectLogFooter: EnvironmentConfiguration.buildFoldingFooter
+      changedProjectsOnly
     };
+
+    if (EnvironmentConfiguration.logFoldingStyle) {
+      const style: ILogFoldingStyle = loggingConfiguration.getLogFoldingStyleByName(
+        EnvironmentConfiguration.logFoldingStyle
+      );
+      executionManagerOptions.projectLogHeader = style.header;
+      executionManagerOptions.projectLogFooter = style.footer;
+    }
 
     const internalOptions: IRunPhasesOptions = {
       initialCreateOperationsContext,

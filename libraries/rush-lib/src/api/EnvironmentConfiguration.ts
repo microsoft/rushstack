@@ -154,42 +154,11 @@ export enum EnvironmentVariableNames {
   RUSH_TAR_BINARY_PATH = 'RUSH_TAR_BINARY_PATH',
 
   /**
-   * If defined, when Rush runs any bulk or phased command in verbose mode, this line will be
-   * printed above the build output. The following variables are provided as interpolated values
-   * if desired:
-   *
-   *   - `${taskName}` - the name of the task being executed (as printed in the header)
-   *
-   * This value is useful for folding long build output in CI environments. Here are some suggested
-   * values for this environment variable:
-   *
-   *   - GitHub Actions:
-   *     - `::group::${taskName}`
-   *   - Azure Devops:
-   *     - `##[group]${taskName}`
-   *   - Travis CI:
-   *     - `travis_fold:start:${taskName}`
+   * If defined, when Rush runs any bulk or phased command in verbose mode, operations will
+   * be wrapped in the folding header and footer defined for this style in the `logging.json`
+   * configuration file.
    */
-  RUSH_BUILD_FOLDING_HEADER = 'RUSH_BUILD_FOLDING_HEADER',
-
-  /*
-   * If defined, when Rush runs any bulk or phased command in verbose mode, this line will be
-   * printed below the build output. The following variables are provided as interpolated values
-   * if desired:
-   *
-   *   - `${taskName}` - the name of the task being executed (as printed in the header)
-   *
-   * This value is useful for folding long build output in CI environments. Here are some suggested
-   * values for this environment variable:
-   *
-   *   - GitHub Actions:
-   *     - `::endgroup::`
-   *   - Azure Devops:
-   *     - `##[endgroup]`
-   *   - Travis CI:
-   *     - `travis_fold:end:${taskName}`
-   */
-  RUSH_BUILD_FOLDING_FOOTER = 'RUSH_BUILD_FOLDING_FOOTER',
+  RUSH_LOG_FOLDING_STYLE = 'RUSH_LOG_FOLDING_STYLE',
 
   /**
    * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
@@ -238,9 +207,7 @@ export class EnvironmentConfiguration {
 
   private static _tarBinaryPath: string | undefined;
 
-  private static _buildFoldingHeader: string | undefined;
-
-  private static _buildFoldingFooter: string | undefined;
+  private static _logFoldingStyle: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -354,23 +321,13 @@ export class EnvironmentConfiguration {
   }
 
   /**
-   * If defined, when Rush runs any bulk or phased command in verbose mode, this line will be
-   * printed above the build output.
-   * See {@link EnvironmentVariableNames.RUSH_BUILD_FOLDING_HEADER}
+   * If defined, when Rush runs any bulk or phased command in verbose mode, the selected log
+   * folding style will be used to print a header and footer above and below the build output.
+   * See {@link EnvironmentVariableNames.RUSH_LOG_FOLDING_STYLE}
    */
-  public static get buildFoldingHeader(): string | undefined {
+  public static get logFoldingStyle(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._buildFoldingHeader;
-  }
-
-  /**
-   * If defined, when Rush runs any bulk or phased command in verbose mode, this line will be
-   * printed below the build output.
-   * See {@link EnvironmentVariableNames.RUSH_BUILD_FOLDING_FOOTER}
-   */
-  public static get buildFoldingFooter(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._buildFoldingFooter;
+    return EnvironmentConfiguration._logFoldingStyle;
   }
 
   /**
@@ -495,13 +452,8 @@ export class EnvironmentConfiguration {
             break;
           }
 
-          case EnvironmentVariableNames.RUSH_BUILD_FOLDING_HEADER: {
-            EnvironmentConfiguration._buildFoldingHeader = value;
-            break;
-          }
-
-          case EnvironmentVariableNames.RUSH_BUILD_FOLDING_FOOTER: {
-            EnvironmentConfiguration._buildFoldingFooter = value;
+          case EnvironmentVariableNames.RUSH_LOG_FOLDING_STYLE: {
+            EnvironmentConfiguration._logFoldingStyle = value;
             break;
           }
 

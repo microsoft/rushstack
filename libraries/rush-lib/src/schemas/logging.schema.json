@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush logging.json config file",
+  "description": "For use with the Rush tool, this configuration file manages logging configuration and customization options. See http://rushjs.io for details.",
+
+  "definitions": {
+    "logFoldingStyle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "title": "Style Name",
+          "description": "The name of this log folding style. Enabled using the RUSH_LOG_FOLDING_STYLE environment variable.",
+          "type": "string"
+        },
+        "header": {
+          "title": "Folding Header",
+          "description": "If provided, this string is printed at the beginning of each folding section.",
+          "type": "string"
+        },
+        "footer": {
+          "title": "Folding Footer",
+          "description": "If provided, this string is printed at the end of each folding section.",
+          "type": "string"
+        }
+      }
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to.  Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "logFoldingStyles": {
+      "title": "Log Folding Styles",
+      "description": "A list of supported log folding styles. To enable log folding, set the RUSH_LOG_FOLDING_STYLE environment variable to one of the named folding styles in this list.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/logFoldingStyle"
+      }
+    }
+  },
+
+  "additionalProperties": false,
+  "required": ["logFoldingStyles"]
+}
