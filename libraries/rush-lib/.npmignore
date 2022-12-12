@@ -29,7 +29,4 @@
 
 # (Add your project-specific overrides here)
 !/assets/**
-/lib/__mocks__/**
-/lib/logic/pnpm/PnpmfileShim*
-/lib/scripts/**
-/lib-esnext/**
+/lib-*/**
