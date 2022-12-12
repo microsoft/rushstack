@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/package-deps-hash",
-      "comment": "Add getRepoStateAsync API for faster repository state calculation.",
-      "type": "minor"
+      "comment": "Add getRepoStateAsync API for faster repository state calculation. Remove synchronous getRepoState API.",
+      "type": "major"
     }
   ],
   "packageName": "@rushstack/package-deps-hash"

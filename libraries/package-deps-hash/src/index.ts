@@ -18,7 +18,6 @@ export {
   IFileDiffStatus,
   getRepoChanges,
   getRepoRoot,
-  getRepoState,
   getRepoStateAsync,
   ensureGitMinimumVersion
 } from './getRepoState';

@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-import { getRepoState, parseGitLsTree, getRepoRoot } from '../getRepoState';
+import { getRepoStateAsync, parseGitLsTree, getRepoRoot } from '../getRepoState';
 
 import { FileSystem, FileConstants } from '@rushstack/node-core-library';
 
@@ -83,9 +83,9 @@ describe(parseGitLsTree.name, () => {
   });
 });
 
-describe(getRepoState.name, () => {
-  it('can parse committed files', () => {
-    const results: Map<string, string> = getRepoState(__dirname);
+describe(getRepoStateAsync.name, () => {
+  it('can parse committed files', async () => {
+    const results: Map<string, string> = await getRepoStateAsync(__dirname);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
     const expectedFiles: Map<string, string> = new Map(
       Object.entries({
@@ -104,12 +104,12 @@ describe(getRepoState.name, () => {
     expect(filteredResults.size).toEqual(expectedFiles.size);
   });
 
-  it('can handle adding one file', () => {
+  it('can handle adding one file', async () => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
 
-    const results: Map<string, string> = getRepoState(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(__dirname);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -134,14 +134,14 @@ describe(getRepoState.name, () => {
     }
   });
 
-  it('can handle adding two files', () => {
+  it('can handle adding two files', async () => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'b.txt');
 
     FileSystem.writeFile(tempFilePath1, 'a');
     FileSystem.writeFile(tempFilePath2, 'a');
 
-    const results: Map<string, string> = getRepoState(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(__dirname);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -168,12 +168,12 @@ describe(getRepoState.name, () => {
     }
   });
 
-  it('can handle removing one file', () => {
+  it('can handle removing one file', async () => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.deleteFile(testFilePath);
 
-    const results: Map<string, string> = getRepoState(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(__dirname);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -199,12 +199,12 @@ describe(getRepoState.name, () => {
     }
   });
 
-  it('can handle changing one file', () => {
+  it('can handle changing one file', async () => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.writeFile(testFilePath, 'abc');
 
-    const results: Map<string, string> = getRepoState(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(__dirname);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -231,7 +231,7 @@ describe(getRepoState.name, () => {
     }
   });
 
-  it('can handle uncommitted filenames with spaces and non-ASCII characters', () => {
+  it('can handle uncommitted filenames with spaces and non-ASCII characters', async () => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a file.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'a  file name.txt');
     const tempFilePath3: string = path.join(TEST_PROJECT_PATH, 'newFile批把.txt');
@@ -240,7 +240,7 @@ describe(getRepoState.name, () => {
     FileSystem.writeFile(tempFilePath2, 'a');
     FileSystem.writeFile(tempFilePath3, 'a');
 
-    const results: Map<string, string> = getRepoState(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(__dirname);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -266,6 +266,38 @@ describe(getRepoState.name, () => {
       FileSystem.deleteFile(tempFilePath1);
       FileSystem.deleteFile(tempFilePath2);
       FileSystem.deleteFile(tempFilePath3);
+    }
+  });
+
+  it('handles requests for additional files', async () => {
+    const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'log.log');
+
+    FileSystem.writeFile(tempFilePath1, 'a');
+
+    const results: Map<string, string> = await getRepoStateAsync(__dirname, [
+      `${TEST_PREFIX}testProject/log.log`
+    ]);
+    const filteredResults: Map<string, string> = getRelevantEntries(results);
+
+    try {
+      const expectedFiles: Map<string, string> = new Map(
+        Object.entries({
+          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
+          'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
+          'testProject/log.log': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
+          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
+        })
+      );
+
+      for (const [filePath, hash] of expectedFiles) {
+        expect(filteredResults.get(filePath)).toEqual(hash);
+      }
+      expect(filteredResults.size).toEqual(expectedFiles.size);
+    } finally {
+      FileSystem.deleteFile(tempFilePath1);
     }
   });
 });

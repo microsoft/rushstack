@@ -76,6 +76,40 @@ export function parseGitLsTree(output: string): IGitTreeState {
 }
 
 /**
+ * Parses the output of `git hash-object`
+ * yields [filePath, hash] pairs.
+ * @internal
+ */
+export function* parseGitHashObject(
+  output: string,
+  filePaths: ReadonlyArray<string>
+): Iterable<[string, string]> {
+  output = output.trim();
+
+  let last: number = 0;
+  let i: number = 0;
+  let index: number = output.indexOf('\n', last);
+  const expected: number = filePaths.length;
+  for (; i < expected && index > 0; i++) {
+    const hash: string = output.slice(last, index);
+    yield [filePaths[i], hash];
+    last = index + 1;
+    index = output.indexOf('\n', last);
+  }
+
+  // Handle last line
+  if (index < 0) {
+    const hash: string = output.slice(last);
+    yield [filePaths[i], hash];
+    i++;
+  }
+
+  if (i < expected) {
+    throw new Error(`Expected ${expected} hashes from "git hash-object" but only received ${i}`);
+  }
+}
+
+/**
  * Information about the changes to a file.
  * @beta
  */
@@ -204,80 +238,6 @@ export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): 
 }
 
 /**
- * Augments the state value with modifications that are not in the index.
- * @param rootDirectory - The root directory of the Git repository
- * @param state - The current map of git path -> object hash. Will be mutated.
- * @param gitPath - The path to the Git executable
- * @internal
- */
-export function applyWorkingTreeState(
-  rootDirectory: string,
-  state: Map<string, string>,
-  gitPath?: string
-): void {
-  const statusResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-    gitPath || 'git',
-    ['--no-optional-locks', 'status', '-z', '-u', '--no-renames', '--ignore-submodules', '--'],
-    {
-      currentWorkingDirectory: rootDirectory
-    }
-  );
-
-  if (statusResult.status !== 0) {
-    ensureGitMinimumVersion(gitPath);
-
-    throw new Error(`git status exited with status ${statusResult.status}: ${statusResult.stderr}`);
-  }
-
-  const locallyModified: Map<string, boolean> = parseGitStatus(statusResult.stdout);
-
-  const filesToHash: string[] = [];
-  for (const [filePath, exists] of locallyModified) {
-    if (exists) {
-      filesToHash.push(filePath);
-    } else {
-      state.delete(filePath);
-    }
-  }
-
-  if (filesToHash.length) {
-    // Use --stdin-paths arg to pass the list of files to git in order to avoid issues with
-    // command length
-    const hashObjectResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-      gitPath || 'git',
-      ['hash-object', '--stdin-paths'],
-      { currentWorkingDirectory: rootDirectory, input: filesToHash.join('\n') }
-    );
-
-    if (hashObjectResult.status !== 0) {
-      ensureGitMinimumVersion(gitPath);
-
-      throw new Error(
-        `git hash-object exited with status ${hashObjectResult.status}: ${hashObjectResult.stderr}`
-      );
-    }
-
-    const hashStdout: string = hashObjectResult.stdout.trim();
-
-    // The result of "git hash-object" will be a list of file hashes delimited by newlines
-    const hashes: string[] = hashStdout.split('\n');
-
-    if (hashes.length !== filesToHash.length) {
-      throw new Error(
-        `Passed ${filesToHash.length} file paths to Git to hash, but received ${hashes.length} hashes.`
-      );
-    }
-
-    const len: number = hashes.length;
-    for (let i: number = 0; i < len; i++) {
-      const hash: string = hashes[i];
-      const filePath: string = filesToHash[i];
-      state.set(filePath, hash);
-    }
-  }
-}
-
-/**
  * Helper function for async process invocation with optional stdin support.
  * @param gitPath - Path to the Git executable
  * @param args - The process arguments
@@ -383,6 +343,11 @@ export async function getRepoStateAsync(
     locallyModifiedPromise
   ]);
 
+  // The result of "git hash-object" will be a list of file hashes delimited by newlines
+  for (const [filePath, hash] of parseGitHashObject(hashObject, hashPaths)) {
+    files.set(filePath, hash);
+  }
+
   // Existence check for the .gitmodules file
   const hasSubmodules: boolean = submodules.size > 0 && FileSystem.exists(`${rootDirectory}/.gitmodules`);
 
@@ -401,67 +366,7 @@ export async function getRepoStateAsync(
     }
   }
 
-  // The result of "git hash-object" will be a list of file hashes delimited by newlines
-  const hashes: string[] = hashObject.trim().split('\n');
-
-  if (hashes.length !== hashPaths.length) {
-    throw new Error(
-      `Passed ${hashPaths.length} file paths to Git to hash, but received ${hashes.length} hashes.`
-    );
-  }
-
-  const len: number = hashes.length;
-  for (let i: number = 0; i < len; i++) {
-    const hash: string = hashes[i];
-    const filePath: string = hashPaths[i];
-    files.set(filePath, hash);
-  }
-
   return files;
-}
-
-/**
- * Gets the object hashes for all files in the Git repo, combining the current commit with working tree state.
- * @param currentWorkingDirectory - The working directory. Only used to find the repository root.
- * @param gitPath - The path to the Git executable
- * @beta
- */
-export function getRepoState(currentWorkingDirectory: string, gitPath?: string): Map<string, string> {
-  const rootDirectory: string = getRepoRoot(currentWorkingDirectory, gitPath);
-
-  const lsTreeResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-    gitPath || 'git',
-    ['--no-optional-locks', 'ls-tree', '-r', '-z', '--full-name', 'HEAD', '--'],
-    {
-      currentWorkingDirectory: rootDirectory
-    }
-  );
-
-  if (lsTreeResult.status !== 0) {
-    ensureGitMinimumVersion(gitPath);
-
-    throw new Error(`git ls-tree exited with status ${lsTreeResult.status}: ${lsTreeResult.stderr}`);
-  }
-
-  const { files, submodules } = parseGitLsTree(lsTreeResult.stdout);
-
-  applyWorkingTreeState(rootDirectory, files, gitPath);
-
-  const state: Map<string, string> = files;
-
-  // Existence check for the .gitmodules file
-  const hasSubmodules: boolean = submodules.size > 0 && FileSystem.exists(`${rootDirectory}/.gitmodules`);
-
-  if (hasSubmodules) {
-    for (const submodulePath of submodules.keys()) {
-      const submoduleState: Map<string, string> = getRepoState(`${rootDirectory}/${submodulePath}`, gitPath);
-      for (const [filePath, hash] of submoduleState) {
-        state.set(`${submodulePath}/${filePath}`, hash);
-      }
-    }
-  }
-
-  return state;
 }
 
 /**
