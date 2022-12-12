@@ -55,8 +55,8 @@ export interface IStorybookPluginOptions {
   storykitPackageName: string;
 
   /**
-   * The module entry point that Heft should use to launch the Storybook toolchain.  Typically it
-   * is the path loaded the `start-storybook` shell script.
+   * The module entry point that Heft `start` command should use to launch the Storybook toolchain.
+   * Typically it is the path loaded the `start-storybook` shell script.
    *
    * @example
    * If you are using `@storybook/react`, then the startup path would be:
@@ -64,6 +64,17 @@ export interface IStorybookPluginOptions {
    * `"startupModulePath": "@storybook/react/bin/index.js"`
    */
   startupModulePath: string;
+
+  /**
+   * The module entry point that Heft `build` command should use to launch the Storybook toolchain.
+   * Typically it is the path loaded the `build-storybook` shell script.
+   *
+   * @example
+   * If you are using `@storybook/react`, then the startup path would be:
+   *
+   * `"startupModulePath": "@storybook/react/bin/build.js"`
+   */
+  staticBuildModulePath: string
 }
 
 /** @public */
@@ -72,8 +83,8 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
 
   private _logger!: ScopedLogger;
   private _storykitPackageName!: string;
-  private _startupModulePath!: string;
-  private _resolvedStartupModulePath!: string;
+  private _modulePath!: string;
+  private _resolvedModulePath!: string;
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -108,7 +119,6 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
           ` plugin option was not specified`
       );
     }
-    this._startupModulePath = options.startupModulePath;
 
     const storybookParameters: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
       associatedActionNames: ['start'],
@@ -117,13 +127,24 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
         '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to launch Storybook.'
     });
 
+    const storybookStaticBuildParameters: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
+      associatedActionNames: ['build'],
+      parameterLongName: '--storybook',
+      description:
+        '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to start static build Storybook.'
+    });
+
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      if (!storybookParameters.actionAssociated || !storybookParameters.value) {
+      if ((!storybookParameters.actionAssociated || !storybookParameters.value)
+        && (!storybookStaticBuildParameters.actionAssociated || !storybookStaticBuildParameters.value))
+      {
         this._logger.terminal.writeVerboseLine(
           'The command line does not include "--storybook", so bundling will proceed without Storybook'
         );
         return;
       }
+
+      this._modulePath = storybookStaticBuildParameters.actionAssociated ? options.staticBuildModulePath: options.startupModulePath;
 
       this._logger.terminal.writeVerboseLine(
         'The command line includes "--storybook", redirecting Webpack to Storybook'
@@ -177,17 +198,17 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
       );
     }
 
-    this._logger.terminal.writeVerboseLine(`Resolving startupModulePath "${this._startupModulePath}"`);
+    this._logger.terminal.writeVerboseLine(`Resolving startupModulePath "${this._modulePath}"`);
     try {
-      this._resolvedStartupModulePath = Import.resolveModule({
-        modulePath: this._startupModulePath,
+      this._resolvedModulePath = Import.resolveModule({
+        modulePath: this._modulePath,
         baseFolderPath: storykitModuleFolder
       });
     } catch (ex) {
       throw new Error(`The ${TASK_NAME} task cannot start: ` + (ex as Error).message);
     }
     this._logger.terminal.writeVerboseLine(
-      `Resolved startupModulePath is "${this._resolvedStartupModulePath}"`
+      `Resolved startupModulePath is "${this._resolvedModulePath}"`
     );
 
     // Example: "/path/to/my-project/.storybook"
@@ -220,7 +241,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
       heftConfiguration.terminalProvider,
       {
         buildFolder: heftConfiguration.buildFolder,
-        resolvedStartupModulePath: this._resolvedStartupModulePath
+        resolvedStartupModulePath: this._resolvedModulePath
       },
       // TODO: Extract SubprocessRunnerBase into a public API
       // eslint-disable-next-line
