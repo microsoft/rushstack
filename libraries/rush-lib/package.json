@@ -12,7 +12,7 @@
   },
   "engineStrict": true,
   "homepage": "https://rushjs.io",
-  "main": "dist/rush-lib.js",
+  "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
     "build": "heft build --clean",
