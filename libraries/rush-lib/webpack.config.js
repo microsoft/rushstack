@@ -1,16 +1,64 @@
 'use strict';
 
+const path = require('path');
 const webpack = require('webpack');
-const { PackageJsonLookup } = require('@rushstack/node-core-library');
+const { PackageJsonLookup, FileSystem, Path } = require('@rushstack/node-core-library');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
-const PathConstants = require('./lib/utilities/PathConstants');
+const PathConstants = require('./lib-commonjs/utilities/PathConstants');
 
-const scriptEntryOption = {
+const SCRIPT_ENTRY_OPTIONS = {
   filename: `${PathConstants.scriptsFolderName}/[name]`,
   library: {
     type: 'commonjs2'
   }
 };
+
+const EXPOSED_LIB_PATHS = [];
+function collectJsFilePaths(absPath, relPath) {
+  const entries = FileSystem.readFolderItems(absPath);
+  for (const entry of entries) {
+    const name = entry.name;
+    // TODO: Use the heuristics from the .npmignore file to decide what to include here
+    if (entry.isFile()) {
+      if (name.match(/(?!\.test)\.js$/)) {
+        EXPOSED_LIB_PATHS.push(`${relPath}/${name.substring(0, name.length - 3)}`);
+      }
+    } else if (entry.isDirectory() && name !== '__mocks__' && name !== 'test') {
+      collectJsFilePaths(`${absPath}/${name}`, `${relPath}/${name}`);
+    }
+  }
+}
+collectJsFilePaths(`${__dirname}/lib-esnext`, '.');
+EXPOSED_LIB_PATHS.sort();
+
+const INDEX_BUNDLE_PATH = `${__dirname}/lib-esnext/index-bundle.js`;
+
+function generateEntrypoints() {
+  FileSystem.writeFile(
+    INDEX_BUNDLE_PATH,
+    [
+      'export function getPath(p) {',
+      '  switch(p) {',
+      ...EXPOSED_LIB_PATHS.map((path) => `  case '${path}': return require('${path}');`),
+      '  }',
+      '}',
+      ''
+    ].join('\n')
+  );
+
+  const distFilePath = `${__dirname}/dist/rush-lib`;
+  for (const libPath of EXPOSED_LIB_PATHS) {
+    const filePath = `${__dirname}/lib/${libPath}.js`;
+    const requirePath = Path.convertToSlashes(path.relative(path.dirname(filePath), distFilePath));
+    FileSystem.writeFile(
+      filePath,
+      [`module.exports = require('${requirePath}').getPath('${libPath}');`].join('\n'),
+      {
+        ensureFolderExists: true
+      }
+    );
+  }
+}
 
 module.exports = () => {
   const packageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
@@ -22,31 +70,33 @@ module.exports = () => {
     ...Object.keys(packageJson.devDependencies || {})
   ]);
 
+  generateEntrypoints();
+
   return {
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
       ['rush-lib']: {
-        import: `${__dirname}/lib-esnext/index.js`,
+        import: INDEX_BUNDLE_PATH,
         library: {
           type: 'commonjs'
         }
       },
       [PathConstants.pnpmfileShimFilename]: {
         import: `${__dirname}/lib-esnext/logic/pnpm/PnpmfileShim.js`,
-        ...scriptEntryOption
+        ...SCRIPT_ENTRY_OPTIONS
       },
       [PathConstants.installRunScriptFilename]: {
         import: `${__dirname}/lib-esnext/scripts/install-run.js`,
-        ...scriptEntryOption
+        ...SCRIPT_ENTRY_OPTIONS
       },
       [PathConstants.installRunRushScriptFilename]: {
         import: `${__dirname}/lib-esnext/scripts/install-run-rush.js`,
-        ...scriptEntryOption
+        ...SCRIPT_ENTRY_OPTIONS
       },
       [PathConstants.installRunRushxScriptFilename]: {
         import: `${__dirname}/lib-esnext/scripts/install-run-rushx.js`,
-        ...scriptEntryOption
+        ...SCRIPT_ENTRY_OPTIONS
       }
     },
     output: {

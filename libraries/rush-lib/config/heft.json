@@ -39,7 +39,7 @@
            * to this folder.
            * NOTE: Assigning "sourceFolder" does not by itself select any files to be copied.
            */
-          "sourceFolder": "lib/cli/test/rush-mock-flush-telemetry-plugin",
+          "sourceFolder": "lib-commonjs/cli/test/rush-mock-flush-telemetry-plugin",
 
           /**
            * (Required) One or more folders that files will be copied into, relative to the project root.
@@ -47,7 +47,7 @@
            * streams to efficiently write multiple outputs.
            */
           "destinationFolders": [
-            "lib/cli/test/tapFlushTelemetryAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-flush-telemetry-plugin"
+            "lib-commonjs/cli/test/tapFlushTelemetryAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-flush-telemetry-plugin"
           ],
 
           /**
@@ -67,11 +67,15 @@
       ]
     },
     {
-      "actionKind": "deleteGlobs",
+      "actionKind": "copyFiles",
       "heftEvent": "bundle",
-      "actionId": "deleteBadTypings",
-      "globsToDelete": [
-        "lib/utilities/prompts/SearchListPrompt.d.ts" // This module has an import with typings issues
+      "actionId": "copy-dts",
+      "copyOperations": [
+        {
+          "sourceFolder": "lib-commonjs",
+          "destinationFolders": ["lib"],
+          "fileExtensions": [".d.ts"]
+        }
       ]
     }
   ],
