@@ -8,21 +8,21 @@ steps:
     displayName: 'git config email'
   - script: 'git config --local user.name Rushbot'
     displayName: 'git config name'
-  - script: 'node common/scripts/install-run-rush.js change --verify'
-    displayName: 'Verify Change Logs'
+  #  - script: 'node common/scripts/install-run-rush.js change --verify'
+  #    displayName: 'Verify Change Logs'
   - script: 'node common/scripts/install-run-rush.js install'
     displayName: 'Rush Install'
-  - script: 'node common/scripts/install-run-rush.js retest --verbose --production'
-    displayName: 'Rush retest (install-run-rush)'
+  - script: 'node common/scripts/install-run-rush.js retest --verbose --production --to rush --to rush-lib'
+    displayName: 'Rush retest (install-run-rush) --to rush'
     env:
       # Prevent time-based browserslist update warning
       # See https://github.com/microsoft/rushstack/issues/2981
       BROWSERSLIST_IGNORE_OLD_DATA: 1
-  - script: 'node apps/rush/lib/start-dev.js test --verbose --production --timeline'
-    displayName: 'Rush test (rush-lib)'
-    env:
-      # Prevent time-based browserslist update warning
-      # See https://github.com/microsoft/rushstack/issues/2981
-      BROWSERSLIST_IGNORE_OLD_DATA: 1
-  - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
-    displayName: 'Ensure repo README is up-to-date'
+#  - script: 'node apps/rush/lib/start-dev.js test --verbose --production --timeline'
+#    displayName: 'Rush test (rush-lib)'
+#    env:
+#      # Prevent time-based browserslist update warning
+#      # See https://github.com/microsoft/rushstack/issues/2981
+#      BROWSERSLIST_IGNORE_OLD_DATA: 1
+#  - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
+#    displayName: 'Ensure repo README is up-to-date'

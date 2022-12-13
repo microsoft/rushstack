@@ -1,0 +1,24 @@
+pool:
+  vmImage: 'ubuntu-latest'
+variables:
+  NodeVersion: 14
+  FORCE_COLOR: 1
+steps:
+  - checkout: self
+    persistCredentials: true
+  - template: templates/build.yaml
+  #  - template: templates/bump-versions.yaml
+  #    parameters:
+  #      VersionPolicyName: noRush
+  #  - template: templates/bump-versions.yaml
+  #    parameters:
+  #      VersionPolicyName: rush
+  - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
+    displayName: 'Prepublish workaround for rush-lib'
+  #  - template: templates/publish.yaml
+  #    parameters:
+  #      VersionPolicyName: noRush
+  - template: templates/publish.yaml
+    parameters:
+      VersionPolicyName: rush
+#  - template: templates/record-published-versions.yaml
