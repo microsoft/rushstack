@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/rush-sdk": "workspace:5.86.0-pr3481.11"
+    "@rushstack/rush-sdk": "workspace:5.86.0-pr3481.12"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

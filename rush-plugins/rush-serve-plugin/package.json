@@ -20,7 +20,7 @@
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
-    "@rushstack/rush-sdk": "workspace:5.86.0-pr3481.11",
+    "@rushstack/rush-sdk": "workspace:5.86.0-pr3481.12",
     "@rushstack/ts-command-line": "workspace:*",
     "express": "4.18.1"
   },
