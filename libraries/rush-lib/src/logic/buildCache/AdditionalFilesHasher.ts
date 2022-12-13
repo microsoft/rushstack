@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import { Async, FileSystem, Import, LegacyAdapters } from '@rushstack/node-core-library';
-import crypto from 'crypto';
-import path from 'path';
+import { Async, Import, LegacyAdapters } from '@rushstack/node-core-library';
+import { getGitHashForFiles } from '@rushstack/package-deps-hash';
 
 import type { IOptions } from 'glob';
 
@@ -15,21 +14,21 @@ const globAsync = (pattern: string, options: IOptions = {}): Promise<string[]> =
 export class AdditionalFilesHasher {
   public static async getFileHashedFilesMap(
     globPatterns: string[],
-    cwd: string
+    packagePath: string
   ): Promise<Map<string, string>> {
-    const filePaths: Set<string> = await this._expandGlobPatterns(globPatterns, cwd);
+    const filePaths: string[] = await this._expandGlobPatterns(globPatterns, packagePath);
 
-    return await this._calculateFileHashes(filePaths, cwd);
+    return getGitHashForFiles(filePaths, packagePath);
   }
 
-  private static async _expandGlobPatterns(globPatterns: string[], cwd: string): Promise<Set<string>> {
+  private static async _expandGlobPatterns(globPatterns: string[], packagePath: string): Promise<string[]> {
     const allMatches: Set<string> = new Set<string>();
 
     await Async.forEachAsync(
       globPatterns,
       async (pattern) => {
         const matches: string[] = await globAsync(pattern, {
-          cwd,
+          cwd: packagePath,
           nodir: true,
           // We want to keep path's type unchanged,
           // i.e. if the pattern was a  relative path, then matched paths should also be relative paths
@@ -57,28 +56,6 @@ export class AdditionalFilesHasher {
       );
     }
 
-    return allMatches;
-  }
-
-  private static async _calculateFileHashes(
-    filePaths: Set<string>,
-    cwd: string
-  ): Promise<Map<string, string>> {
-    const fileHashes: Map<string, string> = new Map<string, string>();
-
-    await Async.forEachAsync(
-      filePaths,
-      async (filepath) => {
-        const fullPath: string = path.isAbsolute(filepath) ? filepath : path.join(cwd, filepath);
-        const content: string = await FileSystem.readFileAsync(fullPath);
-
-        const hashValue: string = crypto.createHash('sha1').update(content).digest('hex');
-
-        fileHashes.set(filepath, hashValue);
-      },
-      { concurrency: 10 }
-    );
-
-    return fileHashes;
+    return Array.from(allMatches);
   }
 }
