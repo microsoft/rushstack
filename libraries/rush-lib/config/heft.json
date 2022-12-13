@@ -69,12 +69,12 @@
     {
       "actionKind": "copyFiles",
       "heftEvent": "bundle",
-      "actionId": "copy-start",
+      "actionId": "copy-dts",
       "copyOperations": [
         {
           "sourceFolder": "lib-commonjs",
           "destinationFolders": ["lib"],
-          "includeGlobs": ["start.js"]
+          "fileExtensions": [".d.ts"]
         }
       ]
     }

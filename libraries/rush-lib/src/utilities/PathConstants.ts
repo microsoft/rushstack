@@ -26,4 +26,4 @@ export const installRunRushxScriptFilename: string = 'install-run-rushx.js';
 /**
  * The path to the scripts folder in rush-lib/dist.
  */
-export const scriptsFolderPath: string = `${rushLibFolderRootPath}/lib/${scriptsFolderName}`;
+export const scriptsFolderPath: string = `${rushLibFolderRootPath}/dist/${scriptsFolderName}`;
