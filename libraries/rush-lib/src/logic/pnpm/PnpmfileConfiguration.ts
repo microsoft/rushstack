@@ -30,7 +30,7 @@ export interface IPnpmfileShimOptions {
 export class PnpmfileConfiguration {
   private _context: IPnpmfileContext | undefined;
 
-  public constructor(context: IPnpmfileContext) {
+  private constructor(context: IPnpmfileContext) {
     this._context = context;
   }
 
