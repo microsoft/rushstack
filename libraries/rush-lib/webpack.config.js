@@ -3,7 +3,7 @@
 const webpack = require('webpack');
 const { PackageJsonLookup } = require('@rushstack/node-core-library');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
-const PathConstants = require('./lib-commonjs/utilities/PathConstants');
+const PathConstants = require('./lib/utilities/PathConstants');
 
 const scriptEntryOption = {
   filename: `${PathConstants.scriptsFolderName}/[name]`,
@@ -26,7 +26,7 @@ module.exports = () => {
     mode: 'development', // So the output isn't minified
     devtool: 'source-map',
     entry: {
-      ['index']: {
+      ['rush-lib']: {
         import: `${__dirname}/lib-esnext/index.js`,
         library: {
           type: 'commonjs'
@@ -50,7 +50,7 @@ module.exports = () => {
       }
     },
     output: {
-      path: `${__dirname}/lib`,
+      path: `${__dirname}/dist`,
       filename: '[name].js',
       chunkFilename: 'chunks/[name].js'
     },

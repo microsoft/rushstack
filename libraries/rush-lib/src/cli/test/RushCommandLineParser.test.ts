@@ -52,10 +52,7 @@ function getDirnameInLib(): string {
   // Run these tests in the /lib folder because some of them require compiled output
   const projectRootFolder: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
   const projectRootRelativeDirnamePath: string = path.relative(projectRootFolder, __dirname);
-  const projectRootRelativeLibDirnamePath: string = projectRootRelativeDirnamePath.replace(
-    /^src/,
-    'lib-commonjs'
-  );
+  const projectRootRelativeLibDirnamePath: string = projectRootRelativeDirnamePath.replace(/^src/, 'lib');
   const dirnameInLIb: string = `${projectRootFolder}/${projectRootRelativeLibDirnamePath}`;
   return dirnameInLIb;
 }
