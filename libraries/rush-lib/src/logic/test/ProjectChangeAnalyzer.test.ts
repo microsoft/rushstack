@@ -276,9 +276,9 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject._tryGetProjectStateHashAsync(projects[0], terminal)).toMatchInlineSnapshot(
-        `"265536e325cdfac3fa806a51873d927a712fc6c9"`
-      );
+      expect(
+        (await subject._tryGetProjectStateHashAsync(projects[0], terminal)).projectState
+      ).toMatchInlineSnapshot(`"265536e325cdfac3fa806a51873d927a712fc6c9"`);
     });
 
     it('returns the same hash regardless of dep order', async () => {
@@ -311,8 +311,8 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subjectB: ProjectChangeAnalyzer = createTestSubject(projectsB, filesB);
 
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-      expect(await subjectA._tryGetProjectStateHashAsync(projectsA[0], terminal)).toEqual(
-        await subjectB._tryGetProjectStateHashAsync(projectsB[0], terminal)
+      expect((await subjectA._tryGetProjectStateHashAsync(projectsA[0], terminal)).projectState).toEqual(
+        (await subjectB._tryGetProjectStateHashAsync(projectsB[0], terminal)).projectState
       );
     });
   });

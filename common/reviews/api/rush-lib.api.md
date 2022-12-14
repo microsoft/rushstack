@@ -746,8 +746,10 @@ export class ProjectChangeAnalyzer {
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
+    // Warning: (ae-forgotten-export) The symbol "IProjectStateCacheEntry" needs to be exported by the entry point index.d.ts
+    //
     // @internal
-    _tryGetProjectStateHashAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<string | undefined>;
+    _tryGetProjectStateHashAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<IProjectStateCacheEntry>;
 }
 
 // @public

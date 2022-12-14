@@ -21,7 +21,7 @@ describe(ProjectBuildCache.name, () => {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
     const projectChangeAnalyzer = {
       [ProjectChangeAnalyzer.prototype._tryGetProjectStateHashAsync.name]: async () => {
-        return 'state_hash';
+        return { projectState: 'state_hash', inputs: {} };
       }
     } as unknown as ProjectChangeAnalyzer;
 

@@ -56,6 +56,11 @@ interface IRawRepoState {
   rootDir: string;
 }
 
+export interface IProjectStateCacheEntry {
+  projectState: string | undefined;
+  inputs: Record<string, string>;
+}
+
 /**
  * @beta
  */
@@ -66,7 +71,7 @@ export class ProjectChangeAnalyzer {
    */
   private _data: IRawRepoState | UNINITIALIZED | undefined = UNINITIALIZED;
   private readonly _filteredData: Map<RushConfigurationProject, Map<string, string>> = new Map();
-  private readonly _projectStateCache: Map<RushConfigurationProject, string> = new Map();
+  private readonly _projectStateCache: Map<RushConfigurationProject, IProjectStateCacheEntry> = new Map();
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
 
@@ -147,32 +152,39 @@ export class ProjectChangeAnalyzer {
   public async _tryGetProjectStateHashAsync(
     project: RushConfigurationProject,
     terminal: ITerminal
-  ): Promise<string | undefined> {
-    let projectState: string | undefined = this._projectStateCache.get(project);
-    if (!projectState) {
+  ): Promise<IProjectStateCacheEntry> {
+    let projectStateCacheEntry: IProjectStateCacheEntry | undefined = this._projectStateCache.get(project);
+    if (!projectStateCacheEntry) {
       const packageDeps: Map<string, string> | undefined = await this._tryGetProjectDependenciesAsync(
         project,
         terminal
       );
 
+      let projectState: string | undefined;
+      const inputs: Record<string, string> = {};
+      projectStateCacheEntry = { projectState, inputs };
       if (!packageDeps) {
-        return undefined;
+        projectState = undefined;
+        projectStateCacheEntry = { projectState: undefined, inputs };
       } else {
         const sortedPackageDepsFiles: string[] = Array.from(packageDeps.keys()).sort();
         const hash: crypto.Hash = crypto.createHash('sha1');
         for (const packageDepsFile of sortedPackageDepsFiles) {
           hash.update(packageDepsFile);
           hash.update(RushConstants.hashDelimiter);
-          hash.update(packageDeps.get(packageDepsFile)!);
+          const depFileHash: string = packageDeps.get(packageDepsFile)!;
+          hash.update(depFileHash);
           hash.update(RushConstants.hashDelimiter);
+          inputs[packageDepsFile] = depFileHash;
         }
 
         projectState = hash.digest('hex');
-        this._projectStateCache.set(project, projectState);
+        projectStateCacheEntry = { projectState, inputs };
+        this._projectStateCache.set(project, projectStateCacheEntry);
       }
     }
 
-    return projectState;
+    return projectStateCacheEntry;
   }
 
   public async _filterProjectDataAsync<T>(

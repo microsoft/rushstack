@@ -3,10 +3,18 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { FileSystem, Path, ITerminal, FolderItem, InternalError, Async } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  Path,
+  ITerminal,
+  FolderItem,
+  InternalError,
+  Async,
+  JsonFile
+} from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import { IProjectStateCacheEntry, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
@@ -432,20 +440,21 @@ export class ProjectBuildCache {
     let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
     projectsToProcess.add(options.projectConfiguration.project);
 
+    const projectStatesRawUnsorted: Record<string, IProjectStateCacheEntry> = {};
     while (projectsToProcess.size > 0) {
       const newProjectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
       for (const projectToProcess of projectsToProcess) {
         projectsThatHaveBeenProcessed.add(projectToProcess);
 
-        const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
-          projectToProcess,
-          options.terminal
-        );
+        const projectStateCacheEntry: IProjectStateCacheEntry =
+          await projectChangeAnalyzer._tryGetProjectStateHashAsync(projectToProcess, options.terminal);
+        const { projectState } = projectStateCacheEntry;
         if (!projectState) {
           // If we hit any projects with unknown state, return unknown cache ID
           return undefined;
         } else {
           projectStates.push(projectState);
+          projectStatesRawUnsorted[projectToProcess.packageName] = projectStateCacheEntry;
           for (const dependency of projectToProcess.dependencyProjects) {
             if (!projectsThatHaveBeenProcessed.has(dependency)) {
               newProjectsToProcess.add(dependency);
@@ -457,15 +466,27 @@ export class ProjectBuildCache {
       projectsToProcess = newProjectsToProcess;
     }
 
+    const projectStatesRaw: Record<string, IProjectStateCacheEntry> = {};
+    for (const packageName of Object.keys(projectStatesRawUnsorted).sort()) {
+      projectStatesRaw[packageName] = projectStatesRawUnsorted[packageName];
+    }
+
     const sortedProjectStates: string[] = projectStates.sort();
+    const hashInputs: string[] = [];
     const hash: crypto.Hash = crypto.createHash('sha1');
     // This value is used to force cache bust when the build cache algorithm changes
+    hashInputs.push(`${RushConstants.buildCacheVersion}`);
     hash.update(`${RushConstants.buildCacheVersion}`);
+    hashInputs.push(RushConstants.hashDelimiter);
     hash.update(RushConstants.hashDelimiter);
     const serializedOutputFolders: string = JSON.stringify(options.projectOutputFolderNames);
+    hashInputs.push(serializedOutputFolders);
     hash.update(serializedOutputFolders);
+    hashInputs.push(RushConstants.hashDelimiter);
     hash.update(RushConstants.hashDelimiter);
+    hashInputs.push(options.command);
     hash.update(options.command);
+    hashInputs.push(RushConstants.hashDelimiter);
     hash.update(RushConstants.hashDelimiter);
     if (options.additionalContext) {
       for (const key of Object.keys(options.additionalContext).sort()) {
@@ -475,14 +496,24 @@ export class ProjectBuildCache {
         // that just _adding_ an env var to the list of dependsOnEnvVars will modify its hash. This
         // seems appropriate, because this behavior is consistent whether or not the env var happens
         // to have a value.
+        hashInputs.push(`${key}=${options.additionalContext[key]}`);
         hash.update(`${key}=${options.additionalContext[key]}`);
+        hashInputs.push(RushConstants.hashDelimiter);
         hash.update(RushConstants.hashDelimiter);
       }
     }
     for (const projectHash of sortedProjectStates) {
+      hashInputs.push(projectHash);
       hash.update(projectHash);
+      hashInputs.push(RushConstants.hashDelimiter);
       hash.update(RushConstants.hashDelimiter);
     }
+
+    const outputPath: string = `${
+      options.projectConfiguration.project.projectFolder
+    }/.rush/hash-inputs-${Date.now()}.json.log`;
+    await JsonFile.saveAsync({ hashInputs, projectStatesRaw }, outputPath, { ensureFolderExists: true });
+    console.log(`Wrote hash inputs to ${outputPath}`);
 
     const projectStateHash: string = hash.digest('hex');
 
