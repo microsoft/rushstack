@@ -74,7 +74,7 @@ export interface IStorybookPluginOptions {
    *
    * `"startupModulePath": "@storybook/react/bin/build.js"`
    */
-  staticBuildModulePath: string
+  staticBuildModulePath: string;
 }
 
 /** @public */
@@ -135,16 +135,19 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     });
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      if ((!storybookParameters.actionAssociated || !storybookParameters.value)
-        && (!storybookStaticBuildParameters.actionAssociated || !storybookStaticBuildParameters.value))
-      {
+      if (
+        (!storybookParameters.actionAssociated || !storybookParameters.value) &&
+        (!storybookStaticBuildParameters.actionAssociated || !storybookStaticBuildParameters.value)
+      ) {
         this._logger.terminal.writeVerboseLine(
           'The command line does not include "--storybook", so bundling will proceed without Storybook'
         );
         return;
       }
 
-      this._modulePath = storybookStaticBuildParameters.actionAssociated ? options.staticBuildModulePath: options.startupModulePath;
+      this._modulePath = storybookStaticBuildParameters.actionAssociated
+        ? options.staticBuildModulePath
+        : options.startupModulePath;
 
       this._logger.terminal.writeVerboseLine(
         'The command line includes "--storybook", redirecting Webpack to Storybook'
@@ -160,8 +163,8 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
         bundle.hooks.configureWebpack.tap(
           { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
           (webpackConfiguration: unknown) => {
-            // Discard Webpack's configuration to prevent Webpack from running
-            return null;
+            // Discard Webpack's configuration to prevent Webpack from running only when starting a storybook server
+            return storybookStaticBuildParameters.actionAssociated ? webpackConfiguration : null;
           }
         );
 
@@ -198,7 +201,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
       );
     }
 
-    this._logger.terminal.writeVerboseLine(`Resolving startupModulePath "${this._modulePath}"`);
+    this._logger.terminal.writeVerboseLine(`Resolving modulePath "${this._modulePath}"`);
     try {
       this._resolvedModulePath = Import.resolveModule({
         modulePath: this._modulePath,
@@ -207,9 +210,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     } catch (ex) {
       throw new Error(`The ${TASK_NAME} task cannot start: ` + (ex as Error).message);
     }
-    this._logger.terminal.writeVerboseLine(
-      `Resolved startupModulePath is "${this._resolvedModulePath}"`
-    );
+    this._logger.terminal.writeVerboseLine(`Resolved modulePath is "${this._resolvedModulePath}"`);
 
     // Example: "/path/to/my-project/.storybook"
     const dotStorybookFolder: string = path.join(heftConfiguration.buildFolder, '.storybook');
