@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-module-minifier-plugin",
+      "comment": "Make @types/estree a dependency instead of devDependency",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-module-minifier-plugin"
+}
