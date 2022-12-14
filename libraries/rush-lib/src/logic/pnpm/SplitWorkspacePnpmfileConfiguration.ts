@@ -4,6 +4,7 @@
 import * as path from 'path';
 import { FileSystem, IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import * as splitWorkspaceGlobalPnpmfile from './SplitWorkspaceGlobalPnpmfileShim';
+import { splitWorkspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 
 import type {
   IPnpmfileContext,
@@ -57,7 +58,7 @@ export class SplitWorkspacePnpmfileConfiguration {
 
     // Write the shim itself
     await FileSystem.copyFileAsync({
-      sourcePath: path.join(__dirname, 'SplitWorkspaceGlobalPnpmfileShim.js'),
+      sourcePath: `${scriptsFolderPath}/${splitWorkspacePnpmfileShimFilename}`,
       destinationPath: splitWorkspaceGlobalPnpmfilePath
     });
 
