@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.1.43",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.43",
+      "date": "Thu, 15 Dec 2022 01:18:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make @types/estree a dependency instead of devDependency"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.1.42",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.1.42",
       "date": "Fri, 09 Dec 2022 16:18:28 GMT",
