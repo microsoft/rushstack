@@ -7,6 +7,7 @@ import {
   FileSystem,
   Import,
   IParsedPackageNameOrError,
+  JsonSchema,
   PackageName
 } from '@rushstack/node-core-library';
 import type {
@@ -23,6 +24,7 @@ import { StorybookRunner } from './StorybookRunner';
 
 const PLUGIN_NAME: string = 'StorybookPlugin';
 const TASK_NAME: string = 'heft-storybook';
+const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-storybook-plugin.schema.json');
 
 /**
  * Options for `StorybookPlugin`.
@@ -63,23 +65,24 @@ export interface IStorybookPluginOptions {
    *
    * `"startupModulePath": "@storybook/react/bin/index.js"`
    */
-  startupModulePath: string;
+  startupModulePath?: string;
 
   /**
    * The module entry point that Heft `build` command should use to launch the Storybook toolchain.
    * Typically it is the path loaded the `build-storybook` shell script.
    *
    * @example
-   * If you are using `@storybook/react`, then the startup path would be:
+   * If you are using `@storybook/react`, then the static build path would be:
    *
-   * `"startupModulePath": "@storybook/react/bin/build.js"`
+   * `"staticBuildModulePath": "@storybook/react/bin/build.js"`
    */
-  staticBuildModulePath: string;
+  staticBuildModulePath?: string;
 }
 
 /** @public */
 export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
   public readonly pluginName: string = PLUGIN_NAME;
+  public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
 
   private _logger!: ScopedLogger;
   private _storykitPackageName!: string;
@@ -113,10 +116,10 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     }
     this._storykitPackageName = options.storykitPackageName;
 
-    if (!options.startupModulePath) {
+    if (!options.startupModulePath && !options.staticBuildModulePath) {
       throw new Error(
-        `The ${TASK_NAME} task cannot start because the "startupModulePath"` +
-          ` plugin option was not specified`
+        `The ${TASK_NAME} task cannot start because the "startupModulePath" and the "staticBuildModulePath"` +
+          ` plugin options were not specified`
       );
     }
 
@@ -145,9 +148,16 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
         return;
       }
 
-      this._modulePath = storybookStaticBuildParameters.actionAssociated
+      const modulePath: string | undefined = storybookStaticBuildParameters.actionAssociated
         ? options.staticBuildModulePath
         : options.startupModulePath;
+      if (!modulePath) {
+        this._logger.terminal.writeVerboseLine(
+          'No matching module path option specified in heft.json, so bundling will proceed without Storybook'
+        );
+        return;
+      }
+      this._modulePath = modulePath;
 
       this._logger.terminal.writeVerboseLine(
         'The command line includes "--storybook", redirecting Webpack to Storybook'
@@ -164,7 +174,9 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
           { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
           (webpackConfiguration: unknown) => {
             // Discard Webpack's configuration to prevent Webpack from running only when starting a storybook server
-            return storybookStaticBuildParameters.actionAssociated ? webpackConfiguration : null;
+            return storybookParameters.actionAssociated && storybookParameters.value
+              ? null
+              : webpackConfiguration;
           }
         );
 

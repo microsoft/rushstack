@@ -7,6 +7,7 @@
     "build": "heft build --clean",
     "start": "heft start",
     "storybook": "heft start --storybook",
+    "build-storybook": "heft build --storybook",
     "_phase:build": "heft build --clean",
     "_phase:test": "heft test --no-build"
   },
