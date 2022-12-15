@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'crypto';
-import { InternalError, JsonFile } from '@rushstack/node-core-library';
+import { InternalError, JsonFile, NewlineKind } from '@rushstack/node-core-library';
 
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
@@ -229,6 +229,9 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     for (const key of keys) {
       file[key] = projectShrinkwrapMap.get(key)!;
     }
-    await JsonFile.saveAsync(file, this.projectShrinkwrapFilePath, { ensureFolderExists: true });
+    await JsonFile.saveAsync(file, this.projectShrinkwrapFilePath, {
+      ensureFolderExists: true,
+      newlineConversion: NewlineKind.Lf
+    });
   }
 }
