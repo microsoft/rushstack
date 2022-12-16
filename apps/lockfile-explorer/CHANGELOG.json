@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "0.1.5",
+      "tag": "@rushstack/lockfile-explorer_v0.1.5",
+      "date": "Fri, 16 Dec 2022 16:20:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where an Error is thrown when a pnpmfile does not exist."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.4",
       "tag": "@rushstack/lockfile-explorer_v0.1.4",
       "date": "Fri, 09 Dec 2022 23:31:28 GMT",
