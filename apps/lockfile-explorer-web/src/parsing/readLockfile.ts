@@ -114,7 +114,7 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
 };
 
 export const readLockfile = async (): Promise<LockfileEntry[]> => {
-  const response = await fetch(`${serviceUrl}/`);
+  const response = await fetch(`${serviceUrl}/api/lockfile`);
   const lockfile: ILockfilePackageType = await response.json();
 
   return generateLockfileGraph(lockfile);

@@ -16,7 +16,6 @@ import type { IAppState } from './state';
 const PORT: number = 8091;
 // Must not have a trailing slash
 const SERVICE_URL: string = `http://localhost:${PORT}`;
-const APP_URL: string = `${SERVICE_URL}/app/`;
 
 const appState: IAppState = init();
 
@@ -41,7 +40,7 @@ setInterval(() => {
 }, 4000);
 
 // This takes precedence over the `/app` static route, which also has an `initappcontext.js` file.
-app.get('/app/initappcontext.js', (req: express.Request, res: express.Response) => {
+app.get('/initappcontext.js', (req: express.Request, res: express.Response) => {
   const appContext: IAppContext = {
     serviceUrl: SERVICE_URL,
     appVersion: appState.appVersion,
@@ -55,11 +54,11 @@ app.get('/app/initappcontext.js', (req: express.Request, res: express.Response) 
   res.type('application/javascript').send(sourceCode);
 });
 
-app.use('/app', express.static(distFolderPath));
+app.use('/', express.static(distFolderPath));
 
 app.use('/favicon.ico', express.static(distFolderPath, { index: 'favicon.ico' }));
 
-app.get('/', async (req: express.Request, res: express.Response) => {
+app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
   const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
   const doc = yaml.load(pnpmLockfileText);
   res.send(doc);
@@ -143,12 +142,12 @@ app.post(
 );
 
 app.listen(PORT, async () => {
-  console.log(`Rush Lockfile Explorer ${appState.appVersion} running at ${APP_URL}`);
+  console.log(`Rush Lockfile Explorer ${appState.appVersion} running at ${SERVICE_URL}`);
 
   if (!process.argv.includes('--debug')) {
     try {
       // Launch the web browser
-      await open(APP_URL);
+      await open(SERVICE_URL);
     } catch (e) {
       console.error('Error launching browser: ' + e.toString());
     }
