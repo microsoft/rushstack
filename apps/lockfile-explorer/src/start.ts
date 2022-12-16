@@ -91,7 +91,14 @@ app.post(
 );
 
 app.get('/api/pnpmfile', (req: express.Request, res: express.Response) => {
-  const cjsFile = fs.readFileSync(path.resolve(appState.pnpmfileLocation));
+  const fileLocation = path.resolve(appState.pnpmfileLocation);
+  if (!fs.existsSync(fileLocation)) {
+    return res.status(404).send({
+      message: `Could not load pnpmfile file in this repo.`,
+      error: `No .pnpmifile.cjs found.`
+    });
+  }
+  const cjsFile = fs.readFileSync(fileLocation);
   res.send(cjsFile);
 });
 
