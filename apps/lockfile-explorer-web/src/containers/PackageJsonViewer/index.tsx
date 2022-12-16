@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { readPnpmfile, readPackageSpec, readPackageJson } from '../../parsing/getPackageFiles';
+import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '../../parsing/getPackageFiles';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -34,20 +34,20 @@ export const PackageJsonViewer = (): JSX.Element => {
   const cb = useCallback((s: PackageView) => () => setSelection(s), []);
 
   useEffect(() => {
-    async function loadPnpmFile(): Promise<void> {
-      const pnpmfile = await readPnpmfile();
+    async function loadPnpmFileAsync(): Promise<void> {
+      const pnpmfile = await readPnpmfileAsync();
       setPnpmfile(pnpmfile);
     }
-    loadPnpmFile().catch((e) => {
+    loadPnpmFileAsync().catch((e) => {
       console.error(`Failed to load project's pnpm file: ${e}`);
     });
   }, []);
 
   useEffect(() => {
-    async function loadPackageDetails(packageName: string): Promise<void> {
-      const packageJSONFile = await readPackageJson(packageName);
+    async function loadPackageDetailsAsync(packageName: string): Promise<void> {
+      const packageJSONFile = await readPackageJsonAsync(packageName);
       setPackageJSON(packageJSONFile);
-      const parsedJSON = await readPackageSpec(packageName);
+      const parsedJSON = await readPackageSpecAsync(packageName);
       setParsedPackageJSON(parsedJSON);
 
       if (packageJSONFile && parsedJSON) {
@@ -57,7 +57,7 @@ export const PackageJsonViewer = (): JSX.Element => {
     }
     if (selectedEntry) {
       if (selectedEntry.entryPackageName) {
-        loadPackageDetails(selectedEntry.packageJsonFolderPath).catch((e) => {
+        loadPackageDetailsAsync(selectedEntry.packageJsonFolderPath).catch((e) => {
           console.error(`Failed to load project information: ${e}`);
         });
       } else {
