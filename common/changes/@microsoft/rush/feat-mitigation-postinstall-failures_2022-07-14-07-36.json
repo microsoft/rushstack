@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Supports deferredInstallationScripts behind a experimental flag, which makes faster retires for install lifecycle scripts",
+      "comment": "Add support for deferred running installation scripts behind an experimental flag, which allows for faster retires of dependency install lifecycle scripts.",
       "type": "none"
     }
   ],
