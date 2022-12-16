@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Include a bundled copy of rush-lib under that package's 'dist' folder.",
+      "comment": "Work towards bundling the files of \"@rushstack/rush-lib\" (Details in GitHub #3837)",
       "type": "none"
     }
   ],

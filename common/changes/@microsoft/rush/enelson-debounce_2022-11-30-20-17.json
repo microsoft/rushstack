@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Document default value for watchDebounceMs",
+      "comment": "Document default value for the \"watchDebounceMs\" setting",
       "type": "none"
     }
   ],
