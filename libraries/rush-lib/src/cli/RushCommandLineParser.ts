@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineHelper } from '@rushstack/ts-command-line';
@@ -408,13 +407,21 @@ export class RushCommandLineParser extends CommandLineParser {
   private _reportErrorAndSetExitCode(error: Error): void {
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
-      console.error(os.EOL + colors.red(PrintUtilities.wrapWords(prefix + error.message)));
+
+      // The colors package will eat multi-newlines, which could break formatting
+      // in user-specified messages and instructions, so we prefer to color each
+      // line individually.
+      const message: string = PrintUtilities.wrapWords(prefix + error.message)
+        .split(/\r?\n/)
+        .map((line) => colors.red(line))
+        .join('\n');
+      console.error(`\n${message}`);
     }
 
     if (this._debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what Node.js
       // would show for an uncaught error
-      console.error(os.EOL + error.stack);
+      console.error(`\n${error.stack}`);
     }
 
     this.flushTelemetry();

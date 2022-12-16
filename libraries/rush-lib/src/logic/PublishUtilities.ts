@@ -6,7 +6,6 @@
  * which itself is a thin wrapper around these helpers.
  */
 
-import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { execSync } from 'child_process';
@@ -134,7 +133,7 @@ export class PublishUtilities {
 
         if (projectHasChanged) {
           console.log(
-            `${EOL}* APPLYING: update ${project.packageName} to version ${versionPolicyChange.newVersion}`
+            `\n* APPLYING: update ${project.packageName} to version ${versionPolicyChange.newVersion}`
           );
         }
 
@@ -272,7 +271,7 @@ export class PublishUtilities {
     }
 
     console.log(
-      `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${commandArgs} ${relativeDirectory}`
+      `\n* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${commandArgs} ${relativeDirectory}`
     );
 
     if (shouldExecute) {
@@ -412,12 +411,12 @@ export class PublishUtilities {
 
     if (!shouldSkipVersionBump) {
       console.log(
-        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType!]} update ` +
+        `\n* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType!]} update ` +
           `for ${change.packageName} to ${newVersion}`
       );
     } else {
       console.log(
-        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update for ${change.packageName} at ${newVersion}`
+        `\n* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update for ${change.packageName} at ${newVersion}`
       );
     }
 

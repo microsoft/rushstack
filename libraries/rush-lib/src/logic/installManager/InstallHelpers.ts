@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
 import {
   FileConstants,
@@ -162,7 +161,7 @@ export class InstallHelpers {
 
     if (!packageManagerMarker.isValid() || lock.dirtyWhenAcquired) {
       logIfConsoleOutputIsNotRestricted(
-        colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`)
+        colors.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
       );
 
       // note that this will remove the last-install flag from the directory
@@ -201,7 +200,7 @@ export class InstallHelpers {
       `${packageManager}-local`
     );
 
-    logIfConsoleOutputIsNotRestricted(os.EOL + `Symlinking "${localPackageManagerToolFolder}"`);
+    logIfConsoleOutputIsNotRestricted(`\nSymlinking "${localPackageManagerToolFolder}"`);
     logIfConsoleOutputIsNotRestricted(`  --> "${packageManagerToolFolder}"`);
 
     // We cannot use FileSystem.exists() to test the existence of a symlink, because it will

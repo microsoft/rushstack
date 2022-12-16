@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import {
@@ -245,7 +244,7 @@ export class PublishAction extends BaseRushAction {
       this._publishChanges(git, publishGit, allPackages);
     }
 
-    console.log(EOL + colors.green('Rush publish finished successfully.'));
+    console.log('\n' + colors.green('Rush publish finished successfully.'));
   }
 
   /**

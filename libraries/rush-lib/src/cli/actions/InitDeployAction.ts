@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import colors from 'colors/safe';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -9,11 +8,9 @@ import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration } from '../../logic/deploy/DeployScenarioConfiguration';
+import { assetsFolderPath } from '../../utilities/PathConstants';
 
-const CONFIG_TEMPLATE_PATH: string = path.join(
-  __dirname,
-  '../../../assets/rush-init-deploy/scenario-template.json'
-);
+const CONFIG_TEMPLATE_PATH: string = `${assetsFolderPath}/rush-init-deploy/scenario-template.json`;
 
 export class InitDeployAction extends BaseRushAction {
   private readonly _project: CommandLineStringParameter;

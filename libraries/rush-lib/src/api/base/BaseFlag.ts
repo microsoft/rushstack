@@ -14,7 +14,7 @@ export class BaseFlag<T extends object = JsonObject> {
   /**
    * Flag file path
    */
-  protected _path: string;
+  protected readonly _path: string;
   /**
    * Content of the flag
    */

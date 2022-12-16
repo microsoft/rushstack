@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, JsonObject, Import, Path, IPackageJson } from '@rushstack/node-core-library';
+import { JsonFile, Import, Path, IPackageJson } from '@rushstack/node-core-library';
 
 import { BaseFlag } from './base/BaseFlag';
 import type { PackageManagerName } from './packageManager/PackageManager';
@@ -156,7 +156,7 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
   ): boolean {
     let oldState: ILastInstallFlagJson;
     try {
-      oldState = JsonFile.load(this._path);
+      oldState = JsonFile.load(this.path);
     } catch (err) {
       return false;
     }
@@ -201,6 +201,7 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
 
     return true;
   }
+
   /**
    * Returns the name of the flag file
    */
@@ -227,7 +228,7 @@ export class LastInstallFlagFactory {
     rushConfiguration: RushConfiguration,
     extraState: Partial<ILastInstallFlagJson> = {}
   ): LastInstallFlag {
-    const currentState: JsonObject = {
+    const currentState: ILastInstallFlagJson = {
       nodeVersion: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,

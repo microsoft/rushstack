@@ -5,6 +5,15 @@ import { IPackageJson } from '../types/IPackageJson';
 
 const serviceUrl: string = window.appContext.serviceUrl;
 
+export const checkAlive = async (): Promise<boolean> => {
+  try {
+    await fetch(`${serviceUrl}/api/health`);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 /**
  * Fetches a projects configuration files from the local file system
  *

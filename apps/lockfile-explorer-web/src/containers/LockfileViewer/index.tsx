@@ -23,6 +23,7 @@ interface ILockfileEntryGroup {
 
 const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
+  const activeFilters = useAppSelector((state) => state.entry.filters);
   const dispatch = useAppDispatch();
   const fieldRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const clear = useCallback(
@@ -40,6 +41,24 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
     }
   }, [selectedEntry, group]);
 
+  if (activeFilters[LockfileEntryFilter.Project]) {
+    return (
+      <div className={styles.packageGroup} ref={fieldRef}>
+        {group.versions.map((entry) => (
+          <div
+            key={entry.rawEntryId}
+            onClick={clear(entry)}
+            className={`${styles.lockfileEntries} ${
+              selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
+            }`}
+          >
+            <h5>{entry.entryPackageName}</h5>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.packageGroup} ref={fieldRef}>
       <h5>{group.entryName}</h5>
@@ -52,8 +71,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
           }`}
         >
           <p>
-            {entry.entryPackageVersion || entry.entryPackageName}{' '}
-            {entry.entrySuffix && `[${entry.entrySuffix}]`}
+            {entry.entryPackageVersion} {entry.entrySuffix && `[${entry.entrySuffix}]`}
           </p>
         </div>
       ))}
