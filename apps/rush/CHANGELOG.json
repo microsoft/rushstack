@@ -2,6 +2,45 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.87.0",
+      "tag": "@microsoft/rush_v5.87.0",
+      "date": "Fri, 16 Dec 2022 19:34:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a typo in the artifactory.json template"
+          },
+          {
+            "comment": "Writing local build cache is more robust on a network drive."
+          },
+          {
+            "comment": "Document default value for the \"watchDebounceMs\" setting"
+          },
+          {
+            "comment": "Add \"nodeSupportedVersionInstructions\" property to rush.json, allowing maintainers to provide additional instructions if the user's node version is unsupported."
+          },
+          {
+            "comment": "(IMPORTANT) Fix a regression where the \"strictPeerDependencies\" setting wasn't applied for some versions of PNPM 7 due to unexpected changes of PNPM's default value (GitHub #3828)"
+          },
+          {
+            "comment": "Fix an issue where if the package manager is PNPM 6.1.0 or newer, and `pnpmStore` is set to `\"local\"`, then a global cache was still used."
+          },
+          {
+            "comment": "Write local telemetry for global script actions"
+          },
+          {
+            "comment": "Normalize all newlines in logging statements to LF. On Windows, some newlines were CRLF."
+          },
+          {
+            "comment": "Upgrade `npm-check` dependency from `~5.9.2` to `~6.0.1`"
+          },
+          {
+            "comment": "Work towards bundling the files of \"@rushstack/rush-lib\" (Details in GitHub #3837)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.86.0",
       "tag": "@microsoft/rush_v5.86.0",
       "date": "Tue, 29 Nov 2022 00:10:20 GMT",
