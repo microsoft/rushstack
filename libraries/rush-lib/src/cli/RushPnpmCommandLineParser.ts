@@ -421,6 +421,7 @@ export class RushPnpmCommandLineParser {
     const installManagerOptions: IInstallManagerOptions = {
       debug: this._debugEnabled,
       allowShrinkwrapUpdates: true,
+      ignoreScripts: false,
       bypassPolicy: false,
       noLink: false,
       fullUpgrade: false,

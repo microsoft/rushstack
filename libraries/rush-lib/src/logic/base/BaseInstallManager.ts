@@ -16,7 +16,8 @@ import {
   FileSystemStats,
   ConsoleTerminalProvider,
   Terminal,
-  ITerminalProvider
+  ITerminalProvider,
+  InternalError
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -25,7 +26,12 @@ import { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
-import { LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
+import {
+  IInstallProject,
+  ILastInstallStateProperty,
+  LastInstallFlag,
+  LastInstallFlagFactory
+} from '../../api/LastInstallFlag';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { PurgeManager } from '../PurgeManager';
@@ -40,6 +46,8 @@ import { PolicyValidator } from '../policy/PolicyValidator';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
+
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -98,6 +106,12 @@ export interface IInstallManagerOptions {
   networkConcurrency: number | undefined;
 
   /**
+   * Whether to specify "--ignore-scripts" command-line parameter, which ignores
+   * install lifecycle scripts in package.json and its dependencies
+   */
+  ignoreScripts: boolean;
+
+  /**
    * Whether or not to collect verbose logs from the package manager.
    * If specified when using PNPM, the logs will be in /common/temp/pnpm.log
    */
@@ -120,6 +134,12 @@ export interface IInstallManagerOptions {
   pnpmFilterArguments: string[];
 
   /**
+   * Selected projects during partial install.
+   * If undefined, that means a full install.
+   */
+  partialInstallSelectedProjects?: Set<RushConfigurationProject>;
+
+  /**
    * Callback to invoke between preparing the common/temp folder and running installation.
    */
   beforeInstallAsync?: () => Promise<void>;
@@ -130,8 +150,19 @@ export interface IInstallManagerOptions {
  */
 export abstract class BaseInstallManager {
   private readonly _commonTempLinkFlag: LastLinkFlag;
+
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
+  private _selectedProjects: RushConfigurationProject[] = [];
+
+  /**
+   * If deferredInstallationScripts, installation will be divided into two stages:
+   * Stage 1: rush implicitly adds "--ignore-scripts" for "pnpm install"
+   * Stage 2: run "pnpm rebuild --pending"
+   *
+   * Note: This feature only works when using pnpm and turn on "useWorkspaces" in rush.json
+   */
+  private _deferredInstallationScripts: boolean = false;
 
   private readonly _terminalProvider: ITerminalProvider;
   private readonly _terminal: Terminal;
@@ -140,6 +171,7 @@ export abstract class BaseInstallManager {
   protected readonly rushGlobalFolder: RushGlobalFolder;
   protected readonly installRecycler: AsyncRecycler;
   protected readonly options: IInstallManagerOptions;
+  protected readonly commonTempInstallFlag: LastInstallFlag;
 
   public constructor(
     rushConfiguration: RushConfiguration,
@@ -153,15 +185,34 @@ export abstract class BaseInstallManager {
     this.options = options;
 
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
+    this.commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
 
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
+  }
+
+  protected get deferredInstallationScripts(): boolean {
+    return this._deferredInstallationScripts;
+  }
+
+  protected get selectedProjects(): RushConfigurationProject[] {
+    return this._selectedProjects;
   }
 
   public async doInstallAsync(): Promise<void> {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+
+    if (this.rushConfiguration.experimentsConfiguration.configuration.deferredInstallationScripts) {
+      // Only works for pnpm and useWorkspaces=true
+      this._deferredInstallationScripts = useWorkspaces && this.rushConfiguration.packageManager === 'pnpm';
+    }
+
+    if (isFilteredInstall && !this.options.partialInstallSelectedProjects) {
+      // This should never even happen
+      throw new InternalError(`Missing selectedProjects when filtered install`);
+    }
 
     // Prevent filtered installs when workspaces is disabled
     if (isFilteredInstall && !useWorkspaces) {
@@ -170,6 +221,18 @@ export abstract class BaseInstallManager {
         colors.red(
           'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
             'command again without specifying these arguments.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
+    if (this.options.ignoreScripts && this.rushConfiguration.packageManager !== 'pnpm') {
+      console.log();
+      console.log(
+        console.log(
+          colors.red(
+            `The --ignore-scripts parameter can only be used with "pnpm" package manager, current package manager is ${this.rushConfiguration.packageManager}.`
+          )
         )
       );
       throw new AlreadyReportedError();
@@ -195,29 +258,46 @@ export abstract class BaseInstallManager {
 
     console.log('\n' + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`));
 
+    this._selectedProjects = this.options.partialInstallSelectedProjects
+      ? Array.from(this.options.partialInstallSelectedProjects)
+      : this.rushConfiguration.projects;
+
+    this.commonTempInstallFlag.mergeFromObject({
+      installProjects: this._selectedProjects.reduce((acc, project) => {
+        const { packageName, projectRelativeFolder } = project;
+        acc[packageName] = {
+          packageName,
+          projectRelativeFolder,
+          ignoreScripts: this._deferredInstallationScripts || this.options.ignoreScripts
+        };
+        return acc;
+      }, {} as Record<string, IInstallProject>)
+    });
+
     // This marker file indicates that the last "rush install" completed successfully.
-    // Always perform a clean install if filter flags were provided. Additionally, if
+    // perform a clean install if selected projects are not matched. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
-    const commonTempInstallFlag: LastInstallFlag = LastInstallFlagFactory.getCommonTempFlag(
-      this.rushConfiguration,
-      { npmrcHash: npmrcHash || '<NO NPMRC>' }
-    );
-    const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
-      .configuration.cleanInstallAfterNpmrcChanges
-      ? ['npmrcHash'] // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
-      : undefined;
+    this.commonTempInstallFlag.mergeFromObject({
+      npmrcHash: npmrcHash || '<NO NPMRC>'
+    });
+
+    const optionsToIgnore: ILastInstallStateProperty[] = ['installProjects'];
+    // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
+    if (!this.rushConfiguration.experimentsConfiguration.configuration.cleanInstallAfterNpmrcChanges) {
+      optionsToIgnore?.push('npmrcHash');
+    }
+
     const cleanInstall: boolean =
-      isFilteredInstall ||
-      !commonTempInstallFlag.checkValidAndReportStoreIssues({
+      !this.commonTempInstallFlag.checkValidAndReportStoreIssues({
         rushVerb: this.options.allowShrinkwrapUpdates ? 'update' : 'install',
         statePropertiesToIgnore: optionsToIgnore
-      });
+      }) || !this.commonTempInstallFlag.isSelectedProjectInstalled();
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
       // Based on timestamps, can we skip this install entirely?
-      const outputStats: FileSystemStats = FileSystem.getStatistics(commonTempInstallFlag.path);
+      const outputStats: FileSystemStats = FileSystem.getStatistics(this.commonTempInstallFlag.path);
       return this.canSkipInstall(outputStats.mtime);
     };
 
@@ -240,7 +320,7 @@ export abstract class BaseInstallManager {
       }
 
       // Delete the successful install file to indicate the install transaction has started
-      commonTempInstallFlag.clear();
+      this.commonTempInstallFlag.clear();
 
       // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
       // this ensures that a full "rush link" is required next time
@@ -278,10 +358,8 @@ export abstract class BaseInstallManager {
       console.log('Installation is already up-to-date.');
     }
 
-    // Create the marker file to indicate a successful install if it's not a filtered install
-    if (!isFilteredInstall) {
-      commonTempInstallFlag.create();
-    }
+    // Create the marker file to indicate a successful install
+    this.commonTempInstallFlag.create();
 
     // Perform any post-install work the install manager requires
     await this.postInstallAsync();
@@ -646,6 +724,11 @@ export abstract class BaseInstallManager {
         semver.satisfies(this.rushConfiguration.packageManagerToolVersion, '^6.34.0')
       ) {
         args.push(pnpmIgnoreCompatibilityDbParameter);
+      }
+
+      if (this._deferredInstallationScripts || this.options.ignoreScripts) {
+        // Stage 1 pnpm install with --ignore-scripts
+        args.push('--ignore-scripts');
       }
     } else if (this.rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');

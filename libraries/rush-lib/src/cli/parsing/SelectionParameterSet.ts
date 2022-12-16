@@ -259,19 +259,22 @@ export class SelectionParameterSet {
   }
 
   /**
-   * Represents the selection as `--filter` parameters to pnpm.
+   * Represents the selection as `--filter` parameters to pnpm, and selected projects when partial install
    *
    * @remarks
    * This is a separate from the selection to allow the filters to be represented more concisely.
    *
    * @see https://pnpm.js.org/en/filtering
    */
-  public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<string[]> {
-    const args: string[] = [];
+  public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<{
+    pnpmFilterArguments: string[];
+    selectedProjects: Set<RushConfigurationProject> | undefined;
+  }> {
+    const pnpmFilterArguments: string[] = [];
 
     // Include exactly these projects (--only)
     for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
-      args.push('--filter', project.packageName);
+      pnpmFilterArguments.push('--filter', project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
@@ -287,19 +290,19 @@ export class SelectionParameterSet {
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
-      args.push('--filter', `${project.packageName}...`);
+      pnpmFilterArguments.push('--filter', `${project.packageName}...`);
     }
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
-      args.push('--filter', `${project.packageName}^...`);
+      pnpmFilterArguments.push('--filter', `${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
     for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
-      args.push('--filter', `...${project.packageName}`);
+      pnpmFilterArguments.push('--filter', `...${project.packageName}`);
     }
 
     // --impacted-by-except
@@ -308,10 +311,19 @@ export class SelectionParameterSet {
       this._impactedByExceptProject,
       terminal
     )) {
-      args.push('--filter', `...^${project.packageName}`);
+      pnpmFilterArguments.push('--filter', `...^${project.packageName}`);
     }
 
-    return args;
+    // Undefined when full install
+    let selectedProjects: Set<RushConfigurationProject> | undefined;
+    if (pnpmFilterArguments.length > 0) {
+      selectedProjects = await this.getSelectedProjectsAsync(terminal);
+    }
+
+    return {
+      pnpmFilterArguments,
+      selectedProjects
+    };
   }
 
   /**

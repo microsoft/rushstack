@@ -150,7 +150,7 @@ export class InstallHelpers {
     const packageManagerToolFolder: string = path.join(rushUserFolder, packageManagerAndVersion);
 
     const packageManagerMarker: LastInstallFlag = new LastInstallFlag(packageManagerToolFolder, {
-      node: process.versions.node
+      nodeVersion: process.versions.node
     });
 
     logIfConsoleOutputIsNotRestricted(`Trying to acquire lock for ${packageManagerAndVersion}`);

@@ -21,6 +21,7 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import { IInstallProject } from '../../api/LastInstallFlag';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -411,6 +412,77 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
+
+    // Stage 2 pnpm rebuild pending scripts
+    if (this.deferredInstallationScripts && !this.options.ignoreScripts) {
+      // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
+      const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
+
+      const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
+        this.rushConfiguration,
+        this.options
+      );
+
+      const rebuildArgs: string[] = ['rebuild', '--pending'];
+      this.pushPnpmRebuildCommandArgs(rebuildArgs);
+
+      console.log(
+        '\n' +
+          colors.bold(
+            `Running "${this.rushConfiguration.packageManager} rebuild --pending" in` +
+              ` ${this.rushConfiguration.commonTempFolder}`
+          ) +
+          '\n'
+      );
+
+      // If any diagnostic options were specified, then show the full command-line
+      if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+        console.log(
+          '\n' +
+            colors.green('Invoking package manager: ') +
+            FileSystem.getRealPath(packageManagerFilename) +
+            ' ' +
+            rebuildArgs.join(' ') +
+            '\n'
+        );
+      }
+
+      try {
+        Utilities.executeCommand({
+          command: packageManagerFilename,
+          args: rebuildArgs,
+          workingDirectory: this.rushConfiguration.commonTempFolder,
+          environment: packageManagerEnv,
+          suppressOutput: false
+        });
+        this.commonTempInstallFlag.mergeFromObject({
+          installProjects: this.selectedProjects.reduce((acc, project) => {
+            const { packageName, projectRelativeFolder } = project;
+            acc[packageName] = {
+              packageName,
+              projectRelativeFolder,
+              ignoreScripts: false
+            };
+            return acc;
+          }, {} as Record<string, IInstallProject>)
+        });
+      } catch (err) {
+        this.commonTempInstallFlag.mergeFromObject({
+          installProjects: this.selectedProjects.reduce((acc, project) => {
+            const { packageName, projectRelativeFolder } = project;
+            acc[packageName] = {
+              packageName,
+              projectRelativeFolder,
+              ignoreScripts: true
+            };
+            return acc;
+          }, {} as Record<string, IInstallProject>)
+        });
+        throw new Error(`Encounter an error when running install lifecycle scripts. error: ${err.message}`);
+      } finally {
+        this.commonTempInstallFlag.save();
+      }
+    }
   }
 
   /**
@@ -428,6 +500,31 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       for (const arg of this.options.pnpmFilterArguments) {
         args.push(arg);
       }
+    }
+  }
+
+  /**
+   * Used when invoking the "pnpm rebuild" command that runs installation scripts of NPM dependencies.
+   * NOTE: Despite the name, "pnpm rebuild" is purely an installation action -- it does not build Rush projects
+   * in the manner of "rush rebuild" or "rush build".
+   */
+  protected pushPnpmRebuildCommandArgs(args: string[]): void {
+    args.push('--recursive');
+
+    if (
+      this.rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
+      EnvironmentConfiguration.pnpmStorePathOverride
+    ) {
+      // pnpm rebuild does not accept --store-dir now... So, config.storeDir is used here
+      args.push(`--config.storeDir=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
+    }
+
+    if (this.options.collectLogFile) {
+      args.push('--reporter', 'ndjson');
+    }
+
+    for (const arg of this.options.pnpmFilterArguments) {
+      args.push(arg);
     }
   }
 }

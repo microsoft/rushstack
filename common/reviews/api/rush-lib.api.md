@@ -57,6 +57,23 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: ReadonlySet<string>;
 }
 
+// @internal
+export class _BaseFlag<T extends object = JsonObject> {
+    constructor(folderPath: string, state?: Partial<T>);
+    clear(): void;
+    create(): void;
+    protected get flagName(): string;
+    protected _isModified: boolean;
+    isValid(): boolean;
+    mergeFromObject(data: Partial<T>): void;
+    protected get oldState(): T | undefined;
+    get path(): string;
+    protected readonly _path: string;
+    save(): void;
+    saveIfModified(): void;
+    protected _state: T;
+}
+
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
@@ -301,6 +318,7 @@ export interface IExecutionResult {
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
+    deferredInstallationScripts?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
@@ -337,6 +355,27 @@ export interface IGetChangedProjectsOptions {
 export interface IGlobalCommand extends IRushCommand {
 }
 
+// @internal
+export interface _IInstallProject extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
+    // (undocumented)
+    ignoreScripts?: boolean;
+}
+
+// @internal
+export interface _ILastInstallFlagJson {
+    autoinstallerPackageJson?: IPackageJson;
+    installProjects?: Record<string, _IInstallProject>;
+    nodeVersion: string;
+    npmrcHash?: string;
+    packageManager: PackageManagerName;
+    packageManagerVersion: string;
+    pnpmStorePath?: string;
+    rushJsonFolder: string;
+    // @deprecated (undocumented)
+    storePath?: string;
+    useWorkspaces?: true;
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -350,8 +389,10 @@ export interface ILaunchOptions {
 export interface _ILockfileValidityCheckOptions {
     // (undocumented)
     rushVerb?: string;
+    // Warning: (ae-forgotten-export) The symbol "ILastInstallStateProperty" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    statePropertiesToIgnore?: string[];
+    statePropertiesToIgnore?: ILastInstallStateProperty[];
 }
 
 // @beta (undocumented)
@@ -555,16 +596,14 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export class _LastInstallFlag {
-    constructor(folderPath: string, state?: JsonObject);
+export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
     checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
         rushVerb: string;
     }): boolean;
-    clear(): void;
-    create(): void;
     protected get flagName(): string;
+    isSelectedProjectInstalled(): boolean;
+    // @override
     isValid(options?: _ILockfileValidityCheckOptions): boolean;
-    readonly path: string;
 }
 
 // @public

@@ -31,7 +31,7 @@ export class RushVersionSelector {
     const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
 
     const installMarker: _LastInstallFlag = new _LastInstallFlag(expectedRushPath, {
-      node: process.versions.node
+      nodeVersion: process.versions.node
     });
 
     if (!installMarker.isValid()) {

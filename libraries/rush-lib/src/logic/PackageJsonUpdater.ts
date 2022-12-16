@@ -308,6 +308,7 @@ export class PackageJsonUpdater {
         bypassPolicy: false,
         noLink: false,
         fullUpgrade: false,
+        ignoreScripts: false,
         recheckShrinkwrap: false,
         networkConcurrency: undefined,
         collectLogFile: false,
@@ -356,6 +357,7 @@ export class PackageJsonUpdater {
       const installManagerOptions: IInstallManagerOptions = {
         debug: debugInstall,
         allowShrinkwrapUpdates: true,
+        ignoreScripts: false,
         bypassPolicy: false,
         noLink: false,
         fullUpgrade: false,

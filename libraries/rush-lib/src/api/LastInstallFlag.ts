@@ -1,22 +1,83 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import { JsonFile, Import, Path, IPackageJson } from '@rushstack/node-core-library';
 
-import { FileSystem, JsonFile, JsonObject, Import, Path } from '@rushstack/node-core-library';
-
-import { PackageManagerName } from './packageManager/PackageManager';
-import { RushConfiguration } from './RushConfiguration';
+import { BaseFlag } from './base/BaseFlag';
+import type { PackageManagerName } from './packageManager/PackageManager';
+import type { RushConfiguration } from './RushConfiguration';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
 /**
+ * Install project state
+ * @internal
+ */
+export interface IInstallProject
+  extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
+  ignoreScripts?: boolean;
+}
+
+/**
+ * This represents the JSON data structure for the "last-install.flag" file.
+ * @internal
+ */
+export interface ILastInstallFlagJson {
+  /**
+   * Current node version
+   */
+  nodeVersion: string;
+  /**
+   * Current package manager name
+   */
+  packageManager: PackageManagerName;
+  /**
+   * Current package manager version
+   */
+  packageManagerVersion: string;
+  /**
+   * Current rush json folder
+   */
+  rushJsonFolder: string;
+  /**
+   * The content of package.json, used in the flag file of autoinstaller
+   */
+  autoinstallerPackageJson?: IPackageJson;
+  /**
+   * Same with pnpmOptions.pnpmStorePath in rush.json
+   */
+  pnpmStorePath?: string;
+  /**
+   * @deprecated Use `pnpmStorePath` instead
+   */
+  storePath?: string;
+  /**
+   * True when "useWorkspaces" is true in rush.json
+   */
+  useWorkspaces?: true;
+  /**
+   * installed projects information indexed by packageName
+   */
+  installProjects?: Record<string, IInstallProject>;
+  /**
+   * The hash of .npmrc file
+   */
+  npmrcHash?: string;
+}
+
+/**
+ * @internal
+ */
+export type ILastInstallStateProperty = keyof ILastInstallFlagJson;
+
+/**
  * @internal
  */
 export interface ILockfileValidityCheckOptions {
-  statePropertiesToIgnore?: string[];
+  statePropertiesToIgnore?: ILastInstallStateProperty[];
   rushVerb?: string;
 }
 
@@ -27,25 +88,45 @@ export interface ILockfileValidityCheckOptions {
  * it can invalidate the last install.
  * @internal
  */
-export class LastInstallFlag {
-  private _state: JsonObject;
-
+export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
   /**
-   * Returns the full path to the flag file
+   * Check whether selected project is installed
+   * @internal
    */
-  public readonly path: string;
+  public isSelectedProjectInstalled(): boolean {
+    let oldState: ILastInstallFlagJson;
+    try {
+      oldState = JsonFile.load(this._path);
+    } catch (err) {
+      return false;
+    }
 
-  /**
-   * Creates a new LastInstall flag
-   * @param folderPath - the folder that this flag is managing
-   * @param state - optional, the state that should be managed or compared
-   */
-  public constructor(folderPath: string, state: JsonObject = {}) {
-    this.path = path.join(folderPath, this.flagName);
-    this._state = state;
+    const newState: ILastInstallFlagJson = { ...this._state };
+
+    if (oldState.installProjects && newState.installProjects) {
+      const newInstallProjectList: IInstallProject[] = Object.values(newState.installProjects);
+      const oldInstallProjectList: IInstallProject[] = Object.values(oldState.installProjects);
+      const omitProperties: (keyof IInstallProject)[] = ['ignoreScripts'];
+      if (oldInstallProjectList.length >= newInstallProjectList.length) {
+        if (
+          lodash.differenceWith(
+            Object.values(newState.installProjects),
+            Object.values(oldState.installProjects),
+            (a, b) => {
+              return lodash.isEqual(lodash.omit(a, omitProperties), lodash.omit(b, omitProperties));
+            }
+          ).length === 0
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
+   * @override
    * Returns true if the file exists and the contents match the current state.
    */
   public isValid(options?: ILockfileValidityCheckOptions): boolean {
@@ -73,23 +154,18 @@ export class LastInstallFlag {
     checkValidAndReportStoreIssues: boolean,
     { rushVerb = 'update', statePropertiesToIgnore }: ILockfileValidityCheckOptions = {}
   ): boolean {
-    let oldState: JsonObject;
+    let oldState: ILastInstallFlagJson;
     try {
       oldState = JsonFile.load(this.path);
     } catch (err) {
       return false;
     }
 
-    const newState: JsonObject = { ...this._state };
+    const newState: ILastInstallFlagJson = { ...this._state };
 
-    if (statePropertiesToIgnore) {
-      for (const optionToIgnore of statePropertiesToIgnore) {
-        delete newState[optionToIgnore];
-        delete oldState[optionToIgnore];
-      }
-    }
+    const omitProperties: (keyof ILastInstallFlagJson)[] = statePropertiesToIgnore || [];
 
-    if (!lodash.isEqual(oldState, newState)) {
+    if (!lodash.isEqual(lodash.omit(oldState, omitProperties), lodash.omit(newState, omitProperties))) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {
@@ -97,11 +173,14 @@ export class LastInstallFlag {
             // Only throw an error if the package manager hasn't changed from PNPM
             oldState.packageManager === pkgManager
           ) {
-            const normalizedOldStorePath: string = oldState.storePath
+            // storePath is the legacy name for pnpmStorePath
+            const normalizedOldStorePath: string = oldState.pnpmStorePath
+              ? Path.convertToPlatformDefault(oldState.pnpmStorePath)
+              : oldState.storePath
               ? Path.convertToPlatformDefault(oldState.storePath)
               : '<global>';
-            const normalizedNewStorePath: string = newState.storePath
-              ? Path.convertToPlatformDefault(newState.storePath)
+            const normalizedNewStorePath: string = newState.pnpmStorePath
+              ? Path.convertToPlatformDefault(newState.pnpmStorePath)
               : '<global>';
             if (
               // Throw if the store path changed
@@ -121,22 +200,6 @@ export class LastInstallFlag {
     }
 
     return true;
-  }
-
-  /**
-   * Writes the flag file to disk with the current state
-   */
-  public create(): void {
-    JsonFile.save(this._state, this.path, {
-      ensureFolderExists: true
-    });
-  }
-
-  /**
-   * Removes the flag file
-   */
-  public clear(): void {
-    FileSystem.deleteFile(this.path);
   }
 
   /**
@@ -163,10 +226,10 @@ export class LastInstallFlagFactory {
    */
   public static getCommonTempFlag(
     rushConfiguration: RushConfiguration,
-    extraState: Record<string, string> = {}
+    extraState: Partial<ILastInstallFlagJson> = {}
   ): LastInstallFlag {
-    const currentState: JsonObject = {
-      node: process.versions.node,
+    const currentState: ILastInstallFlagJson = {
+      nodeVersion: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
       rushJsonFolder: rushConfiguration.rushJsonFolder,
@@ -174,9 +237,9 @@ export class LastInstallFlagFactory {
     };
 
     if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
-      currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+      currentState.pnpmStorePath = rushConfiguration.pnpmOptions.pnpmStorePath;
       if (rushConfiguration.pnpmOptions.useWorkspaces) {
-        currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
+        currentState.useWorkspaces = rushConfiguration.pnpmOptions.useWorkspaces;
       }
     }
 
