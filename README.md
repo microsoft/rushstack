@@ -1,8 +1,9 @@
 <table><tr><td>
 <a href="https://rushstack.io/"><img src="https://rushstack.io/images/rushstack.svg" width="300px" /></a>
 <p align="center"><a href="https://rushstack.io/">https://rushstack.io/</a></p>
+<!-- Verification of Mastodon account -->
+<a rel="me" class="no-external-link-icon" href="https://fosstodon.org/@rushstack"></a>
 </td></tr></table>
-
 
 
 [![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
@@ -157,8 +158,6 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
 <!-- GENERATED PROJECT SUMMARY END -->
 
-<!-- Verification of Mastodon account -->
-<a rel="me" class="no-external-link-icon" href="https://fosstodon.org/@rushstack"></a>
 
 ## Contributor Notice
 
