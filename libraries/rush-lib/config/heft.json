@@ -74,7 +74,8 @@
         {
           "sourceFolder": "lib-commonjs",
           "destinationFolders": ["lib"],
-          "fileExtensions": [".d.ts"]
+          "includeGlobs": ["**/*.d.ts"],
+          "excludeGlobs": ["**/*.test.*", "**/test/**/*", "**/__mocks__/**/*"]
         }
       ]
     }
