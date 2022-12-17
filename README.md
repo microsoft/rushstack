@@ -157,6 +157,9 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
 <!-- GENERATED PROJECT SUMMARY END -->
 
+<!-- Verification of Mastodon account -->
+<a rel="me" class="no-external-link-icon" href="https://fosstodon.org/@rushstack"></a>
+
 ## Contributor Notice
 
 This repo welcomes contributions and suggestions.  Most contributions require you to agree to a
