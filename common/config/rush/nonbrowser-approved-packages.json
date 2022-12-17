@@ -207,6 +207,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/webpack-deep-imports-compat-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/webpack-plugin-utilities",
       "allowedCategories": [ "libraries" ]
     },
@@ -736,6 +740,10 @@
     },
     {
       "name": "webpack-sources",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "webpack-virtual-modules",
       "allowedCategories": [ "libraries" ]
     },
     {

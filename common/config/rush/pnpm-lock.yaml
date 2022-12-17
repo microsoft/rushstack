@@ -2483,6 +2483,29 @@ importers:
       '@types/tapable': 1.0.6
       '@types/webpack': 4.41.32
 
+  ../../webpack/webpack-deep-imports-compat-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      fast-glob: ~3.2.4
+      webpack: ~5.68.0
+      webpack-virtual-modules: ~0.5.0
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      fast-glob: 3.2.12
+      webpack-virtual-modules: 0.5.0
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      webpack: 5.68.0
+
   ../../webpack/webpack-plugin-utilities:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -20651,6 +20674,10 @@ packages:
     dependencies:
       debug: 3.2.7
     dev: true
+
+  /webpack-virtual-modules/0.5.0:
+    resolution: {integrity: sha512-kyDivFZ7ZM0BVOUteVbDFhlRt7Ah/CSPwJdi8hBpkK7QLumUqdLtVfm/PX/hkcnrvr0i77fO5+TjZ94Pe+C9iw==}
+    dev: false
 
   /webpack/4.44.2:
     resolution: {integrity: sha512-6KJVGlCxYdISyurpQ0IPTklv+DULv05rs2hseIXer6D7KrUicRDLFb4IUM1S6LUAKypPM/nSiVSuv8jHu1m3/Q==}
