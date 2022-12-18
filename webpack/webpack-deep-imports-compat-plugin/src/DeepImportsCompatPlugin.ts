@@ -136,7 +136,7 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
       context
     } = options;
     if (path.isAbsolute(inFolderName)) {
-      throw new Error(`The "inFolder.folderNAme" option must not be absolute.`);
+      throw new Error(`The "inFolder.folderName" option must not be absolute.`);
     }
 
     if (path.isAbsolute(outFolder)) {
