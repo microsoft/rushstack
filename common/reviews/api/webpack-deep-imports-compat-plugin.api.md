@@ -18,17 +18,13 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
 
 // @public (undocumented)
 export interface IDeepImportsCompatPluginOptions {
-    // (undocumented)
     bundleName: string;
-    // (undocumented)
     context?: string;
-    // (undocumented)
     inFolder: {
         folderName: string;
         includePatterns: string[];
         excludePatterns?: string[];
     };
-    // (undocumented)
     outFolderName: string;
 }
 

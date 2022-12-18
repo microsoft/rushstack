@@ -1,7 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { WebpackPluginInstance, Compiler, Configuration, Chunk } from 'webpack';
+import type {
+  WebpackPluginInstance,
+  Compiler,
+  Configuration,
+  Chunk,
+  WebpackError as WebpackErrorType
+} from 'webpack';
 import VirtualModulesPlugin from 'webpack-virtual-modules';
 import path from 'path';
 import glob from 'fast-glob';
@@ -13,14 +19,37 @@ const PLUGIN_NAME: 'DeepImportsCompatPlugin' = 'DeepImportsCompatPlugin';
  * @public
  */
 export interface IDeepImportsCompatPluginOptions {
+  /**
+   * Specification of the input files.
+   */
   inFolder: {
+    /**
+     * The folder name under the webpack context where the loose files are located.
+     */
     folderName: string;
     // TODO: Support .npmignore/the package.json files property
+    /**
+     * The glob patterns to use to find the loose files.
+     */
     includePatterns: string[];
+    /**
+     * The glob patterns to use to exclude files from the loose files that would otherwise
+     * be included by the {@link IDeepImportsCompatPluginOptions.inFolder.includePatterns} patterns.
+     */
     excludePatterns?: string[];
   };
+  /**
+   * The folder name under the webpack context where the commonJS files that point to the
+   * generated bundle will be written.
+   */
   outFolderName: string;
+  /**
+   * The name of the generated bundle.
+   */
   bundleName: string;
+  /**
+   * The webpack context. This is required if the webpack configuration does not provide one.
+   */
   context?: string;
 }
 
@@ -31,6 +60,9 @@ interface IExtendedConfiguration extends Configuration {
   [HAS_BEEN_APPLIED_SYMBOL]?: true;
 }
 
+/**
+ * Returns the number of `/` characters present in a given string.
+ */
 function countSlashes(str: string): number {
   let count: number = 0;
   for (
@@ -198,20 +230,26 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
       this._virtualModules.writeModule(this._moduleName, lines);
     });
 
+    const WebpackError: typeof WebpackErrorType = compiler.webpack.WebpackError;
+
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapPromise(PLUGIN_NAME, async () => {
         // `ChunkGroup` is not exported from 'webpack'
         // eslint-disable-next-line @typescript-eslint/typedef
         const chunkGroup /* ChunkGroup | undefined */ = compilation.namedChunkGroups.get(bundleName);
         if (!chunkGroup) {
-          throw new Error(`The chunk group ${bundleName} was not found.`);
+          compilation.errors.push(new WebpackError(`The chunk group ${bundleName} was not found.`));
+          return;
         }
 
         let runtimeChunk: Chunk | undefined;
         for (const chunk of chunkGroup.chunks) {
           if (chunk.hasRuntime()) {
             if (runtimeChunk) {
-              throw new Error(`Multiple runtime chunks were found in the ${bundleName} chunk group.`);
+              compilation.errors.push(
+                new WebpackError(`Multiple runtime chunks were found in the ${bundleName} chunk group.`)
+              );
+              return;
             } else {
               runtimeChunk = chunk;
             }
@@ -219,7 +257,10 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
         }
 
         if (!runtimeChunk) {
-          throw new Error(`The runtime chunk in the ${bundleName} chunk group not found.`);
+          compilation.errors.push(
+            new WebpackError(`The runtime chunk in the ${bundleName} chunk group not found.`)
+          );
+          return;
         }
 
         const filenames: string[] = Array.from(runtimeChunk.files);
@@ -227,7 +268,10 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
         for (const filename of filenames) {
           if (filename.endsWith(JS_EXTENSION)) {
             if (jsFileBaseName) {
-              throw new Error(`Multiple JS files were found in the ${bundleName} chunk group.`);
+              compilation.errors.push(
+                new WebpackError(`Multiple JS files were found in the ${bundleName} chunk group.`)
+              );
+              return;
             } else {
               jsFileBaseName = filename.substring(0, filename.length - JS_EXTENSION.length);
             }
@@ -235,12 +279,16 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
         }
 
         if (!jsFileBaseName) {
-          throw new Error(`The JS file in the ${bundleName} chunk group not found.`);
+          compilation.errors.push(
+            new WebpackError(`The JS file in the ${bundleName} chunk group not found.`)
+          );
+          return;
         }
 
         const outputPath: string | undefined = compilation.options.output.path;
         if (!outputPath) {
-          throw new Error(`The "output.path" option was not specified.`);
+          compilation.errors.push(new WebpackError(`The "output.path" option was not specified.`));
+          return;
         }
 
         const jsFilePath: string = Path.convertToSlashes(path.join(outputPath, jsFileBaseName));
