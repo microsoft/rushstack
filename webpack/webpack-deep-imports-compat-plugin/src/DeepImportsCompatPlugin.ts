@@ -118,14 +118,10 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
       webpackConfiguration.plugins = [];
     }
 
+    let virtualModulesPlugin: VirtualModulesPlugin | undefined;
     for (const existingPlugin of webpackConfiguration.plugins) {
-      if (existingPlugin instanceof DeepImportsCompatPlugin) {
-        throw new Error(`The ${PLUGIN_NAME} has already been applied to this webpack configuration.`);
-      } else if (existingPlugin instanceof VirtualModulesPlugin) {
-        throw new Error(
-          `The ${PLUGIN_NAME} cannot be applied because another plugin has already registered ` +
-            `the VirtualModulesPlugin.`
-        );
+      if (existingPlugin instanceof VirtualModulesPlugin) {
+        virtualModulesPlugin = existingPlugin;
       }
     }
 
@@ -153,7 +149,10 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
     const resolvedInFolder: string = path.join(contextToUse, inFolderName);
     const moduleName: string = path.join(resolvedInFolder, `___${PLUGIN_NAME}__${bundleName}__`);
 
-    const virtualModulesPlugin: VirtualModulesPlugin = new VirtualModulesPlugin();
+    if (!virtualModulesPlugin) {
+      virtualModulesPlugin = new VirtualModulesPlugin();
+    }
+
     const plugin: DeepImportsCompatPlugin = new DeepImportsCompatPlugin(
       HAS_BEEN_APPLIED_SYMBOL,
       options,
