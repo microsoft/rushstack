@@ -113,4 +113,4 @@ DeepImportsCompatPlugin.applyToWebpackConfiguration(configuration, {
 module.exports = configuration
 ```
 
-**DO NOT MANUALLY ADD THIS PLUGIN TO YOUR WEBPACK CONFIGURATION'S `plugins` PROPERTY**
+Manually adding this plugin to your Webpack configuration's `plugins` array will result in an error.
