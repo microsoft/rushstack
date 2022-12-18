@@ -87,11 +87,16 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
   private readonly _resolvedInFolder: string;
 
   private constructor(
+    flag: typeof HAS_BEEN_APPLIED_SYMBOL,
     options: IDeepImportsCompatPluginOptions,
     virtualModulesPlugin: VirtualModulesPlugin,
     resolvedInFolder: string,
     moduleName: string
   ) {
+    if (flag !== HAS_BEEN_APPLIED_SYMBOL) {
+      throw new Error(`The ${PLUGIN_NAME} constructor is not public.`);
+    }
+
     this._options = options;
     this._virtualModules = virtualModulesPlugin;
     this._resolvedInFolder = resolvedInFolder;
@@ -150,6 +155,7 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
 
     const virtualModulesPlugin: VirtualModulesPlugin = new VirtualModulesPlugin();
     const plugin: DeepImportsCompatPlugin = new DeepImportsCompatPlugin(
+      HAS_BEEN_APPLIED_SYMBOL,
       options,
       virtualModulesPlugin,
       resolvedInFolder,
