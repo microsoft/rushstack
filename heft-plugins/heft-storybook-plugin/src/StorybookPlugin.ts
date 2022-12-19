@@ -24,7 +24,7 @@ import { StorybookRunner } from './StorybookRunner';
 
 const PLUGIN_NAME: string = 'StorybookPlugin';
 const TASK_NAME: string = 'heft-storybook';
-const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-storybook-plugin.schema.json');
+const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-storybook-plugin.schema.json`;
 
 /**
  * Options for `StorybookPlugin`.
