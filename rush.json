@@ -1041,6 +1041,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/webpack-deep-imports-compat-plugin",
+      "projectFolder": "webpack/webpack-deep-imports-compat-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false // for now
+    },
+    {
       "packageName": "@rushstack/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
