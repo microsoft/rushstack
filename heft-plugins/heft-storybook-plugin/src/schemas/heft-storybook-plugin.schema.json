@@ -12,12 +12,12 @@
       "type": "string"
     },
     "startupModulePath": {
-      "title": "The module entry point that Heft `start` command should use to launch the Storybook toolchain.",
+      "title": "The module entry point that Heft serve mode should use to launch the Storybook toolchain.",
       "description": "Typically it is the path loaded the `start-storybook` shell script. For example, If you are using `@storybook/react`, then the startup path would be: `\"startupModulePath\": \"@storybook/react/bin/index.js\"`",
       "type": "string"
     },
     "staticBuildModulePath": {
-      "title": "The module entry point that Heft `build` command should use to launch the Storybook toolchain.",
+      "title": "The module entry point that Heft non-serve mode should use to launch the Storybook toolchain.",
       "description": "Typically it is the path loaded the `build-storybook` shell script. For example, If you are using `@storybook/react`, then the static build path would be: `\"staticBuildModulePath\": \"@storybook/react/bin/build.js\"`",
       "type": "string"
     }

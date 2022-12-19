@@ -57,7 +57,7 @@ export interface IStorybookPluginOptions {
   storykitPackageName: string;
 
   /**
-   * The module entry point that Heft `start` command should use to launch the Storybook toolchain.
+   * The module entry point that Heft serve mode should use to launch the Storybook toolchain.
    * Typically it is the path loaded the `start-storybook` shell script.
    *
    * @example
@@ -68,7 +68,7 @@ export interface IStorybookPluginOptions {
   startupModulePath?: string;
 
   /**
-   * The module entry point that Heft `build` command should use to launch the Storybook toolchain.
+   * The module entry point that Heft non-serve mode should use to launch the Storybook toolchain.
    * Typically it is the path loaded the `build-storybook` shell script.
    *
    * @example
@@ -164,9 +164,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
           { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
           (webpackConfiguration: unknown) => {
             // Discard Webpack's configuration to prevent Webpack from running only when starting a storybook server
-            return storybookParameters.actionAssociated && storybookParameters.value
-              ? null
-              : webpackConfiguration;
+            return build.properties.serveMode ? null : webpackConfiguration;
           }
         );
 
