@@ -124,33 +124,23 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     }
 
     const storybookParameters: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
-      associatedActionNames: ['start'],
+      associatedActionNames: ['start', 'build'],
       parameterLongName: '--storybook',
       description:
         '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to launch Storybook.'
     });
 
-    const storybookStaticBuildParameters: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
-      associatedActionNames: ['build'],
-      parameterLongName: '--storybook',
-      description:
-        '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to start static build Storybook.'
-    });
-
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      if (
-        (!storybookParameters.actionAssociated || !storybookParameters.value) &&
-        (!storybookStaticBuildParameters.actionAssociated || !storybookStaticBuildParameters.value)
-      ) {
+      if (!storybookParameters.actionAssociated || !storybookParameters.value) {
         this._logger.terminal.writeVerboseLine(
           'The command line does not include "--storybook", so bundling will proceed without Storybook'
         );
         return;
       }
 
-      const modulePath: string | undefined = storybookStaticBuildParameters.actionAssociated
-        ? options.staticBuildModulePath
-        : options.startupModulePath;
+      const modulePath: string | undefined = build.properties.serveMode
+        ? options.startupModulePath
+        : options.staticBuildModulePath;
       if (!modulePath) {
         this._logger.terminal.writeVerboseLine(
           'No matching module path option specified in heft.json, so bundling will proceed without Storybook'
