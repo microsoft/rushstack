@@ -4,10 +4,11 @@
 import * as path from 'path';
 import {
   Terminal,
-  ITerminalProvider,
-  IPackageJson,
+  type ITerminalProvider,
+  type IPackageJson,
   PackageJsonLookup,
-  InternalError
+  InternalError,
+  type ITerminal
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 import { RigConfig } from '@rushstack/rig-package';
@@ -119,7 +120,7 @@ export class HeftConfiguration {
   /**
    * Terminal instance to facilitate logging.
    */
-  public get globalTerminal(): Terminal {
+  public get globalTerminal(): ITerminal {
     return this._globalTerminal;
   }
 
