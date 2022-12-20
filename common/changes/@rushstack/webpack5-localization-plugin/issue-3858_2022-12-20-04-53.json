@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/webpack5-localization-plugin",
       "comment": "Convert LocalizationPlugin._stringKeys to public stringKeys property.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/webpack5-localization-plugin"
