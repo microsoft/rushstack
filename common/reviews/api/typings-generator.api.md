@@ -60,7 +60,7 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
 // @public
 export class TypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
-    generateTypingsAsync(filePaths?: string[]): Promise<void>;
+    generateTypingsAsync(relativeFilePaths?: string[]): Promise<void>;
     // (undocumented)
     getOutputFilePaths(relativePath: string): string[];
     readonly ignoredFileGlobs: readonly string[];

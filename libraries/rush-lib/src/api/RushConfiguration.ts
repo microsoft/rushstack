@@ -12,8 +12,7 @@ import {
   Path,
   FileSystem,
   PackageNameParser,
-  FileSystemStats,
-  Import
+  FileSystemStats
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
@@ -38,14 +37,10 @@ import { RushPluginsConfiguration } from './RushPluginsConfiguration';
 import { IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 import { INpmOptionsJson, NpmOptionsConfiguration } from '../logic/npm/NpmOptionsConfiguration';
 import { IYarnOptionsJson, YarnOptionsConfiguration } from '../logic/yarn/YarnOptionsConfiguration';
+import schemaJson from '../schemas/rush.schema.json';
 
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
-
-const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = Import.lazy(
-  '../logic/DependencyAnalyzer',
-  require
-);
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -162,6 +157,7 @@ export interface IRushConfigurationJson {
   rushVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
+  nodeSupportedVersionInstructions?: string;
   suppressNodeLtsWarning?: boolean;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
@@ -209,66 +205,10 @@ export interface ITryFindRushJsonLocationOptions {
  * @public
  */
 export class RushConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/rush.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _rushJsonFile: string;
-  private _rushJsonFolder: string;
-  private _changesFolder: string;
-  private _commonFolder: string;
-  private _commonTempFolder: string;
-  private _commonScriptsFolder: string;
-  private _commonRushConfigFolder: string;
-  private _packageManager!: PackageManagerName;
-  private _packageManagerWrapper: PackageManager;
-  private _npmCacheFolder: string;
-  private _npmTmpFolder: string;
-  private _yarnCacheFolder: string;
-  private _shrinkwrapFilename: string;
-  private _tempShrinkwrapFilename: string;
-  private _tempShrinkwrapPreinstallFilename: string;
-  private _currentVariantJsonFilename: string;
-  private _packageManagerToolVersion: string;
-  private _packageManagerToolFilename: string;
-  private _projectFolderMinDepth: number;
-  private _projectFolderMaxDepth: number;
-  private _allowMostlyStandardPackageNames: boolean;
-  private _ensureConsistentVersions: boolean;
-  private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
   private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
-
-  // "approvedPackagesPolicy" feature
-  private _approvedPackagesPolicy: ApprovedPackagesPolicy;
-
-  // "gitPolicy" feature
-  private _gitAllowedEmailRegExps: string[];
-  private _gitSampleEmail: string;
-  private _gitVersionBumpCommitMessage: string | undefined;
-  private _gitChangeLogUpdateCommitMessage: string | undefined;
-  private _gitChangefilesCommitMessage: string | undefined;
-  private _gitTagSeparator: string | undefined;
-
-  // "hotfixChangeEnabled" feature
-  private _hotfixChangeEnabled: boolean;
-
-  // Repository info
-  private _repositoryUrls: string[];
-  private _repositoryDefaultBranch: string;
-  private _repositoryDefaultRemote: string;
-
-  private _npmOptions: NpmOptionsConfiguration;
-  private _pnpmOptions: PnpmOptionsConfiguration;
-  private _yarnOptions: YarnOptionsConfiguration;
-  private _packageManagerConfigurationOptions!: PackageManagerOptionsConfigurationBase;
-
-  // Rush hooks
-  private _eventHooks: EventHooks;
-
-  private readonly _packageNameParser: PackageNameParser;
-
-  private _telemetryEnabled: boolean;
 
   // Lazily loaded when the projects() getter is called.
   private _projects: RushConfigurationProject[] | undefined;
@@ -282,20 +222,338 @@ export class RushConfiguration {
   // variant -> common-versions configuration
   private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
 
-  private _versionPolicyConfiguration: VersionPolicyConfiguration;
-  private _versionPolicyConfigurationFilePath: string;
-  private _experimentsConfiguration: ExperimentsConfiguration;
+  /**
+   * The name of the package manager being used to install dependencies
+   */
+  public readonly packageManager!: PackageManagerName;
 
-  private __rushPluginsConfiguration: RushPluginsConfiguration;
+  /**
+   * {@inheritdoc PackageManager}
+   *
+   * @privateremarks
+   * In the next major breaking API change, we will rename this property to "packageManager" and eliminate the
+   * old property with that name.
+   *
+   * @beta
+   */
+  public readonly packageManagerWrapper: PackageManager;
 
-  private readonly _rushConfigurationJson: IRushConfigurationJson;
+  /**
+   * Gets the JSON data structure for the "rush.json" configuration file.
+   *
+   * @internal
+   */
+  public readonly rushConfigurationJson: IRushConfigurationJson;
+
+  /**
+   * The absolute path to the "rush.json" configuration file that was loaded to construct this object.
+   */
+  public readonly rushJsonFile: string;
+
+  /**
+   * The absolute path of the folder that contains rush.json for this project.
+   */
+  public readonly rushJsonFolder: string;
+
+  /**
+   * The folder that contains all change files.
+   */
+  public readonly changesFolder: string;
+
+  /**
+   * The fully resolved path for the "common" folder where Rush will store settings that
+   * affect all Rush projects.  This is always a subfolder of the folder containing "rush.json".
+   * Example: `C:\MyRepo\common`
+   */
+  public readonly commonFolder: string;
+
+  /**
+   * The folder where Rush's additional config files are stored.  This folder is always a
+   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
+   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
+   * Rush will report an error if this this folder contains any unrecognized files.
+   *
+   * Example: `C:\MyRepo\common\config\rush`
+   */
+  public readonly commonRushConfigFolder: string;
+
+  /**
+   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
+   * under the common folder.
+   * Example: `C:\MyRepo\common\temp`
+   */
+  public readonly commonTempFolder: string;
+
+  /**
+   * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
+   * under the common folder.
+   * Example: `C:\MyRepo\common\scripts`
+   */
+  public readonly commonScriptsFolder: string;
+
+  /**
+   * The local folder that will store the NPM package cache.  Rush does not rely on the
+   * npm's default global cache folder, because npm's caching implementation does not
+   * reliably handle multiple processes.  (For example, if a build box is running
+   * "rush install" simultaneously for two different working folders, it may fail randomly.)
+   *
+   * Example: `C:\MyRepo\common\temp\npm-cache`
+   */
+  public readonly npmCacheFolder: string;
+
+  /**
+   * The local folder where npm's temporary files will be written during installation.
+   * Rush does not rely on the global default folder, because it may be on a different
+   * hard disk.
+   *
+   * Example: `C:\MyRepo\common\temp\npm-tmp`
+   */
+  public readonly npmTmpFolder: string;
+
+  /**
+   * The local folder that will store the Yarn package cache.
+   *
+   * Example: `C:\MyRepo\common\temp\yarn-cache`
+   */
+  public readonly yarnCacheFolder: string;
+
+  /**
+   * The filename (without any path) of the shrinkwrap file that is used by the package manager.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: `npm-shrinkwrap.json` or `pnpm-lock.yaml`
+   */
+  public readonly shrinkwrapFilename: string;
+
+  /**
+   * The full path of the temporary shrinkwrap file that is used during "rush install".
+   * This file may get rewritten by the package manager during installation.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap.json` or `C:\MyRepo\common\temp\pnpm-lock.yaml`
+   */
+  public readonly tempShrinkwrapFilename: string;
+
+  /**
+   * The full path of a backup copy of tempShrinkwrapFilename. This backup copy is made
+   * before installation begins, and can be compared to determine how the package manager
+   * modified tempShrinkwrapFilename.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json`
+   * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
+   */
+  public readonly tempShrinkwrapPreinstallFilename: string;
+
+  /**
+   * The filename of the variant dependency data file.  By default this is
+   * called 'current-variant.json' resides in the Rush common folder.
+   * Its data structure is defined by ICurrentVariantJson.
+   *
+   * Example: `C:\MyRepo\common\temp\current-variant.json`
+   */
+  public readonly currentVariantJsonFilename: string;
+
+  /**
+   * The version of the locally installed NPM tool.  (Example: "1.2.3")
+   */
+  public readonly packageManagerToolVersion: string;
+
+  /**
+   * The absolute path to the locally installed NPM tool.  If "rush install" has not
+   * been run, then this file may not exist yet.
+   * Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
+   */
+  public readonly packageManagerToolFilename: string;
+
+  /**
+   * The minimum allowable folder depth for the projectFolder field in the rush.json file.
+   * This setting provides a way for repository maintainers to discourage nesting of project folders
+   * that makes the directory tree more difficult to navigate.  The default value is 2,
+   * which implements a standard 2-level hierarchy of `<categoryFolder>/<projectFolder>/package.json`.
+   */
+  public readonly projectFolderMinDepth: number;
+
+  /**
+   * The maximum allowable folder depth for the projectFolder field in the rush.json file.
+   * This setting provides a way for repository maintainers to discourage nesting of project folders
+   * that makes the directory tree more difficult to navigate.  The default value is 2,
+   * which implements on a standard convention of `<categoryFolder>/<projectFolder>/package.json`.
+   */
+  public readonly projectFolderMaxDepth: number;
+
+  /**
+   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
+   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
+   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
+   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
+   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
+   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
+   * the rules too much it is likely to cause very confusing malfunctions.
+   *
+   * The default value is false.
+   */
+  public readonly allowMostlyStandardPackageNames: boolean;
+
+  /**
+   * The "approvedPackagesPolicy" settings.
+   */
+  public readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * A list of regular expressions describing allowable email patterns for Git commits.
+   * They are case-insensitive anchored JavaScript RegExps.
+   * Example: `".*@example\.com"`
+   * This array will never be undefined.
+   */
+  public readonly gitAllowedEmailRegExps: string[];
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * An example valid email address that conforms to one of the allowedEmailRegExps.
+   * Example: `"foxtrot@example\.com"`
+   * This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
+   */
+  public readonly gitSampleEmail: string;
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * The commit message to use when committing changes during 'rush publish'
+   */
+  public readonly gitVersionBumpCommitMessage: string | undefined;
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * The commit message to use when committing change log files 'rush version'
+   */
+  public readonly gitChangeLogUpdateCommitMessage: string | undefined;
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * The commit message to use when committing change log files 'rush version'
+   */
+  public readonly gitChangefilesCommitMessage: string | undefined;
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * The separator between package name and version in git tag.
+   */
+  public readonly gitTagSeparator: string | undefined;
+
+  /**
+   * [Part of the "hotfixChange" feature.]
+   * Enables creating hotfix changes
+   */
+  public readonly hotfixChangeEnabled: boolean;
+
+  /**
+   * Remote URL(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for `<projectName>.visualstudio.com` versus
+   * `dev.azure.com/<projectName>` URLs.
+   */
+  public readonly repositoryUrls: string[];
+
+  /**
+   * The default branch name. This tells "rush change" which remote branch to compare against.
+   */
+  public readonly repositoryDefaultBranch: string;
+
+  /**
+   * The default remote. This tells "rush change" which remote to compare against if the remote URL is not set
+   * or if a remote matching the provided remote URL is not found.
+   */
+  public readonly repositoryDefaultRemote: string;
+
+  /**
+   * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+   * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+   * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+   * for production usage because they frequently have bugs.  They may cause Rush itself
+   * to malfunction.
+   *
+   * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+   * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+   * to disable Rush's warning.
+   */
+  public readonly suppressNodeLtsWarning: boolean;
+
+  /**
+   * If true, then consistent version specifiers for dependencies will be enforced.
+   * I.e. "rush check" is run before some commands.
+   */
+  public readonly ensureConsistentVersions: boolean;
+
+  /**
+   * Indicates whether telemetry collection is enabled for Rush runs.
+   * @beta
+   */
+  public readonly telemetryEnabled: boolean;
+
+  /**
+   * {@inheritDoc NpmOptionsConfiguration}
+   */
+  public readonly npmOptions: NpmOptionsConfiguration;
+
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration}
+   */
+  public readonly pnpmOptions: PnpmOptionsConfiguration;
+
+  /**
+   * {@inheritDoc YarnOptionsConfiguration}
+   */
+  public readonly yarnOptions: YarnOptionsConfiguration;
+
+  /**
+   * The configuration options used by the current package manager.
+   * @remarks
+   * For package manager specific variants, reference {@link RushConfiguration.npmOptions | npmOptions},
+   * {@link RushConfiguration.pnpmOptions | pnpmOptions}, or {@link RushConfiguration.yarnOptions | yarnOptions}.
+   */
+  public readonly packageManagerOptions!: PackageManagerOptionsConfigurationBase;
+
+  /**
+   * The rush hooks. It allows customized scripts to run at the specified point.
+   * @beta
+   */
+  public readonly eventHooks: EventHooks;
+
+  /**
+   * The rush hooks. It allows customized scripts to run at the specified point.
+   */
+  public readonly packageNameParser: PackageNameParser;
+
+  /**
+   * @beta
+   */
+  public readonly versionPolicyConfiguration: VersionPolicyConfiguration;
+
+  /**
+   * @beta
+   */
+  public readonly versionPolicyConfigurationFilePath: string;
+
+  /**
+   * This configuration object contains settings repo maintainers have specified to enable
+   * and disable experimental Rush features.
+   *
+   * @beta
+   */
+  public readonly experimentsConfiguration: ExperimentsConfiguration;
+
+  /**
+   * @internal
+   */
+  public readonly _rushPluginsConfiguration: RushPluginsConfiguration;
 
   /**
    * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
-    this._rushConfigurationJson = rushConfigurationJson;
+    this.rushConfigurationJson = rushConfigurationJson;
     EnvironmentConfiguration.validate();
 
     if (rushConfigurationJson.nodeSupportedVersionRange) {
@@ -306,10 +564,15 @@ export class RushConfiguration {
         );
       }
       if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
-        const message: string =
+        let message: string =
           `Your dev environment is running Node.js version ${process.version} which does` +
           ` not meet the requirements for building this repository.  (The rush.json configuration` +
           ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
+
+        if (rushConfigurationJson.nodeSupportedVersionInstructions) {
+          message += '\n\n' + rushConfigurationJson.nodeSupportedVersionInstructions;
+        }
+
         if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
           console.warn(message);
         } else {
@@ -318,49 +581,49 @@ export class RushConfiguration {
       }
     }
 
-    this._rushJsonFile = rushJsonFilename;
-    this._rushJsonFolder = path.dirname(rushJsonFilename);
+    this.rushJsonFile = rushJsonFilename;
+    this.rushJsonFolder = path.dirname(rushJsonFilename);
 
-    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
+    this.commonFolder = path.resolve(path.join(this.rushJsonFolder, RushConstants.commonFolderName));
 
-    this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
+    this.commonRushConfigFolder = path.join(this.commonFolder, 'config', 'rush');
 
-    this._commonTempFolder =
+    this.commonTempFolder =
       EnvironmentConfiguration.rushTempFolderOverride ||
-      path.join(this._commonFolder, RushConstants.rushTempFolderName);
+      path.join(this.commonFolder, RushConstants.rushTempFolderName);
 
-    this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
+    this.commonScriptsFolder = path.join(this.commonFolder, 'scripts');
 
-    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
-    this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
+    this.npmCacheFolder = path.resolve(path.join(this.commonTempFolder, 'npm-cache'));
+    this.npmTmpFolder = path.resolve(path.join(this.commonTempFolder, 'npm-tmp'));
+    this.yarnCacheFolder = path.resolve(path.join(this.commonTempFolder, 'yarn-cache'));
 
-    this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
+    this.changesFolder = path.join(this.commonFolder, RushConstants.changeFilesFolderName);
 
-    this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
+    this.currentVariantJsonFilename = path.join(this.commonTempFolder, 'current-variant.json');
 
-    this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
+    this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
-    this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
+    this.ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
     const experimentsConfigFile: string = path.join(
-      this._commonRushConfigFolder,
+      this.commonRushConfigFolder,
       RushConstants.experimentsFilename
     );
-    this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
+    this.experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
 
     const rushPluginsConfigFilename: string = path.join(
-      this._commonRushConfigFolder,
+      this.commonRushConfigFolder,
       RushConstants.rushPluginsConfigFilename
     );
-    this.__rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
+    this._rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
-    this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
-    this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
+    this.npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
+    this.yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
     try {
-      this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-        `${this._commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`,
-        this._commonTempFolder
+      this.pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        `${this.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`,
+        this.commonTempFolder
       );
       if (rushConfigurationJson.pnpmOptions) {
         throw new Error(
@@ -370,9 +633,9 @@ export class RushConfiguration {
       }
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
-        this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonObject(
+        this.pnpmOptions = PnpmOptionsConfiguration.loadFromJsonObject(
           rushConfigurationJson.pnpmOptions || {},
-          this._commonTempFolder
+          this.commonTempFolder
         );
       } else {
         throw error;
@@ -383,18 +646,18 @@ export class RushConfiguration {
     const packageManagerFields: string[] = [];
 
     if (rushConfigurationJson.npmVersion) {
-      this._packageManager = 'npm';
-      this._packageManagerConfigurationOptions = this._npmOptions;
+      this.packageManager = 'npm';
+      this.packageManagerOptions = this.npmOptions;
       packageManagerFields.push('npmVersion');
     }
     if (rushConfigurationJson.pnpmVersion) {
-      this._packageManager = 'pnpm';
-      this._packageManagerConfigurationOptions = this._pnpmOptions;
+      this.packageManager = 'pnpm';
+      this.packageManagerOptions = this.pnpmOptions;
       packageManagerFields.push('pnpmVersion');
     }
     if (rushConfigurationJson.yarnVersion) {
-      this._packageManager = 'yarn';
-      this._packageManagerConfigurationOptions = this._yarnOptions;
+      this.packageManager = 'yarn';
+      this.packageManagerOptions = this.yarnOptions;
       packageManagerFields.push('yarnVersion');
     }
 
@@ -411,23 +674,23 @@ export class RushConfiguration {
       );
     }
 
-    if (this._packageManager === 'npm') {
-      this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
-      this._packageManagerWrapper = new NpmPackageManager(this._packageManagerToolVersion);
-    } else if (this._packageManager === 'pnpm') {
-      this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
-      this._packageManagerWrapper = new PnpmPackageManager(this._packageManagerToolVersion);
+    if (this.packageManager === 'npm') {
+      this.packageManagerToolVersion = rushConfigurationJson.npmVersion!;
+      this.packageManagerWrapper = new NpmPackageManager(this.packageManagerToolVersion);
+    } else if (this.packageManager === 'pnpm') {
+      this.packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
+      this.packageManagerWrapper = new PnpmPackageManager(this.packageManagerToolVersion);
     } else {
-      this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
-      this._packageManagerWrapper = new YarnPackageManager(this._packageManagerToolVersion);
+      this.packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
+      this.packageManagerWrapper = new YarnPackageManager(this.packageManagerToolVersion);
     }
 
-    this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
+    this.shrinkwrapFilename = this.packageManagerWrapper.shrinkwrapFilename;
 
-    this._tempShrinkwrapFilename = path.join(this._commonTempFolder, this._shrinkwrapFilename);
-    this._packageManagerToolFilename = path.resolve(
+    this.tempShrinkwrapFilename = path.join(this.commonTempFolder, this.shrinkwrapFilename);
+    this.packageManagerToolFilename = path.resolve(
       path.join(
-        this._commonTempFolder,
+        this.commonTempFolder,
         `${this.packageManager}-local`,
         'node_modules',
         '.bin',
@@ -436,52 +699,52 @@ export class RushConfiguration {
     );
 
     /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
-    const parsedPath: path.ParsedPath = path.parse(this._tempShrinkwrapFilename);
-    this._tempShrinkwrapPreinstallFilename = path.join(
+    const parsedPath: path.ParsedPath = path.parse(this.tempShrinkwrapFilename);
+    this.tempShrinkwrapPreinstallFilename = path.join(
       parsedPath.dir,
       parsedPath.name + '-preinstall' + parsedPath.ext
     );
 
     RushConfiguration._validateCommonRushConfigFolder(
-      this._commonRushConfigFolder,
-      this._packageManagerWrapper,
-      this._experimentsConfiguration
+      this.commonRushConfigFolder,
+      this.packageManagerWrapper,
+      this.experimentsConfiguration
     );
 
-    this._projectFolderMinDepth =
+    this.projectFolderMinDepth =
       rushConfigurationJson.projectFolderMinDepth !== undefined
         ? rushConfigurationJson.projectFolderMinDepth
         : 1;
-    if (this._projectFolderMinDepth < 1) {
+    if (this.projectFolderMinDepth < 1) {
       throw new Error('Invalid projectFolderMinDepth; the minimum possible value is 1');
     }
 
-    this._projectFolderMaxDepth =
+    this.projectFolderMaxDepth =
       rushConfigurationJson.projectFolderMaxDepth !== undefined
         ? rushConfigurationJson.projectFolderMaxDepth
         : 2;
-    if (this._projectFolderMaxDepth < this._projectFolderMinDepth) {
+    if (this.projectFolderMaxDepth < this.projectFolderMinDepth) {
       throw new Error('The projectFolderMaxDepth cannot be smaller than the projectFolderMinDepth');
     }
 
-    this._allowMostlyStandardPackageNames = !!rushConfigurationJson.allowMostlyStandardPackageNames;
-    this._packageNameParser = this._allowMostlyStandardPackageNames
+    this.allowMostlyStandardPackageNames = !!rushConfigurationJson.allowMostlyStandardPackageNames;
+    this.packageNameParser = this.allowMostlyStandardPackageNames
       ? PackageNameParsers.mostlyStandard
       : PackageNameParsers.rushDefault;
 
-    this._approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
+    this.approvedPackagesPolicy = new ApprovedPackagesPolicy(this, rushConfigurationJson);
 
-    this._gitAllowedEmailRegExps = [];
-    this._gitSampleEmail = '';
+    this.gitAllowedEmailRegExps = [];
+    this.gitSampleEmail = '';
     if (rushConfigurationJson.gitPolicy) {
       if (rushConfigurationJson.gitPolicy.sampleEmail) {
-        this._gitSampleEmail = rushConfigurationJson.gitPolicy.sampleEmail;
+        this.gitSampleEmail = rushConfigurationJson.gitPolicy.sampleEmail;
       }
 
       if (rushConfigurationJson.gitPolicy.allowedEmailRegExps) {
-        this._gitAllowedEmailRegExps = rushConfigurationJson.gitPolicy.allowedEmailRegExps;
+        this.gitAllowedEmailRegExps = rushConfigurationJson.gitPolicy.allowedEmailRegExps;
 
-        if (this._gitSampleEmail.trim().length < 1) {
+        if (this.gitSampleEmail.trim().length < 1) {
           throw new Error(
             'The rush.json file is missing the "sampleEmail" option, ' +
               'which is required when using "allowedEmailRegExps"'
@@ -490,33 +753,33 @@ export class RushConfiguration {
       }
 
       if (rushConfigurationJson.gitPolicy.versionBumpCommitMessage) {
-        this._gitVersionBumpCommitMessage = rushConfigurationJson.gitPolicy.versionBumpCommitMessage;
+        this.gitVersionBumpCommitMessage = rushConfigurationJson.gitPolicy.versionBumpCommitMessage;
       }
 
       if (rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage) {
-        this._gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
+        this.gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
       }
 
       if (rushConfigurationJson.gitPolicy.changefilesCommitMessage) {
-        this._gitChangefilesCommitMessage = rushConfigurationJson.gitPolicy.changefilesCommitMessage;
+        this.gitChangefilesCommitMessage = rushConfigurationJson.gitPolicy.changefilesCommitMessage;
       }
 
       if (rushConfigurationJson.gitPolicy.tagSeparator) {
-        this._gitTagSeparator = rushConfigurationJson.gitPolicy.tagSeparator;
+        this.gitTagSeparator = rushConfigurationJson.gitPolicy.tagSeparator;
       }
     }
 
-    this._hotfixChangeEnabled = false;
+    this.hotfixChangeEnabled = false;
     if (rushConfigurationJson.hotfixChangeEnabled) {
-      this._hotfixChangeEnabled = rushConfigurationJson.hotfixChangeEnabled;
+      this.hotfixChangeEnabled = rushConfigurationJson.hotfixChangeEnabled;
     }
 
     if (!rushConfigurationJson.repository) {
       rushConfigurationJson.repository = {};
     }
 
-    this._repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || DEFAULT_BRANCH;
-    this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
+    this.repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || DEFAULT_BRANCH;
+    this.repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
     const repositoryFieldWithMultipleUrls: IRushRepositoryJsonMultipleUrls =
       rushConfigurationJson.repository as IRushRepositoryJsonMultipleUrls;
     const repositoryFieldWithSingleUrl: IRushRepositoryJsonSingleUrl =
@@ -526,23 +789,21 @@ export class RushConfiguration {
         throw new Error("The 'repository.url' field cannot be used when 'repository.urls' is present");
       }
 
-      this._repositoryUrls = repositoryFieldWithMultipleUrls.urls;
+      this.repositoryUrls = repositoryFieldWithMultipleUrls.urls;
     } else if (repositoryFieldWithSingleUrl.url) {
-      this._repositoryUrls = [repositoryFieldWithSingleUrl.url];
+      this.repositoryUrls = [repositoryFieldWithSingleUrl.url];
     } else {
-      this._repositoryUrls = [];
+      this.repositoryUrls = [];
     }
 
-    this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
-    this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
+    this.telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
+    this.eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
-    this._versionPolicyConfigurationFilePath = path.join(
-      this._commonRushConfigFolder,
+    this.versionPolicyConfigurationFilePath = path.join(
+      this.commonRushConfigFolder,
       RushConstants.versionPoliciesFilename
     );
-    this._versionPolicyConfiguration = new VersionPolicyConfiguration(
-      this._versionPolicyConfigurationFilePath
-    );
+    this.versionPolicyConfiguration = new VersionPolicyConfiguration(this.versionPolicyConfigurationFilePath);
 
     this._variants = new Set<string>();
 
@@ -567,13 +828,13 @@ export class RushConfiguration {
 
     // We sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.slice(0);
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this.rushConfigurationJson.projects.slice(0);
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );
 
-    const allowedProjectTags: Set<string> | undefined = this._rushConfigurationJson.allowedProjectTags
-      ? new Set(this._rushConfigurationJson.allowedProjectTags)
+    const allowedProjectTags: Set<string> | undefined = this.rushConfigurationJson.allowedProjectTags
+      ? new Set(this.rushConfigurationJson.allowedProjectTags)
       : undefined;
     const usedTempNames: Set<string> = new Set();
     for (let i: number = 0, len: number = sortedProjectJsons.length; i < len; i++) {
@@ -608,7 +869,7 @@ export class RushConfiguration {
           );
         }
       });
-      this._versionPolicyConfiguration.validate(this.projectsByName);
+      this.versionPolicyConfiguration.validate(this.projectsByName);
 
       // Consumer relationships will be established the first time one is requested
     }
@@ -822,100 +1083,11 @@ export class RushConfiguration {
   }
 
   /**
-   * The name of the package manager being used to install dependencies
-   */
-  public get packageManager(): PackageManagerName {
-    return this._packageManager;
-  }
-
-  /**
-   * {@inheritdoc PackageManager}
-   *
-   * @privateremarks
-   * In the next major breaking API change, we will rename this property to "packageManager" and eliminate the
-   * old property with that name.
-   *
-   * @beta
-   */
-  public get packageManagerWrapper(): PackageManager {
-    return this._packageManagerWrapper;
-  }
-
-  /**
-   * Gets the JSON data structure for the "rush.json" configuration file.
-   *
-   * @internal
-   */
-  public get rushConfigurationJson(): IRushConfigurationJson {
-    return this._rushConfigurationJson;
-  }
-
-  /**
-   * The absolute path to the "rush.json" configuration file that was loaded to construct this object.
-   */
-  public get rushJsonFile(): string {
-    return this._rushJsonFile;
-  }
-
-  /**
-   * The absolute path of the folder that contains rush.json for this project.
-   */
-  public get rushJsonFolder(): string {
-    return this._rushJsonFolder;
-  }
-
-  /**
-   * The folder that contains all change files.
-   */
-  public get changesFolder(): string {
-    return this._changesFolder;
-  }
-
-  /**
-   * The fully resolved path for the "common" folder where Rush will store settings that
-   * affect all Rush projects.  This is always a subfolder of the folder containing "rush.json".
-   * Example: `C:\MyRepo\common`
-   */
-  public get commonFolder(): string {
-    return this._commonFolder;
-  }
-
-  /**
-   * The folder where Rush's additional config files are stored.  This folder is always a
-   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
-   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
-   * Rush will report an error if this this folder contains any unrecognized files.
-   *
-   * Example: `C:\MyRepo\common\config\rush`
-   */
-  public get commonRushConfigFolder(): string {
-    return this._commonRushConfigFolder;
-  }
-
-  /**
-   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
-   * under the common folder.
-   * Example: `C:\MyRepo\common\temp`
-   */
-  public get commonTempFolder(): string {
-    return this._commonTempFolder;
-  }
-
-  /**
-   * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
-   * under the common folder.
-   * Example: `C:\MyRepo\common\scripts`
-   */
-  public get commonScriptsFolder(): string {
-    return this._commonScriptsFolder;
-  }
-
-  /**
    * The fully resolved path for the "autoinstallers" folder.
    * Example: `C:\MyRepo\common\autoinstallers`
    */
   public get commonAutoinstallersFolder(): string {
-    return path.join(this._commonFolder, 'autoinstallers');
+    return path.join(this.commonFolder, 'autoinstallers');
   }
 
   /**
@@ -923,39 +1095,7 @@ export class RushConfiguration {
    * Example: `C:\MyRepo\common\config\rush-plugins`
    */
   public get rushPluginOptionsFolder(): string {
-    return path.join(this._commonFolder, 'config', 'rush-plugins');
-  }
-
-  /**
-   * The local folder that will store the NPM package cache.  Rush does not rely on the
-   * npm's default global cache folder, because npm's caching implementation does not
-   * reliably handle multiple processes.  (For example, if a build box is running
-   * "rush install" simultaneously for two different working folders, it may fail randomly.)
-   *
-   * Example: `C:\MyRepo\common\temp\npm-cache`
-   */
-  public get npmCacheFolder(): string {
-    return this._npmCacheFolder;
-  }
-
-  /**
-   * The local folder where npm's temporary files will be written during installation.
-   * Rush does not rely on the global default folder, because it may be on a different
-   * hard disk.
-   *
-   * Example: `C:\MyRepo\common\temp\npm-tmp`
-   */
-  public get npmTmpFolder(): string {
-    return this._npmTmpFolder;
-  }
-
-  /**
-   * The local folder that will store the Yarn package cache.
-   *
-   * Example: `C:\MyRepo\common\temp\yarn-cache`
-   */
-  public get yarnCacheFolder(): string {
-    return this._yarnCacheFolder;
+    return path.join(this.commonFolder, 'config', 'rush-plugins');
   }
 
   /**
@@ -973,46 +1113,12 @@ export class RushConfiguration {
   }
 
   /**
-   * The filename (without any path) of the shrinkwrap file that is used by the package manager.
-   * @remarks
-   * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `npm-shrinkwrap.json` or `pnpm-lock.yaml`
-   */
-  public get shrinkwrapFilename(): string {
-    return this._shrinkwrapFilename;
-  }
-
-  /**
-   * The full path of the temporary shrinkwrap file that is used during "rush install".
-   * This file may get rewritten by the package manager during installation.
-   * @remarks
-   * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap.json` or `C:\MyRepo\common\temp\pnpm-lock.yaml`
-   */
-  public get tempShrinkwrapFilename(): string {
-    return this._tempShrinkwrapFilename;
-  }
-
-  /**
-   * The full path of a backup copy of tempShrinkwrapFilename. This backup copy is made
-   * before installation begins, and can be compared to determine how the package manager
-   * modified tempShrinkwrapFilename.
-   * @remarks
-   * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json`
-   * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
-   */
-  public get tempShrinkwrapPreinstallFilename(): string {
-    return this._tempShrinkwrapPreinstallFilename;
-  }
-
-  /**
    * Returns an English phrase such as "shrinkwrap file" that can be used in logging messages
    * to refer to the shrinkwrap file using appropriate terminology for the currently selected
    * package manager.
    */
   public get shrinkwrapFilePhrase(): string {
-    if (this._packageManager === 'yarn') {
+    if (this.packageManager === 'yarn') {
       // Eventually we'd like to be consistent with Yarn's terminology of calling this a "lock file",
       // but a lot of Rush documentation uses "shrinkwrap" file and would all need to be updated.
       return 'shrinkwrap file (yarn.lock)';
@@ -1039,196 +1145,10 @@ export class RushConfiguration {
   }
 
   /**
-   * The filename of the variant dependency data file.  By default this is
-   * called 'current-variant.json' resides in the Rush common folder.
-   * Its data structure is defined by ICurrentVariantJson.
-   *
-   * Example: `C:\MyRepo\common\temp\current-variant.json`
-   */
-  public get currentVariantJsonFilename(): string {
-    return this._currentVariantJsonFilename;
-  }
-
-  /**
-   * The version of the locally installed NPM tool.  (Example: "1.2.3")
-   */
-  public get packageManagerToolVersion(): string {
-    return this._packageManagerToolVersion;
-  }
-
-  /**
-   * The absolute path to the locally installed NPM tool.  If "rush install" has not
-   * been run, then this file may not exist yet.
-   * Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
-   */
-  public get packageManagerToolFilename(): string {
-    return this._packageManagerToolFilename;
-  }
-
-  /**
-   * The minimum allowable folder depth for the projectFolder field in the rush.json file.
-   * This setting provides a way for repository maintainers to discourage nesting of project folders
-   * that makes the directory tree more difficult to navigate.  The default value is 2,
-   * which implements a standard 2-level hierarchy of `<categoryFolder>/<projectFolder>/package.json`.
-   */
-  public get projectFolderMinDepth(): number {
-    return this._projectFolderMinDepth;
-  }
-
-  /**
-   * The maximum allowable folder depth for the projectFolder field in the rush.json file.
-   * This setting provides a way for repository maintainers to discourage nesting of project folders
-   * that makes the directory tree more difficult to navigate.  The default value is 2,
-   * which implements on a standard convention of `<categoryFolder>/<projectFolder>/package.json`.
-   */
-  public get projectFolderMaxDepth(): number {
-    return this._projectFolderMaxDepth;
-  }
-
-  /**
-   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
-   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
-   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
-   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
-   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
-   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
-   * the rules too much it is likely to cause very confusing malfunctions.
-   *
-   * The default value is false.
-   */
-  public get allowMostlyStandardPackageNames(): boolean {
-    return this._allowMostlyStandardPackageNames;
-  }
-
-  /**
-   * The "approvedPackagesPolicy" settings.
-   */
-  public get approvedPackagesPolicy(): ApprovedPackagesPolicy {
-    return this._approvedPackagesPolicy;
-  }
-
-  /**
-   * [Part of the "gitPolicy" feature.]
-   * A list of regular expressions describing allowable email patterns for Git commits.
-   * They are case-insensitive anchored JavaScript RegExps.
-   * Example: `".*@example\.com"`
-   * This array will never be undefined.
-   */
-  public get gitAllowedEmailRegExps(): string[] {
-    return this._gitAllowedEmailRegExps;
-  }
-
-  /**
-   * [Part of the "gitPolicy" feature.]
-   * An example valid email address that conforms to one of the allowedEmailRegExps.
-   * Example: `"foxtrot@example\.com"`
-   * This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
-   */
-  public get gitSampleEmail(): string {
-    return this._gitSampleEmail;
-  }
-
-  /**
-   * [Part of the "gitPolicy" feature.]
-   * The commit message to use when committing changes during 'rush publish'
-   */
-  public get gitVersionBumpCommitMessage(): string | undefined {
-    return this._gitVersionBumpCommitMessage;
-  }
-
-  /**
-   * [Part of the "gitPolicy" feature.]
-   * The commit message to use when committing change log files 'rush version'
-   */
-  public get gitChangeLogUpdateCommitMessage(): string | undefined {
-    return this._gitChangeLogUpdateCommitMessage;
-  }
-
-  /**
-   * [Part of the "gitPolicy" feature.]
-   * The commit message to use when committing change log files 'rush version'
-   */
-  public get gitChangefilesCommitMessage(): string | undefined {
-    return this._gitChangefilesCommitMessage;
-  }
-
-  /**
-   * [Part of the "gitPolicy" feature.]
-   * The separator between package name and version in git tag.
-   */
-  public get gitTagSeparator(): string | undefined {
-    return this._gitTagSeparator;
-  }
-
-  /**
-   * [Part of the "hotfixChange" feature.]
-   * Enables creating hotfix changes
-   */
-  public get hotfixChangeEnabled(): boolean {
-    return this._hotfixChangeEnabled;
-  }
-
-  /**
-   * Remote URL(s) of the repository. If a value is provided, \"rush change\" will
-   * use one of these to find the right remote to compare against. Specifying multiple URLs
-   * is useful if a GitHub repository is renamed or for `<projectName>.visualstudio.com` versus
-   * `dev.azure.com/<projectName>` URLs.
-   */
-  public get repositoryUrls(): string[] {
-    return this._repositoryUrls;
-  }
-
-  /**
-   * The default branch name. This tells "rush change" which remote branch to compare against.
-   */
-  public get repositoryDefaultBranch(): string {
-    return this._repositoryDefaultBranch;
-  }
-
-  /**
-   * The default remote. This tells "rush change" which remote to compare against if the remote URL is not set
-   * or if a remote matching the provided remote URL is not found.
-   */
-  public get repositoryDefaultRemote(): string {
-    return this._repositoryDefaultRemote;
-  }
-
-  /**
    * The default fully-qualified git remote branch of the repository. This helps "rush change" find the right branch to compare against.
    */
   public get repositoryDefaultFullyQualifiedRemoteBranch(): string {
     return `${this.repositoryDefaultRemote}/${this.repositoryDefaultBranch}`;
-  }
-
-  /**
-   * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
-   * spend six months in a stabilization period before the first Long Term Support (LTS) version.
-   * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
-   * for production usage because they frequently have bugs.  They may cause Rush itself
-   * to malfunction.
-   *
-   * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
-   * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
-   * to disable Rush's warning.
-   */
-  public get suppressNodeLtsWarning(): boolean {
-    return this._suppressNodeLtsWarning;
-  }
-
-  /**
-   * If true, then consistent version specifiers for dependencies will be enforced.
-   * I.e. "rush check" is run before some commands.
-   */
-  public get ensureConsistentVersions(): boolean {
-    return this._ensureConsistentVersions;
-  }
-
-  /**
-   * Indicates whether telemetry collection is enabled for Rush runs.
-   * @beta
-   */
-  public get telemetryEnabled(): boolean {
-    return this._telemetryEnabled;
   }
 
   public get projects(): RushConfigurationProject[] {
@@ -1269,37 +1189,6 @@ export class RushConfiguration {
   }
 
   /**
-   * {@inheritDoc NpmOptionsConfiguration}
-   */
-  public get npmOptions(): NpmOptionsConfiguration {
-    return this._npmOptions;
-  }
-
-  /**
-   * {@inheritDoc PnpmOptionsConfiguration}
-   */
-  public get pnpmOptions(): PnpmOptionsConfiguration {
-    return this._pnpmOptions;
-  }
-
-  /**
-   * {@inheritDoc YarnOptionsConfiguration}
-   */
-  public get yarnOptions(): YarnOptionsConfiguration {
-    return this._yarnOptions;
-  }
-
-  /**
-   * The configuration options used by the current package manager.
-   * @remarks
-   * For package manager specific variants, reference {@link RushConfiguration.npmOptions | npmOptions},
-   * {@link RushConfiguration.pnpmOptions | pnpmOptions}, or {@link RushConfiguration.yarnOptions | yarnOptions}.
-   */
-  public get packageManagerOptions(): PackageManagerOptionsConfigurationBase {
-    return this._packageManagerConfigurationOptions;
-  }
-
-  /**
    * Settings from the common-versions.json config file.
    * @remarks
    * If the common-versions.json file is missing, this property will not be undefined.
@@ -1322,28 +1211,13 @@ export class RushConfiguration {
   public get currentInstalledVariant(): string | undefined {
     let variant: string | undefined;
 
-    if (FileSystem.exists(this._currentVariantJsonFilename)) {
-      const currentVariantJson: ICurrentVariantJson = JsonFile.load(this._currentVariantJsonFilename);
+    if (FileSystem.exists(this.currentVariantJsonFilename)) {
+      const currentVariantJson: ICurrentVariantJson = JsonFile.load(this.currentVariantJsonFilename);
 
       variant = currentVariantJson.variant || undefined;
     }
 
     return variant;
-  }
-
-  /**
-   * The rush hooks. It allows customized scripts to run at the specified point.
-   * @beta
-   */
-  public get eventHooks(): EventHooks {
-    return this._eventHooks;
-  }
-
-  /**
-   * The rush hooks. It allows customized scripts to run at the specified point.
-   */
-  public get packageNameParser(): PackageNameParser {
-    return this._packageNameParser;
   }
 
   /**
@@ -1389,6 +1263,9 @@ export class RushConfiguration {
    * @returns A map of dependency name --\> version specifier for implicitly preferred versions.
    */
   public getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string> {
+    // TODO: During the next major release of Rush, replace this `require` call with a dynamic import, and
+    // change this function to be async.
+    const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = require('../logic/DependencyAnalyzer');
     const dependencyAnalyzer: DependencyAnalyzerModuleType.DependencyAnalyzer =
       DependencyAnalyzerModule.DependencyAnalyzer.forRushConfiguration(this);
     const dependencyAnalysis: DependencyAnalyzerModuleType.IDependencyAnalysis =
@@ -1437,7 +1314,7 @@ export class RushConfiguration {
 
     const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
 
-    return path.join(variantConfigFolderPath, this._shrinkwrapFilename);
+    return path.join(variantConfigFolderPath, this.shrinkwrapFilename);
   }
 
   /**
@@ -1521,37 +1398,6 @@ export class RushConfiguration {
   }
 
   /**
-   * @beta
-   */
-  public get versionPolicyConfiguration(): VersionPolicyConfiguration {
-    return this._versionPolicyConfiguration;
-  }
-
-  /**
-   * @beta
-   */
-  public get versionPolicyConfigurationFilePath(): string {
-    return this._versionPolicyConfigurationFilePath;
-  }
-
-  /**
-   * This configuration object contains settings repo maintainers have specified to enable
-   * and disable experimental Rush features.
-   *
-   * @beta
-   */
-  public get experimentsConfiguration(): ExperimentsConfiguration {
-    return this._experimentsConfiguration;
-  }
-
-  /**
-   * @internal
-   */
-  public get _rushPluginsConfiguration(): RushPluginsConfiguration {
-    return this.__rushPluginsConfiguration;
-  }
-
-  /**
    * Returns the project for which the specified path is underneath that project's folder.
    * If the path is not under any project's folder, returns undefined.
    */
@@ -1583,7 +1429,7 @@ export class RushConfiguration {
     }
 
     return path.join(
-      this._commonRushConfigFolder,
+      this.commonRushConfigFolder,
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : [])
     );
   }

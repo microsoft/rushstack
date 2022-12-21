@@ -2,6 +2,75 @@
   "name": "@rushstack/rush-serve-plugin",
   "entries": [
     {
+      "version": "0.3.8",
+      "tag": "@rushstack/rush-serve-plugin_v0.3.8",
+      "date": "Tue, 20 Dec 2022 01:18:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.7",
+      "tag": "@rushstack/rush-serve-plugin_v0.3.7",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.6",
+      "tag": "@rushstack/rush-serve-plugin_v0.3.6",
+      "date": "Tue, 29 Nov 2022 01:16:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.5",
+      "tag": "@rushstack/rush-serve-plugin_v0.3.5",
+      "date": "Fri, 18 Nov 2022 00:55:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.4",
       "tag": "@rushstack/rush-serve-plugin_v0.3.4",
       "date": "Sat, 12 Nov 2022 00:16:31 GMT",

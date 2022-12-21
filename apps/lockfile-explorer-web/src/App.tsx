@@ -12,6 +12,7 @@ import { LockfileEntryDetailsView } from './containers/LockfileEntryDetailsView'
 import { BookmarksSidebar } from './containers/BookmarksSidebar';
 import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
 import { LogoPanel } from './containers/LogoPanel';
+import { ConnectionModal } from './components/ConnectionModal';
 
 /**
  * This React component renders the application page.
@@ -30,11 +31,12 @@ export const App = (): JSX.Element => {
   }, []);
 
   return (
-    <div className={styles.AppContainer}>
-      <div className={styles.AppGrid}>
+    <>
+      <ConnectionModal />
+      <div className={styles.AppContainer}>
         <div className="ms-Grid" dir="ltr">
           <div className="ms-Grid-row">
-            <div className="ms-Grid-col ms-sm3">
+            <div className={`ms-Grid-col ms-sm3 ${styles.BodyContainer}`}>
               <LockfileViewer />
             </div>
             <div className={`ms-Grid-col ms-sm7 ${styles.BodyContainer}`}>
@@ -42,13 +44,13 @@ export const App = (): JSX.Element => {
               <PackageJsonViewer />
               <LockfileEntryDetailsView />
             </div>
-            <div className="ms-Grid-col ms-sm2">
+            <div className={`ms-Grid-col ms-sm2 ${styles.BodyContainer}`}>
+              <LogoPanel />
               <BookmarksSidebar />
             </div>
           </div>
         </div>
       </div>
-      <LogoPanel />
-    </div>
+    </>
   );
 };

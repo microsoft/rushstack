@@ -443,10 +443,10 @@
       "versionPolicyName": "rush"
     },
     {
-      "packageName": "@rushstack/rush-sdk",
-      "projectFolder": "libraries/rush-sdk",
+      "packageName": "@rushstack/trace-import",
+      "projectFolder": "apps/trace-import",
       "reviewCategory": "libraries",
-      "versionPolicyName": "rush"
+      "shouldPublish": true
     },
 
     // "build-tests" folder (alphabetical order)
@@ -901,6 +901,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-sdk",
+      "projectFolder": "libraries/rush-sdk",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@microsoft/rushell",
       "projectFolder": "libraries/rushell",
       "reviewCategory": "libraries",
@@ -1033,6 +1039,12 @@
       "projectFolder": "webpack/preserve-dynamic-require-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack-deep-imports-compat-plugin",
+      "projectFolder": "webpack/webpack-deep-imports-compat-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false // for now
     },
     {
       "packageName": "@rushstack/set-webpack-public-path-plugin",

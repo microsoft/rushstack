@@ -134,6 +134,8 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     getDataForSerialNumber(serialNumber: string): _IStringPlaceholder | undefined;
     // (undocumented)
     getPlaceholder(localizedFileKey: string, stringName: string): _IStringPlaceholder | undefined;
+    // (undocumented)
+    readonly stringKeys: Map<string, _IStringPlaceholder>;
 }
 
 // (No @packageDocumentation comment for this package)

@@ -3,6 +3,8 @@
 .LockfileEntryListView {
   display: flex;
   justify-content: space-between;
+  height: 30%;
+  padding-top: 12px;
   & > * {
     width: calc(50% - 48px - 12px);
   }
@@ -34,4 +36,38 @@
 
 .SelectedDependencyItem {
   background-color: #dff6dd;
+}
+
+.InfluencerList {
+  margin-top: 12px;
+  height: 10%;
+  overflow: scroll;
+}
+
+.DependencyDetails {
+  margin-top: 12px;
+  height: 4%;
+  overflow: scroll;
+}
+
+.InfluencerEntry {
+  display: block;
+  cursor: pointer;
+  &:hover {
+    color: #107c10;
+    text-decoration: underline;
+  }
+}
+
+.DependencyDetailInfo {
+  display: flex;
+  align-items: center;
+  span {
+    font-size: 12px;
+    margin-left: 4px;
+  }
+}
+
+.TransitiveReferencersHeader {
+  margin-top: 12px;
 }

@@ -14,6 +14,7 @@ import { InstallHelpers } from './installManager/InstallHelpers';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConstants } from './RushConstants';
 import { LastInstallFlag } from '../api/LastInstallFlag';
+import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 
 interface IAutoinstallerOptions {
   autoinstallerName: string;
@@ -30,7 +31,8 @@ export class Autoinstaller {
   public constructor(options: IAutoinstallerOptions) {
     this.name = options.autoinstallerName;
     this._rushConfiguration = options.rushConfiguration;
-    this._restrictConsoleOutput = options.restrictConsoleOutput || false;
+    this._restrictConsoleOutput =
+      options.restrictConsoleOutput ?? RushCommandLineParser.shouldRestrictConsoleOutput();
 
     Autoinstaller.validateName(this.name);
   }

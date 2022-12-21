@@ -47,6 +47,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/apps/lockfile-explorer](./apps/lockfile-explorer/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Flockfile-explorer.svg)](https://badge.fury.io/js/%40rushstack%2Flockfile-explorer) | [changelog](./apps/lockfile-explorer/CHANGELOG.md) | [@rushstack/lockfile-explorer](https://www.npmjs.com/package/@rushstack/lockfile-explorer) |
 | [/apps/rundown](./apps/rundown/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frundown.svg)](https://badge.fury.io/js/%40rushstack%2Frundown) | [changelog](./apps/rundown/CHANGELOG.md) | [@rushstack/rundown](https://www.npmjs.com/package/@rushstack/rundown) |
 | [/apps/rush](./apps/rush/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush) | [changelog](./apps/rush/CHANGELOG.md) | [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush) |
+| [/apps/trace-import](./apps/trace-import/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Ftrace-import.svg)](https://badge.fury.io/js/%40rushstack%2Ftrace-import) | [changelog](./apps/trace-import/CHANGELOG.md) | [@rushstack/trace-import](https://www.npmjs.com/package/@rushstack/trace-import) |
 | [/eslint/eslint-config](./eslint/eslint-config/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-config.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-config) | [changelog](./eslint/eslint-config/CHANGELOG.md) | [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) |
 | [/eslint/eslint-patch](./eslint/eslint-patch/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-patch.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-patch) | [changelog](./eslint/eslint-patch/CHANGELOG.md) | [@rushstack/eslint-patch](https://www.npmjs.com/package/@rushstack/eslint-patch) |
 | [/eslint/eslint-plugin](./eslint/eslint-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-plugin) | [changelog](./eslint/eslint-plugin/CHANGELOG.md) | [@rushstack/eslint-plugin](https://www.npmjs.com/package/@rushstack/eslint-plugin) |
@@ -154,6 +155,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
+| [/webpack/webpack-deep-imports-compat-plugin](./webpack/webpack-deep-imports-compat-plugin/) | This plugin creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder. |
 <!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice

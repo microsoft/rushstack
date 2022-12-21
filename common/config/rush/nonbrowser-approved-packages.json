@@ -207,7 +207,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/webpack-deep-imports-compat-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/webpack-plugin-utilities",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -405,6 +413,10 @@
     {
       "name": "fastify",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "figures",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "file-loader",
@@ -728,6 +740,10 @@
     },
     {
       "name": "webpack-sources",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "webpack-virtual-modules",
       "allowedCategories": [ "libraries" ]
     },
     {

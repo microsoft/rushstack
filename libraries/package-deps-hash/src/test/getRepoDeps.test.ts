@@ -44,10 +44,10 @@ describe(parseGitLsTree.name, () => {
     const hash: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
 
     const output: string = `100644 blob ${hash}\t${filename}\x00`;
-    const changes: Map<string, string> = parseGitLsTree(output);
+    const { files } = parseGitLsTree(output);
 
-    expect(changes.size).toEqual(1); // Expect there to be exactly 1 change
-    expect(changes.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
+    expect(files.size).toEqual(1); // Expect there to be exactly 1 change
+    expect(files.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
   });
 
   it('can handle a submodule', () => {
@@ -55,10 +55,10 @@ describe(parseGitLsTree.name, () => {
     const hash: string = 'c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac';
 
     const output: string = `160000 commit ${hash}\t${filename}\x00`;
-    const changes: Map<string, string> = parseGitLsTree(output);
+    const { submodules } = parseGitLsTree(output);
 
-    expect(changes.size).toEqual(1); // Expect there to be exactly 1 change
-    expect(changes.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
+    expect(submodules.size).toEqual(1); // Expect there to be exactly 1 submodule change
+    expect(submodules.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
   });
 
   it('can handle multiple lines', () => {
@@ -68,12 +68,18 @@ describe(parseGitLsTree.name, () => {
     const filename2: string = 'src/foo bar/tsd.d.ts';
     const hash2: string = '0123456789abcdef1234567890abcdef01234567';
 
-    const output: string = `100644 blob ${hash1}\t${filename1}\x00100666 blob ${hash2}\t${filename2}\0`;
-    const changes: Map<string, string> = parseGitLsTree(output);
+    const filename3: string = 'submodule/src/index.ts';
+    const hash3: string = 'fedcba9876543210fedcba9876543210fedcba98';
 
-    expect(changes.size).toEqual(2); // Expect there to be exactly 2 changes
-    expect(changes.get(filename1)).toEqual(hash1); // Expect the hash to be ${hash1}
-    expect(changes.get(filename2)).toEqual(hash2); // Expect the hash to be ${hash2}
+    const output: string = `100644 blob ${hash1}\t${filename1}\x00100666 blob ${hash2}\t${filename2}\x00106666 commit ${hash3}\t${filename3}\0`;
+    const { files, submodules } = parseGitLsTree(output);
+
+    expect(files.size).toEqual(2); // Expect there to be exactly 2 changes
+    expect(files.get(filename1)).toEqual(hash1); // Expect the hash to be ${hash1}
+    expect(files.get(filename2)).toEqual(hash2); // Expect the hash to be ${hash2}
+
+    expect(submodules.size).toEqual(1); // Expect there to be exactly 1 submodule changes
+    expect(submodules.get(filename3)).toEqual(hash3); // Expect the hash to be ${hash3}
   });
 });
 

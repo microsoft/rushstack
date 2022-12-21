@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+
+## 0.4.2
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
+
+## 0.4.1
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 0.4.0
+Tue, 29 Nov 2022 01:16:49 GMT
+
+### Minor changes
+
+- Remove a postinstall step that patches Jest in-place. This is better achieved with a PNPM patch. See https://github.com/microsoft/rushstack/pull/3790 for more information.
 
 ## 0.3.45
 Tue, 08 Nov 2022 01:20:55 GMT

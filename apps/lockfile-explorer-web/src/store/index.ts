@@ -4,11 +4,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import { entryReducer } from './slices/entrySlice';
+import { workspaceReducer } from './slices/workspaceSlice';
 
 /* eslint @rushstack/typedef-var: off */
 export const store = configureStore({
   reducer: {
-    entry: entryReducer
+    entry: entryReducer,
+    workspace: workspaceReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

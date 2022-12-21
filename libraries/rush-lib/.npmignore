@@ -29,4 +29,6 @@
 
 # (Add your project-specific overrides here)
 !/assets/**
-lib/__mocks__/**
+/lib/__mocks__/**
+/lib/scripts/**
+/lib-esnext/**

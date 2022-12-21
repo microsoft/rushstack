@@ -1,3 +1,8 @@
+.PackageJsonWrapper {
+  height: 30%;
+  margin-top: 12px;
+}
+
 .FileContents {
   height: calc(25vh - 35px);
   overflow: scroll;
@@ -30,5 +35,27 @@
   }
   & > * + * {
     margin-top: 8px;
+  }
+}
+
+.PackageSpecEntry {
+  & > * {
+    display: inline;
+  }
+  & > * + * {
+    margin-left: 12px;
+  }
+}
+
+.DependencyRows {
+  display: flex;
+  align-items: flex-start;
+  & > * + * {
+    margin-left: 12px;
+  }
+  div {
+    & > * + * {
+      margin-top: 4px;
+    }
   }
 }

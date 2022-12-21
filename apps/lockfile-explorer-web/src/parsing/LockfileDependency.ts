@@ -87,6 +87,7 @@ export class LockfileDependency {
               ? node.peerDependenciesMeta[this.name].optional
               : false
         };
+        this.entryId = 'Peer: ' + this.name;
       } else {
         console.error('Peer dependencies info missing!', node);
       }

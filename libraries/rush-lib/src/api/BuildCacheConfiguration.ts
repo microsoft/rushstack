@@ -19,6 +19,7 @@ import { RushUserConfiguration } from './RushUserConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
 import type { CloudBuildCacheProviderFactory, RushSession } from '../pluginFramework/RushSession';
+import schemaJson from '../schemas/build-cache.schema.json';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
@@ -63,9 +64,7 @@ interface IBuildCacheConfigurationOptions {
  * @beta
  */
 export class BuildCacheConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '..', 'schemas', 'build-cache.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   /**
    * Indicates whether the build cache feature is enabled.

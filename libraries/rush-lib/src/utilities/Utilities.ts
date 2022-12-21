@@ -15,6 +15,7 @@ import {
 import type * as stream from 'stream';
 
 import { RushConfiguration } from '../api/RushConfiguration';
+import { syncNpmrc } from './npmrcUtilities';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 export const UNINITIALIZED: UNINITIALIZED = 'UNINITIALIZED';
@@ -125,6 +126,8 @@ interface ICreateEnvironmentForRushCommandOptions {
 }
 
 export class Utilities {
+  public static syncNpmrc: typeof syncNpmrc = syncNpmrc;
+
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
    * this looks something like "/home/username/"
@@ -154,7 +157,7 @@ export class Utilities {
   /**
    * Returns the values from a Set<T>
    */
-  public static getSetAsArray<T>(set: Set<T>): T[] {
+  public static getSetAsArray<T>(set: Set<T> | ReadonlySet<T>): T[] {
     // When ES6 is supported, we can use Array.from() instead.
     return Array.from(set);
   }
@@ -221,7 +224,7 @@ export class Utilities {
       maxWaitTimeMs,
       (e) =>
         new Error(
-          `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
+          `Error: ${e}\nOften this is caused by a file lock ` +
             'from a process such as your text editor, command prompt, ' +
             'or a filesystem watcher.'
         ),
@@ -271,7 +274,7 @@ export class Utilities {
       FileSystem.deleteFolder(folderPath);
     } catch (e) {
       throw new Error(
-        `${(e as Error).message}${os.EOL}Often this is caused by a file lock from a process ` +
+        `${(e as Error).message}\nOften this is caused by a file lock from a process ` +
           'such as your text editor, command prompt, or a filesystem watcher'
       );
     }
@@ -365,20 +368,20 @@ export class Utilities {
       try {
         Utilities.executeCommand(options);
       } catch (error) {
-        console.log(os.EOL + 'The command failed:');
+        console.log('\nThe command failed:');
         console.log(` ${options.command} ` + options.args.join(' '));
         console.log(`ERROR: ${(error as Error).toString()}`);
 
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
-          console.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
+          console.log(`Trying again (attempt #${attemptNumber})...\n`);
           if (retryCallback) {
             retryCallback();
           }
 
           continue;
         } else {
-          console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
+          console.error(`Giving up after ${attemptNumber} attempts\n`);
           throw error;
         }
       }
@@ -460,7 +463,7 @@ export class Utilities {
       Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
     }
 
-    console.log(os.EOL + 'Running "npm install" in ' + directory);
+    console.log('\nRunning "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
     Utilities.executeCommandWithRetry(
@@ -473,66 +476,6 @@ export class Utilities {
       },
       options.maxInstallAttempts
     );
-  }
-
-  /**
-   * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
-   * unusable lines from the .npmrc file.
-   *
-   * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
-   * the .npmrc file to provide different authentication tokens for different registry.
-   * However, if the environment variable is undefined, it expands to an empty string, which
-   * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
-   * we'd prefer to skip that line and continue looking in other places such as the user's
-   * home directory.
-   *
-   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
-   */
-  public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
-    console.log(`Transforming ${sourceNpmrcPath}`); // Verbose
-    console.log(`  --> "${targetNpmrcPath}"`);
-    let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
-    npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
-    const resultLines: string[] = [];
-
-    // This finds environment variable tokens that look like "${VAR_NAME}"
-    const expansionRegExp: RegExp = /\$\{([^\}]+)\}/g;
-
-    // Comment lines start with "#" or ";"
-    const commentRegExp: RegExp = /^\s*[#;]/;
-
-    // Trim out lines that reference environment variables that aren't defined
-    for (const line of npmrcFileLines) {
-      let lineShouldBeTrimmed: boolean = false;
-
-      // Ignore comment lines
-      if (!commentRegExp.test(line)) {
-        const environmentVariables: string[] | null = line.match(expansionRegExp);
-        if (environmentVariables) {
-          for (const token of environmentVariables) {
-            // Remove the leading "${" and the trailing "}" from the token
-            const environmentVariableName: string = token.substring(2, token.length - 1);
-
-            // Is the environment variable defined?
-            if (!process.env[environmentVariableName]) {
-              // No, so trim this line
-              lineShouldBeTrimmed = true;
-              break;
-            }
-          }
-        }
-      }
-
-      if (lineShouldBeTrimmed) {
-        // Example output:
-        // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-        resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
-      } else {
-        resultLines.push(line);
-      }
-    }
-
-    FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
   }
 
   /**
@@ -550,35 +493,6 @@ export class Utilities {
         console.log(`Deleting ${destinationPath}`);
         FileSystem.deleteFile(destinationPath);
       }
-    }
-  }
-
-  /**
-   * syncNpmrc() copies the .npmrc file to the target folder, and also trims unusable lines from the .npmrc file.
-   * If the source .npmrc file not exist, then syncNpmrc() will delete an .npmrc that is found in the target folder.
-   *
-   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
-   */
-  public static syncNpmrc(
-    sourceNpmrcFolder: string,
-    targetNpmrcFolder: string,
-    useNpmrcPublish?: boolean
-  ): void {
-    const sourceNpmrcPath: string = path.join(
-      sourceNpmrcFolder,
-      !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
-    );
-    const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
-    try {
-      if (FileSystem.exists(sourceNpmrcPath)) {
-        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
-      } else if (FileSystem.exists(targetNpmrcPath)) {
-        // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
-        console.log(`Deleting ${targetNpmrcPath}`); // Verbose
-        FileSystem.deleteFile(targetNpmrcPath);
-      }
-    } catch (e) {
-      throw new Error(`Error syncing .npmrc file: ${e}`);
     }
   }
 
@@ -812,7 +726,7 @@ export class Utilities {
 
   private static _processResult(result: child_process.SpawnSyncReturns<Buffer>): void {
     if (result.error) {
-      result.error.message += os.EOL + (result.stderr ? result.stderr.toString() + os.EOL : '');
+      result.error.message += '\n' + (result.stderr ? result.stderr.toString() + '\n' : '');
       throw result.error;
     }
 
@@ -820,7 +734,7 @@ export class Utilities {
       throw new Error(
         'The command failed with exit code ' +
           result.status +
-          os.EOL +
+          '\n' +
           (result.stderr ? result.stderr.toString() : '')
       );
     }
