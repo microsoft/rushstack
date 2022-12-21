@@ -88,7 +88,12 @@ module.exports = () => {
     inFolder: {
       folderName: 'lib-esnext',
       includePatterns: ['**/*.js'],
-      excludePatterns: ['**/*.test.*', '**/test/**/*', '**/__mocks__/**/*']
+      excludePatterns: [
+        '**/*.test.*',
+        '**/test/**/*',
+        '**/__mocks__/**/*',
+        'utilities/prompts/SearchListPrompt.js' // This module has an import with typings issues
+      ]
     },
     outFolderName: 'lib'
   });
