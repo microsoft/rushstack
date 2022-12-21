@@ -11,6 +11,7 @@ import {
   removeBookmark,
   selectCurrentEntry
 } from '../../store/slices/entrySlice';
+import { Button } from '@rushstack/components';
 
 export const SelectedEntryPreview = (): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
@@ -64,6 +65,7 @@ export const SelectedEntryPreview = (): JSX.Element => {
         <div className={styles.SelectedEntryBookmarkRow}>
           <h5>No Entry Selected</h5>
           {renderButtonRow()}
+          <Button></Button>
         </div>
       </div>
     );

@@ -431,6 +431,11 @@
       "reviewCategory": "libraries"
     },
     {
+      "packageName": "@rushstack/components",
+      "projectFolder": "apps/rush-components",
+      "reviewCategory": "libraries"
+    },
+    {
       "packageName": "@rushstack/rundown",
       "projectFolder": "apps/rundown",
       "reviewCategory": "libraries",

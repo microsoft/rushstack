@@ -13,6 +13,7 @@ import { BookmarksSidebar } from './containers/BookmarksSidebar';
 import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
 import { LogoPanel } from './containers/LogoPanel';
 import { ConnectionModal } from './components/ConnectionModal';
+import { ScrollArea } from '@rushstack/components';
 
 /**
  * This React component renders the application page.
@@ -43,6 +44,7 @@ export const App = (): JSX.Element => {
               <SelectedEntryPreview />
               <PackageJsonViewer />
               <LockfileEntryDetailsView />
+              <ScrollArea />
             </div>
             <div className={`ms-Grid-col ms-sm2 ${styles.BodyContainer}`}>
               <LogoPanel />

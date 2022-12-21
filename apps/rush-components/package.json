@@ -1,9 +1,11 @@
 {
-  "name": "@rushstack/lockfile-explorer-web",
-  "description": "Rush Lockfile Explorer: helper project for building the React web application component",
+  "name": "@rushstack/components",
+  "description": "Rush Component Library: a set of themed components for rush projects",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
+  "module": "lib/start.js",
+  "types": "lib/start.d.ts",
   "scripts": {
     "build": "heft test --clean",
     "start": "heft start",
@@ -12,14 +14,8 @@
     "_phase:test": "heft test --no-build"
   },
   "dependencies": {
-    "@fluentui/react": "^8.96.1",
     "react": "~16.13.1",
-    "react-dom": "~16.13.1",
-    "@lifaon/path": "~2.1.0",
-    "@reduxjs/toolkit": "~1.8.6",
-    "react-redux": "~8.0.4",
-    "redux": "~4.2.0",
-    "@rushstack/components": "workspace:*"
+    "react-dom": "~16.13.1"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
@@ -29,6 +25,7 @@
     "@types/react-dom": "16.9.14",
     "@types/react": "16.14.23",
     "@types/webpack-env": "1.13.0",
-    "office-ui-fabric-core": "~11.0.1"
+    "@radix-ui/react-scroll-area": "~1.0.2",
+    "@radix-ui/colors": "~0.1.8"
   }
 }
