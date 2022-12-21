@@ -91,7 +91,14 @@ module.exports = () => {
       ],
       {
         chunks: 'all',
-        minChunks: 1
+        minChunks: 1,
+        cacheGroups: {
+          commons: {
+            name: 'commons',
+            chunks: 'initial',
+            minChunks: 2
+          }
+        }
       }
     ),
     generateConfiguration({
