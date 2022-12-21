@@ -67,22 +67,10 @@
       ]
     },
     {
-      "actionKind": "copyFiles",
+      "actionKind": "runScript",
       "heftEvent": "bundle",
-      "actionId": "copy-dts",
-      "copyOperations": [
-        {
-          "sourceFolder": "lib-commonjs",
-          "destinationFolders": ["lib"],
-          "includeGlobs": ["**/*.d.ts"],
-          "excludeGlobs": [
-            "**/*.test.*",
-            "**/test/**/*",
-            "**/__mocks__/**/*",
-            "utilities/prompts/SearchListPrompt.d.ts" // This module has an import with typings issues
-          ]
-        }
-      ]
+      "actionId": "copyEmptyModules",
+      "scriptPath": "./scripts/copyEmptyModules.js"
     }
   ],
 
