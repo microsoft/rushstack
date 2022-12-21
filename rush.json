@@ -767,6 +767,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-lib-declaration-paths-test",
+      "projectFolder": "build-tests/rush-lib-declaration-paths-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-project-change-analyzer-test",
       "projectFolder": "build-tests/rush-project-change-analyzer-test",
       "reviewCategory": "tests",

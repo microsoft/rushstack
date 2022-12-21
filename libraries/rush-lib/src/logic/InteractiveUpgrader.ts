@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import npmCheck from 'npm-check';
+import type * as NpmCheck from 'npm-check';
 import colors from 'colors/safe';
 
 import { RushConfiguration } from '../api/RushConfiguration';

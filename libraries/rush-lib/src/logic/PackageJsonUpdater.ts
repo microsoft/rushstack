@@ -3,6 +3,7 @@
 
 import colors from 'colors/safe';
 import * as semver from 'semver';
+import type * as NpmCheck from 'npm-check';
 import { ConsoleTerminalProvider, Terminal, ITerminalProvider, Colors } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
