@@ -65,6 +65,14 @@
           "hardlink": true
         }
       ]
+    },
+    {
+      "actionKind": "deleteGlobs",
+      "heftEvent": "bundle",
+      "actionId": "deleteBadTypings",
+      "globsToDelete": [
+        "lib/utilities/prompts/SearchListPrompt.d.ts" // This module has an import with typings issues
+      ]
     }
   ],
 

@@ -5,6 +5,24 @@
 
   "eventActions": [
     {
+      "actionKind": "deleteGlobs",
+      "actionId": "deleteSrc",
+      "heftEvent": "clean",
+      "globsToDelete": ["src/**/*"]
+    },
+    {
+      "actionKind": "copyFiles",
+      "heftEvent": "pre-compile",
+      "actionId": "createSrc",
+      "copyOperations": [
+        {
+          "sourceFolder": "node_modules/@microsoft/rush-lib/src",
+          "destinationFolders": ["src"],
+          "includeGlobs": ["npm-check-typings.d.ts"]
+        }
+      ]
+    },
+    {
       "actionKind": "runScript",
       "heftEvent": "pre-compile",
       "actionId": "createSrc",

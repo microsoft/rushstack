@@ -26,13 +26,14 @@ module.exports = {
       }
     }
 
-    const indexFileLines = [];
+    const indexFileLines = ['/// <reference path="./npm-check-typings.d.ts" />', ''];
     for await (const dtsPath of collectDtsPaths(`${rushLibPath}/lib`, '@microsoft/rush-lib/lib')) {
       indexFileLines.push(`import '${dtsPath}';`);
     }
 
     const srcFolderPath = `${buildFolder}/src`;
-    await FileSystem.ensureEmptyFolderAsync(srcFolderPath);
-    await FileSystem.writeFileAsync(`${srcFolderPath}/index.ts`, indexFileLines.join('\n'));
+    await FileSystem.writeFileAsync(`${srcFolderPath}/index.ts`, indexFileLines.join('\n'), {
+      ensureFolderExists: true
+    });
   }
 };
