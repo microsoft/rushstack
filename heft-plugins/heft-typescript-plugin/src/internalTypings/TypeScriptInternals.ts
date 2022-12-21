@@ -30,6 +30,12 @@ export interface IResolveModuleNameResolutionHost {
   getCurrentDirectory(): string;
 }
 
+export interface IExtendedSolutionBuilder
+  extends TTypescript.SolutionBuilder<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram> {
+  getBuildOrder(): readonly string[];
+  invalidateProject(configFilePath: string, mode: 0 | 1 | 2): void;
+}
+
 /**
  * @beta
  */

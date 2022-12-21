@@ -35,7 +35,7 @@ export class EmitFilesPatch {
 
   public static install(
     ts: ExtendedTypeScript,
-    tsconfig: TTypescript.ParsedCommandLine,
+    baseCompilerOptions: TTypescript.CompilerOptions,
     moduleKindsToEmit: ICachedEmitModuleKind[],
     changedFiles?: Set<TTypescript.SourceFile>
   ): void {
@@ -99,10 +99,10 @@ export class EmitFilesPatch {
         for (const moduleKindToEmit of moduleKindsToEmit) {
           const compilerOptions: TTypescript.CompilerOptions = moduleKindToEmit.isPrimary
             ? {
-                ...tsconfig.options
+                ...baseCompilerOptions
               }
             : {
-                ...tsconfig.options,
+                ...baseCompilerOptions,
                 module: moduleKindToEmit.moduleKind,
                 outDir: moduleKindToEmit.outFolderPath,
 
