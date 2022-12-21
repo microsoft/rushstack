@@ -26,7 +26,8 @@ import { PurgeManager } from '../logic/PurgeManager';
 
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import type { SpawnSyncReturns } from 'child_process';
-import type { BaseInstallManager, IInstallManagerOptions } from '../logic/base/BaseInstallManager';
+import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
+import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 const semver: typeof import('semver') = Import.lazy('semver', require);

@@ -6,6 +6,10 @@ import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
+import type {
+  IPackageForRushUpdate,
+  IPackageJsonUpdaterRushBaseUpdateOptions
+} from '../../logic/PackageJsonUpdaterTypes';
 
 export interface IBasePackageJsonUpdaterRushOptions {
   /**
@@ -15,7 +19,7 @@ export interface IBasePackageJsonUpdaterRushOptions {
   /**
    * The dependencies to be added.
    */
-  packagesToHandle: PackageJsonUpdaterType.IPackageForRushUpdate[];
+  packagesToHandle: IPackageForRushUpdate[];
   /**
    * If specified, "rush update" will not be run after updating the package.json file(s).
    */
@@ -49,7 +53,7 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
     });
   }
 
-  protected abstract getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushBaseUpdateOptions;
+  protected abstract getUpdateOptions(): IPackageJsonUpdaterRushBaseUpdateOptions;
 
   protected getProjects(): RushConfigurationProject[] {
     if (this._allFlag.value) {
