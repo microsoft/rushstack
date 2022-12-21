@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Execute a shell command in scope of a project",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

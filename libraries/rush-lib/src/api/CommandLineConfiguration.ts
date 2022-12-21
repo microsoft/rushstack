@@ -70,6 +70,11 @@ export interface IPhase {
    * By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.
    */
   allowWarningsOnSuccess: boolean;
+
+  /**
+   * If the \"shellCommand\" field is set in a bulk type command, rush will use this command instead of \"scripts\" entry matching that the phase name
+   */
+  shellCommand?: string;
 }
 
 export interface ICommandWithParameters {
@@ -658,7 +663,8 @@ export class CommandLineConfiguration {
         upstream: new Set()
       },
       ignoreMissingScript: !!command.ignoreMissingScript,
-      allowWarningsOnSuccess: !!command.allowWarningsInSuccessfulBuild
+      allowWarningsOnSuccess: !!command.allowWarningsInSuccessfulBuild,
+      shellCommand: command.shellCommand
     };
 
     if (!command.ignoreDependencyOrder) {
