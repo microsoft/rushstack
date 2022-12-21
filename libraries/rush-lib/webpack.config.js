@@ -82,7 +82,7 @@ module.exports = () => {
       },
       [
         new DeepImportsCompatPlugin({
-          path: `${__dirname}/dist/rush-lib-manifest.json`,
+          path: `${__dirname}/temp/rush-lib-manifest.json`,
           inFolderName: 'lib-esnext',
           outFolderName: 'lib',
           pathsToIgnore: ['utilities/prompts/SearchListPrompt.js'],
