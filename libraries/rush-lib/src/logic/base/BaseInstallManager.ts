@@ -44,6 +44,7 @@ import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import { SplitWorkspacePnpmfileConfiguration } from '../pnpm/SplitWorkspacePnpmfileConfiguration';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { SelectionParameterSet } from '../../cli/parsing/SelectionParameterSet';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -148,6 +149,11 @@ export interface IInstallManagerOptions {
    * Selected projects during partial install.
    */
   selectedProjects?: Set<RushConfigurationProject>;
+
+  /**
+   * Selection parameters for partial install.
+   */
+  selectionParameters?: SelectionParameterSet;
 }
 
 /**
@@ -651,14 +657,17 @@ export abstract class BaseInstallManager {
     // Force update if the shrinkwrap is out of date
     if (!shrinkwrapIsUpToDate) {
       if (!this.options.allowShrinkwrapUpdates) {
-        let extraMessageForSplitWorkspace: string = '';
-        if (this.rushConfiguration.hasSplitWorkspaceProject && this.options.includeSplitWorkspace) {
-          extraMessageForSplitWorkspace += ` Note that projects in the split workspace will not be updated unless you select them using a parameter such as "--to" or "--include-split-workspace"`;
+        const selectionArguments: string[] = this.options.selectionParameters?.toArguments() || [];
+        if (selectionArguments.length !== 0) {
+          // prepend an empty string to the array to ensure the space is added
+          selectionArguments.unshift('');
         }
         console.log();
         console.log(
           colors.red(
-            `The ${this.rushConfiguration.shrinkwrapFilePhrase} is out of date. You need to run "rush update".${extraMessageForSplitWorkspace}`
+            `The ${
+              this.rushConfiguration.shrinkwrapFilePhrase
+            } is out of date. You need to run "rush update${selectionArguments.join(' ')}".`
           )
         );
         throw new AlreadyReportedError();
