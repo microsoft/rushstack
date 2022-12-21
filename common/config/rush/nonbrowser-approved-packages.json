@@ -743,10 +743,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "webpack-virtual-modules",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "wordwrap",
       "allowedCategories": [ "libraries" ]
     },

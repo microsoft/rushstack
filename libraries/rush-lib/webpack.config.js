@@ -1,16 +1,13 @@
 'use strict';
 
 const webpack = require('webpack');
-const { PackageJsonLookup, FileSystem, Path } = require('@rushstack/node-core-library');
+const { PackageJsonLookup } = require('@rushstack/node-core-library');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
 const { DeepImportsCompatPlugin } = require('@rushstack/webpack-deep-imports-compat-plugin');
 const PathConstants = require('./lib-commonjs/utilities/PathConstants');
 
 const SCRIPT_ENTRY_OPTIONS = {
-  filename: `${PathConstants.scriptsFolderName}/[name]`,
-  library: {
-    type: 'commonjs2'
-  }
+  filename: `${PathConstants.scriptsFolderName}/[name]`
 };
 
 module.exports = () => {
@@ -23,11 +20,81 @@ module.exports = () => {
     ...Object.keys(packageJson.devDependencies || {})
   ]);
 
-  const configuration = {
-    context: __dirname,
-    mode: 'development', // So the output isn't minified
-    devtool: 'source-map',
-    entry: {
+  function generateConfiguration(entry, extraPlugins = [], splitChunks = undefined) {
+    return {
+      context: __dirname,
+      mode: 'development', // So the output isn't minified
+      devtool: 'source-map',
+      entry,
+      output: {
+        path: `${__dirname}/dist`,
+        filename: '[name].js',
+        chunkFilename: 'chunks/[name].js',
+        library: {
+          type: 'commonjs2'
+        }
+      },
+      target: 'node',
+      plugins: [
+        new PreserveDynamicRequireWebpackPlugin(),
+        new webpack.ids.DeterministicModuleIdsPlugin({
+          maxLength: 6
+        }),
+        ...extraPlugins
+      ],
+      externals: [
+        ({ request }, callback) => {
+          let packageName;
+          let firstSlashIndex = request.indexOf('/');
+          if (firstSlashIndex === -1) {
+            packageName = request;
+          } else if (request.startsWith('@')) {
+            let secondSlash = request.indexOf('/', firstSlashIndex + 1);
+            if (secondSlash === -1) {
+              packageName = request;
+            } else {
+              packageName = request.substring(0, secondSlash);
+            }
+          } else {
+            packageName = request.substring(0, firstSlashIndex);
+          }
+
+          if (externalDependencyNames.has(packageName)) {
+            callback(null, `commonjs ${request}`);
+          } else {
+            callback();
+          }
+        }
+      ],
+      optimization: {
+        splitChunks
+      }
+    };
+  }
+
+  const configurations = [
+    generateConfiguration(
+      {
+        'rush-lib': `${__dirname}/lib-esnext/index.js`,
+        start: `${__dirname}/lib-esnext/start.js`,
+        startx: `${__dirname}/lib-esnext/startx.js`,
+        'start-pnpm': `${__dirname}/lib-esnext/start-pnpm.js`
+      },
+      [
+        new DeepImportsCompatPlugin({
+          path: `${__dirname}/dist/rush-lib-manifest.json`,
+          inFolderName: 'lib-esnext',
+          outFolderName: 'lib',
+          pathsToIgnore: ['utilities/prompts/SearchListPrompt.js'],
+          dTsFilesInputFolderName: 'lib-commonjs'
+        })
+      ],
+      {
+        chunks: 'all',
+        minChunks: 1
+      }
+    ),
+    generateConfiguration({
       [PathConstants.pnpmfileShimFilename]: {
         import: `${__dirname}/lib-esnext/logic/pnpm/PnpmfileShim.js`,
         ...SCRIPT_ENTRY_OPTIONS
@@ -44,59 +111,8 @@ module.exports = () => {
         import: `${__dirname}/lib-esnext/scripts/install-run-rushx.js`,
         ...SCRIPT_ENTRY_OPTIONS
       }
-    },
-    output: {
-      path: `${__dirname}/dist`,
-      filename: '[name].js',
-      chunkFilename: 'chunks/[name].js'
-    },
-    target: 'node',
-    plugins: [
-      new PreserveDynamicRequireWebpackPlugin(),
-      new webpack.ids.DeterministicModuleIdsPlugin({
-        maxLength: 6
-      })
-    ],
-    externals: [
-      ({ request }, callback) => {
-        let packageName;
-        let firstSlashIndex = request.indexOf('/');
-        if (firstSlashIndex === -1) {
-          packageName = request;
-        } else if (request.startsWith('@')) {
-          let secondSlash = request.indexOf('/', firstSlashIndex + 1);
-          if (secondSlash === -1) {
-            packageName = request;
-          } else {
-            packageName = request.substring(0, secondSlash);
-          }
-        } else {
-          packageName = request.substring(0, firstSlashIndex);
-        }
+    })
+  ];
 
-        if (externalDependencyNames.has(packageName)) {
-          callback(null, `commonjs ${request}`);
-        } else {
-          callback();
-        }
-      }
-    ]
-  };
-
-  DeepImportsCompatPlugin.applyToWebpackConfiguration(configuration, {
-    bundleName: 'rush-lib',
-    inFolder: {
-      folderName: 'lib-esnext',
-      includePatterns: ['**/*.js'],
-      excludePatterns: [
-        '**/*.test.*',
-        '**/test/**/*',
-        '**/__mocks__/**/*',
-        'utilities/prompts/SearchListPrompt.js' // This module has an import with typings issues
-      ]
-    },
-    outFolderName: 'lib'
-  });
-
-  return configuration;
+  return configurations;
 };

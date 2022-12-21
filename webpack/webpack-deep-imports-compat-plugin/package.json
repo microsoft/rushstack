@@ -31,8 +31,6 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
-    "fast-glob": "~3.2.4",
-    "webpack-virtual-modules": "~0.5.0"
+    "@rushstack/node-core-library": "workspace:*"
   }
 }

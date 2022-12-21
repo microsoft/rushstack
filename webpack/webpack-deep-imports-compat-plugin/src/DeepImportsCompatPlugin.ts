@@ -1,64 +1,47 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type {
-  WebpackPluginInstance,
-  Compiler,
-  Configuration,
-  Chunk,
-  WebpackError as WebpackErrorType
-} from 'webpack';
-import VirtualModulesPlugin from 'webpack-virtual-modules';
+import { DllPlugin, type Compiler, WebpackError, Chunk, NormalModule } from 'webpack';
 import path from 'path';
-import glob from 'fast-glob';
-import { Path } from '@rushstack/node-core-library';
+import { Async, FileSystem, LegacyAdapters, Path } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: 'DeepImportsCompatPlugin' = 'DeepImportsCompatPlugin';
+
+declare const dummyDllPlugin: DllPlugin;
+type DllPluginOptions = typeof dummyDllPlugin.options;
 
 /**
  * @public
  */
-export interface IDeepImportsCompatPluginOptions {
+export interface IDeepImportsCompatPluginOptions extends DllPluginOptions {
   /**
-   * Specification of the input files.
+   * The folder name under the webpack context containing the constituent files included in the
+   * entry's runtime chunk that will be output to the {@link IDeepImportsCompatPluginOptions.outFolderName}
+   * folder.
    */
-  inFolder: {
-    /**
-     * The folder name under the webpack context where the loose files are located.
-     */
-    folderName: string;
-    // TODO: Support .npmignore/the package.json files property
-    /**
-     * The glob patterns to use to find the loose files.
-     */
-    includePatterns: string[];
-    /**
-     * The glob patterns to use to exclude files from the loose files that would otherwise
-     * be included by the {@link IDeepImportsCompatPluginOptions.inFolder.includePatterns} patterns.
-     */
-    excludePatterns?: string[];
-  };
+  inFolderName: string;
+
   /**
    * The folder name under the webpack context where the commonJS files that point to the
    * generated bundle will be written.
    */
   outFolderName: string;
+
   /**
-   * The name of the generated bundle.
+   * Do not create files under {@link IDeepImportsCompatPluginOptions.outFolderName}
+   * for modules with paths listed in this array.
    */
-  bundleName: string;
+  pathsToIgnore?: string[];
+
   /**
-   * The webpack context. This is required if the webpack configuration does not provide one.
+   * If defined, copy .d.ts files for the .js files contained in the entry's runtime chunk from this folder
+   * under the webpack context.
    */
-  context?: string;
+  dTsFilesInputFolderName?: string;
 }
 
-const HAS_BEEN_APPLIED_SYMBOL: unique symbol = Symbol(`${PLUGIN_NAME}.hasBeenApplied`);
 const JS_EXTENSION: string = '.js';
-
-interface IExtendedConfiguration extends Configuration {
-  [HAS_BEEN_APPLIED_SYMBOL]?: true;
-}
+const DTS_EXTENSION: string = '.d.ts';
 
 /**
  * Returns the number of `/` characters present in a given string.
@@ -80,214 +63,71 @@ function countSlashes(str: string): number {
  * Webpack plugin that creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder.
  * @public
  */
-export class DeepImportsCompatPlugin implements WebpackPluginInstance {
-  private readonly _options: IDeepImportsCompatPluginOptions;
-  private readonly _virtualModules: VirtualModulesPlugin;
-  private readonly _moduleName: string;
-  private readonly _resolvedInFolder: string;
+export class DeepImportsCompatPlugin extends DllPlugin {
+  private readonly _inFolderName: string;
+  private readonly _outFolderName: string;
+  private readonly _pathsToIgnoreWithoutExtensions: Set<string>;
+  private readonly _dTsFilesInputFolderName: string | undefined;
 
-  private constructor(
-    flag: typeof HAS_BEEN_APPLIED_SYMBOL,
-    options: IDeepImportsCompatPluginOptions,
-    virtualModulesPlugin: VirtualModulesPlugin,
-    resolvedInFolder: string,
-    moduleName: string
-  ) {
-    if (flag !== HAS_BEEN_APPLIED_SYMBOL) {
-      throw new Error(`The ${PLUGIN_NAME} constructor is not public.`);
-    }
-
-    this._options = options;
-    this._virtualModules = virtualModulesPlugin;
-    this._resolvedInFolder = resolvedInFolder;
-    this._moduleName = moduleName;
-  }
-
-  public static applyToWebpackConfiguration(
-    webpackConfiguration: Configuration,
-    options: IDeepImportsCompatPluginOptions
-  ): void {
-    const extendedConfiguration: IExtendedConfiguration = webpackConfiguration as IExtendedConfiguration;
-    if (extendedConfiguration[HAS_BEEN_APPLIED_SYMBOL]) {
-      throw new Error(`The ${PLUGIN_NAME} has already been applied to this webpack configuration.`);
-    }
-
-    extendedConfiguration[HAS_BEEN_APPLIED_SYMBOL] = true;
-
-    if (!webpackConfiguration.plugins) {
-      webpackConfiguration.plugins = [];
-    }
-
-    let virtualModulesPlugin: VirtualModulesPlugin | undefined;
-    for (const existingPlugin of webpackConfiguration.plugins) {
-      if (existingPlugin instanceof VirtualModulesPlugin) {
-        virtualModulesPlugin = existingPlugin;
-      }
-    }
-
-    const {
-      inFolder: { folderName: inFolderName },
-      outFolderName: outFolder,
-      bundleName,
-      context
-    } = options;
-    if (path.isAbsolute(inFolderName)) {
-      throw new Error(`The "inFolder.folderName" option must not be absolute.`);
-    }
-
-    if (path.isAbsolute(outFolder)) {
-      throw new Error(`The "outFolder" option must not be absolute.`);
-    }
-
-    const contextToUse: string | undefined = webpackConfiguration.context || context;
-    if (!contextToUse) {
-      throw new Error(
-        `The "context" option must be provided, either on the webpack configuration or on the plugin options.`
-      );
-    }
-
-    const resolvedInFolder: string = path.join(contextToUse, inFolderName);
-    const moduleName: string = path.join(resolvedInFolder, `___${PLUGIN_NAME}__${bundleName}__`);
-
-    if (!virtualModulesPlugin) {
-      virtualModulesPlugin = new VirtualModulesPlugin();
-    }
-
-    const plugin: DeepImportsCompatPlugin = new DeepImportsCompatPlugin(
-      HAS_BEEN_APPLIED_SYMBOL,
-      options,
-      virtualModulesPlugin,
-      resolvedInFolder,
-      moduleName
-    );
-
-    webpackConfiguration.plugins.push(virtualModulesPlugin);
-    webpackConfiguration.plugins.push(plugin);
-
-    if (!webpackConfiguration.entry) {
-      webpackConfiguration.entry = {};
-    }
-
-    if (typeof webpackConfiguration.entry === 'string') {
-      throw new Error(`The "entry" option must not be a string.`);
-    }
-
-    if (Array.isArray(webpackConfiguration.entry)) {
-      throw new Error(`The "entry" option must not be an array.`);
-    }
-
-    if (typeof webpackConfiguration.entry === 'function') {
-      throw new Error(`The "entry" option must not be a function.`);
-    }
-
-    webpackConfiguration.entry[bundleName] = {
-      import: moduleName,
-      library: {
-        type: 'commonjs'
-      }
+  public constructor(options: IDeepImportsCompatPluginOptions) {
+    const superOptions: DllPluginOptions = {
+      ...options
     };
+    delete (superOptions as Partial<IDeepImportsCompatPluginOptions>).inFolderName;
+    delete (superOptions as Partial<IDeepImportsCompatPluginOptions>).outFolderName;
+    delete (superOptions as Partial<IDeepImportsCompatPluginOptions>).dTsFilesInputFolderName;
+    delete (superOptions as Partial<IDeepImportsCompatPluginOptions>).pathsToIgnore;
+    super(superOptions);
+
+    const inFolderName: string = options.inFolderName;
+    if (!inFolderName) {
+      throw new Error(`The "inFolderName" option was not specified.`);
+    }
+
+    if (path.isAbsolute(inFolderName)) {
+      throw new Error(`The "inFolderName" option must not be absolute.`);
+    }
+
+    const outFolderName: string = options.outFolderName;
+    if (!outFolderName) {
+      throw new Error(`The "outFolderName" option was not specified.`);
+    }
+
+    if (path.isAbsolute(outFolderName)) {
+      throw new Error(`The "outFolderName" option must not be absolute.`);
+    }
+
+    const dTsFilesInputFolderName: string | undefined = options.dTsFilesInputFolderName;
+    if (dTsFilesInputFolderName && path.isAbsolute(dTsFilesInputFolderName)) {
+      throw new Error(`The "dTsFilesInputFolderName" option must not be absolute.`);
+    }
+
+    const pathsToIgnoreWithoutExtensions: Set<string> = new Set();
+    for (const pathToIgnore of options.pathsToIgnore || []) {
+      let normalizedPathToIgnore: string = Path.convertToSlashes(pathToIgnore);
+      if (normalizedPathToIgnore.endsWith(JS_EXTENSION)) {
+        normalizedPathToIgnore = normalizedPathToIgnore.slice(0, -JS_EXTENSION.length);
+      }
+
+      pathsToIgnoreWithoutExtensions.add(normalizedPathToIgnore);
+    }
+
+    this._inFolderName = options.inFolderName;
+    this._outFolderName = options.outFolderName;
+    this._pathsToIgnoreWithoutExtensions = pathsToIgnoreWithoutExtensions;
+    this._dTsFilesInputFolderName = dTsFilesInputFolderName;
   }
 
   public apply(compiler: Compiler): void {
-    const {
-      inFolder: { includePatterns: inFolderIncludePatterns, excludePatterns: inFolderExcludePatterns },
-      bundleName,
-      outFolderName
-    } = this._options;
-    const resolvedInFolder: string = this._resolvedInFolder;
-    let libPaths: string[];
-    compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
-      const [includePaths, excludePaths] = await Promise.all([
-        glob(inFolderIncludePatterns, {
-          cwd: resolvedInFolder,
-          onlyFiles: true
-        }),
-        inFolderExcludePatterns
-          ? glob(inFolderExcludePatterns, {
-              cwd: resolvedInFolder,
-              onlyFiles: true
-            })
-          : undefined
-      ]);
-
-      if (excludePaths) {
-        const excludePathsSet: Set<string> = new Set(excludePaths);
-        libPaths = [];
-        for (const includePath of includePaths) {
-          if (!excludePathsSet.has(includePath)) {
-            libPaths.push(includePath);
-          }
-        }
-      } else {
-        libPaths = includePaths;
-      }
-
-      libPaths = libPaths.sort();
-
-      const lines: string = [
-        'export function getPath(p) {',
-        '  switch(p) {',
-        ...libPaths.map((path) => `  case '${path}': return require('./${path}');`),
-        '  }',
-        '}',
-        ''
-      ].join('\n');
-      this._virtualModules.writeModule(this._moduleName, lines);
-    });
-
-    const WebpackError: typeof WebpackErrorType = compiler.webpack.WebpackError;
+    super.apply(compiler);
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapPromise(PLUGIN_NAME, async () => {
-        // `ChunkGroup` is not exported from 'webpack'
-        // eslint-disable-next-line @typescript-eslint/typedef
-        const chunkGroup /* ChunkGroup | undefined */ = compilation.namedChunkGroups.get(bundleName);
-        if (!chunkGroup) {
-          compilation.errors.push(new WebpackError(`The chunk group ${bundleName} was not found.`));
-          return;
-        }
-
-        let runtimeChunk: Chunk | undefined;
-        for (const chunk of chunkGroup.chunks) {
+        const runtimeChunks: Chunk[] = [];
+        for (const chunk of compilation.chunks) {
           if (chunk.hasRuntime()) {
-            if (runtimeChunk) {
-              compilation.errors.push(
-                new WebpackError(`Multiple runtime chunks were found in the ${bundleName} chunk group.`)
-              );
-              return;
-            } else {
-              runtimeChunk = chunk;
-            }
+            runtimeChunks.push(chunk);
           }
-        }
-
-        if (!runtimeChunk) {
-          compilation.errors.push(
-            new WebpackError(`The runtime chunk in the ${bundleName} chunk group not found.`)
-          );
-          return;
-        }
-
-        const filenames: string[] = Array.from(runtimeChunk.files);
-        let jsFileBaseName: string | undefined;
-        for (const filename of filenames) {
-          if (filename.endsWith(JS_EXTENSION)) {
-            if (jsFileBaseName) {
-              compilation.errors.push(
-                new WebpackError(`Multiple JS files were found in the ${bundleName} chunk group.`)
-              );
-              return;
-            } else {
-              jsFileBaseName = filename.substring(0, filename.length - JS_EXTENSION.length);
-            }
-          }
-        }
-
-        if (!jsFileBaseName) {
-          compilation.errors.push(
-            new WebpackError(`The JS file in the ${bundleName} chunk group not found.`)
-          );
-          return;
         }
 
         const outputPath: string | undefined = compilation.options.output.path;
@@ -296,26 +136,126 @@ export class DeepImportsCompatPlugin implements WebpackPluginInstance {
           return;
         }
 
-        const jsFilePath: string = Path.convertToSlashes(path.join(outputPath, jsFileBaseName));
-        const jsFileFolderPath: string = jsFilePath.substring(0, jsFilePath.lastIndexOf('/'));
+        interface ILibModuleDescriptor {
+          libPathWithoutExtension: string;
+          moduleId: string | number;
+        }
 
-        const resolvedLibOutFolder: string = path.join(compiler.context, outFolderName);
+        const pathsToIgnoreWithoutExtension: Set<string> = this._pathsToIgnoreWithoutExtensions;
+        const resolvedLibInFolder: string = path.join(compiler.context, this._inFolderName);
+        const libModulesByChunk: Map<Chunk, ILibModuleDescriptor[]> = new Map();
+        const encounteredLibPaths: Set<string> = new Set();
+        for (const runtimeChunk of runtimeChunks) {
+          const libModules: ILibModuleDescriptor[] = [];
+          for (const initialChunk of runtimeChunk.getAllInitialChunks()) {
+            for (const runtimeChunkModule of compilation.chunkGraph.getChunkModules(initialChunk)) {
+              if (runtimeChunkModule.type === 'javascript/auto') {
+                const modulePath: string | undefined = (runtimeChunkModule as NormalModule)?.resource;
+                if (modulePath?.startsWith(resolvedLibInFolder) && modulePath.endsWith(JS_EXTENSION)) {
+                  const modulePathWithoutExtension: string = modulePath.slice(0, -JS_EXTENSION.length); // Remove the .js extension
+                  const relativePathWithoutExtension: string = Path.convertToSlashes(
+                    path.relative(resolvedLibInFolder, modulePathWithoutExtension)
+                  );
+
+                  if (!pathsToIgnoreWithoutExtension.has(relativePathWithoutExtension)) {
+                    if (!encounteredLibPaths.has(relativePathWithoutExtension)) {
+                      libModules.push({
+                        libPathWithoutExtension: relativePathWithoutExtension,
+                        moduleId: compilation.chunkGraph.getModuleId(runtimeChunkModule)
+                      });
+
+                      encounteredLibPaths.add(relativePathWithoutExtension);
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          libModulesByChunk.set(runtimeChunk, libModules);
+        }
+
+        const resolvedLibOutFolder: string = path.join(compiler.context, this._outFolderName);
         const outputPathRelativeLibOutFolder: string = Path.convertToSlashes(
-          path.relative(jsFileFolderPath, resolvedLibOutFolder)
+          path.relative(outputPath, resolvedLibOutFolder)
         );
-        const libOutFolderRelativeOutputPath: string = Path.convertToSlashes(
-          path.relative(resolvedLibOutFolder, jsFilePath)
-        );
-        for (const libPath of libPaths) {
-          const depth: number = countSlashes(libPath);
-          const requirePath: string = '../'.repeat(depth) + libOutFolderRelativeOutputPath;
-          const moduleText: string = [
-            `module.exports = require('${requirePath}').getPath('${libPath}');`
-          ].join('\n');
 
-          compilation.emitAsset(
-            `${outputPathRelativeLibOutFolder}/${libPath}`,
-            new compiler.webpack.sources.RawSource(moduleText)
+        const resolvedDtsFilesInputFolderName: string | undefined = this._dTsFilesInputFolderName
+          ? path.join(compiler.context, this._dTsFilesInputFolderName)
+          : undefined;
+
+        for (const [chunk, libModules] of libModulesByChunk) {
+          const bundleFilenames: string[] = Array.from(chunk.files);
+          let bundleJsFileBaseName: string | undefined;
+          for (const filename of bundleFilenames) {
+            if (filename.endsWith(JS_EXTENSION)) {
+              if (bundleJsFileBaseName) {
+                compilation.errors.push(
+                  new WebpackError(`Multiple JS files were found for the ${chunk.name} chunk.`)
+                );
+                return undefined;
+              } else {
+                bundleJsFileBaseName = filename.substring(0, filename.length - JS_EXTENSION.length);
+              }
+            }
+          }
+
+          if (!bundleJsFileBaseName) {
+            compilation.errors.push(
+              new WebpackError(`The JS file for the ${chunk.name} chunk was not found.`)
+            );
+            return;
+          }
+
+          const jsFilePath: string = Path.convertToSlashes(path.join(outputPath!, bundleJsFileBaseName));
+          const libOutFolderRelativeOutputPath: string = Path.convertToSlashes(
+            path.relative(resolvedLibOutFolder, jsFilePath)
+          );
+
+          await Async.forEachAsync(
+            libModules,
+            async ({ libPathWithoutExtension, moduleId }) => {
+              const depth: number = countSlashes(libPathWithoutExtension);
+              const requirePath: string = '../'.repeat(depth) + libOutFolderRelativeOutputPath;
+              const moduleText: string = [
+                `module.exports = require(${JSON.stringify(requirePath)})(${JSON.stringify(moduleId)});`
+              ].join('\n');
+
+              compilation.emitAsset(
+                `${outputPathRelativeLibOutFolder}/${libPathWithoutExtension}${JS_EXTENSION}`,
+                new compiler.webpack.sources.RawSource(moduleText)
+              );
+
+              if (resolvedDtsFilesInputFolderName) {
+                const dtsFilePath: string = path.join(
+                  resolvedDtsFilesInputFolderName,
+                  `${libPathWithoutExtension}${DTS_EXTENSION}`
+                );
+                let dtsFileContents: string | undefined;
+                try {
+                  dtsFileContents = (
+                    await LegacyAdapters.convertCallbackToPromise(
+                      compiler.inputFileSystem.readFile,
+                      dtsFilePath
+                    )
+                  )?.toString();
+                } catch (e) {
+                  if (!FileSystem.isNotExistError(e)) {
+                    throw e;
+                  }
+                }
+
+                if (dtsFileContents) {
+                  compilation.emitAsset(
+                    `${outputPathRelativeLibOutFolder}/${libPathWithoutExtension}${DTS_EXTENSION}`,
+                    new compiler.webpack.sources.RawSource(dtsFileContents)
+                  );
+
+                  compilation.fileDependencies.add(dtsFilePath);
+                }
+              }
+            },
+            { concurrency: 10 }
           );
         }
       });

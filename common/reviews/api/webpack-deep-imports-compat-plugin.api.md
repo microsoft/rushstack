@@ -4,28 +4,24 @@
 
 ```ts
 
-import type { Compiler } from 'webpack';
-import type { Configuration } from 'webpack';
-import type { WebpackPluginInstance } from 'webpack';
+import { Compiler } from 'webpack';
+import { DllPlugin } from 'webpack';
 
 // @public
-export class DeepImportsCompatPlugin implements WebpackPluginInstance {
+export class DeepImportsCompatPlugin extends DllPlugin {
+    constructor(options: IDeepImportsCompatPluginOptions);
     // (undocumented)
     apply(compiler: Compiler): void;
-    // (undocumented)
-    static applyToWebpackConfiguration(webpackConfiguration: Configuration, options: IDeepImportsCompatPluginOptions): void;
 }
 
+// Warning: (ae-forgotten-export) The symbol "DllPluginOptions" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
-export interface IDeepImportsCompatPluginOptions {
-    bundleName: string;
-    context?: string;
-    inFolder: {
-        folderName: string;
-        includePatterns: string[];
-        excludePatterns?: string[];
-    };
+export interface IDeepImportsCompatPluginOptions extends DllPluginOptions {
+    dTsFilesInputFolderName?: string;
+    inFolderName: string;
     outFolderName: string;
+    pathsToIgnore?: string[];
 }
 
 // (No @packageDocumentation comment for this package)
