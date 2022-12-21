@@ -29,7 +29,9 @@ export abstract class AzureAuthenticationBase {
     // (undocumented)
     protected abstract _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
     // (undocumented)
-    tryGetCachedCredentialAsync(doNotThrowIfExpired?: boolean): Promise<ICredentialCacheEntry | undefined>;
+    tryGetCachedCredentialAsync(options?: ITryGetCachedCredentialOptionsThrow | ITryGetCachedCredentialOptionsIgnore): Promise<ICredentialCacheEntry | undefined>;
+    // (undocumented)
+    tryGetCachedCredentialAsync(options: ITryGetCachedCredentialOptionsLogWarning): Promise<ICredentialCacheEntry | undefined>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
     updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void>;
@@ -62,6 +64,9 @@ export class AzureStorageAuthentication extends AzureAuthenticationBase {
 }
 
 // @public (undocumented)
+export type ExpiredCredentialBehavior = 'logWarning' | 'throwError' | 'ignore';
+
+// @public (undocumented)
 export interface IAzureAuthenticationBaseOptions {
     // (undocumented)
     azureEnvironment?: AzureEnvironmentName;
@@ -85,6 +90,30 @@ export interface ICredentialResult {
     credentialString: string;
     // (undocumented)
     expiresOn?: Date;
+}
+
+// @public (undocumented)
+export interface ITryGetCachedCredentialOptionsBase {
+    expiredCredentialBehavior?: ExpiredCredentialBehavior;
+    // (undocumented)
+    terminal?: ITerminal;
+}
+
+// @public (undocumented)
+export interface ITryGetCachedCredentialOptionsIgnore extends ITryGetCachedCredentialOptionsBase {
+    expiredCredentialBehavior: 'ignore';
+}
+
+// @public (undocumented)
+export interface ITryGetCachedCredentialOptionsLogWarning extends ITryGetCachedCredentialOptionsBase {
+    expiredCredentialBehavior: 'logWarning';
+    // (undocumented)
+    terminal: ITerminal;
+}
+
+// @public (undocumented)
+export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCredentialOptionsBase {
+    expiredCredentialBehavior: 'throwError';
 }
 
 // @public (undocumented)
