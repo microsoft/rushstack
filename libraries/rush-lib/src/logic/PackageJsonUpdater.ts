@@ -6,8 +6,8 @@ import * as semver from 'semver';
 import { ConsoleTerminalProvider, Terminal, ITerminalProvider, Colors } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { BaseInstallManager } from './base/BaseInstallManager';
-import { IInstallManagerOptions } from './base/BaseInstallManagerTypes';
+import type { BaseInstallManager } from './base/BaseInstallManager';
+import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes';
 import { InstallManagerFactory } from './InstallManagerFactory';
 import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
