@@ -76,10 +76,10 @@ function createShellOperations(
 
       const displayName: string = getDisplayName(phase, project);
 
-      if (commandToRun || phase.shellCommand) {
+      if (commandToRun) {
         operation.runner = new ShellOperationRunner({
           buildCacheConfiguration,
-          commandToRun: phase.shellCommand || commandToRun || '',
+          commandToRun: commandToRun || '',
           displayName,
           isIncrementalBuildAllowed,
           phase,
@@ -110,7 +110,7 @@ function getScriptToRun(
 ): string | undefined {
   const { scripts } = rushProject.packageJson;
 
-  const rawCommand: string | undefined | null = scripts?.[commandToRun] ?? shellCommand;
+  const rawCommand: string | undefined | null = shellCommand ?? scripts?.[commandToRun];
 
   if (rawCommand === undefined || rawCommand === null) {
     return undefined;

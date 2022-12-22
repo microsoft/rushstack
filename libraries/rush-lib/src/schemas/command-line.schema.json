@@ -109,7 +109,8 @@
             "incremental": { "$ref": "#/definitions/anything" },
             "allowWarningsInSuccessfulBuild": { "$ref": "#/definitions/anything" },
             "watchForChanges": { "$ref": "#/definitions/anything" },
-            "disableBuildCache": { "$ref": "#/definitions/anything" }
+            "disableBuildCache": { "$ref": "#/definitions/anything" },
+            "shellCommand": { "$ref": "#/definitions/anything" }
           }
         }
       ]
