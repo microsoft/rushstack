@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "The 'rush add' command now supports '--peer' flag",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
