@@ -2,6 +2,33 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "0.1.6",
+      "tag": "@rushstack/lockfile-explorer_v0.1.6",
+      "date": "Tue, 20 Dec 2022 01:18:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.5",
+      "tag": "@rushstack/lockfile-explorer_v0.1.5",
+      "date": "Fri, 16 Dec 2022 16:20:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where an Error is thrown when a pnpmfile does not exist."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.4",
       "tag": "@rushstack/lockfile-explorer_v0.1.4",
       "date": "Fri, 09 Dec 2022 23:31:28 GMT",

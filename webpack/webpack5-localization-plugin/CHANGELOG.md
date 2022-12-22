@@ -1,6 +1,18 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Fri, 09 Dec 2022 16:18:28 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Dec 2022 21:56:32 GMT and should not be manually modified.
+
+## 0.2.0
+Tue, 20 Dec 2022 21:56:32 GMT
+
+### Minor changes
+
+- Convert LocalizationPlugin._stringKeys to public stringKeys property.
+
+## 0.1.40
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
 
 ## 0.1.39
 Fri, 09 Dec 2022 16:18:28 GMT

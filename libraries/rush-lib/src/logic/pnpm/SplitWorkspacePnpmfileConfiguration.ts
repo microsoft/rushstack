@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, Import, IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import * as splitWorkspaceGlobalPnpmfile from './SplitWorkspaceGlobalPnpmfileShim';
 import { splitWorkspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 
@@ -94,8 +94,8 @@ export class SplitWorkspacePnpmfileConfiguration {
     const settings: ISplitWorkspacePnpmfileShimSettings = {
       workspaceProjects,
       splitWorkspaceProjects,
-      semverPath: require.resolve('semver'),
-      pathNormalizerPath: require.resolve('normalize-path')
+      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname }),
+      pathNormalizerPath: Import.resolveModule({ modulePath: 'normalize-path', baseFolderPath: __dirname })
     };
 
     // common/config/rush/.pnpmfile-split-workspace.cjs

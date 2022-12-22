@@ -28,7 +28,7 @@ trace-import --help
 ## Command line
 
 ```
-usage: trace-import [-h] [-d] -p MODULE_PATH [-b FOLDER_PATH] [-r {cjs,es,ts}]
+usage: trace-import [-h] [-d] -p IMPORT_PATH [-b FOLDER_PATH] [-t {cjs,es,ts}]
 
 This tool analyzes import module paths, to determine the resolved target
 folder. For example, if the "semver" NPM package is installed, "trace-import
@@ -41,7 +41,7 @@ Optional arguments:
   -h, --help            Show this help message and exit.
   -d, --debug           Show the full call stack if an error occurs while
                         executing the tool
-  -p MODULE_PATH, --path MODULE_PATH
+  -p IMPORT_PATH, --path IMPORT_PATH
                         The import module path to be analyzed. For example,
                         "example" in expressions such as: require("example");
                         require.resolve("example"); import { Thing } from
@@ -50,7 +50,7 @@ Optional arguments:
                         The "--path" string will be resolved as if the import
                         statement appeared in a script located in this folder.
                          If omitted, the current working directory is used.
-  -r {cjs,es,ts}, --resolution-type {cjs,es,ts}
+  -t {cjs,es,ts}, --resolution-type {cjs,es,ts}
                         The type of module resolution to perform: "cjs" for
                         CommonJS, "es" for ES modules, or "ts" for TypeScript
                         typings. The default value is "cjs".
@@ -61,7 +61,7 @@ Optional arguments:
 These commands were invoked in the `C:\Git\rushstack\apps\trace-import` folder
 where trace-import is developed.
 
-### Resolving a CommonJS default index
+### Resolving a CommonJS main index
 ```
 trace-import --path semver
 ```
@@ -70,18 +70,18 @@ Sample output:
 ```
 Base folder:             C:\Git\rushstack\apps\trace-import
 Package name:            semver
-Module path:             (not specified)
+Package subpath:         (not specified)
 
 Resolving...
 
 Package folder:          C:\Git\rushstack\common\temp\node_modules\.pnpm\semver@7.3.8\node_modules\semver
 package.json:            semver (7.3.8)
-Default entry point:     "main": "index.js"
+Main index:              "main": "index.js"
 
 Target path:             C:\Git\rushstack\common\temp\node_modules\.pnpm\semver@7.3.8\node_modules\semver\index.js
 ```
 
-### Resolving a CommonJS arbitrary path
+### Resolving a CommonJS package subpath
 ```
 trace-import --path typescript/bin/tsc
 ```
@@ -90,7 +90,7 @@ Sample output:
 ```
 Base folder:             C:\Git\rushstack\apps\trace-import
 Package name:            typescript
-Module path:             bin/tsc
+Package subpath:         bin/tsc
 
 Resolving...
 
@@ -109,7 +109,7 @@ Sample output:
 ```
 Base folder:             C:\Git\rushstack\apps\trace-import
 Package name:            semver
-Module path:             (not specified)
+Package subpath:         (not specified)
 
 Resolving...
 
@@ -117,9 +117,25 @@ Package folder:          C:\Git\rushstack\common\temp\node_modules\.pnpm\semver@
 package.json:            semver (7.3.8)
 @types folder:           C:\Git\rushstack\common\temp\node_modules\.pnpm\@types+semver@7.3.5\node_modules\@types\semver
 @types package.json:     @types/semver (7.3.5)
-@types default index:    "types": "index.d.ts"
+@types main index:       "types": "index.d.ts"
 
 Target path:             C:\Git\rushstack\common\temp\node_modules\.pnpm\@types+semver@7.3.5\node_modules\@types\semver\index.d.ts
+```
+
+### Resolving a relative path
+```
+trace-import --path ./config/rig.json
+```
+
+Sample output:
+```
+Base folder:             C:\Git\rushstack\apps\trace-import
+Import path:             ./config/rig.json
+
+The import path does not appear to reference an NPM package.
+Resolving...
+
+Target path:             C:\Git\rushstack\apps\trace-import\config\rig.json
 ```
 
 ## Links

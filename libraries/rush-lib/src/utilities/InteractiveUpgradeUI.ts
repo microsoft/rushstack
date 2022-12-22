@@ -10,6 +10,7 @@ import colors from 'colors/safe';
 import CliTable from 'cli-table';
 import Separator from 'inquirer/lib/objects/separator';
 import { Import } from '@rushstack/node-core-library';
+import type * as NpmCheck from 'npm-check';
 
 const _: typeof import('lodash') = Import.lazy('lodash', require);
 
