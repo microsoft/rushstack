@@ -1,14 +1,14 @@
 {
-  "name": "@rushstack/webpack-deep-imports-compat-plugin",
+  "name": "@rushstack/webpack-deep-imports-plugin",
   "version": "0.0.0",
   "description": "This plugin creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder.",
   "main": "lib/index.js",
-  "typings": "dist/webpack-deep-imports-compat-plugin.d.ts",
+  "typings": "dist/webpack-deep-imports-plugin.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "webpack/webpack-deep-imports-compat-plugin"
+    "directory": "webpack/webpack-deep-imports-plugin"
   },
   "engines": {
     "node": ">=14.19.0"

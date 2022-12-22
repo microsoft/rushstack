@@ -3,7 +3,7 @@
 const webpack = require('webpack');
 const { PackageJsonLookup } = require('@rushstack/node-core-library');
 const { PreserveDynamicRequireWebpackPlugin } = require('@rushstack/webpack-preserve-dynamic-require-plugin');
-const { DeepImportsCompatPlugin } = require('@rushstack/webpack-deep-imports-compat-plugin');
+const { DeepImportsPlugin } = require('@rushstack/webpack-deep-imports-plugin');
 const PathConstants = require('./lib-commonjs/utilities/PathConstants');
 
 const SCRIPT_ENTRY_OPTIONS = {
@@ -81,7 +81,7 @@ module.exports = () => {
         'start-pnpm': `${__dirname}/lib-esnext/start-pnpm.js`
       },
       [
-        new DeepImportsCompatPlugin({
+        new DeepImportsPlugin({
           path: `${__dirname}/temp/rush-lib-manifest.json`,
           inFolderName: 'lib-esnext',
           outFolderName: 'lib',

@@ -5,7 +5,7 @@ import { DllPlugin, type Compiler, WebpackError, Chunk, NormalModule } from 'web
 import path from 'path';
 import { Async, FileSystem, LegacyAdapters, Path } from '@rushstack/node-core-library';
 
-const PLUGIN_NAME: 'DeepImportsCompatPlugin' = 'DeepImportsCompatPlugin';
+const PLUGIN_NAME: 'DeepImportsPlugin' = 'DeepImportsPlugin';
 
 declare const dummyDllPlugin: DllPlugin;
 type DllPluginOptions = typeof dummyDllPlugin.options;
@@ -13,10 +13,10 @@ type DllPluginOptions = typeof dummyDllPlugin.options;
 /**
  * @public
  */
-export interface IDeepImportsCompatPluginOptions extends DllPluginOptions {
+export interface IDeepImportsPluginOptions extends DllPluginOptions {
   /**
    * The folder name under the webpack context containing the constituent files included in the
-   * entry's runtime chunk that will be output to the {@link IDeepImportsCompatPluginOptions.outFolderName}
+   * entry's runtime chunk that will be output to the {@link IDeepImportsPluginOptions.outFolderName}
    * folder.
    */
   inFolderName: string;
@@ -28,7 +28,7 @@ export interface IDeepImportsCompatPluginOptions extends DllPluginOptions {
   outFolderName: string;
 
   /**
-   * Do not create files under {@link IDeepImportsCompatPluginOptions.outFolderName}
+   * Do not create files under {@link IDeepImportsPluginOptions.outFolderName}
    * for modules with paths listed in this array.
    */
   pathsToIgnore?: string[];
@@ -63,20 +63,20 @@ function countSlashes(str: string): number {
  * Webpack plugin that creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder.
  * @public
  */
-export class DeepImportsCompatPlugin extends DllPlugin {
+export class DeepImportsPlugin extends DllPlugin {
   private readonly _inFolderName: string;
   private readonly _outFolderName: string;
   private readonly _pathsToIgnoreWithoutExtensions: Set<string>;
   private readonly _dTsFilesInputFolderName: string | undefined;
 
-  public constructor(options: IDeepImportsCompatPluginOptions) {
+  public constructor(options: IDeepImportsPluginOptions) {
     const superOptions: DllPluginOptions = {
       ...options
     };
-    delete (superOptions as Partial<IDeepImportsCompatPluginOptions>).inFolderName;
-    delete (superOptions as Partial<IDeepImportsCompatPluginOptions>).outFolderName;
-    delete (superOptions as Partial<IDeepImportsCompatPluginOptions>).dTsFilesInputFolderName;
-    delete (superOptions as Partial<IDeepImportsCompatPluginOptions>).pathsToIgnore;
+    delete (superOptions as Partial<IDeepImportsPluginOptions>).inFolderName;
+    delete (superOptions as Partial<IDeepImportsPluginOptions>).outFolderName;
+    delete (superOptions as Partial<IDeepImportsPluginOptions>).dTsFilesInputFolderName;
+    delete (superOptions as Partial<IDeepImportsPluginOptions>).pathsToIgnore;
     super(superOptions);
 
     const inFolderName: string = options.inFolderName;

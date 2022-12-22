@@ -1,4 +1,4 @@
-# @rushstack/webpack-deep-imports-compat-plugin
+# @rushstack/webpack-deep-imports-plugin
 
 This package contains a plugin for webpack 5 that creates a bundle and commonJS files in a 'lib' folder,
 mirroring modules in another 'lib' folder.
@@ -28,14 +28,14 @@ This plugin is based on the built-in Webpack `DllPlugin`.
 In your `webpack.config.js` file, apply this plugin with
 
 ```JS
-const { DeepImportsCompatPlugin } = require('@rushstack/webpack-deep-imports-compat-plugin');
+const { DeepImportsPlugin } = require('@rushstack/webpack-deep-imports-plugin');
 
 const configuration = {
   entry: {
     'my-project': `${__dirname}/lib-esnext/index.js`
   },
   plugins: [
-    new DeepImportsCompatPlugin({
+    new DeepImportsPlugin({
       path: `${__dirname}/dist/my-project-manifest.json`, // From `DllPlugin`'s options
       inFolderName: 'lib-esnext', // The folder containing the original loose files and the entrypoint
       outFolderName: 'lib', // The folder where the bundle and commonJS files will be written

@@ -1047,8 +1047,8 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@rushstack/webpack-deep-imports-compat-plugin",
-      "projectFolder": "webpack/webpack-deep-imports-compat-plugin",
+      "packageName": "@rushstack/webpack-deep-imports-plugin",
+      "projectFolder": "webpack/webpack-deep-imports-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": false // for now
     },
