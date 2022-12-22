@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@radix-ui/colors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@radix-ui/react-scroll-area",
       "allowedCategories": [ "libraries" ]
     },

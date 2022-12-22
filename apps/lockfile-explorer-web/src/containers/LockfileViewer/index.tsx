@@ -15,6 +15,7 @@ import {
 } from '../../store/slices/entrySlice';
 import { FilterBar } from '../../components/FilterBar';
 import { getFilterFromLocalStorage, saveFilterToLocalStorage } from '../../helpers/localStorage';
+import { Tabs } from '@rushstack/components';
 
 interface ILockfileEntryGroup {
   entryName: string;
@@ -166,6 +167,30 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
 
   return (
     <div className={styles.ViewWrapper}>
+      <Tabs
+        items={[
+          {
+            header: 'Projects',
+            body: (
+              <div className={styles.lockfileEntriesWrapper}>
+                {getEntriesToShow().map((lockfileEntryGroup) => (
+                  <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
+                ))}
+              </div>
+            )
+          },
+          {
+            header: 'Packages',
+            body: (
+              <div className={styles.lockfileEntriesWrapper}>
+                {getEntriesToShow().map((lockfileEntryGroup) => (
+                  <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
+                ))}
+              </div>
+            )
+          }
+        ]}
+      />
       <FilterBar
         options={[
           {
