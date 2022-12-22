@@ -73,12 +73,3 @@
     margin-top: 4px;
   }
 }
-
-.filterOption {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  & > * + * {
-    margin-left: 4px;
-  }
-}

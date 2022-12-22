@@ -13,8 +13,9 @@ input {
 .TabsRoot {
   display: flex;
   flex-direction: column;
-  width: 300px;
+  width: 100%;
   box-shadow: 0 2px 10px var(--blackA4);
+  overflow-y: scroll;
 }
 
 .TabsList {

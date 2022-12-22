@@ -271,6 +271,8 @@ importers:
   ../../apps/rush-components:
     specifiers:
       '@radix-ui/colors': ~0.1.8
+      '@radix-ui/react-checkbox': ~1.0.1
+      '@radix-ui/react-icons': ~1.1.1
       '@radix-ui/react-scroll-area': ~1.0.2
       '@radix-ui/react-tabs': ~1.0.1
       '@rushstack/eslint-config': workspace:*
@@ -287,6 +289,8 @@ importers:
       react-dom: 16.13.1_react@16.13.1
     devDependencies:
       '@radix-ui/colors': 0.1.8
+      '@radix-ui/react-checkbox': 1.0.1_5owmthsvj5ictknaj3ev736ofq
+      '@radix-ui/react-icons': 1.1.1_react@16.13.1
       '@radix-ui/react-scroll-area': 1.0.2_5owmthsvj5ictknaj3ev736ofq
       '@radix-ui/react-tabs': 1.0.1_5owmthsvj5ictknaj3ev736ofq
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -5843,6 +5847,25 @@ packages:
       '@babel/runtime': 7.20.6
     dev: true
 
+  /@radix-ui/react-checkbox/1.0.1_5owmthsvj5ictknaj3ev736ofq:
+    resolution: {integrity: sha512-TisH0B8hWmYP3ONRduYCyN04rR9yLPIw/Rwyn1RoC1suSoGCa8Wn+YPdSSSarSszeIbcg3p2lBkDp2XXit4sZw==}
+    peerDependencies:
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    dependencies:
+      '@babel/runtime': 7.20.6
+      '@radix-ui/primitive': 1.0.0
+      '@radix-ui/react-compose-refs': 1.0.0_react@16.13.1
+      '@radix-ui/react-context': 1.0.0_react@16.13.1
+      '@radix-ui/react-presence': 1.0.0_5owmthsvj5ictknaj3ev736ofq
+      '@radix-ui/react-primitive': 1.0.1_5owmthsvj5ictknaj3ev736ofq
+      '@radix-ui/react-use-controllable-state': 1.0.0_react@16.13.1
+      '@radix-ui/react-use-previous': 1.0.0_react@16.13.1
+      '@radix-ui/react-use-size': 1.0.0_react@16.13.1
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+    dev: true
+
   /@radix-ui/react-collection/1.0.1_5owmthsvj5ictknaj3ev736ofq:
     resolution: {integrity: sha512-uuiFbs+YCKjn3X1DTSx9G7BHApu4GHbi3kgiwsnFUbOKCrwejAJv4eE4Vc8C0Oaxt9T0aV4ox0WCOdx+39Xo+g==}
     peerDependencies:
@@ -5882,6 +5905,14 @@ packages:
       react: ^16.8 || ^17.0 || ^18.0
     dependencies:
       '@babel/runtime': 7.20.6
+      react: 16.13.1
+    dev: true
+
+  /@radix-ui/react-icons/1.1.1_react@16.13.1:
+    resolution: {integrity: sha512-xc3wQC59rsFylVbSusQCrrM+6695ppF730Q6yqzhRdqDcRNWIm2R6ngpzBoSOQMcwnq4p805F+Gr7xo4fmtN1A==}
+    peerDependencies:
+      react: ^16.x || ^17.x || ^18.x
+    dependencies:
       react: 16.13.1
     dev: true
 
@@ -6014,6 +6045,25 @@ packages:
       react: ^16.8 || ^17.0 || ^18.0
     dependencies:
       '@babel/runtime': 7.20.6
+      react: 16.13.1
+    dev: true
+
+  /@radix-ui/react-use-previous/1.0.0_react@16.13.1:
+    resolution: {integrity: sha512-RG2K8z/K7InnOKpq6YLDmT49HGjNmrK+fr82UCVKT2sW0GYfVnYp4wZWBooT/EYfQ5faA9uIjvsuMMhH61rheg==}
+    peerDependencies:
+      react: ^16.8 || ^17.0 || ^18.0
+    dependencies:
+      '@babel/runtime': 7.20.6
+      react: 16.13.1
+    dev: true
+
+  /@radix-ui/react-use-size/1.0.0_react@16.13.1:
+    resolution: {integrity: sha512-imZ3aYcoYCKhhgNpkNDh/aTiU05qw9hX+HHI1QDBTyIlcFjgeFlKKySNGMwTp7nYFLQg/j0VA2FmCY4WPDDHMg==}
+    peerDependencies:
+      react: ^16.8 || ^17.0 || ^18.0
+    dependencies:
+      '@babel/runtime': 7.20.6
+      '@radix-ui/react-use-layout-effect': 1.0.0_react@16.13.1
       react: 16.13.1
     dev: true
 

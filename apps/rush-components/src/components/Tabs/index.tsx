@@ -4,11 +4,28 @@ import styles from './styles.scss';
 
 type TabsItem = {
   header: string;
-  body: any;
+  body?: any;
 };
 
-export const Tabs = ({ items, def }: { items: TabsItem[]; def?: string }) => (
-  <RadixTabs.Root className={styles.TabsRoot} defaultValue={def || items[0].header}>
+export const Tabs = ({
+  items,
+  def,
+  value,
+  onChange,
+  children
+}: {
+  items: TabsItem[];
+  def?: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  children?: any;
+}) => (
+  <RadixTabs.Root
+    className={styles.TabsRoot}
+    defaultValue={def || items[0].header}
+    value={value}
+    onValueChange={onChange}
+  >
     <RadixTabs.List className={styles.TabsList} aria-label="Manage your account">
       {items.map((item) => (
         <RadixTabs.Trigger className={styles.TabsTrigger} value={item.header}>
@@ -16,10 +33,12 @@ export const Tabs = ({ items, def }: { items: TabsItem[]; def?: string }) => (
         </RadixTabs.Trigger>
       ))}
     </RadixTabs.List>
-    {items.map((item) => (
-      <RadixTabs.Content className={styles.TabsContent} value={item.header}>
-        {item.body};
-      </RadixTabs.Content>
-    ))}
+    {children
+      ? children
+      : items.map((item) => (
+          <RadixTabs.Content className={styles.TabsContent} value={item.header}>
+            {item.body}
+          </RadixTabs.Content>
+        ))}
   </RadixTabs.Root>
 );
