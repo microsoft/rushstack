@@ -123,6 +123,7 @@ export class InstallAction extends BaseInstallAction {
       pnpmFilterArguments,
       splitWorkspacePnpmFilterArguments,
       selectedProjects,
+      selectionParameters: this._selectionParameters,
       checkOnly: this._checkOnlyParameter.value,
 
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)

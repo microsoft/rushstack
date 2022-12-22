@@ -471,4 +471,14 @@ export class SelectionParameterSet {
 
     return selection;
   }
+
+  public toArguments(): string[] {
+    const args: string[] = [];
+    for (const selector of this._selectors) {
+      for (const value of selector.values) {
+        args.push(selector.longName, value);
+      }
+    }
+    return args;
+  }
 }
