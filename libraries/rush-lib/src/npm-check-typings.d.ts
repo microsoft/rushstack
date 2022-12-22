@@ -31,6 +31,7 @@ declare namespace NpmCheck {
     packageWanted: string; // Requested version from the package.json.
     packageJson: string; // Version or range requested in the parent package.json.
     devDependency: boolean; // Is this a devDependency?
+    peerDependency: boolean; // Is this a peerDependency?
     usedInScripts: undefined | string[]; // Array of `scripts` in package.json that use this module.
     mismatch: boolean; // Does the version installed not match the range in package.json?
     semverValid: string; // Is the installed version valid semver?
