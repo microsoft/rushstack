@@ -3,10 +3,12 @@
 
 import colors from 'colors/safe';
 import * as semver from 'semver';
+import type * as NpmCheck from 'npm-check';
 import { ConsoleTerminalProvider, Terminal, ITerminalProvider, Colors } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
+import type { BaseInstallManager } from './base/BaseInstallManager';
+import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes';
 import { InstallManagerFactory } from './InstallManagerFactory';
 import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
@@ -19,62 +21,13 @@ import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchF
 import { RushConstants } from './RushConstants';
 import { InstallHelpers } from './installManager/InstallHelpers';
 import type { DependencyAnalyzer, IDependencyAnalysis } from './DependencyAnalyzer';
-
-/**
- * The type of SemVer range specifier that is prepended to the version
- */
-export const enum SemVerStyle {
-  Exact = 'exact',
-  Caret = 'caret',
-  Tilde = 'tilde',
-  Passthrough = 'passthrough'
-}
-
-export interface IPackageForRushUpdate {
-  packageName: string;
-}
-
-export interface IPackageForRushAdd extends IPackageForRushUpdate {
-  /**
-   * The style of range that should be used if the version is automatically detected.
-   */
-  rangeStyle: SemVerStyle;
-
-  /**
-   * If not undefined, the latest version will be used (that doesn't break ensureConsistentVersions).
-   * If specified, the latest version meeting the SemVer specifier will be used as the basis.
-   */
-  version?: string;
-}
-
-export interface IPackageForRushRemove extends IPackageForRushUpdate {}
-
-export interface IPackageJsonUpdaterRushBaseUpdateOptions {
-  /**
-   * The projects whose package.jsons should get updated
-   */
-  projects: RushConfigurationProject[];
-  /**
-   * The dependencies to be added or removed.
-   */
-  packagesToUpdate: IPackageForRushUpdate[];
-  /**
-   * If specified, "rush update" will not be run after updating the package.json file(s).
-   */
-  skipUpdate: boolean;
-  /**
-   * If specified, "rush update" will be run in debug mode.
-   */
-  debugInstall: boolean;
-  /**
-   * actionName
-   */
-  actionName: string;
-  /**
-   * The variant to consider when performing installations and validating shrinkwrap updates.
-   */
-  variant?: string | undefined;
-}
+import {
+  type IPackageForRushAdd,
+  type IPackageJsonUpdaterRushAddOptions,
+  type IPackageJsonUpdaterRushBaseUpdateOptions,
+  type IPackageJsonUpdaterRushRemoveOptions,
+  SemVerStyle
+} from './PackageJsonUpdaterTypes';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -105,33 +58,6 @@ export interface IPackageJsonUpdaterRushUpgradeOptions {
    */
   variant?: string | undefined;
 }
-
-/**
- * Configuration options for adding or updating a dependency in a single project
- */
-export interface IPackageJsonUpdaterRushAddOptions extends IPackageJsonUpdaterRushBaseUpdateOptions {
-  /**
-   * Whether or not this dependency should be added as a devDependency.
-   */
-  devDependency: boolean;
-  /**
-   * Whether or not this dependency should be added as a peerDependency.
-   */
-  peerDependency: boolean;
-  /**
-   * If specified, other packages that use this dependency will also have their package.json's updated.
-   */
-  updateOtherPackages: boolean;
-  /**
-   * The dependencies to be added.
-   */
-  packagesToUpdate: IPackageForRushAdd[];
-}
-
-/**
- * Options for remove a dependency from a particular project.
- */
-export interface IPackageJsonUpdaterRushRemoveOptions extends IPackageJsonUpdaterRushBaseUpdateOptions {}
 
 /**
  * Configuration options for adding or updating a dependency in single project

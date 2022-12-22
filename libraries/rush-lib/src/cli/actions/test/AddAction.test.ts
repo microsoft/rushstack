@@ -3,7 +3,8 @@
 
 import '../../test/mockRushCommandLineParser';
 
-import { IPackageJsonUpdaterRushAddOptions, PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
+import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
+import type { IPackageJsonUpdaterRushAddOptions } from '../../../logic/PackageJsonUpdaterTypes';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { AddAction } from '../AddAction';
 

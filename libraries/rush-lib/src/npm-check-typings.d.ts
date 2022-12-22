@@ -1,4 +1,4 @@
-declare namespace NpmCheck {
+declare module 'npm-check' {
   interface INpmCheckOptions {
     global?: boolean;
     update?: boolean;
@@ -44,8 +44,4 @@ declare namespace NpmCheck {
   export default function (options: INpmCheckOptions): {
     then(stateFn: (state: INpmCheckCurrentState) => void): void;
   };
-}
-
-declare module 'npm-check' {
-  export = NpmCheck.default;
 }

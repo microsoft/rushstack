@@ -6,7 +6,8 @@ import { PurgeManager } from './PurgeManager';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 
-import type { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
+import type { BaseInstallManager } from './base/BaseInstallManager';
+import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes';
 
 export class InstallManagerFactory {
   public static async getInstallManagerAsync(

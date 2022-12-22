@@ -6,7 +6,12 @@ export {
   AzureAuthenticationBase,
   type IAzureAuthenticationBaseOptions,
   type ICredentialResult,
-  type AzureEnvironmentName
+  type AzureEnvironmentName,
+  type ITryGetCachedCredentialOptionsBase,
+  type ITryGetCachedCredentialOptionsLogWarning,
+  type ITryGetCachedCredentialOptionsThrow,
+  type ITryGetCachedCredentialOptionsIgnore,
+  type ExpiredCredentialBehavior
 } from './AzureAuthenticationBase';
 export {
   AzureStorageAuthentication,

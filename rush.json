@@ -767,6 +767,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-lib-declaration-paths-test",
+      "projectFolder": "build-tests/rush-lib-declaration-paths-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-project-change-analyzer-test",
       "projectFolder": "build-tests/rush-project-change-analyzer-test",
       "reviewCategory": "tests",
@@ -1041,8 +1047,8 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@rushstack/webpack-deep-imports-compat-plugin",
-      "projectFolder": "webpack/webpack-deep-imports-compat-plugin",
+      "packageName": "@rushstack/webpack-deep-imports-plugin",
+      "projectFolder": "webpack/webpack-deep-imports-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": false // for now
     },
