@@ -3,6 +3,7 @@
   "compilerOptions": {
     "types": ["heft-jest", "node", "webpack-env"],
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "outDir": "lib-commonjs"
   }
 }
