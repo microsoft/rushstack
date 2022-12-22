@@ -8,6 +8,19 @@ addition to the package's `main` entrypoint), but you don't want to pay the cost
 this plugin can be used to create a Webpack bundle that maintains compatibility with the paths to the
 existing loose files.
 
+This enables a couple common use cases:
+
+- **Calling internal APIs:** SemVer compatibility guarantees may only apply to official public APIs,
+  which are typically top-exports of the package's `main` module. However, in situations where
+  certain functionality has not yet been exposed as a public API, consumers may find it expedient
+  to use deep imports to access library internals, with the understanding that bypassing the
+  API contract is done "at your own risk".
+
+- **Unit test mocking:** Library APIs often neglect to expose interfaces needed for
+  testability, such as intercepting network or disk operations. In order to write proper
+  unit tests, it may be necessary to mock the library's internals. Deep imports provide
+  a convenient way for tests to replace internal library modules with mock implementations.
+
 This plugin is based on the built-in Webpack `DllPlugin`.
 
 ## Usage
