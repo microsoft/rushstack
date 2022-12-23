@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "The 'rush add' command now supports '--peer' flag",
+      "comment": "Add a `--peer` flag to the `rush add` command to add the specified dependency as a `peerDependency`.",
       "type": "none"
     }
   ],
