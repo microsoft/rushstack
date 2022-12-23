@@ -64,7 +64,7 @@ export interface IPackageJsonUpdaterRushBaseUpdateOptions {
  */
 export interface IPackageJsonUpdaterRushAddOptions extends IPackageJsonUpdaterRushBaseUpdateOptions {
   /**
-   * Whether or not this dependency should be added as a devDependency, instead of a regular dependency.
+   * Whether or not this dependency should be added as a devDependency instead of as a regular dependency.
    */
   devDependency: boolean;
   /**
