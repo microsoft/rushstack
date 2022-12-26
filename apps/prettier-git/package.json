@@ -1,0 +1,34 @@
+{
+  "name": "@rushstack/prettier-git",
+  "version": "0.0.0",
+  "description": "Runs Prettier on files that have been changed since a specified Git revision.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/prettier-git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "engineStrict": true,
+  "homepage": "https://rushstack.io",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
+  },
+  "bin": {
+    "rundown": "./bin/prettier-git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "prettier": "~2.3.0"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24"
+  }
+}

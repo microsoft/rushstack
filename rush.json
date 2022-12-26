@@ -431,6 +431,12 @@
       "reviewCategory": "libraries"
     },
     {
+      "packageName": "@rushstack/prettier-git",
+      "projectFolder": "apps/prettier-git",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rundown",
       "projectFolder": "apps/rundown",
       "reviewCategory": "libraries",

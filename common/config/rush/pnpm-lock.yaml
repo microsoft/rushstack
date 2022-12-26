@@ -212,6 +212,25 @@ importers:
       '@types/webpack-env': 1.13.0
       office-ui-fabric-core: 11.0.1
 
+  ../../apps/prettier-git:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      prettier: ~2.3.0
+    dependencies:
+      prettier: 2.3.2
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+
   ../../apps/rundown:
     specifiers:
       '@rushstack/eslint-config': workspace:*
