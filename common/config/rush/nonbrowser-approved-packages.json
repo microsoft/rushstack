@@ -163,6 +163,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/heft-suppress-browserslist-warning-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/heft-typescript-plugin",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },

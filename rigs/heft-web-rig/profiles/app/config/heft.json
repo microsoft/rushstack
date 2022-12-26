@@ -17,6 +17,12 @@
     }
   },
 
+  "heftPlugins": [
+    {
+      "pluginPackage": "@rushstack/heft-suppress-browserslist-warning-plugin"
+    }
+  ],
+
   "phasesByName": {
     "build": {
       "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6"] }],

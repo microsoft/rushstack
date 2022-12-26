@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Include @rushstack/heft-suppress-browserslist-warning-plugin to suppress the warning printed when the `browserslist` package decides it's out of date.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

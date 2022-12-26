@@ -4,6 +4,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
+  "heftPlugins": [
+    {
+      "pluginPackage": "@rushstack/heft-suppress-browserslist-warning-plugin"
+    }
+  ],
+
   // TODO: Add comments
   "phasesByName": {
     "build": {

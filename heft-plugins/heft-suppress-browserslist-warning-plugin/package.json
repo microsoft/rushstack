@@ -1,0 +1,26 @@
+{
+  "name": "@rushstack/heft-suppress-browserslist-warning-plugin",
+  "version": "0.0.0",
+  "description": "A Heft plugin to set the \"BROWSERSLIST_IGNORE_OLD_DATA\" env variable to \"1\" during build.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-suppress-browserslist-warning-plugin"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "main": "lib/index.js",
+  "typings": "dist/heft-suppress-browserslist-warning-plugin.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "0.64.7"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*"
+  }
+}
