@@ -3,13 +3,10 @@
 @import '@radix-ui/colors/violet.css';
 
 .ScrollAreaRoot {
-  width: 200px;
-  height: 225px;
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 2px 10px var(--blackA7);
-  background-color: white;
   --scrollbar-size: 6px;
+  height: 100vh;
 }
 
 .ScrollAreaViewport {
@@ -60,20 +57,4 @@
 
 .ScrollAreaCorner {
   background: var(--blackA8);
-}
-
-.Text {
-  color: var(--violet11);
-  font-size: 15px;
-  line-height: 18px;
-  font-weight: 500;
-}
-
-.Tag {
-  color: var(--mauve12);
-  font-size: 13px;
-  line-height: 18px;
-  margin-top: 10px;
-  border-top: 1px solid var(--mauve6);
-  padding-top: 10px;
 }

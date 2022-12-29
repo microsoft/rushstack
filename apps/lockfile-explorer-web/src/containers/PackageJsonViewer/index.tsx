@@ -9,10 +9,10 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
 import { IPackageJson } from '../../types/IPackageJson';
 import { compareSpec } from '../../parsing/compareSpec';
-import { FilterBar } from '../../components/FilterBar';
 import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
+import { Tabs } from '@rushstack/components';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -31,7 +31,8 @@ export const PackageJsonViewer = (): JSX.Element => {
 
   const [selection, setSelection] = useState<PackageView>(PackageView.PARSED_PACKAGE_JSON);
 
-  const cb = useCallback((s: PackageView) => () => setSelection(s), []);
+  const cb = useCallback((s: PackageView) => setSelection(s), []);
+  console.log('selection: ', selection);
 
   useEffect(() => {
     async function loadPnpmFileAsync(): Promise<void> {
@@ -196,24 +197,23 @@ export const PackageJsonViewer = (): JSX.Element => {
 
   return (
     <div className={styles.PackageJsonWrapper}>
-      <FilterBar
-        options={[
+      <Tabs
+        items={[
           {
-            text: `package spec ${isEntryModified(selectedEntry, specChanges) ? '*' : ''}`,
-            active: selection === PackageView.PARSED_PACKAGE_JSON,
-            onClick: cb(PackageView.PARSED_PACKAGE_JSON)
+            header: `package spec ${isEntryModified(selectedEntry, specChanges) ? '*' : ''}`,
+            value: PackageView.PARSED_PACKAGE_JSON
           },
           {
-            text: 'package.json',
-            active: selection === PackageView.PACKAGE_JSON,
-            onClick: cb(PackageView.PACKAGE_JSON)
+            header: 'package.json',
+            value: PackageView.PACKAGE_JSON
           },
           {
-            text: '.pnpmfile.cjs',
-            active: selection === PackageView.PACKAGE_SPEC,
-            onClick: cb(PackageView.PACKAGE_SPEC)
+            header: '.pnpmfile.cjs',
+            value: PackageView.PACKAGE_SPEC
           }
         ]}
+        value={selection}
+        onChange={cb}
       />
       <div className={appStyles.ContainerCard}>
         <div className={styles.FileContents}>{renderFile()}</div>

@@ -4,6 +4,7 @@ import styles from './styles.scss';
 
 type TabsItem = {
   header: string;
+  value?: string | number;
   body?: any;
 };
 
@@ -12,33 +13,38 @@ export const Tabs = ({
   def,
   value,
   onChange,
-  children
+  renderChildren
 }: {
   items: TabsItem[];
   def?: string;
-  value?: string;
-  onChange?: (value: string) => void;
-  children?: any;
-}) => (
-  <RadixTabs.Root
-    className={styles.TabsRoot}
-    defaultValue={def || items[0].header}
-    value={value}
-    onValueChange={onChange}
-  >
-    <RadixTabs.List className={styles.TabsList} aria-label="Manage your account">
-      {items.map((item) => (
-        <RadixTabs.Trigger className={styles.TabsTrigger} value={item.header}>
-          {item.header}
-        </RadixTabs.Trigger>
-      ))}
-    </RadixTabs.List>
-    {children
-      ? children
-      : items.map((item) => (
-          <RadixTabs.Content className={styles.TabsContent} value={item.header}>
-            {item.body}
-          </RadixTabs.Content>
+  value?: string | number;
+  onChange?: (value: any) => void;
+  renderChildren?: () => JSX.Element;
+}) => {
+  const getItemValue = (item: TabsItem) => (item.value === undefined ? item.header : item.value);
+  return (
+    <RadixTabs.Root
+      className={styles.TabsRoot}
+      defaultValue={def || items[0].header}
+      value={value}
+      onValueChange={onChange}
+    >
+      <RadixTabs.List className={styles.TabsList} aria-label="Manage your account">
+        {items.map((item) => (
+          <RadixTabs.Trigger key={item.header} className={styles.TabsTrigger} value={getItemValue(item)}>
+            {item.header}
+          </RadixTabs.Trigger>
         ))}
-  </RadixTabs.Root>
-);
+      </RadixTabs.List>
+      {renderChildren
+        ? renderChildren()
+        : items.map((item) =>
+            item.body ? (
+              <RadixTabs.Content className={styles.TabsContent} value={getItemValue(item)}>
+                {item.body}
+              </RadixTabs.Content>
+            ) : null
+          )}
+    </RadixTabs.Root>
+  );
+};

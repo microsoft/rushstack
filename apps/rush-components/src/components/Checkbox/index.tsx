@@ -25,7 +25,7 @@ export const Checkbox = ({
           <CheckIcon />
         </RadixCheckbox.Indicator>
       </RadixCheckbox.Root>
-      <label className={styles.Label} htmlFor="c1">
+      <label className={styles.Label} htmlFor={label}>
         {label}
       </label>
     </div>

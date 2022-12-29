@@ -1,13 +1,20 @@
+@use '../../styles/base';
+
 .ViewWrapper {
-  height: calc(100% - 12px);
-  padding-top: 12px;
+  height: calc(100% - 24px);
+  @include base.card;
+  padding: 0 12px;
+  margin-top: 12px;
 }
 
 .ViewContents {
   display: flex;
   flex-direction: column;
-  min-height: calc(100% - 70px - 35px);
-  max-height: calc(100% - 70px - 35px);
+  min-height: calc(100% - 35px);
+  max-height: calc(100% - 35px);
+  & > * + * {
+    margin-top: 12px;
+  }
 }
 
 .LockfileEntryListViewWrapper {
@@ -17,23 +24,6 @@
 
   &:hover {
     border: 1px solid black;
-  }
-}
-
-.LockfileFilterBar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-
-  input {
-    border: solid 1px #666;
-    border-radius: 4px;
-    padding: 0.4em;
-    width: 100%;
-  }
-
-  & > * + * {
-    margin-left: 12px;
   }
 }
 
@@ -59,11 +49,8 @@
 }
 
 .lockfileEntriesWrapper {
-  overflow: scroll;
   flex: 1;
-  & > * + * {
-    margin-top: 12px;
-  }
+  height: 100%;
 }
 
 .filterSection {
