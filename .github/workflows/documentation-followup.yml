@@ -17,8 +17,6 @@ jobs:
           ${{ toJson(github.event) }}
           EOF
 
-          echo event writen
-
           cat <<-"EOF" | node
           const fs = require('fs');
 
@@ -51,6 +49,10 @@ jobs:
           ].join('\n'), 'utf8');
 
           EOF
+
+          if [ -f result.env ]; then
+            cat result.env >> $GITHUB_ENV
+          fi
       - name: File ticket
         if: ${{ env.POST_DOC_BODY != null }}
         run: |
