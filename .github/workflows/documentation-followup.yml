@@ -1,10 +1,10 @@
-name: Documentation Followup
+name: Documentation Tickets
 
 on: [pull_request]
 
 jobs:
-  file-ticket:
-    name: File Ticket
+  file-tickets:
+    name: File Tickets
     runs-on: ubuntu-latest
     steps:
       - name: Use nodejs
@@ -21,11 +21,11 @@ jobs:
           const fs = require('fs');
 
           const EVENT_FILE = 'event.json';
-          const RESULT_FILE = 'result.env';
+          const RESULT_FILE = 'issue.md';
           const DELIMITER = '## Impacted documentation';
 
           const event = JSON.parse(fs.readFileSync(EVENT_FILE, 'utf8'));
-          const strippedBody = event.pull_request.body.replace(/<!-+(.|\n)+?-+>/g, '');
+          const strippedBody = event.pull_request.body.replace(/<!-+(.|\r|\n)+?-+>/g, '');
           const delimIndex = strippedBody.indexOf(DELIMITER);
 
           if (delimIndex < 0) {
@@ -42,19 +42,29 @@ jobs:
 
           const quotedBody = delimBody.split('\n').map(line => `> ${line}`).join('\n');
           fs.writeFileSync(RESULT_FILE, [
-            'POST_DOC_BODY<<EOF',
+            '### Summary',
+            '',
+            'Follow up on documentation tasks from ' + event.pull_request.html_url + '.',
+            '',
+            '### Details',
+            '',
+            'This ticket was generated automatically. Suggested documentation updates:',
+            ''
             quotedBody,
-            'EOF',
-            'POST_DOC_HTML_URL=' + event.pull_request.html_url
+            ''
           ].join('\n'), 'utf8');
 
           EOF
 
-          if [ -f result.env ]; then
-            cat result.env >> $GITHUB_ENV
+          if [ -f issue.md ]; then
+            echo "FILE_TICKET=1" >> $GITHUB_ENV
           fi
       - name: File ticket
-        if: ${{ env.POST_DOC_BODY != null }}
-        run: |
-          echo "Great! ${{ env.POST_DOC_HTML_URL }}"
-          echo "Great! ${{ env.POST_DOC_BODY }}"
+        if: ${{ env.FILE_TICKET == '1' }}
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          repository: https://github.com/elliot-nelson/rushstack-websites
+          title: '[doc] ${{ github.event.pull_request.title }}'
+          content-filepath: ./issue.md
+          labels: |
+            automated
