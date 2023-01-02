@@ -9,6 +9,6 @@ jobs:
     steps:
       - run: |
           echo Hello
-          echo ${{github.event.pull_request}}
-          echo ${{toJson(github.event.pull_request)}}
+          echo "${{github.event.pull_request}}"
+          echo "${{toJson(github.event.pull_request)}}"
           echo Done
