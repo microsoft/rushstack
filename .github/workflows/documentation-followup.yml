@@ -49,7 +49,7 @@ jobs:
             '### Details',
             '',
             'This ticket was generated automatically. Suggested documentation updates:',
-            ''
+            '',
             quotedBody,
             ''
           ].join('\n'), 'utf8');
