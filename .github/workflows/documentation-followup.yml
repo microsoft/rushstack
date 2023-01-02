@@ -59,12 +59,14 @@ jobs:
           if [ -f issue.md ]; then
             echo "FILE_TICKET=1" >> $GITHUB_ENV
           fi
+      - run: |
+          cat issue.md
       - name: File ticket
         if: ${{ env.FILE_TICKET == '1' }}
         uses: peter-evans/create-issue-from-file@v4
         with:
-          repository: https://github.com/elliot-nelson/rushstack-websites
-          token: ${{ secrets.RUSHSTACK_WEBSITES_TOKEN }}
+          #repository: https://github.com/elliot-nelson/rushstack-websites
+          #token: '${{ secrets.RUSHSTACK_WEBSITES_TOKEN }}'
           title: '[doc] ${{ github.event.pull_request.title }}'
           content-filepath: ./issue.md
           labels: |
