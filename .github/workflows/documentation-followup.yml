@@ -9,3 +9,4 @@ jobs:
     steps:
       - run: |
           echo Hello
+          echo ${{github.event.pull_request}}
