@@ -10,5 +10,6 @@ jobs:
       - run: |
           echo Hello
           echo "${{github.event.pull_request}}"
-          echo "${{toJson(github.event.pull_request)}}"
+          echo "${{toJson(github.event.pull_request.body)}}"
+          echo "${{toJson(github.event.pull_request.html_url)}}"
           echo Done
