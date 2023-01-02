@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 16 Dec 2022 19:34:26 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Dec 2022 20:11:58 GMT and should not be manually modified.
+
+## 5.88.0
+Thu, 22 Dec 2022 20:11:58 GMT
+
+### Updates
+
+- Improve the experience during a rush operation when the cached credentials have expired. Now, a warning is printed instead of an error being thrown and the operation halted.
+- (BREAKING API CHANGE IN @rushstack/rush-azure-storage-build-cache-plugin) Change the signature of `AzureAuthenticationBase.tryGetCachedCredentialAsync` to optionally take an object describing the behavior when credentials have expired. The behavior of the function without an argument is unchanged.
 
 ## 5.87.0
 Fri, 16 Dec 2022 19:34:26 GMT

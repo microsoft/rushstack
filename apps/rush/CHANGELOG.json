@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.88.0",
+      "tag": "@microsoft/rush_v5.88.0",
+      "date": "Thu, 22 Dec 2022 20:11:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the experience during a rush operation when the cached credentials have expired. Now, a warning is printed instead of an error being thrown and the operation halted."
+          },
+          {
+            "comment": "(BREAKING API CHANGE IN @rushstack/rush-azure-storage-build-cache-plugin) Change the signature of `AzureAuthenticationBase.tryGetCachedCredentialAsync` to optionally take an object describing the behavior when credentials have expired. The behavior of the function without an argument is unchanged."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.87.0",
       "tag": "@microsoft/rush_v5.87.0",
       "date": "Fri, 16 Dec 2022 19:34:26 GMT",
