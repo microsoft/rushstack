@@ -17,6 +17,8 @@ jobs:
           ${{ toJson(github.event) }}
           EOF
 
+          echo event writen
+
           cat <<-"EOF" | node
           const fs = require('fs');
 
@@ -28,19 +30,26 @@ jobs:
           const strippedBody = event.pull_request.body.replace(/<!-+(.|\n)+?-+>/g, '');
           const delimIndex = strippedBody.indexOf(DELIMITER);
 
-          if (delimIndex < 0) process.exit(1);
+          if (delimIndex < 0) {
+            console.log('No documentation tasks detected -- skipping doc ticket.');
+            process.exit(0);
+          }
 
           const delimBody = strippedBody.substring(delimIndex + DELIMITER.length).trim();
 
-          if (delimBody.length > 0) {
-            const quotedBody = delimBody.split('\n').map(line => `> ${line}`).join('\n');
-            fs.writeFileSync(RESULT_FILE, [
-              'POST_DOC_BODY<<EOF',
-              quotedBody,
-              'EOF',
-              'POST_DOC_HTML_URL=' + event.pull_request.html_url
-            ].join('\n'), 'utf8');
+          if (delimBody.length === 0) {
+            console.log('No documentation tasks detected -- skipping doc ticket.');
+            process.exit(0);
           }
+
+          const quotedBody = delimBody.split('\n').map(line => `> ${line}`).join('\n');
+          fs.writeFileSync(RESULT_FILE, [
+            'POST_DOC_BODY<<EOF',
+            quotedBody,
+            'EOF',
+            'POST_DOC_HTML_URL=' + event.pull_request.html_url
+          ].join('\n'), 'utf8');
+
           EOF
       - name: File ticket
         if: ${{ env.POST_DOC_BODY != null }}
