@@ -1,10 +1,16 @@
-name: Documentation Tickets
+name: File Doc Tickets
 
-on: [pull_request]
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
 
 jobs:
   file-tickets:
     name: File Tickets
+    if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-latest
     steps:
       - name: Use nodejs
@@ -59,8 +65,6 @@ jobs:
           if [ -f issue.md ]; then
             echo "FILE_TICKET=1" >> $GITHUB_ENV
           fi
-      - run: |
-          cat issue.md
       - name: File ticket
         if: ${{ env.FILE_TICKET == '1' }}
         uses: peter-evans/create-issue-from-file@v4
