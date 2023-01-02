@@ -14,7 +14,7 @@ jobs:
       - name: Parse PR body
         run: |
           cat <<-"EOF" > event.json
-          ${{ github.event }}
+          ${{ toJson(github.event) }}
           EOF
 
           cat <<-"EOF" | node
