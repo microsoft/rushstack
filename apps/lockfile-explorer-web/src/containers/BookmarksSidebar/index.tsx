@@ -7,6 +7,7 @@ import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { LockfileEntry } from '../../parsing/LockfileEntry';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
+import { Button } from '@rushstack/components';
 
 export const BookmarksSidebar = (): JSX.Element => {
   const bookmarks = useAppSelector((state) => state.entry.bookmarkedEntries);
@@ -32,7 +33,7 @@ export const BookmarksSidebar = (): JSX.Element => {
       {bookmarks.map((bookmarkedEntry) => (
         <div key={bookmarkedEntry.rawEntryId} className={styles.BookmarkEntry}>
           <p onClick={clear(bookmarkedEntry)}>{bookmarkedEntry.displayText}</p>
-          <button onClick={deleteEntry(bookmarkedEntry)}>Remove</button>
+          <Button onClick={deleteEntry(bookmarkedEntry)}>Remove</Button>
         </div>
       ))}
     </div>

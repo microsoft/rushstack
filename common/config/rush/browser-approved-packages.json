@@ -15,6 +15,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@radix-ui/react-checkbox",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-icons",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@radix-ui/react-scroll-area",
       "allowedCategories": [ "libraries" ]
     },

@@ -40,20 +40,20 @@ export const SelectedEntryPreview = (): JSX.Element => {
   const renderButtonRow = (): JSX.Element => {
     return (
       <div className={styles.NavigationButtonRow}>
-        <button disabled={entryStack.length <= 1} onClick={pop}>
+        <Button disabled={entryStack.length <= 1} onClick={pop}>
           Back
-        </button>
-        <button disabled={entryForwardStack.length === 0} onClick={forward}>
+        </Button>
+        <Button disabled={entryForwardStack.length === 0} onClick={forward}>
           Forward
-        </button>
+        </Button>
         {isBookmarked ? (
-          <button onClick={deleteEntry} disabled={!selectedEntry}>
+          <Button onClick={deleteEntry} disabled={!selectedEntry}>
             Remove&nbsp;Bookmark
-          </button>
+          </Button>
         ) : (
-          <button onClick={bookmark} disabled={!selectedEntry}>
+          <Button onClick={bookmark} disabled={!selectedEntry}>
             Add&nbsp;Bookmark
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -65,7 +65,6 @@ export const SelectedEntryPreview = (): JSX.Element => {
         <div className={styles.SelectedEntryBookmarkRow}>
           <h5>No Entry Selected</h5>
           {renderButtonRow()}
-          <Button></Button>
         </div>
       </div>
     );
