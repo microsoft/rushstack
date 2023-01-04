@@ -261,6 +261,7 @@ export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;
+    preWriteContentCallback?: (content: string) => string;
     showDiagnostics?: boolean;
     showVerboseMessages?: boolean;
     typescriptCompilerFolder?: string;
