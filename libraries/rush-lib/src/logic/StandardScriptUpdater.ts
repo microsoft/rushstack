@@ -7,6 +7,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import {
   installRunRushScriptFilename,
   installRunRushxScriptFilename,
+  installRunRushPnpmScriptFilename,
   installRunScriptFilename,
   scriptsFolderPath
 } from '../utilities/PathConstants';
@@ -61,6 +62,19 @@ const _scripts: IScriptSpecifier[] = [
       '// An example usage would be:',
       '//',
       `//    node common/scripts/${installRunRushxScriptFilename} custom-command`
+    ]
+  },
+  {
+    scriptName: installRunRushPnpmScriptFilename,
+    headerLines: [
+      '// This script is intended for usage in an automated build environment where the Rush command may not have',
+      '// been preinstalled, or may have an unpredictable version.  This script will automatically install the version of Rush',
+      '// specified in the rush.json configuration file (if not already installed), and then pass a command-line to the',
+      '// rush-pnpm command.',
+      '//',
+      '// An example usage would be:',
+      '//',
+      `//    node common/scripts/${installRunRushPnpmScriptFilename} pnpm-command`
     ]
   }
 ];
