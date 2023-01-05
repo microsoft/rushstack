@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[rush] Create custom git hooks instead of copy",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -449,11 +449,22 @@ export abstract class BaseInstallManager {
         // Clear the currently installed git hooks and install fresh copies
         FileSystem.ensureEmptyFolder(hookDestination);
 
+        // Find the relative path from Git hooks directory to the directory storing the actual scripts.
+        const hookRelativePath: string = path.relative(hookDestination, hookSource);
+
         // Only copy files that look like Git hook names
         const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
         for (const filename of filteredHookFilenames) {
-          // Copy the file.  Important: For Bash scripts, the EOL must not be CRLF.
-          const hookFileContent: string = FileSystem.readFile(path.join(hookSource, filename));
+          const hookFileContent: string = `#!/bin/bash
+SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
+if [[ -f "$SCRIPT_IMPLEMENTATION_PATH" ]]; then
+  exec "$SCRIPT_IMPLEMENTATION_PATH"
+else
+  echo "The ${filename} Git hook does not exist in your version of the repo. Either remove the ${filename} hook file (e.g. '.git/hooks/${filename}') in case this feature is not used anymore in main branch. Otherwise, updating your branch to current mainstream will solve the issue."
+fi
+`;
+          // Create the hook file.  Important: For Bash scripts, the EOL must not be CRLF.
           FileSystem.writeFile(path.join(hookDestination, filename), hookFileContent, {
             convertLineEndings: NewlineKind.Lf
           });
