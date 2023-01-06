@@ -1,9 +1,8 @@
-@import 'office-ui-fabric-core/dist/sass/References';
+@use '../../styles/base';
 
 .SelectedEntryCard {
   margin-top: 12px;
-  box-shadow: $ms-depth-shadow-8;
-  background-color: $ms-color-gray10;
+  @include base.card;
   padding: 12px 24px;
   height: 8%;
   overflow: scroll;

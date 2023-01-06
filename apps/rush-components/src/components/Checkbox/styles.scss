@@ -1,5 +1,4 @@
-@import '@radix-ui/colors/blackA.css';
-@import '@radix-ui/colors/violet.css';
+@use '../../styles/colors';
 
 /* reset */
 button {
@@ -14,17 +13,18 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px var(--blackA7);
+  box-shadow: 0 2px 10px colors.$black;
+  cursor: pointer;
 }
 .CheckboxRoot:hover {
-  background-color: var(--violet3);
+  background-color: colors.$primary-background;
 }
 .CheckboxRoot:focus {
-  box-shadow: 0 0 0 2px black;
+  box-shadow: 0 0 0 2px colors.$primary-active;
 }
 
 .CheckboxIndicator {
-  color: var(--violet11);
+  color: colors.$primary-active;
 }
 
 .Label {

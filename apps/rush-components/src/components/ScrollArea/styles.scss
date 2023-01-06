@@ -1,6 +1,4 @@
-@import '@radix-ui/colors/blackA.css';
-@import '@radix-ui/colors/mauve.css';
-@import '@radix-ui/colors/violet.css';
+@use '../../styles/colors';
 
 .ScrollAreaRoot {
   border-radius: 4px;
@@ -22,11 +20,11 @@
   /* disable browser handling of all panning and zooming gestures on touch devices */
   touch-action: none;
   padding: 2px;
-  background: var(--blackA6);
+  background: colors.$black;
   transition: background 160ms ease-out;
 }
 .ScrollAreaScrollbar:hover {
-  background: var(--blackA8);
+  background: colors.$black;
 }
 .ScrollAreaScrollbar[data-orientation='vertical'] {
   width: var(--scrollbar-size);
@@ -38,7 +36,7 @@
 
 .ScrollAreaThumb {
   flex: 1;
-  background: var(--mauve10);
+  background: colors.$primary-active;
   border-radius: var(--scrollbar-size);
   position: relative;
 }
@@ -56,5 +54,5 @@
 }
 
 .ScrollAreaCorner {
-  background: var(--blackA8);
+  background: colors.$black;
 }

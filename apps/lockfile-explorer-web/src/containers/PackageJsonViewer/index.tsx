@@ -215,9 +215,7 @@ export const PackageJsonViewer = (): JSX.Element => {
         value={selection}
         onChange={cb}
       />
-      <div className={appStyles.ContainerCard}>
-        <div className={styles.FileContents}>{renderFile()}</div>
-      </div>
+      <div className={styles.FileContents}>{renderFile()}</div>
     </div>
   );
 };

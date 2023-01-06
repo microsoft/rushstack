@@ -1,4 +1,7 @@
+@use '../../styles/base';
+
 .PackageJsonWrapper {
+  @include base.card;
   height: 30%;
   margin-top: 12px;
 }
@@ -6,6 +9,7 @@
 .FileContents {
   height: calc(25vh - 35px);
   overflow: scroll;
+  padding: 12px;
 }
 
 @mixin SpecWrapper {
