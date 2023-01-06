@@ -47,14 +47,6 @@ describe(LoadThemedStylesLoader.name, () => {
     }
   });
 
-  it('correctly calls loadStyles in load-themed-styles with a module reference', () => {
-    // TODO: Can we still mock this?
-  });
-
-  it('correctly calls loadStyles in load-themed-styles with a string reference', async () => {
-    // TODO: Can we still mock this?
-  });
-
   it('correctly handles the async option set to "false"', async () => {
     const stats = await getCompiler('./MockStyle1.css', { async: false });
     if (stats !== undefined) {
