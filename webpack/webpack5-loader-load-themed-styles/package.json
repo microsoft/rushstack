@@ -18,9 +18,6 @@
   "peerDependencies": {
     "@microsoft/load-themed-styles": "^2.0.19"
   },
-  "dependencies": {
-    "loader-utils": "3.2.1"
-  },
   "devDependencies": {
     "@microsoft/load-themed-styles": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
