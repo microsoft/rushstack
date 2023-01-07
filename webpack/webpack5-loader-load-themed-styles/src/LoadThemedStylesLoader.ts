@@ -3,7 +3,7 @@
 
 /**
  * This simple loader wraps the loading of CSS in script equivalent to
- *  require("load-themed-styles").loadStyles('... css text ...').
+ *  require("@microsoft/load-themed-styles").loadStyles('... css text ...').
  * @packageDocumentation
  */
 
