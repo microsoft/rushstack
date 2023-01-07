@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/webpack5-loader-load-themed-styles",
       "comment": "Introduce webpack5-loader-load-themed-styles",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/webpack5-loader-load-themed-styles"
