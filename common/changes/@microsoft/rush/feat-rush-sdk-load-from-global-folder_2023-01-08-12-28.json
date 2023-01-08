@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "rush-sdk will try to load from rush global folder before install-run-rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
