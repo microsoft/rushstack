@@ -2016,10 +2016,12 @@ importers:
       '@types/semver': 7.3.5
       '@types/webpack-env': 1.13.0
       tapable: 2.2.1
+      true-case-path: ~2.2.1
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
       '@types/node-fetch': 1.6.9
       tapable: 2.2.1
+      true-case-path: 2.2.1
     devDependencies:
       '@microsoft/rush-lib': link:../rush-lib
       '@rushstack/eslint-config': link:../../eslint/eslint-config
