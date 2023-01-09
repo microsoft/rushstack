@@ -23,6 +23,7 @@ export interface ILoadThemedStylesLoaderOptions {
    */
   async?: boolean;
   loadThemedStylesPath?: string;
+  esModule?: boolean;
 }
 
 /**
@@ -42,19 +43,30 @@ export const pitch: PitchLoaderDefinitionFunction<ILoadThemedStylesLoaderOptions
     throw new Error('The "namedExport" option has been removed.');
   }
 
-  const { async = false, loadThemedStylesPath = defaultThemedStylesPath } = options;
+  const { async = false, loadThemedStylesPath = defaultThemedStylesPath, esModule = false } = options;
   const stringifiedRequest: string = JSON.stringify(
     loaderContext.utils.contextify(loaderContext.context, '!!' + remainingRequest)
   );
 
+  const importCode: [contentImport: string, loaderImport: string] = esModule
+    ? [
+        `import content from ${stringifiedRequest};`,
+        `import { loadStyles } from ${JSON.stringify(loadThemedStylesPath)};`
+      ]
+    : [
+        `var content = require(${stringifiedRequest});`,
+        `var loader = require(${JSON.stringify(loadThemedStylesPath)});`
+      ];
+
   return [
-    `var content = require(${stringifiedRequest});`,
-    `var loader = require(${JSON.stringify(loadThemedStylesPath)});`,
+    ...importCode,
     '',
     'if(typeof content === "string") content = [[module.id, content]];',
     '',
     '// add the styles to the DOM',
-    `for (var i = 0; i < content.length; i++) loader.loadStyles(content[i][1], ${async === true});`,
+    `for (var i = 0; i < content.length; i++) ${
+      esModule ? 'loadStyles' : 'loader.loadStyles'
+    }(content[i][1], ${async === true});`,
     '',
     'if(content.locals) module.exports = content.locals;'
   ].join('\n');

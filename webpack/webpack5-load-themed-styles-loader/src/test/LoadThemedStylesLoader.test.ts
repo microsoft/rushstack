@@ -77,6 +77,15 @@ describe('webpack5-load-themed-style-loader', () => {
     }
   });
 
+  it('generates desired output for esModule option set to "true" as a snapshot', async () => {
+    const stats = await getCompiler('./MockStyle1.css', { esModule: true });
+    if (stats !== undefined) {
+      const content = stats.toJson({ source: true }).modules?.[0].source;
+
+      expect(content).toMatchSnapshot();
+    }
+  });
+
   it('generates desired loader output snapshot', async () => {
     const stats = await getCompiler('./MockStyle1.css');
     if (stats !== undefined) {

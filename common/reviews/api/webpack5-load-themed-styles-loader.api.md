@@ -10,6 +10,8 @@ import type { PitchLoaderDefinitionFunction } from 'webpack';
 export interface ILoadThemedStylesLoaderOptions {
     async?: boolean;
     // (undocumented)
+    esModule?: boolean;
+    // (undocumented)
     loadThemedStylesPath?: string;
 }
 
