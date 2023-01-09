@@ -7,7 +7,7 @@
 ## Overview
 
 This simple Webpack loader that wraps the loading of CSS in script equivalent
-to `require("load-themed-styles").loadStyles( /* css text */ )`.
+to `require("@microsoft/load-themed-styles").loadStyles( /* css text */ )`.
 It is designed to be a replacement for style-loader.
 
 ## Usage
