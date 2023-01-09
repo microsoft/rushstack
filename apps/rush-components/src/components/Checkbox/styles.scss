@@ -13,14 +13,11 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px colors.$black;
+  border: 1px solid colors.$black;
   cursor: pointer;
 }
 .CheckboxRoot:hover {
   background-color: colors.$primary-background;
-}
-.CheckboxRoot:focus {
-  box-shadow: 0 0 0 2px colors.$primary-active;
 }
 
 .CheckboxIndicator {

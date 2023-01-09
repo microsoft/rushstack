@@ -1,7 +1,7 @@
 @use './styles/base';
 
 .ContainerCard {
-  padding: 24px;
+  padding: 12px;
   @include base.card;
 }
 

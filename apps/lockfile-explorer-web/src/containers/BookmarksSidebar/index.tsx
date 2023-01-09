@@ -7,7 +7,7 @@ import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { LockfileEntry } from '../../parsing/LockfileEntry';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
-import { Button } from '@rushstack/components';
+import { Button, ScrollArea } from '@rushstack/components';
 
 export const BookmarksSidebar = (): JSX.Element => {
   const bookmarks = useAppSelector((state) => state.entry.bookmarkedEntries);
@@ -28,14 +28,16 @@ export const BookmarksSidebar = (): JSX.Element => {
 
   return (
     <div className={`${appStyles.ContainerCard} ${styles.BookmarksWrapper}`}>
-      <h5>Bookmarks</h5>
-      <hr />
-      {bookmarks.map((bookmarkedEntry) => (
-        <div key={bookmarkedEntry.rawEntryId} className={styles.BookmarkEntry}>
-          <p onClick={clear(bookmarkedEntry)}>{bookmarkedEntry.displayText}</p>
-          <Button onClick={deleteEntry(bookmarkedEntry)}>Remove</Button>
-        </div>
-      ))}
+      <ScrollArea>
+        <h5>Bookmarks</h5>
+        <hr />
+        {bookmarks.map((bookmarkedEntry) => (
+          <div key={bookmarkedEntry.rawEntryId} className={styles.BookmarkEntry}>
+            <p onClick={clear(bookmarkedEntry)}>{bookmarkedEntry.displayText}</p>
+            <Button onClick={deleteEntry(bookmarkedEntry)}>Remove</Button>
+          </div>
+        ))}
+      </ScrollArea>
     </div>
   );
 };

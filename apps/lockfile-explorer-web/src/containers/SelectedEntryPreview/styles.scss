@@ -3,9 +3,8 @@
 .SelectedEntryCard {
   margin-top: 12px;
   @include base.card;
-  padding: 12px 24px;
+  padding: 12px;
   height: 8%;
-  overflow: scroll;
   p {
     font-size: 12px;
   }

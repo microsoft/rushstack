@@ -12,7 +12,7 @@ import { compareSpec } from '../../parsing/compareSpec';
 import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
-import { Tabs } from '@rushstack/components';
+import { ScrollArea, Tabs } from '@rushstack/components';
 
 enum PackageView {
   PACKAGE_JSON,
@@ -215,7 +215,10 @@ export const PackageJsonViewer = (): JSX.Element => {
         value={selection}
         onChange={cb}
       />
-      <div className={styles.FileContents}>{renderFile()}</div>
+
+      <div className={styles.FileContents}>
+        <ScrollArea>{renderFile()}</ScrollArea>
+      </div>
     </div>
   );
 };

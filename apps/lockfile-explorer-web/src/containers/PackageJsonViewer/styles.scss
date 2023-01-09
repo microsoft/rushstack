@@ -7,9 +7,9 @@
 }
 
 .FileContents {
-  height: calc(25vh - 35px);
-  overflow: scroll;
-  padding: 12px;
+  height: calc(100% - 46px);
+  padding: 0 12px;
+  overflow: hidden;
 }
 
 @mixin SpecWrapper {

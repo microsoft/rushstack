@@ -7,9 +7,9 @@ type ButtonProps = {
   onClick: () => void;
 };
 
-export const Button = ({ children, disabled = false }: ButtonProps) => {
+export const Button = ({ children, disabled = false, onClick }: ButtonProps) => {
   return (
-    <button disabled={disabled} className={styles.ButtonWrapper}>
+    <button disabled={disabled} className={styles.ButtonWrapper} onClick={onClick}>
       {children}
     </button>
   );

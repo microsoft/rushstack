@@ -12,6 +12,7 @@
   flex-direction: column;
   min-height: calc(100% - 35px);
   max-height: calc(100% - 35px);
+  height: calc(100% - 35px);
   & > * + * {
     margin-top: 12px;
   }

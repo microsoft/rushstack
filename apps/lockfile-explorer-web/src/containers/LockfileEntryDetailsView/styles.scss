@@ -6,7 +6,7 @@
   height: 30%;
   padding-top: 12px;
   & > * {
-    width: calc(50% - 48px - 12px);
+    width: calc(50% - 24px - 12px);
   }
   h5 {
     margin: 0;
@@ -15,8 +15,7 @@
 
 .DependencyListWrapper {
   margin-top: 8px;
-  height: calc(25vh - 24px);
-  overflow: scroll;
+  height: calc(100% - 24px);
 }
 
 .DependencyItem {
@@ -41,13 +40,11 @@
 .InfluencerList {
   margin-top: 12px;
   height: 10%;
-  overflow: scroll;
 }
 
 .DependencyDetails {
   margin-top: 12px;
   height: 4%;
-  overflow: scroll;
 }
 
 .InfluencerEntry {
