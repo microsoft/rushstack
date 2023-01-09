@@ -15,7 +15,7 @@ export interface MergedClassAndInterface {
     // (undocumented)
     anotherProp: boolean;
     // (undocumented)
-    someMethod(x: string | boolean): void;
+    someMethod(x: boolean | string): void;
 }
 
 // @public (undocumented)

@@ -19,7 +19,7 @@ export interface IDefaultLocaleOptions {
 // @public (undocumented)
 export interface ILocaleData {
     // (undocumented)
-    [locFilePath: string]: string | ILocaleFileData;
+    [locFilePath: string]: ILocaleFileData | string;
 }
 
 // @public (undocumented)
@@ -80,7 +80,7 @@ export interface ILocalizationStatsOptions {
 export interface ILocalizedData {
     defaultLocale: IDefaultLocaleOptions;
     ignoreMissingResxComments?: boolean;
-    normalizeResxNewlines?: 'lf' | 'crlf';
+    normalizeResxNewlines?: 'crlf' | 'lf';
     passthroughLocale?: IPassthroughLocaleOptions;
     pseudolocales?: IPseudolocalesOptions;
     resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
@@ -116,7 +116,7 @@ export interface IPseudolocalesOptions {
 // @public (undocumented)
 export interface IResolvedMissingTranslations {
     // (undocumented)
-    [localeName: string]: string | ILocaleFileData;
+    [localeName: string]: ILocaleFileData | string;
 }
 
 // @internal (undocumented)

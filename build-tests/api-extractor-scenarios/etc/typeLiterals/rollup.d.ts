@@ -6,10 +6,10 @@ export declare class ClassWithTypeLiterals {
         y: number;
     }): void;
     /** type literal output  */
-    method2(): {
+    method2(): undefined | {
         classValue: ClassWithTypeLiterals;
         callback: () => number;
-    } | undefined;
+    };
 }
 
 export { }

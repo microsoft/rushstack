@@ -49,7 +49,7 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> e
     // (undocumented)
     getAdditionalOutputFiles?: (relativePath: string) => string[];
     // (undocumented)
-    parseAndGenerateTypings: (fileContents: string, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
+    parseAndGenerateTypings: (fileContents: string, filePath: string, relativePath: string) => Promise<TTypingsResult> | TTypingsResult;
 }
 
 // @public

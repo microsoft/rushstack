@@ -69,7 +69,7 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 }
 
 // @beta (undocumented)
-export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
+export type CustomActionParameterType = ReadonlyArray<string> | boolean | number | string | undefined;
 
 // @beta
 export class HeftCommandLine {
@@ -134,7 +134,7 @@ export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuil
 // @public (undocumented)
 export interface IBuildStageProperties {
     // @beta (undocumented)
-    emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
+    emitExtensionForTests?: '.cjs' | '.js' | '.mjs';
     // @beta (undocumented)
     emitFolderNameForTests?: string;
     // @beta (undocumented)
@@ -201,7 +201,7 @@ export interface ICustomActionOptions<TParameters> {
     // (undocumented)
     actionName: string;
     // (undocumented)
-    callback: (parameters: TParameters) => void | Promise<void>;
+    callback: (parameters: TParameters) => Promise<void> | void;
     // (undocumented)
     documentation: string;
     // (undocumented)

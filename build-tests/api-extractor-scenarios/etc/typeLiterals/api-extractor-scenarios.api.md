@@ -10,10 +10,10 @@ export class ClassWithTypeLiterals {
         x: number;
         y: number;
     }): void;
-    method2(): {
+    method2(): undefined | {
         classValue: ClassWithTypeLiterals;
         callback: () => number;
-    } | undefined;
+    };
 }
 
 // (No @packageDocumentation comment for this package)

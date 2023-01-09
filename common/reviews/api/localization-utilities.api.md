@@ -103,7 +103,7 @@ export function parseResJson({ content, ignoreString, filePath }: IParseFileOpti
 export function parseResx(options: IParseResxOptions): ILocalizationFile;
 
 // @public (undocumented)
-export type ParserKind = 'resx' | 'loc.json' | 'resjson';
+export type ParserKind = 'loc.json' | 'resjson' | 'resx';
 
 // @public
 export class TypingsGenerator extends StringValuesTypingsGenerator {
