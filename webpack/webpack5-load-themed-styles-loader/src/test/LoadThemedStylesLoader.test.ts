@@ -82,7 +82,7 @@ describe('webpack5-load-themed-style-loader', () => {
     if (stats !== undefined) {
       const content = stats.toJson({ source: true }).modules?.[0].source;
 
-      expect(content).toMatchSnapshot();
+      expect(content).toMatchSnapshot('LoaderContent ESModule');
     }
   });
 
@@ -91,7 +91,7 @@ describe('webpack5-load-themed-style-loader', () => {
     if (stats !== undefined) {
       const content = stats.toJson({ source: true }).modules?.[0].source;
 
-      expect(content).toMatchSnapshot();
+      expect(content).toMatchSnapshot('LoaderContent');
     }
   });
 });
