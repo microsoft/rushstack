@@ -1,8 +1,8 @@
-# @microsoft/webpack5-loader-load-themed-styles
+# @microsoft/webpack5-load-themed-styles-loader
 
 ## Installation
 
-`npm install @microsoft/webpack5-loader-load-themed-styles --save-dev`
+`npm install @microsoft/webpack5-load-themed-styles-loader --save-dev`
 
 ## Overview
 
@@ -17,7 +17,7 @@ It is designed to be a replacement for style-loader.
 This loader is designed to be used in conjunction with css-loader.
 
 ``` javascript
-var css = require("@microsoft/webpack5-loader-load-themed-styles!css!./file.css");
+var css = require("@microsoft/webpack5-load-themed-styles-loader!css!./file.css");
 // => returns css code from file.css, uses load-themed-styles to load the CSS on the page.
 ```
 
@@ -26,7 +26,7 @@ var css = require("@microsoft/webpack5-loader-load-themed-styles!css!./file.css"
 ``` javascript
         use: [
           {
-            loader: "@microsoft/webpack5-loader-load-themed-styles",  // creates style nodes from JS strings
+            loader: "@microsoft/webpack5-load-themed-styles-loader",  // creates style nodes from JS strings
             options: {
               async: false
             }
@@ -73,4 +73,4 @@ changes to the DOM.
   https://github.com/microsoft/rushstack/blob/main/webpack/webpack5-loader-load-themed-styles/CHANGELOG.md) - Find
   out what's new in the latest version
 
-`@microsoft/webpack5-loader-load-themed-styles` is part of the [Rush Stack](https://rushstack.io/) family of projects.
+`@microsoft/webpack5-load-themed-styles-loader` is part of the [Rush Stack](https://rushstack.io/) family of projects.

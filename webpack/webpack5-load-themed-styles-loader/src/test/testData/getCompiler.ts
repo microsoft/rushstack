@@ -2,7 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 import type { Compiler, Stats } from 'webpack';
 import { createFsFromVolume, Volume } from 'memfs';
-import { ILoadThemedStylesLoaderOptions } from '../../LoadThemedStylesLoader';
+import { ILoadThemedStylesLoaderOptions } from '../..';
 
 // webpack5-loader-load-themed-styles/src/LoadThemedStylesLoader.ts
 const LOADER_PATH: string = path.resolve(__dirname, '../../index.ts');

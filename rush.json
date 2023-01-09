@@ -1029,8 +1029,8 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/webpack5-loader-load-themed-styles",
-      "projectFolder": "webpack/webpack5-loader-load-themed-styles",
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+      "projectFolder": "webpack/webpack5-load-themed-styles-loader",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

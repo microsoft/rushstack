@@ -1,24 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LoadThemedStylesLoader } from '../LoadThemedStylesLoader';
+import * as loader from '..';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
 import getCompiler from './testData/getCompiler';
 
 const MATCH_GENERATED_LOADER_STRING_REGEXP: RegExp = /var\sloader\s\=\srequire\(["'](.+?)["']\)/;
 const MATCH_LOADER_DOT_LOADSTYLES_FUNCTION_ASYNC_VALUE_REGEXP: RegExp = /loader\.loadStyles\(.+?,\s(.+?)\)/;
 
-describe(LoadThemedStylesLoader.name, () => {
+describe('webpack5-load-themed-style-loader', () => {
   beforeEach(() => {
     LoadThemedStylesMock.loadedData = [];
     LoadThemedStylesMock.calledWithAsync = [];
   });
 
   it('follows the Webpack loader interface', () => {
-    expect(LoadThemedStylesLoader).toBeDefined();
-    expect(LoadThemedStylesLoader.pitch).toBeDefined();
-
-    expect(() => new LoadThemedStylesLoader()).toThrow();
+    expect(loader.pitch).toBeDefined();
   });
 
   it('it inserts the resolved load-themed-styles path', async () => {
@@ -37,7 +34,7 @@ describe(LoadThemedStylesLoader.name, () => {
     // It would error when I attempt to use the .ts mock in src/test/testData
     // beacuse I'm not setting up default support for webpack to load .ts files.
     const expectedPath: string = '../../../lib/test/testData/LoadThemedStylesMock';
-    const stats = await getCompiler('./MockStyle1.css', { loadedThemedStylesPath: expectedPath });
+    const stats = await getCompiler('./MockStyle1.css', { loadThemedStylesPath: expectedPath });
     if (stats !== undefined) {
       const content = stats.toJson({ source: true }).modules?.[0].source;
       const match = MATCH_GENERATED_LOADER_STRING_REGEXP.exec(content as string);
@@ -77,6 +74,15 @@ describe(LoadThemedStylesLoader.name, () => {
       const asyncValue = match?.[1];
 
       expect(asyncValue).toEqual('true');
+    }
+  });
+
+  it('generates desired loader output snapshot', async () => {
+    const stats = await getCompiler('./MockStyle1.css');
+    if (stats !== undefined) {
+      const content = stats.toJson({ source: true }).modules?.[0].source;
+
+      expect(content).toMatchSnapshot();
     }
   });
 });
