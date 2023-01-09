@@ -170,4 +170,39 @@ export class DtsEmitHelpers {
       }
     }
   }
+
+  public static modifySpanChildrenWithSort(span: Span): void {
+    span.modification.sortChildren = true;
+
+    let startIndex: number = 0;
+
+    if (span.children[0]?.kind === ts.SyntaxKind.BarToken) {
+      startIndex = 1;
+    }
+
+    for (let sortingIndex: number = 0; sortingIndex < span.children.length; sortingIndex++) {
+      const childToBeSorted: Span = span.children[sortingIndex];
+
+      if (childToBeSorted.kind === ts.SyntaxKind.BarToken) {
+        childToBeSorted.modification.sortKey = sortingIndex;
+        continue;
+      }
+
+      childToBeSorted.modification.sortKey = childToBeSorted.modification.sortKey || startIndex;
+
+      for (let compareIndex: number = sortingIndex + 1; compareIndex < span.children.length; compareIndex++) {
+        const childToBeCompared: Span = span.children[compareIndex];
+
+        if (childToBeSorted.getText() > childToBeCompared.getText()) {
+          childToBeSorted.modification.sortKey =
+            ((childToBeSorted.modification.sortKey as number) || startIndex) + 1;
+        } else {
+          childToBeCompared.modification.sortKey =
+            ((childToBeCompared.modification.sortKey as number) || startIndex) + 1;
+        }
+      }
+
+      childToBeSorted.modification.sortKey = (childToBeSorted.modification.sortKey as number) * 2;
+    }
+  }
 }

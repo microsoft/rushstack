@@ -268,6 +268,10 @@ export class ApiReportGenerator {
     let recurseChildren: boolean = true;
     let sortChildren: boolean = false;
 
+    if (span?.parent?.kind === ts.SyntaxKind.UnionType) {
+      DtsEmitHelpers.modifySpanChildrenWithSort(span);
+    }
+
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
         span.modification.skipAll();
