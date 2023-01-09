@@ -6,7 +6,7 @@ export declare class Item {
 /** @public */
 declare interface Options {
     name: string;
-    color: 'red' | 'blue';
+    color: 'blue' | 'red';
     subOptions: SubOptions;
 }
 

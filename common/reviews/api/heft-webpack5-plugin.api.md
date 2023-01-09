@@ -17,12 +17,12 @@ export default _default;
 // @public (undocumented)
 export interface IWebpackBuildStageProperties extends IBuildStageProperties {
     // (undocumented)
-    webpackStats?: webpack.Stats | webpack.MultiStats;
+    webpackStats?: webpack.MultiStats | webpack.Stats;
 }
 
 // @public (undocumented)
 export interface IWebpackBundleSubstageProperties extends IBundleSubstageProperties {
-    webpackConfiguration?: webpack.Configuration | webpack.Configuration[] | null;
+    webpackConfiguration?: null | webpack.Configuration | webpack.Configuration[];
 }
 
 // @public (undocumented)

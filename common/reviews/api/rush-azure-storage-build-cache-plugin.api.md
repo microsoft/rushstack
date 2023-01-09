@@ -29,7 +29,7 @@ export abstract class AzureAuthenticationBase {
     // (undocumented)
     protected abstract _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
     // (undocumented)
-    tryGetCachedCredentialAsync(options?: ITryGetCachedCredentialOptionsThrow | ITryGetCachedCredentialOptionsIgnore): Promise<ICredentialCacheEntry | undefined>;
+    tryGetCachedCredentialAsync(options?: ITryGetCachedCredentialOptionsIgnore | ITryGetCachedCredentialOptionsThrow): Promise<ICredentialCacheEntry | undefined>;
     // (undocumented)
     tryGetCachedCredentialAsync(options: ITryGetCachedCredentialOptionsLogWarning): Promise<ICredentialCacheEntry | undefined>;
     // (undocumented)
@@ -64,7 +64,7 @@ export class AzureStorageAuthentication extends AzureAuthenticationBase {
 }
 
 // @public (undocumented)
-export type ExpiredCredentialBehavior = 'logWarning' | 'throwError' | 'ignore';
+export type ExpiredCredentialBehavior = 'ignore' | 'logWarning' | 'throwError';
 
 // @public (undocumented)
 export interface IAzureAuthenticationBaseOptions {

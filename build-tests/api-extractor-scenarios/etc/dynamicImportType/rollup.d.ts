@@ -19,7 +19,7 @@ export { Lib2Interface }
 
 declare interface Options {
     name: string;
-    color: 'red' | 'blue';
+    color: 'blue' | 'red';
 }
 
 export { }

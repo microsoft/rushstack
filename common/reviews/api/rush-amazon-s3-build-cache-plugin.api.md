@@ -18,9 +18,9 @@ export class AmazonS3Client {
     // (undocumented)
     getObjectAsync(objectName: string): Promise<Buffer | undefined>;
     // (undocumented)
-    _getSha256Hmac(key: string | Buffer, data: string): Buffer;
+    _getSha256Hmac(key: Buffer | string, data: string): Buffer;
     // (undocumented)
-    _getSha256Hmac(key: string | Buffer, data: string, encoding: 'hex'): string;
+    _getSha256Hmac(key: Buffer | string, data: string, encoding: 'hex'): string;
     // (undocumented)
     static tryDeserializeCredentials(credentialString: string | undefined): IAmazonS3Credentials | undefined;
     // (undocumented)

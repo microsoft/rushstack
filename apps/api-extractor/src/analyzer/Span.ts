@@ -77,7 +77,7 @@ export class SpanModification {
   /**
    * Used if the parent span has Span.sortChildren=true.
    */
-  public sortKey: string | undefined;
+  public sortKey: number | string | undefined;
 
   /**
    * Optionally configures getModifiedText() to search for a "/*" doc comment and indent it.

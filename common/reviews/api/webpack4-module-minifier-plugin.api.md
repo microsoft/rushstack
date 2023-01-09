@@ -42,7 +42,7 @@ export interface _IAcornComment {
     // (undocumented)
     start: number;
     // (undocumented)
-    type: 'Line' | 'Block';
+    type: 'Block' | 'Line';
     // (undocumented)
     value: string;
 }
@@ -52,7 +52,7 @@ export interface IAssetInfo {
     chunk: webpack.compilation.Chunk;
     externalNames: Map<string, string>;
     fileName: string;
-    modules: (string | number)[];
+    modules: (number | string)[];
     source: Source;
 }
 
@@ -69,7 +69,7 @@ export interface IDehydratedAssets {
 export interface IExtendedModule extends webpack.compilation.Module {
     external?: boolean;
     hasDependencies(callback: (dep: webpack.compilation.Dependency) => boolean | void): boolean;
-    id: string | number | null;
+    id: null | number | string;
     identifier(): string;
     modules?: IExtendedModule[];
     readableIdentifier(requestShortener: unknown): string;
@@ -87,7 +87,7 @@ export interface IModuleInfo {
 }
 
 // @public
-export type IModuleMap = Map<string | number, IModuleInfo>;
+export type IModuleMap = Map<number | string, IModuleInfo>;
 
 export { IModuleMinificationCallback }
 
@@ -105,7 +105,7 @@ export { IModuleMinifierFunction }
 
 // @public
 export interface IModuleMinifierPluginHooks {
-    finalModuleId: SyncWaterfallHook<string | number | undefined, webpack.compilation.Compilation>;
+    finalModuleId: SyncWaterfallHook<number | string | undefined, webpack.compilation.Compilation>;
     postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, IPostProcessFragmentContext>;
     rehydrateAssets: AsyncSeriesWaterfallHook<IDehydratedAssets, webpack.compilation.Compilation>;
 }
@@ -135,7 +135,7 @@ export interface _INormalModuleFactoryModuleData {
 export interface IPostProcessFragmentContext {
     compilation: webpack.compilation.Compilation;
     loggingName: string;
-    module: webpack.compilation.Module | undefined;
+    module: undefined | webpack.compilation.Module;
 }
 
 // @internal

@@ -253,6 +253,11 @@ export class DtsRollupGenerator {
     const previousSpan: Span | undefined = span.previousSibling;
 
     let recurseChildren: boolean = true;
+
+    if (span?.parent?.kind === ts.SyntaxKind.UnionType) {
+      DtsEmitHelpers.modifySpanChildrenWithSort(span);
+    }
+
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
         // If the @packageDocumentation comment seems to be attached to one of the regular API items,

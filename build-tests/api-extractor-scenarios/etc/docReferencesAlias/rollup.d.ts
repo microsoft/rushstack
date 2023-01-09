@@ -6,7 +6,7 @@ export declare class Item {
 /** @public */
 export declare interface renamed_Options {
     name: string;
-    color: 'red' | 'blue';
+    color: 'blue' | 'red';
 }
 
 export { }
