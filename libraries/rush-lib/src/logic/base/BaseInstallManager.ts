@@ -16,7 +16,8 @@ import {
   FileSystemStats,
   ConsoleTerminalProvider,
   Terminal,
-  ITerminalProvider
+  ITerminalProvider,
+  Path
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -450,7 +451,7 @@ export abstract class BaseInstallManager {
         FileSystem.ensureEmptyFolder(hookDestination);
 
         // Find the relative path from Git hooks directory to the directory storing the actual scripts.
-        const hookRelativePath: string = path.relative(hookDestination, hookSource);
+        const hookRelativePath: string = Path.convertToSlashes(path.relative(hookDestination, hookSource));
 
         // Only copy files that look like Git hook names
         const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
