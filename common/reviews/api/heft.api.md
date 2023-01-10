@@ -17,7 +17,6 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
-import { SyncHook } from 'tapable';
 
 // @beta
 export class CancellationToken {
@@ -285,7 +284,7 @@ export interface IRunScriptOptions {
 export interface IScopedLogger {
     emitError(error: Error): void;
     emitWarning(warning: Error): void;
-    // (undocumented)
+    readonly loggerName: string;
     readonly terminal: ITerminal;
 }
 
@@ -295,59 +294,6 @@ export class _MetricsCollector {
     // (undocumented)
     readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     setStartTime(): void;
-}
-
-// @public
-export class MetricsCollectorHooks {
-    flush: AsyncParallelHook;
-    flushAndTeardown: AsyncParallelHook;
-    recordMetric: SyncHook<string, IMetricsData>;
-}
-
-// @beta (undocumented)
-export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
-
-// @beta (undocumented)
-export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;
-
-// @public (undocumented)
-export class ScopedLogger implements IScopedLogger {
-    // Warning: (ae-forgotten-export) The symbol "IScopedLoggerOptions" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    constructor(options: IScopedLoggerOptions);
-    emitError(error: Error): void;
-    emitWarning(warning: Error): void;
-    // (undocumented)
-    get errors(): ReadonlyArray<Error>;
-    // (undocumented)
-    readonly loggerName: string;
-    // @internal (undocumented)
-    readonly _requestingPlugin: IHeftPlugin;
-    // (undocumented)
-    readonly terminal: ITerminal;
-    // (undocumented)
-    readonly terminalProvider: ITerminalProvider;
-    // (undocumented)
-    get warnings(): ReadonlyArray<Error>;
-}
-
-// @public (undocumented)
-export abstract class StageHooksBase<TStageProperties extends object> {
-    // (undocumented)
-    readonly afterLoadStageConfiguration: AsyncSeriesHook;
-    // (undocumented)
-    readonly loadStageConfiguration: AsyncSeriesHook;
-    // @beta
-    readonly overrideStage: AsyncSeriesBailHook<TStageProperties>;
-}
-
-// @public (undocumented)
-export class TestStageHooks extends StageHooksBase<ITestStageProperties> {
-    // (undocumented)
-    readonly configureTest: AsyncSeriesHook;
-    // (undocumented)
-    readonly run: AsyncParallelHook;
 }
 
 // (No @packageDocumentation comment for this package)

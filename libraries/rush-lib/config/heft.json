@@ -39,6 +39,18 @@
           }
         }
       }
+    },
+
+    "test": {
+      "tasksByName": {
+        "jest": {
+          "taskPlugin": {
+            "options": {
+              "folderNameForTests": "lib-commonjs"
+            }
+          }
+        }
+      }
     }
   }
 }
