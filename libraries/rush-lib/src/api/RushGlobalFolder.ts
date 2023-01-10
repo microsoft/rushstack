@@ -11,9 +11,6 @@ import { EnvironmentConfiguration } from './EnvironmentConfiguration';
  * @internal
  */
 export class RushGlobalFolder {
-  private _rushGlobalFolder: string;
-  private _rushNodeSpecificUserFolder: string;
-
   /**
    * The global folder where Rush stores temporary files.
    *
@@ -31,17 +28,13 @@ export class RushGlobalFolder {
    *
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
-  public get path(): string {
-    return this._rushGlobalFolder;
-  }
+  public readonly path: string;
 
   /**
    * The absolute path to Rush's storage in the home directory for the current user and node version.
    * On Windows, it would be something like `C:\Users\YourName\.rush\node-v3.4.5`.
    */
-  public get nodeSpecificPath(): string {
-    return this._rushNodeSpecificUserFolder;
-  }
+  public readonly nodeSpecificPath: string;
 
   public constructor() {
     // Because RushGlobalFolder is used by the front-end VersionSelector before EnvironmentConfiguration
@@ -49,14 +42,14 @@ export class RushGlobalFolder {
     const rushGlobalFolderOverride: string | undefined =
       EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
     if (rushGlobalFolderOverride !== undefined) {
-      this._rushGlobalFolder = rushGlobalFolderOverride;
+      this.path = rushGlobalFolderOverride;
     } else {
-      this._rushGlobalFolder = path.join(Utilities.getHomeFolder(), '.rush');
+      this.path = path.join(Utilities.getHomeFolder(), '.rush');
     }
 
     const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)
       ? process.version
       : 'unknown-version';
-    this._rushNodeSpecificUserFolder = path.join(this._rushGlobalFolder, `node-${normalizedNodeVersion}`);
+    this.nodeSpecificPath = path.join(this.path, `node-${normalizedNodeVersion}`);
   }
 }

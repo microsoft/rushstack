@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
@@ -52,7 +51,7 @@ export class PurgeAction extends BaseRushAction {
     purgeManager.deleteAll();
 
     console.log(
-      os.EOL +
+      '\n' +
         colors.green(
           `Rush purge started successfully and will complete asynchronously. (${stopwatch.toString()})`
         )

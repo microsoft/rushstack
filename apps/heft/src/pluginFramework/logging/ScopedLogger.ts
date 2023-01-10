@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal, ITerminalProvider } from '@rushstack/node-core-library';
+import { type ITerminal, Terminal, ITerminalProvider } from '@rushstack/node-core-library';
 
 import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { LoggingManager } from './LoggingManager';
@@ -21,7 +21,7 @@ export interface IScopedLogger {
   /**
    * The terminal used to write messages to the console.
    */
-  readonly terminal: Terminal;
+  readonly terminal: ITerminal;
 
   /**
    * Call this function to emit an error to the heft runtime.
@@ -63,7 +63,7 @@ export class ScopedLogger implements IScopedLogger {
 
   public readonly terminalProvider: ITerminalProvider;
 
-  public readonly terminal: Terminal;
+  public readonly terminal: ITerminal;
 
   /**
    * @internal

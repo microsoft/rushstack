@@ -132,7 +132,7 @@ export abstract class BaseShrinkwrapFile {
    **/
   public abstract getProjectShrinkwrap(
     project: RushConfigurationProject
-  ): BaseProjectShrinkwrapFile | undefined;
+  ): BaseProjectShrinkwrapFile<BaseShrinkwrapFile> | undefined;
 
   /**
    * Returns whether or not the workspace specified by the shrinkwrap matches the state of
@@ -143,7 +143,10 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public abstract isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean;
+  public abstract isWorkspaceProjectModifiedAsync(
+    project: RushConfigurationProject,
+    variant?: string
+  ): Promise<boolean>;
 
   /** @virtual */
   protected abstract serialize(): string;

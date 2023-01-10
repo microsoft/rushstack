@@ -2,6 +2,21 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.53.3",
+      "tag": "@rushstack/node-core-library_v3.53.3",
+      "date": "Fri, 09 Dec 2022 16:18:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve performance of `Import.resolvePackage`."
+          },
+          {
+            "comment": "Improve the error message emitted when a path inside a package is passed to `Import.resolvePackage`."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.53.2",
       "tag": "@rushstack/node-core-library_v3.53.2",
       "date": "Thu, 13 Oct 2022 00:20:15 GMT",

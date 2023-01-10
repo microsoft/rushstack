@@ -17,14 +17,24 @@
             "options": {
               "copyOperations": [
                 {
-                  "sourcePath": "lib/cli/test/rush-mock-flush-telemetry-plugin",
+                  "sourcePath": "lib-commonjs/cli/test/rush-mock-flush-telemetry-plugin",
                   "destinationFolders": [
-                    "lib/cli/test/tapFlushTelemetryAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-flush-telemetry-plugin"
+                    "lib-commonjs/cli/test/tapFlushTelemetryAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-flush-telemetry-plugin"
                   ],
                   "fileExtensions": [".json", ".js", ".map"],
                   "hardlink": true
                 }
               ]
+            }
+          }
+        },
+
+        "copy-empty-modules": {
+          "taskDependencies": ["typescript"],
+          "taskEvent": {
+            "eventKind": "runScript",
+            "options": {
+              "scriptPath": "./scripts/copyEmptyModules.js"
             }
           }
         }

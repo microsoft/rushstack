@@ -33,6 +33,11 @@ export class LastLinkFlag extends LastInstallFlag {
     throw new InternalError('Not implemented');
   }
 
+  /**
+   * Returns the name of the flag file
+   *
+   * @override
+   */
   protected get flagName(): string {
     return LAST_LINK_FLAG_FILE_NAME;
   }

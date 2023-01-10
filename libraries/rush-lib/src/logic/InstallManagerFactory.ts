@@ -1,26 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import } from '@rushstack/node-core-library';
 import { WorkspaceInstallManager } from './installManager/WorkspaceInstallManager';
 import { PurgeManager } from './PurgeManager';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 
-import type { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
-
-const rushInstallManagerModule: typeof import('./installManager/RushInstallManager') = Import.lazy(
-  './installManager/RushInstallManager',
-  require
-);
+import type { BaseInstallManager } from './base/BaseInstallManager';
+import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes';
 
 export class InstallManagerFactory {
-  public static getInstallManager(
+  public static async getInstallManagerAsync(
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder,
     purgeManager: PurgeManager,
     options: IInstallManagerOptions
-  ): BaseInstallManager {
+  ): Promise<BaseInstallManager> {
     if (
       rushConfiguration.packageManager === 'pnpm' &&
       rushConfiguration.pnpmOptions &&
@@ -29,6 +24,10 @@ export class InstallManagerFactory {
       return new WorkspaceInstallManager(rushConfiguration, rushGlobalFolder, purgeManager, options);
     }
 
+    const rushInstallManagerModule: typeof import('./installManager/RushInstallManager') = await import(
+      /* webpackChunkName: 'RushInstallManager' */
+      './installManager/RushInstallManager'
+    );
     return new rushInstallManagerModule.RushInstallManager(
       rushConfiguration,
       rushGlobalFolder,

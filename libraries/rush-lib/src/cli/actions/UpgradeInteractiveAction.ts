@@ -46,8 +46,8 @@ export class UpgradeInteractiveAction extends BaseRushAction {
 
   public async runAsync(): Promise<void> {
     const [{ PackageJsonUpdater }, { InteractiveUpgrader }] = await Promise.all([
-      import('../../logic/PackageJsonUpdater'),
-      import('../../logic/InteractiveUpgrader')
+      import(/* webpackChunkName: 'PackageJsonUpdater' */ '../../logic/PackageJsonUpdater'),
+      import(/* webpackChunkName: 'InteractiveUpgrader' */ '../../logic/InteractiveUpgrader')
     ]);
 
     const packageJsonUpdater: PackageJsonUpdaterType.PackageJsonUpdater = new PackageJsonUpdater(

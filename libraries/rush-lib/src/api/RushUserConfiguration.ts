@@ -6,6 +6,7 @@ import * as path from 'path';
 
 import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
+import schemaJson from '../schemas/rush-user-settings.schema.json';
 
 interface IRushUserSettingsJson {
   buildCacheFolder?: string;
@@ -17,9 +18,7 @@ interface IRushUserSettingsJson {
  * @beta
  */
 export class RushUserConfiguration {
-  private static _schema: JsonSchema = JsonSchema.fromFile(
-    path.resolve(__dirname, '..', 'schemas', 'rush-user-settings.schema.json')
-  );
+  private static _schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   /**
    * If provided, store build cache in the specified folder. Must be an absolute path.

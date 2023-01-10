@@ -2,7 +2,7 @@
 
 <div>
   <br />
-  <a href="https://rushstack.io/">
+  <a href="https://lfx.rushstack.io/">
     <img width="380" alt="Rush Lockfile Explorer" src="https://rushstack.io/images/lockfile-explorer.svg">
   </a>
   <p />
@@ -10,8 +10,8 @@
 
 > 🚨 *EARLY PREVIEW RELEASE* 🚨
 >
-> Not all features are implemented yet.  Please provide feedback by commenting
-> on the [Design Proposal](https://github.com/microsoft/rushstack/issues/3695)
+> Please provide feedback by commenting on
+> the [Design Proposal](https://github.com/microsoft/rushstack/issues/3695)
 > or creating a GitHub issue. Thanks!
 
 **Rush Lockfile Explorer** helps you investigate and solve version conflicts when working
@@ -56,7 +56,7 @@ lockfile-explorer
 
 The CLI will start a Node.js service on `http://localhost/` and try to launch your default web browser:
 
-<img width="800" alt="screenshot" src="https://rushstack.io/images/lockfile-explorer/screenshot.png"><br/>
+<img width="800" alt="screenshot" src="https://lfx.rushstack.io/images/site/readme-screenshot.png"><br/>
 *Lockfile Explorer main window*
 
 
@@ -73,8 +73,11 @@ command was invoked.  It will read files such as:
 
 ## Links
 
+- [Documentation](https://lfx.rushstack.io/) on the Lockfile Explorer project website
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/apps/lockfile-explorer/CHANGELOG.md) - Find
   out what's new in the latest version
+- [@rushstack/trace-import](https://www.npmjs.com/package/@rushstack/trace-import) -
+  a command-line tool for troubleshooting how modules are resolved by `import` and `require()`
 
 Rush Lockfile Explorer is part of the [Rush Stack](https://rushstack.io/) family of projects.
