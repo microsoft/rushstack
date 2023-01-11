@@ -51,9 +51,13 @@ interface IGitState {
   rootDir: string;
 }
 
-interface IRawRepoState {
+/**
+ * @internal
+ */
+export interface IRawRepoState {
   projectState: Map<RushConfigurationProject, Map<string, string>> | undefined;
   rootDir: string;
+  rawHashes: Map<string, string>;
 }
 
 /**
@@ -331,7 +335,8 @@ export class ProjectChangeAnalyzer {
       // Mark as resolved, but no data
       return {
         projectState: undefined,
-        rootDir: this._rushConfiguration.rushJsonFolder
+        rootDir: this._rushConfiguration.rushJsonFolder,
+        rawHashes: new Map()
       };
     }
 
@@ -416,7 +421,8 @@ export class ProjectChangeAnalyzer {
 
     return {
       projectState: projectHashDeps,
-      rootDir
+      rootDir,
+      rawHashes: repoState.hashes
     };
   }
 

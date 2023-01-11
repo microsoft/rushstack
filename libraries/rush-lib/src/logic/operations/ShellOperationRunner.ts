@@ -38,7 +38,7 @@ import { OperationStateFile } from './OperationStateFile';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { ProjectChangeAnalyzer, IRawRepoState } from '../ProjectChangeAnalyzer';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
@@ -451,10 +451,15 @@ export class ShellOperationRunner implements IOperationRunner {
                   additionalContext['$' + varName] = process.env[varName] || '';
                 }
               }
+
               if (operationSettings.dependsOnAdditionalFiles) {
+                const repoState: IRawRepoState | undefined =
+                  this._projectChangeAnalyzer._ensureInitialized(terminal);
+
                 const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
                   operationSettings.dependsOnAdditionalFiles,
-                  this._rushProject.projectFolder
+                  this._rushProject.projectFolder,
+                  repoState
                 );
 
                 terminal.writeDebugLine(

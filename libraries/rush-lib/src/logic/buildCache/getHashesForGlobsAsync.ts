@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 import { Async, Import, LegacyAdapters } from '@rushstack/node-core-library';
 import { getGitHashForFiles } from '@rushstack/package-deps-hash';
-
+import * as path from 'path';
 import type { IOptions } from 'glob';
+import type { IRawRepoState } from '../ProjectChangeAnalyzer';
 
 const glob: typeof import('glob') = Import.lazy('glob', require);
 
@@ -52,11 +53,68 @@ async function expandGlobPatternsAsync(
   return Array.from(allMatches);
 }
 
+interface IKnownHashesResult {
+  foundPaths: Map<string, string>;
+  missingPaths: string[];
+}
+
+function getKnownHashes(
+  filePaths: string[],
+  packagePath: string,
+  repoState: IRawRepoState
+): IKnownHashesResult {
+  const missingPaths: string[] = [];
+  const foundPaths: Map<string, string> = new Map();
+
+  for (const filePath of filePaths) {
+    const absolutePath: string = path.isAbsolute(filePath) ? filePath : path.join(packagePath, filePath);
+
+    /**
+     * We are using RegExp here to prevent false positives in the following string.replace function
+     * - `^` anchor makes sure that we are replacing only the beginning of the string
+     * - extra `/` makes sure that we are remove extra slash from the relative path
+     */
+    const gitFilePath: string = absolutePath.replace(new RegExp('^' + repoState.rootDir + '/'), '');
+    const foundHash: string | undefined = repoState.rawHashes.get(gitFilePath);
+
+    if (foundHash) {
+      foundPaths.set(filePath, foundHash);
+    } else {
+      missingPaths.push(filePath);
+    }
+  }
+
+  return { foundPaths, missingPaths };
+}
+
 export async function getHashesForGlobsAsync(
   globPatterns: Iterable<string>,
-  packagePath: string
+  packagePath: string,
+  repoState: IRawRepoState | undefined
 ): Promise<Map<string, string>> {
   const filePaths: string[] = await expandGlobPatternsAsync(globPatterns, packagePath);
 
-  return getGitHashForFiles(filePaths, packagePath);
+  if (!repoState) {
+    return getGitHashForFiles(filePaths, packagePath);
+  }
+
+  const { foundPaths, missingPaths } = getKnownHashes(filePaths, packagePath, repoState);
+  const calculatedHashes: Map<string, string> = getGitHashForFiles(missingPaths, packagePath);
+
+  /**
+   * We want to keep the order of the output the same regardless whether the file was already
+   * hashed by git or not (as this can change, e.g. due to .gitignore).
+   * Therefore we will populate our final hashes map in the same order as `filePaths`.
+   */
+  const result: Map<string, string> = new Map();
+  for (const filePath of filePaths) {
+    const hash: string | undefined = foundPaths.get(filePath) || calculatedHashes.get(filePath);
+    if (!hash) {
+      // Sanity check -- this should never happen
+      throw new Error(`Failed to calculate hash of file: "${filePath}"`);
+    }
+    result.set(filePath, hash);
+  }
+
+  return result;
 }
