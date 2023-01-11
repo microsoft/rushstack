@@ -78,7 +78,14 @@ describe('webpack5-load-themed-style-loader', () => {
   });
 
   it('generates desired output for esModule option set to "true" as a snapshot', async () => {
-    const stats = await getCompiler('./MockStyle1.css', { esModule: true });
+    // We mock the path of the loader because the full resolved path can change between machines
+    // IE: Different folder topology, etc. So we just used the mocked module and set it
+    // to loadThemedStylesPath option from the loader.
+    const expectedPath: string = '../../../lib/test/testData/LoadThemedStylesMock';
+    const stats = await getCompiler('./MockStyle1.css', {
+      loadThemedStylesPath: expectedPath,
+      esModule: true
+    });
     if (stats !== undefined) {
       const content = stats.toJson({ source: true }).modules?.[0].source;
 
@@ -87,7 +94,8 @@ describe('webpack5-load-themed-style-loader', () => {
   });
 
   it('generates desired loader output snapshot', async () => {
-    const stats = await getCompiler('./MockStyle1.css');
+    const expectedPath: string = '../../../lib/test/testData/LoadThemedStylesMock';
+    const stats = await getCompiler('./MockStyle1.css', { loadThemedStylesPath: expectedPath });
     if (stats !== undefined) {
       const content = stats.toJson({ source: true }).modules?.[0].source;
 
