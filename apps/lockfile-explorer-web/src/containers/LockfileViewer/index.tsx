@@ -153,8 +153,8 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   );
 
   const togglePackageView = useCallback(
-    (selected: LockfileEntryFilter) => {
-      if (selected === LockfileEntryFilter.Project) {
+    (selected: string) => {
+      if (selected === 'Projects') {
         dispatch(selectFilter({ filter: LockfileEntryFilter.Project, state: true }));
         dispatch(selectFilter({ filter: LockfileEntryFilter.Package, state: false }));
       } else {
@@ -178,9 +178,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
             }
           ]}
           value={activeFilters[LockfileEntryFilter.Project] ? 'Projects' : 'Packages'}
-          onChange={(val) => {
-            togglePackageView(val === 'Projects' ? LockfileEntryFilter.Project : LockfileEntryFilter.Package);
-          }}
+          onChange={togglePackageView}
         />
         <Input
           type="search"
