@@ -49,6 +49,10 @@
     {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "update-notifier",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }
