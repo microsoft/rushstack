@@ -110,52 +110,55 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   public apply(compiler: Compiler): void {
     pluginForCompiler.set(compiler, this);
 
-    // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
-    const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
-
-    const { errors, warnings } = this._initializeAndValidateOptions(compiler, isWebpackDevServer);
-
-    if (errors.length > 0 || warnings.length > 0) {
-      compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
-        compilation.errors.push(...errors);
-        compilation.warnings.push(...warnings);
-      });
-
-      if (errors.length > 0) {
-        // If there are any errors, just pass through the resources in source and don't do any
-        // additional configuration
-        return;
-      }
-    }
-
-    const {
-      WebpackError,
-      runtime: { GetChunkFilenameRuntimeModule }
-    } = compiler.webpack;
-
-    // Side-channel for async chunk URL generator chunk, since the actual chunk is completely inaccessible
-    // from the assetPath hook below when invoked to build the async URL generator
-    let chunkWithAsyncURLGenerator: Chunk | undefined;
-
-    const originalGenerate: typeof GetChunkFilenameRuntimeModule.prototype.generate =
-      GetChunkFilenameRuntimeModule.prototype.generate;
-    GetChunkFilenameRuntimeModule.prototype.generate = function (
-      this: runtime.GetChunkFilenameRuntimeModule
-    ) {
-      // `originalGenerate` will invoke `getAssetPath` to produce the async URL generator
-      // Need to know the identity of the containing chunk to correctly produce the asset path expression
-      chunkWithAsyncURLGenerator = this.chunk;
-      const result: string = originalGenerate.call(this);
-      // Unset after the call finishes because we are no longer generating async URL generators
-      chunkWithAsyncURLGenerator = undefined;
-      return result;
-    };
-
-    const asyncGeneratorTest: RegExp = /^\" \+/;
-
-    const { runtimeLocaleExpression } = this._options;
-
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
+      // https://github.com/webpack/webpack-dev-server/pull/1929/files#diff-15fb51940da53816af13330d8ce69b4eR66
+      const isWebpackDevServer: boolean = process.env.WEBPACK_DEV_SERVER === 'true';
+
+      const { errors, warnings } = this._initializeAndValidateOptions(
+        compilation.compiler,
+        isWebpackDevServer
+      );
+
+      if (errors.length > 0 || warnings.length > 0) {
+        compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
+          compilation.errors.push(...errors);
+          compilation.warnings.push(...warnings);
+        });
+
+        if (errors.length > 0) {
+          // If there are any errors, just pass through the resources in source and don't do any
+          // additional configuration
+          return;
+        }
+      }
+
+      const {
+        WebpackError,
+        runtime: { GetChunkFilenameRuntimeModule }
+      } = compilation.compiler.webpack;
+
+      // Side-channel for async chunk URL generator chunk, since the actual chunk is completely inaccessible
+      // from the assetPath hook below when invoked to build the async URL generator
+      let chunkWithAsyncURLGenerator: Chunk | undefined;
+
+      const originalGenerate: typeof GetChunkFilenameRuntimeModule.prototype.generate =
+        GetChunkFilenameRuntimeModule.prototype.generate;
+      GetChunkFilenameRuntimeModule.prototype.generate = function (
+        this: runtime.GetChunkFilenameRuntimeModule
+      ) {
+        // `originalGenerate` will invoke `getAssetPath` to produce the async URL generator
+        // Need to know the identity of the containing chunk to correctly produce the asset path expression
+        chunkWithAsyncURLGenerator = this.chunk;
+        const result: string = originalGenerate.call(this);
+        // Unset after the call finishes because we are no longer generating async URL generators
+        chunkWithAsyncURLGenerator = undefined;
+        return result;
+      };
+
+      const asyncGeneratorTest: RegExp = /^\" \+/;
+
+      const { runtimeLocaleExpression } = this._options;
+
       compilation.hooks.assetPath.tap(
         PLUGIN_NAME,
         (assetPath: string, options: IAssetPathOptions): string => {
