@@ -2611,6 +2611,28 @@ importers:
       webpack: 4.44.2
       webpack-sources: 1.4.3
 
+  ../../webpack/webpack5-load-themed-styles-loader:
+    specifiers:
+      '@microsoft/load-themed-styles': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      css-loader: ~6.6.0
+      memfs: 3.4.3
+      webpack: ~5.68.0
+    devDependencies:
+      '@microsoft/load-themed-styles': link:../../libraries/load-themed-styles
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      css-loader: 6.6.0_webpack@5.68.0
+      memfs: 3.4.3
+      webpack: 5.68.0
+
   ../../webpack/webpack5-localization-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*
