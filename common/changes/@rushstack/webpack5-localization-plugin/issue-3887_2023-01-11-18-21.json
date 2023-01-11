@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Fix errors where `compiler.webpack` was not accessible when using the plugin.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}
