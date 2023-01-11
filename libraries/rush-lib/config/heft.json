@@ -37,6 +37,13 @@
               "scriptPath": "./scripts/copyEmptyModules.js"
             }
           }
+        },
+
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
         }
       }
     },
