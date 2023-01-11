@@ -16,7 +16,13 @@
     "_phase:test": "heft test --no-build"
   },
   "peerDependencies": {
-    "@microsoft/load-themed-styles": "^2.0.19"
+    "@microsoft/load-themed-styles": "^2.0.19",
+    "webpack": "^5"
+  },
+  "peerDependenciesMeta": {
+    "webpack": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@microsoft/load-themed-styles": "workspace:*",
