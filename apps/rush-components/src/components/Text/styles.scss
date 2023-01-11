@@ -1,0 +1,41 @@
+@mixin HeadingStyles {
+  font-weight: bold;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.H1 {
+  @include HeadingStyles;
+  font-size: 24px;
+}
+.H2 {
+  @include HeadingStyles;
+  font-size: 21px;
+}
+.H3 {
+  @include HeadingStyles;
+  font-size: 19px;
+}
+.H4 {
+  @include HeadingStyles;
+  font-size: 16px;
+}
+.H5 {
+  @include HeadingStyles;
+  font-size: 14px;
+}
+.H6 {
+  @include HeadingStyles;
+  font-size: 12px;
+}
+
+.ParagraphStyles {
+  margin: 0;
+  font-weight: normal;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.SpanStyles {
+  font-size: 12px;
+}

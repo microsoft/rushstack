@@ -7,10 +7,13 @@
   padding: 4px 0;
   margin-top: 8px;
   cursor: pointer;
-  &:hover {
-    background: #dff6dd;
-  }
   & > * + * {
     margin-top: 8px;
+  }
+}
+
+.BookmarkLabel {
+  &:hover {
+    background: #dff6dd;
   }
 }

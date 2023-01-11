@@ -5,9 +5,6 @@
   @include base.card;
   padding: 12px;
   height: 8%;
-  p {
-    font-size: 12px;
-  }
   & > * + * {
     margin-top: 8px;
   }

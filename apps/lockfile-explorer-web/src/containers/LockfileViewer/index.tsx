@@ -13,7 +13,7 @@ import {
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
 import { getFilterFromLocalStorage, saveFilterToLocalStorage } from '../../helpers/localStorage';
-import { Tabs, Checkbox, ScrollArea, Input } from '@rushstack/components';
+import { Tabs, Checkbox, ScrollArea, Input, Text } from '@rushstack/components';
 
 interface ILockfileEntryGroup {
   entryName: string;
@@ -51,7 +51,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
               selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
             }`}
           >
-            <h5>{entry.entryPackageName}</h5>
+            <Text type="h5">{entry.entryPackageName}</Text>
           </div>
         ))}
       </div>
@@ -60,7 +60,9 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
 
   return (
     <div className={styles.packageGroup} ref={fieldRef}>
-      <h5>{group.entryName}</h5>
+      <Text type="h5" bold>
+        {group.entryName}
+      </Text>
       {group.versions.map((entry) => (
         <div
           key={entry.rawEntryId}
@@ -69,9 +71,9 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
             selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
           }`}
         >
-          <p>
+          <Text type="p">
             {entry.entryPackageVersion} {entry.entrySuffix && `[${entry.entrySuffix}]`}
-          </p>
+          </Text>
         </div>
       ))}
     </div>
@@ -153,13 +155,9 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   const togglePackageView = useCallback(
     (selected: LockfileEntryFilter) => {
       if (selected === LockfileEntryFilter.Project) {
-        console.log('first');
-
         dispatch(selectFilter({ filter: LockfileEntryFilter.Project, state: true }));
         dispatch(selectFilter({ filter: LockfileEntryFilter.Package, state: false }));
       } else {
-        console.log('elsing');
-
         dispatch(selectFilter({ filter: LockfileEntryFilter.Package, state: true }));
         dispatch(selectFilter({ filter: LockfileEntryFilter.Project, state: false }));
       }
@@ -201,7 +199,9 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
         </ScrollArea>
         {activeFilters[LockfileEntryFilter.Package] ? (
           <div className={styles.filterSection}>
-            <h5>Filters</h5>
+            <Text type="h5" bold>
+              Filters
+            </Text>
             <Checkbox
               label="Must have side-by-side versions"
               isChecked={activeFilters[LockfileEntryFilter.SideBySide]}

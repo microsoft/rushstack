@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollArea } from '@rushstack/components';
+import { ScrollArea, Text } from '@rushstack/components';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
 import { IDependencyType, LockfileDependency } from '../../parsing/LockfileDependency';
@@ -121,7 +121,6 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   const selectResolvedReferencer = useCallback(
     (referrer) => () => {
-      console.log('going to entry: ', referrer);
       dispatch(pushToStack(referrer));
     },
     [selectedEntry]
@@ -135,28 +134,34 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
       <div className={`${appStyles.ContainerCard} ${styles.DependencyDetails}`}>
         <ScrollArea>
           <div className={styles.DependencyDetailInfo}>
-            <h5>Selected&nbsp;Dependency: </h5>
-            <span>
+            <Text type="h5" bold>
+              Selected&nbsp;Dependency:{' '}
+            </Text>
+            <Text type="span">
               {inspectDependency.name}: {inspectDependency.version}
-            </span>
+            </Text>
           </div>
           <div className={styles.DependencyDetailInfo}>
-            <h5>package.json spec: </h5>
-            <span>
+            <Text type="h5" bold>
+              package.json spec:{' '}
+            </Text>
+            <Text type="span">
               {inspectDependency.dependencyType === IDependencyType.PEER_DEPENDENCY
                 ? `"${inspectDependency.peerDependencyMeta.version}" ${
                     inspectDependency.peerDependencyMeta.optional ? 'Optional' : 'Required'
                   } Peer`
                 : inspectDependency.version}
-            </span>
+            </Text>
           </div>
           <div className={styles.DependencyDetailInfo}>
-            <h5>.pnpmfile.cjs: </h5>
-            <span>
+            <Text type="h5" bold>
+              .pnpmfile.cjs:{' '}
+            </Text>
+            <Text type="span">
               {specChanges.has(inspectDependency.name)
                 ? displaySpecChanges(specChanges, inspectDependency.name)
                 : 'No Effect'}
-            </span>
+            </Text>
           </div>
         </ScrollArea>
       </div>
@@ -171,14 +176,14 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     if (!peerDeps.length) {
       return (
         <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
-          <h5>No peer dependencies.</h5>
+          <Text type="h5">No peer dependencies.</Text>
         </div>
       );
     }
     if (!inspectDependency || inspectDependency.dependencyType !== IDependencyType.PEER_DEPENDENCY) {
       return (
         <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
-          <h5>Select a peer dependency to view its influencers</h5>
+          <Text type="h5">Select a peer dependency to view its influencers</Text>
         </div>
       );
     }
@@ -189,7 +194,9 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     return (
       <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
         <ScrollArea>
-          <h5>Determinants:</h5>
+          <Text type="h5" bold>
+            Determinants:
+          </Text>
           {determinants.length ? (
             determinants.map(({ entry }) => (
               <a
@@ -201,9 +208,11 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
               </a>
             ))
           ) : (
-            <p>(none)</p>
+            <Text type="p">(none)</Text>
           )}
-          <h5 className={styles.TransitiveReferencersHeader}>Transitive Referencers:</h5>
+          <Text type="h5" bold className={styles.TransitiveReferencersHeader}>
+            Transitive Referencers:
+          </Text>
           {transitiveReferrers.length ? (
             transitiveReferrers.map(({ entry }) => (
               <a
@@ -215,7 +224,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
               </a>
             ))
           ) : (
-            <p>(none)</p>
+            <Text type="p">(none)</Text>
           )}
         </ScrollArea>
       </div>
@@ -225,7 +234,9 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
   if (!selectedEntry) {
     return (
       <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
-        <h5>Select an entry to view its details</h5>
+        <Text type="h5" bold>
+          Select an entry to view its details
+        </Text>
       </div>
     );
   }
@@ -234,7 +245,9 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     <>
       <div className={styles.LockfileEntryListView}>
         <div className={appStyles.ContainerCard}>
-          <h5>Direct Referrers</h5>
+          <Text type="h5" bold>
+            Direct Referrers
+          </Text>
           <div className={styles.DependencyListWrapper}>
             <ScrollArea>
               {selectedEntry.referrers?.map((referrer: LockfileEntry) => (
@@ -243,9 +256,11 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                   key={referrer.rawEntryId}
                   onClick={selectResolvedReferencer(referrer)}
                 >
-                  <h5>Name: {referrer.displayText}</h5>
+                  <Text type="h5" bold>
+                    Name: {referrer.displayText}
+                  </Text>
                   <div>
-                    <p>Entry ID: {referrer.rawEntryId}</p>
+                    <Text type="p">Entry ID: {referrer.rawEntryId}</Text>
                   </div>
                 </div>
               ))}
@@ -253,7 +268,9 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           </div>
         </div>
         <div className={appStyles.ContainerCard}>
-          <h5>Direct Dependencies</h5>
+          <Text type="h5" bold>
+            Direct Dependencies
+          </Text>
           <div className={styles.DependencyListWrapper}>
             <ScrollArea>
               {selectedEntry.dependencies?.map((dependency: LockfileDependency) => (
@@ -264,17 +281,17 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                   key={dependency.entryId || dependency.name}
                   onClick={selectResolvedEntry(dependency)}
                 >
-                  <h5>
+                  <Text type="h5" bold>
                     Name: {dependency.name}{' '}
                     {dependency.dependencyType === IDependencyType.PEER_DEPENDENCY
                       ? `${
                           dependency.peerDependencyMeta.optional ? '(Optional)' : '(Non-optional)'
                         } Peer Dependency`
                       : ''}
-                  </h5>
+                  </Text>
                   <div>
-                    <p>Version: {dependency.version}</p>
-                    <p>Entry ID: {dependency.entryId}</p>
+                    <Text type="p">Version: {dependency.version}</Text>
+                    <Text type="p">Entry ID: {dependency.entryId}</Text>
                   </div>
                 </div>
               ))}

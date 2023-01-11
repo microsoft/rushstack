@@ -11,7 +11,7 @@ import {
   removeBookmark,
   selectCurrentEntry
 } from '../../store/slices/entrySlice';
-import { Button, ScrollArea } from '@rushstack/components';
+import { Button, ScrollArea, Text } from '@rushstack/components';
 
 export const SelectedEntryPreview = (): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
@@ -63,7 +63,9 @@ export const SelectedEntryPreview = (): JSX.Element => {
     return (
       <div className={styles.SelectedEntryCard}>
         <div className={styles.SelectedEntryBookmarkRow}>
-          <h5>No Entry Selected</h5>
+          <Text type="h5" bold>
+            No Entry Selected
+          </Text>
           {renderButtonRow()}
         </div>
       </div>
@@ -75,14 +77,16 @@ export const SelectedEntryPreview = (): JSX.Element => {
       <ScrollArea>
         <div className={styles.SelectedEntryBookmarkRow}>
           <div className={styles.SelectedEntryHeader}>
-            <h5>Selected entry:</h5>
+            <Text type="h5" bold>
+              Selected entry:
+            </Text>
             <span>{selectedEntry.displayText}</span>
           </div>
           {renderButtonRow()}
         </div>
         <div>
-          <p>Package Entry: {selectedEntry.rawEntryId}</p>
-          <p>Package JSON path: {selectedEntry.packageJsonFolderPath}</p>
+          <Text type="p">Package Entry: {selectedEntry.rawEntryId}</Text>
+          <Text type="p">Package JSON path: {selectedEntry.packageJsonFolderPath}</Text>
         </div>
       </ScrollArea>
     </div>
