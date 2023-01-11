@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import styles from './App.scss';
-import { readLockfile } from './parsing/readLockfile';
+import { readLockfileAsync } from './parsing/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';
 import { PackageJsonViewer } from './containers/PackageJsonViewer';
 import { useAppDispatch } from './store/hooks';
@@ -21,11 +21,11 @@ export const App = (): JSX.Element => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    async function loadLockfile(): Promise<void> {
-      const lockfile = await readLockfile();
+    async function loadLockfileAsync(): Promise<void> {
+      const lockfile = await readLockfileAsync();
       dispatch(loadEntries(lockfile));
     }
-    loadLockfile().catch((e) => {
+    loadLockfileAsync().catch((e) => {
       console.log(`Failed to read lockfile: ${e}`);
     });
   }, []);

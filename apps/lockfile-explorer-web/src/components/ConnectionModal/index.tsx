@@ -4,7 +4,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { checkAlive } from '../../parsing/getPackageFiles';
+import { checkAliveAsync } from '../../parsing/getPackageFiles';
 import { ReactNull } from '../../types/ReactNull';
 
 export const ConnectionModal = (): JSX.Element | ReactNull => {
@@ -12,8 +12,8 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
   const [checking, setChecking] = useState(false);
   const [manualChecked, setManualChecked] = useState(false);
 
-  async function keepAlive(): Promise<void> {
-    if (await checkAlive()) {
+  async function keepAliveAsync(): Promise<void> {
+    if (await checkAliveAsync()) {
       setIsAlive(true);
     } else {
       setIsAlive(false);
@@ -22,13 +22,13 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
   }
 
   useEffect(() => {
-    window.setInterval(keepAlive, 2000);
+    window.setInterval(keepAliveAsync, 2000);
   }, []);
 
   const checkAliveManual = useCallback(() => {
     setChecking(true);
     setManualChecked(true);
-    keepAlive().catch((e) => {
+    keepAliveAsync().catch((e) => {
       // Keep alive cannot fail
       console.error(`Unexpected exception: ${e}`);
     });
