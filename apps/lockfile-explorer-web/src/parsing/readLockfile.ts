@@ -53,7 +53,7 @@ export interface ILockfilePackageType {
  *
  * @returns A list of all the LockfileEntries in the lockfile.
  */
-export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileEntry[] => {
+export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileEntry[] {
   const allEntries: LockfileEntry[] = [];
   const allEntriesById: { [key in string]: LockfileEntry } = {};
 
@@ -97,7 +97,10 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
   for (const entry of allEntries) {
     for (const dependency of entry.dependencies) {
       // Peer dependencies do not have a matching entry
-      if (dependency.dependencyType === IDependencyType.PEER_DEPENDENCY) continue;
+      if (dependency.dependencyType === IDependencyType.PEER_DEPENDENCY) {
+        continue;
+      }
+
       const matchedEntry = allEntriesById[dependency.entryId];
       if (matchedEntry) {
         // Create a two-way link between the dependency and the entry
@@ -111,11 +114,11 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
   }
 
   return allEntries;
-};
+}
 
-export const readLockfile = async (): Promise<LockfileEntry[]> => {
-  const response = await fetch(`${serviceUrl}/`);
+export async function readLockfileAsync(): Promise<LockfileEntry[]> {
+  const response = await fetch(`${serviceUrl}/api/lockfile`);
   const lockfile: ILockfilePackageType = await response.json();
 
   return generateLockfileGraph(lockfile);
-};
+}
