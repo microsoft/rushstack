@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Restore log files when cache hit",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
