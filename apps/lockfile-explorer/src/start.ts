@@ -10,7 +10,7 @@ import open from 'open';
 import updateNotifier from 'update-notifier';
 import { FileSystem, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/AppContext';
-
+import packageJSON from '../package.json';
 import { init } from './init';
 import type { IAppState } from './state';
 
@@ -18,7 +18,6 @@ const PORT: number = 8091;
 // Must not have a trailing slash
 const SERVICE_URL: string = `http://localhost:${PORT}`;
 
-const packageJSON = JsonFile.load('../package.json');
 updateNotifier({ pkg: packageJSON }).notify();
 
 const appState: IAppState = init();
