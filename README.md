@@ -102,7 +102,6 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | Folder | Description |
 | ------ | -----------|
 | [/apps/lockfile-explorer-web](./apps/lockfile-explorer-web/) | Rush Lockfile Explorer: helper project for building the React web application component |
-| [/apps/rush-components](./apps/rush-components/) | Rush Component Library: a set of themed components for rush projects |
 | [/build-tests-samples/heft-node-basic-tutorial](./build-tests-samples/heft-node-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-jest-tutorial](./build-tests-samples/heft-node-jest-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-rig-tutorial](./build-tests-samples/heft-node-rig-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
@@ -153,6 +152,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/set-webpack-public-path-plugin-webpack4-test](./build-tests/set-webpack-public-path-plugin-webpack4-test/) | Building this project tests the set-webpack-public-path-plugin using Webpack 4 |
 | [/build-tests/ts-command-line-test](./build-tests/ts-command-line-test/) | Building this project is a regression test for ts-command-line |
+| [/libraries/rush-components](./libraries/rush-components/) | Rush Component Library: a set of themed components for rush projects |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
