@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "[rush] Create custom git hooks instead of copy",
+      "comment": "Generate scripts in the Git hooks folder referring to the actual hook implementations in-place in the Rush `common/git-hooks/` folder instead of copying the scripts to the Git hooks folder.",
       "type": "none"
     }
   ],

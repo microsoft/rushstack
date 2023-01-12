@@ -462,7 +462,7 @@ SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
 if [[ -f "$SCRIPT_IMPLEMENTATION_PATH" ]]; then
   exec "$SCRIPT_IMPLEMENTATION_PATH"
 else
-  echo "The ${filename} Git hook does not exist in your version of the repo. Either remove the ${filename} hook file (e.g. '.git/hooks/${filename}') in case this feature is not used anymore in main branch. Otherwise, updating your branch to current mainstream will solve the issue."
+  echo "The ${filename} Git hook no longer exists in your version of the repo. Run 'rush install' or 'rush update' to refresh your installed Git hooks."
 fi
 `;
           // Create the hook file.  Important: For Bash scripts, the EOL must not be CRLF.
