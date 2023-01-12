@@ -137,10 +137,7 @@ if (rushLibModule === undefined) {
         let installAndRunRushStderrContent: string = '';
         try {
           // Third, try to invoke install-run-rush.js to install the appropriate version of "rush-lib"
-          const installAndRunRushJSPath: string = path.join(
-            monorepoRoot,
-            'common/scripts/install-run-rush.js'
-          );
+          const installAndRunRushJSPath: string = `${monorepoRoot}/common/scripts/install-run-rush.js`;
 
           terminal.writeLine('The Rush engine has not been installed yet. Invoking install-run-rush.js...');
 
