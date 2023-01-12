@@ -3,13 +3,13 @@ import styles from './styles.scss';
 
 export type TextType = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
 
-type TextProps = {
+interface ITextProps {
   type: TextType;
   bold?: boolean;
   children: React.ReactNode;
   className?: string;
-};
-export const Text = ({ type, bold = false, children, className }: TextProps): JSX.Element => {
+}
+export const Text = ({ type, bold = false, children, className }: ITextProps): JSX.Element => {
   const generalStyles: { [key in string]: string | number } = {
     ['fontWeight']: bold ? 'bold' : 'normal'
   };
@@ -41,9 +41,9 @@ export const Text = ({ type, bold = false, children, className }: TextProps): JS
       );
     case 'h5':
       return (
-        <Text type="h5" bold className={`${styles.H5} ${className ? className : ''}`} style={generalStyles}>
+        <h5 className={`${styles.H5} ${className ? className : ''}`} style={generalStyles}>
           {children}
-        </Text>
+        </h5>
       );
     case 'h6':
       return (

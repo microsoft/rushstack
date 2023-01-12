@@ -11,7 +11,7 @@ export const Checkbox = ({
   label: string;
   isChecked: boolean;
   onChecked: (checked: boolean) => void;
-}) => (
+}): JSX.Element => (
   <form>
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <RadixCheckbox.Root

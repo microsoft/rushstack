@@ -2,11 +2,11 @@ import React from 'react';
 import * as RadixTabs from '@radix-ui/react-tabs';
 import styles from './styles.scss';
 
-type TabsItem = {
+interface ITabsItem {
   header: string;
   value?: string | number;
-  body?: any;
-};
+  body?: React.ReactNode;
+}
 
 export const Tabs = ({
   items,
@@ -15,13 +15,15 @@ export const Tabs = ({
   onChange,
   renderChildren
 }: {
-  items: TabsItem[];
+  items: ITabsItem[];
   def?: string;
   value?: string | number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange?: (value: any) => void;
   renderChildren?: () => JSX.Element;
-}) => {
-  const getItemValue = (item: TabsItem) => (item.value === undefined ? item.header : item.value);
+}): JSX.Element => {
+  const getItemValue = (item: ITabsItem): string | number =>
+    item.value === undefined ? item.header : item.value;
   return (
     <RadixTabs.Root
       className={styles.TabsRoot}
