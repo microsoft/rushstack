@@ -432,7 +432,7 @@
     },
     {
       "packageName": "@rushstack/components",
-      "projectFolder": "apps/rush-components",
+      "projectFolder": "libraries/rush-components",
       "reviewCategory": "libraries"
     },
     {

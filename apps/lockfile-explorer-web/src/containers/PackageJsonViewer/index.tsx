@@ -11,7 +11,7 @@ import { compareSpec } from '../../parsing/compareSpec';
 import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
-import { ScrollArea, Tabs, Text } from '@rushstack/components';
+import { ScrollArea, Tabs, Text } from '../../../../../libraries/rush-components/lib/start';
 
 enum PackageView {
   PACKAGE_JSON,
