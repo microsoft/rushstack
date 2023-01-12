@@ -77,6 +77,17 @@ export interface IStorybookPluginOptions {
    * `"staticBuildModulePath": "@storybook/react/bin/build.js"`
    */
   staticBuildModulePath?: string;
+
+  /**
+   * The storybook defined cli options for start and build storybook.
+   * If this is empty, then it will use the default options config.
+   *
+   * @example
+   * If you want to change the static build output dir to staticBuildDir, then the cli option would be:
+   *
+   * `"options": [ "--output-dir=staticBuildDir" ]`
+   */
+  options?: string[];
 }
 
 /** @public */
@@ -88,6 +99,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
   private _storykitPackageName!: string;
   private _modulePath!: string;
   private _resolvedModulePath!: string;
+  private _options?: string[];
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -115,6 +127,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
       );
     }
     this._storykitPackageName = options.storykitPackageName;
+    this._options = options.options;
 
     if (!options.startupModulePath && !options.staticBuildModulePath) {
       throw new Error(
@@ -242,6 +255,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
       heftConfiguration.terminalProvider,
       {
         buildFolder: heftConfiguration.buildFolder,
+        options: this._options,
         resolvedStartupModulePath: this._resolvedModulePath
       },
       // TODO: Extract SubprocessRunnerBase into a public API
