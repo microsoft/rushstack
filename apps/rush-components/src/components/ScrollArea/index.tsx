@@ -2,7 +2,12 @@ import React from 'react';
 import * as RadixScrollArea from '@radix-ui/react-scroll-area';
 import styles from './styles.scss';
 
-export const ScrollArea = ({ children }: { children: React.ReactNode }): JSX.Element => (
+export interface IScrollAreaProps {
+  children: React.ReactNode;
+}
+
+// Note: the height of the scroll area's parent must be fixed
+export const ScrollArea = ({ children }: IScrollAreaProps): JSX.Element => (
   <RadixScrollArea.Root className={styles.ScrollAreaRoot}>
     <RadixScrollArea.Viewport className={styles.ScrollAreaViewport}>{children}</RadixScrollArea.Viewport>
     <RadixScrollArea.Scrollbar className={styles.ScrollAreaScrollbar} orientation="vertical">

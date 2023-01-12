@@ -3,13 +3,14 @@ import styles from './styles.scss';
 
 export type TextType = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
 
-interface ITextProps {
+export interface ITextProps {
   type: TextType;
   bold?: boolean;
   children: React.ReactNode;
   className?: string;
   size?: number;
 }
+
 export const Text = ({ type, bold = false, children, className, size }: ITextProps): JSX.Element => {
   const generalStyles: { [key in string]: string | number } = {
     ['fontWeight']: bold ? 'bold' : 'normal',

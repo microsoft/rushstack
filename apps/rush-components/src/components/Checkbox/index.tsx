@@ -3,15 +3,13 @@ import * as RadixCheckbox from '@radix-ui/react-checkbox';
 import { CheckIcon } from '@radix-ui/react-icons';
 import styles from './styles.scss';
 
-export const Checkbox = ({
-  label,
-  isChecked,
-  onChecked
-}: {
+export interface ICheckboxProps {
   label: string;
   isChecked: boolean;
   onChecked: (checked: boolean) => void;
-}): JSX.Element => (
+}
+
+export const Checkbox = ({ label, isChecked, onChecked }: ICheckboxProps): JSX.Element => (
   <form>
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <RadixCheckbox.Root

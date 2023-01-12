@@ -2,26 +2,22 @@ import React from 'react';
 import * as RadixTabs from '@radix-ui/react-tabs';
 import styles from './styles.scss';
 
-interface ITabsItem {
+export interface ITabsItem {
   header: string;
   value?: string | number;
   body?: React.ReactNode;
 }
 
-export const Tabs = ({
-  items,
-  def,
-  value,
-  onChange,
-  renderChildren
-}: {
+export interface ITabsProps {
   items: ITabsItem[];
   def?: string;
   value?: string | number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange?: (value: any) => void;
   renderChildren?: () => JSX.Element;
-}): JSX.Element => {
+}
+
+export const Tabs = ({ items, def, value, onChange, renderChildren }: ITabsProps): JSX.Element => {
   const getItemValue = (item: ITabsItem): string | number =>
     item.value === undefined ? item.header : item.value;
   return (

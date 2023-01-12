@@ -1,17 +1,14 @@
 import React from 'react';
 import styles from './styles.scss';
 
-export const Input = ({
-  value,
-  placeholder,
-  onChange,
-  type = 'text'
-}: {
+export interface IInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
   placeholder?: string;
-}): JSX.Element => {
+}
+
+export const Input = ({ value, placeholder, onChange, type = 'text' }: IInputProps): JSX.Element => {
   return (
     <input
       type={type}
