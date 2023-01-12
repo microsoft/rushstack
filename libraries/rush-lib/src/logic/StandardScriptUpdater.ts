@@ -63,7 +63,10 @@ const _scripts: IScriptSpecifier[] = [
       '//',
       `//    node common/scripts/${installRunRushxScriptFilename} custom-command`
     ]
-  },
+  }
+];
+
+const _pnpmOnlyScripts: IScriptSpecifier[] = [
   {
     scriptName: installRunRushPnpmScriptFilename,
     headerLines: [
@@ -79,6 +82,14 @@ const _scripts: IScriptSpecifier[] = [
   }
 ];
 
+const getScripts = (rushConfiguration: RushConfiguration): IScriptSpecifier[] => {
+  if (rushConfiguration.packageManager === 'pnpm') {
+    return _scripts.concat(_pnpmOnlyScripts);
+  }
+
+  return _scripts;
+};
+
 /**
  * Checks whether the common/scripts files are up to date, and recopies them if needed.
  * This is used by the "rush install" and "rush update" commands.
@@ -93,7 +104,7 @@ export class StandardScriptUpdater {
 
     let anyChanges: boolean = false;
     await Async.forEachAsync(
-      _scripts,
+      getScripts(rushConfiguration),
       async (script: IScriptSpecifier) => {
         const changed: boolean = await StandardScriptUpdater._updateScriptOrThrowAsync(
           script,
@@ -118,7 +129,7 @@ export class StandardScriptUpdater {
    */
   public static async validateAsync(rushConfiguration: RushConfiguration): Promise<void> {
     await Async.forEachAsync(
-      _scripts,
+      getScripts(rushConfiguration),
       async (script: IScriptSpecifier) => {
         await StandardScriptUpdater._updateScriptOrThrowAsync(script, rushConfiguration, true);
       },
