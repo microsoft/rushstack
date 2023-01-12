@@ -13,7 +13,7 @@ import {
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
 import { getFilterFromLocalStorage, saveFilterToLocalStorage } from '../../helpers/localStorage';
-import { Tabs, Checkbox, ScrollArea, Input, Text } from '../../../../../libraries/rush-components/lib/start';
+import { Tabs, Checkbox, ScrollArea, Input, Text } from '@rushstack/components';
 
 interface ILockfileEntryGroup {
   entryName: string;

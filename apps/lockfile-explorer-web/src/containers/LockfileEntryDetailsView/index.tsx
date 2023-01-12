@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollArea, Text } from '../../../../../libraries/rush-components/lib/start';
+import { ScrollArea, Text } from '@rushstack/components';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
 import { IDependencyType, LockfileDependency } from '../../parsing/LockfileDependency';

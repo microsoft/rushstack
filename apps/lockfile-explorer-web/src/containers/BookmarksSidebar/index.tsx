@@ -7,7 +7,7 @@ import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { LockfileEntry } from '../../parsing/LockfileEntry';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
-import { Button, ScrollArea, Text } from '../../../../../libraries/rush-components/lib/start';
+import { Button, ScrollArea, Text } from '@rushstack/components';
 
 export const BookmarksSidebar = (): JSX.Element => {
   const bookmarks = useAppSelector((state) => state.entry.bookmarkedEntries);
