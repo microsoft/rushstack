@@ -8,10 +8,12 @@ interface ITextProps {
   bold?: boolean;
   children: React.ReactNode;
   className?: string;
+  size?: number;
 }
-export const Text = ({ type, bold = false, children, className }: ITextProps): JSX.Element => {
+export const Text = ({ type, bold = false, children, className, size }: ITextProps): JSX.Element => {
   const generalStyles: { [key in string]: string | number } = {
-    ['fontWeight']: bold ? 'bold' : 'normal'
+    ['fontWeight']: bold ? 'bold' : 'normal',
+    ...(size ? { fontSize: size } : {})
   };
 
   switch (type) {
