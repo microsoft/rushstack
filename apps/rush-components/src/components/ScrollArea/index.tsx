@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import React from 'react';
 import * as RadixScrollArea from '@radix-ui/react-scroll-area';
 import styles from './styles.scss';
