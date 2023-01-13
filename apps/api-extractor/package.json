@@ -57,7 +57,8 @@
     "@types/lodash": "4.14.116",
     "@types/node": "18.17.15",
     "@types/resolve": "1.20.2",
-    "@types/semver": "7.5.0"
+    "@types/semver": "7.5.0",
+    "typescript": "5.3.3"
   },
   "peerDependencies": {
     "typescript": "5.3.3"
