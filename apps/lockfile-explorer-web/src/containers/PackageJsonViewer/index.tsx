@@ -256,7 +256,9 @@ export const PackageJsonViewer = (): JSX.Element => {
       />
 
       <div className={styles.FileContents}>
-        <ScrollArea>{renderFile()}</ScrollArea>
+        <ScrollArea>
+          <div className={styles.FileInnerContent}>{renderFile()}</div>
+        </ScrollArea>
       </div>
     </div>
   );

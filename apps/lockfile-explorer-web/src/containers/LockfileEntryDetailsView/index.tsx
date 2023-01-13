@@ -245,7 +245,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     <>
       <div className={styles.LockfileEntryListView}>
         <div className={appStyles.ContainerCard}>
-          <Text type="h5" bold>
+          <Text type="h4" bold>
             Direct Referrers
           </Text>
           <div className={styles.DependencyListWrapper}>
@@ -268,7 +268,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           </div>
         </div>
         <div className={appStyles.ContainerCard}>
-          <Text type="h5" bold>
+          <Text type="h4" bold>
             Direct Dependencies
           </Text>
           <div className={styles.DependencyListWrapper}>
