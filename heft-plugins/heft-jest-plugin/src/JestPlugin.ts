@@ -203,6 +203,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
 
     if (!options?.debugHeftReporter) {
       // Extract the reporters and transform to include the Heft reporter by default
+      // @ts-expect-error `argv.reporters` is typed as a string array, but works with array of configs via direct call to runCLI
       jestArgv.reporters = JestPlugin._extractHeftJestReporters(
         scopedLogger,
         heftConfiguration,
