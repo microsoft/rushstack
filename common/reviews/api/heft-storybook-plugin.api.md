@@ -12,10 +12,10 @@ export default _default;
 
 // @public
 export interface IStorybookPluginOptions {
-  options?: string[];
-  startupModulePath?: string;
-  staticBuildModulePath?: string;
-  storykitPackageName: string;
+    startupModulePath?: string;
+    staticBuildModulePath?: string;
+    staticBuildOutputDir?: string;
+    storykitPackageName: string;
 }
 
 ```

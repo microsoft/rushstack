@@ -21,10 +21,10 @@
       "description": "Typically it is the path loaded the `build-storybook` shell script. For example, If you are using `@storybook/react`, then the static build path would be: `\"staticBuildModulePath\": \"@storybook/react/bin/build.js\"`",
       "type": "string"
     },
-    "options": {
-      "title": "The storybook defined cli options for start and build storybook.",
-      "description": "If this is empty, then it will use the default options config. For example, If you want to change the static build output dir to staticBuildDir, then the cli option would be: `\"options\": [ \"--output-dir=staticBuildDir\" ]`",
-      "type": "array"
+    "staticBuildOutputDir": {
+      "title": "The customized output dir for storybook static build.",
+      "description": "If this is empty, then it will use the storybook default output dir. If you want to change the static build output dir to staticBuildDir, then the static build output dir would be: `\"staticBuildOutputDir\": \"staticBuildDir\"`",
+      "type": "string"
     }
   }
 }

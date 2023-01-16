@@ -11,7 +11,7 @@ import {
 
 export interface IStorybookRunnerConfiguration extends ISubprocessRunnerBaseConfiguration {
   resolvedStartupModulePath: string;
-  options?: string[];
+  staticBuildOutputDir?: string;
 }
 
 // TODO: Why must this be a different name from the logger in StorybookPlugin.ts?
@@ -30,9 +30,11 @@ export class StorybookRunner extends SubprocessRunnerBase<IStorybookRunnerConfig
 
     terminal.writeLine('Launching ' + this._configuration.resolvedStartupModulePath);
 
-    if (this._configuration.options) {
-      process.argv.push(...this._configuration.options);
+    const originalArgv: string[] = process.argv;
+    if (this._configuration.staticBuildOutputDir) {
+      process.argv.push(`--output-dir=${this._configuration.staticBuildOutputDir}`);
     }
+    process.argv = originalArgv;
 
     require(this._configuration.resolvedStartupModulePath);
 
