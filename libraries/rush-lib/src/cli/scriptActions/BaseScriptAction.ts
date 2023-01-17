@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParameter } from '@rushstack/ts-command-line';
+import { CommandLineParameter, CommandLineRemainder } from '@rushstack/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
 import { Command, CommandLineConfiguration, IParameterJson } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
-import type { ParameterJson } from '../../api/CommandLineJson';
+import type { IRemainderJson, ParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Constructor parameters for BaseScriptAction
@@ -29,11 +29,21 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
   protected readonly commandLineConfiguration: CommandLineConfiguration;
   protected readonly customParameters: Map<IParameterJson, CommandLineParameter> = new Map();
   protected readonly command: TCommand;
+  protected _customRemainder: CommandLineRemainder | undefined;
+  protected _customRemainderJson: IRemainderJson | undefined;
 
   public constructor(options: IBaseScriptActionOptions<TCommand>) {
     super(options);
     this.commandLineConfiguration = options.commandLineConfiguration;
     this.command = options.command;
+  }
+
+  protected get customRemainder(): CommandLineRemainder | undefined {
+    return this._customRemainder;
+  }
+
+  protected get customRemainderJson(): IRemainderJson | undefined {
+    return this._customRemainderJson;
   }
 
   protected defineScriptParameters(): void {
@@ -118,6 +128,19 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
       }
 
       this.customParameters.set(parameter, tsCommandLineParameter);
+    }
+  }
+
+  protected defineScriptRemainder(): void {
+    if (!this.commandLineConfiguration) {
+      return;
+    }
+
+    if (this.command.associatedRemainder) {
+      this._customRemainderJson = this.command.associatedRemainder;
+      this._customRemainder = this.defineCommandLineRemainder({
+        description: this.command.associatedRemainder.description
+      });
     }
   }
 }

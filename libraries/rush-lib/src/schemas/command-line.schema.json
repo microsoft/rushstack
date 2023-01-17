@@ -661,6 +661,18 @@
           }
         }
       ]
+    },
+    "remainder": {
+      "title": "Remainder",
+      "description": "A list of custom remainder which stores arguments after the recognized portion",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": {
+        "description": { "$ref": "#/definitions/anything" },
+        "associatedCommands": { "$ref": "#/definitions/anything" },
+        "associatedPhases": { "$ref": "#/definitions/anything" }
+      }
     }
   },
 
@@ -711,6 +723,15 @@
           { "$ref": "#/definitions/integerListParameter" },
           { "$ref": "#/definitions/choiceListParameter" }
         ]
+      }
+    },
+
+    "remainders": {
+      "title": "Custom Remainders",
+      "description": "A list of custom remainder that can be associated with custom commands",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/remainder"
       }
     }
   }

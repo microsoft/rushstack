@@ -38,6 +38,7 @@ function createShellOperations(
   } = context;
 
   const customParametersByPhase: Map<IPhase, string[]> = new Map();
+  const remainderByPhase: Map<IPhase, string[]> = new Map();
 
   function getCustomParameterValuesForPhase(phase: IPhase): ReadonlyArray<string> {
     let customParameterValues: string[] | undefined = customParametersByPhase.get(phase);
@@ -53,6 +54,18 @@ function createShellOperations(
     return customParameterValues;
   }
 
+  function getRemainderValuesForPhase(phase: IPhase): ReadonlyArray<string> {
+    let remainderValues: string[] | undefined = remainderByPhase.get(phase);
+    if (!remainderValues) {
+      remainderValues = [];
+      phase.associatedRemainder?.appendToArgList(remainderValues);
+
+      remainderByPhase.set(phase, remainderValues);
+    }
+
+    return remainderValues;
+  }
+
   for (const operation of operations) {
     const { associatedPhase: phase, associatedProject: project } = operation;
 
@@ -60,8 +73,14 @@ function createShellOperations(
       // This is a shell command. In the future, may consider having a property on the initial operation
       // to specify a runner type requested in rush-project.json
       const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
+      const remainderValues: ReadonlyArray<string> = getRemainderValuesForPhase(phase);
 
-      const commandToRun: string | undefined = getScriptToRun(project, phase.name, customParameterValues);
+      const commandToRun: string | undefined = getScriptToRun(
+        project,
+        phase.name,
+        customParameterValues,
+        remainderValues
+      );
 
       if (commandToRun === undefined && !phase.ignoreMissingScript) {
         throw new Error(
@@ -100,7 +119,8 @@ function createShellOperations(
 function getScriptToRun(
   rushProject: RushConfigurationProject,
   commandToRun: string,
-  customParameterValues: ReadonlyArray<string>
+  customParameterValues: ReadonlyArray<string>,
+  remainderValues: ReadonlyArray<string>
 ): string | undefined {
   const { scripts } = rushProject.packageJson;
 
@@ -113,7 +133,9 @@ function getScriptToRun(
   if (!rawCommand) {
     return '';
   } else {
-    const shellCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
+    const shellCommand: string = `${rawCommand} ${customParameterValues.join(' ')} ${remainderValues.join(
+      ' '
+    )}`;
     return process.platform === 'win32' ? convertSlashesForWindows(shellCommand) : shellCommand;
   }
 }

@@ -11,6 +11,7 @@ import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import type { CommandLineRemainder } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
@@ -259,6 +260,7 @@ export interface IConfigurationEnvironmentVariable {
 export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+    readonly customRemainder: CommandLineRemainder | undefined;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
@@ -441,6 +443,7 @@ export interface IPackageManagerOptionsJsonBase {
 export interface IPhase {
     allowWarningsOnSuccess: boolean;
     associatedParameters: Set<CommandLineParameter>;
+    associatedRemainder: CommandLineRemainder | undefined;
     dependencies: {
         self: Set<IPhase>;
         upstream: Set<IPhase>;

@@ -8,6 +8,7 @@ import { AlreadyReportedError, InternalError, ITerminal, Terminal } from '@rushs
 import {
   CommandLineFlagParameter,
   CommandLineParameter,
+  CommandLineRemainder,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
@@ -216,6 +217,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     this.defineScriptParameters();
+    this.defineScriptRemainder();
 
     for (const [{ associatedPhases }, tsCommandLineParameter] of this.customParameters) {
       if (associatedPhases) {
@@ -227,6 +229,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           phase.associatedParameters.add(tsCommandLineParameter);
         }
       }
+    }
+
+    for (const phaseName of this.customRemainderJson?.associatedPhases || []) {
+      const phase: IPhase | undefined = this._knownPhases.get(phaseName);
+      if (!phase) {
+        throw new InternalError(`Could not find a phase matching ${phaseName}.`);
+      }
+      phase.associatedRemainder = this.customRemainder;
     }
   }
 
@@ -321,11 +331,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     for (const [configParameter, parserParameter] of this.customParameters) {
       customParametersByName.set(configParameter.longName, parserParameter);
     }
+    const customRemainder: CommandLineRemainder | undefined = this.customRemainder;
 
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const initialCreateOperationsContext: ICreateOperationsContext = {
       buildCacheConfiguration,
       customParameters: customParametersByName,
+      customRemainder,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       isInitial: true,
       isWatch,

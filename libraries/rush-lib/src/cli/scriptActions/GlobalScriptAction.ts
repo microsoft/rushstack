@@ -83,6 +83,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     }
 
     this.defineScriptParameters();
+    this.defineScriptRemainder();
   }
 
   private async _prepareAutoinstallerName(): Promise<void> {
@@ -135,9 +136,28 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
       customParameterValues[i] = customParameterValue;
     }
 
+    const remainderValues: string[] = [];
+    if (this.customRemainder) {
+      this.remainder?.appendToArgList(remainderValues);
+    }
+
+    for (let i: number = 0; i < remainderValues.length; i++) {
+      let remainderValue: string = remainderValues[i];
+      remainderValue = remainderValue.replace(/"/g, '\\"');
+
+      if (remainderValue.indexOf(' ') >= 0) {
+        remainderValue = `"${remainderValue}"`;
+      }
+
+      remainderValues[i] = remainderValue;
+    }
+
     let shellCommand: string = this._shellCommand;
     if (customParameterValues.length > 0) {
       shellCommand += ' ' + customParameterValues.join(' ');
+    }
+    if (remainderValues.length > 0) {
+      shellCommand += ' ' + remainderValues.join(' ');
     }
 
     const shellCommandTokenContext: IShellCommandTokenContext | undefined =

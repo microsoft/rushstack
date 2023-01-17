@@ -3,7 +3,7 @@
 
 import { AsyncSeriesHook, AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
 
-import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import type { CommandLineParameter, CommandLineRemainder } from '@rushstack/ts-command-line';
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import type { IPhase } from '../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -38,6 +38,10 @@ export interface ICreateOperationsContext {
    * Maps from the `longName` field in command-line.json to the parser configuration in ts-command-line.
    */
   readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+  /**
+   * The custom remainder for the executing command.
+   */
+  readonly customRemainder: CommandLineRemainder | undefined;
   /**
    * If true, projects may read their output from cache or be skipped if already up to date.
    * If false, neither of the above may occur, e.g. "rush rebuild"
