@@ -2234,14 +2234,12 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       eslint: ~8.7.0
-      jest-environment-jsdom: ~29.3.1
       jest-environment-node: ~29.3.1
       typescript: ~4.8.4
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       eslint: 8.7.0
-      jest-environment-jsdom: 29.3.1
       jest-environment-node: 29.3.1
       typescript: 4.8.4
     devDependencies:
