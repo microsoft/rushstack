@@ -1039,6 +1039,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+      "projectFolder": "webpack/webpack5-load-themed-styles-loader",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/hashed-folder-copy-plugin",
       "projectFolder": "webpack/hashed-folder-copy-plugin",
       "reviewCategory": "libraries",

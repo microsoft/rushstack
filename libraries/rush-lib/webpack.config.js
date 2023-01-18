@@ -117,6 +117,10 @@ module.exports = () => {
       [PathConstants.installRunRushxScriptFilename]: {
         import: `${__dirname}/lib-esnext/scripts/install-run-rushx.js`,
         ...SCRIPT_ENTRY_OPTIONS
+      },
+      [PathConstants.installRunRushPnpmScriptFilename]: {
+        import: `${__dirname}/lib-esnext/scripts/install-run-rush-pnpm.js`,
+        ...SCRIPT_ENTRY_OPTIONS
       }
     })
   ];

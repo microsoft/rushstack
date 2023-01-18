@@ -1,0 +1,29 @@
+{
+  "name": "@microsoft/webpack5-load-themed-styles-loader",
+  "entries": [
+    {
+      "version": "0.1.1",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.1",
+      "date": "Wed, 11 Jan 2023 05:17:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make webpack@5 an optional peer dependency."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.0",
+      "date": "Wed, 11 Jan 2023 04:07:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce webpack5-loader-load-themed-styles"
+          }
+        ]
+      }
+    }
+  ]
+}

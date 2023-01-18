@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "0.1.7",
+      "tag": "@rushstack/lockfile-explorer_v0.1.7",
+      "date": "Wed, 18 Jan 2023 05:02:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Print an upgrade notice when there is a newer release of the @rushstack/lockfile-explorer package"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.6",
       "tag": "@rushstack/lockfile-explorer_v0.1.6",
       "date": "Tue, 20 Dec 2022 01:18:22 GMT",
