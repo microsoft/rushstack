@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/lockfile-explorer",
-      "comment": "Add update notifier to lockfile explorer",
+      "comment": "Print an upgrade notice when there is a newer release of the @rushstack/lockfile-explorer package",
       "type": "patch"
     }
   ],
