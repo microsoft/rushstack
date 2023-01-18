@@ -1785,13 +1785,13 @@ importers:
       '@types/serialize-javascript': 5.0.2
       serialize-javascript: 6.0.0
       source-map: ~0.7.3
-      terser: 5.9.0
+      terser: 5.16.1
     dependencies:
       '@rushstack/worker-pool': link:../worker-pool
       '@types/node': 12.20.24
       serialize-javascript: 6.0.0
       source-map: 0.7.4
-      terser: 5.9.0
+      terser: 5.16.1
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -19546,7 +19546,7 @@ packages:
       schema-utils: 3.1.1
       serialize-javascript: 5.0.1
       source-map: 0.6.1
-      terser: 5.9.0
+      terser: 5.16.1
       webpack: 4.44.2
       webpack-sources: 1.4.3
     dev: true
@@ -19591,15 +19591,6 @@ packages:
       '@jridgewell/source-map': 0.3.2
       acorn: 8.8.1
       commander: 2.20.3
-      source-map-support: 0.5.21
-
-  /terser/5.9.0:
-    resolution: {integrity: sha512-h5hxa23sCdpzcye/7b8YqbE5OwKca/ni0RQz1uRX3tGh8haaGHqcuSqbGRybuAKNdntZ0mDgFNXPJ48xQ2RXKQ==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dependencies:
-      commander: 2.20.3
-      source-map: 0.7.4
       source-map-support: 0.5.21
 
   /test-exclude/6.0.0:
