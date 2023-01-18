@@ -78,8 +78,6 @@ type TSolutionHost = TTypescript.SolutionBuilderHost<TTypescript.EmitAndSemantic
 type TWatchSolutionHost =
   TTypescript.SolutionBuilderWithWatchHost<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
 
-const EMPTY_JSON: object = {};
-
 interface ICompilerCapabilities {
   /**
    * Support for incremental compilation via `ts.createIncrementalProgram()`.
@@ -360,7 +358,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       tsconfig,
       compilerHost
     } = measureTsPerformance('Configure', () => {
-      this._overrideTypeScriptReadJson(ts);
       const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
       this._validateTsconfig(ts, _tsconfig);
 
@@ -492,7 +489,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       rawDiagnostics,
       solutionBuilderHost
     } = await measureTsPerformanceAsync('Configure', async () => {
-      this._overrideTypeScriptReadJson(ts);
       const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
       this._validateTsconfig(ts, _tsconfig);
 
@@ -1177,37 +1173,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       reportSolutionBuilderStatus,
       reportWatchStatus
     );
-  }
-
-  private _overrideTypeScriptReadJson(ts: ExtendedTypeScript): void {
-    ts.readJson = (filePath: string) => {
-      let jsonData: object | undefined = this._tsReadJsonCache.get(filePath);
-      if (jsonData) {
-        return jsonData;
-      } else {
-        try {
-          const fileContents: string = this._cachedFileSystem.readFile(filePath);
-          if (!fileContents) {
-            jsonData = EMPTY_JSON;
-          } else {
-            const parsedFile: ReturnType<typeof ts.parseConfigFileTextToJson> = ts.parseConfigFileTextToJson(
-              filePath,
-              fileContents
-            );
-            if (parsedFile.error) {
-              jsonData = EMPTY_JSON;
-            } else {
-              jsonData = parsedFile.config as object;
-            }
-          }
-        } catch (error) {
-          jsonData = EMPTY_JSON;
-        }
-
-        this._tsReadJsonCache.set(filePath, jsonData);
-        return jsonData;
-      }
-    };
   }
 
   private _parseModuleKind(ts: ExtendedTypeScript, moduleKindName: string): TTypescript.ModuleKind {

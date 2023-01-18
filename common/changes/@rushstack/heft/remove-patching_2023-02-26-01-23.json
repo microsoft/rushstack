@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Remove ts.readJson patch",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
