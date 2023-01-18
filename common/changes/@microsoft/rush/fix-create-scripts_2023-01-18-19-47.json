@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `create-scripts.js` does not exist during `rush deploy`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
