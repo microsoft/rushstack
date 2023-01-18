@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.33.8",
+      "tag": "@microsoft/api-extractor_v7.33.8",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Use ts.getCheckFlags to fix TS 5.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.33.7",
       "tag": "@microsoft/api-extractor_v7.33.7",
       "date": "Fri, 09 Dec 2022 16:18:28 GMT",
