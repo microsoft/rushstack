@@ -56,7 +56,8 @@
       "options": {
         "storykitPackageName": "heft-storybook-react-tutorial-storykit",
         "startupModulePath": "@storybook/react/bin/index.js",
-        "staticBuildModulePath": "@storybook/react/bin/build.js"
+        "staticBuildModulePath": "@storybook/react/bin/build.js",
+        "staticBuildOutputDir": "static-build-dir"
       }
     }
   ]

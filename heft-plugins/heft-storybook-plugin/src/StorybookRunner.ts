@@ -30,11 +30,11 @@ export class StorybookRunner extends SubprocessRunnerBase<IStorybookRunnerConfig
 
     terminal.writeLine('Launching ' + this._configuration.resolvedStartupModulePath);
 
-    const originalArgv: string[] = process.argv;
     if (this._configuration.staticBuildOutputDir) {
+      const originalArgv: string[] = process.argv;
       process.argv.push(`--output-dir=${this._configuration.staticBuildOutputDir}`);
+      process.argv = originalArgv;
     }
-    process.argv = originalArgv;
 
     require(this._configuration.resolvedStartupModulePath);
 

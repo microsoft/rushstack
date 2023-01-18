@@ -127,7 +127,6 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
       );
     }
     this._storykitPackageName = options.storykitPackageName;
-    this._staticBuildOutputDir = options.staticBuildOutputDir;
 
     if (!options.startupModulePath && !options.staticBuildModulePath) {
       throw new Error(
@@ -151,6 +150,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
         return;
       }
 
+      this._staticBuildOutputDir = build.properties.serveMode ? undefined : options.staticBuildModulePath;
       const modulePath: string | undefined = build.properties.serveMode
         ? options.startupModulePath
         : options.staticBuildModulePath;
