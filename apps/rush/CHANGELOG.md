@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 22 Dec 2022 20:11:58 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:31 GMT and should not be manually modified.
+
+## 5.88.1
+Wed, 18 Jan 2023 22:44:31 GMT
+
+### Updates
+
+- Fix an issue where `create-scripts.js` does not exist during `rush deploy`.
+- Add install-run-rush-pnpm.js script
+- Update JSZip to 3.8.0.
 
 ## 5.88.0
 Thu, 22 Dec 2022 20:11:58 GMT

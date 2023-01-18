@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.88.1",
+      "tag": "@microsoft/rush_v5.88.1",
+      "date": "Wed, 18 Jan 2023 22:44:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `create-scripts.js` does not exist during `rush deploy`."
+          },
+          {
+            "comment": "Add install-run-rush-pnpm.js script"
+          },
+          {
+            "comment": "Update JSZip to 3.8.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.88.0",
       "tag": "@microsoft/rush_v5.88.0",
       "date": "Thu, 22 Dec 2022 20:11:58 GMT",
