@@ -85,7 +85,8 @@ describe(parseGitLsTree.name, () => {
 
 describe(getRepoStateAsync.name, () => {
   it('can parse committed files', async () => {
-    const results: Map<string, string> = await getRepoStateAsync(__dirname);
+    const repoRoot: string = getRepoRoot(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
     const expectedFiles: Map<string, string> = new Map(
       Object.entries({
@@ -109,7 +110,8 @@ describe(getRepoStateAsync.name, () => {
 
     FileSystem.writeFile(tempFilePath, 'a');
 
-    const results: Map<string, string> = await getRepoStateAsync(__dirname);
+    const repoRoot: string = getRepoRoot(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -141,7 +143,8 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath1, 'a');
     FileSystem.writeFile(tempFilePath2, 'a');
 
-    const results: Map<string, string> = await getRepoStateAsync(__dirname);
+    const repoRoot: string = getRepoRoot(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -173,7 +176,8 @@ describe(getRepoStateAsync.name, () => {
 
     FileSystem.deleteFile(testFilePath);
 
-    const results: Map<string, string> = await getRepoStateAsync(__dirname);
+    const repoRoot: string = getRepoRoot(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -204,7 +208,8 @@ describe(getRepoStateAsync.name, () => {
 
     FileSystem.writeFile(testFilePath, 'abc');
 
-    const results: Map<string, string> = await getRepoStateAsync(__dirname);
+    const repoRoot: string = getRepoRoot(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -240,7 +245,8 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath2, 'a');
     FileSystem.writeFile(tempFilePath3, 'a');
 
-    const results: Map<string, string> = await getRepoStateAsync(__dirname);
+    const repoRoot: string = getRepoRoot(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
@@ -274,7 +280,8 @@ describe(getRepoStateAsync.name, () => {
 
     FileSystem.writeFile(tempFilePath1, 'a');
 
-    const results: Map<string, string> = await getRepoStateAsync(__dirname, [
+    const repoRoot: string = getRepoRoot(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(repoRoot, [
       `${TEST_PREFIX}testProject/log.log`
     ]);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
