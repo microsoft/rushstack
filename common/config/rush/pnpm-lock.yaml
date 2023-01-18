@@ -1922,7 +1922,7 @@ importers:
       ignore: ~5.1.6
       inquirer: ~7.3.3
       js-yaml: ~3.13.1
-      jszip: ~3.7.1
+      jszip: ~3.8.0
       lodash: ~4.17.15
       node-fetch: 2.6.7
       npm-check: ~6.0.1
@@ -1960,7 +1960,7 @@ importers:
       ignore: 5.1.9
       inquirer: 7.3.3
       js-yaml: 3.13.1
-      jszip: 3.7.1
+      jszip: 3.8.0
       lodash: 4.17.21
       node-fetch: 2.6.7
       npm-check: 6.0.1
@@ -15077,8 +15077,8 @@ packages:
       pako: 1.0.11
     dev: true
 
-  /jszip/3.7.1:
-    resolution: {integrity: sha512-ghL0tz1XG9ZEmRMcEN2vt7xabrDdqHHeykgARpmZ0BiIctWxM47Vt63ZO2dnp4QYt/xJVLLy5Zv1l/xRdh2byg==}
+  /jszip/3.8.0:
+    resolution: {integrity: sha512-cnpQrXvFSLdsR9KR5/x7zdf6c3m8IhZfZzSblFEHSqBaVwD2nvJ4CuCKLyvKvwBgZm08CgfSoiTBQLm5WW9hGw==}
     dependencies:
       lie: 3.3.0
       pako: 1.0.11
