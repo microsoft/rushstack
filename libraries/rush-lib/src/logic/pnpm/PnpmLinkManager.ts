@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 import uriEncode from 'strict-uri-encode';
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
+import { base32 } from 'rfc4648';
 import colors from 'colors/safe';
 
 import {
@@ -217,6 +218,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
     const pathToLocalInstallation: string = this._getPathToLocalInstallation(
+      tarballEntry,
       absolutePathToTgzFile,
       folderNameSuffix
     );
@@ -272,8 +274,12 @@ export class PnpmLinkManager extends BaseLinkManager {
     });
   }
 
-  private _getPathToLocalInstallation(absolutePathToTgzFile: string, folderSuffix: string): string {
-    if (this._pnpmVersion.major >= 6) {
+  private _getPathToLocalInstallation(
+    tarballEntry: string,
+    absolutePathToTgzFile: string,
+    folderSuffix: string
+  ): string {
+    if (this._pnpmVersion.major === 6) {
       // PNPM 6 changed formatting to replace all ':' and '/' chars with '+'. Additionally, folder names > 120
       // are trimmed and hashed. NOTE: PNPM internally uses fs.realpath.native, which will cause additional
       // issues in environments that do not support long paths.
@@ -292,6 +298,26 @@ export class PnpmLinkManager extends BaseLinkManager {
           .createHash('md5')
           .update(folderName)
           .digest('hex')}`;
+      }
+
+      return path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        folderName,
+        RushConstants.nodeModulesFolderName
+      );
+    } else if (this._pnpmVersion.major >= 7) {
+      // PNPM 7 changed the local path format again and the hashing algorithm
+      // See https://github.com/pnpm/pnpm/releases/tag/v7.0.0
+      // e.g.:
+      //   file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
+      const specialCharRegex: RegExp = /\/|:/g;
+      const escapedLocalPath: string = Path.convertToSlashes(tarballEntry).replace(specialCharRegex, '+');
+      let folderName: string = `${escapedLocalPath}${folderSuffix}`;
+      // https://github.com/pnpm/pnpm/blob/v7.0.0/packages/dependency-path/src/index.ts#L136
+      if (folderName.length > 120) {
+        folderName = `${folderName.substring(0, 50)}_${createBase32Hash(folderName)}`;
       }
 
       return path.join(
@@ -376,4 +402,8 @@ export class PnpmLinkManager extends BaseLinkManager {
     newLocalPackage.symlinkTargetFolderPath = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
     return newLocalPackage;
   }
+}
+
+function createBase32Hash(str: string): string {
+  return base32.stringify(crypto.createHash('md5').update(str).digest()).replace(/(=+)$/, '').toLowerCase();
 }
