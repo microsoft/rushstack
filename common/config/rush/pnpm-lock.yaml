@@ -1785,13 +1785,13 @@ importers:
       '@types/serialize-javascript': 5.0.2
       serialize-javascript: 6.0.0
       source-map: ~0.7.3
-      terser: 5.9.0
+      terser: 5.16.1
     dependencies:
       '@rushstack/worker-pool': link:../worker-pool
       '@types/node': 12.20.24
       serialize-javascript: 6.0.0
       source-map: 0.7.4
-      terser: 5.9.0
+      terser: 5.16.1
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -1955,7 +1955,7 @@ importers:
       ignore: ~5.1.6
       inquirer: ~7.3.3
       js-yaml: ~3.13.1
-      jszip: ~3.7.1
+      jszip: ~3.8.0
       lodash: ~4.17.15
       node-fetch: 2.6.7
       npm-check: ~6.0.1
@@ -1993,7 +1993,7 @@ importers:
       ignore: 5.1.9
       inquirer: 7.3.3
       js-yaml: 3.13.1
-      jszip: 3.7.1
+      jszip: 3.8.0
       lodash: 4.17.21
       node-fetch: 2.6.7
       npm-check: 6.0.1
@@ -15346,8 +15346,8 @@ packages:
       pako: 1.0.11
     dev: true
 
-  /jszip/3.7.1:
-    resolution: {integrity: sha512-ghL0tz1XG9ZEmRMcEN2vt7xabrDdqHHeykgARpmZ0BiIctWxM47Vt63ZO2dnp4QYt/xJVLLy5Zv1l/xRdh2byg==}
+  /jszip/3.8.0:
+    resolution: {integrity: sha512-cnpQrXvFSLdsR9KR5/x7zdf6c3m8IhZfZzSblFEHSqBaVwD2nvJ4CuCKLyvKvwBgZm08CgfSoiTBQLm5WW9hGw==}
     dependencies:
       lie: 3.3.0
       pako: 1.0.11
@@ -19811,7 +19811,7 @@ packages:
       schema-utils: 3.1.1
       serialize-javascript: 5.0.1
       source-map: 0.6.1
-      terser: 5.9.0
+      terser: 5.16.1
       webpack: 4.44.2
       webpack-sources: 1.4.3
     dev: true
@@ -19856,15 +19856,6 @@ packages:
       '@jridgewell/source-map': 0.3.2
       acorn: 8.8.1
       commander: 2.20.3
-      source-map-support: 0.5.21
-
-  /terser/5.9.0:
-    resolution: {integrity: sha512-h5hxa23sCdpzcye/7b8YqbE5OwKca/ni0RQz1uRX3tGh8haaGHqcuSqbGRybuAKNdntZ0mDgFNXPJ48xQ2RXKQ==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dependencies:
-      commander: 2.20.3
-      source-map: 0.7.4
       source-map-support: 0.5.21
 
   /test-exclude/6.0.0:

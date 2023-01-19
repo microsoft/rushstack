@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+
+## 0.1.45
+Wed, 18 Jan 2023 22:44:12 GMT
+
+### Patches
+
+- Update to terser 5.16.1
 
 ## 0.1.44
 Tue, 20 Dec 2022 01:18:22 GMT
