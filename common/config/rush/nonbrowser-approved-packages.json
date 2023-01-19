@@ -207,6 +207,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/webpack-deep-imports-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/webpack-plugin-utilities",
       "allowedCategories": [ "libraries" ]
     },

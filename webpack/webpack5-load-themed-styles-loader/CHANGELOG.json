@@ -1,0 +1,50 @@
+{
+  "name": "@microsoft/webpack5-load-themed-styles-loader",
+  "entries": [
+    {
+      "version": "0.1.2",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.2",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.0.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.0.19` to `^2.0.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.1",
+      "date": "Wed, 11 Jan 2023 05:17:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make webpack@5 an optional peer dependency."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.0",
+      "date": "Wed, 11 Jan 2023 04:07:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce webpack5-loader-load-themed-styles"
+          }
+        ]
+      }
+    }
+  ]
+}

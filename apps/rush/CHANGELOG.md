@@ -1,6 +1,39 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 29 Nov 2022 00:10:20 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:31 GMT and should not be manually modified.
+
+## 5.88.1
+Wed, 18 Jan 2023 22:44:31 GMT
+
+### Updates
+
+- Fix an issue where `create-scripts.js` does not exist during `rush deploy`.
+- Add install-run-rush-pnpm.js script
+- Update JSZip to 3.8.0.
+
+## 5.88.0
+Thu, 22 Dec 2022 20:11:58 GMT
+
+### Updates
+
+- Improve the experience during a rush operation when the cached credentials have expired. Now, a warning is printed instead of an error being thrown and the operation halted.
+- (BREAKING API CHANGE IN @rushstack/rush-azure-storage-build-cache-plugin) Change the signature of `AzureAuthenticationBase.tryGetCachedCredentialAsync` to optionally take an object describing the behavior when credentials have expired. The behavior of the function without an argument is unchanged.
+
+## 5.87.0
+Fri, 16 Dec 2022 19:34:26 GMT
+
+### Updates
+
+- Fix a typo in the artifactory.json template
+- Writing local build cache is more robust on a network drive.
+- Document default value for the "watchDebounceMs" setting
+- Add "nodeSupportedVersionInstructions" property to rush.json, allowing maintainers to provide additional instructions if the user's node version is unsupported.
+- (IMPORTANT) Fix a regression where the "strictPeerDependencies" setting wasn't applied for some versions of PNPM 7 due to unexpected changes of PNPM's default value (GitHub #3828)
+- Fix an issue where if the package manager is PNPM 6.1.0 or newer, and `pnpmStore` is set to `"local"`, then a global cache was still used.
+- Write local telemetry for global script actions
+- Normalize all newlines in logging statements to LF. On Windows, some newlines were CRLF.
+- Upgrade `npm-check` dependency from `~5.9.2` to `~6.0.1`
+- Work towards bundling the files of "@rushstack/rush-lib" (Details in GitHub #3837)
 
 ## 5.86.0
 Tue, 29 Nov 2022 00:10:20 GMT

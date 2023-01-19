@@ -1,6 +1,30 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Fri, 09 Dec 2022 23:31:28 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+
+## 0.1.8
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.1.7
+Wed, 18 Jan 2023 05:02:16 GMT
+
+### Patches
+
+- Print an upgrade notice when there is a newer release of the @rushstack/lockfile-explorer package
+
+## 0.1.6
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
+
+## 0.1.5
+Fri, 16 Dec 2022 16:20:52 GMT
+
+### Patches
+
+- Fix an issue where an Error is thrown when a pnpmfile does not exist.
 
 ## 0.1.4
 Fri, 09 Dec 2022 23:31:28 GMT

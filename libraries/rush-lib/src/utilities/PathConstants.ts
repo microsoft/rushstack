@@ -16,12 +16,14 @@ export const assetsFolderPath: string = `${rushLibFolderRootPath}/assets`;
 /**
  * The folder name ("scripts") where the scripts in rush-lib are built.
  */
-export const scriptsFolderName: string = 'scripts';
+const scriptsFolderName: string = 'scripts';
 
 export const pnpmfileShimFilename: string = 'PnpmfileShim.js';
 export const installRunScriptFilename: string = 'install-run.js';
 export const installRunRushScriptFilename: string = 'install-run-rush.js';
 export const installRunRushxScriptFilename: string = 'install-run-rushx.js';
+export const installRunRushPnpmScriptFilename: string = 'install-run-rush-pnpm.js';
+export const createLinksScriptFilename: string = 'create-links.js';
 
 /**
  * The path to the scripts folder in rush-lib/dist.

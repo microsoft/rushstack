@@ -11,7 +11,8 @@ import type {
 
 import { BaseRushAction, IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
-import { BaseInstallManager, IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
+import type { BaseInstallManager } from '../../logic/base/BaseInstallManager';
+import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
