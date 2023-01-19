@@ -22,6 +22,7 @@ export const pnpmfileShimFilename: string = 'PnpmfileShim.js';
 export const installRunScriptFilename: string = 'install-run.js';
 export const installRunRushScriptFilename: string = 'install-run-rush.js';
 export const installRunRushxScriptFilename: string = 'install-run-rushx.js';
+export const installRunRushPnpmScriptFilename: string = 'install-run-rush-pnpm.js';
 
 /**
  * The path to the scripts folder in rush-lib/dist.
