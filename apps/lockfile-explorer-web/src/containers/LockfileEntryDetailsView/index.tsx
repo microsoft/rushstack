@@ -131,7 +131,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
       return ReactNull;
     }
     return (
-      <div className={`${appStyles.ContainerCard} ${styles.DependencyDetails}`}>
+      <div className={`${styles.DependencyDetails}`}>
         <ScrollArea>
           <div className={styles.DependencyDetailInfo}>
             <Text type="h5" bold>

@@ -37,8 +37,11 @@
 }
 
 .DependencyDetails {
+  @include base.card;
+  padding: 0 12px;
   margin-top: 12px;
   height: 4%;
+  min-height: 64px;
 }
 
 .InfluencerEntry {
