@@ -29,6 +29,7 @@ import { OperationError } from './OperationError';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
+import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { RushConstants } from '../RushConstants';
@@ -37,7 +38,7 @@ import { OperationStateFile } from './OperationStateFile';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { ProjectChangeAnalyzer, IRawRepoState } from '../ProjectChangeAnalyzer';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
@@ -448,6 +449,27 @@ export class ShellOperationRunner implements IOperationRunner {
               if (operationSettings.dependsOnEnvVars) {
                 for (const varName of operationSettings.dependsOnEnvVars) {
                   additionalContext['$' + varName] = process.env[varName] || '';
+                }
+              }
+
+              if (operationSettings.dependsOnAdditionalFiles) {
+                const repoState: IRawRepoState | undefined =
+                  this._projectChangeAnalyzer._ensureInitialized(terminal);
+
+                const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
+                  operationSettings.dependsOnAdditionalFiles,
+                  this._rushProject.projectFolder,
+                  repoState
+                );
+
+                terminal.writeDebugLine(
+                  `Including additional files to calculate build cache hash:\n  ${Array.from(
+                    additionalFiles.keys()
+                  ).join('\n  ')} `
+                );
+
+                for (const [filePath, fileHash] of additionalFiles) {
+                  additionalContext['file://' + filePath] = fileHash;
                 }
               }
               this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
