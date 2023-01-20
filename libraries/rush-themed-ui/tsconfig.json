@@ -3,7 +3,6 @@
   "compilerOptions": {
     "types": ["heft-jest", "webpack-env"],
     "target": "es2017",
-    "lib": ["es2017", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
-    "skipLibCheck": true
+    "lib": ["es2017", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"]
   }
 }

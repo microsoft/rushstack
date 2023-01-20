@@ -74,7 +74,7 @@ export interface ITabsProps {
     // (undocumented)
     renderChildren?: () => JSX.Element;
     // (undocumented)
-    value?: string | number;
+    value: string | number;
 }
 
 // @public

@@ -22,7 +22,7 @@ export interface ITabsItem {
 export interface ITabsProps {
   items: ITabsItem[];
   def?: string;
-  value?: string | number;
+  value: string | number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange?: (value: any) => void;
   renderChildren?: () => JSX.Element;
@@ -33,13 +33,13 @@ export interface ITabsProps {
  * @public
  */
 export const Tabs = ({ items, def, value, onChange, renderChildren }: ITabsProps): JSX.Element => {
-  const getItemValue = (item: ITabsItem): string | number =>
-    item.value === undefined ? item.header : item.value;
+  const getItemValue = (item: ITabsItem): string =>
+    item.value === undefined ? item.header : item.value.toString();
   return (
     <RadixTabs.Root
       className={styles.TabsRoot}
       defaultValue={def || items[0].header}
-      value={value}
+      value={value.toString()}
       onValueChange={onChange}
     >
       <RadixTabs.List className={styles.TabsList} aria-label="Manage your account">
