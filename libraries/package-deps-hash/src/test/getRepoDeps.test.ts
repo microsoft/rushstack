@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 
 import { getRepoStateAsync, parseGitLsTree, getRepoRoot } from '../getRepoState';
 
-import { FileSystem, FileConstants } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'), path.join('src', 'test'));
 
@@ -15,27 +15,20 @@ const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 
 const FILTERS: string[] = [`testProject/`, `nestedTestProject/`];
 
-function getRelevantEntries(results: Map<string, string>): Map<string, string> {
-  const relevantResults: Map<string, string> = new Map();
+function checkSnapshot(results: Map<string, string>): void {
+  const relevantResults: Record<string, string> = {};
   for (const [key, hash] of results) {
     if (key.startsWith(TEST_PREFIX)) {
       const partialKey: string = key.slice(TEST_PREFIX.length);
       for (const filter of FILTERS) {
         if (partialKey.startsWith(filter)) {
-          relevantResults.set(partialKey, hash);
+          relevantResults[partialKey] = hash;
         }
       }
     }
   }
-  return relevantResults;
-}
 
-function checkSnapshot(results: Map<string, string>): void {
-  const asObject: Record<string, string> = {};
-  for (const [key, value] of results) {
-    asObject[key] = value;
-  }
-  expect(asObject).toMatchSnapshot();
+  expect(relevantResults).toMatchSnapshot();
 }
 
 describe(getRepoRoot.name, () => {
@@ -95,23 +88,7 @@ describe(getRepoStateAsync.name, () => {
   it('can parse committed files', async () => {
     const repoRoot: string = getRepoRoot(__dirname);
     const results: Map<string, string> = await getRepoStateAsync(repoRoot);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-    checkSnapshot(filteredResults);
-    const expectedFiles: Map<string, string> = new Map(
-      Object.entries({
-        'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-        'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-        'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-        [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-      })
-    );
-
-    for (const [filePath, hash] of expectedFiles) {
-      expect(filteredResults.get(filePath)).toEqual(hash);
-    }
-    expect(filteredResults.size).toEqual(expectedFiles.size);
+    checkSnapshot(results);
   });
 
   it('can handle adding one file', async () => {
@@ -119,28 +96,10 @@ describe(getRepoStateAsync.name, () => {
 
     FileSystem.writeFile(tempFilePath, 'a');
 
-    const repoRoot: string = getRepoRoot(__dirname);
-    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      checkSnapshot(filteredResults);
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const repoRoot: string = getRepoRoot(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath);
     }
@@ -153,29 +112,10 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath1, 'a');
     FileSystem.writeFile(tempFilePath2, 'a');
 
-    const repoRoot: string = getRepoRoot(__dirname);
-    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      checkSnapshot(filteredResults);
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/b.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const repoRoot: string = getRepoRoot(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
       FileSystem.deleteFile(tempFilePath2);
@@ -187,26 +127,10 @@ describe(getRepoStateAsync.name, () => {
 
     FileSystem.deleteFile(testFilePath);
 
-    const repoRoot: string = getRepoRoot(__dirname);
-    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      checkSnapshot(filteredResults);
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const repoRoot: string = getRepoRoot(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
         stdio: 'ignore',
@@ -220,27 +144,10 @@ describe(getRepoStateAsync.name, () => {
 
     FileSystem.writeFile(testFilePath, 'abc');
 
-    const repoRoot: string = getRepoRoot(__dirname);
-    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      checkSnapshot(filteredResults);
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/file1.txt': 'f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const repoRoot: string = getRepoRoot(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
         stdio: 'ignore',
@@ -258,31 +165,10 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath2, 'a');
     FileSystem.writeFile(tempFilePath3, 'a');
 
-    const repoRoot: string = getRepoRoot(__dirname);
-    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      checkSnapshot(filteredResults);
-
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/a file.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/a  file name.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          'testProject/newFile批把.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const repoRoot: string = getRepoRoot(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
       FileSystem.deleteFile(tempFilePath2);
@@ -295,30 +181,12 @@ describe(getRepoStateAsync.name, () => {
 
     FileSystem.writeFile(tempFilePath1, 'a');
 
-    const repoRoot: string = getRepoRoot(__dirname);
-    const results: Map<string, string> = await getRepoStateAsync(repoRoot, [
-      `${TEST_PREFIX}testProject/log.log`
-    ]);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      checkSnapshot(filteredResults);
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          'testProject/log.log': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const repoRoot: string = getRepoRoot(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(repoRoot, [
+        `${TEST_PREFIX}testProject/log.log`
+      ]);
+      checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
     }
