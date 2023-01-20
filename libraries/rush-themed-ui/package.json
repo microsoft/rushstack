@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
-  "module": "lib/start.js",
-  "types": "lib/start.d.ts",
+  "module": "dist/rush-themed-ui.js",
+  "types": "dist/rush-themed-ui.d.ts",
   "scripts": {
     "build": "heft test --clean",
-    "start": "heft start",
+    "start": "heft build --watch",
     "test": "heft test",
     "_phase:build": "heft build --clean",
     "_phase:test": "heft test --no-build"
