@@ -1,5 +1,5 @@
 {
-  "name": "@rushstack/components",
+  "name": "@rushstack/rush-themed-ui",
   "description": "Rush Component Library: a set of themed components for rush projects",
   "version": "0.0.0",
   "private": true,

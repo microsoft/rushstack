@@ -11,7 +11,7 @@ import {
   removeBookmark,
   selectCurrentEntry
 } from '../../store/slices/entrySlice';
-import { Button, ScrollArea, Text } from '@rushstack/components';
+import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
 export const SelectedEntryPreview = (): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);

@@ -35,7 +35,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/components",
+      "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },
     {

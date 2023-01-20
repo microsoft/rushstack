@@ -190,10 +190,10 @@ importers:
       '@fluentui/react': ^8.96.1
       '@lifaon/path': ~2.1.0
       '@reduxjs/toolkit': ~1.8.6
-      '@rushstack/components': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-web-rig': workspace:*
+      '@rushstack/rush-themed-ui': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
@@ -206,7 +206,7 @@ importers:
       '@fluentui/react': 8.103.6_tlqvpdqnq63ssdllbmshthdmo4
       '@lifaon/path': 2.1.0
       '@reduxjs/toolkit': 1.8.6_qfynotfwlyrsyq662adyrweaoe
-      '@rushstack/components': link:../../libraries/rush-components
+      '@rushstack/rush-themed-ui': link:../../libraries/rush-themed-ui
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
       react-redux: 8.0.5_6ue7j6tfp4xzdzadarjwzo6kwu
@@ -1876,39 +1876,6 @@ importers:
       '@types/resolve': 1.20.2
       ajv: 6.12.6
 
-  ../../libraries/rush-components:
-    specifiers:
-      '@radix-ui/colors': ~0.1.8
-      '@radix-ui/react-checkbox': ~1.0.1
-      '@radix-ui/react-icons': ~1.1.1
-      '@radix-ui/react-scroll-area': ~1.0.2
-      '@radix-ui/react-tabs': ~1.0.1
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-web-rig': workspace:*
-      '@types/heft-jest': 1.0.1
-      '@types/react': 16.14.23
-      '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
-      react: ~16.13.1
-      react-dom: ~16.13.1
-    dependencies:
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
-    devDependencies:
-      '@radix-ui/colors': 0.1.8
-      '@radix-ui/react-checkbox': 1.0.1_5owmthsvj5ictknaj3ev736ofq
-      '@radix-ui/react-icons': 1.1.1_react@16.13.1
-      '@radix-ui/react-scroll-area': 1.0.2_5owmthsvj5ictknaj3ev736ofq
-      '@radix-ui/react-tabs': 1.0.1_5owmthsvj5ictknaj3ev736ofq
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-web-rig': link:../../rigs/heft-web-rig
-      '@types/heft-jest': 1.0.1
-      '@types/react': 16.14.23
-      '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
-
   ../../libraries/rush-lib:
     specifiers:
       '@pnpm/link-bins': ~5.3.7
@@ -2063,6 +2030,39 @@ importers:
       '@rushstack/ts-command-line': link:../ts-command-line
       '@types/heft-jest': 1.0.1
       '@types/semver': 7.3.5
+      '@types/webpack-env': 1.13.0
+
+  ../../libraries/rush-themed-ui:
+    specifiers:
+      '@radix-ui/colors': ~0.1.8
+      '@radix-ui/react-checkbox': ~1.0.1
+      '@radix-ui/react-icons': ~1.1.1
+      '@radix-ui/react-scroll-area': ~1.0.2
+      '@radix-ui/react-tabs': ~1.0.1
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-web-rig': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/react': 16.14.23
+      '@types/react-dom': 16.9.14
+      '@types/webpack-env': 1.13.0
+      react: ~16.13.1
+      react-dom: ~16.13.1
+    dependencies:
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+    devDependencies:
+      '@radix-ui/colors': 0.1.8
+      '@radix-ui/react-checkbox': 1.0.1_5owmthsvj5ictknaj3ev736ofq
+      '@radix-ui/react-icons': 1.1.1_react@16.13.1
+      '@radix-ui/react-scroll-area': 1.0.2_5owmthsvj5ictknaj3ev736ofq
+      '@radix-ui/react-tabs': 1.0.1_5owmthsvj5ictknaj3ev736ofq
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-web-rig': link:../../rigs/heft-web-rig
+      '@types/heft-jest': 1.0.1
+      '@types/react': 16.14.23
+      '@types/react-dom': 16.9.14
       '@types/webpack-env': 1.13.0
 
   ../../libraries/rushell:

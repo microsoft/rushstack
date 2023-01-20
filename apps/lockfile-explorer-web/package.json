@@ -19,7 +19,7 @@
     "@reduxjs/toolkit": "~1.8.6",
     "react-redux": "~8.0.4",
     "redux": "~4.2.0",
-    "@rushstack/components": "workspace:*"
+    "@rushstack/rush-themed-ui": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

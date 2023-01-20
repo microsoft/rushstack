@@ -431,8 +431,8 @@
       "reviewCategory": "libraries"
     },
     {
-      "packageName": "@rushstack/components",
-      "projectFolder": "libraries/rush-components",
+      "packageName": "@rushstack/rush-themed-ui",
+      "projectFolder": "libraries/rush-themed-ui",
       "reviewCategory": "libraries"
     },
     {
