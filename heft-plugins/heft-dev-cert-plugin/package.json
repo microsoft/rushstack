@@ -8,31 +8,25 @@
     "directory": "heft-plugins/heft-dev-cert-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-dev-cert-plugin.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
     "@rushstack/heft": "^0.49.0"
   },
   "dependencies": {
-    "@rushstack/debug-certificate-manager": "workspace:*",
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/debug-certificate-manager": "workspace:*"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
-    "eslint": "~8.7.0",
-    "webpack-dev-server": "~4.9.3",
-    "webpack": "~5.68.0"
+    "eslint": "~8.7.0"
   }
 }

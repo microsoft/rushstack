@@ -29,11 +29,11 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start --clean",
+    "start": "heft serve-watch",
     "serve": "node ./lib/start.js --debug",
     "test": "heft test",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",

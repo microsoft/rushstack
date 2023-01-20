@@ -11,6 +11,19 @@
       "title": "Disable Configuration Module Resolution",
       "description": "If set to true, modules specified in the Jest configuration will be resolved using Jest default (rootDir-relative) resolution. Otherwise, modules will be resolved using Node module resolution.",
       "type": "boolean"
+    },
+
+    "extensionForTests": {
+      "title": "File Extension For Tests",
+      "description": "Specifies the file extension for tests located in the \"folderNameForTests\".  Because Jest uses the Node.js runtime to execute tests, the module format contained must be CommonJS. The default value is \".js\".",
+      "pattern": "^\\.(c|m)?js$",
+      "type": "string"
+    },
+
+    "folderNameForTests": {
+      "title": "Folder Name For Tests",
+      "description": "Specifies the intermediary folder that tests will use.  Because Jest uses the Node.js runtime to execute tests, the module format must be CommonJS. The default value is \"lib\".",
+      "type": "string"
     }
   }
 }

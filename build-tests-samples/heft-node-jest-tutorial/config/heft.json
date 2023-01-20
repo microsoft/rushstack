@@ -1,29 +1,41 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 
-  "eventActions": [
-    {
-      "actionKind": "deleteGlobs",
-      "heftEvent": "clean",
-      "actionId": "defaultClean",
-      "globsToDelete": ["dist", "lib", "temp"]
-    }
-  ],
+  "watchOptions": {
+    "ignoredSourceFileGlobs": [
+      // Snapshots from Jest are updated even when the source file hasn't changed
+      "**/*.snap"
+    ]
+  },
 
-  /**
-   * The list of Heft plugins to be loaded.
-   */
-  "heftPlugins": [
-    {
-      /**
-       * The path to the plugin package.
-       */
-      "plugin": "@rushstack/heft-jest-plugin"
+  // TODO: Add comments
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }],
+      "tasksByName": {
+        "typescript": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        },
+        "lint": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-lint-plugin"
+          }
+        }
+      }
+    },
 
-      /**
-       * An optional object that provides additional settings that may be defined by the plugin.
-       */
-      // "options": { }
+    "test": {
+      "phaseDependencies": ["build"],
+      "tasksByName": {
+        "jest": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-jest-plugin"
+          }
+        }
+      }
     }
-  ]
+  }
 }

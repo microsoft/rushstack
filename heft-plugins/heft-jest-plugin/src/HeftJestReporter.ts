@@ -13,10 +13,11 @@ import {
   Config
 } from '@jest/reporters';
 
-import type { HeftConfiguration } from '@rushstack/heft';
+import type { HeftConfiguration, IScopedLogger } from '@rushstack/heft';
 
 export interface IHeftJestReporterOptions {
   heftConfiguration: HeftConfiguration;
+  logger: IScopedLogger;
   debugMode: boolean;
 }
 
@@ -33,12 +34,12 @@ export interface IHeftJestReporterOptions {
  */
 export default class HeftJestReporter implements Reporter {
   private _terminal: ITerminal;
-  private _buildFolder: string;
+  private _buildFolderPath: string;
   private _debugMode: boolean;
 
   public constructor(jestConfig: Config.GlobalConfig, options: IHeftJestReporterOptions) {
-    this._terminal = options.heftConfiguration.globalTerminal;
-    this._buildFolder = options.heftConfiguration.buildFolder;
+    this._terminal = options.logger.terminal;
+    this._buildFolderPath = options.heftConfiguration.buildFolderPath;
     this._debugMode = options.debugMode;
   }
 
@@ -57,24 +58,22 @@ export default class HeftJestReporter implements Reporter {
     this._writeConsoleOutput(testResult);
     const { numPassingTests, numFailingTests, failureMessage, testExecError, perfStats } = testResult;
 
-    if (numFailingTests > 0) {
-      this._terminal.write(Colors.redBackground(Colors.black('FAIL')));
-    } else if (testExecError) {
-      this._terminal.write(Colors.redBackground(Colors.black(`FAIL (${testExecError.type})`)));
-    } else {
-      this._terminal.write(Colors.greenBackground(Colors.black('PASS')));
-    }
-
     // Calculate the suite duration time from the test result. This is necessary because Jest doesn't
     // provide the duration on the 'test' object (at least not as of Jest 25), and other reporters
     // (ex. jest-junit) only use perfStats:
     // https://github.com/jest-community/jest-junit/blob/12da1a20217a9b6f30858013175319c1256f5b15/utils/buildJsonResults.js#L112
     const duration: string = perfStats ? `${((perfStats.end - perfStats.start) / 1000).toFixed(3)}s` : '?';
-    this._terminal.writeLine(
-      ` ${this._getTestPath(
-        test.path
-      )} (duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed)`
-    );
+    const message: string =
+      ` ${this._getTestPath(test.path)} ` +
+      `(duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed)`;
+
+    if (numFailingTests > 0) {
+      this._terminal.writeLine(Colors.redBackground(Colors.black('FAIL')), message);
+    } else if (testExecError) {
+      this._terminal.writeLine(Colors.redBackground(Colors.black(`FAIL (${testExecError.type})`)), message);
+    } else {
+      this._terminal.writeLine(Colors.greenBackground(Colors.black('PASS')), message);
+    }
 
     if (failureMessage) {
       this._terminal.writeErrorLine(failureMessage);
@@ -201,7 +200,7 @@ export default class HeftJestReporter implements Reporter {
   }
 
   private _getTestPath(fullTestPath: string): string {
-    return path.relative(this._buildFolder, fullTestPath);
+    return path.relative(this._buildFolderPath, fullTestPath);
   }
 
   private _formatWithPlural(num: number, singular: string, plural: string): string {

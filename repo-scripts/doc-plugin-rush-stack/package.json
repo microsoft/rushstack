@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
     "@microsoft/api-documenter": "workspace:*",
