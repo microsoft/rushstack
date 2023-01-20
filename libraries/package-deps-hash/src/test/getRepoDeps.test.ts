@@ -30,6 +30,14 @@ function getRelevantEntries(results: Map<string, string>): Map<string, string> {
   return relevantResults;
 }
 
+function checkSnapshot(results: Map<string, string>): void {
+  const asObject: Record<string, string> = {};
+  for (const [key, value] of results) {
+    asObject[key] = value;
+  }
+  expect(asObject).toMatchSnapshot();
+}
+
 describe(getRepoRoot.name, () => {
   it(`returns the correct directory`, () => {
     const root: string = getRepoRoot(__dirname);
@@ -88,6 +96,7 @@ describe(getRepoStateAsync.name, () => {
     const repoRoot: string = getRepoRoot(__dirname);
     const results: Map<string, string> = await getRepoStateAsync(repoRoot);
     const filteredResults: Map<string, string> = getRelevantEntries(results);
+    checkSnapshot(filteredResults);
     const expectedFiles: Map<string, string> = new Map(
       Object.entries({
         'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
@@ -115,6 +124,7 @@ describe(getRepoStateAsync.name, () => {
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
+      checkSnapshot(filteredResults);
       const expectedFiles: Map<string, string> = new Map(
         Object.entries({
           'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
@@ -148,6 +158,7 @@ describe(getRepoStateAsync.name, () => {
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
+      checkSnapshot(filteredResults);
       const expectedFiles: Map<string, string> = new Map(
         Object.entries({
           'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
@@ -181,6 +192,7 @@ describe(getRepoStateAsync.name, () => {
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
+      checkSnapshot(filteredResults);
       const expectedFiles: Map<string, string> = new Map(
         Object.entries({
           'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
@@ -213,6 +225,7 @@ describe(getRepoStateAsync.name, () => {
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
+      checkSnapshot(filteredResults);
       const expectedFiles: Map<string, string> = new Map(
         Object.entries({
           'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
@@ -250,6 +263,8 @@ describe(getRepoStateAsync.name, () => {
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
+      checkSnapshot(filteredResults);
+
       const expectedFiles: Map<string, string> = new Map(
         Object.entries({
           'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
@@ -287,6 +302,7 @@ describe(getRepoStateAsync.name, () => {
     const filteredResults: Map<string, string> = getRelevantEntries(results);
 
     try {
+      checkSnapshot(filteredResults);
       const expectedFiles: Map<string, string> = new Map(
         Object.entries({
           'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
