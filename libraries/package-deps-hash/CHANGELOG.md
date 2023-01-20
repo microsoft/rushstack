@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Jan 2023 16:19:50 GMT and should not be manually modified.
+
+## 4.0.0
+Fri, 20 Jan 2023 16:19:50 GMT
+
+### Breaking changes
+
+- Add getRepoStateAsync API for faster repository state calculation. Remove synchronous getRepoState API.
 
 ## 3.2.67
 Wed, 18 Jan 2023 22:44:12 GMT

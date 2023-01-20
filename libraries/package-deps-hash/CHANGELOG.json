@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@rushstack/package-deps-hash_v4.0.0",
+      "date": "Fri, 20 Jan 2023 16:19:50 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Add getRepoStateAsync API for faster repository state calculation. Remove synchronous getRepoState API."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.67",
       "tag": "@rushstack/package-deps-hash_v3.2.67",
       "date": "Wed, 18 Jan 2023 22:44:12 GMT",
