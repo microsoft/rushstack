@@ -431,6 +431,11 @@
       "reviewCategory": "libraries"
     },
     {
+      "packageName": "@rushstack/rush-themed-ui",
+      "projectFolder": "libraries/rush-themed-ui",
+      "reviewCategory": "libraries"
+    },
+    {
       "packageName": "@rushstack/rundown",
       "projectFolder": "apps/rundown",
       "reviewCategory": "libraries",

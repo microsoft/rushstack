@@ -101,9 +101,9 @@ app.post(
 );
 
 app.get('/api/pnpmfile', async (req: express.Request, res: express.Response) => {
-  let pnpmLockfile: string;
+  let pnpmfile: string;
   try {
-    pnpmLockfile = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
+    pnpmfile = await FileSystem.readFileAsync(appState.pnpmfileLocation);
   } catch (e) {
     if (FileSystem.isNotExistError(e)) {
       return res.status(404).send({
@@ -115,7 +115,7 @@ app.get('/api/pnpmfile', async (req: express.Request, res: express.Response) => 
     }
   }
 
-  res.send(pnpmLockfile);
+  res.send(pnpmfile);
 });
 
 app.post(
