@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Use getRepoStateAsync to optimize performance of calculating repository state.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
