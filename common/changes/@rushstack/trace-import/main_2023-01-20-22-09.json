@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/trace-import",
+      "comment": "Update README.md",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/trace-import"
+}
