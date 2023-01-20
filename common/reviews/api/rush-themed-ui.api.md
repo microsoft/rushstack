@@ -6,15 +6,23 @@
 
 import { default as React_2 } from 'react';
 
-// Warning: (ae-forgotten-export) The symbol "IButtonProps" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
+// @public
 export const Button: ({ children, disabled, onClick }: IButtonProps) => JSX.Element;
 
-// @public (undocumented)
+// @public
 export const Checkbox: ({ label, isChecked, onChecked }: ICheckboxProps) => JSX.Element;
 
-// @public (undocumented)
+// @public
+export interface IButtonProps {
+    // (undocumented)
+    children: JSX.Element | string;
+    // (undocumented)
+    disabled?: boolean;
+    // (undocumented)
+    onClick: () => void;
+}
+
+// @public
 export interface ICheckboxProps {
     // (undocumented)
     isChecked: boolean;
@@ -24,7 +32,7 @@ export interface ICheckboxProps {
     onChecked: (checked: boolean) => void;
 }
 
-// @public (undocumented)
+// @public
 export interface IInputProps {
     // (undocumented)
     onChange: (e: React_2.ChangeEvent<HTMLInputElement>) => void;
@@ -36,16 +44,16 @@ export interface IInputProps {
     value: string;
 }
 
-// @public (undocumented)
+// @public
 export const Input: ({ value, placeholder, onChange, type }: IInputProps) => JSX.Element;
 
-// @public (undocumented)
+// @public
 export interface IScrollAreaProps {
     // (undocumented)
     children: React_2.ReactNode;
 }
 
-// @public (undocumented)
+// @public
 export interface ITabsItem {
     // (undocumented)
     body?: React_2.ReactNode;
@@ -55,7 +63,7 @@ export interface ITabsItem {
     value?: string | number;
 }
 
-// @public (undocumented)
+// @public
 export interface ITabsProps {
     // (undocumented)
     def?: string;
@@ -69,7 +77,7 @@ export interface ITabsProps {
     value?: string | number;
 }
 
-// @public (undocumented)
+// @public
 export interface ITextProps {
     // (undocumented)
     bold?: boolean;
@@ -83,19 +91,17 @@ export interface ITextProps {
     type: TextType;
 }
 
-// @public (undocumented)
+// @public
 export const ScrollArea: ({ children }: IScrollAreaProps) => JSX.Element;
 
-// @public (undocumented)
+// @public
 export const Tabs: ({ items, def, value, onChange, renderChildren }: ITabsProps) => JSX.Element;
 
-// @public (undocumented)
+// @public
 const Text_2: ({ type, bold, children, className, size }: ITextProps) => JSX.Element;
 export { Text_2 as Text }
 
-// @public (undocumented)
+// @public
 export type TextType = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
-
-// (No @packageDocumentation comment for this package)
 
 ```

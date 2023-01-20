@@ -5,12 +5,20 @@ import React from 'react';
 import * as RadixTabs from '@radix-ui/react-tabs';
 import styles from './styles.scss';
 
+/**
+ * React props for {@link Tabs}
+ * @public
+ */
 export interface ITabsItem {
   header: string;
   value?: string | number;
   body?: React.ReactNode;
 }
 
+/**
+ * React props for {@link Tabs}
+ * @public
+ */
 export interface ITabsProps {
   items: ITabsItem[];
   def?: string;
@@ -20,6 +28,10 @@ export interface ITabsProps {
   renderChildren?: () => JSX.Element;
 }
 
+/**
+ * A tab control UI component
+ * @public
+ */
 export const Tabs = ({ items, def, value, onChange, renderChildren }: ITabsProps): JSX.Element => {
   const getItemValue = (item: ITabsItem): string | number =>
     item.value === undefined ? item.header : item.value;

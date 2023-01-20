@@ -4,8 +4,16 @@
 import React from 'react';
 import styles from './styles.scss';
 
+/**
+ * Indicates the type of HTML element used with {@link ITextProps}.
+ * @public
+ */
 export type TextType = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
 
+/**
+ * React props for {@link Text}
+ * @public
+ */
 export interface ITextProps {
   type: TextType;
   bold?: boolean;
@@ -14,6 +22,10 @@ export interface ITextProps {
   size?: number;
 }
 
+/**
+ * A text box UI component
+ * @public
+ */
 export const Text = ({ type, bold = false, children, className, size }: ITextProps): JSX.Element => {
   const generalStyles: { [key in string]: string | number } = {
     ['fontWeight']: bold ? 'bold' : 'normal',

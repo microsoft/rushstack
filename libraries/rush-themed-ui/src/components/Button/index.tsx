@@ -5,12 +5,20 @@ import React from 'react';
 import { Text } from '../Text';
 import styles from './styles.scss';
 
-interface IButtonProps {
+/**
+ * React props for {@link Button}
+ * @public
+ */
+export interface IButtonProps {
   children: JSX.Element | string;
   disabled?: boolean;
   onClick: () => void;
 }
 
+/**
+ * A button UI component
+ * @public
+ */
 export const Button = ({ children, disabled = false, onClick }: IButtonProps): JSX.Element => {
   return (
     <button disabled={disabled} className={styles.ButtonWrapper} onClick={onClick}>
