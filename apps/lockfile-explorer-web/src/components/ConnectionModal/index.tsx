@@ -43,15 +43,16 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
     <div className={styles.DisconnectOverlayBackground}>
       <div className={`${styles.DisconnectOverlay} ${appStyles.ContainerCard}`}>
         <Text type="h5" bold>
-          The server has disconnected!
+          The Lockfile Explorer server has disconnected!
         </Text>
         {manualChecked ? (
           <Text type="p">
-            We were still not able to establish a connection to the server. Are you sure it is running?
+            We were still not able to connect to the server. Are you sure the &quot;lockfile-explorer&quot;
+            shell command is running?
           </Text>
         ) : (
           <Text type="p">
-            Please re-start the local development server to continue using this application.
+            Please restart the &quot;lockfile-explorer&quot; shell command to continue using this application.
           </Text>
         )}
         <div className={styles.DisconnectCheckRow}>

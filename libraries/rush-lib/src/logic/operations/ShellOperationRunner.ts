@@ -454,7 +454,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
               if (operationSettings.dependsOnAdditionalFiles) {
                 const repoState: IRawRepoState | undefined =
-                  this._projectChangeAnalyzer._ensureInitialized(terminal);
+                  await this._projectChangeAnalyzer._ensureInitializedAsync(terminal);
 
                 const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
                   operationSettings.dependsOnAdditionalFiles,

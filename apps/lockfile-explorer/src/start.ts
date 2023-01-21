@@ -18,9 +18,23 @@ const PORT: number = 8091;
 // Must not have a trailing slash
 const SERVICE_URL: string = `http://localhost:${PORT}`;
 
-updateNotifier({ pkg: packageJSON }).notify();
-
 const appState: IAppState = init();
+
+console.log(
+  colors.bold(`\nRush Lockfile Explorer ${appState.appVersion}`) +
+    colors.cyan(' - https://lfx.rushstack.io/\n')
+);
+
+// TODO: Later if we introduce more CLI parameters, switch to a proper CLI parser
+const args: string[] = process.argv.slice(2);
+if (args.length > 0 && args[0] !== '--debug') {
+  console.log('Usage: lockfile-explorer [--debug]\n');
+  console.log('The "lfx" command is a shorthand alias for "lockfile-explorer".');
+  console.log('See the project website for documentation and support.\n');
+  process.exit(1);
+}
+
+updateNotifier({ pkg: packageJSON }).notify();
 
 process.chdir(appState.lockfileExplorerProjectRoot);
 const distFolderPath: string = `${appState.lockfileExplorerProjectRoot}/dist`;
@@ -145,7 +159,7 @@ app.post(
 );
 
 app.listen(PORT, async () => {
-  console.log(`Rush Lockfile Explorer ${appState.appVersion} running at ${SERVICE_URL}`);
+  console.log(`App launched on ${SERVICE_URL}`);
 
   if (!process.argv.includes('--debug')) {
     try {
