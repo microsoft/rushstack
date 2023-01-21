@@ -2,6 +2,26 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/lockfile-explorer_v0.2.0",
+      "date": "Sat, 21 Jan 2023 04:36:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"lfx\" as an alias for the \"lockfile-explorer\" shell command"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add some basic command-line help and improve some message strings"
+          },
+          {
+            "comment": "Add support for rush components"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.8",
       "tag": "@rushstack/lockfile-explorer_v0.1.8",
       "date": "Wed, 18 Jan 2023 22:44:12 GMT",

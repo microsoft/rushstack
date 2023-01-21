@@ -1,6 +1,18 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+This log was last generated on Sat, 21 Jan 2023 04:36:33 GMT and should not be manually modified.
+
+## 0.2.0
+Sat, 21 Jan 2023 04:36:33 GMT
+
+### Minor changes
+
+- Add "lfx" as an alias for the "lockfile-explorer" shell command
+
+### Patches
+
+- Add some basic command-line help and improve some message strings
+- Add support for rush components
 
 ## 0.1.8
 Wed, 18 Jan 2023 22:44:12 GMT
