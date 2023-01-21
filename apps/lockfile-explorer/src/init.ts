@@ -21,7 +21,7 @@ export const init = (): IAppState => {
     const rushJsonPath: string = `${currExploredDir}/rush.json`;
     const pnpmLockPath: string = `${currExploredDir}/pnpm-lock.yaml`;
     if (FileSystem.exists(rushJsonPath)) {
-      console.log('found rush project: ', rushJsonPath);
+      console.log('Found a Rush workspace: ', rushJsonPath);
       // Load the rush projects
       const rushJson: IRushConfigurationJson = JsonFile.load(rushJsonPath);
       const projectsByProjectFolder: Map<string, IRushProjectDetails> = new Map();
@@ -64,7 +64,7 @@ export const init = (): IAppState => {
   }
 
   if (!appState) {
-    throw new Error('Could not find a rush or pnpm project!');
+    throw new Error('Could not find a Rush or PNPM workspace!');
   }
 
   return appState;
