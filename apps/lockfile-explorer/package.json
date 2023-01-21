@@ -25,7 +25,8 @@
   "homepage": "https://lfx.rushstack.io/",
   "license": "MIT",
   "bin": {
-    "lockfile-explorer": "./bin/lockfile-explorer"
+    "lockfile-explorer": "./bin/lockfile-explorer",
+    "lfx": "./bin/lockfile-explorer"
   },
   "scripts": {
     "build": "heft build --clean",
