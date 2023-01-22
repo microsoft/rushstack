@@ -85,7 +85,21 @@ describe(parseGitLsTree.name, () => {
 });
 
 describe(getRepoStateAsync.name, () => {
-  it('can parse committed files', async () => {
+  // TEMPORARILY DISABLED DUE TO NONDETERMINISTIC TEST FAILURES
+  // https://github.com/microsoft/rushstack/issues/3913
+  //
+  //  ● getRepoStateAsync › can parse committed files
+  //
+  //    TypeError: Cannot read properties of undefined (reading 'startsWith')
+  //
+  //      19 |   const relevantResults: Record<string, string> = {};
+  //      20 |   for (const [key, hash] of results) {
+  //    > 21 |     if (key.startsWith(TEST_PREFIX)) {
+  //         |             ^
+  //      22 |       const partialKey: string = key.slice(TEST_PREFIX.length);
+  //      23 |       for (const filter of FILTERS) {
+  //      24 |         if (partialKey.startsWith(filter)) {
+  it.skip('can parse committed files', async () => {
     const repoRoot: string = getRepoRoot(__dirname);
     const results: Map<string, string> = await getRepoStateAsync(repoRoot);
     checkSnapshot(results);
@@ -122,7 +136,9 @@ describe(getRepoStateAsync.name, () => {
     }
   });
 
-  it('can handle removing one file', async () => {
+  // TEMPORARILY DISABLED DUE TO NONDETERMINISTIC TEST FAILURES
+  // https://github.com/microsoft/rushstack/issues/3913
+  it.skip('can handle removing one file', async () => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.deleteFile(testFilePath);
