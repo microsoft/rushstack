@@ -138,7 +138,7 @@
         {
           "sourceFolder": "node_modules/@rushstack/rush-themed-ui/dist",
           "destinationFolders": ["dist"],
-          "fileExtensions": [".js", ".map"]
+          "fileExtensions": [".js", ".svg", ".css", ".txt"]
         }
       ]
     }
