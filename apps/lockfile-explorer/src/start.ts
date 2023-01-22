@@ -34,7 +34,17 @@ if (args.length > 0 && args[0] !== '--debug') {
   process.exit(1);
 }
 
-updateNotifier({ pkg: packageJSON }).notify();
+updateNotifier({
+  pkg: packageJSON,
+  // Normally update-notifier waits a day or so before it starts displaying upgrade notices.
+  // In debug mode, show the notice right away.
+  updateCheckInterval: appState.debugMode ? 0 : undefined
+}).notify({
+  // Make sure it says "-g" in the "npm install" example command line
+  isGlobal: true,
+  // Show the notice immediately, rather than waiting for process.onExit()
+  defer: false
+});
 
 process.chdir(appState.lockfileExplorerProjectRoot);
 const distFolderPath: string = `${appState.lockfileExplorerProjectRoot}/dist`;
@@ -161,7 +171,7 @@ app.post(
 app.listen(PORT, async () => {
   console.log(`App launched on ${SERVICE_URL}`);
 
-  if (!process.argv.includes('--debug')) {
+  if (!appState.debugMode) {
     try {
       // Launch the web browser
       await open(SERVICE_URL);

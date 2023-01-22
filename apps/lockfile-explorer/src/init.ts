@@ -13,6 +13,7 @@ export const init = (): IAppState => {
   const currDir = process.cwd();
   const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
   const appVersion: string = JsonFile.load(`${lockfileExplorerProjectRoot}/package.json`).version;
+  const debugMode: boolean = process.argv.indexOf('--debug') >= 0;
 
   let appState: IAppState | undefined;
   let currExploredDir = Path.convertToSlashes(currDir);
@@ -35,6 +36,7 @@ export const init = (): IAppState => {
       appState = {
         currDir,
         appVersion,
+        debugMode,
         lockfileExplorerProjectRoot,
         projectType: ProjectType.RUSH_PROJECT,
         pnpmLockfileLocation: `${currExploredDir}/common/config/rush/pnpm-lock.yaml`,
@@ -50,6 +52,7 @@ export const init = (): IAppState => {
       appState = {
         currDir,
         appVersion,
+        debugMode,
         lockfileExplorerProjectRoot,
         projectType: ProjectType.PNPM_WORKSPACE,
         pnpmLockfileLocation: `${currExploredDir}/pnpm-lock.yaml`,
