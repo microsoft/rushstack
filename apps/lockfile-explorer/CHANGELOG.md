@@ -1,6 +1,14 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Sat, 21 Jan 2023 04:36:33 GMT and should not be manually modified.
+This log was last generated on Sun, 22 Jan 2023 20:37:08 GMT and should not be manually modified.
+
+## 0.2.1
+Sun, 22 Jan 2023 20:37:08 GMT
+
+### Patches
+
+- Fix an issue where the upgrade notice wasn't displayed until after pressing CTRL+C
+- Fix a regression where some CSS styles were not being loaded properly
 
 ## 0.2.0
 Sat, 21 Jan 2023 04:36:33 GMT
