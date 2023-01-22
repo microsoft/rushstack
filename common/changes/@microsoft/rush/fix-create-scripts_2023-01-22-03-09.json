@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a regression where the 'dist/scripts' folder name was named 'dist/undefined'",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
