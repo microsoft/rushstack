@@ -4,16 +4,18 @@
 // This function will read the current directory and try to figure out if it's a rush project or regular pnpm workspace
 // Currently it will throw error if neither can be determined
 
-import { FileSystem, JsonFile, PackageJsonLookup, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 
 import { type IAppState, IRushProjectDetails, ProjectType } from './state';
 
-export const init = (): IAppState => {
+export const init = (options: {
+  lockfileExplorerProjectRoot: string;
+  appVersion: string;
+  debugMode: boolean;
+}): IAppState => {
+  const { lockfileExplorerProjectRoot, appVersion, debugMode } = options;
   const currDir = process.cwd();
-  const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-  const appVersion: string = JsonFile.load(`${lockfileExplorerProjectRoot}/package.json`).version;
-  const debugMode: boolean = process.argv.indexOf('--debug') >= 0;
 
   let appState: IAppState | undefined;
   let currExploredDir = Path.convertToSlashes(currDir);
