@@ -13,7 +13,7 @@ import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
 
-const PackageView = {
+const PackageView: { [key in string]: string } = {
   PACKAGE_JSON: 'PACKAGE_JSON',
   PACKAGE_SPEC: 'PACKAGE_SPEC',
   PARSED_PACKAGE_JSON: 'PARSED_PACKAGE_JSON'
