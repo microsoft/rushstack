@@ -8,4 +8,10 @@
     cursor: pointer;
     background-color: colors.$primary-background;
   }
+  &:disabled {
+    cursor: default;
+    background-color: colors.$background-primary;
+    color: colors.$gray;
+    border-color: colors.$secondary-active;
+  }
 }

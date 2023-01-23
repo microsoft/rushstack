@@ -60,7 +60,7 @@ export interface ITabsItem {
     // (undocumented)
     header: string;
     // (undocumented)
-    value?: string | number;
+    value?: string;
 }
 
 // @public
@@ -74,7 +74,7 @@ export interface ITabsProps {
     // (undocumented)
     renderChildren?: () => JSX.Element;
     // (undocumented)
-    value: string | number;
+    value: string;
 }
 
 // @public
