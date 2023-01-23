@@ -13,11 +13,11 @@ import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
 
-enum PackageView {
-  PACKAGE_JSON,
-  PACKAGE_SPEC,
-  PARSED_PACKAGE_JSON
-}
+const PackageView = {
+  PACKAGE_JSON: 'PACKAGE_JSON',
+  PACKAGE_SPEC: 'PACKAGE_SPEC',
+  PARSED_PACKAGE_JSON: 'PARSED_PACKAGE_JSON'
+};
 
 export const PackageJsonViewer = (): JSX.Element => {
   const dispatch = useAppDispatch();
@@ -28,9 +28,12 @@ export const PackageJsonViewer = (): JSX.Element => {
 
   const specChanges = useAppSelector((state) => state.workspace.specChanges);
 
-  const [selection, setSelection] = useState<PackageView>(PackageView.PARSED_PACKAGE_JSON);
+  const [selection, setSelection] = useState<string>(PackageView.PARSED_PACKAGE_JSON);
 
-  const cb = useCallback((s: PackageView) => setSelection(s), []);
+  const cb = useCallback((s: string) => {
+    console.log('new view: ', s);
+    setSelection(s);
+  }, []);
 
   useEffect(() => {
     async function loadPnpmFileAsync(): Promise<void> {
