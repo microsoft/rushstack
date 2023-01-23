@@ -83,13 +83,17 @@ export function parseGitLsTree(output: string): IGitTreeState {
 export function* parseGitHashObject(
   output: string,
   filePaths: ReadonlyArray<string>
-): Iterable<[string, string]> {
+): IterableIterator<[string, string]> {
+  const expected: number = filePaths.length;
+  if (expected === 0) {
+    return;
+  }
+
   output = output.trim();
 
   let last: number = 0;
   let i: number = 0;
   let index: number = output.indexOf('\n', last);
-  const expected: number = filePaths.length;
   for (; i < expected && index > 0; i++) {
     const hash: string = output.slice(last, index);
     yield [filePaths[i], hash];
@@ -97,15 +101,15 @@ export function* parseGitHashObject(
     index = output.indexOf('\n', last);
   }
 
-  // Handle last line
+  // Handle last line. Will be non-empty to due trim() call.
   if (index < 0) {
     const hash: string = output.slice(last);
     yield [filePaths[i], hash];
     i++;
   }
 
-  if (i < expected) {
-    throw new Error(`Expected ${expected} hashes from "git hash-object" but only received ${i}`);
+  if (i !== expected) {
+    throw new Error(`Expected ${expected} hashes from "git hash-object" but received ${i}`);
   }
 }
 

@@ -82,3 +82,23 @@ Object {
   "testProject/package.json": "18a1e415e56220fa5122428a4ef8eb8874756576",
 }
 `;
+
+exports[`parseGitHashObject can parse multiple entries 1`] = `
+Map {
+  "a" => "11",
+  "b" => "22",
+  "c" => "33",
+}
+`;
+
+exports[`parseGitHashObject can parse multiple entries with trailing whitespace 1`] = `
+Map {
+  "a" => "11",
+  "b" => "22",
+  "c" => "33",
+}
+`;
+
+exports[`parseGitHashObject throws if too few hashes are provided 1`] = `"Expected 3 hashes from \\"git hash-object\\" but received 2"`;
+
+exports[`parseGitHashObject throws if too many hashes are provided 1`] = `"Expected 2 hashes from \\"git hash-object\\" but received 3"`;
