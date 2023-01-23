@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-import { getRepoStateAsync, parseGitLsTree, getRepoRoot } from '../getRepoState';
+import { getRepoStateAsync, parseGitLsTree, getRepoRoot, parseGitHashObject } from '../getRepoState';
 
 import { FileSystem } from '@rushstack/node-core-library';
 
@@ -84,24 +84,38 @@ describe(parseGitLsTree.name, () => {
   });
 });
 
+describe(parseGitHashObject.name, () => {
+  it('can handle requesting zero entries', () => {
+    const results: Map<string, string> = new Map(parseGitHashObject('', []));
+    expect(results.size).toEqual(0);
+  });
+
+  it('can parse multiple entries', () => {
+    const results: Map<string, string> = new Map(parseGitHashObject('11\n22\n33', ['a', 'b', 'c']));
+    expect(results).toMatchSnapshot();
+  });
+
+  it('can parse multiple entries with trailing whitespace', () => {
+    const results: Map<string, string> = new Map(parseGitHashObject('11\n22\n33\n\n', ['a', 'b', 'c']));
+    expect(results).toMatchSnapshot();
+  });
+
+  it('throws if too few hashes are provided', () => {
+    expect(() => {
+      new Map(parseGitHashObject('11\n22', ['a', 'b', 'c']));
+    }).toThrowErrorMatchingSnapshot();
+  });
+
+  it('throws if too many hashes are provided', () => {
+    expect(() => {
+      new Map(parseGitHashObject('11\n22\n33', ['a', 'b']));
+    }).toThrowErrorMatchingSnapshot();
+  });
+});
+
 describe(getRepoStateAsync.name, () => {
-  // TEMPORARILY DISABLED DUE TO NONDETERMINISTIC TEST FAILURES
-  // https://github.com/microsoft/rushstack/issues/3913
-  //
-  //  ● getRepoStateAsync › can parse committed files
-  //
-  //    TypeError: Cannot read properties of undefined (reading 'startsWith')
-  //
-  //      19 |   const relevantResults: Record<string, string> = {};
-  //      20 |   for (const [key, hash] of results) {
-  //    > 21 |     if (key.startsWith(TEST_PREFIX)) {
-  //         |             ^
-  //      22 |       const partialKey: string = key.slice(TEST_PREFIX.length);
-  //      23 |       for (const filter of FILTERS) {
-  //      24 |         if (partialKey.startsWith(filter)) {
-  it.skip('can parse committed files', async () => {
-    const repoRoot: string = getRepoRoot(__dirname);
-    const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+  it('can parse committed files', async () => {
+    const results: Map<string, string> = await getRepoStateAsync(__dirname);
     checkSnapshot(results);
   });
 
@@ -111,8 +125,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath, 'a');
 
     try {
-      const repoRoot: string = getRepoRoot(__dirname);
-      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath);
@@ -127,8 +140,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath2, 'a');
 
     try {
-      const repoRoot: string = getRepoRoot(__dirname);
-      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
@@ -136,16 +148,13 @@ describe(getRepoStateAsync.name, () => {
     }
   });
 
-  // TEMPORARILY DISABLED DUE TO NONDETERMINISTIC TEST FAILURES
-  // https://github.com/microsoft/rushstack/issues/3913
-  it.skip('can handle removing one file', async () => {
+  it('can handle removing one file', async () => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.deleteFile(testFilePath);
 
     try {
-      const repoRoot: string = getRepoRoot(__dirname);
-      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
       checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
@@ -161,8 +170,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(testFilePath, 'abc');
 
     try {
-      const repoRoot: string = getRepoRoot(__dirname);
-      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
       checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
@@ -182,8 +190,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath3, 'a');
 
     try {
-      const repoRoot: string = getRepoRoot(__dirname);
-      const results: Map<string, string> = await getRepoStateAsync(repoRoot);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
@@ -198,8 +205,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath1, 'a');
 
     try {
-      const repoRoot: string = getRepoRoot(__dirname);
-      const results: Map<string, string> = await getRepoStateAsync(repoRoot, [
+      const results: Map<string, string> = await getRepoStateAsync(__dirname, [
         `${TEST_PREFIX}testProject/log.log`
       ]);
       checkSnapshot(results);
