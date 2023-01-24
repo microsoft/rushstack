@@ -312,10 +312,8 @@ export class PnpmLinkManager extends BaseLinkManager {
       // See https://github.com/pnpm/pnpm/releases/tag/v7.0.0
       // e.g.:
       //   file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
-      const specialCharRegex: RegExp = /\/|:/g;
-      const escapedLocalPath: string = Path.convertToSlashes(tarballEntry).replace(specialCharRegex, '+');
-      const folderName: string = depPathToFilename(`${escapedLocalPath}${folderSuffix}`);
-
+      const escapedLocalPath: string = depPathToFilename(tarballEntry);
+      const folderName: string = `${escapedLocalPath}${folderSuffix}`;
       return path.join(
         this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
