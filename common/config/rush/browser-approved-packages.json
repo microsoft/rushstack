@@ -71,10 +71,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "rfc4648",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "rxjs",
       "allowedCategories": [ "libraries" ]
     },
