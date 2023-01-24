@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix linking error due to PNPM v7 local install path breaking change",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
