@@ -87,7 +87,7 @@ export class LockfileEntry {
       this.entryId = 'project:' + this.packageJsonFolderPath;
       this.entryPackageName = packageName.toString();
       if (duplicates?.has(this.entryPackageName)) {
-        const fullPath = new Path(rawEntryId).makeAbsolute('/').toString();
+        const fullPath = new Path(rawEntryId).makeAbsolute('/').toString().substring(1);
         this.displayText = `Project: ${this.entryPackageName} (${fullPath})`;
         this.entryPackageName = `${this.entryPackageName} (${fullPath})`;
       } else {

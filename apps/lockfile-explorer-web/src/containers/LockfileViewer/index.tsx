@@ -121,6 +121,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
     } else if (packageFilter && activeFilters[LockfileEntryFilter.Package]) {
       filteredEntries = entries.filter((entry) => entry.entryPackageName.indexOf(packageFilter) !== -1);
     }
+
     const reducedEntries = filteredEntries.reduce((groups: { [key in string]: LockfileEntry[] }, item) => {
       const group = groups[item.entryPackageName] || [];
       group.push(item);
@@ -140,6 +141,12 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
     }
     if (activeFilters[LockfileEntryFilter.Doppelganger]) {
       groupedEntries = groupedEntries.filter((entry) => multipleVersions(entry.versions));
+    }
+
+    if (activeFilters[LockfileEntryFilter.Project]) {
+      groupedEntries = groupedEntries.sort((a, b) =>
+        a.entryName > b.entryName ? 1 : b.entryName > a.entryName ? -1 : 0
+      );
     }
 
     return groupedEntries;
