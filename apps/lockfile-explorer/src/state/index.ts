@@ -19,6 +19,7 @@ export interface IAppStateBase {
   pnpmLockfileLocation: string;
   pnpmfileLocation: string;
   appVersion: string;
+  debugMode: boolean;
 }
 
 export interface IRushAppState extends IAppStateBase {

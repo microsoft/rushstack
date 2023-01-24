@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import appStyles from '../../App.scss';
 import styles from './styles.scss';
 import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { ReactNull } from '../../types/ReactNull';
@@ -13,8 +12,8 @@ import {
   selectFilteredEntries,
   setFilter as selectFilter
 } from '../../store/slices/entrySlice';
-import { FilterBar } from '../../components/FilterBar';
 import { getFilterFromLocalStorage, saveFilterToLocalStorage } from '../../helpers/localStorage';
+import { Tabs, Checkbox, ScrollArea, Input, Text } from '@rushstack/rush-themed-ui';
 
 interface ILockfileEntryGroup {
   entryName: string;
@@ -52,7 +51,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
               selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
             }`}
           >
-            <h5>{entry.entryPackageName}</h5>
+            <Text type="h5">{entry.entryPackageName}</Text>
           </div>
         ))}
       </div>
@@ -61,7 +60,9 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
 
   return (
     <div className={styles.packageGroup} ref={fieldRef}>
-      <h5>{group.entryName}</h5>
+      <Text type="h5" bold>
+        {group.entryName}
+      </Text>
       {group.versions.map((entry) => (
         <div
           key={entry.rawEntryId}
@@ -70,9 +71,9 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
             selectedEntry?.rawEntryId === entry.rawEntryId ? styles.lockfileSelectedEntry : ''
           }`}
         >
-          <p>
+          <Text type="p">
             {entry.entryPackageVersion} {entry.entrySuffix && `[${entry.entrySuffix}]`}
-          </p>
+          </Text>
         </div>
       ))}
     </div>
@@ -152,8 +153,8 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
   );
 
   const togglePackageView = useCallback(
-    (selected: LockfileEntryFilter) => () => {
-      if (selected === LockfileEntryFilter.Project) {
+    (selected: string) => {
+      if (selected === 'Projects') {
         dispatch(selectFilter({ filter: LockfileEntryFilter.Project, state: true }));
         dispatch(selectFilter({ filter: LockfileEntryFilter.Package, state: false }));
       } else {
@@ -166,61 +167,55 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
 
   return (
     <div className={styles.ViewWrapper}>
-      <FilterBar
-        options={[
-          {
-            text: 'Projects',
-            active: activeFilters[LockfileEntryFilter.Project],
-            onClick: togglePackageView(LockfileEntryFilter.Project)
-          },
-          {
-            text: 'Packages',
-            active: activeFilters[LockfileEntryFilter.Package],
-            onClick: togglePackageView(LockfileEntryFilter.Package)
-          }
-        ]}
-      />
-      <div className={`${styles.ViewContents} ${appStyles.ContainerCard}`}>
-        <div className={styles.LockfileFilterBar}>
-          <input
-            type="search"
-            placeholder="Filter..."
-            value={activeFilters[LockfileEntryFilter.Project] ? projectFilter : packageFilter}
-            onChange={updateFilter(
-              activeFilters[LockfileEntryFilter.Project]
-                ? LockfileEntryFilter.Project
-                : LockfileEntryFilter.Package
-            )}
-          />
-        </div>
-        <div className={styles.lockfileEntriesWrapper}>
+      <div className={`${styles.ViewContents}`}>
+        <Tabs
+          items={[
+            {
+              header: 'Projects'
+            },
+            {
+              header: 'Packages'
+            }
+          ]}
+          value={activeFilters[LockfileEntryFilter.Project] ? 'Projects' : 'Packages'}
+          onChange={togglePackageView}
+        />
+        <Input
+          type="search"
+          placeholder="Filter..."
+          value={activeFilters[LockfileEntryFilter.Project] ? projectFilter : packageFilter}
+          onChange={updateFilter(
+            activeFilters[LockfileEntryFilter.Project]
+              ? LockfileEntryFilter.Project
+              : LockfileEntryFilter.Package
+          )}
+        />
+        <ScrollArea>
           {getEntriesToShow().map((lockfileEntryGroup) => (
             <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
           ))}
-        </div>
+        </ScrollArea>
         {activeFilters[LockfileEntryFilter.Package] ? (
           <div className={styles.filterSection}>
-            <h5>Filters</h5>
-            <div
-              className={styles.filterOption}
-              onClick={changeFilter(
+            <Text type="h5" bold>
+              Filters
+            </Text>
+            <Checkbox
+              label="Must have side-by-side versions"
+              isChecked={activeFilters[LockfileEntryFilter.SideBySide]}
+              onChecked={changeFilter(
                 LockfileEntryFilter.SideBySide,
                 !activeFilters[LockfileEntryFilter.SideBySide]
               )}
-            >
-              <input type="checkbox" checked={activeFilters[LockfileEntryFilter.SideBySide]} readOnly />
-              <h5>Must have side-by-side versions</h5>
-            </div>
-            <div
-              className={styles.filterOption}
-              onClick={changeFilter(
+            />
+            <Checkbox
+              label="Must have doppelgangers"
+              isChecked={activeFilters[LockfileEntryFilter.Doppelganger]}
+              onChecked={changeFilter(
                 LockfileEntryFilter.Doppelganger,
                 !activeFilters[LockfileEntryFilter.Doppelganger]
               )}
-            >
-              <input type="checkbox" checked={activeFilters[LockfileEntryFilter.Doppelganger]} readOnly />
-              <h5>Must have doppelgangers</h5>
-            </div>
+            />
           </div>
         ) : null}
       </div>

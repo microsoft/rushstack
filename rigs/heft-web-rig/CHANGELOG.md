@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+This log was last generated on Sun, 22 Jan 2023 20:37:08 GMT and should not be manually modified.
+
+## 0.13.0
+Sun, 22 Jan 2023 20:37:08 GMT
+
+### Minor changes
+
+- Disable "mini-css-extract-plugin" for the "library" rig profile because there isn't a straightforward way to load .css files from a library
 
 ## 0.12.17
 Wed, 18 Jan 2023 22:44:12 GMT

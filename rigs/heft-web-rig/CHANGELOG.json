@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/heft-web-rig_v0.13.0",
+      "date": "Sun, 22 Jan 2023 20:37:08 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Disable \"mini-css-extract-plugin\" for the \"library\" rig profile because there isn't a straightforward way to load .css files from a library"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.17",
       "tag": "@rushstack/heft-web-rig_v0.12.17",
       "date": "Wed, 18 Jan 2023 22:44:12 GMT",

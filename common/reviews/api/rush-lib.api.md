@@ -740,7 +740,7 @@ export class ProjectChangeAnalyzer {
     // Warning: (ae-forgotten-export) The symbol "IRawRepoState" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
-    _ensureInitialized(terminal: ITerminal): IRawRepoState | undefined;
+    _ensureInitializedAsync(terminal: ITerminal): Promise<IRawRepoState | undefined>;
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;

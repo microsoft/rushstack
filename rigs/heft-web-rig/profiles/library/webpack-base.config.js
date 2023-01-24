@@ -41,6 +41,10 @@ module.exports = function createWebpackConfig({ env, argv, projectRoot, configOv
     env: env,
     argv: argv,
     projectRoot: projectRoot,
+    // "If you're building a design system or component library and shipping to NPM you shouldn't
+    // extract just yet, let your consumers do it in their app."
+    // https://compiledcssinjs.com/docs/css-extraction-webpack
+    extractCssInProduction: false,
     configOverride: createWebpackConfigCommon.merge(libraryOverrides, configOverride)
   });
 };

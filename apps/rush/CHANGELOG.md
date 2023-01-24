@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 18 Jan 2023 22:44:31 GMT and should not be manually modified.
+This log was last generated on Sun, 22 Jan 2023 04:18:44 GMT and should not be manually modified.
+
+## 5.88.2
+Sun, 22 Jan 2023 04:18:44 GMT
+
+### Updates
+
+- Fix a regression where the 'dist/scripts' folder name was named 'dist/undefined'
 
 ## 5.88.1
 Wed, 18 Jan 2023 22:44:31 GMT

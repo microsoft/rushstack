@@ -11,7 +11,31 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@radix-ui/colors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-checkbox",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-icons",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-scroll-area",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-tabs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@reduxjs/toolkit",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },
     {

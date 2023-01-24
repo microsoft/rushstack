@@ -1,0 +1,61 @@
+@use '../../styles/colors';
+
+.ScrollAreaRoot {
+  border-radius: 4px;
+  overflow: hidden;
+  --scrollbar-size: 6px;
+  height: 100%;
+}
+
+.ScrollAreaViewport {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  & > * {
+    padding-right: 8px;
+  }
+}
+
+.ScrollAreaScrollbar {
+  display: flex;
+  /* ensures no selection */
+  user-select: none;
+  /* disable browser handling of all panning and zooming gestures on touch devices */
+  touch-action: none;
+  padding: 2px;
+  background: colors.$background-secondary;
+  transition: background 160ms ease-out;
+}
+.ScrollAreaScrollbar:hover {
+  background: colors.$background-secondary;
+}
+.ScrollAreaScrollbar[data-orientation='vertical'] {
+  width: var(--scrollbar-size);
+}
+.ScrollAreaScrollbar[data-orientation='horizontal'] {
+  flex-direction: column;
+  height: var(--scrollbar-size);
+}
+
+.ScrollAreaThumb {
+  flex: 1;
+  background: colors.$primary-active;
+  border-radius: var(--scrollbar-size);
+  position: relative;
+}
+/* increase target size for touch devices https://www.w3.org/WAI/WCAG21/Understanding/target-size.html */
+.ScrollAreaThumb::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.ScrollAreaCorner {
+  background: colors.$background-secondary;
+}
