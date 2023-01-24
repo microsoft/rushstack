@@ -176,8 +176,6 @@ export const PackageJsonViewer = (): JSX.Element => {
               Please select a Project or Package to view the parsed package.json
             </Text>
           );
-        console.log('selected entry: ', selectedEntry);
-        console.log(parsedPackageJSON);
         return (
           <div className={styles.PackageSpecWrapper}>
             <div className={styles.PackageSpecEntry}>
