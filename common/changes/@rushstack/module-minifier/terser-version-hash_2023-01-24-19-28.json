@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier",
+      "comment": "Include terser package version in config hash.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier"
+}
