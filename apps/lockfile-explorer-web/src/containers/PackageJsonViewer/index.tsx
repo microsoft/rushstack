@@ -12,6 +12,7 @@ import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
+import { LockfileEntryFilter } from '../../parsing/LockfileEntry';
 
 const PackageView: { [key in string]: string } = {
   PACKAGE_JSON: 'PACKAGE_JSON',
@@ -175,13 +176,19 @@ export const PackageJsonViewer = (): JSX.Element => {
               Please select a Project or Package to view the parsed package.json
             </Text>
           );
+        console.log('selected entry: ', selectedEntry);
+        console.log(parsedPackageJSON);
         return (
           <div className={styles.PackageSpecWrapper}>
             <div className={styles.PackageSpecEntry}>
               <Text type="h5" bold>
                 Package Name:
               </Text>
-              <Text type="p">{selectedEntry?.displayText}</Text>
+              <Text type="p">
+                {selectedEntry?.kind === LockfileEntryFilter.Project
+                  ? parsedPackageJSON.name
+                  : selectedEntry?.displayText}
+              </Text>
             </div>
             <div className={styles.PackageSpecEntry}>
               <Text type="h5" bold>

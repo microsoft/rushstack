@@ -17,6 +17,7 @@ interface IProps {
   rawEntryId: string;
   kind: LockfileEntryFilter;
   rawYamlData: ILockfileNode;
+  duplicates?: Set<string>;
 }
 
 /**
@@ -61,7 +62,7 @@ export class LockfileEntry {
   public entrySuffix: string = '';
 
   public constructor(data: IProps) {
-    const { rawEntryId, kind, rawYamlData } = data;
+    const { rawEntryId, kind, rawYamlData, duplicates } = data;
     this.rawEntryId = rawEntryId;
     this.kind = kind;
 
@@ -85,7 +86,13 @@ export class LockfileEntry {
       this.packageJsonFolderPath = packageJsonFolderPath.toString();
       this.entryId = 'project:' + this.packageJsonFolderPath;
       this.entryPackageName = packageName.toString();
-      this.displayText = 'Project: ' + this.entryPackageName;
+      if (duplicates?.has(this.entryPackageName)) {
+        const fullPath = new Path(rawEntryId).makeAbsolute('/').toString();
+        this.displayText = `Project: ${this.entryPackageName} (${fullPath})`;
+        this.entryPackageName = `${this.entryPackageName} (${fullPath})`;
+      } else {
+        this.displayText = 'Project: ' + this.entryPackageName;
+      }
     } else {
       this.displayText = rawEntryId;
 
