@@ -113,21 +113,12 @@ export class OperationMetadataManager {
     terminal.writeLine('');
     terminal.writeLine(`Restoring cached log file at ${this._logPath}`);
     try {
-      await new Promise<void>((resolve, reject) => {
-        const logReadStream: fs.ReadStream = fs.createReadStream(this._logPath, {
-          encoding: 'utf-8'
-        });
-
-        logReadStream.on('data', (data) => {
-          terminal.write(data);
-        });
-        logReadStream.on('end', () => {
-          resolve();
-        });
-        logReadStream.on('error', (e) => {
-          reject(e);
-        });
+      const logReadStream: fs.readStream = fs.createReadStream(this._logPath, {
+        encoding: 'utf-8'
       });
+      for await (const data of logReadStream) {
+        terminal.write(data);
+      }
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;
