@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/lockfile-explorer_v0.2.2",
+      "date": "Tue, 24 Jan 2023 00:16:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with the tab component"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@rushstack/lockfile-explorer_v0.2.1",
       "date": "Sun, 22 Jan 2023 20:37:08 GMT",

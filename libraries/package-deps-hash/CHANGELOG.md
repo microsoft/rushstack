@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Fri, 20 Jan 2023 16:19:50 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Jan 2023 00:16:54 GMT and should not be manually modified.
+
+## 4.0.1
+Tue, 24 Jan 2023 00:16:54 GMT
+
+### Patches
+
+- Fix bug in parseGitHashObject when 0 hashes are expected.
 
 ## 4.0.0
 Fri, 20 Jan 2023 16:19:50 GMT

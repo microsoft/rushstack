@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Sun, 22 Jan 2023 20:37:08 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Jan 2023 00:16:54 GMT and should not be manually modified.
+
+## 0.2.2
+Tue, 24 Jan 2023 00:16:54 GMT
+
+### Patches
+
+- Fix an issue with the tab component
 
 ## 0.2.1
 Sun, 22 Jan 2023 20:37:08 GMT
