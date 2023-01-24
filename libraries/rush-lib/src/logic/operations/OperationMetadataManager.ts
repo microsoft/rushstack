@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import { FileSystem, ITerminal } from '@rushstack/node-core-library';
+import { Async, FileSystem, IFileSystemCopyFileOptions, ITerminal } from '@rushstack/node-core-library';
 
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';
@@ -76,26 +76,27 @@ export class OperationMetadataManager {
     };
     await this.stateFile.writeAsync(state);
 
-    try {
-      await FileSystem.copyFileAsync({
+    const copyFileOptions: IFileSystemCopyFileOptions[] = [
+      {
         sourcePath: logPath,
         destinationPath: this._logPath
-      });
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
-      }
-    }
-    try {
-      await FileSystem.copyFileAsync({
+      },
+      {
         sourcePath: errorLogPath,
         destinationPath: this._relativeLogPath
-      });
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
       }
-    }
+    ];
+
+    // Try to copy log files
+    await Async.forEachAsync(copyFileOptions, async (options) => {
+      try {
+        await FileSystem.copyFileAsync(options);
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
+      }
+    });
   }
 
   public async tryRestoreAsync({
