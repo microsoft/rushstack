@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 import uriEncode from 'strict-uri-encode';
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
-import { base32 } from 'rfc4648';
+import { depPathToFilename } from 'dependency-path';
 import colors from 'colors/safe';
 
 import {
@@ -314,11 +314,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       //   file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
       const specialCharRegex: RegExp = /\/|:/g;
       const escapedLocalPath: string = Path.convertToSlashes(tarballEntry).replace(specialCharRegex, '+');
-      let folderName: string = `${escapedLocalPath}${folderSuffix}`;
-      // https://github.com/pnpm/pnpm/blob/v7.0.0/packages/dependency-path/src/index.ts#L136
-      if (folderName.length > 120) {
-        folderName = `${folderName.substring(0, 50)}_${createBase32Hash(folderName)}`;
-      }
+      const folderName: string = depPathToFilename(`${escapedLocalPath}${folderSuffix}`);
 
       return path.join(
         this._rushConfiguration.commonTempFolder,
@@ -402,8 +398,4 @@ export class PnpmLinkManager extends BaseLinkManager {
     newLocalPackage.symlinkTargetFolderPath = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
     return newLocalPackage;
   }
-}
-
-function createBase32Hash(str: string): string {
-  return base32.stringify(crypto.createHash('md5').update(str).digest()).replace(/(=+)$/, '').toLowerCase();
 }

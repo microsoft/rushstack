@@ -23,6 +23,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "dependency-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "office-ui-fabric-core",
       "allowedCategories": [ "libraries" ]
     },
