@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 22 Jan 2023 04:18:44 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Jan 2023 22:30:06 GMT and should not be manually modified.
+
+## 5.89.0
+Tue, 24 Jan 2023 22:30:06 GMT
+
+### Updates
+
+- Fix linking error due to PNPM v7 local install path breaking change
+- Introduce "dependsOnAdditionalFiles" configuration option to operations in rush-project.json. This option allows to pass glob (minimatch) patterns pointing to files outside of .git repository. If provided, the hash values of these files will become part of the final hash when reading and writing from cache.
+- Use getRepoStateAsync to optimize performance of calculating repository state.
+- Generate scripts in the Git hooks folder referring to the actual hook implementations in-place in the Rush `common/git-hooks/` folder instead of copying the scripts to the Git hooks folder.
 
 ## 5.88.2
 Sun, 22 Jan 2023 04:18:44 GMT
