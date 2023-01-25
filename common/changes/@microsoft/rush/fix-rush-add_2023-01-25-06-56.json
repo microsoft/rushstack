@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue with `rush add` where the approved packages files aren't updated.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
