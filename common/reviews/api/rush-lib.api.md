@@ -656,6 +656,7 @@ export class PackageJsonDependency {
 
 // @public (undocumented)
 export class PackageJsonEditor {
+    protected constructor(filepath: string, data: IPackageJson);
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
     get dependencyList(): ReadonlyArray<PackageJsonDependency>;
@@ -881,7 +882,7 @@ export class RushConfigurationProject {
     get isMainProject(): boolean;
     // @deprecated
     get localDependencyProjects(): ReadonlyArray<RushConfigurationProject>;
-    readonly packageJson: IPackageJson;
+    get packageJson(): IPackageJson;
     // @beta
     readonly packageJsonEditor: PackageJsonEditor;
     readonly packageName: string;

@@ -66,7 +66,7 @@ export class PackageJsonEditor {
 
   public readonly filePath: string;
 
-  private constructor(filepath: string, data: IPackageJson) {
+  protected constructor(filepath: string, data: IPackageJson) {
     this.filePath = filepath;
     this._sourceData = data;
     this._modified = false;
