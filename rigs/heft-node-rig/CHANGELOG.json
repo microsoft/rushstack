@@ -2,6 +2,27 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.11.13",
+      "tag": "@rushstack/heft-node-rig_v1.11.13",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.1` to `^0.49.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.11.12",
       "tag": "@rushstack/heft-node-rig_v1.11.12",
       "date": "Wed, 18 Jan 2023 22:44:12 GMT",
