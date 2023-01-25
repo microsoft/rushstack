@@ -15,6 +15,7 @@ import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { ApiReturnTypeMixin, IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { IApiAbstractMixinOptions, ApiAbstractMixin } from '../mixins/ApiAbstractMixin';
 import {
   ApiTypeParameterListMixin,
   IApiTypeParameterListMixinOptions
@@ -27,6 +28,7 @@ import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptiona
  */
 export interface IApiMethodOptions
   extends IApiNameMixinOptions,
+    IApiAbstractMixinOptions,
     IApiOptionalMixinOptions,
     IApiParameterListMixinOptions,
     IApiProtectedMixinOptions,
@@ -58,10 +60,12 @@ export interface IApiMethodOptions
  * @public
  */
 export class ApiMethod extends ApiNameMixin(
-  ApiOptionalMixin(
-    ApiParameterListMixin(
-      ApiProtectedMixin(
-        ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiTypeParameterListMixin(ApiDeclaredItem))))
+  ApiAbstractMixin(
+    ApiOptionalMixin(
+      ApiParameterListMixin(
+        ApiProtectedMixin(
+          ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiTypeParameterListMixin(ApiDeclaredItem))))
+        )
       )
     )
   )

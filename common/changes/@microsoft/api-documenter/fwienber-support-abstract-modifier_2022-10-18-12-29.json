@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Display the 'abstract' modifier for classes and members (GitHub #3661)",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}

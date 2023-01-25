@@ -16,6 +16,8 @@ import { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
 
 export { DecoratorExample } from './DecoratorExample';
 
+export { AbstractClass } from './AbstractClass';
+
 /**
  * A type alias
  * @public
