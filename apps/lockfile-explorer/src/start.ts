@@ -196,8 +196,10 @@ if (debugMode) {
   // Catch exceptions and report them nicely
   try {
     startApp(debugMode);
-  } catch (e) {
-    console.error();
-    console.error(colors.red('ERROR: ' + e.message));
+  } catch (error) {
+    if (!(error instanceof AlreadyReportedError)) {
+      console.error();
+      console.error(colors.red('ERROR: ' + error.message));
+    }
   }
 }
