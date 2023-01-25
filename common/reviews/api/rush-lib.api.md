@@ -656,6 +656,7 @@ export class PackageJsonDependency {
 
 // @public (undocumented)
 export class PackageJsonEditor {
+    // @internal
     protected constructor(filepath: string, data: IPackageJson);
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
