@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Fix #3661: Track 'abstract' modifier of classes, methods, and properties in new field 'isAbstract'",
+      "comment": "Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)",
       "type": "minor"
     }
   ],
