@@ -1,6 +1,43 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+
+## 0.8.15
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.8.14
+Tue, 20 Dec 2022 01:18:23 GMT
+
+_Version update only_
+
+## 0.8.13
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 0.8.12
+Thu, 01 Dec 2022 03:22:36 GMT
+
+### Patches
+
+- Add a check to ensure that relative paths passed to generateTypingsAsync and getOutputFilePaths are actually relative.
+
+## 0.8.11
+Tue, 29 Nov 2022 01:16:50 GMT
+
+_Version update only_
+
+## 0.8.10
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 0.8.9
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
 
 ## 0.8.8
 Mon, 17 Oct 2022 22:14:21 GMT

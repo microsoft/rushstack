@@ -1,0 +1,33 @@
+@use '../../styles/colors';
+
+/* reset */
+button {
+  all: unset;
+}
+
+.CheckboxRoot {
+  background-color: white;
+  width: 25px;
+  min-width: 25px;
+  height: 25px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid colors.$black;
+  cursor: pointer;
+}
+.CheckboxRoot:hover {
+  background-color: colors.$primary-background;
+}
+
+.CheckboxIndicator {
+  color: colors.$primary-active;
+}
+
+.Label {
+  padding-left: 15px;
+  font-size: 15px;
+  line-height: 1;
+  user-select: none;
+}

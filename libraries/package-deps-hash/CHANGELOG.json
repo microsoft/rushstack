@@ -2,6 +2,147 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.0.1",
+      "tag": "@rushstack/package-deps-hash_v4.0.1",
+      "date": "Tue, 24 Jan 2023 00:16:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug in parseGitHashObject when 0 hashes are expected."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.0",
+      "tag": "@rushstack/package-deps-hash_v4.0.0",
+      "date": "Fri, 20 Jan 2023 16:19:50 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Add getRepoStateAsync API for faster repository state calculation. Remove synchronous getRepoState API."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.67",
+      "tag": "@rushstack/package-deps-hash_v3.2.67",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.66",
+      "tag": "@rushstack/package-deps-hash_v3.2.66",
+      "date": "Tue, 20 Dec 2022 01:18:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.65",
+      "tag": "@rushstack/package-deps-hash_v3.2.65",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.64",
+      "tag": "@rushstack/package-deps-hash_v3.2.64",
+      "date": "Tue, 29 Nov 2022 01:16:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.63",
+      "tag": "@rushstack/package-deps-hash_v3.2.63",
+      "date": "Fri, 18 Nov 2022 04:02:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor the logic of getting file hashes under git submodule paths"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.62",
+      "tag": "@rushstack/package-deps-hash_v3.2.62",
+      "date": "Tue, 15 Nov 2022 18:43:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Get file hashes under git submodule paths when analyzing repo state"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.61",
+      "tag": "@rushstack/package-deps-hash_v3.2.61",
+      "date": "Tue, 08 Nov 2022 01:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.60",
+      "tag": "@rushstack/package-deps-hash_v3.2.60",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.59",
       "tag": "@rushstack/package-deps-hash_v3.2.59",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",

@@ -4,7 +4,6 @@
 import * as glob from 'glob';
 import colors from 'colors/safe';
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as ssri from 'ssri';
@@ -19,7 +18,8 @@ import {
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
-import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
+import { BaseInstallManager } from '../base/BaseInstallManager';
+import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { IRushTempPackageJson } from '../../logic/base/BasePackage';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -89,7 +89,7 @@ export class RushInstallManager extends BaseInstallManager {
       RushConstants.rushTempProjectsFolderName
     );
 
-    console.log(os.EOL + colors.bold('Updating temp projects in ' + tempProjectsFolder));
+    console.log('\n' + colors.bold('Updating temp projects in ' + tempProjectsFolder));
 
     Utilities.createFolderWithRetry(tempProjectsFolder);
 
@@ -555,23 +555,23 @@ export class RushInstallManager extends BaseInstallManager {
     this.pushConfigurationArgs(installArgs, this.options);
 
     console.log(
-      os.EOL +
+      '\n' +
         colors.bold(
           `Running "${this.rushConfiguration.packageManager} install" in` +
             ` ${this.rushConfiguration.commonTempFolder}`
         ) +
-        os.EOL
+        '\n'
     );
 
     // If any diagnostic options were specified, then show the full command-line
     if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
       console.log(
-        os.EOL +
+        '\n' +
           colors.green('Invoking package manager: ') +
           FileSystem.getRealPath(packageManagerFilename) +
           ' ' +
           installArgs.join(' ') +
-          os.EOL
+          '\n'
       );
     }
 
@@ -616,7 +616,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     if (this.rushConfiguration.packageManager === 'npm') {
-      console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+      console.log('\n' + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
       this.pushConfigurationArgs(npmArgs, this.options);
       Utilities.executeCommand({
@@ -624,7 +624,7 @@ export class RushInstallManager extends BaseInstallManager {
         args: npmArgs,
         workingDirectory: this.rushConfiguration.commonTempFolder
       });
-      console.log('"npm shrinkwrap" completed' + os.EOL);
+      console.log('"npm shrinkwrap" completed\n');
 
       this._fixupNpm5Regression();
     }
@@ -636,7 +636,7 @@ export class RushInstallManager extends BaseInstallManager {
       await linkManager.createSymlinksForProjects(false);
     } else {
       console.log(
-        os.EOL + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+        '\n' + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
       );
     }
   }
@@ -682,9 +682,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     if (anyChanges) {
-      console.log(
-        os.EOL + colors.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + os.EOL
-      );
+      console.log('\n' + colors.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + '\n');
     }
   }
 
@@ -700,13 +698,13 @@ export class RushInstallManager extends BaseInstallManager {
     for (const rushProject of this.rushConfiguration.projects) {
       if (!tempProjectNames.has(rushProject.tempProjectName)) {
         console.log(
-          os.EOL +
+          '\n' +
             colors.yellow(
               PrintUtilities.wrapWords(
                 `Your ${this.rushConfiguration.shrinkwrapFilePhrase} is missing the project "${rushProject.packageName}".`
               )
             ) +
-            os.EOL
+            '\n'
         );
         return true; // found one
       }

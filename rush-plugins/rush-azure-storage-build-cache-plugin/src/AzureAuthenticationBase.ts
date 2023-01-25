@@ -3,8 +3,64 @@
 
 import { DeviceCodeCredential, type DeviceCodeInfo, AzureAuthorityHosts } from '@azure/identity';
 import type { ITerminal } from '@rushstack/node-core-library';
-import { CredentialCache, type ICredentialCacheEntry } from '@rushstack/rush-sdk';
+import { CredentialCache } from '@rushstack/rush-sdk';
+// Use a separate import line so the .d.ts file ends up with an `import type { ... }`
+// See https://github.com/microsoft/rushstack/issues/3432
+import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import { PrintUtilities } from '@rushstack/terminal';
+
+/**
+ * @public
+ */
+export type ExpiredCredentialBehavior = 'logWarning' | 'throwError' | 'ignore';
+
+/**
+ * @public
+ */
+export interface ITryGetCachedCredentialOptionsBase {
+  /**
+   * The behavior to take when the cached credential has expired.
+   * Defaults to 'throwError'
+   */
+  expiredCredentialBehavior?: ExpiredCredentialBehavior;
+  terminal?: ITerminal;
+}
+
+/**
+ * @public
+ */
+export interface ITryGetCachedCredentialOptionsLogWarning extends ITryGetCachedCredentialOptionsBase {
+  /**
+   * {@inheritdoc ITryGetCachedCredentialOptionsBase.expiredCredentialBehavior}
+   */
+  expiredCredentialBehavior: 'logWarning';
+  terminal: ITerminal;
+}
+
+/**
+ * @public
+ */
+export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCredentialOptionsBase {
+  /**
+   * {@inheritdoc ITryGetCachedCredentialOptionsBase.expiredCredentialBehavior}
+   */
+  expiredCredentialBehavior: 'throwError';
+}
+
+/**
+ * @public
+ */
+export interface ITryGetCachedCredentialOptionsIgnore extends ITryGetCachedCredentialOptionsBase {
+  /**
+   * {@inheritdoc ITryGetCachedCredentialOptionsBase.expiredCredentialBehavior}
+   */
+  expiredCredentialBehavior: 'ignore';
+}
+
+export type ITryGetCachedCredentialOptions =
+  | ITryGetCachedCredentialOptionsLogWarning
+  | ITryGetCachedCredentialOptionsThrow
+  | ITryGetCachedCredentialOptionsIgnore;
 
 /**
  * @public
@@ -22,7 +78,8 @@ export interface IAzureAuthenticationBaseOptions {
  * @public
  */ export interface ICredentialResult {
   credentialString: string;
-  expiresOn: Date | undefined;
+  expiresOn?: Date;
+  credentialMetadata?: object;
 }
 
 /**
@@ -60,7 +117,9 @@ export abstract class AzureAuthenticationBase {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        credentialsCache.setCacheEntry(this._credentialCacheId, credential);
+        credentialsCache.setCacheEntry(this._credentialCacheId, {
+          credential
+        });
         await credentialsCache.saveIfModifiedAsync();
       }
     );
@@ -95,11 +154,11 @@ export abstract class AzureAuthenticationBase {
         }
 
         const credential: ICredentialResult = await this._getCredentialAsync(terminal);
-        credentialsCache.setCacheEntry(
-          this._credentialCacheId,
-          credential.credentialString,
-          credential.expiresOn
-        );
+        credentialsCache.setCacheEntry(this._credentialCacheId, {
+          credential: credential.credentialString,
+          expires: credential.expiresOn,
+          credentialMetadata: credential.credentialMetadata
+        });
         await credentialsCache.saveIfModifiedAsync();
       }
     );
@@ -117,7 +176,17 @@ export abstract class AzureAuthenticationBase {
     );
   }
 
-  public async tryGetCachedCredentialAsync(doNotThrowIfExpired?: boolean): Promise<string | undefined> {
+  public async tryGetCachedCredentialAsync(
+    options?: ITryGetCachedCredentialOptionsThrow | ITryGetCachedCredentialOptionsIgnore
+  ): Promise<ICredentialCacheEntry | undefined>;
+  public async tryGetCachedCredentialAsync(
+    options: ITryGetCachedCredentialOptionsLogWarning
+  ): Promise<ICredentialCacheEntry | undefined>;
+  public async tryGetCachedCredentialAsync(
+    { expiredCredentialBehavior, terminal }: ITryGetCachedCredentialOptions = {
+      expiredCredentialBehavior: 'throwError'
+    }
+  ): Promise<ICredentialCacheEntry | undefined> {
     let cacheEntry: ICredentialCacheEntry | undefined;
     await CredentialCache.usingAsync(
       {
@@ -130,18 +199,22 @@ export abstract class AzureAuthenticationBase {
 
     const expirationTime: number | undefined = cacheEntry?.expires?.getTime();
     if (expirationTime && expirationTime < Date.now()) {
-      if (!doNotThrowIfExpired) {
+      if (expiredCredentialBehavior === 'logWarning' || expiredCredentialBehavior === 'throwError') {
         let errorMessage: string = `Cached Azure ${this._credentialKindForLogging} credentials have expired.`;
         if (this._credentialUpdateCommandForLogging) {
           errorMessage += ` Update the credentials by running "${this._credentialUpdateCommandForLogging}".`;
         }
 
-        throw new Error(errorMessage);
-      } else {
-        return undefined;
+        if (expiredCredentialBehavior === 'logWarning') {
+          terminal.writeWarningLine(errorMessage);
+        } else if (expiredCredentialBehavior === 'throwError') {
+          throw new Error(errorMessage);
+        }
       }
+
+      return undefined;
     } else {
-      return cacheEntry?.credential;
+      return cacheEntry;
     }
   }
 

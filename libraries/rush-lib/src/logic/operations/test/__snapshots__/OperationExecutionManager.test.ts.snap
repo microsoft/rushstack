@@ -1,9 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OperationExecutionManager Constructor throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of 'tequila', expected a number, a percentage, or 'max'"`;
-
-exports[`OperationExecutionManager Constructor throwsErrorOnInvalidParallelismPercentage 1`] = `"Invalid percentage value of '200%', value cannot be less than '0%' or more than '100%'"`;
-
 exports[`OperationExecutionManager Error logging printedStderrAfterError 1`] = `
 Array [
   Object {
@@ -407,37 +403,37 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "=============================================================================================================
+    "text": "==========================================================================================
 ",
   },
   Object {
     "kind": "O",
-    "text": "[cyan]success with warnings (success)[default] [yellow]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![default] [white]0.2s[default]
+    "text": "[cyan]success with warnings (success)[default] [yellow]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![default] [white]0.2s[default]
 ",
   },
   Object {
     "kind": "O",
-    "text": "=============================================================================================================
+    "text": "==========================================================================================
 ",
   },
   Object {
     "kind": "O",
-    "text": "LEGEND:                                                                                      Total Work: 0.2s
+    "text": "LEGEND:                                                                   Total Work: 0.2s
 ",
   },
   Object {
     "kind": "O",
-    "text": "  [#] Success  [!] Failed/warnings  [%] Skipped/cached/no-op                                 Wall Clock: 0.2s
+    "text": "  [#] Success  [!] Failed/warnings  [%] Skipped/cached/no-op              Wall Clock: 0.2s
 ",
   },
   Object {
     "kind": "O",
-    "text": "                                                                                      Max Parallelism Used: 1
+    "text": "                                                                   Max Parallelism Used: 1
 ",
   },
   Object {
     "kind": "O",
-    "text": "                                                                                    Avg Parallelism Used: 1.0
+    "text": "                                                                 Avg Parallelism Used: 1.0
 ",
   },
   Object {

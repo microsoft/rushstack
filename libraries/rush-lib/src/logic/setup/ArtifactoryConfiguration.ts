@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
+
+import schemaJson from '../../schemas/artifactory.schema.json';
 
 export interface IArtifactoryPackageRegistryJson {
   enabled: boolean;
@@ -10,6 +11,8 @@ export interface IArtifactoryPackageRegistryJson {
 
   registryUrl: string;
   artifactoryWebsiteUrl: string;
+
+  credentialType?: 'password' | 'authToken';
 
   messageOverrides?: {
     introduction?: string;
@@ -33,12 +36,14 @@ export interface IArtifactoryJson {
  * It configures the "rush setup" command.
  */
 export class ArtifactoryConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.resolve(__dirname, '..', '..', 'schemas', 'artifactory.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _setupJson: IArtifactoryJson;
-  private _jsonFileName: string;
+  private readonly _jsonFileName: string;
+
+  /**
+   * Get the artifactory configuration.
+   */
+  public readonly configuration: Readonly<IArtifactoryJson>;
 
   /**
    * @internal
@@ -46,7 +51,7 @@ export class ArtifactoryConfiguration {
   public constructor(jsonFileName: string) {
     this._jsonFileName = jsonFileName;
 
-    this._setupJson = {
+    this.configuration = {
       packageRegistry: {
         enabled: false,
         registryUrl: '',
@@ -55,14 +60,10 @@ export class ArtifactoryConfiguration {
     };
 
     if (FileSystem.exists(this._jsonFileName)) {
-      this._setupJson = JsonFile.loadAndValidate(this._jsonFileName, ArtifactoryConfiguration._jsonSchema);
+      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, ArtifactoryConfiguration._jsonSchema);
+      if (!this.configuration.packageRegistry.credentialType) {
+        this.configuration.packageRegistry.credentialType = 'password';
+      }
     }
-  }
-
-  /**
-   * Get the experiments configuration.
-   */
-  public get configuration(): Readonly<IArtifactoryJson> {
-    return this._setupJson;
   }
 }

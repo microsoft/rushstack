@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { LastInstallFlag } from '../LastInstallFlag';
+import { LastInstallFlag, LAST_INSTALL_FLAG_FILE_NAME } from '../LastInstallFlag';
 
 const TEMP_DIR_PATH: string = `${__dirname}/temp`;
 
@@ -14,6 +15,11 @@ describe(LastInstallFlag.name, () => {
 
   afterEach(() => {
     FileSystem.ensureEmptyFolder(TEMP_DIR_PATH);
+  });
+
+  it('can get correct path', () => {
+    const flag: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH);
+    expect(path.basename(flag.path)).toEqual(LAST_INSTALL_FLAG_FILE_NAME);
   });
 
   it('can create and remove a flag in an empty directory', () => {
@@ -82,7 +88,7 @@ describe(LastInstallFlag.name, () => {
 
     flag1.create();
     expect(() => {
-      flag2.checkValidAndReportStoreIssues('install');
+      flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' });
     }).toThrowError(/PNPM store path/);
   });
 
@@ -97,8 +103,25 @@ describe(LastInstallFlag.name, () => {
 
     flag1.create();
     expect(() => {
-      flag2.checkValidAndReportStoreIssues('install');
+      flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' });
     }).not.toThrow();
-    expect(flag2.checkValidAndReportStoreIssues('install')).toEqual(false);
+    expect(flag2.checkValidAndReportStoreIssues({ rushVerb: 'install' })).toEqual(false);
+  });
+
+  it("ignores a specified option that doesn't match", () => {
+    const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      option1: 'a',
+      option2: 'b'
+    });
+    const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+      option1: 'a',
+      option2: 'c'
+    });
+
+    flag1.create();
+    expect(() => {
+      flag2.isValid({ statePropertiesToIgnore: ['option2'] });
+    }).not.toThrow();
+    expect(flag2.isValid({ statePropertiesToIgnore: ['option2'] })).toEqual(true);
   });
 });

@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const createWebpackConfig = require('@rushstack/heft-web-rig/profiles/app/webpack-base.config');
 
 module.exports = function createConfig(env, argv) {
@@ -11,9 +12,8 @@ module.exports = function createConfig(env, argv) {
     configOverride: {
       resolve: {
         alias: {
-          // // Use the bundled library
-          // 'heft-web-rig-library-tutorial':
-          //   'heft-web-rig-library-tutorial/dist/heft-web-rig-library-tutorial.js'
+          // Don't rebundle this large library
+          '@rushstack/rush-themed-ui': '@rushstack/rush-themed-ui/dist/rush-themed-ui.js'
         }
       },
       performance: {
@@ -24,7 +24,15 @@ module.exports = function createConfig(env, argv) {
         // maxAssetSize: 500000
       },
       devServer: {
-        port: 8096
+        port: 8096,
+        static: {
+          directory: path.join(__dirname, 'dist')
+        },
+        client: {
+          webSocketURL: {
+            port: 8096
+          }
+        }
       }
     }
   });

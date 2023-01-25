@@ -157,7 +157,9 @@
    *
    * PNPM documentation: https://pnpm.io/package_json#pnpmneverbuiltdependencies
    */
-  "globalNeverBuiltDependencies": [/*[LINE "HYPOTHETICAL"]*/ "fsevents"],
+  "globalNeverBuiltDependencies": [
+    /*[LINE "HYPOTHETICAL"]*/ "fsevents"
+  ],
 
   /**
    * The `globalAllowedDeprecatedVersions` setting suppresses installation warnings for package
@@ -174,6 +176,16 @@
   "globalAllowedDeprecatedVersions": {
     /*[LINE "HYPOTHETICAL"]*/ "request": "*"
   },
+
+
+  /**
+   * (THIS FIELD IS MACHINE GENERATED)  The "globalPatchedDependencies" field is updated automatically
+   * by the `rush-pnpm patch-commit` command.  It is a dictionary, where the key is an NPM package name
+   * and exact version, and the value is a relative path to the associated patch file.
+   *
+   * PNPM documentation: https://pnpm.io/package_json#pnpmpatcheddependencies
+   */
+  "globalPatchedDependencies": { },
 
   /**
    * (USE AT YOUR OWN RISK)  This is a free-form property bag that will be copied into

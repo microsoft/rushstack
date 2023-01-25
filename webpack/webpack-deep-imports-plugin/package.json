@@ -1,0 +1,36 @@
+{
+  "name": "@rushstack/webpack-deep-imports-plugin",
+  "version": "0.0.0",
+  "description": "This plugin creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder.",
+  "main": "lib/index.js",
+  "typings": "dist/webpack-deep-imports-plugin.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "webpack/webpack-deep-imports-plugin"
+  },
+  "engines": {
+    "node": ">=14.19.0"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
+  },
+  "peerDependencies": {
+    "webpack": "^5.68.0"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24",
+    "webpack": "~5.68.0"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*"
+  }
+}

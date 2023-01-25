@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { AlreadyReportedError, ITerminal, Path } from '@rushstack/node-core-library';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
@@ -10,6 +9,8 @@ import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
+import schemaJson from '../schemas/rush-project.schema.json';
+import anythingSchemaJson from '../schemas/rush-project.schema.json';
 
 /**
  * Describes the file structure for the "<project root>/config/rush-project.json" config file.
@@ -65,6 +66,27 @@ export interface IOperationSettings {
    * the build scripts to be compatible with caching.
    */
   disableBuildCacheForOperation?: boolean;
+
+  /**
+   * An optional list of environment variables that can affect this operation. The values of
+   * these environment variables will become part of the hash when reading and writing the build cache.
+   *
+   * Note: generally speaking, all environment variables available to Rush are also available to any
+   * operations performed -- Rush assumes that environment variables do not affect build outputs unless
+   * you list them here.
+   */
+  dependsOnEnvVars?: string[];
+
+  /**
+   * An optional list of glob (minimatch) patterns pointing to files that can affect this operation.
+   * The hash values of the contents of these files will become part of the final hash when reading
+   * and writing the build cache.
+   *
+   * Note: if a particular file will be matched by patterns provided by both `incrementalBuildIgnoredGlobs` and
+   * `dependsOnAdditionalFiles` options - `dependsOnAdditionalFiles` will win and the file will be included
+   * calculating final hash value when reading and writing the build cache
+   */
+  dependsOnAdditionalFiles?: string[];
 }
 
 interface IOldRushProjectJson {
@@ -76,7 +98,7 @@ interface IOldRushProjectJson {
 const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
   new ConfigurationFile<IRushProjectJson>({
     projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
-    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
+    jsonSchemaObject: schemaJson,
     propertyInheritance: {
       operationSettings: {
         inheritanceType: InheritanceType.custom,
@@ -89,7 +111,7 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
           } else if (!parent) {
             return child;
           } else {
-            // Merge the outputFolderNames arrays
+            // Merge any properties that need to be merged
             const resultOperationSettingsByOperationName: Map<string, IOperationSettings> = new Map();
             for (const parentOperationSettings of parent) {
               resultOperationSettingsByOperationName.set(
@@ -117,7 +139,7 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
               let mergedOperationSettings: IOperationSettings | undefined =
                 resultOperationSettingsByOperationName.get(operationName);
               if (mergedOperationSettings) {
-                // The parent operation settings object already exists, so append to the outputFolderNames
+                // The parent operation settings object already exists
                 const outputFolderNames: string[] | undefined =
                   mergedOperationSettings.outputFolderNames && childOperationSettings.outputFolderNames
                     ? [
@@ -126,10 +148,19 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
                       ]
                     : mergedOperationSettings.outputFolderNames || childOperationSettings.outputFolderNames;
 
+                const dependsOnEnvVars: string[] | undefined =
+                  mergedOperationSettings.dependsOnEnvVars && childOperationSettings.dependsOnEnvVars
+                    ? [
+                        ...mergedOperationSettings.dependsOnEnvVars,
+                        ...childOperationSettings.dependsOnEnvVars
+                      ]
+                    : mergedOperationSettings.dependsOnEnvVars || childOperationSettings.dependsOnEnvVars;
+
                 mergedOperationSettings = {
                   ...mergedOperationSettings,
                   ...childOperationSettings,
-                  outputFolderNames
+                  ...(outputFolderNames ? { outputFolderNames } : {}),
+                  ...(dependsOnEnvVars ? { dependsOnEnvVars } : {})
                 };
                 resultOperationSettingsByOperationName.set(operationName, mergedOperationSettings);
               } else {
@@ -150,7 +181,7 @@ const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
 const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IOldRushProjectJson> =
   new ConfigurationFile<IOldRushProjectJson>({
     projectRelativeFilePath: RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath,
-    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'anything.schema.json')
+    jsonSchemaObject: anythingSchemaJson
   });
 
 /**

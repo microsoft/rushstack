@@ -2,6 +2,30 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.25.3",
+      "tag": "@microsoft/api-extractor-model_v7.25.3",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.25.2",
+      "tag": "@microsoft/api-extractor-model_v7.25.2",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the @microsoft/tsdoc dependency version to 0.14.2."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.25.1",
       "tag": "@microsoft/api-extractor-model_v7.25.1",
       "date": "Thu, 13 Oct 2022 00:20:15 GMT",

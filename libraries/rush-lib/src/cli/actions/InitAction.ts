@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as os from 'os';
 import * as path from 'path';
-
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseConfiglessRushAction } from './BaseRushAction';
 import {
   FileSystem,
   NewlineKind,
@@ -16,7 +12,11 @@ import {
 } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { BaseConfiglessRushAction } from './BaseRushAction';
+
 import { Rush } from '../../api/Rush';
+import { assetsFolderPath } from '../../utilities/PathConstants';
 
 // Matches a well-formed BEGIN macro starting a block section.
 // Example:  /*[BEGIN "DEMO"]*/
@@ -114,9 +114,7 @@ export class InitAction extends BaseConfiglessRushAction {
         colors.red('ERROR: Found an existing configuration in: ' + this.rushConfiguration.rushJsonFile)
       );
       console.log(
-        os.EOL +
-          'The "rush init" command must be run in a new folder without ' +
-          'an existing Rush configuration.'
+        '\nThe "rush init" command must be run in a new folder without an existing Rush configuration.'
       );
       return false;
     }
@@ -134,16 +132,12 @@ export class InitAction extends BaseConfiglessRushAction {
       // or "CONTRIBUTING.md"
       if (stats.isDirectory()) {
         console.error(colors.red(`ERROR: Found a subdirectory: "${itemName}"`));
-        console.log(
-          os.EOL + 'The "rush init" command must be run in a new folder with no projects added yet.'
-        );
+        console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
         return false;
       } else {
         if (itemName.toLowerCase() === 'package.json') {
           console.error(colors.red(`ERROR: Found a package.json file in this folder`));
-          console.log(
-            os.EOL + 'The "rush init" command must be run in a new folder with no projects added yet.'
-          );
+          console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
           return false;
         }
       }
@@ -155,10 +149,9 @@ export class InitAction extends BaseConfiglessRushAction {
     // The "[dot]" base name is used for hidden files to prevent various tools from interpreting them.
     // For example, "npm publish" will always exclude the filename ".gitignore"
     const templateFilePaths: string[] = [
-      'rush.json',
-      '[dot]gitattributes',
       '[dot]github/workflows/ci.yml',
-      '[dot]gitignore',
+
+      'common/config/rush/.pnpmfile.cjs',
       'common/config/rush/[dot]npmrc',
       'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/artifactory.json',
@@ -166,13 +159,18 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',
-      'common/config/rush/.pnpmfile.cjs',
-      'common/config/rush/version-policies.json',
+      'common/config/rush/pnpm-config.json',
       'common/config/rush/rush-plugins.json',
-      'common/git-hooks/commit-msg.sample'
+      'common/config/rush/version-policies.json',
+
+      'common/git-hooks/commit-msg.sample',
+
+      '[dot]gitattributes',
+      '[dot]gitignore',
+      'rush.json'
     ];
 
-    const assetsSubfolder: string = path.resolve(__dirname, '../../../assets/rush-init');
+    const assetsSubfolder: string = `${assetsFolderPath}/rush-init`;
 
     for (const templateFilePath of templateFilePaths) {
       const sourcePath: string = path.join(assetsSubfolder, templateFilePath);
@@ -346,7 +344,7 @@ export class InitAction extends BaseConfiglessRushAction {
     }
 
     // Write the output
-    FileSystem.writeFile(destinationPath, outputLines.join(os.EOL), {
+    FileSystem.writeFile(destinationPath, outputLines.join('\n'), {
       ensureFolderExists: true
     });
   }

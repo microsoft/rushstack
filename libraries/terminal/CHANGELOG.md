@@ -1,6 +1,43 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+
+## 0.3.89
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.3.88
+Tue, 20 Dec 2022 01:18:23 GMT
+
+_Version update only_
+
+## 0.3.87
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 0.3.86
+Mon, 05 Dec 2022 16:16:09 GMT
+
+### Patches
+
+- The wrapWords method now respects existing spaces and newlines in a pre-formatted message.
+
+## 0.3.85
+Tue, 29 Nov 2022 01:16:50 GMT
+
+_Version update only_
+
+## 0.3.84
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 0.3.83
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
 
 ## 0.3.82
 Mon, 17 Oct 2022 22:14:21 GMT

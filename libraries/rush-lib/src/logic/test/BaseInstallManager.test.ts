@@ -4,11 +4,8 @@ import * as path from 'path';
 import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 import { PurgeManager } from '../PurgeManager';
-import {
-  BaseInstallManager,
-  IInstallManagerOptions,
-  pnpmIgnoreCompatibilityDbParameter
-} from '../base/BaseInstallManager';
+import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager';
+import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';

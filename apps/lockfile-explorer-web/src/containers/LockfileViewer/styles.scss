@@ -1,29 +1,58 @@
-.LockfileViewerWrapper {
-  margin: 24px;
-  display: flex;
-  height: calc(100% - 48px);
+@use '../../styles/base';
 
-  & > * + * {
-    margin-left: 24px;
-  }
+.ViewWrapper {
+  height: calc(100% - 24px);
+  @include base.card;
+  padding: 0 12px;
+  margin-top: 12px;
 }
 
-.LockfileEntryListWrapper {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 24px;
-
-  min-width: 300px;
-  max-width: 400px;
-
-  overflow: scroll;
-
+.ViewContents {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 35px);
   & > * + * {
     margin-top: 12px;
   }
+}
 
-  .lockfileEntries {
-    height: calc(100% - 40px);
-    overflow: scroll;
+.LockfileEntryListViewWrapper {
+  cursor: pointer;
+  border: 1px solid #fff;
+  padding: 4px 8px;
+
+  &:hover {
+    border: 1px solid black;
+  }
+}
+
+.packageGroup {
+  & > * + * {
+    margin-top: 4px;
+  }
+}
+
+.lockfileEntries {
+  cursor: pointer;
+  padding: 4px 8px;
+  &:hover {
+    background: #dff6dd;
+  }
+}
+
+.lockfileSelectedEntry {
+  background-color: #dff6dd;
+}
+
+.lockfileEntriesWrapper {
+  flex: 1;
+  height: 100%;
+}
+
+.filterSection {
+  border-top: 1px solid #000;
+  padding-top: 24px;
+  & > * + * {
+    margin-top: 4px;
   }
 }

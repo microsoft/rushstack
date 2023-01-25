@@ -422,11 +422,17 @@
     {
       "packageName": "@rushstack/lockfile-explorer",
       "projectFolder": "apps/lockfile-explorer",
-      "reviewCategory": "libraries"
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/lockfile-explorer-web",
       "projectFolder": "apps/lockfile-explorer-web",
+      "reviewCategory": "libraries"
+    },
+    {
+      "packageName": "@rushstack/rush-themed-ui",
+      "projectFolder": "libraries/rush-themed-ui",
       "reviewCategory": "libraries"
     },
     {
@@ -442,10 +448,10 @@
       "versionPolicyName": "rush"
     },
     {
-      "packageName": "@rushstack/rush-sdk",
-      "projectFolder": "libraries/rush-sdk",
+      "packageName": "@rushstack/trace-import",
+      "projectFolder": "apps/trace-import",
       "reviewCategory": "libraries",
-      "versionPolicyName": "rush"
+      "shouldPublish": true
     },
 
     // "build-tests" folder (alphabetical order)
@@ -766,6 +772,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-lib-declaration-paths-test",
+      "projectFolder": "build-tests/rush-lib-declaration-paths-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-project-change-analyzer-test",
       "projectFolder": "build-tests/rush-project-change-analyzer-test",
       "reviewCategory": "tests",
@@ -900,6 +912,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-sdk",
+      "projectFolder": "libraries/rush-sdk",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@microsoft/rushell",
       "projectFolder": "libraries/rushell",
       "reviewCategory": "libraries",
@@ -1016,6 +1034,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+      "projectFolder": "webpack/webpack5-load-themed-styles-loader",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/hashed-folder-copy-plugin",
       "projectFolder": "webpack/hashed-folder-copy-plugin",
       "reviewCategory": "libraries",
@@ -1032,6 +1056,12 @@
       "projectFolder": "webpack/preserve-dynamic-require-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack-deep-imports-plugin",
+      "projectFolder": "webpack/webpack-deep-imports-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false // for now
     },
     {
       "packageName": "@rushstack/set-webpack-public-path-plugin",

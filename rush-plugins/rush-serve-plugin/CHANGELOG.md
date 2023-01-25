@@ -1,6 +1,67 @@
 # Change Log - @rushstack/rush-serve-plugin
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+
+## 0.3.9
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.3.8
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
+
+## 0.3.7
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 0.3.6
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
+
+## 0.3.5
+Fri, 18 Nov 2022 00:55:17 GMT
+
+_Version update only_
+
+## 0.3.4
+Sat, 12 Nov 2022 00:16:31 GMT
+
+### Patches
+
+- Serve the CA certificate alongside the TLS certificate.
+
+## 0.3.3
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 0.3.2
+Fri, 04 Nov 2022 00:15:59 GMT
+
+_Version update only_
+
+## 0.3.1
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 0.3.0
+Tue, 25 Oct 2022 00:20:44 GMT
+
+### Minor changes
+
+- Extract host name from active TLS certificate.
+
+## 0.2.7
+Wed, 19 Oct 2022 23:43:41 GMT
+
+### Patches
+
+- Add web bundle specific headers to @rushstack/rush-serve-plugin.
 
 ## 0.2.6
 Mon, 17 Oct 2022 22:14:21 GMT

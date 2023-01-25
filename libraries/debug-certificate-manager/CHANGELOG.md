@@ -1,6 +1,65 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+
+## 1.2.9
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 1.2.8
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
+
+## 1.2.7
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 1.2.6
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
+
+## 1.2.5
+Fri, 18 Nov 2022 00:55:17 GMT
+
+### Patches
+
+- Reduce default certificate validity period to 365 days. Check certificate validity period as part of validating the existing certificate.
+
+## 1.2.4
+Sat, 12 Nov 2022 00:16:31 GMT
+
+### Patches
+
+- Mark X.509 issuerAltName extension non-critical, since Firefox doesn't understand it.
+
+## 1.2.3
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 1.2.2
+Fri, 04 Nov 2022 00:15:59 GMT
+
+### Patches
+
+- Remove usage of Import.lazy so that the tool can be bundled.
+
+## 1.2.1
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 1.2.0
+Tue, 25 Oct 2022 00:20:44 GMT
+
+### Minor changes
+
+- Support custom certificate subjects and validity period.
+- Generate and trust a separate CA certificate, use that to generate the TLS certificate, then destroy the private key for the CA certificate.
 
 ## 1.1.84
 Mon, 17 Oct 2022 22:14:21 GMT

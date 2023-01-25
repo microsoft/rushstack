@@ -10,12 +10,14 @@ import {
   JsonSchema
 } from '@rushstack/node-core-library';
 import * as path from 'path';
+
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushPlugin } from '../IRushPlugin';
 import { RushSdk } from './RushSdk';
+import schemaJson from '../../schemas/rush-plugin-manifest.schema.json';
 
 export interface IRushPluginManifest {
   pluginName: string;
@@ -39,9 +41,7 @@ export interface IPluginLoaderOptions<TPluginConfiguration extends IRushPluginCo
 export abstract class PluginLoaderBase<
   TPluginConfiguration extends IRushPluginConfigurationBase = IRushPluginConfigurationBase
 > {
-  protected static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../../schemas/rush-plugin-manifest.schema.json')
-  );
+  protected static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   public readonly packageName: Readonly<string>;
   public readonly pluginName: Readonly<string>;

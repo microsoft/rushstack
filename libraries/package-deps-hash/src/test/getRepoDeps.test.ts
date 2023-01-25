@@ -4,9 +4,9 @@
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-import { getRepoState, parseGitLsTree, getRepoRoot } from '../getRepoState';
+import { getRepoStateAsync, parseGitLsTree, getRepoRoot, parseGitHashObject } from '../getRepoState';
 
-import { FileSystem, FileConstants } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 const SOURCE_PATH: string = path.join(__dirname).replace(path.join('lib', 'test'), path.join('src', 'test'));
 
@@ -15,19 +15,20 @@ const TEST_PROJECT_PATH: string = path.join(SOURCE_PATH, 'testProject');
 
 const FILTERS: string[] = [`testProject/`, `nestedTestProject/`];
 
-function getRelevantEntries(results: Map<string, string>): Map<string, string> {
-  const relevantResults: Map<string, string> = new Map();
+function checkSnapshot(results: Map<string, string>): void {
+  const relevantResults: Record<string, string> = {};
   for (const [key, hash] of results) {
     if (key.startsWith(TEST_PREFIX)) {
       const partialKey: string = key.slice(TEST_PREFIX.length);
       for (const filter of FILTERS) {
         if (partialKey.startsWith(filter)) {
-          relevantResults.set(partialKey, hash);
+          relevantResults[partialKey] = hash;
         }
       }
     }
   }
-  return relevantResults;
+
+  expect(relevantResults).toMatchSnapshot();
 }
 
 describe(getRepoRoot.name, () => {
@@ -44,10 +45,10 @@ describe(parseGitLsTree.name, () => {
     const hash: string = '3451bccdc831cb43d7a70ed8e628dcf9c7f888c8';
 
     const output: string = `100644 blob ${hash}\t${filename}\x00`;
-    const changes: Map<string, string> = parseGitLsTree(output);
+    const { files } = parseGitLsTree(output);
 
-    expect(changes.size).toEqual(1); // Expect there to be exactly 1 change
-    expect(changes.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
+    expect(files.size).toEqual(1); // Expect there to be exactly 1 change
+    expect(files.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
   });
 
   it('can handle a submodule', () => {
@@ -55,10 +56,10 @@ describe(parseGitLsTree.name, () => {
     const hash: string = 'c5880bf5b0c6c1f2e2c43c95beeb8f0a808e8bac';
 
     const output: string = `160000 commit ${hash}\t${filename}\x00`;
-    const changes: Map<string, string> = parseGitLsTree(output);
+    const { submodules } = parseGitLsTree(output);
 
-    expect(changes.size).toEqual(1); // Expect there to be exactly 1 change
-    expect(changes.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
+    expect(submodules.size).toEqual(1); // Expect there to be exactly 1 submodule change
+    expect(submodules.get(filename)).toEqual(hash); // Expect the hash to be ${hash}
   });
 
   it('can handle multiple lines', () => {
@@ -68,123 +69,93 @@ describe(parseGitLsTree.name, () => {
     const filename2: string = 'src/foo bar/tsd.d.ts';
     const hash2: string = '0123456789abcdef1234567890abcdef01234567';
 
-    const output: string = `100644 blob ${hash1}\t${filename1}\x00100666 blob ${hash2}\t${filename2}\0`;
-    const changes: Map<string, string> = parseGitLsTree(output);
+    const filename3: string = 'submodule/src/index.ts';
+    const hash3: string = 'fedcba9876543210fedcba9876543210fedcba98';
 
-    expect(changes.size).toEqual(2); // Expect there to be exactly 2 changes
-    expect(changes.get(filename1)).toEqual(hash1); // Expect the hash to be ${hash1}
-    expect(changes.get(filename2)).toEqual(hash2); // Expect the hash to be ${hash2}
+    const output: string = `100644 blob ${hash1}\t${filename1}\x00100666 blob ${hash2}\t${filename2}\x00106666 commit ${hash3}\t${filename3}\0`;
+    const { files, submodules } = parseGitLsTree(output);
+
+    expect(files.size).toEqual(2); // Expect there to be exactly 2 changes
+    expect(files.get(filename1)).toEqual(hash1); // Expect the hash to be ${hash1}
+    expect(files.get(filename2)).toEqual(hash2); // Expect the hash to be ${hash2}
+
+    expect(submodules.size).toEqual(1); // Expect there to be exactly 1 submodule changes
+    expect(submodules.get(filename3)).toEqual(hash3); // Expect the hash to be ${hash3}
   });
 });
 
-describe(getRepoState.name, () => {
-  it('can parse committed files', () => {
-    const results: Map<string, string> = getRepoState(__dirname);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-    const expectedFiles: Map<string, string> = new Map(
-      Object.entries({
-        'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-        'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-        'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-        'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-        [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-      })
-    );
-
-    for (const [filePath, hash] of expectedFiles) {
-      expect(filteredResults.get(filePath)).toEqual(hash);
-    }
-    expect(filteredResults.size).toEqual(expectedFiles.size);
+describe(parseGitHashObject.name, () => {
+  it('can handle requesting zero entries', () => {
+    const results: Map<string, string> = new Map(parseGitHashObject('', []));
+    expect(results.size).toEqual(0);
   });
 
-  it('can handle adding one file', () => {
+  it('can parse multiple entries', () => {
+    const results: Map<string, string> = new Map(parseGitHashObject('11\n22\n33', ['a', 'b', 'c']));
+    expect(results).toMatchSnapshot();
+  });
+
+  it('can parse multiple entries with trailing whitespace', () => {
+    const results: Map<string, string> = new Map(parseGitHashObject('11\n22\n33\n\n', ['a', 'b', 'c']));
+    expect(results).toMatchSnapshot();
+  });
+
+  it('throws if too few hashes are provided', () => {
+    expect(() => {
+      new Map(parseGitHashObject('11\n22', ['a', 'b', 'c']));
+    }).toThrowErrorMatchingSnapshot();
+  });
+
+  it('throws if too many hashes are provided', () => {
+    expect(() => {
+      new Map(parseGitHashObject('11\n22\n33', ['a', 'b']));
+    }).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe(getRepoStateAsync.name, () => {
+  it('can parse committed files', async () => {
+    const results: Map<string, string> = await getRepoStateAsync(__dirname);
+    checkSnapshot(results);
+  });
+
+  it('can handle adding one file', async () => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
     FileSystem.writeFile(tempFilePath, 'a');
 
-    const results: Map<string, string> = getRepoState(__dirname);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath);
     }
   });
 
-  it('can handle adding two files', () => {
+  it('can handle adding two files', async () => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'b.txt');
 
     FileSystem.writeFile(tempFilePath1, 'a');
     FileSystem.writeFile(tempFilePath2, 'a');
 
-    const results: Map<string, string> = getRepoState(__dirname);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/a.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/b.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
       FileSystem.deleteFile(tempFilePath2);
     }
   });
 
-  it('can handle removing one file', () => {
+  it('can handle removing one file', async () => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.deleteFile(testFilePath);
 
-    const results: Map<string, string> = getRepoState(__dirname);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
         stdio: 'ignore',
@@ -193,30 +164,14 @@ describe(getRepoState.name, () => {
     }
   });
 
-  it('can handle changing one file', () => {
+  it('can handle changing one file', async () => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
     FileSystem.writeFile(testFilePath, 'abc');
 
-    const results: Map<string, string> = getRepoState(__dirname);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/file1.txt': 'f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
         stdio: 'ignore',
@@ -225,7 +180,7 @@ describe(getRepoState.name, () => {
     }
   });
 
-  it('can handle uncommitted filenames with spaces and non-ASCII characters', () => {
+  it('can handle uncommitted filenames with spaces and non-ASCII characters', async () => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a file.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'a  file name.txt');
     const tempFilePath3: string = path.join(TEST_PROJECT_PATH, 'newFile批把.txt');
@@ -234,32 +189,28 @@ describe(getRepoState.name, () => {
     FileSystem.writeFile(tempFilePath2, 'a');
     FileSystem.writeFile(tempFilePath3, 'a');
 
-    const results: Map<string, string> = getRepoState(__dirname);
-    const filteredResults: Map<string, string> = getRelevantEntries(results);
-
     try {
-      const expectedFiles: Map<string, string> = new Map(
-        Object.entries({
-          'nestedTestProject/src/file 1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          [`nestedTestProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576',
-          'testProject/a file.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/a  file name.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          'testProject/file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
-          'testProject/file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
-          'testProject/file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
-          'testProject/newFile批把.txt': '2e65efe2a145dda7ee51d1741299f848e5bf752e',
-          [`testProject/${FileConstants.PackageJson}`]: '18a1e415e56220fa5122428a4ef8eb8874756576'
-        })
-      );
-
-      for (const [filePath, hash] of expectedFiles) {
-        expect(filteredResults.get(filePath)).toEqual(hash);
-      }
-      expect(filteredResults.size).toEqual(expectedFiles.size);
+      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
       FileSystem.deleteFile(tempFilePath2);
       FileSystem.deleteFile(tempFilePath3);
+    }
+  });
+
+  it('handles requests for additional files', async () => {
+    const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'log.log');
+
+    FileSystem.writeFile(tempFilePath1, 'a');
+
+    try {
+      const results: Map<string, string> = await getRepoStateAsync(__dirname, [
+        `${TEST_PREFIX}testProject/log.log`
+      ]);
+      checkSnapshot(results);
+    } finally {
+      FileSystem.deleteFile(tempFilePath1);
     }
   });
 });

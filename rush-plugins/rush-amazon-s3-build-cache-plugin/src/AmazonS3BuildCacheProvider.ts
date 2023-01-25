@@ -190,7 +190,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
-        credentialsCache.setCacheEntry(this._credentialCacheId, credential);
+        credentialsCache.setCacheEntry(this._credentialCacheId, { credential });
         await credentialsCache.saveIfModifiedAsync();
       }
     );

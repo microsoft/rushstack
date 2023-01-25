@@ -173,7 +173,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * {@inheritdoc CommandLineParameterProvider.onDefineParameters}
    */
   protected onDefineParameters(): void {
-    this.onDefineUnscopedParameters();
+    this.onDefineUnscopedParameters?.();
 
     if (!this._scopingParameters.length) {
       throw new Error(
@@ -224,7 +224,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    * Scoping parameters are defined by setting the parameterGroupName to
    * ScopedCommandLineAction.ScopingParameterGroupName.
    */
-  protected abstract onDefineUnscopedParameters(): void;
+  protected onDefineUnscopedParameters?(): void;
 
   /**
    * The child class should implement this hook to define its scoped command-line

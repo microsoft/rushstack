@@ -1,6 +1,33 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+
+## 0.49.1
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.49.0
+Tue, 20 Dec 2022 01:18:22 GMT
+
+### Minor changes
+
+- Replace Terminal with ITerminal in the API.
+
+## 0.48.9
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 0.48.8
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 0.48.7
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
 
 ## 0.48.6
 Mon, 17 Oct 2022 22:14:21 GMT

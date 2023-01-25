@@ -132,8 +132,6 @@ export enum EnvironmentVariableNames {
    * @remarks
    * Specify `1` to enable the build cache or `0` to disable it.
    *
-   * If set to `0`, this is equivalent to passing the `--disable-build-cache` flag.
-   *
    * If there is no build cache configured, then this environment variable is ignored.
    */
   RUSH_BUILD_CACHE_ENABLED = 'RUSH_BUILD_CACHE_ENABLED',

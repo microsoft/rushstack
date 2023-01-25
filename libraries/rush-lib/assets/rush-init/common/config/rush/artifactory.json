@@ -47,6 +47,14 @@
     "artifactoryWebsiteUrl": "",
 
     /**
+     * Uncomment this line to specify the type of credential to save in the user's ~/.npmrc file.
+     * The default is "password", which means the user's API token will be traded in for an
+     * npm password specific to that registry. Optionally you can specify "authToken", which
+     * will save the user's API token as credentials instead.
+     */
+    // "credentialType": "password",
+
+    /**
      * These settings allow the "rush setup" interactive prompts to be customized, for
      * example with messages specific to your team or configuration.  Specify an empty string
      * to suppress that message entirely.
@@ -84,6 +92,18 @@
        * button if you haven't already done so previously."
        */
       // "locateApiKey": ""
+
+      /**
+       * Overrides the message that normally prompts:
+       * "What is your Artifactory user name?"
+       */
+      // "userNamePrompt": ""
+
+      /**
+       * Overrides the message that normally prompts:
+       * "What is your Artifactory API key?"
+       */
+      // "apiKeyPrompt": ""
     }
   }
 }

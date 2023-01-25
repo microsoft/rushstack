@@ -2,6 +2,111 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.4.3",
+      "tag": "@rushstack/heft-jest-plugin_v0.4.3",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.0` to `^0.49.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "@rushstack/heft-jest-plugin_v0.4.2",
+      "date": "Tue, 20 Dec 2022 01:18:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.9` to `^0.49.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1",
+      "tag": "@rushstack/heft-jest-plugin_v0.4.1",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.8` to `^0.48.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.0",
+      "tag": "@rushstack/heft-jest-plugin_v0.4.0",
+      "date": "Tue, 29 Nov 2022 01:16:49 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove a postinstall step that patches Jest in-place. This is better achieved with a PNPM patch. See https://github.com/microsoft/rushstack/pull/3790 for more information."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.45",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.45",
+      "date": "Tue, 08 Nov 2022 01:20:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.7` to `^0.48.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.44",
+      "tag": "@rushstack/heft-jest-plugin_v0.3.44",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.48.6` to `^0.48.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.43",
       "tag": "@rushstack/heft-jest-plugin_v0.3.43",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",

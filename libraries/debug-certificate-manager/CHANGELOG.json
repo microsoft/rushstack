@@ -2,6 +2,147 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.9",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.9",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.8",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.8",
+      "date": "Tue, 20 Dec 2022 01:18:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.7",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.7",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.6",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.6",
+      "date": "Tue, 29 Nov 2022 01:16:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.5",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.5",
+      "date": "Fri, 18 Nov 2022 00:55:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reduce default certificate validity period to 365 days. Check certificate validity period as part of validating the existing certificate."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.4",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.4",
+      "date": "Sat, 12 Nov 2022 00:16:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Mark X.509 issuerAltName extension non-critical, since Firefox doesn't understand it."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.3",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.3",
+      "date": "Tue, 08 Nov 2022 01:20:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.2",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.2",
+      "date": "Fri, 04 Nov 2022 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove usage of Import.lazy so that the tool can be bundled."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.1",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.1",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.0",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.0",
+      "date": "Tue, 25 Oct 2022 00:20:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support custom certificate subjects and validity period."
+          },
+          {
+            "comment": "Generate and trust a separate CA certificate, use that to generate the TLS certificate, then destroy the private key for the CA certificate."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.84",
       "tag": "@rushstack/debug-certificate-manager_v1.1.84",
       "date": "Mon, 17 Oct 2022 22:14:21 GMT",

@@ -6,6 +6,7 @@
 
 import { AzureAuthorityHosts } from '@azure/identity';
 import { DeviceCodeCredential } from '@azure/identity';
+import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { ITerminal } from '@rushstack/node-core-library';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
@@ -28,7 +29,9 @@ export abstract class AzureAuthenticationBase {
     // (undocumented)
     protected abstract _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
     // (undocumented)
-    tryGetCachedCredentialAsync(doNotThrowIfExpired?: boolean): Promise<string | undefined>;
+    tryGetCachedCredentialAsync(options?: ITryGetCachedCredentialOptionsThrow | ITryGetCachedCredentialOptionsIgnore): Promise<ICredentialCacheEntry | undefined>;
+    // (undocumented)
+    tryGetCachedCredentialAsync(options: ITryGetCachedCredentialOptionsLogWarning): Promise<ICredentialCacheEntry | undefined>;
     // (undocumented)
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
     updateCachedCredentialInteractiveAsync(terminal: ITerminal, onlyIfExistingCredentialExpiresAfter?: Date): Promise<void>;
@@ -61,6 +64,9 @@ export class AzureStorageAuthentication extends AzureAuthenticationBase {
 }
 
 // @public (undocumented)
+export type ExpiredCredentialBehavior = 'logWarning' | 'throwError' | 'ignore';
+
+// @public (undocumented)
 export interface IAzureAuthenticationBaseOptions {
     // (undocumented)
     azureEnvironment?: AzureEnvironmentName;
@@ -79,9 +85,35 @@ export interface IAzureStorageAuthenticationOptions extends IAzureAuthentication
 // @public (undocumented)
 export interface ICredentialResult {
     // (undocumented)
+    credentialMetadata?: object;
+    // (undocumented)
     credentialString: string;
     // (undocumented)
-    expiresOn: Date | undefined;
+    expiresOn?: Date;
+}
+
+// @public (undocumented)
+export interface ITryGetCachedCredentialOptionsBase {
+    expiredCredentialBehavior?: ExpiredCredentialBehavior;
+    // (undocumented)
+    terminal?: ITerminal;
+}
+
+// @public (undocumented)
+export interface ITryGetCachedCredentialOptionsIgnore extends ITryGetCachedCredentialOptionsBase {
+    expiredCredentialBehavior: 'ignore';
+}
+
+// @public (undocumented)
+export interface ITryGetCachedCredentialOptionsLogWarning extends ITryGetCachedCredentialOptionsBase {
+    expiredCredentialBehavior: 'logWarning';
+    // (undocumented)
+    terminal: ITerminal;
+}
+
+// @public (undocumented)
+export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCredentialOptionsBase {
+    expiredCredentialBehavior: 'throwError';
 }
 
 // @public (undocumented)

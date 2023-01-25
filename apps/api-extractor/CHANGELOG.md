@@ -1,6 +1,30 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 17 Oct 2022 22:14:21 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+
+## 7.33.8
+Wed, 18 Jan 2023 22:44:12 GMT
+
+### Patches
+
+- Use ts.getCheckFlags to fix TS 5.0
+
+## 7.33.7
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 7.33.6
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 7.33.5
+Wed, 26 Oct 2022 00:16:16 GMT
+
+### Patches
+
+- Update the @microsoft/tsdoc dependency version to 0.14.2.
 
 ## 7.33.4
 Mon, 17 Oct 2022 22:14:21 GMT
