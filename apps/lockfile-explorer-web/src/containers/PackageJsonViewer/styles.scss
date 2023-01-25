@@ -2,7 +2,8 @@
 
 .PackageJsonWrapper {
   @include base.card;
-  height: 30%;
+  min-height: 400px;
+  flex: 1;
   margin-top: 12px;
 }
 
