@@ -14,7 +14,7 @@ build orchestrator, but you can also use it to analyze a standalone PNPM workspa
 
 Lockfile Explorer helps with problems such as:
 
-- Understanding why a multiple versions of an NPM package are appearing in your `node_modules` folder
+- Understanding why multiple versions of an NPM package are appearing in your `node_modules` folder
 - Tracing dependencies to determine which project caused an NPM package to be installed
 - Finding and eliminating "doppelgangers" (multiple installations of the same version
   of the same package)
