@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@rushstack/lockfile-explorer_v1.0.0",
+      "date": "Wed, 25 Jan 2023 03:01:43 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Initial feature-complete release of Lockfile Explorer"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@rushstack/lockfile-explorer_v0.2.2",
       "date": "Tue, 24 Jan 2023 00:16:54 GMT",
