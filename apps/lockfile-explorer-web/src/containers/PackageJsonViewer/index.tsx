@@ -12,6 +12,7 @@ import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 import { isEntryModified } from '../../helpers/isEntryModified';
 import { ScrollArea, Tabs, Text } from '@rushstack/rush-themed-ui';
+import { LockfileEntryFilter } from '../../parsing/LockfileEntry';
 
 const PackageView: { [key in string]: string } = {
   PACKAGE_JSON: 'PACKAGE_JSON',
@@ -31,7 +32,6 @@ export const PackageJsonViewer = (): JSX.Element => {
   const [selection, setSelection] = useState<string>(PackageView.PARSED_PACKAGE_JSON);
 
   const cb = useCallback((s: string) => {
-    console.log('new view: ', s);
     setSelection(s);
   }, []);
 
@@ -182,13 +182,17 @@ export const PackageJsonViewer = (): JSX.Element => {
               <Text type="h5" bold>
                 Package Name:
               </Text>
-              <Text type="p">{selectedEntry?.displayText}</Text>
+              <Text type="p">
+                {selectedEntry?.kind === LockfileEntryFilter.Project
+                  ? parsedPackageJSON.name
+                  : selectedEntry?.displayText}
+              </Text>
             </div>
             <div className={styles.PackageSpecEntry}>
               <Text type="h5" bold>
                 Version:
               </Text>
-              <Text type="p">{selectedEntry?.entryPackageVersion}</Text>
+              <Text type="p">{selectedEntry?.entryPackageVersion || parsedPackageJSON.version}</Text>
             </div>
             <div className={styles.DependencyRows}>
               <div>
