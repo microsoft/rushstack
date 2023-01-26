@@ -35,7 +35,7 @@ function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IM
 // End Asset",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
-  "/release/main.js": "// Begin Asset Hash=9cd46cad33286e832bc626d69f2907991c519c63a9f73fd55869b619624d7406
+  "/release/main.js": "// Begin Asset Hash=ba01c299c5bb3f37b96b943e3a4992b22dfc4d7dc60e5dca924861e9f87e1e1a
 define([\\"bar\\",\\"baz\\"], (__WEBPACK_EXTERNAL_MODULE__565__, __WEBPACK_EXTERNAL_MODULE__506__) => { return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -185,8 +185,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__506__;
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			}
-/******/ 			;
+/******/ 			};
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);
@@ -363,7 +362,7 @@ function foo() { (0,bar__WEBPACK_IMPORTED_MODULE_0__.something)(); }
 // End Asset",
   "/release/async.js.LICENSE.txt": "// @lic OtherLicense
 ",
-  "/release/main.js": "// Begin Asset Hash=16e37b04873ddcaeef9bc7f0ba90d9a7e8c849ebc9c4d1528cf1273460d1393e
+  "/release/main.js": "// Begin Asset Hash=8cb2cd5ea24475cb83869e60a7e7e6c19f900a89b19a075000f7a98850f0f6aa
 define([\\"bar\\"], (__WEBPACK_EXTERNAL_MODULE__565__) => { return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -505,8 +504,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__565__;
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			}
-/******/ 			;
+/******/ 			};
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);

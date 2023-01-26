@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade to webpack 5.75.0",
+      "type": "patch",
+      "packageName": "@rushstack/webpack-plugin-utilities"
+    }
+  ],
+  "packageName": "@rushstack/webpack-plugin-utilities",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

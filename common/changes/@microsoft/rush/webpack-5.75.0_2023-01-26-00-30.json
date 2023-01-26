@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade to webpack 5.75.0",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
