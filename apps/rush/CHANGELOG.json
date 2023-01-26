@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.89.1",
+      "tag": "@microsoft/rush_v5.89.1",
+      "date": "Thu, 26 Jan 2023 02:55:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with `rush add` where the approved packages files aren't updated."
+          },
+          {
+            "comment": "Revert generation of scripts in the Git hooks folder due to various git-related issues"
+          },
+          {
+            "comment": "Upgrade to webpack 5.75.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.89.0",
       "tag": "@microsoft/rush_v5.89.0",
       "date": "Tue, 24 Jan 2023 22:30:06 GMT",

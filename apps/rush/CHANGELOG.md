@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 24 Jan 2023 22:30:06 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jan 2023 02:55:30 GMT and should not be manually modified.
+
+## 5.89.1
+Thu, 26 Jan 2023 02:55:30 GMT
+
+### Updates
+
+- Fix an issue with `rush add` where the approved packages files aren't updated.
+- Revert generation of scripts in the Git hooks folder due to various git-related issues
+- Upgrade to webpack 5.75.0
 
 ## 5.89.0
 Tue, 24 Jan 2023 22:30:06 GMT
