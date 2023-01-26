@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade to webpack 5.75.0",
+      "type": "patch",
+      "packageName": "@rushstack/heft-dev-cert-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-dev-cert-plugin",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
