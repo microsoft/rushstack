@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/module-minifier",
-      "comment": "Include terser package version in config hash.",
+      "comment": "Ensure updates to the version of Terser trigger a hash change.",
       "type": "patch"
     }
   ],
