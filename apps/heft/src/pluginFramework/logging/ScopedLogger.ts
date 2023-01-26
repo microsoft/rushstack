@@ -24,6 +24,11 @@ export interface IScopedLogger {
   readonly terminal: ITerminal;
 
   /**
+   * Indicates if the logger has emitted any errors.
+   */
+  readonly hasErrors: boolean;
+
+  /**
    * Call this function to emit an error to the heft runtime.
    */
   emitError(error: Error): void;
@@ -77,6 +82,13 @@ export class ScopedLogger implements IScopedLogger {
       `[${this.loggerName}] `
     );
     this.terminal = new Terminal(this.terminalProvider);
+  }
+
+  /**
+   * {@inheritdoc IScopedLogger.hasErrors}
+   */
+  public get hasErrors(): boolean {
+    return this._errors.length > 0;
   }
 
   /**

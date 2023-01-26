@@ -8,7 +8,7 @@ import {
   Test,
   TestResult,
   AggregatedResult,
-  Context,
+  TestContext,
   ReporterOnStartOptions,
   Config
 } from '@jest/reporters';
@@ -176,7 +176,7 @@ export default class HeftJestReporter implements Reporter {
     );
   }
 
-  public async onRunComplete(contexts: Set<Context>, results: AggregatedResult): Promise<void> {
+  public async onRunComplete(contexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
     const { numPassedTests, numFailedTests, numTotalTests, numRuntimeErrorTestSuites } = results;
 
     this._terminal.writeLine();

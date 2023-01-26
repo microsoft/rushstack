@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import glob from 'fast-glob';
+import * as path from 'path';
+import glob, { FileSystemAdapter } from 'fast-glob';
+import type { IWatchFileSystemAdapter, IWatchedFileState } from '../utilities/WatchFileSystemAdapter';
 
 /**
  * Used to specify a selection of one or more files.
@@ -75,19 +77,69 @@ export interface IGlobOptions {
  * @public
  */
 export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<string[]>;
+/**
+ * Glob a set of files and return a map of paths that match the provided patterns to their current state in the watcher.
+ *
+ * @param patterns - Glob patterns to match against.
+ * @param options - Options that are used when globbing the set of files.
+ *
+ * @public
+ */
+export type WatchGlobFn = (
+  pattern: string | string[],
+  options?: IGlobOptions | undefined
+) => Promise<Map<string, IWatchedFileState>>;
+
+function isWatchFileSystemAdapter(adapter: FileSystemAdapter): adapter is IWatchFileSystemAdapter {
+  return !!(adapter as IWatchFileSystemAdapter).getFileState;
+}
+
+export interface IWatchGlobOptions extends IGlobOptions {
+  fs: IWatchFileSystemAdapter;
+}
+
+export async function watchGlobAsync(
+  pattern: string | string[],
+  options: IWatchGlobOptions
+): Promise<Map<string, IWatchedFileState>> {
+  const rawFiles: string[] = await glob(pattern, options);
+
+  const results: Map<string, IWatchedFileState> = new Map();
+  const { fs, cwd = process.cwd() } = options;
+  for (const file of rawFiles) {
+    results.set(file, fs.getFileState(path.resolve(cwd, file)));
+  }
+
+  return results;
+}
 
 export async function getFilePathsAsync(
   fileGlobSpecifier: IFileSelectionSpecifier,
-  globFn: GlobFn
+  fs?: FileSystemAdapter
 ): Promise<Set<string>> {
-  return new Set<string>(
-    await globFn(getIncludedGlobPatterns(fileGlobSpecifier), {
-      cwd: fileGlobSpecifier.sourcePath,
-      ignore: fileGlobSpecifier.excludeGlobs,
-      dot: true,
-      absolute: true
-    })
-  );
+  const rawFiles: string[] = await glob(fileGlobSpecifier.includeGlobs!, {
+    fs,
+    cwd: fileGlobSpecifier.sourcePath,
+    ignore: fileGlobSpecifier.excludeGlobs,
+    dot: true,
+    absolute: true
+  });
+
+  if (fs && isWatchFileSystemAdapter(fs)) {
+    const changedFiles: Set<string> = new Set();
+    for (const file of rawFiles) {
+      if (fs.getFileState(path.normalize(file)).changed) {
+        changedFiles.add(file);
+      }
+    }
+    return changedFiles;
+  }
+
+  return new Set(rawFiles);
+}
+
+export function normalizeFileSelectionSpecifier(fileGlobSpecifier: IFileSelectionSpecifier): void {
+  fileGlobSpecifier.includeGlobs = getIncludedGlobPatterns(fileGlobSpecifier);
 }
 
 function getIncludedGlobPatterns(fileGlobSpecifier: IFileSelectionSpecifier): string[] {

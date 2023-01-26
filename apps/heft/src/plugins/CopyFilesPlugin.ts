@@ -2,19 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import glob from 'fast-glob';
-import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
+import { AlreadyExistsBehavior, FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getFilePathsAsync, type GlobFn, type IFileSelectionSpecifier } from './FileGlobSpecifier';
+import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type {
-  IHeftTaskSession,
-  IHeftTaskRunHookOptions,
-  IHeftTaskRunIncrementalHookOptions
-} from '../pluginFramework/HeftTaskSession';
-import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
+import { WatchFileSystemAdapter } from '../utilities/WatchFileSystemAdapter';
 
 /**
  * Used to specify a selection of files to copy from a specific source folder to one
@@ -71,31 +66,23 @@ interface ICopyDescriptor {
   hardlink: boolean;
 }
 
-export async function copyFilesAsync(copyOperations: ICopyOperation[], logger: IScopedLogger): Promise<void> {
-  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(copyOperations, glob);
-  await _copyFilesInnerAsync(copyDescriptors, logger);
-}
-
-export async function copyIncrementalFilesAsync(
-  copyOperations: ICopyOperation[],
-  globChangedFilesAsyncFn: GlobFn,
-  isFirstRun: boolean,
-  logger: IScopedLogger
+export async function copyFilesAsync(
+  copyOperations: Iterable<ICopyOperation>,
+  terminal: ITerminal,
+  watchFileSystemAdapter?: WatchFileSystemAdapter
 ): Promise<void> {
-  const copyDescriptors: ICopyDescriptor[] = await _getCopyDescriptorsAsync(
+  const copyDescriptors: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
     copyOperations,
-    // Use the normal globber if it is the first run, to ensure that non-watched files are copied
-    isFirstRun ? glob : globChangedFilesAsyncFn
+    watchFileSystemAdapter
   );
-  await _copyFilesInnerAsync(copyDescriptors, logger);
+
+  await _copyFilesInnerAsync(copyDescriptors, terminal);
 }
 
 async function _getCopyDescriptorsAsync(
-  copyConfigurations: ICopyOperation[],
-  globFn: GlobFn
-): Promise<ICopyDescriptor[]> {
-  const processedCopyDescriptors: ICopyDescriptor[] = [];
-
+  copyConfigurations: Iterable<ICopyOperation>,
+  fs: WatchFileSystemAdapter | undefined
+): Promise<Map<string, ICopyDescriptor>> {
   // Create a map to deduplicate and prevent double-writes
   // resolvedDestinationFilePath -> descriptor
   const destinationCopyDescriptors: Map<string, ICopyDescriptor> = new Map();
@@ -103,54 +90,19 @@ async function _getCopyDescriptorsAsync(
   await Async.forEachAsync(
     copyConfigurations,
     async (copyConfiguration: ICopyOperation) => {
-      let sourceFolder: string | undefined;
-      let sourceFilePaths: Set<string> | undefined;
-      if (
-        !copyConfiguration.fileExtensions?.length &&
-        !copyConfiguration.includeGlobs?.length &&
-        !copyConfiguration.excludeGlobs?.length
-      ) {
-        sourceFolder = path.dirname(copyConfiguration.sourcePath);
-        if (copyConfiguration.hardlink) {
-          // Specify a glob to match all files in the folder, since folders cannot be hardlinked.
-          // Perform globbing from one folder up, so that we create the folder in the destination.
-          try {
-            sourceFilePaths = await getFilePathsAsync(
-              {
-                ...copyConfiguration,
-                sourcePath: sourceFolder,
-                includeGlobs: [`${path.basename(copyConfiguration.sourcePath)}/**/*`]
-              },
-              globFn
-            );
-          } catch (error) {
-            if (FileSystem.isNotDirectoryError(error)) {
-              // The source path is a file, not a folder. Handled below.
-            } else {
-              throw error;
-            }
-          }
-        }
-
-        // Still not set, either it's not a hardlink or it's a file.
-        if (!sourceFilePaths) {
-          sourceFilePaths = new Set([copyConfiguration.sourcePath]);
-        }
-      } else {
-        // Assume the source path is a folder
-        sourceFolder = copyConfiguration.sourcePath;
-        sourceFilePaths = await getFilePathsAsync(copyConfiguration, globFn);
-      }
+      // The source path is required to be a folder
+      const sourceFolder: string | undefined = copyConfiguration.sourcePath;
+      const sourceFilePaths: Set<string> | undefined = await getFilePathsAsync(copyConfiguration, fs);
 
       // Dedupe and throw if a double-write is detected
       for (const destinationFolderPath of copyConfiguration.destinationFolders) {
         for (const sourceFilePath of sourceFilePaths!) {
-          const sourceFileRelativePath: string = path.relative(sourceFolder!, sourceFilePath);
-
           // Only include the relative path from the sourceFolder if flatten is false
           const resolvedDestinationPath: string = path.resolve(
             destinationFolderPath,
-            copyConfiguration.flatten ? path.basename(sourceFileRelativePath) : sourceFileRelativePath
+            copyConfiguration.flatten
+              ? path.basename(sourceFilePath)
+              : path.relative(sourceFolder!, sourceFilePath)
           );
 
           // Throw if a duplicate copy target with a different source or options is specified
@@ -175,7 +127,7 @@ async function _getCopyDescriptorsAsync(
             destinationPath: resolvedDestinationPath,
             hardlink: !!copyConfiguration.hardlink
           };
-          processedCopyDescriptors.push(processedCopyDescriptor);
+
           destinationCopyDescriptors.set(resolvedDestinationPath, processedCopyDescriptor);
         }
       }
@@ -183,22 +135,21 @@ async function _getCopyDescriptorsAsync(
     { concurrency: Constants.maxParallelism }
   );
 
-  // We're done with the map, grab the values and return
-  return processedCopyDescriptors;
+  return destinationCopyDescriptors;
 }
 
 async function _copyFilesInnerAsync(
-  copyDescriptors: ICopyDescriptor[],
-  logger: IScopedLogger
+  copyDescriptors: Map<string, ICopyDescriptor>,
+  terminal: ITerminal
 ): Promise<void> {
-  if (copyDescriptors.length === 0) {
+  if (copyDescriptors.size === 0) {
     return;
   }
 
   let copiedFolderOrFileCount: number = 0;
   let linkedFileCount: number = 0;
   await Async.forEachAsync(
-    copyDescriptors,
+    copyDescriptors.values(),
     async (copyDescriptor: ICopyDescriptor) => {
       if (copyDescriptor.hardlink) {
         linkedFileCount++;
@@ -207,7 +158,7 @@ async function _copyFilesInnerAsync(
           newLinkPath: copyDescriptor.destinationPath,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
-        logger.terminal.writeVerboseLine(
+        terminal.writeVerboseLine(
           `Linked "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}".`
         );
       } else {
@@ -217,7 +168,7 @@ async function _copyFilesInnerAsync(
           destinationPath: copyDescriptor.destinationPath,
           alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
         });
-        logger.terminal.writeVerboseLine(
+        terminal.writeVerboseLine(
           `Copied "${copyDescriptor.sourcePath}" to "${copyDescriptor.destinationPath}".`
         );
       }
@@ -226,27 +177,26 @@ async function _copyFilesInnerAsync(
   );
 
   const folderOrFilesPlural: string = copiedFolderOrFileCount === 1 ? '' : 's';
-  logger.terminal.writeLine(
+  terminal.writeLine(
     `Copied ${copiedFolderOrFileCount} folder${folderOrFilesPlural} or file${folderOrFilesPlural} and ` +
       `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
   );
 }
 
-function _resolveCopyOperationPaths(
+function* _resolveCopyOperationPaths(
   heftConfiguration: HeftConfiguration,
   copyOperations: Iterable<ICopyOperation>
-): void {
+): IterableIterator<ICopyOperation> {
+  function resolvePath(inputPath: string): string {
+    return path.resolve(heftConfiguration.buildFolderPath, inputPath);
+  }
+
   for (const copyOperation of copyOperations) {
-    if (!path.isAbsolute(copyOperation.sourcePath)) {
-      copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolderPath, copyOperation.sourcePath);
-    }
-    const destinationFolders: string[] = [];
-    for (const destinationFolder of copyOperation.destinationFolders) {
-      if (!path.isAbsolute(destinationFolder)) {
-        destinationFolders.push(path.resolve(heftConfiguration.buildFolderPath, destinationFolder));
-      }
-    }
-    copyOperation.destinationFolders = destinationFolders;
+    yield {
+      ...copyOperation,
+      sourcePath: resolvePath(copyOperation.sourcePath),
+      destinationFolders: copyOperation.destinationFolders.map(resolvePath)
+    };
   }
 }
 
@@ -258,24 +208,14 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
     heftConfiguration: HeftConfiguration,
     pluginOptions: ICopyFilesPluginOptions
   ): void {
-    // TODO: Remove once improved heft-config-file is used to resolve paths
-    _resolveCopyOperationPaths(heftConfiguration, pluginOptions.copyOperations);
-
-    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      runOptions.addCopyOperations(pluginOptions.copyOperations);
-    });
-
-    taskSession.hooks.runIncremental.tapPromise(
+    taskSession.hooks.registerFileOperations.tap(
       PLUGIN_NAME,
-      async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        runIncrementalOptions.addCopyOperations(
-          pluginOptions.copyOperations.map((copyOperation) => {
-            return {
-              ...copyOperation,
-              onlyIfChanged: true
-            };
-          })
-        );
+      (operations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
+        // TODO: Remove transformation once improved heft-config-file is used to resolve paths
+        for (const operation of _resolveCopyOperationPaths(heftConfiguration, pluginOptions.copyOperations)) {
+          operations.copyOperations.add(operation);
+        }
+        return operations;
       }
     );
   }

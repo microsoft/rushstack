@@ -156,5 +156,9 @@
         "lodash": "~4.17.15"
       }
     }
+  },
+
+  "globalPeerDependencyRules": {
+    "allowAny": ["@rushstack/heft"]
   }
 }

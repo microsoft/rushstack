@@ -1,7 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IOperationRunner } from './IOperationRunner';
+import type { ITerminal } from '@rushstack/node-core-library';
+
+import { Stopwatch } from '../utilities/Stopwatch';
+import type {
+  IOperationRunner,
+  IOperationRunnerContext,
+  IOperationState,
+  IOperationStates
+} from './IOperationRunner';
+import { OperationError } from './OperationError';
+import { OperationStatus } from './OperationStatus';
 
 /**
  * Options for constructing a new Operation.
@@ -25,6 +35,13 @@ export interface IOperationOptions {
   weight?: number | undefined;
 }
 
+export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 'isFirstRun'> {
+  beforeExecute(operation: Operation, state: IOperationState): void;
+  afterExecute(operation: Operation, state: IOperationState): void;
+
+  terminal: ITerminal;
+}
+
 /**
  * The `Operation` class is a node in the dependency graph of work that needs to be scheduled by the
  * `OperationExecutionManager`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
@@ -34,11 +51,15 @@ export interface IOperationOptions {
  *
  * @alpha
  */
-export class Operation {
+export class Operation implements IOperationStates {
   /**
    * A set of all dependencies which must be executed before this operation is complete.
    */
   public readonly dependencies: Set<Operation> = new Set<Operation>();
+  /**
+   * A set of all operations that wait for this operation.
+   */
+  public readonly consumers: Set<Operation> = new Set<Operation>();
 
   public readonly groupName: string | undefined;
 
@@ -47,6 +68,37 @@ export class Operation {
    * running the operation.
    */
   public runner: IOperationRunner | undefined = undefined;
+
+  /**
+   * This number represents how far away this Operation is from the furthest "root" operation (i.e.
+   * an operation with no consumers). This helps us to calculate the critical path (i.e. the
+   * longest chain of projects which must be executed in order, thereby limiting execution speed
+   * of the entire operation tree.
+   *
+   * This number is calculated via a memoized depth-first search, and when choosing the next
+   * operation to execute, the operation with the highest criticalPathLength is chosen.
+   *
+   * Example:
+   *        (0) A
+   *             \
+   *          (1) B     C (0)         (applications)
+   *               \   /|\
+   *                \ / | \
+   *             (2) D  |  X (1)      (utilities)
+   *                    | / \
+   *                    |/   \
+   *                (2) Y     Z (2)   (other utilities)
+   *
+   * All roots (A & C) have a criticalPathLength of 0.
+   * B has a score of 1, since A depends on it.
+   * D has a score of 2, since we look at the longest chain (e.g D->B->A is longer than D->C)
+   * X has a score of 1, since the only package which depends on it is A
+   * Z has a score of 2, since only X depends on it, and X has a score of 1
+   * Y has a score of 2, since the chain Y->X->C is longer than Y->C
+   *
+   * The algorithm is implemented in AsyncOperationQueue.ts as calculateCriticalPathLength()
+   */
+  public criticalPathLength: number | undefined = undefined;
 
   /**
    * The weight for this operation. This scalar is the contribution of this operation to the
@@ -61,6 +113,14 @@ export class Operation {
    */
   public weight: number;
 
+  public lastState: IOperationState | undefined = undefined;
+
+  public state: IOperationState | undefined = undefined;
+
+  private _promise: Promise<OperationStatus> | undefined = undefined;
+
+  private _runPending: boolean = true;
+
   public constructor(options?: IOperationOptions) {
     this.groupName = options?.groupName;
     this.runner = options?.runner;
@@ -72,5 +132,131 @@ export class Operation {
    */
   public get name(): string | undefined {
     return this.runner?.name;
+  }
+
+  public addDependency(dependency: Operation): void {
+    this.dependencies.add(dependency);
+    dependency.consumers.add(this);
+  }
+
+  public deleteDependency(dependency: Operation): void {
+    this.dependencies.delete(dependency);
+    dependency.consumers.delete(this);
+  }
+
+  public reset(): void {
+    // Reset operation state
+    this.lastState = this.state;
+
+    this.state = {
+      status: OperationStatus.Ready,
+      error: undefined,
+      stopwatch: new Stopwatch()
+    };
+
+    this._promise = undefined;
+    this._runPending = true;
+  }
+
+  /**
+   * @internal
+   */
+  public async _executeAsync(context: IExecuteOperationContext): Promise<OperationStatus> {
+    const { state } = this;
+    if (!state) {
+      throw new Error(`Operation state has not been initialized.`);
+    }
+
+    if (!this._promise) {
+      this._promise = this._executeInnerAsync(context, state);
+    }
+
+    return this._promise;
+  }
+
+  private async _executeInnerAsync(
+    context: IExecuteOperationContext,
+    rawState: IOperationState
+  ): Promise<OperationStatus> {
+    const state: IOperationState = rawState;
+    const { runner } = this;
+
+    const dependencyResults: PromiseSettledResult<OperationStatus>[] = await Promise.allSettled(
+      Array.from(this.dependencies, (dependency: Operation) => dependency._executeAsync(context))
+    );
+
+    const { cancellationToken, requestRun, queueWork } = context;
+
+    if (cancellationToken.isCancelled) {
+      state.status = OperationStatus.Cancelled;
+      return state.status;
+    }
+
+    for (const result of dependencyResults) {
+      if (
+        result.status === 'rejected' ||
+        result.value === OperationStatus.Blocked ||
+        result.value === OperationStatus.Failure
+      ) {
+        state.status = OperationStatus.Blocked;
+        return state.status;
+      }
+    }
+
+    const innerContext: IOperationRunnerContext = {
+      cancellationToken,
+      isFirstRun: !this.lastState,
+      queueWork,
+      requestRun: () => {
+        switch (this.state?.status) {
+          case OperationStatus.Ready:
+            return;
+          case OperationStatus.Executing:
+            this._runPending = true;
+            return;
+          default:
+            return requestRun?.();
+        }
+      }
+    };
+
+    await queueWork(async () => {
+      // Redundant variable to satisfy require-atomic-updates
+      const innerState: IOperationState = state;
+
+      if (cancellationToken.isCancelled) {
+        innerState.status = OperationStatus.Cancelled;
+        return innerState.status;
+      }
+
+      context.beforeExecute(this, innerState);
+
+      innerState.status = OperationStatus.Executing;
+      innerState.stopwatch.start();
+
+      while (this._runPending) {
+        this._runPending = false;
+        try {
+          innerState.status = runner ? await runner.executeAsync(innerContext) : OperationStatus.NoOp;
+        } catch (error) {
+          innerState.status = OperationStatus.Failure;
+          innerState.error = error as OperationError;
+        }
+
+        if (this._runPending) {
+          if (cancellationToken.isCancelled) {
+            innerState.status = OperationStatus.Cancelled;
+            break;
+          } else {
+            context.terminal.writeLine(`Immediate rerun requested. Executing.`);
+          }
+        }
+      }
+
+      state.stopwatch.stop();
+      context.afterExecute(this, state);
+    }, this.criticalPathLength ?? 0);
+
+    return state.status;
   }
 }

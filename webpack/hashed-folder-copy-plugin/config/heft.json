@@ -17,7 +17,8 @@
             "options": {
               "copyOperations": [
                 {
-                  "sourcePath": "./src/ambientTypes.d.ts",
+                  "sourcePath": "./src",
+                  "includeGlobs": ["ambientTypes.d.ts"],
                   "destinationFolders": ["."]
                 }
               ]

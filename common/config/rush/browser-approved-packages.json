@@ -53,6 +53,10 @@
     {
       "name": "update-notifier",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "watchpack",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }

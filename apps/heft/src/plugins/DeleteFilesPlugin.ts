@@ -2,14 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import glob from 'fast-glob';
 import { FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
+import {
+  getFilePathsAsync,
+  normalizeFileSelectionSpecifier,
+  type IFileSelectionSpecifier
+} from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
-import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
+import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
 
 /**
  * Used to specify a selection of source files to delete from the specified source folder.
@@ -35,8 +38,9 @@ async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperatio
         // If no globs or file extensions are provided add the path to the set of paths to delete
         pathsToDelete.add(deleteOperation.sourcePath);
       } else {
+        normalizeFileSelectionSpecifier(deleteOperation);
         // Glob the files under the source path and add them to the set of files to delete
-        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation, glob);
+        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation);
         for (const sourceFilePath of sourceFilePaths) {
           pathsToDelete.add(sourceFilePath);
         }
@@ -49,7 +53,7 @@ async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperatio
 }
 
 export async function deleteFilesAsync(
-  deleteOperations: IDeleteOperation[],
+  deleteOperations: Iterable<IDeleteOperation>,
   terminal: ITerminal
 ): Promise<void> {
   const pathsToDelete: Set<string> = await _getPathsToDeleteAsync(deleteOperations);
@@ -93,14 +97,15 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, terminal: ITer
   }
 }
 
-function _resolveDeleteOperationPaths(
+function* _resolveDeleteOperationPaths(
   heftConfiguration: HeftConfiguration,
   deleteOperations: Iterable<IDeleteOperation>
-): void {
-  for (const copyOperation of deleteOperations) {
-    if (!path.isAbsolute(copyOperation.sourcePath)) {
-      copyOperation.sourcePath = path.resolve(heftConfiguration.buildFolderPath, copyOperation.sourcePath);
-    }
+): IterableIterator<IDeleteOperation> {
+  for (const deleteOperation of deleteOperations) {
+    yield {
+      ...deleteOperation,
+      sourcePath: path.resolve(heftConfiguration.buildFolderPath, deleteOperation.sourcePath)
+    };
   }
 }
 
@@ -112,11 +117,18 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     heftConfiguration: HeftConfiguration,
     pluginOptions: IDeleteFilesPluginOptions
   ): void {
-    // TODO: Remove once improved heft-config-file is used
-    _resolveDeleteOperationPaths(heftConfiguration, pluginOptions.deleteOperations);
-
-    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      runOptions.addDeleteOperations(pluginOptions.deleteOperations);
-    });
+    taskSession.hooks.registerFileOperations.tap(
+      PLUGIN_NAME,
+      (fileOperations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
+        // TODO: Remove transform once improved heft-config-file is used
+        for (const deleteOperation of _resolveDeleteOperationPaths(
+          heftConfiguration,
+          pluginOptions.deleteOperations
+        )) {
+          fileOperations.deleteOperations.add(deleteOperation);
+        }
+        return fileOperations;
+      }
+    );
   }
 }

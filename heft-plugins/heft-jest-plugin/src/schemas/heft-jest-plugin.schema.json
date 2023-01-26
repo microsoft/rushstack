@@ -24,6 +24,12 @@
       "title": "Folder Name For Tests",
       "description": "Specifies the intermediary folder that tests will use.  Because Jest uses the Node.js runtime to execute tests, the module format must be CommonJS. The default value is \"lib\".",
       "type": "string"
+    },
+
+    "folderNameForSnapshots": {
+      "title": "Folder Name For Snapshots",
+      "description": "Specifies the source folder where snapshots are committed to. This is used along with \"folderNameForTests\" when watching for changes to identify the relevant test for a snapshot. The default value is \"src\".",
+      "type": "string"
     }
   }
 }

@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/node-core-library';
-
 import type { OperationStatus } from './OperationStatus';
-import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import type { OperationError } from './OperationError';
+
+import type { CancellationToken } from '../pluginFramework/CancellationToken';
+import type { Stopwatch } from '../utilities/Stopwatch';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -12,8 +13,27 @@ import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
  * @beta
  */
 export interface IOperationRunnerContext {
-  terminal: ITerminal;
-  loggingManager: LoggingManager;
+  cancellationToken: CancellationToken;
+
+  isFirstRun: boolean;
+
+  requestRun?: () => void;
+
+  queueWork<T>(workFn: () => Promise<T>, priority: number): Promise<T>;
+}
+
+/**
+ *
+ */
+export interface IOperationState {
+  status: OperationStatus;
+  error: OperationError | undefined;
+  stopwatch: Stopwatch;
+}
+
+export interface IOperationStates {
+  readonly state: Readonly<IOperationState> | undefined;
+  readonly lastState: Readonly<IOperationState> | undefined;
 }
 
 /**

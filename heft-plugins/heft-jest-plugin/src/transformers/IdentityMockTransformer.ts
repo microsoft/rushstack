@@ -4,7 +4,6 @@
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import type { SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
-import type { Config } from '@jest/types';
 
 // The transpiled output for IdentityMockProxy.ts
 const proxyCode: string = FileSystem.readFile(path.join(__dirname, '..', 'identityMock.js')).toString();
@@ -22,7 +21,9 @@ const proxyCode: string = FileSystem.readFile(path.join(__dirname, '..', 'identi
  * to the target project folder, not Heft's folder.)
  */
 export class IdentityMockTransformer implements SyncTransformer {
-  public process(sourceText: string, sourcePath: Config.Path, options: TransformOptions): TransformedSource {
-    return proxyCode;
+  public process(sourceText: string, sourcePath: string, options: TransformOptions): TransformedSource {
+    return {
+      code: proxyCode
+    };
   }
 }

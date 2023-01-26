@@ -19,6 +19,7 @@ import { definePhaseScopingParameters, expandPhases } from './RunAction';
 import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import { initializeHeft, runWithLoggingAsync } from '../HeftActionRunner';
 import { CancellationToken } from '../../pluginFramework/CancellationToken';
+import { OperationStatus } from '../../operations/OperationStatus';
 
 export class CleanAction extends CommandLineAction implements IHeftAction {
   public readonly watch: boolean = false;
@@ -98,7 +99,7 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
     );
   }
 
-  private async _cleanFilesAsync(): Promise<void> {
+  private async _cleanFilesAsync(): Promise<OperationStatus> {
     const deleteOperations: IDeleteOperation[] = [];
     for (const phase of this.selectedPhases) {
       // Add the temp folder and cache folder (if requested) for each task
@@ -116,5 +117,7 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
 
     // Delete the files
     await deleteFilesAsync(deleteOperations, this._terminal);
+
+    return deleteOperations.length === 0 ? OperationStatus.NoOp : OperationStatus.Success;
   }
 }

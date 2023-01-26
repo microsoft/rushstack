@@ -1,20 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
-import { AlreadyReportedError, Async, ITerminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 
-import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
 import { OperationStatus } from './OperationStatus';
-import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
-import type { Operation } from './Operation';
+import type { Operation, IExecuteOperationContext } from './Operation';
 import { OperationGroupRecord } from './OperationGroupRecord';
-import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import { CancellationToken } from '../pluginFramework/CancellationToken';
+import { computeTopology } from './AsyncOperationQueue';
+import { IOperationState } from './IOperationRunner';
 
-export interface IOperationExecutionManagerOptions {
-  parallelism: string | undefined;
+export interface IOperationExecutionOptions {
+  cancellationToken: CancellationToken;
+  parallelism: number;
   terminal: ITerminal;
-  loggingManager: LoggingManager;
+
+  requestRun?: () => void;
 }
 
 /**
@@ -24,45 +25,26 @@ export interface IOperationExecutionManagerOptions {
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
-  private readonly _executionRecords: Set<OperationExecutionRecord>;
-  private readonly _groupRecords: Map<string, OperationGroupRecord> = new Map();
-  private readonly _startedGroups: Set<OperationGroupRecord> = new Set();
-  private readonly _finishedGroups: Set<OperationGroupRecord> = new Set();
-  private readonly _parallelism: number;
+  private readonly _operations: Operation[];
+  private readonly _groupRecords: Map<string, OperationGroupRecord>;
   private readonly _totalOperations: number;
-  private readonly _terminal: ITerminal;
 
-  // Variables for current status
-  private _hasReportedFailures: boolean;
-
-  public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
-    const { parallelism, terminal, loggingManager } = options;
-    this._hasReportedFailures = false;
-    this._terminal = terminal;
-
-    // Convert the developer graph to the mutable execution graph;
-    const executionRecordContext: IOperationExecutionRecordContext = {
-      terminal,
-      loggingManager
-    };
+  public constructor(operations: ReadonlySet<Operation>) {
+    const groupRecords: Map<string, OperationGroupRecord> = new Map();
+    this._groupRecords = groupRecords;
 
     let totalOperations: number = 0;
-    const executionRecords: Map<Operation, OperationExecutionRecord> = new Map();
     for (const operation of operations) {
+      const { groupName } = operation;
       let group: OperationGroupRecord | undefined = undefined;
-      if (operation.groupName && !(group = this._groupRecords.get(operation.groupName))) {
-        group = new OperationGroupRecord(operation.groupName);
-        this._groupRecords.set(operation.groupName, group);
+      if (groupName && !(group = groupRecords.get(groupName))) {
+        group = new OperationGroupRecord(groupName);
+        groupRecords.set(groupName, group);
       }
 
-      const executionRecord: OperationExecutionRecord = new OperationExecutionRecord({
-        operation,
-        group,
-        context: executionRecordContext
-      });
+      group?.addOperation(operation);
 
-      executionRecords.set(operation, executionRecord);
-      if (!executionRecord.runner.silent) {
+      if (!operation.runner?.silent) {
         // Only count non-silent operations
         totalOperations++;
       }
@@ -70,60 +52,16 @@ export class OperationExecutionManager {
 
     this._totalOperations = totalOperations;
 
-    for (const [operation, consumer] of executionRecords) {
-      for (const dependency of operation.dependencies) {
-        const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
-        if (!dependencyRecord) {
+    this._operations = computeTopology(operations);
+
+    for (const consumer of operations) {
+      for (const dependency of consumer.dependencies) {
+        if (!operations.has(dependency)) {
           throw new Error(
             `Operation ${JSON.stringify(consumer.name)} declares a dependency on operation ` +
               `${JSON.stringify(dependency.name)} that is not in the set of operations to execute.`
           );
         }
-        consumer.dependencies.add(dependencyRecord);
-        dependencyRecord.consumers.add(consumer);
-      }
-    }
-    this._executionRecords = new Set(executionRecords.values());
-
-    const numberOfCores: number = os.cpus().length;
-
-    if (parallelism) {
-      if (parallelism === 'max') {
-        this._parallelism = numberOfCores;
-      } else {
-        const parallelismAsNumber: number = Number(parallelism);
-
-        if (typeof parallelism === 'string' && parallelism.trim().endsWith('%')) {
-          const parsedPercentage: number = Number(parallelism.trim().replace(/\%$/, ''));
-
-          if (parsedPercentage <= 0 || parsedPercentage > 100) {
-            throw new Error(
-              `Invalid percentage value of '${parallelism}', value cannot be less than '0%' or more than '100%'`
-            );
-          }
-
-          const workers: number = Math.floor((parallelismAsNumber / 100) * numberOfCores);
-          this._parallelism = Math.max(workers, 1);
-        } else if (!isNaN(parallelismAsNumber)) {
-          this._parallelism = Math.max(parallelismAsNumber, 1);
-        } else {
-          throw new Error(
-            `Invalid parallelism value of '${parallelism}', expected a number, a percentage, or 'max'`
-          );
-        }
-      }
-    } else {
-      // If an explicit parallelism number wasn't provided, then choose a sensible
-      // default.
-      if (os.platform() === 'win32') {
-        // On desktop Windows, some people have complained that their system becomes
-        // sluggish if Rush is using all the CPU cores.  Leave one thread for
-        // other operations. For CI environments, you can use the "max" argument to use all available cores.
-        this._parallelism = Math.max(numberOfCores - 1, 1);
-      } else {
-        // Unix-like operating systems have more balanced scheduling, so default
-        // to the number of CPU cores
-        this._parallelism = numberOfCores;
       }
     }
   }
@@ -132,96 +70,99 @@ export class OperationExecutionManager {
    * Executes all operations which have been registered, returning a promise which is resolved when all the
    * operations are completed successfully, or rejects when any operation fails.
    */
-  public async executeAsync(): Promise<void> {
+  public async executeAsync(executionOptions: IOperationExecutionOptions): Promise<OperationStatus> {
     const totalOperations: number = this._totalOperations;
 
-    this._terminal.writeVerboseLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
+    let hasReportedFailures: boolean = false;
 
-    const maxParallelism: number = Math.min(totalOperations, this._parallelism);
-    const prioritySort: IOperationSortFunction = (
-      a: OperationExecutionRecord,
-      b: OperationExecutionRecord
-    ): number => {
-      return a.criticalPathLength! - b.criticalPathLength!;
-    };
-    const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(this._executionRecords, prioritySort);
+    const { cancellationToken, parallelism, terminal, requestRun } = executionOptions;
 
-    // This function is a callback because it may write to the collatedWriter before
-    // operation.executeAsync returns (and cleans up the writer)
-    const onOperationComplete: (record: OperationExecutionRecord) => void = (
-      record: OperationExecutionRecord
-    ) => {
-      if (record.status === OperationStatus.Failure) {
-        // This operation failed. Mark it as such and all reachable dependents as blocked.
-        // Failed operations get reported, even if silent.
-        // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
-        const message: string | undefined = record.error?.message;
-        if (message) {
-          record.terminal.writeErrorLine(message);
-        }
-        const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
-        for (const blockedRecord of blockedQueue) {
-          if (blockedRecord.status === OperationStatus.Ready) {
-            blockedRecord.status = OperationStatus.Blocked;
-            for (const dependent of blockedRecord.consumers) {
-              blockedQueue.add(dependent);
-            }
-          }
-        }
-        this._hasReportedFailures = true;
-      } else if (record.status === OperationStatus.Cancelled) {
-        // This operation was cancelled. Mark it as such and all reachable dependents as cancelled.
-        const cancelledQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
-        for (const cancelledRecord of cancelledQueue) {
-          if (cancelledRecord.status === OperationStatus.Ready) {
-            cancelledRecord.status = OperationStatus.Cancelled;
-            for (const dependent of cancelledRecord.consumers) {
-              cancelledQueue.add(dependent);
-            }
-          }
-        }
-      }
+    const startedGroups: Set<OperationGroupRecord> = new Set();
+    const finishedGroups: Set<OperationGroupRecord> = new Set();
 
-      // Apply status changes to direct dependents
-      for (const item of record.consumers) {
-        // Remove this operation from the dependencies, to unblock the scheduler
-        item.dependencies.delete(record);
-      }
-    };
+    const maxParallelism: number = Math.min(totalOperations, parallelism);
+    const groupRecords: Map<string, OperationGroupRecord> = this._groupRecords;
+    for (const groupRecord of groupRecords.values()) {
+      groupRecord.reset();
+    }
 
-    await Async.forEachAsync(
-      executionQueue,
-      async (operation: OperationExecutionRecord) => {
+    for (const operation of this._operations) {
+      operation.reset();
+    }
+
+    terminal.writeVerboseLine(`Executing a maximum of ${maxParallelism} simultaneous tasks...`);
+
+    const executionContext: IExecuteOperationContext = {
+      terminal,
+      cancellationToken,
+
+      requestRun,
+
+      queueWork: <T>(workFn: () => Promise<T>, priority: number): Promise<T> => {
+        // TODO: Update to throttle parallelism
+        // Can just be a standard queue from async
+        return workFn();
+      },
+
+      beforeExecute: (operation: Operation): void => {
         // Initialize group if uninitialized and log the group name
-        const groupRecord: OperationGroupRecord | undefined = operation.group;
-        if (groupRecord && !this._startedGroups.has(groupRecord)) {
-          this._startedGroups.add(groupRecord);
-          this._terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
+        const { groupName } = operation;
+        const groupRecord: OperationGroupRecord | undefined = groupName
+          ? groupRecords.get(groupName)
+          : undefined;
+        if (groupRecord && !startedGroups.has(groupRecord)) {
+          startedGroups.add(groupRecord);
+          groupRecord.startTimer();
+          terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
+        }
+      },
+
+      afterExecute: (operation: Operation, state: IOperationState): void => {
+        const { groupName } = operation;
+        const groupRecord: OperationGroupRecord | undefined = groupName
+          ? groupRecords.get(groupName)
+          : undefined;
+        if (groupRecord) {
+          groupRecord.setOperationAsComplete(operation, state);
         }
 
-        // Execute the operation
-        await operation.executeAsync(onOperationComplete);
+        if (state.status === OperationStatus.Failure) {
+          // This operation failed. Mark it as such and all reachable dependents as blocked.
+          // Failed operations get reported, even if silent.
+          // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
+          const message: string | undefined = state.error?.message;
+          if (message) {
+            terminal.writeErrorLine(message);
+          }
+          hasReportedFailures = true;
+        }
 
         // Log out the group name and duration if it is the last operation in the group
-        if (groupRecord?.finished && !this._finishedGroups.has(groupRecord)) {
-          this._finishedGroups.add(groupRecord);
+        if (groupRecord?.finished && !finishedGroups.has(groupRecord)) {
+          finishedGroups.add(groupRecord);
           const finishedLoggingWord: string = groupRecord.hasFailures
             ? 'encountered an error'
             : groupRecord.hasCancellations
             ? 'cancelled'
             : 'finished';
-          this._terminal.writeLine(
+          terminal.writeLine(
             ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
           );
         }
-      },
-      {
-        concurrency: maxParallelism
       }
-    );
+    };
 
-    if (this._hasReportedFailures) {
-      throw new AlreadyReportedError();
-    }
+    await Promise.all(this._operations.map((record: Operation) => record._executeAsync(executionContext)));
+
+    const finalStatus: OperationStatus =
+      this._totalOperations === 0
+        ? OperationStatus.NoOp
+        : cancellationToken.isCancelled
+        ? OperationStatus.Cancelled
+        : hasReportedFailures
+        ? OperationStatus.Failure
+        : OperationStatus.Success;
+
+    return finalStatus;
   }
 }

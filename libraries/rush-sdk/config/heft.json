@@ -22,7 +22,8 @@
             "options": {
               "copyOperations": [
                 {
-                  "sourcePath": "./node_modules/@microsoft/rush-lib/dist/rush-lib.d.ts",
+                  "sourcePath": "./node_modules/@microsoft/rush-lib/dist",
+                  "includeGlobs": ["rush-lib.d.ts"],
                   "destinationFolders": ["dist"]
                 }
               ]

@@ -26,7 +26,7 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
     '/'
   );
 
-  const loader: string = resolve(__dirname, '../loaders/locjson-loader.ts');
+  const loader: string = resolve(__dirname, '../loaders/locjson-loader.js');
   const options: ILocalizationPluginOptions = {
     localizedData: {
       defaultLocale: {
