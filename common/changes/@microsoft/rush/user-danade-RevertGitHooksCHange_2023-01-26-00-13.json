@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Revert generation of scripts in the Git hooks folder due to various git-related issues",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
