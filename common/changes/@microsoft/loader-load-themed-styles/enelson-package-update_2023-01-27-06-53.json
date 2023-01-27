@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles"
+}
