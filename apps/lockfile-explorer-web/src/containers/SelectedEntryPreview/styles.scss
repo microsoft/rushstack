@@ -3,8 +3,7 @@
 .SelectedEntryCard {
   margin-top: 12px;
   @include base.card;
-  padding: 12px 12px 0;
-  height: 10%;
+  padding: 12px;
   & > * + * {
     margin-top: 8px;
   }

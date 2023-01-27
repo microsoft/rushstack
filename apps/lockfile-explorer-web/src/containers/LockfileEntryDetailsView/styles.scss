@@ -3,7 +3,8 @@
 .LockfileEntryListView {
   display: flex;
   justify-content: space-between;
-  height: 30%;
+  min-height: 400px;
+  flex: 1;
   padding-top: 12px;
   & > * {
     width: calc(50% - 24px - 12px);
@@ -32,16 +33,13 @@
 }
 
 .InfluencerList {
-  margin-top: 12px;
-  height: 10%;
+  margin: 12px 0;
 }
 
 .DependencyDetails {
   @include base.card;
-  padding: 0 12px;
+  padding: 12px;
   margin-top: 12px;
-  height: 4%;
-  min-height: 64px;
 }
 
 .InfluencerEntry {
