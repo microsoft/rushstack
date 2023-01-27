@@ -31,6 +31,6 @@
     "@rushstack/terminal": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/semver": "7.3.5",
-    "@types/webpack-env": "1.13.0"
+    "@types/webpack-env": "1.18.0"
   }
 }

@@ -197,7 +197,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       react: ~16.13.1
       react-dom: ~16.13.1
       react-redux: ~8.0.4
@@ -218,7 +218,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
 
   ../../apps/rundown:
     specifiers:
@@ -393,7 +393,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       css-loader: ~5.2.7
       eslint: ~8.7.0
       heft-storybook-react-tutorial-storykit: workspace:*
@@ -418,7 +418,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       css-loader: 5.2.7_webpack@4.44.2
       eslint: 8.7.0
       heft-storybook-react-tutorial-storykit: link:../heft-storybook-react-tutorial-storykit
@@ -443,7 +443,7 @@ importers:
       '@types/node': 14.18.36
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       babel-loader: ~8.2.3
       css-loader: ~5.2.7
       jest: ~27.4.2
@@ -467,7 +467,7 @@ importers:
       '@types/node': 14.18.36
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       babel-loader: 8.2.5_4bf35c6ryl6gwyrcrj2ykng7ny
       css-loader: 5.2.7_webpack@4.44.2
       jest: 27.4.7_@types+node@14.18.36
@@ -486,7 +486,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       heft-web-rig-library-tutorial: workspace:*
       react: ~16.13.1
       react-dom: ~16.13.1
@@ -504,7 +504,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       typescript: 4.8.4
 
   ../../build-tests-samples/heft-web-rig-library-tutorial:
@@ -515,7 +515,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       react: ~16.13.1
       react-dom: ~16.13.1
       tslib: ~2.3.1
@@ -531,7 +531,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       typescript: 4.8.4
 
   ../../build-tests-samples/heft-webpack-basic-tutorial:
@@ -543,7 +543,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       css-loader: ~6.6.0
       eslint: ~8.7.0
       html-webpack-plugin: ~5.5.0
@@ -566,7 +566,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       css-loader: 6.6.0_webpack@5.75.0
       eslint: 8.7.0
       html-webpack-plugin: 5.5.0_webpack@5.75.0
@@ -781,7 +781,7 @@ importers:
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@rushstack/webpack4-module-minifier-plugin': workspace:*
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: ~4.5.2
       typescript: ~4.8.4
       webpack: ~4.44.2
@@ -792,7 +792,7 @@ importers:
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       typescript: 4.8.4
       webpack: 4.44.2
@@ -803,7 +803,7 @@ importers:
       '@rushstack/hashed-folder-copy-plugin': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-webpack5-plugin': workspace:*
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: ~4.5.2
       typescript: ~4.8.4
       webpack: ~5.75.0
@@ -812,7 +812,7 @@ importers:
       '@rushstack/hashed-folder-copy-plugin': link:../../webpack/hashed-folder-copy-plugin
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: 4.5.2_webpack@5.75.0
       typescript: 4.8.4
       webpack: 5.75.0
@@ -1046,7 +1046,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       autoprefixer: ~10.4.2
       buttono: ~1.0.2
       css-loader: ~5.2.7
@@ -1072,7 +1072,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       autoprefixer: 10.4.13_postcss@8.4.21
       css-loader: 5.2.7_webpack@4.44.2
       eslint: 8.7.0
@@ -1094,7 +1094,7 @@ importers:
       '@rushstack/heft-jest-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/jest': 27.4.0
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       eslint: ~8.7.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
@@ -1105,7 +1105,7 @@ importers:
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
       '@types/jest': 27.4.0
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.8.4
       tslint-microsoft-contrib: 6.2.0_is64cncltak2c2767drphpzcku
@@ -1129,7 +1129,7 @@ importers:
       '@rushstack/heft-jest-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@types/heft-jest': 1.0.1
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       eslint: ~8.7.0
       file-loader: ~6.0.0
       tslint: ~5.20.1
@@ -1143,7 +1143,7 @@ importers:
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@types/heft-jest': 1.0.1
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       eslint: 8.7.0
       file-loader: 6.0.0_webpack@4.44.2
       tslint: 5.20.1_typescript@4.8.4
@@ -1161,7 +1161,7 @@ importers:
       '@rushstack/module-minifier': workspace:*
       '@rushstack/webpack5-module-minifier-plugin': workspace:*
       '@types/heft-jest': 1.0.1
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       eslint: ~8.7.0
       html-webpack-plugin: ~5.5.0
       tslint: ~5.20.1
@@ -1177,7 +1177,7 @@ importers:
       '@rushstack/module-minifier': link:../../libraries/module-minifier
       '@rushstack/webpack5-module-minifier-plugin': link:../../webpack/webpack5-module-minifier-plugin
       '@types/heft-jest': 1.0.1
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       eslint: 8.7.0
       html-webpack-plugin: 5.5.0_webpack@5.75.0
       tslint: 5.20.1_typescript@4.8.4
@@ -1199,7 +1199,7 @@ importers:
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@rushstack/webpack4-localization-plugin': workspace:*
       '@rushstack/webpack4-module-minifier-plugin': workspace:*
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: ~4.5.2
       ts-loader: 6.0.0
       typescript: ~4.8.4
@@ -1212,7 +1212,7 @@ importers:
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@rushstack/webpack4-localization-plugin': link:../../webpack/webpack4-localization-plugin
       '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       ts-loader: 6.0.0_typescript@4.8.4
       typescript: 4.8.4
@@ -1228,7 +1228,7 @@ importers:
       '@rushstack/webpack4-localization-plugin': workspace:*
       '@rushstack/webpack4-module-minifier-plugin': workspace:*
       '@types/lodash': 4.14.116
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: ~4.5.2
       lodash: ~4.17.15
       ts-loader: 6.0.0
@@ -1243,7 +1243,7 @@ importers:
       '@rushstack/webpack4-localization-plugin': link:../../webpack/webpack4-localization-plugin
       '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
       '@types/lodash': 4.14.116
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       lodash: 4.17.21
       ts-loader: 6.0.0_typescript@4.8.4
@@ -1258,7 +1258,7 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@rushstack/webpack4-localization-plugin': workspace:*
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: ~4.5.2
       ts-loader: 6.0.0
       typescript: ~4.8.4
@@ -1270,7 +1270,7 @@ importers:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@rushstack/webpack4-localization-plugin': link:../../webpack/webpack4-localization-plugin
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       ts-loader: 6.0.0_typescript@4.8.4
       typescript: 4.8.4
@@ -1341,7 +1341,7 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       eslint: ~8.7.0
       html-webpack-plugin: ~4.5.2
       typescript: ~4.8.4
@@ -1351,7 +1351,7 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       eslint: 8.7.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       typescript: 4.8.4
@@ -1741,13 +1741,13 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-web-rig': workspace:*
       '@types/heft-jest': 1.0.1
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-web-rig': link:../../rigs/heft-web-rig
       '@types/heft-jest': 1.0.1
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
 
   ../../libraries/localization-utilities:
     specifiers:
@@ -1909,7 +1909,7 @@ importers:
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       '@yarnpkg/lockfile': ~1.0.2
       builtin-modules: ~3.1.0
       cli-table: ~0.3.1
@@ -2000,7 +2000,7 @@ importers:
       '@types/ssri': 7.1.1
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       webpack: 5.75.0
 
   ../../libraries/rush-sdk:
@@ -2016,7 +2016,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node-fetch': 2.6.2
       '@types/semver': 7.3.5
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       tapable: 2.2.1
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
@@ -2032,7 +2032,7 @@ importers:
       '@rushstack/ts-command-line': link:../ts-command-line
       '@types/heft-jest': 1.0.1
       '@types/semver': 7.3.5
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
 
   ../../libraries/rush-themed-ui:
     specifiers:
@@ -2047,7 +2047,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
       react: ~16.13.1
       react-dom: ~16.13.1
     dependencies:
@@ -2065,7 +2065,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
-      '@types/webpack-env': 1.13.0
+      '@types/webpack-env': 1.18.0
 
   ../../libraries/rushell:
     specifiers:
@@ -8069,7 +8069,7 @@ packages:
   /@types/node-fetch/2.6.2:
     resolution: {integrity: sha512-DHqhlq5jeESLy19TYhLakJ07kNumXWjcDdxXsLUMJZ6ue8VZJj4kLPQVE/2mdHh3xZziNF1xppu5lwmS53HR+A==}
     dependencies:
-      '@types/node': 12.20.24
+      '@types/node': 14.18.36
       form-data: 3.0.1
 
   /@types/node-forge/1.0.4:
@@ -8084,6 +8084,7 @@ packages:
 
   /@types/node/12.20.24:
     resolution: {integrity: sha512-yxDeaQIAJlMav7fH5AQqPH1u8YIuhYJXYBzxaQ4PifsU0GDO38MSdmEDeRlIxrKbC6NbEaaEHDanWb+y30U8SQ==}
+    dev: true
 
   /@types/node/14.18.36:
     resolution: {integrity: sha512-FXKWbsJ6a1hIrRxv+FoukuHnGTgEzKYGi7kilfMae96AL9UNkPFNWJEEYWzdRI9ooIkbr4AKldyuSTLql06vLQ==}
@@ -8247,12 +8248,8 @@ packages:
     resolution: {integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==}
     dev: false
 
-  /@types/webpack-env/1.13.0:
-    resolution: {integrity: sha512-0BANcVFVqkAD1i7/fWy9Vu6KjB9whuAmkfFX0GFwNzubu2i0qXDsLvGZSbU1QimJHWH4rqjJDQ/PX9v5OVepEA==}
-
   /@types/webpack-env/1.18.0:
     resolution: {integrity: sha512-56/MAlX5WMsPVbOg7tAxnYvNYMMWr/QJiIp6BxVSW3JJXUVzzOn64qW8TzQyMSqSUFM2+PVI4aUHcHOzIz/1tg==}
-    dev: true
 
   /@types/webpack-sources/1.4.2:
     resolution: {integrity: sha512-77T++JyKow4BQB/m9O96n9d/UUHWLQHlcqXb9Vsf4F1+wKNrrlWNFPDLKNT92RJnCSL6CieTc+NDXtCVZswdTw==}
