@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier",
+      "comment": "Ensure updates to the version of Terser trigger a hash change.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier"
+}
