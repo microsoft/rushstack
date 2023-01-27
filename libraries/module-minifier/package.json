@@ -16,7 +16,7 @@
     "_phase:test": "heft test --no-build"
   },
   "dependencies": {
-    "@types/node": "12.20.24",
+    "@types/node": "14.18.36",
     "@rushstack/worker-pool": "workspace:*",
     "serialize-javascript": "6.0.0",
     "source-map": "~0.7.3",

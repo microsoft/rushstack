@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@rushstack/worker-pool": "workspace:*",
-    "@types/node": "12.20.24",
+    "@types/node": "14.18.36",
     "@types/tapable": "1.0.6",
     "@types/estree": "0.0.50",
     "tapable": "2.2.1"

@@ -30,6 +30,6 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/express": "4.17.13",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24"
+    "@types/node": "14.18.36"
   }
 }

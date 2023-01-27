@@ -16,7 +16,7 @@
     "_phase:test": "heft test --no-build"
   },
   "dependencies": {
-    "@types/node": "12.20.24",
+    "@types/node": "14.18.36",
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
     "import-lazy": "~4.0.0",

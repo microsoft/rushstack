@@ -38,7 +38,7 @@
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
-    "@types/node": "12.20.24",
+    "@types/node": "14.18.36",
     "eslint": "~8.7.0",
     "jest-environment-node": "~27.4.2",
     "jest-watch-select-projects": "2.0.0",
