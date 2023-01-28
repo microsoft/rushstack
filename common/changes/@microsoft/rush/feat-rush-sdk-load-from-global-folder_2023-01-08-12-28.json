@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add functionality to `@rushstack/rush-sdk` to try to load Rush from the global installation location before installing it by invoking the `install-run-rush` script.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

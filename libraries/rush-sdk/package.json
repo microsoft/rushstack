@@ -19,7 +19,8 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@types/node-fetch": "1.6.9",
-    "tapable": "2.2.1"
+    "tapable": "2.2.1",
+    "true-case-path": "~2.2.1"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
