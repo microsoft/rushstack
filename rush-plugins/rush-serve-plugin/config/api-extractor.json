@@ -9,7 +9,7 @@
   },
 
   "docModel": {
-    "enabled": true,
+    "enabled": false,
     "apiJsonFilePath": "../../../common/temp/api/<unscopedPackageName>.api.json"
   },
 
