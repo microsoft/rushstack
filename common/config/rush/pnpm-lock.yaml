@@ -2793,9 +2793,6 @@ packages:
   /@aws-cdk/cloud-assembly-schema/2.7.0:
     resolution: {integrity: sha512-vKTKLMPvzUhsYo3c4/EbMJq+bwIgHkwK0lV9fc5mQlnTUTyHe6nGIvyzmWWMd5BVEkgNzw+QdecxeeYJNu/doA==}
     engines: {node: '>= 14.15.0'}
-    dependencies:
-      jsonschema: 1.4.1
-      semver: 7.3.8
     dev: true
     bundledDependencies:
       - jsonschema
@@ -2819,7 +2816,6 @@ packages:
     engines: {node: '>= 14.15.0'}
     dependencies:
       '@aws-cdk/cloud-assembly-schema': 2.7.0
-      semver: 7.3.8
     dev: true
     bundledDependencies:
       - semver
@@ -4432,10 +4428,6 @@ packages:
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
 
-  /@balena/dockerignore/1.0.2:
-    resolution: {integrity: sha512-wMue2Sy4GAVTk6Ic4tJVcnfdau+gx2EnG7S+uAEe+TWJFqE4YoWN4/H8MSLj4eYJKxGg26lZwboEniNiNwZQ6Q==}
-    dev: true
-
   /@base2/pretty-print-object/1.0.1:
     resolution: {integrity: sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==}
     dev: true
@@ -5304,7 +5296,7 @@ packages:
       '@bcoe/v8-coverage': 0.2.3
       '@jest/console': 27.5.1
       '@jest/test-result': 27.5.1_@types+node@12.20.24
-      '@jest/transform': 27.4.6
+      '@jest/transform': 27.5.1
       '@jest/types': 27.4.2
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/node': 12.20.24
@@ -5319,7 +5311,7 @@ packages:
       istanbul-lib-source-maps: 4.0.1
       istanbul-reports: 3.1.5
       jest-haste-map: 27.5.1
-      jest-resolve: 27.4.6
+      jest-resolve: 27.5.1
       jest-util: 27.5.1
       jest-worker: 27.5.1
       slash: 3.0.0
@@ -9295,8 +9287,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /async-each/1.0.3:
-    resolution: {integrity: sha512-z/WhQ5FPySLdvREByI2vZiTWwCnF0moMJ1hK9YQwDTHKh6I7/uSckMetoRGb5UBZPC1z0jlw+n/XCgjeH7y1AQ==}
+  /async-each/1.0.4:
+    resolution: {integrity: sha512-qL5v0vnRtD4rxlrzLz3WMnMfTvTrMf3IK1xFCF0Q5vqXJkULhM13gO2ynE8RZMjE+bPcH0AUHgcd5BU1FtO1tA==}
     optional: true
 
   /async-limiter/1.0.1:
@@ -9389,16 +9381,7 @@ packages:
     peerDependencies:
       constructs: ^10.0.0
     dependencies:
-      '@balena/dockerignore': 1.0.2
-      case: 1.6.3
       constructs: 10.0.130
-      fs-extra: 9.1.0
-      ignore: 5.2.4
-      jsonschema: 1.4.1
-      minimatch: 3.1.2
-      punycode: 2.3.0
-      semver: 7.3.8
-      yaml: 1.10.2
     dev: true
     bundledDependencies:
       - '@balena/dockerignore'
@@ -10167,11 +10150,6 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /case/1.6.3:
-    resolution: {integrity: sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==}
-    engines: {node: '>= 0.8.0'}
-    dev: true
-
   /ccount/1.1.0:
     resolution: {integrity: sha512-vlNK021QdI7PNeiUh/lKkC/mNHHfV0m/Ad5JoI0TYtlBnJAslM/JIkm/tGC88bkLIwO6OQ5uV6ztS6kVAtCDlg==}
     dev: true
@@ -10258,7 +10236,7 @@ packages:
     deprecated: Chokidar 2 does not receive security updates since 2019. Upgrade to chokidar 3 with 15x fewer dependencies
     dependencies:
       anymatch: 2.0.0
-      async-each: 1.0.3
+      async-each: 1.0.4
       braces: 2.3.2
       glob-parent: 3.1.0
       inherits: 2.0.4
@@ -11276,12 +11254,12 @@ packages:
       cosmiconfig: 7.1.0
       debug: 4.3.4
       deps-regex: 0.1.4
-      ignore: 5.2.4
+      ignore: 5.1.9
       is-core-module: 2.11.0
       js-yaml: 3.14.1
       json5: 2.2.3
       lodash: 4.17.21
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       multimatch: 5.0.0
       please-upgrade-node: 3.2.0
       query-ast: 1.0.5
@@ -15444,10 +15422,6 @@ packages:
     resolution: {integrity: sha512-e0Jtg4KAzDJKKwzbLaUtinCn0RZseWBVRTRGihSpvFlM3wTR7ExSp+PTdeTsDrLNJUe7L7JYJe8mblHX5SCT6A==}
     engines: {node: '>=10.0'}
 
-  /jsonschema/1.4.1:
-    resolution: {integrity: sha512-S6cATIPVv1z0IlxdN+zUk5EPjkGCdnhN4wVSBlvoUO1tOLJootbo9CquNJmbIh4yikWHiUedhRYrNPn1arpEmQ==}
-    dev: true
-
   /jsonwebtoken/9.0.0:
     resolution: {integrity: sha512-tuGfYXxkQGDPnLJ7SibiQgVgeDgfbPq2k2ICcbgqW8WxWLBAxKQM/ZCu/IT8SOSwmaYl4dpTFCW5xZv7YbbWUw==}
     engines: {node: '>=12', npm: '>=6'}
@@ -16287,7 +16261,7 @@ packages:
       array-differ: 3.0.0
       array-union: 2.1.0
       arrify: 2.0.1
-      minimatch: 3.1.2
+      minimatch: 3.0.8
     dev: false
 
   /mute-stream/0.0.8:
@@ -21390,7 +21364,7 @@ packages:
   /wide-align/1.1.5:
     resolution: {integrity: sha512-eDMORYaPNZ4sQIuuYPDHdQvf4gyCF9rEEV/yPxGfwPkRodwEgiMUUXTx/dex+Me0wxx53S+NgUHaP7y3MGlDmg==}
     dependencies:
-      string-width: 4.2.3
+      string-width: 1.0.2
     dev: true
 
   /widest-line/3.1.0:
