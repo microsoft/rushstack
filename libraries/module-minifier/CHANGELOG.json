@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.1.48",
+      "tag": "@rushstack/module-minifier_v0.1.48",
+      "date": "Sat, 28 Jan 2023 01:22:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure updates to the version of Terser trigger a hash change."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.47",
       "tag": "@rushstack/module-minifier_v0.1.47",
       "date": "Thu, 26 Jan 2023 02:55:10 GMT",
