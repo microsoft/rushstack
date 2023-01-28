@@ -13,7 +13,7 @@ import {
   Terminal,
   ConsoleTerminalProvider
 } from '@rushstack/node-core-library';
-import { RushGlobalFolder } from './RushGlobalFolder';
+import { RushGlobalFolder } from '@microsoft/rush-lib/lib/api/RushGlobalFolder';
 
 import type { SpawnSyncReturns } from 'child_process';
 
@@ -186,18 +186,31 @@ ${errorMessage}
   process.exit(1);
 }
 
-// Based on TypeScript's __exportStar()
-for (const property in rushLibModule) {
-  if (property !== 'default' && !exports.hasOwnProperty(property)) {
-    const rushLibModuleForClosure: RushLibModuleType = rushLibModule;
+exportStar(rushLibModule);
 
-    // Based on TypeScript's __createBinding()
-    Object.defineProperty(exports, property, {
-      enumerable: true,
-      get: function () {
-        return rushLibModuleForClosure[property];
-      }
-    });
+// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-explicit-any
+declare let __webpack_exports__: any;
+function exportStar(rushLibModule: RushLibModuleType): void {
+  let exportsObject: object = exports;
+  if (typeof __webpack_exports__ === 'object' && __webpack_exports__ !== null) {
+    // If this library has been bundled with Webpack, we need to call modify the real exports object
+    // `__webpack_exports__` is the exports object that Webpack creates for the module
+    // during bundling.
+    exportsObject = __webpack_exports__;
+  }
+  // Based on TypeScript's __exportStar()
+  for (const property in rushLibModule) {
+    if (property !== 'default' && !exportsObject.hasOwnProperty(property)) {
+      const rushLibModuleForClosure: RushLibModuleType = rushLibModule;
+
+      // Based on TypeScript's __createBinding()
+      Object.defineProperty(exportsObject, property, {
+        enumerable: true,
+        get: function () {
+          return rushLibModuleForClosure[property];
+        }
+      });
+    }
   }
 }
 
