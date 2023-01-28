@@ -110,6 +110,4 @@ export class TypingsGenerator extends StringValuesTypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
 }
 
-// (No @packageDocumentation comment for this package)
-
 ```
