@@ -6,12 +6,12 @@
 
 Some abstract method.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 abstract method(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 

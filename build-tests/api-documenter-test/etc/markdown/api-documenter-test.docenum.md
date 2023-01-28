@@ -7,7 +7,7 @@
 Docs for DocEnum
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare enum DocEnum 

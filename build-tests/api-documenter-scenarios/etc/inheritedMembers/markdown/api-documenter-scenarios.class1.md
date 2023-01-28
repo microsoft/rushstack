@@ -5,12 +5,12 @@
 ## Class1 class
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class Class1 extends Class2<number> 
 ```
-<b>Extends:</b> [Class2](./api-documenter-scenarios.class2.md)<!-- -->&lt;number&gt;
+**Extends:** [Class2](./api-documenter-scenarios.class2.md)<!-- -->&lt;number&gt;
 
 ## Properties
 

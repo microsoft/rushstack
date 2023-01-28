@@ -6,7 +6,7 @@
 
 Some abstract class with abstract members.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare abstract class AbstractClass 

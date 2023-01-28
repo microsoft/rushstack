@@ -6,7 +6,7 @@
 
 a union type with a function
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 numberOrFunction: number | (() => number);
