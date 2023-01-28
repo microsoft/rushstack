@@ -85,9 +85,9 @@ export interface IStorybookPluginOptions {
    * @example
    * If you want to change the static build output dir to staticBuildDir, then the static build output dir would be:
    *
-   * `"staticBuildOutputDir": "newStaticBuildDir"`
+   * `"staticBuildOutputFolder": "newStaticBuildDir"`
    */
-  staticBuildOutputDir?: string;
+  staticBuildOutputFolder?: string;
 }
 
 /** @public */
@@ -99,7 +99,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
   private _storykitPackageName!: string;
   private _modulePath!: string;
   private _resolvedModulePath!: string;
-  private _staticBuildOutputDir?: string;
+  private _staticBuildOutputFolder?: string;
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -150,7 +150,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
         return;
       }
 
-      this._staticBuildOutputDir = build.properties.serveMode ? undefined : options.staticBuildModulePath;
+      this._staticBuildOutputFolder = build.properties.serveMode ? undefined : options.staticBuildModulePath;
       const modulePath: string | undefined = build.properties.serveMode
         ? options.startupModulePath
         : options.staticBuildModulePath;
@@ -255,7 +255,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
       heftConfiguration.terminalProvider,
       {
         buildFolder: heftConfiguration.buildFolder,
-        staticBuildOutputDir: this._staticBuildOutputDir,
+        staticBuildOutputFolder: this._staticBuildOutputFolder,
         resolvedStartupModulePath: this._resolvedModulePath
       },
       // TODO: Extract SubprocessRunnerBase into a public API
