@@ -5,7 +5,7 @@
 ## IInterface1 interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IInterface1 

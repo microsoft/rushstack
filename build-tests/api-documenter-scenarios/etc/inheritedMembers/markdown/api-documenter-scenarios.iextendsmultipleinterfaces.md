@@ -6,12 +6,12 @@
 
 Some interface that extends multiple interfaces.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IExtendsMultipleInterfaces extends IInterface1, IInterface2 
 ```
-<b>Extends:</b> [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->, [IInterface2](./api-documenter-scenarios.iinterface2.md)
+**Extends:** [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->, [IInterface2](./api-documenter-scenarios.iinterface2.md)
 
 ## Properties
 

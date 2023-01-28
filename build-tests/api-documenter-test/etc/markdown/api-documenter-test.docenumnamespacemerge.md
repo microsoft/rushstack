@@ -6,7 +6,7 @@
 
 Namespace that merges with enum
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare namespace DocEnumNamespaceMerge 

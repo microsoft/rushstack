@@ -6,7 +6,7 @@
 
 API Extractor will surface an `ae-missing-getter` finding for this property.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 set writeonlyProperty(value: string);

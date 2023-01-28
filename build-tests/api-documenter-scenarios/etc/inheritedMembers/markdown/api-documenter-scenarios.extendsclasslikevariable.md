@@ -6,12 +6,12 @@
 
 Some class that extends a class-like variable.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class ExtendsClassLikeVariable extends ClassLikeVariable 
 ```
-<b>Extends:</b> ClassLikeVariable
+**Extends:** ClassLikeVariable
 
-<i>(Some inherited members may not be shown because they are not represented in the documentation.)</i>
+_(Some inherited members may not be shown because they are not represented in the documentation.)_
 

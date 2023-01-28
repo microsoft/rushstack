@@ -6,7 +6,7 @@
 
 An ECMAScript symbol
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 example: unique symbol
