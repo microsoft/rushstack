@@ -159,7 +159,12 @@ test('render Markdown from TSDoc', () => {
             new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: 'Cell 1' })])
           ]),
           new DocTableCell({ configuration }, [
-            new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: 'Cell 2' })])
+            new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: 'Cell 2' })]),
+            new DocParagraph({ configuration }, [
+              new DocEmphasisSpan({ configuration, bold: true }, [
+                new DocPlainText({ configuration, text: 'bold text' })
+              ])
+            ])
           ])
         ])
       ]
@@ -176,5 +181,6 @@ test('render Markdown from TSDoc', () => {
     }
   });
 
-  expect(stringBuilder).toMatchSnapshot();
+  expect(stringBuilder.toString()).toMatchSnapshot();
+  console.log(stringBuilder.toString());
 });
