@@ -56,6 +56,11 @@
             "commandKind": {
               "enum": ["bulk"]
             },
+            "shellCommand": {
+              "title": "Shell Command",
+              "description": "(Optional) If the \"shellCommand\" field is set for a bulk command, Rush will invoke it for each selected project; otherwise, Rush will invoke the package.json \"scripts\" entry matching Rush command name.\n\nThe string is the path to a script that will be invoked using the OS shell. The working directory will be the folder that contains rush.json.  If custom parameters are associated with this command, their values will be appended to the end of this string.",
+              "type": "string"
+            },
             "enableParallelism": {
               "title": "enableParallelism",
               "description": "If true then this command can be run in parallel, i.e. executed simultaneously for multiple projects.",
@@ -102,6 +107,7 @@
             "summary": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
+            "shellCommand": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "ignoreDependencyOrder": { "$ref": "#/definitions/anything" },
@@ -109,8 +115,7 @@
             "incremental": { "$ref": "#/definitions/anything" },
             "allowWarningsInSuccessfulBuild": { "$ref": "#/definitions/anything" },
             "watchForChanges": { "$ref": "#/definitions/anything" },
-            "disableBuildCache": { "$ref": "#/definitions/anything" },
-            "shellCommand": { "$ref": "#/definitions/anything" }
+            "disableBuildCache": { "$ref": "#/definitions/anything" }
           }
         }
       ]
