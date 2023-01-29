@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.21.0",
+      "tag": "@microsoft/api-documenter_v7.21.0",
+      "date": "Sun, 29 Jan 2023 20:09:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where `<b>`/`<i>` tags sometimes interfered with parsing of other Markdown on the same line; italics and boldface are now emitted using `*` and `_`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.20.1",
       "tag": "@microsoft/api-documenter_v7.20.1",
       "date": "Thu, 26 Jan 2023 02:55:10 GMT",
