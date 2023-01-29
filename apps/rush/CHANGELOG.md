@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 26 Jan 2023 02:55:30 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Jan 2023 20:10:17 GMT and should not be manually modified.
+
+## 5.90.0
+Sun, 29 Jan 2023 20:10:17 GMT
+
+### Updates
+
+- Allow "shellCommand" to be optionally specified for bulk custom commands, so that a centralized script can be used instead of invoking package.json scripts (GitHub #3819)
 
 ## 5.89.1
 Thu, 26 Jan 2023 02:55:30 GMT

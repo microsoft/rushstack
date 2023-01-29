@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.90.0",
+      "tag": "@microsoft/rush_v5.90.0",
+      "date": "Sun, 29 Jan 2023 20:10:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow \"shellCommand\" to be optionally specified for bulk custom commands, so that a centralized script can be used instead of invoking package.json scripts (GitHub #3819)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.89.1",
       "tag": "@microsoft/rush_v5.89.1",
       "date": "Thu, 26 Jan 2023 02:55:30 GMT",
