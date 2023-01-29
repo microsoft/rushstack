@@ -106,7 +106,7 @@ function getScriptToRun(
   rushProject: RushConfigurationProject,
   commandToRun: string,
   customParameterValues: ReadonlyArray<string>,
-  shellCommand?: string
+  shellCommand: string | undefined
 ): string | undefined {
   const { scripts } = rushProject.packageJson;
 
