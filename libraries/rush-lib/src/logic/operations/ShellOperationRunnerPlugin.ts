@@ -61,7 +61,12 @@ function createShellOperations(
       // to specify a runner type requested in rush-project.json
       const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
 
-      const commandToRun: string | undefined = getScriptToRun(project, phase.name, customParameterValues);
+      const commandToRun: string | undefined = getScriptToRun(
+        project,
+        phase.name,
+        customParameterValues,
+        phase.shellCommand
+      );
 
       if (commandToRun === undefined && !phase.ignoreMissingScript) {
         throw new Error(
@@ -100,11 +105,12 @@ function createShellOperations(
 function getScriptToRun(
   rushProject: RushConfigurationProject,
   commandToRun: string,
-  customParameterValues: ReadonlyArray<string>
+  customParameterValues: ReadonlyArray<string>,
+  shellCommand: string | undefined
 ): string | undefined {
   const { scripts } = rushProject.packageJson;
 
-  const rawCommand: string | undefined | null = scripts?.[commandToRun];
+  const rawCommand: string | undefined | null = shellCommand ?? scripts?.[commandToRun];
 
   if (rawCommand === undefined || rawCommand === null) {
     return undefined;

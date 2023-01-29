@@ -449,6 +449,7 @@ export interface IPhase {
     isSynthetic: boolean;
     logFilenameIdentifier: string;
     name: string;
+    shellCommand?: string;
 }
 
 // @beta
