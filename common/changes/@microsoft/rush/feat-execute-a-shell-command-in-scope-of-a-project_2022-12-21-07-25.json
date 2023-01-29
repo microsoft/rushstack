@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Execute a shell command in scope of a project",
+      "comment": "Allow \"shellCommand\" to be optionally specified for bulk custom commands, so that a centralized script can be used instead of invoking package.json scripts (GitHub #3819)",
       "type": "none"
     }
   ],
