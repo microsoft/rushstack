@@ -20,66 +20,6 @@ Object {
 }
 `;
 
-exports[`ConfigurationFile A simple config file Correctly loads the config file 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "log": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
-
-exports[`ConfigurationFile A simple config file Correctly resolves paths relative to the config file 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "log": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
-
-exports[`ConfigurationFile A simple config file Correctly resolves paths relative to the project root 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "log": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
-
-exports[`ConfigurationFile A simple config file containing an array Correctly loads the config file 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "log": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
-
-exports[`ConfigurationFile A simple config file containing an array Correctly resolves paths relative to the config file 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "log": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
-
-exports[`ConfigurationFile A simple config file containing an array Correctly resolves paths relative to the project root 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "log": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
-
 exports[`ConfigurationFile A simple config file containing an array and an object Correctly loads the config file 1`] = `
 Object {
   "debug": "",
@@ -111,16 +51,6 @@ Object {
 `;
 
 exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "append" and "merge" in config meta 1`] = `
-Object {
-  "debug": "",
-  "error": "",
-  "log": "",
-  "verbose": "",
-  "warning": "",
-}
-`;
-
-exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "append" in config meta 1`] = `
 Object {
   "debug": "",
   "error": "",

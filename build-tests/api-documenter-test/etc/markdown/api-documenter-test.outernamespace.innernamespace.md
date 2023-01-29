@@ -6,7 +6,7 @@
 
 A nested namespace
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 namespace InnerNamespace 

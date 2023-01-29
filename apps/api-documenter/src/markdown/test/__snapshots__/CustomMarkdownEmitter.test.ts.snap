@@ -1,12 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`render Markdown from TSDoc 1`] = `
-StringBuilder {
-  "_chunks": Array [
-    "
+"
 ## Simple bold test
 
-This is a <b>bold</b> word.
+This is a **bold** word.
 
 ## All whitespace bold
 
@@ -14,27 +12,27 @@ This is a <b>bold</b> word.
 
 ## Newline bold
 
-<b>line 1</b> <b>line 2</b>
+**line 1** **line 2**
 
 ## Newline bold with spaces
 
-  <b>line 1</b>    <b>line 2</b>    <b>line 3</b>  
+  **line 1**    **line 2**    **line 3**  
 
 ## Adjacent bold regions
 
-<b>one</b><b>two</b> <b>three</b> <b>four</b>non-bold<!-- --><b>five</b>
+**one**<!-- -->**two** **three** **four**<!-- -->non-bold<!-- -->**five**
 
 ## Adjacent to other characters
 
-[a link](./index.md)<!-- --><b>bold</b>non-boldmore-non-bold
+[a link](./index.md)<!-- -->**bold**<!-- -->non-boldmore-non-bold
 
 ## Unknown block tag
 
-<b>bold</b>non-boldmore-non-bold
+**bold**<!-- -->non-boldmore-non-bold
 
 ## Bad characters
 
-<b>\\\\*one\\\\*two\\\\*</b><b>three\\\\*four</b>
+**\\\\*one\\\\*two\\\\***<!-- -->**three\\\\*four**
 
 ## Characters that should be escaped
 
@@ -54,9 +52,7 @@ HTML escape: &amp;quot;
 
 |  Header 1 | Header 2 |
 |  --- | --- |
-|  Cell 1 | Cell 2 |
+|  Cell 1 | <p>Cell 2</p><p>**bold text**</p> |
 
-",
-  ],
-}
+"
 `;

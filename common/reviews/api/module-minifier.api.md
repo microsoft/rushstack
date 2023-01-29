@@ -118,6 +118,4 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
-// (No @packageDocumentation comment for this package)
-
 ```

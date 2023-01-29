@@ -1,6 +1,28 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 09 Dec 2022 16:18:28 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jan 2023 02:55:10 GMT and should not be manually modified.
+
+## 7.20.1
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 7.20.0
+Wed, 25 Jan 2023 07:26:55 GMT
+
+### Minor changes
+
+- Display the 'abstract' modifier for classes and members (GitHub #3661)
+
+## 7.19.28
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 7.19.27
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
 
 ## 7.19.26
 Fri, 09 Dec 2022 16:18:28 GMT

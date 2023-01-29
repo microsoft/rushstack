@@ -7,7 +7,7 @@
 Some less common TypeScript declaration kinds.
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IDocInterface3 

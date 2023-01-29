@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack5-module-minifier-plugin",
-  "version": "5.1.43",
+  "version": "5.1.48",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "lib/index.js",
   "typings": "dist/webpack5-module-minifier-plugin.d.ts",
@@ -36,7 +36,7 @@
     "@rushstack/module-minifier": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "memfs": "3.4.3",
-    "webpack": "~5.68.0"
+    "webpack": "~5.75.0"
   },
   "sideEffects": false
 }

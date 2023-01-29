@@ -6,7 +6,7 @@
 
 This is a function with an optional parameter.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 optionalParamFunction(x?: number): void;
@@ -16,9 +16,9 @@ optionalParamFunction(x?: number): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  x | number | <i>(Optional)</i> the number |
+|  x | number | _(Optional)_ the number |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

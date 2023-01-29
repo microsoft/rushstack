@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.26.0",
+      "tag": "@microsoft/api-extractor-model_v7.26.0",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.25.3",
       "tag": "@microsoft/api-extractor-model_v7.25.3",
       "date": "Fri, 09 Dec 2022 16:18:28 GMT",

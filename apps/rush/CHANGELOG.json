@@ -2,6 +2,129 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.89.1",
+      "tag": "@microsoft/rush_v5.89.1",
+      "date": "Thu, 26 Jan 2023 02:55:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with `rush add` where the approved packages files aren't updated."
+          },
+          {
+            "comment": "Revert generation of scripts in the Git hooks folder due to various git-related issues"
+          },
+          {
+            "comment": "Upgrade to webpack 5.75.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.89.0",
+      "tag": "@microsoft/rush_v5.89.0",
+      "date": "Tue, 24 Jan 2023 22:30:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix linking error due to PNPM v7 local install path breaking change"
+          },
+          {
+            "comment": "Introduce \"dependsOnAdditionalFiles\" configuration option to operations in rush-project.json. This option allows to pass glob (minimatch) patterns pointing to files outside of .git repository. If provided, the hash values of these files will become part of the final hash when reading and writing from cache."
+          },
+          {
+            "comment": "Use getRepoStateAsync to optimize performance of calculating repository state."
+          },
+          {
+            "comment": "Generate scripts in the Git hooks folder referring to the actual hook implementations in-place in the Rush `common/git-hooks/` folder instead of copying the scripts to the Git hooks folder."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.88.2",
+      "tag": "@microsoft/rush_v5.88.2",
+      "date": "Sun, 22 Jan 2023 04:18:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression where the 'dist/scripts' folder name was named 'dist/undefined'"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.88.1",
+      "tag": "@microsoft/rush_v5.88.1",
+      "date": "Wed, 18 Jan 2023 22:44:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `create-scripts.js` does not exist during `rush deploy`."
+          },
+          {
+            "comment": "Add install-run-rush-pnpm.js script"
+          },
+          {
+            "comment": "Update JSZip to 3.8.0."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.88.0",
+      "tag": "@microsoft/rush_v5.88.0",
+      "date": "Thu, 22 Dec 2022 20:11:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the experience during a rush operation when the cached credentials have expired. Now, a warning is printed instead of an error being thrown and the operation halted."
+          },
+          {
+            "comment": "(BREAKING API CHANGE IN @rushstack/rush-azure-storage-build-cache-plugin) Change the signature of `AzureAuthenticationBase.tryGetCachedCredentialAsync` to optionally take an object describing the behavior when credentials have expired. The behavior of the function without an argument is unchanged."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.87.0",
+      "tag": "@microsoft/rush_v5.87.0",
+      "date": "Fri, 16 Dec 2022 19:34:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a typo in the artifactory.json template"
+          },
+          {
+            "comment": "Writing local build cache is more robust on a network drive."
+          },
+          {
+            "comment": "Document default value for the \"watchDebounceMs\" setting"
+          },
+          {
+            "comment": "Add \"nodeSupportedVersionInstructions\" property to rush.json, allowing maintainers to provide additional instructions if the user's node version is unsupported."
+          },
+          {
+            "comment": "(IMPORTANT) Fix a regression where the \"strictPeerDependencies\" setting wasn't applied for some versions of PNPM 7 due to unexpected changes of PNPM's default value (GitHub #3828)"
+          },
+          {
+            "comment": "Fix an issue where if the package manager is PNPM 6.1.0 or newer, and `pnpmStore` is set to `\"local\"`, then a global cache was still used."
+          },
+          {
+            "comment": "Write local telemetry for global script actions"
+          },
+          {
+            "comment": "Normalize all newlines in logging statements to LF. On Windows, some newlines were CRLF."
+          },
+          {
+            "comment": "Upgrade `npm-check` dependency from `~5.9.2` to `~6.0.1`"
+          },
+          {
+            "comment": "Work towards bundling the files of \"@rushstack/rush-lib\" (Details in GitHub #3837)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.86.0",
       "tag": "@microsoft/rush_v5.86.0",
       "date": "Tue, 29 Nov 2022 00:10:20 GMT",

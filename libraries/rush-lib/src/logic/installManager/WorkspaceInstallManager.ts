@@ -6,7 +6,8 @@ import * as path from 'path';
 import * as semver from 'semver';
 import { FileSystem, FileConstants, AlreadyReportedError, Async } from '@rushstack/node-core-library';
 
-import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
+import { BaseInstallManager } from '../base/BaseInstallManager';
+import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';

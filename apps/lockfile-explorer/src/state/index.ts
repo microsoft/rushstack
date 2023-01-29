@@ -11,39 +11,27 @@ export interface IRushProjectDetails {
   projectFolder: string;
 }
 
-export interface IAppState {
+export interface IAppStateBase {
+  lockfileExplorerProjectRoot: string;
   currDir: string;
   projectRoot: string;
   projectType: ProjectType;
   pnpmLockfileLocation: string;
   pnpmfileLocation: string;
   appVersion: string;
+  debugMode: boolean;
+}
+
+export interface IRushAppState extends IAppStateBase {
+  projectType: ProjectType.RUSH_PROJECT;
   rush: {
-    projects: {
-      [key in string]: IRushProjectDetails;
-    };
+    rushJsonPath: string;
+    projectsByProjectFolder: Map<string, IRushProjectDetails>;
   };
 }
 
-interface IProps {
-  currDir: string;
+export interface IPnpmWorkspaceAppState extends IAppStateBase {
+  projectType: ProjectType.PNPM_WORKSPACE;
 }
-export class AppState implements IAppState {
-  public currDir: string;
-  public projectRoot: string = '';
-  public projectType: ProjectType = ProjectType.RUSH_PROJECT;
-  public pnpmLockfileLocation: string = '';
-  public pnpmfileLocation: string = '';
-  public appVersion: string = '';
-  public rush: {
-    projects: {
-      [key in string]: IRushProjectDetails;
-    };
-  } = {
-    projects: {}
-  };
 
-  public constructor(props: IProps) {
-    this.currDir = props.currDir;
-  }
-}
+export type IAppState = IRushAppState | IPnpmWorkspaceAppState;

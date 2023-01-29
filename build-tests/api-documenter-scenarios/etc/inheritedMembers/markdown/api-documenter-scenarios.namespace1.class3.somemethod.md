@@ -6,7 +6,7 @@
 
 Some method.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 someMethod(x: boolean | string): void;
@@ -18,7 +18,7 @@ someMethod(x: boolean | string): void;
 |  --- | --- | --- |
 |  x | boolean \| string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

@@ -46,12 +46,12 @@ describe(ProjectChangeAnalyzer.name, () => {
 
     const subject: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
 
-    subject['_getRepoDeps'] = jest.fn(() => {
-      return {
+    subject['_getRepoDepsAsync'] = jest.fn(() => {
+      return Promise.resolve({
         gitPath: 'git',
         hashes: files,
         rootDir: ''
-      };
+      });
     });
 
     return subject;
@@ -255,7 +255,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([['apps/apple/core.js', 'a101']])
       );
-      expect(subject['_getRepoDeps']).toHaveBeenCalledTimes(1);
+      expect(subject['_getRepoDepsAsync']).toHaveBeenCalledTimes(1);
     });
   });
 

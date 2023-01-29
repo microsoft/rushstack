@@ -7,6 +7,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import {
   installRunRushScriptFilename,
   installRunRushxScriptFilename,
+  installRunRushPnpmScriptFilename,
   installRunScriptFilename,
   scriptsFolderPath
 } from '../utilities/PathConstants';
@@ -65,6 +66,30 @@ const _scripts: IScriptSpecifier[] = [
   }
 ];
 
+const _pnpmOnlyScripts: IScriptSpecifier[] = [
+  {
+    scriptName: installRunRushPnpmScriptFilename,
+    headerLines: [
+      '// This script is intended for usage in an automated build environment where the Rush command may not have',
+      '// been preinstalled, or may have an unpredictable version.  This script will automatically install the version of Rush',
+      '// specified in the rush.json configuration file (if not already installed), and then pass a command-line to the',
+      '// rush-pnpm command.',
+      '//',
+      '// An example usage would be:',
+      '//',
+      `//    node common/scripts/${installRunRushPnpmScriptFilename} pnpm-command`
+    ]
+  }
+];
+
+const getScripts = (rushConfiguration: RushConfiguration): IScriptSpecifier[] => {
+  if (rushConfiguration.packageManager === 'pnpm') {
+    return _scripts.concat(_pnpmOnlyScripts);
+  }
+
+  return _scripts;
+};
+
 /**
  * Checks whether the common/scripts files are up to date, and recopies them if needed.
  * This is used by the "rush install" and "rush update" commands.
@@ -79,7 +104,7 @@ export class StandardScriptUpdater {
 
     let anyChanges: boolean = false;
     await Async.forEachAsync(
-      _scripts,
+      getScripts(rushConfiguration),
       async (script: IScriptSpecifier) => {
         const changed: boolean = await StandardScriptUpdater._updateScriptOrThrowAsync(
           script,
@@ -104,7 +129,7 @@ export class StandardScriptUpdater {
    */
   public static async validateAsync(rushConfiguration: RushConfiguration): Promise<void> {
     await Async.forEachAsync(
-      _scripts,
+      getScripts(rushConfiguration),
       async (script: IScriptSpecifier) => {
         await StandardScriptUpdater._updateScriptOrThrowAsync(script, rushConfiguration, true);
       },

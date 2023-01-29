@@ -25,6 +25,11 @@ import {
   IApiExportedMixinOptions,
   ApiExportedMixin
 } from '../mixins/ApiExportedMixin';
+import {
+  ApiAbstractMixin,
+  IApiAbstractMixinJson,
+  IApiAbstractMixinOptions
+} from '../mixins/ApiAbstractMixin';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -33,6 +38,7 @@ import {
 export interface IApiClassOptions
   extends IApiItemContainerMixinOptions,
     IApiNameMixinOptions,
+    IApiAbstractMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiDeclaredItemOptions,
     IApiTypeParameterListMixinOptions,
@@ -43,6 +49,7 @@ export interface IApiClassOptions
 
 export interface IApiClassJson
   extends IApiDeclaredItemJson,
+    IApiAbstractMixinJson,
     IApiTypeParameterListMixinJson,
     IApiExportedMixinJson {
   extendsTokenRange?: IExcerptTokenRange;
@@ -66,7 +73,9 @@ export interface IApiClassJson
  * @public
  */
 export class ApiClass extends ApiItemContainerMixin(
-  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem))))
+  ApiNameMixin(
+    ApiAbstractMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem))))
+  )
 ) {
   /**
    * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.

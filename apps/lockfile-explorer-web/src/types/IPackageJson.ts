@@ -3,6 +3,7 @@
 
 export interface IPackageJson {
   name: string;
+  version: string;
   dependencies: {
     [key in string]: string;
   };

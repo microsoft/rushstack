@@ -78,7 +78,7 @@ export function getPluginInstance(compiler: Compiler | undefined): LocalizationP
  * @public
  */
 export class LocalizationPlugin implements WebpackPluginInstance {
-  private readonly _stringKeys: Map<string, IStringPlaceholder> = new Map();
+  public readonly stringKeys: Map<string, IStringPlaceholder> = new Map();
 
   private readonly _options: ILocalizationPluginOptions;
   private readonly _resolvedTranslatedStringsFromOptions: Map<
@@ -461,7 +461,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
    */
   public getPlaceholder(localizedFileKey: string, stringName: string): IStringPlaceholder | undefined {
     const stringKey: string = `${localizedFileKey}?${stringName}`;
-    return this._stringKeys.get(stringKey);
+    return this.stringKeys.get(stringKey);
   }
 
   /**
@@ -485,7 +485,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     const resultObject: Record<string, string> = {};
     for (const [stringName, stringValue] of localizedFileData) {
       const stringKey: string = `${localizedFileKey}?${stringName}`;
-      let placeholder: IStringPlaceholder | undefined = this._stringKeys.get(stringKey);
+      let placeholder: IStringPlaceholder | undefined = this.stringKeys.get(stringKey);
       if (!placeholder) {
         // TODO: This may need to be a deterministic identifier to support watch / incremental compilation
         const suffix: string = `${this._stringPlaceholderCounter++}`;
@@ -501,7 +501,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           stringName
         };
 
-        this._stringKeys.set(stringKey, placeholder);
+        this.stringKeys.set(stringKey, placeholder);
         this._stringPlaceholderMap.set(suffix, placeholder);
       }
 
@@ -520,7 +520,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   ): void {
     for (const [stringName, stringValue] of localizedFileData) {
       const stringKey: string = `${localizedFileKey}?${stringName}`;
-      const placeholder: IStringPlaceholder | undefined = this._stringKeys.get(stringKey);
+      const placeholder: IStringPlaceholder | undefined = this.stringKeys.get(stringKey);
       if (placeholder) {
         placeholder.valuesByLocale.set(localeName, stringValue);
       }
