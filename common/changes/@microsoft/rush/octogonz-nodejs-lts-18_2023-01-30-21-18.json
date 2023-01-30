@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update \"rush init\" and version checks to reflect that Node.js 18.x is now the Long Term Support (LTS) release series",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
