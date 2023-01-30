@@ -20,11 +20,11 @@
   },
   "peerDependencies": {
     "@rushstack/module-minifier": "*",
-    "webpack": "^5.68.0"
+    "webpack": "^5.68.0",
+    "@types/node": "^12.20.24"
   },
   "dependencies": {
     "@rushstack/worker-pool": "workspace:*",
-    "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
     "@types/estree": "0.0.50",
     "tapable": "2.2.1"
@@ -36,7 +36,13 @@
     "@rushstack/module-minifier": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "memfs": "3.4.3",
-    "webpack": "~5.75.0"
+    "webpack": "~5.75.0",
+    "@types/node": "12.20.24"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
+  }
 }

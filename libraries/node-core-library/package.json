@@ -16,7 +16,6 @@
     "_phase:test": "heft test --no-build"
   },
   "dependencies": {
-    "@types/node": "12.20.24",
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
     "import-lazy": "~4.0.0",
@@ -33,6 +32,15 @@
     "@types/heft-jest": "1.0.1",
     "@types/jju": "1.4.1",
     "@types/resolve": "1.20.2",
-    "@types/semver": "7.3.5"
+    "@types/semver": "7.3.5",
+    "@types/node": "12.20.24"
+  },
+  "peerDependencies": {
+    "@types/node": "^12.20.24"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
   }
 }

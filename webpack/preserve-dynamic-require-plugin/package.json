@@ -18,7 +18,6 @@
     "_phase:build": "heft build --clean",
     "_phase:test": "heft test --no-build"
   },
-  "dependencies": {},
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",

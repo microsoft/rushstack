@@ -17,7 +17,8 @@
   "peerDependencies": {
     "@rushstack/set-webpack-public-path-plugin": "^3.3.87",
     "@types/webpack": "^4.39.0",
-    "webpack": "^4.31.0"
+    "webpack": "^4.31.0",
+    "@types/node": "^12.20.24"
   },
   "peerDependenciesMeta": {
     "@rushstack/set-webpack-public-path-plugin": {
@@ -25,12 +26,14 @@
     },
     "@types/webpack": {
       "optional": true
+    },
+    "@types/node": {
+      "optional": true
     }
   },
   "dependencies": {
     "@rushstack/localization-utilities": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
     "loader-utils": "1.4.2",
     "lodash": "~4.17.15",
@@ -45,6 +48,7 @@
     "@types/lodash": "4.14.116",
     "@types/minimatch": "3.0.5",
     "@types/webpack": "4.41.32",
-    "webpack": "~4.44.2"
+    "webpack": "~4.44.2",
+    "@types/node": "12.20.24"
   }
 }
