@@ -9,13 +9,13 @@ import * as semver from 'semver';
 import type { RushConfiguration } from '../api/RushConfiguration';
 
 /**
- * This constant is the major version of the next LTS node Node.js release. This constant should be updated when
- * a new LTS version is added to Rush's support matrix.
+ * This constant is the major version of the currently active LTS node Node.js release series.
+ * This constant should be updated whenever a new LTS version is added to Rush's support matrix.
  *
  * LTS schedule: https://nodejs.org/en/about/releases/
- * LTS versions: https://nodejs.org/en/download/releases/
+ * LTS versions: https://nodejs.org/en/download/releases/  (searchable)
  */
-const UPCOMING_NODE_LTS_VERSION: number = 18;
+const LATEST_NODE_LTS_VERSION: number = 18;
 const nodeVersion: string = process.versions.node;
 const nodeMajorVersion: number = semver.major(nodeVersion);
 
@@ -82,7 +82,15 @@ export class NodeJsCompatibility {
    * Warn about a Node.js version that has not been tested yet with Rush.
    */
   public static warnAboutVersionTooNew(options: IWarnAboutVersionTooNewOptions): boolean {
-    if (nodeMajorVersion >= UPCOMING_NODE_LTS_VERSION + 1) {
+    // For example, suppose that LATEST_NODE_LTS_VERSION=18, then the schedule might look like this:
+    //
+    //                            14.x: Maintenance
+    //                            16.x: Maintenance
+    // LATEST_NODE_LTS_VERSION    18.x: Active LTS
+    //                            19.x: Current experimental odd-numbered release series
+    //                            20.x: "Pending" release series (that will later become LTS)
+    // LATEST_NODE_LTS_VERSION+3  21.x: . . .
+    if (nodeMajorVersion >= LATEST_NODE_LTS_VERSION + 3) {
       if (!options.alreadyReportedNodeTooNewError) {
         // We are on a much newer release than we have tested and support
         if (options.isRushLib) {
