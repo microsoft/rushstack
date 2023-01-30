@@ -1,6 +1,30 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jan 2023 02:55:10 GMT and should not be manually modified.
+
+## 0.13.2
+Thu, 26 Jan 2023 02:55:10 GMT
+
+### Patches
+
+- Upgrade to webpack 5.75.0
+
+## 0.13.1
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.13.0
+Sun, 22 Jan 2023 20:37:08 GMT
+
+### Minor changes
+
+- Disable "mini-css-extract-plugin" for the "library" rig profile because there isn't a straightforward way to load .css files from a library
+
+## 0.12.17
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.12.16
 Tue, 20 Dec 2022 01:18:22 GMT

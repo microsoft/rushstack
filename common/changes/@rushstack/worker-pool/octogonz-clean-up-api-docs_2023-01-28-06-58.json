@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/worker-pool",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/worker-pool"
+}

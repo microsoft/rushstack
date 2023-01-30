@@ -12,9 +12,8 @@ module.exports = function createConfig(env, argv) {
     configOverride: {
       resolve: {
         alias: {
-          // // Use the bundled library
-          // 'heft-web-rig-library-tutorial':
-          //   'heft-web-rig-library-tutorial/dist/heft-web-rig-library-tutorial.js'
+          // Don't rebundle this large library
+          '@rushstack/rush-themed-ui': '@rushstack/rush-themed-ui/dist/rush-themed-ui.js'
         }
       },
       performance: {

@@ -152,6 +152,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/set-webpack-public-path-plugin-webpack4-test](./build-tests/set-webpack-public-path-plugin-webpack4-test/) | Building this project tests the set-webpack-public-path-plugin using Webpack 4 |
 | [/build-tests/ts-command-line-test](./build-tests/ts-command-line-test/) | Building this project is a regression test for ts-command-line |
+| [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |

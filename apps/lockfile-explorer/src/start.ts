@@ -8,151 +8,198 @@ import process from 'process';
 import colors from 'colors/safe';
 import open from 'open';
 import updateNotifier from 'update-notifier';
-import { FileSystem, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, type IPackageJson, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { IAppContext } from '@rushstack/lockfile-explorer-web/lib/AppContext';
 import packageJSON from '../package.json';
 import { init } from './init';
 import type { IAppState } from './state';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
-const PORT: number = 8091;
-// Must not have a trailing slash
-const SERVICE_URL: string = `http://localhost:${PORT}`;
+function startApp(debugMode: boolean): void {
+  const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
+  const appVersion: string = JsonFile.load(`${lockfileExplorerProjectRoot}/package.json`).version;
 
-updateNotifier({ pkg: packageJSON }).notify();
+  console.log(
+    colors.bold(`\nRush Lockfile Explorer ${appVersion}`) + colors.cyan(' - https://lfx.rushstack.io/\n')
+  );
 
-const appState: IAppState = init();
+  updateNotifier({
+    pkg: packageJSON,
+    // Normally update-notifier waits a day or so before it starts displaying upgrade notices.
+    // In debug mode, show the notice right away.
+    updateCheckInterval: debugMode ? 0 : undefined
+  }).notify({
+    // Make sure it says "-g" in the "npm install" example command line
+    isGlobal: true,
+    // Show the notice immediately, rather than waiting for process.onExit()
+    defer: false
+  });
 
-process.chdir(appState.lockfileExplorerProjectRoot);
-const distFolderPath: string = `${appState.lockfileExplorerProjectRoot}/dist`;
-const app: express.Application = express();
-app.use(express.json());
-app.use(cors());
+  const PORT: number = 8091;
+  // Must not have a trailing slash
+  const SERVICE_URL: string = `http://localhost:${PORT}`;
 
-// Variable used to check if the front-end client is still connected
-let awaitingFirstConnect: boolean = true;
-let isClientConnected: boolean = false;
-let disconnected: boolean = false;
-setInterval(() => {
-  if (!isClientConnected && !awaitingFirstConnect && !disconnected) {
-    console.log(colors.red('The client has disconnected!'));
-    console.log(`Please open a browser window at http://localhost:${PORT}/app`);
-    disconnected = true;
-  } else if (!awaitingFirstConnect) {
-    isClientConnected = false;
+  // TODO: Later if we introduce more CLI parameters, switch to a proper CLI parser
+  const args: string[] = process.argv.slice(2);
+  if (args.length > 0 && args[0] !== '--debug') {
+    console.log('Usage: lockfile-explorer [--debug]\n');
+    console.log('The "lfx" command is a shorthand alias for "lockfile-explorer".');
+    console.log('See the project website for documentation and support.\n');
+    throw new AlreadyReportedError();
   }
-}, 4000);
 
-// This takes precedence over the `/app` static route, which also has an `initappcontext.js` file.
-app.get('/initappcontext.js', (req: express.Request, res: express.Response) => {
-  const appContext: IAppContext = {
-    serviceUrl: SERVICE_URL,
-    appVersion: appState.appVersion,
-    debugMode: process.argv.indexOf('--debug') >= 0
-  };
-  const sourceCode: string = [
-    `console.log('Loaded initappcontext.js');`,
-    `appContext = ${JSON.stringify(appContext)}`
-  ].join('\n');
+  const appState: IAppState = init({ lockfileExplorerProjectRoot, appVersion, debugMode });
 
-  res.type('application/javascript').send(sourceCode);
-});
+  // Important: This must happen after init() reads the current working directory
+  process.chdir(appState.lockfileExplorerProjectRoot);
 
-app.use('/', express.static(distFolderPath));
+  const distFolderPath: string = `${appState.lockfileExplorerProjectRoot}/dist`;
+  const app: express.Application = express();
+  app.use(express.json());
+  app.use(cors());
 
-app.use('/favicon.ico', express.static(distFolderPath, { index: 'favicon.ico' }));
+  // Variable used to check if the front-end client is still connected
+  let awaitingFirstConnect: boolean = true;
+  let isClientConnected: boolean = false;
+  let disconnected: boolean = false;
+  setInterval(() => {
+    if (!isClientConnected && !awaitingFirstConnect && !disconnected) {
+      console.log(colors.red('The client has disconnected!'));
+      console.log(`Please open a browser window at http://localhost:${PORT}/app`);
+      disconnected = true;
+    } else if (!awaitingFirstConnect) {
+      isClientConnected = false;
+    }
+  }, 4000);
 
-app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
-  const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-  const doc = yaml.load(pnpmLockfileText);
-  res.send(doc);
-});
+  // This takes precedence over the `/app` static route, which also has an `initappcontext.js` file.
+  app.get('/initappcontext.js', (req: express.Request, res: express.Response) => {
+    const appContext: IAppContext = {
+      serviceUrl: SERVICE_URL,
+      appVersion: appState.appVersion,
+      debugMode: process.argv.indexOf('--debug') >= 0
+    };
+    const sourceCode: string = [
+      `console.log('Loaded initappcontext.js');`,
+      `appContext = ${JSON.stringify(appContext)}`
+    ].join('\n');
 
-app.get('/api/health', (req: express.Request, res: express.Response) => {
-  awaitingFirstConnect = false;
-  isClientConnected = true;
-  if (disconnected) {
-    disconnected = false;
-    console.log(colors.green('The client has reconnected!'));
-  }
-  res.status(200).send();
-});
+    res.type('application/javascript').send(sourceCode);
+  });
 
-app.post(
-  '/api/package-json',
-  async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
-    const { projectPath } = req.body;
-    const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
-    let packageJsonText: string;
+  app.use('/', express.static(distFolderPath));
+
+  app.use('/favicon.ico', express.static(distFolderPath, { index: 'favicon.ico' }));
+
+  app.get('/api/lockfile', async (req: express.Request, res: express.Response) => {
+    const pnpmLockfileText: string = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
+    const doc = yaml.load(pnpmLockfileText);
+    res.send(doc);
+  });
+
+  app.get('/api/health', (req: express.Request, res: express.Response) => {
+    awaitingFirstConnect = false;
+    isClientConnected = true;
+    if (disconnected) {
+      disconnected = false;
+      console.log(colors.green('The client has reconnected!'));
+    }
+    res.status(200).send();
+  });
+
+  app.post(
+    '/api/package-json',
+    async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
+      const { projectPath } = req.body;
+      const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
+      let packageJsonText: string;
+      try {
+        packageJsonText = await FileSystem.readFileAsync(fileLocation);
+      } catch (e) {
+        if (FileSystem.isNotExistError(e)) {
+          return res.status(404).send({
+            message: `Could not load package.json file for this package. Have you installed all the dependencies for this workspace?`,
+            error: `No package.json in location: ${projectPath}`
+          });
+        } else {
+          throw e;
+        }
+      }
+
+      res.send(packageJsonText);
+    }
+  );
+
+  app.get('/api/pnpmfile', async (req: express.Request, res: express.Response) => {
+    let pnpmfile: string;
     try {
-      packageJsonText = await FileSystem.readFileAsync(fileLocation);
+      pnpmfile = await FileSystem.readFileAsync(appState.pnpmfileLocation);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
         return res.status(404).send({
-          message: `Could not load package.json file for this package. Have you installed all the dependencies for this workspace?`,
-          error: `No package.json in location: ${projectPath}`
+          message: `Could not load pnpmfile file in this repo.`,
+          error: `No .pnpmifile.cjs found.`
         });
       } else {
         throw e;
       }
     }
 
-    res.send(packageJsonText);
-  }
-);
+    res.send(pnpmfile);
+  });
 
-app.get('/api/pnpmfile', async (req: express.Request, res: express.Response) => {
-  let pnpmLockfile: string;
+  app.post(
+    '/api/package-spec',
+    async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
+      const { projectPath } = req.body;
+      const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
+      let packageJson: IPackageJson;
+      try {
+        packageJson = await JsonFile.loadAsync(fileLocation);
+      } catch (e) {
+        if (FileSystem.isNotExistError(e)) {
+          return res.status(404).send({
+            message: `Could not load package.json file in location: ${projectPath}`
+          });
+        } else {
+          throw e;
+        }
+      }
+
+      const {
+        hooks: { readPackage }
+      } = require(appState.pnpmfileLocation);
+      const parsedPackage = readPackage(packageJson);
+      res.send(parsedPackage);
+    }
+  );
+
+  app.listen(PORT, async () => {
+    console.log(`App launched on ${SERVICE_URL}`);
+
+    if (!appState.debugMode) {
+      try {
+        // Launch the web browser
+        await open(SERVICE_URL);
+      } catch (e) {
+        console.error('Error launching browser: ' + e.toString());
+      }
+    }
+  });
+}
+
+const debugMode: boolean = process.argv.indexOf('--debug') >= 0;
+if (debugMode) {
+  // Display the full callstack for errors
+  startApp(debugMode);
+} else {
+  // Catch exceptions and report them nicely
   try {
-    pnpmLockfile = await FileSystem.readFileAsync(appState.pnpmLockfileLocation);
-  } catch (e) {
-    if (FileSystem.isNotExistError(e)) {
-      return res.status(404).send({
-        message: `Could not load pnpmfile file in this repo.`,
-        error: `No .pnpmifile.cjs found.`
-      });
-    } else {
-      throw e;
+    startApp(debugMode);
+  } catch (error) {
+    if (!(error instanceof AlreadyReportedError)) {
+      console.error();
+      console.error(colors.red('ERROR: ' + error.message));
     }
   }
-
-  res.send(pnpmLockfile);
-});
-
-app.post(
-  '/api/package-spec',
-  async (req: express.Request<{}, {}, { projectPath: string }, {}>, res: express.Response) => {
-    const { projectPath } = req.body;
-    const fileLocation = `${appState.projectRoot}/${projectPath}/package.json`;
-    let packageJson: IPackageJson;
-    try {
-      packageJson = await JsonFile.loadAsync(fileLocation);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        return res.status(404).send({
-          message: `Could not load package.json file in location: ${projectPath}`
-        });
-      } else {
-        throw e;
-      }
-    }
-
-    const {
-      hooks: { readPackage }
-    } = require(appState.pnpmfileLocation);
-    const parsedPackage = readPackage(packageJson);
-    res.send(parsedPackage);
-  }
-);
-
-app.listen(PORT, async () => {
-  console.log(`Rush Lockfile Explorer ${appState.appVersion} running at ${SERVICE_URL}`);
-
-  if (!process.argv.includes('--debug')) {
-    try {
-      // Launch the web browser
-      await open(SERVICE_URL);
-    } catch (e) {
-      console.error('Error launching browser: ' + e.toString());
-    }
-  }
-});
+}

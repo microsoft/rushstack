@@ -461,6 +461,4 @@ export class TestStageHooks extends StageHooksBase<ITestStageProperties> {
     readonly run: AsyncParallelHook;
 }
 
-// (No @packageDocumentation comment for this package)
-
 ```

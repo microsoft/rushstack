@@ -6,7 +6,7 @@
 
 This is an overloaded function.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 exampleFunction(a: string, b: string): string;
@@ -19,7 +19,7 @@ exampleFunction(a: string, b: string): string;
 |  a | string | the first string |
 |  b | string | the second string |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 
