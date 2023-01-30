@@ -413,27 +413,27 @@ export class ProjectChangeAnalyzer {
         const additionalFilesToHash: string[] = [];
 
         if (this._rushConfiguration.packageManager === 'pnpm') {
-          const absoluteFilePathsToCheck: string[] = [];
-
-          for (const project of this._rushConfiguration.projects) {
-            const projectShrinkwrapFilePath: string =
-              BaseProjectShrinkwrapFile.getFilePathForProject(project);
-            absoluteFilePathsToCheck.push(projectShrinkwrapFilePath);
-            const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
-              path.relative(rootDir, projectShrinkwrapFilePath)
-            );
-
-            additionalFilesToHash.push(relativeProjectShrinkwrapFilePath);
-          }
-
-          await Async.forEachAsync(absoluteFilePathsToCheck, async (filePath: string) => {
-            if (!(await FileSystem.existsAsync(filePath))) {
-              throw new Error(
-                `A project dependency file (${filePath}) is missing. You may need to run ` +
-                  '"rush install" or "rush update".'
+          await Async.forEachAsync(
+            this._rushConfiguration.projects,
+            async (project: RushConfigurationProject) => {
+              const projectShrinkwrapFilePath: string =
+                BaseProjectShrinkwrapFile.getFilePathForProject(project);
+              if (!(await FileSystem.existsAsync(projectShrinkwrapFilePath))) {
+                // Missing shrinkwrap of split workspace project is allowed because split workspace project can be partial installed
+                if (project.splitWorkspace) {
+                  return;
+                }
+                throw new Error(
+                  `A project dependency file (${projectShrinkwrapFilePath}) is missing. You may need to run ` +
+                    '"rush install" or "rush update".'
+                );
+              }
+              const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
+                path.relative(rootDir, projectShrinkwrapFilePath)
               );
+              additionalFilesToHash.push(relativeProjectShrinkwrapFilePath);
             }
-          });
+          );
         }
 
         const hashes: Map<string, string> = await getRepoStateAsync(rootDir, additionalFilesToHash, gitPath);
