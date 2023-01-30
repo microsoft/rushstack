@@ -811,20 +811,88 @@ export class ExportAnalyzer {
     }
     visitedAstModules.add(astModule);
 
-    let astEntity: AstEntity | undefined = astModule.cachedExportedEntities.get(exportName);
-    if (astEntity !== undefined) {
-      return astEntity;
+    // Do we have a cached result?
+    const cachedAstEntity: AstEntity | undefined = astModule.cachedExportedEntities.get(exportName);
+    if (cachedAstEntity) {
+      return cachedAstEntity;
     }
 
-    // Try the explicit exports
+    // If not, try the explicit exports.
+    //
+    // ```
+    // file1.ts
+    // export class SomeClass {}
+    //              ^^^^^^^^^
+    //
+    // file2.ts
+    // import { SomeClass }  from './file1';
+    // ```
     const escapedExportName: ts.__String = ts.escapeLeadingUnderscores(exportName);
-    if (astModule.moduleSymbol.exports) {
-      const exportSymbol: ts.Symbol | undefined = astModule.moduleSymbol.exports.get(escapedExportName);
-      if (exportSymbol) {
-        astEntity = this.fetchReferencedAstEntity(exportSymbol, astModule.isExternal);
+    const exportSymbol: ts.Symbol | undefined = astModule.moduleSymbol.exports?.get(escapedExportName);
+    if (exportSymbol) {
+      const astEntity: AstEntity | undefined = this.fetchReferencedAstEntity(
+        exportSymbol,
+        astModule.isExternal
+      );
+      if (astEntity) {
+        astModule.cachedExportedEntities.set(exportName, astEntity);
+        return astEntity;
+      }
+    }
 
-        if (astEntity !== undefined) {
-          astModule.cachedExportedEntities.set(exportName, astEntity); // cache for next time
+    // Is this module using `export =`?
+    const exportEqualsSymbol: ts.Symbol | undefined = astModule.moduleSymbol.exports?.get(
+      ts.InternalSymbolName.ExportEquals
+    );
+    if (exportEqualsSymbol) {
+      const followedSymbol: ts.Symbol | undefined = TypeScriptInternals.getImmediateAliasedSymbol(
+        exportEqualsSymbol,
+        this._typeChecker
+      );
+
+      // If this is a default export, then use the followed symbol.
+      //
+      // ```
+      // file1.ts
+      // export = SomeClass;
+      // class SomeClass {}
+      //       ^^^^^^^^^
+      //
+      // file2.ts
+      // import SomeClass from './file1';
+      // ```
+      if (followedSymbol && escapedExportName === ts.InternalSymbolName.Default) {
+        const astEntity: AstEntity | undefined = this.fetchReferencedAstEntity(
+          followedSymbol,
+          astModule.isExternal
+        );
+        if (astEntity) {
+          astModule.cachedExportedEntities.set(exportName, astEntity);
+          return astEntity;
+        }
+      }
+
+      // Otherwise, this could be an export from the followed symbol's exports.
+      //
+      // ```
+      // file1.ts
+      // export = ns;
+      // namespace ns {
+      //   export class SomeClass {}
+      //                ^^^^^^^^^
+      // }
+      //
+      // file2.ts
+      // import { SomeClass } from './file1';
+      // ```
+      const exportSymbol: ts.Symbol | undefined = followedSymbol?.exports?.get(escapedExportName);
+      if (exportSymbol) {
+        const astEntity: AstEntity | undefined = this.fetchReferencedAstEntity(
+          exportSymbol,
+          astModule.isExternal
+        );
+        if (astEntity) {
+          astModule.cachedExportedEntities.set(exportName, astEntity);
           return astEntity;
         }
       }
@@ -832,9 +900,12 @@ export class ExportAnalyzer {
 
     // Try each of the star imports
     for (const starExportedModule of astModule.starExportedModules) {
-      astEntity = this._tryGetExportOfAstModule(exportName, starExportedModule, visitedAstModules);
-
-      if (astEntity !== undefined) {
+      const astEntity: AstEntity | undefined = this._tryGetExportOfAstModule(
+        exportName,
+        starExportedModule,
+        visitedAstModules
+      );
+      if (astEntity) {
         if (starExportedModule.externalModulePath !== undefined) {
           // This entity was obtained from an external module, so return an AstImport instead
           const astSymbol: AstSymbol = astEntity as AstSymbol;
