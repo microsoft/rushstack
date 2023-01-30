@@ -146,7 +146,7 @@ importers:
 
   ../../apps/lockfile-explorer:
     specifiers:
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.90.0-pr3481.15
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -1303,7 +1303,7 @@ importers:
 
   ../../build-tests/rush-lib-declaration-paths-test:
     specifiers:
-      '@microsoft/rush-lib': workspace:*
+      '@microsoft/rush-lib': workspace:5.90.0-pr3481.15
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
