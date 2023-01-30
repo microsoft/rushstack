@@ -2,7 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { RushConstants } from '../../logic/RushConstants';
-import { Command, CommandLineConfiguration, IParameterJson, IPhase } from '../CommandLineConfiguration';
+import {
+  IPhasedCommandConfig,
+  CommandLineConfiguration,
+  IParameterJson,
+  IPhase,
+  Command
+} from '../CommandLineConfiguration';
 
 describe(CommandLineConfiguration.name, () => {
   it('Forbids a misnamed phase', () => {
@@ -260,6 +266,32 @@ describe(CommandLineConfiguration.name, () => {
       expect(phase).toBeDefined();
       const phaseParametersArray: unknown[] = Array.from(phase!.associatedParameters);
       expect(phaseParametersArray).toHaveLength(0);
+    });
+  });
+
+  describe('shellCommand in bulk command', () => {
+    it('get "custom-shell-command-echo" command', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'bulk',
+            name: 'custom-shell-command-echo',
+            summary: 'custom define bulk shellCommand echo',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            shellCommand: 'echo'
+          }
+        ]
+      });
+
+      const command: IPhasedCommandConfig | undefined = commandLineConfiguration.commands.get(
+        'custom-shell-command-echo'
+      ) as IPhasedCommandConfig;
+      expect(command).toBeDefined();
+      expect(command?.phases).toBeDefined();
+      const phase = [...command?.phases][0];
+      expect(phase.name).toEqual('custom-shell-command-echo');
+      expect(phase.shellCommand).toEqual('echo');
     });
   });
 });

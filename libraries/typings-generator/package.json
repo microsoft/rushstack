@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/typings-generator",
-  "version": "0.8.13",
+  "version": "0.8.18",
   "description": "This library provides functionality for automatically generating typings for non-TS files.",
   "keywords": [
     "dts",
@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "12.20.24",
     "chokidar": "~3.4.0",
     "glob": "~7.0.5"
   },
@@ -29,6 +28,15 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
-    "@types/glob": "7.1.1"
+    "@types/glob": "7.1.1",
+    "@types/node": "12.20.24"
+  },
+  "peerDependencies": {
+    "@types/node": "^12.20.24"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
   }
 }

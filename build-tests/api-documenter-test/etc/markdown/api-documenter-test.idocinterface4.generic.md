@@ -6,7 +6,7 @@
 
 make sure html entities are escaped in tables.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 generic: Generic<number>;

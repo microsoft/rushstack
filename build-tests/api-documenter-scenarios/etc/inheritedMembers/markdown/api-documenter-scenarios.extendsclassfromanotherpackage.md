@@ -6,12 +6,12 @@
 
 Some class that extends a class from another package. This base class is not in any API doc model.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class ExtendsClassFromAnotherPackage extends Extractor 
 ```
-<b>Extends:</b> Extractor
+**Extends:** Extractor
 
-<i>(Some inherited members may not be shown because they are not represented in the documentation.)</i>
+_(Some inherited members may not be shown because they are not represented in the documentation.)_
 

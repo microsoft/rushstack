@@ -18,7 +18,8 @@ import {
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
-import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
+import { BaseInstallManager } from '../base/BaseInstallManager';
+import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { IRushTempPackageJson } from '../../logic/base/BasePackage';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';

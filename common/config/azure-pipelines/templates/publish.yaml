@@ -1,6 +1,9 @@
 parameters:
   - name: VersionPolicyName
     type: string
+  - name: BranchName
+    type: string
+    default: $(Build.SourceBranchName)
 
 steps:
   - script: 'node common/scripts/install-run-rush.js publish --apply --publish --include-all --target-branch release/rush-pr3481 --add-commit-details --set-access-level public --tag pr3481'

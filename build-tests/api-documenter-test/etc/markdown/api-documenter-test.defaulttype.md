@@ -6,7 +6,7 @@
 
 Type parameter default type used by test case below.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface DefaultType 

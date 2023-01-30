@@ -23,6 +23,8 @@ export const splitWorkspacePnpmfileShimFilename: string = 'SplitWorkspaceGlobalP
 export const installRunScriptFilename: string = 'install-run.js';
 export const installRunRushScriptFilename: string = 'install-run-rush.js';
 export const installRunRushxScriptFilename: string = 'install-run-rushx.js';
+export const installRunRushPnpmScriptFilename: string = 'install-run-rush-pnpm.js';
+export const createLinksScriptFilename: string = 'create-links.js';
 
 /**
  * The path to the scripts folder in rush-lib/dist.

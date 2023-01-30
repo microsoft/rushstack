@@ -3,7 +3,8 @@
 
 import '../../test/mockRushCommandLineParser';
 
-import { PackageJsonUpdater, IPackageJsonUpdaterRushRemoveOptions } from '../../../logic/PackageJsonUpdater';
+import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
+import type { IPackageJsonUpdaterRushRemoveOptions } from '../../../logic/PackageJsonUpdaterTypes';
 import { RushCommandLineParser } from '../../RushCommandLineParser';
 import { RemoveAction } from '../RemoveAction';
 import { VersionMismatchFinderProject } from '../../../logic/versionMismatch/VersionMismatchFinderProject';

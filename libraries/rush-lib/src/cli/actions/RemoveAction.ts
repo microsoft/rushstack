@@ -7,8 +7,10 @@ import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@
 import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-
-import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
+import type {
+  IPackageForRushRemove,
+  IPackageJsonUpdaterRushRemoveOptions
+} from '../../logic/PackageJsonUpdaterTypes';
 
 export class RemoveAction extends BaseAddAndRemoveAction {
   protected readonly _allFlag: CommandLineFlagParameter;
@@ -46,10 +48,10 @@ export class RemoveAction extends BaseAddAndRemoveAction {
     });
   }
 
-  public getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushRemoveOptions {
+  public getUpdateOptions(): IPackageJsonUpdaterRushRemoveOptions {
     const projects: RushConfigurationProject[] = super.getProjects();
 
-    const packagesToRemove: PackageJsonUpdaterType.IPackageForRushRemove[] = [];
+    const packagesToRemove: IPackageForRushRemove[] = [];
 
     for (const specifiedPackageName of this.specifiedPackageNameList) {
       /**

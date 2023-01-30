@@ -39,6 +39,8 @@ items:
         items:
           - name: InjectedCustomItem
             uid: customUrl
+          - name: AbstractClass
+            uid: 'api-documenter-test!AbstractClass:class'
           - name: Constraint
             uid: 'api-documenter-test!Constraint:interface'
           - name: DecoratorExample

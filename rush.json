@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.80.0",
+  "rushVersion": "5.90.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "7.13.0",
+  "pnpmVersion": "7.26.1",
 
   // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
@@ -43,6 +43,14 @@
    * LTS versions: https://nodejs.org/en/download/releases/
    */
   "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0",
+
+  /**
+   * If the version check above fails, Rush will display a message showing the current
+   * node version and the supported version range. You can use this setting to provide
+   * additional instructions that will display below the warning, if there's a specific
+   * tool or script you'd like the user to use to get in line with the expected version.
+   */
+  // "nodeSupportedVersionInstructions": "Run 'nvs use' to switch to the expected node version.",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
@@ -184,7 +192,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]"
+    // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]",
 
     /**
      * The commit message to use when commiting changefiles during 'rush change --commit'
@@ -301,11 +309,14 @@
   // "hotfixChangeEnabled": false,
 
   /**
-   * This is an optional, but recommended, list of available tags that can be applied
-   * to projects. If this property is not specified, any tag is allowed. This
-   * list is useful in preventing typos when specifying tags for projects.
+   * This is an optional, but recommended, list of allowed tags that can be applied to Rush projects
+   * using the "tags" setting in this file.  This list is useful for preventing mistakes such as misspelling,
+   * and it also provides a centralized place to document your tags.  If "allowedProjectTags" list is
+   * not specified, then any valid tag is allowed.  A tag name must be one or more words
+   * separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits,
+   * ".", and "@" characters.
    */
-  // "allowedProjectTags": [ "apps", "Web", "tools" ],
+  // "allowedProjectTags": [ "tools", "frontend-team", "1.0.0-release" ],
 
   /**
    * (Required) This is the inventory of projects to be managed by Rush.
@@ -391,11 +402,13 @@
     //   // "versionPolicyName": "",
     //
     //   /**
-    //     * An optional set of custom tags that can be used to select this project. For example,
-    //     * adding "my-custom-tag" will allow this project to be selected by the
-    //     * command "rush list --only tag:my-custom-tag"
-    //     */
-    //   // "tags": ["apps", "web"]
+    //    * An optional set of custom tags that can be used to select this project.  For example,
+    //    * adding "my-custom-tag" will allow this project to be selected by the
+    //    * command "rush list --only tag:my-custom-tag".  The tag name must be one or more words
+    //    * separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits,
+    //    * ".", and "@" characters.
+    //    */
+    //   // "tags": [ "1.0.0-release", "frontend-team" ]
     // },
 
     // "apps" folder (alphabetical order)
@@ -428,6 +441,11 @@
     {
       "packageName": "@rushstack/lockfile-explorer-web",
       "projectFolder": "apps/lockfile-explorer-web",
+      "reviewCategory": "libraries"
+    },
+    {
+      "packageName": "@rushstack/rush-themed-ui",
+      "projectFolder": "libraries/rush-themed-ui",
       "reviewCategory": "libraries"
     },
     {
@@ -767,6 +785,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-lib-declaration-paths-test",
+      "projectFolder": "build-tests/rush-lib-declaration-paths-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-project-change-analyzer-test",
       "projectFolder": "build-tests/rush-project-change-analyzer-test",
       "reviewCategory": "tests",
@@ -1023,6 +1047,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+      "projectFolder": "webpack/webpack5-load-themed-styles-loader",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/hashed-folder-copy-plugin",
       "projectFolder": "webpack/hashed-folder-copy-plugin",
       "reviewCategory": "libraries",
@@ -1039,6 +1069,12 @@
       "projectFolder": "webpack/preserve-dynamic-require-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack-deep-imports-plugin",
+      "projectFolder": "webpack/webpack-deep-imports-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false // for now
     },
     {
       "packageName": "@rushstack/set-webpack-public-path-plugin",

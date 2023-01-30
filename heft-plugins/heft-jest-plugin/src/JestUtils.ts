@@ -5,7 +5,6 @@ import * as path from 'path';
 import { createHash } from 'crypto';
 import { default as JestResolver } from 'jest-resolve';
 import type { TransformOptions } from '@jest/transform';
-import type { Config } from '@jest/types';
 
 import { FileSystem } from '@rushstack/node-core-library';
 
@@ -15,21 +14,21 @@ export type CacheKeyOptions = Pick<TransformOptions, 'config' | 'configString' |
 // See: https://github.com/facebook/jest/blob/86e64611c98dd3a6656be27dc5c342d53f8e7c30/packages/jest-create-cache-key-function/src/index.ts#L35
 export type GetCacheKeyFunction = (
   sourceText: string,
-  sourcePath: Config.Path,
+  sourcePath: string,
   options: CacheKeyOptions
 ) => string;
 
 // See: https://github.com/facebook/jest/blob/3093c18c428d962eb959437b322c6a5b0ae0e7a2/packages/jest-config/src/utils.ts#L14
 export interface IResolveOptions {
-  rootDir: Config.Path;
+  rootDir: string;
   key: string;
-  filePath: Config.Path;
+  filePath: string;
   optional?: boolean;
 }
 
 // Adapted from Jest to expose non-exported resolve function
 // See: https://github.com/facebook/jest/blob/3093c18c428d962eb959437b322c6a5b0ae0e7a2/packages/jest-config/src/utils.ts#L58
-export const replaceRootDirInPath = (rootDir: Config.Path, filePath: Config.Path): string => {
+export const replaceRootDirInPath = (rootDir: string, filePath: string): string => {
   if (!/^<rootDir>/.test(filePath)) {
     return filePath;
   }
@@ -117,7 +116,7 @@ const getGlobalCacheKeyAsync = async (files: string[], values: string[]): Promis
 
 // See: https://github.com/facebook/jest/blob/86e64611c98dd3a6656be27dc5c342d53f8e7c30/packages/jest-create-cache-key-function/src/index.ts#L57
 const createCacheKeyFunctionInternal = (globalCacheKey: string): GetCacheKeyFunction => {
-  return (sourceText: string, sourcePath: Config.Path, options: CacheKeyOptions): string => {
+  return (sourceText: string, sourcePath: string, options: CacheKeyOptions): string => {
     const { config, instrument } = options;
     return createHash('md5')
       .update(globalCacheKey)

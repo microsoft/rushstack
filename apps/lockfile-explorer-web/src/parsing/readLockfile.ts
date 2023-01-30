@@ -3,6 +3,7 @@
 
 import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
 import { IDependencyType } from './LockfileDependency';
+import { Path } from '@lifaon/path';
 
 const serviceUrl: string = window.appContext.serviceUrl;
 
@@ -53,12 +54,25 @@ export interface ILockfilePackageType {
  *
  * @returns A list of all the LockfileEntries in the lockfile.
  */
-export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileEntry[] => {
+export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileEntry[] {
   const allEntries: LockfileEntry[] = [];
   const allEntriesById: { [key in string]: LockfileEntry } = {};
 
   const allImporters = [];
   if (lockfile.importers) {
+    // Find duplicate importer names
+    const baseNames = new Set<string>();
+    const duplicates = new Set<string>();
+    for (const importerKey of Object.keys(lockfile.importers)) {
+      const baseName = new Path(importerKey).basename();
+      if (baseName) {
+        if (baseNames.has(baseName)) {
+          duplicates.add(baseName);
+        }
+        baseNames.add(baseName);
+      }
+    }
+
     for (const [importerKey, importerValue] of Object.entries(lockfile.importers)) {
       // console.log('normalized importer key: ', new Path(importerKey).makeAbsolute('/').toString());
 
@@ -67,7 +81,8 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
         // entryId: normalizedPath,
         rawEntryId: importerKey,
         kind: LockfileEntryFilter.Project,
-        rawYamlData: importerValue
+        rawYamlData: importerValue,
+        duplicates
       });
       allImporters.push(importer);
       allEntries.push(importer);
@@ -97,7 +112,10 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
   for (const entry of allEntries) {
     for (const dependency of entry.dependencies) {
       // Peer dependencies do not have a matching entry
-      if (dependency.dependencyType === IDependencyType.PEER_DEPENDENCY) continue;
+      if (dependency.dependencyType === IDependencyType.PEER_DEPENDENCY) {
+        continue;
+      }
+
       const matchedEntry = allEntriesById[dependency.entryId];
       if (matchedEntry) {
         // Create a two-way link between the dependency and the entry
@@ -111,11 +129,11 @@ export const generateLockfileGraph = (lockfile: ILockfilePackageType): LockfileE
   }
 
   return allEntries;
-};
+}
 
-export const readLockfile = async (): Promise<LockfileEntry[]> => {
-  const response = await fetch(`${serviceUrl}/`);
+export async function readLockfileAsync(): Promise<LockfileEntry[]> {
+  const response = await fetch(`${serviceUrl}/api/lockfile`);
   const lockfile: ILockfilePackageType = await response.json();
 
   return generateLockfileGraph(lockfile);
-};
+}

@@ -96,7 +96,7 @@ function a2() { console.log('async-2'); }
   "/release/async-2.js.LICENSE.txt": "// @license BAZ
 // @license MIT
 ",
-  "/release/entry1.js": "// Begin Asset Hash=c996a1acfe7a5c08cedd48b71f07127db18d3edb374b4029ea1f52b5f3d91046
+  "/release/entry1.js": "// Begin Asset Hash=9b2f2c0d54fbb3ce1ede4408a8968452e80e92d384220ca8c3c87c535c02237b
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({});
 /************************************************************************/
@@ -216,8 +216,7 @@ function a2() { console.log('async-2'); }
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			}
-/******/ 			;
+/******/ 			};
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);
@@ -355,7 +354,7 @@ __webpack_require__.e(/* import() | async-1 */ 842).then(__webpack_require__.bin
 /******/ })()
 ;
 // End Asset",
-  "/release/entry2.js": "// Begin Asset Hash=d9cd061f467e4700fec1af86a474a67c4d7365ee55f0de51449a8822cf4cd44f
+  "/release/entry2.js": "// Begin Asset Hash=b6b2dec55f1385016da9824761fd9d3624d5835eb8e6178c678910e1e84f25b0
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({});
 /************************************************************************/
@@ -475,8 +474,7 @@ __webpack_require__.e(/* import() | async-1 */ 842).then(__webpack_require__.bin
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			}
-/******/ 			;
+/******/ 			};
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);

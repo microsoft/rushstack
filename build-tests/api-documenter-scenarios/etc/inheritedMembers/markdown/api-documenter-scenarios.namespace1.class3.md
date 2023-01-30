@@ -5,7 +5,7 @@
 ## Namespace1.Class3 class
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 class Class3 

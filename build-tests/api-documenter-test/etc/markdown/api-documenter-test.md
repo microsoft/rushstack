@@ -19,6 +19,12 @@ This project tests various documentation generation scenarios and doc comment sy
 |  [Generic](./api-documenter-test.generic.md) | Generic class. |
 |  [SystemEvent](./api-documenter-test.systemevent.md) | <p>A class used to exposed events.</p> |
 
+## Abstract Classes
+
+|  Abstract Class | Description |
+|  --- | --- |
+|  [AbstractClass](./api-documenter-test.abstractclass.md) | Some abstract class with abstract members. |
+
 ## Enumerations
 
 |  Enumeration | Description |

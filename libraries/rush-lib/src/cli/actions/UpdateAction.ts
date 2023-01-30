@@ -4,7 +4,7 @@
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseInstallAction } from './BaseInstallAction';
-import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
+import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';

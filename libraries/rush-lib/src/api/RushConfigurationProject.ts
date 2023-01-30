@@ -7,10 +7,11 @@ import { JsonFile, IPackageJson, FileSystem, FileConstants, JsonSyntax } from '@
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
-import { PackageJsonEditor } from './PackageJsonEditor';
+import type { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageNameParsers } from './PackageNameParsers';
 import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier';
+import { SaveCallbackPackageJsonEditor } from './SaveCallbackPackageJsonEditor';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -62,6 +63,7 @@ export class RushConfigurationProject {
   private _versionPolicy: VersionPolicy | undefined = undefined;
   private _dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
   private _consumingProjects: Set<RushConfigurationProject> | undefined = undefined;
+  private _packageJson: IPackageJson;
 
   /**
    * The name of the NPM package.  An error is reported if this name is not
@@ -122,7 +124,9 @@ export class RushConfigurationProject {
   /**
    * The parsed NPM "package.json" file from projectFolder.
    */
-  public readonly packageJson: IPackageJson;
+  public get packageJson(): IPackageJson {
+    return this._packageJson;
+  }
 
   /**
    * A useful wrapper around the package.json file for making modifications
@@ -215,7 +219,7 @@ export class RushConfigurationProject {
     const packageJsonFilename: string = path.join(this.projectFolder, FileConstants.PackageJson);
 
     try {
-      this.packageJson = JsonFile.load(packageJsonFilename, { jsonSyntax: JsonSyntax.Strict });
+      this._packageJson = JsonFile.load(packageJsonFilename, { jsonSyntax: JsonSyntax.Strict });
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(
@@ -265,7 +269,15 @@ export class RushConfigurationProject {
       );
     }
 
-    this.packageJsonEditor = PackageJsonEditor.fromObject(this.packageJson, packageJsonFilename);
+    this.packageJsonEditor = SaveCallbackPackageJsonEditor.fromObjectWithCallback({
+      object: this.packageJson,
+      filename: packageJsonFilename,
+      onSaved: (newObject) => {
+        // Just update the in-memory copy, don't bother doing the validation again
+        this._packageJson = newObject;
+        this._dependencyProjects = undefined; // Reset the cached dependency projects
+      }
+    });
 
     this.tempProjectName = tempProjectName;
 

@@ -73,6 +73,4 @@ export class TypingsGenerator {
     readonly sourceFolderPath: string;
 }
 
-// (No @packageDocumentation comment for this package)
-
 ```
