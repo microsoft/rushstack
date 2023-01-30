@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Thu, 26 Jan 2023 02:55:10 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 16:22:31 GMT and should not be manually modified.
+
+## 1.12.1
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 1.12.0
+Mon, 30 Jan 2023 00:55:44 GMT
+
+### Minor changes
+
+- Upgrade Jest from `~27.4.2` to `~29.3.1`
 
 ## 1.11.14
 Thu, 26 Jan 2023 02:55:10 GMT

@@ -6,7 +6,7 @@
 
 Some protected property.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 protected protectedProperty: string;

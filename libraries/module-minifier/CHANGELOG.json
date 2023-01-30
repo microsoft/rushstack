@@ -2,6 +2,56 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/module-minifier_v0.2.0",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Move the @types/node dependency to an optional peerDependency."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.49",
+      "tag": "@rushstack/module-minifier_v0.1.49",
+      "date": "Mon, 30 Jan 2023 00:55:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.1.48`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.48",
+      "tag": "@rushstack/module-minifier_v0.1.48",
+      "date": "Sat, 28 Jan 2023 01:22:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure updates to the version of Terser trigger a hash change."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.47",
       "tag": "@rushstack/module-minifier_v0.1.47",
       "date": "Thu, 26 Jan 2023 02:55:10 GMT",

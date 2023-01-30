@@ -6,7 +6,7 @@
 
 Some abstract property.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 protected abstract property: number;

@@ -66,8 +66,11 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       workerScriptPath: require.resolve('./MinifierWorker')
     });
 
+    const { version: terserVersion } = require('terser/package.json');
+
     this._configHash = createHash('sha256')
       .update(WorkerPoolMinifier.name, 'utf8')
+      .update(`terser@${terserVersion}`)
       .update(serialize(terserOptions))
       .digest('base64');
 

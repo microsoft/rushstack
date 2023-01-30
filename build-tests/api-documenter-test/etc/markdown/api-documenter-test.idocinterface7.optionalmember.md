@@ -6,12 +6,12 @@
 
 Description of optionalMember
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 optionalMember?(): any;
 ```
-<b>Returns:</b>
+**Returns:**
 
 any
 

@@ -10,7 +10,7 @@
     "_phase:build": "node build.js"
   },
   "dependencies": {
-    "@types/jest": "27.4.0",
+    "@types/jest": "29.2.5",
     "@types/long": "4.0.0",
     "long": "^4.0.0"
   },

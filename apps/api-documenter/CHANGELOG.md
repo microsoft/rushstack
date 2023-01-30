@@ -1,6 +1,23 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 26 Jan 2023 02:55:10 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 16:22:30 GMT and should not be manually modified.
+
+## 7.21.2
+Mon, 30 Jan 2023 16:22:30 GMT
+
+_Version update only_
+
+## 7.21.1
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 7.21.0
+Sun, 29 Jan 2023 20:09:58 GMT
+
+### Minor changes
+
+- Fix an issue where `<b>`/`<i>` tags sometimes interfered with parsing of other Markdown on the same line; italics and boldface are now emitted using `*` and `_`
 
 ## 7.20.1
 Thu, 26 Jan 2023 02:55:10 GMT

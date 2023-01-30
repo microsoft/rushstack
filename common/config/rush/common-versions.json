@@ -4,6 +4,7 @@
  */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json",
+
   /**
    * A table that specifies a "preferred version" for a given NPM package.  This feature is typically used
    * to hold back an indirect dependency to a specific older version, or to reduce duplication of indirect dependencies.
@@ -33,6 +34,7 @@
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "~8.7.0"
   },
+
   /**
    * When set to true, for all projects in the repo, all dependencies will be automatically added as preferredVersions,
    * except in cases where different projects specify different version ranges for a given dependency.  For older
@@ -46,6 +48,7 @@
    * will recalculate all version selections.
    */
   // "implicitlyPreferredVersions": false,
+
   /**
    * The "rush check" command can be used to enforce that every project in the repo must specify
    * the same SemVer range for a given dependency.  However, sometimes exceptions are needed.
