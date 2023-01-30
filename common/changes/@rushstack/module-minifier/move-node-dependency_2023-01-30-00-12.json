@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Move the @types/node dependency to an optional peerDependency.",
+      "type": "minor",
+      "packageName": "@rushstack/module-minifier"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier",
+  "email": "iclanton@users.noreply.github.com"
+}

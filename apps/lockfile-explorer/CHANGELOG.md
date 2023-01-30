@@ -1,6 +1,67 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 00:55:44 GMT and should not be manually modified.
+
+## 1.0.3
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 1.0.2
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 1.0.1
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 1.0.0
+Wed, 25 Jan 2023 03:01:43 GMT
+
+### Breaking changes
+
+- Initial feature-complete release of Lockfile Explorer
+
+## 0.2.2
+Tue, 24 Jan 2023 00:16:54 GMT
+
+### Patches
+
+- Fix an issue with the tab component
+
+## 0.2.1
+Sun, 22 Jan 2023 20:37:08 GMT
+
+### Patches
+
+- Fix an issue where the upgrade notice wasn't displayed until after pressing CTRL+C
+- Fix a regression where some CSS styles were not being loaded properly
+
+## 0.2.0
+Sat, 21 Jan 2023 04:36:33 GMT
+
+### Minor changes
+
+- Add "lfx" as an alias for the "lockfile-explorer" shell command
+
+### Patches
+
+- Add some basic command-line help and improve some message strings
+- Add support for rush components
+
+## 0.1.8
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.1.7
+Wed, 18 Jan 2023 05:02:16 GMT
+
+### Patches
+
+- Print an upgrade notice when there is a newer release of the @rushstack/lockfile-explorer package
 
 ## 0.1.6
 Tue, 20 Dec 2022 01:18:22 GMT

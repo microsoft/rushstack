@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1010,
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -184,6 +184,7 @@
           ],
           "fileUrlPath": "src/includeForgottenExports/internal1.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "AnotherDuplicateName_2",
           "preserveMemberOrder": false,
           "members": [],
@@ -201,6 +202,7 @@
           ],
           "fileUrlPath": "src/includeForgottenExports/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "AnotherDuplicateName",
           "preserveMemberOrder": false,
           "members": [],
@@ -270,6 +272,7 @@
           ],
           "fileUrlPath": "src/includeForgottenExports/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ForgottenExport1",
           "preserveMemberOrder": false,
           "members": [
@@ -316,7 +319,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "implementsTokenRanges": []
@@ -373,6 +377,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "ForgottenExport5",
               "preserveMemberOrder": false,
               "members": [],
@@ -392,6 +397,7 @@
           ],
           "fileUrlPath": "src/includeForgottenExports/internal2.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ForgottenExport6",
           "preserveMemberOrder": false,
           "members": [],
@@ -419,6 +425,7 @@
               ],
               "fileUrlPath": "src/includeForgottenExports/internal2.ts",
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "ForgottenExport6",
               "preserveMemberOrder": false,
               "members": [],
@@ -626,6 +633,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "ForgottenExport3",
               "preserveMemberOrder": false,
               "members": [],

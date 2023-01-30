@@ -1,6 +1,56 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 16 Dec 2022 19:34:26 GMT and should not be manually modified.
+This log was last generated on Sun, 29 Jan 2023 20:10:17 GMT and should not be manually modified.
+
+## 5.90.0
+Sun, 29 Jan 2023 20:10:17 GMT
+
+### Updates
+
+- Allow "shellCommand" to be optionally specified for bulk custom commands, so that a centralized script can be used instead of invoking package.json scripts (GitHub #3819)
+
+## 5.89.1
+Thu, 26 Jan 2023 02:55:30 GMT
+
+### Updates
+
+- Fix an issue with `rush add` where the approved packages files aren't updated.
+- Revert generation of scripts in the Git hooks folder due to various git-related issues
+- Upgrade to webpack 5.75.0
+
+## 5.89.0
+Tue, 24 Jan 2023 22:30:06 GMT
+
+### Updates
+
+- Fix linking error due to PNPM v7 local install path breaking change
+- Introduce "dependsOnAdditionalFiles" configuration option to operations in rush-project.json. This option allows to pass glob (minimatch) patterns pointing to files outside of .git repository. If provided, the hash values of these files will become part of the final hash when reading and writing from cache.
+- Use getRepoStateAsync to optimize performance of calculating repository state.
+- Generate scripts in the Git hooks folder referring to the actual hook implementations in-place in the Rush `common/git-hooks/` folder instead of copying the scripts to the Git hooks folder.
+
+## 5.88.2
+Sun, 22 Jan 2023 04:18:44 GMT
+
+### Updates
+
+- Fix a regression where the 'dist/scripts' folder name was named 'dist/undefined'
+
+## 5.88.1
+Wed, 18 Jan 2023 22:44:31 GMT
+
+### Updates
+
+- Fix an issue where `create-scripts.js` does not exist during `rush deploy`.
+- Add install-run-rush-pnpm.js script
+- Update JSZip to 3.8.0.
+
+## 5.88.0
+Thu, 22 Dec 2022 20:11:58 GMT
+
+### Updates
+
+- Improve the experience during a rush operation when the cached credentials have expired. Now, a warning is printed instead of an error being thrown and the operation halted.
+- (BREAKING API CHANGE IN @rushstack/rush-azure-storage-build-cache-plugin) Change the signature of `AzureAuthenticationBase.tryGetCachedCredentialAsync` to optionally take an object describing the behavior when credentials have expired. The behavior of the function without an argument is unchanged.
 
 ## 5.87.0
 Fri, 16 Dec 2022 19:34:26 GMT

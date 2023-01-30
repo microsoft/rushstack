@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.34.0",
+      "tag": "@microsoft/api-extractor_v7.34.0",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.8",
+      "tag": "@microsoft/api-extractor_v7.33.8",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Use ts.getCheckFlags to fix TS 5.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.33.7",
       "tag": "@microsoft/api-extractor_v7.33.7",
       "date": "Fri, 09 Dec 2022 16:18:28 GMT",

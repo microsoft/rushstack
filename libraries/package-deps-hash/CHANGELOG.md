@@ -1,6 +1,40 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 00:55:44 GMT and should not be manually modified.
+
+## 4.0.4
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 4.0.3
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 4.0.2
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 4.0.1
+Tue, 24 Jan 2023 00:16:54 GMT
+
+### Patches
+
+- Fix bug in parseGitHashObject when 0 hashes are expected.
+
+## 4.0.0
+Fri, 20 Jan 2023 16:19:50 GMT
+
+### Breaking changes
+
+- Add getRepoStateAsync API for faster repository state calculation. Remove synchronous getRepoState API.
+
+## 3.2.67
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 3.2.66
 Tue, 20 Dec 2022 01:18:22 GMT

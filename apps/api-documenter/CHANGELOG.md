@@ -1,6 +1,35 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 00:55:44 GMT and should not be manually modified.
+
+## 7.21.1
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 7.21.0
+Sun, 29 Jan 2023 20:09:58 GMT
+
+### Minor changes
+
+- Fix an issue where `<b>`/`<i>` tags sometimes interfered with parsing of other Markdown on the same line; italics and boldface are now emitted using `*` and `_`
+
+## 7.20.1
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 7.20.0
+Wed, 25 Jan 2023 07:26:55 GMT
+
+### Minor changes
+
+- Display the 'abstract' modifier for classes and members (GitHub #3661)
+
+## 7.19.28
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 7.19.27
 Tue, 20 Dec 2022 01:18:22 GMT

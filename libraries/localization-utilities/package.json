@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/localization-utilities",
-  "version": "0.8.38",
+  "version": "0.8.42",
   "description": "This plugin contains some useful functions for localization.",
   "main": "lib/index.js",
   "typings": "dist/localization-utilities.d.ts",

@@ -6,14 +6,14 @@
 
 Some interface that extends an interface-like type alias as well as another interface.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias, IInterface1 
 ```
-<b>Extends:</b> [IInterfaceLikeTypeAlias](./api-documenter-scenarios.iinterfaceliketypealias.md)<!-- -->, [IInterface1](./api-documenter-scenarios.iinterface1.md)
+**Extends:** [IInterfaceLikeTypeAlias](./api-documenter-scenarios.iinterfaceliketypealias.md)<!-- -->, [IInterface1](./api-documenter-scenarios.iinterface1.md)
 
-<i>(Some inherited members may not be shown because they are not represented in the documentation.)</i>
+_(Some inherited members may not be shown because they are not represented in the documentation.)_
 
 ## Properties
 

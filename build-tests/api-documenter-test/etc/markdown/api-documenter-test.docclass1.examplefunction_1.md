@@ -6,7 +6,7 @@
 
 This is also an overloaded function.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 exampleFunction(x: number): number;
@@ -18,7 +18,7 @@ exampleFunction(x: number): number;
 |  --- | --- | --- |
 |  x | number | the number |
 
-<b>Returns:</b>
+**Returns:**
 
 number
 

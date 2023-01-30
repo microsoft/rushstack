@@ -6,7 +6,7 @@
 
 Some overload.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 someOverload(x: string): void;
@@ -18,7 +18,7 @@ someOverload(x: string): void;
 |  --- | --- | --- |
 |  x | string |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

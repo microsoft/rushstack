@@ -6,7 +6,7 @@
 
 Interface without inline tag to test custom TOC with injection
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IDocInterface6 

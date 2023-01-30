@@ -5,12 +5,12 @@
 ## Class2 class
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class Class2<T> extends Namespace1.Class3 
 ```
-<b>Extends:</b> [Namespace1.Class3](./api-documenter-scenarios.namespace1.class3.md)
+**Extends:** [Namespace1.Class3](./api-documenter-scenarios.namespace1.class3.md)
 
 ## Properties
 

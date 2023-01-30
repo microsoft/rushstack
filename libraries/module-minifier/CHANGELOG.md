@@ -1,6 +1,35 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 00:55:44 GMT and should not be manually modified.
+
+## 0.1.49
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.1.48
+Sat, 28 Jan 2023 01:22:02 GMT
+
+### Patches
+
+- Ensure updates to the version of Terser trigger a hash change.
+
+## 0.1.47
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.1.46
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.1.45
+Wed, 18 Jan 2023 22:44:12 GMT
+
+### Patches
+
+- Update to terser 5.16.1
 
 ## 0.1.44
 Tue, 20 Dec 2022 01:18:22 GMT

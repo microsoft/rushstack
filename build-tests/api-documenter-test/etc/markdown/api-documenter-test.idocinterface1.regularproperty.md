@@ -6,7 +6,7 @@
 
 Does something
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 regularProperty: SystemEvent;

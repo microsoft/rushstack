@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Move the @types/node dependency to an optional peerDependency.",
+      "type": "minor",
+      "packageName": "@rushstack/typings-generator"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator",
+  "email": "iclanton@users.noreply.github.com"
+}

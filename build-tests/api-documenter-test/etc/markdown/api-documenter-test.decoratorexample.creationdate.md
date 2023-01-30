@@ -6,12 +6,12 @@
 
 The date when the record was created.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 creationDate: Date;
 ```
-<b>Decorators:</b>
+**Decorators:**
 
 `@jsonSerialized`
 

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.87.0",
+  "version": "5.90.0",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -35,6 +35,7 @@
     "builtin-modules": "~3.1.0",
     "cli-table": "~0.3.1",
     "colors": "~1.2.1",
+    "dependency-path": "~9.2.8",
     "figures": "3.0.0",
     "git-repo-info": "~2.1.0",
     "glob-escape": "~0.0.2",
@@ -43,7 +44,7 @@
     "ignore": "~5.1.6",
     "inquirer": "~7.3.3",
     "js-yaml": "~3.13.1",
-    "jszip": "~3.7.1",
+    "jszip": "~3.8.0",
     "lodash": "~4.17.15",
     "node-fetch": "2.6.7",
     "npm-check": "~6.0.1",
@@ -85,7 +86,7 @@
     "@types/tar": "6.1.1",
     "@types/normalize-path": "~3.0.0",
     "@types/webpack-env": "1.13.0",
-    "webpack": "~5.68.0"
+    "webpack": "~5.75.0"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

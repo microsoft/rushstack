@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/terminal",
-  "version": "0.3.88",
+  "version": "0.3.92",
   "description": "User interface primitives for console applications",
   "main": "lib/index.js",
   "typings": "dist/terminal.d.ts",
@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "12.20.24",
     "wordwrap": "~1.0.0"
   },
   "devDependencies": {
@@ -26,6 +25,15 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/wordwrap": "~1.0.0",
-    "colors": "~1.2.1"
+    "colors": "~1.2.1",
+    "@types/node": "12.20.24"
+  },
+  "peerDependencies": {
+    "@types/node": "^12.20.24"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
   }
 }

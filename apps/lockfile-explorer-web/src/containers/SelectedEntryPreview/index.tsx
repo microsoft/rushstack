@@ -11,6 +11,7 @@ import {
   removeBookmark,
   selectCurrentEntry
 } from '../../store/slices/entrySlice';
+import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
 export const SelectedEntryPreview = (): JSX.Element => {
   const selectedEntry = useAppSelector(selectCurrentEntry);
@@ -39,20 +40,20 @@ export const SelectedEntryPreview = (): JSX.Element => {
   const renderButtonRow = (): JSX.Element => {
     return (
       <div className={styles.NavigationButtonRow}>
-        <button disabled={entryStack.length <= 1} onClick={pop}>
+        <Button disabled={entryStack.length <= 1} onClick={pop}>
           Back
-        </button>
-        <button disabled={entryForwardStack.length === 0} onClick={forward}>
+        </Button>
+        <Button disabled={entryForwardStack.length === 0} onClick={forward}>
           Forward
-        </button>
+        </Button>
         {isBookmarked ? (
-          <button onClick={deleteEntry} disabled={!selectedEntry}>
+          <Button onClick={deleteEntry} disabled={!selectedEntry}>
             Remove&nbsp;Bookmark
-          </button>
+          </Button>
         ) : (
-          <button onClick={bookmark} disabled={!selectedEntry}>
+          <Button onClick={bookmark} disabled={!selectedEntry}>
             Add&nbsp;Bookmark
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -62,7 +63,9 @@ export const SelectedEntryPreview = (): JSX.Element => {
     return (
       <div className={styles.SelectedEntryCard}>
         <div className={styles.SelectedEntryBookmarkRow}>
-          <h5>No Entry Selected</h5>
+          <Text type="h5" bold>
+            No Entry Selected
+          </Text>
           {renderButtonRow()}
         </div>
       </div>
@@ -71,17 +74,21 @@ export const SelectedEntryPreview = (): JSX.Element => {
 
   return (
     <div className={styles.SelectedEntryCard}>
-      <div className={styles.SelectedEntryBookmarkRow}>
-        <div className={styles.SelectedEntryHeader}>
-          <h5>Selected entry:</h5>
-          <span>{selectedEntry.displayText}</span>
+      <ScrollArea>
+        <div className={styles.SelectedEntryBookmarkRow}>
+          <div className={styles.SelectedEntryHeader}>
+            <Text type="h5" bold>
+              Selected entry:
+            </Text>
+            <span>{selectedEntry.displayText}</span>
+          </div>
+          {renderButtonRow()}
         </div>
-        {renderButtonRow()}
-      </div>
-      <div>
-        <p>Package Entry: {selectedEntry.rawEntryId}</p>
-        <p>Package JSON path: {selectedEntry.packageJsonFolderPath}</p>
-      </div>
+        <div>
+          <Text type="p">Package Entry: {selectedEntry.rawEntryId}</Text>
+          <Text type="p">Package JSON path: {selectedEntry.packageJsonFolderPath}</Text>
+        </div>
+      </ScrollArea>
     </div>
   );
 };

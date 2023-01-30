@@ -6,7 +6,7 @@
 
 Adds an handler for the event.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 addHandler(handler: () => void): void;
@@ -18,7 +18,7 @@ addHandler(handler: () => void): void;
 |  --- | --- | --- |
 |  handler | () =&gt; void |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

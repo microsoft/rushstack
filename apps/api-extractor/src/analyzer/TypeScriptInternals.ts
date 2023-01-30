@@ -48,7 +48,7 @@ export class TypeScriptInternals {
     if (
       // eslint-disable-next-line no-bitwise
       symbol.flags & ts.SymbolFlags.Transient &&
-      (symbol as any).checkFlags === (ts as any).CheckFlags.Late
+      (ts as any).getCheckFlags(symbol) === (ts as any).CheckFlags.Late
     ) {
       return true;
     }
