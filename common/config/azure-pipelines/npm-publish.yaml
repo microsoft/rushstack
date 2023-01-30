@@ -2,7 +2,7 @@ pool:
   vmImage: 'ubuntu-latest'
 variables:
   - name: NodeVersion
-    value: 14
+    value: 18
   - name: FORCE_COLOR
     value: 1
   - name: SourceBranch
