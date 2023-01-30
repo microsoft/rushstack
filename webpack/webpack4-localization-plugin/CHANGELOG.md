@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack4-localization-plugin
 
-This log was last generated on Mon, 30 Jan 2023 00:55:44 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 16:22:30 GMT and should not be manually modified.
+
+## 0.16.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Move the @types/node dependency to an optional peerDependency.
 
 ## 0.15.45
 Mon, 30 Jan 2023 00:55:44 GMT
