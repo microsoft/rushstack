@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Upgrade Jest from `~27.4.2` to `~29.3.1`",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}
