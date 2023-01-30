@@ -18,7 +18,7 @@ function createWebpackConfig({ production }) {
     module: {
       rules: [
         {
-          test: /\.css$/,
+          test: /\.s?css$/,
           exclude: /node_modules/,
           use: [
             // Creates `style` nodes from JS strings
