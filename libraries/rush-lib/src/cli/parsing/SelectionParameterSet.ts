@@ -19,6 +19,7 @@ import {
 } from '../../logic/selectors/GitChangedProjectSelectorParser';
 import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser';
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
+import { SplitWorkspaceProjectSelectorParser } from '../../logic/selectors/SplitWorkspaceProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 
 /**
@@ -61,6 +62,7 @@ export class SelectionParameterSet {
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration, gitOptions));
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('split', new SplitWorkspaceProjectSelectorParser(rushConfiguration));
 
     this._selectorParserByScope = selectorParsers;
 
