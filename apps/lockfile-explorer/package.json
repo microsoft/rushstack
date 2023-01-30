@@ -37,7 +37,7 @@
     "_phase:test": "heft test --no-build"
   },
   "devDependencies": {
-    "@microsoft/rush-lib": "workspace:*",
+    "@microsoft/rush-lib": "workspace:5.90.0-pr3481.15",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
