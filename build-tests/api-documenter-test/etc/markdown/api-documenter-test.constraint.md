@@ -6,7 +6,7 @@
 
 Type parameter constraint used by test case below.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface Constraint 

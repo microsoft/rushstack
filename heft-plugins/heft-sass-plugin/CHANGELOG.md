@@ -1,6 +1,33 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Jan 2023 01:23:23 GMT and should not be manually modified.
+
+## 0.8.0
+Tue, 31 Jan 2023 01:23:23 GMT
+
+### Minor changes
+
+- Add "preserveSCSSExtension" flag for backwards compatibility with build flows that cannot be expected to alter import resolution.
+
+## 0.7.10
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 0.7.9
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.7.8
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.7.7
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
 
 ## 0.7.6
 Wed, 18 Jan 2023 22:44:12 GMT

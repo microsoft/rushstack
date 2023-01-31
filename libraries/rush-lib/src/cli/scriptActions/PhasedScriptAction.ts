@@ -353,7 +353,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     terminal.write('Analyzing repo state... ');
     const repoStateStopwatch: Stopwatch = new Stopwatch();
     repoStateStopwatch.start();
-    projectChangeAnalyzer._ensureInitialized(terminal);
+    await projectChangeAnalyzer._ensureInitializedAsync(terminal);
     repoStateStopwatch.stop();
     terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
     terminal.writeLine();

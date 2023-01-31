@@ -1,6 +1,33 @@
 # Change Log - @rushstack/webpack4-module-minifier-plugin
 
-This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 16:22:30 GMT and should not be manually modified.
+
+## 0.10.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Move the @types/node dependency to an optional peerDependency.
+
+## 0.9.48
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.9.47
+Sat, 28 Jan 2023 01:22:02 GMT
+
+_Version update only_
+
+## 0.9.46
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.9.45
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
 
 ## 0.9.44
 Wed, 18 Jan 2023 22:44:12 GMT

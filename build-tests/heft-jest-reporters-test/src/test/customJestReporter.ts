@@ -6,7 +6,7 @@ import type {
   Test,
   TestResult,
   AggregatedResult,
-  Context,
+  TestContext,
   ReporterOnStartOptions
 } from '@jest/reporters';
 
@@ -28,7 +28,7 @@ module.exports = class CustomJestReporter implements Reporter {
     }
   }
 
-  public onRunComplete(contexts: Set<Context>, results: AggregatedResult): void | Promise<void> {
+  public onRunComplete(contexts: Set<TestContext>, results: AggregatedResult): void | Promise<void> {
     console.log('################# Completing test run #################');
     console.log();
   }

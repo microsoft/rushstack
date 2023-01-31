@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 16:22:30 GMT and should not be manually modified.
+
+## 7.34.1
+Mon, 30 Jan 2023 16:22:30 GMT
+
+_Version update only_
+
+## 7.34.0
+Wed, 25 Jan 2023 07:26:55 GMT
+
+### Minor changes
+
+- Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)
 
 ## 7.33.8
 Wed, 18 Jan 2023 22:44:12 GMT

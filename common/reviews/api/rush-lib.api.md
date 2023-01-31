@@ -449,6 +449,7 @@ export interface IPhase {
     isSynthetic: boolean;
     logFilenameIdentifier: string;
     name: string;
+    shellCommand?: string;
 }
 
 // @beta
@@ -656,6 +657,8 @@ export class PackageJsonDependency {
 
 // @public (undocumented)
 export class PackageJsonEditor {
+    // @internal
+    protected constructor(filepath: string, data: IPackageJson);
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
     get dependencyList(): ReadonlyArray<PackageJsonDependency>;
@@ -740,7 +743,7 @@ export class ProjectChangeAnalyzer {
     // Warning: (ae-forgotten-export) The symbol "IRawRepoState" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
-    _ensureInitialized(terminal: ITerminal): IRawRepoState | undefined;
+    _ensureInitializedAsync(terminal: ITerminal): Promise<IRawRepoState | undefined>;
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
@@ -881,7 +884,7 @@ export class RushConfigurationProject {
     get isMainProject(): boolean;
     // @deprecated
     get localDependencyProjects(): ReadonlyArray<RushConfigurationProject>;
-    readonly packageJson: IPackageJson;
+    get packageJson(): IPackageJson;
     // @beta
     readonly packageJsonEditor: PackageJsonEditor;
     readonly packageName: string;

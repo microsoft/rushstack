@@ -1,0 +1,40 @@
+### YamlMime:TSType
+name: AbstractClass
+uid: 'api-documenter-test!AbstractClass:class'
+package: api-documenter-test!
+fullName: AbstractClass
+summary: Some abstract class with abstract members.
+remarks: ''
+example: []
+isPreview: false
+isDeprecated: false
+type: class
+properties:
+  - name: property
+    uid: 'api-documenter-test!AbstractClass#property:member'
+    package: api-documenter-test!
+    fullName: property
+    summary: Some abstract property.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'protected abstract property: number;'
+      return:
+        type: number
+methods:
+  - name: method()
+    uid: 'api-documenter-test!AbstractClass#method:member(1)'
+    package: api-documenter-test!
+    fullName: method()
+    summary: Some abstract method.
+    remarks: ''
+    example: []
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'abstract method(): void;'
+      return:
+        type: void
+        description: ''

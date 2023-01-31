@@ -3,6 +3,7 @@
 
 import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
 import { IDependencyType } from './LockfileDependency';
+import { Path } from '@lifaon/path';
 
 const serviceUrl: string = window.appContext.serviceUrl;
 
@@ -59,6 +60,19 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
 
   const allImporters = [];
   if (lockfile.importers) {
+    // Find duplicate importer names
+    const baseNames = new Set<string>();
+    const duplicates = new Set<string>();
+    for (const importerKey of Object.keys(lockfile.importers)) {
+      const baseName = new Path(importerKey).basename();
+      if (baseName) {
+        if (baseNames.has(baseName)) {
+          duplicates.add(baseName);
+        }
+        baseNames.add(baseName);
+      }
+    }
+
     for (const [importerKey, importerValue] of Object.entries(lockfile.importers)) {
       // console.log('normalized importer key: ', new Path(importerKey).makeAbsolute('/').toString());
 
@@ -67,7 +81,8 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
         // entryId: normalizedPath,
         rawEntryId: importerKey,
         kind: LockfileEntryFilter.Project,
-        rawYamlData: importerValue
+        rawYamlData: importerValue,
+        duplicates
       });
       allImporters.push(importer);
       allEntries.push(importer);

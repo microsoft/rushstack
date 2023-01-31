@@ -6,12 +6,12 @@
 
 Construct signature
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 new (): IDocInterface1;
 ```
-<b>Returns:</b>
+**Returns:**
 
 [IDocInterface1](./api-documenter-test.idocinterface1.md)
 

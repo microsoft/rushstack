@@ -1,6 +1,30 @@
 # Change Log - @rushstack/webpack-preserve-dynamic-require-plugin
 
-This log was last generated on Wed, 18 Jan 2023 22:44:12 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Jan 2023 16:22:30 GMT and should not be manually modified.
+
+## 0.10.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Move the @types/node dependency to an optional peerDependency.
+
+## 0.9.52
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.9.51
+Thu, 26 Jan 2023 02:55:10 GMT
+
+### Patches
+
+- Upgrade to webpack 5.75.0
+
+## 0.9.50
+Wed, 25 Jan 2023 07:26:56 GMT
+
+_Version update only_
 
 ## 0.9.49
 Wed, 18 Jan 2023 22:44:12 GMT

@@ -181,7 +181,9 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
       transpiledTextWithSourceMap = transpiledText + sourceMapComment;
     }
 
-    return transpiledTextWithSourceMap;
+    return {
+      code: transpiledTextWithSourceMap
+    };
   }
 
   private static _waitForTranspiledFile(sourcePath: string, transpiledPath: string): void {
@@ -311,7 +313,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
   /**
    * @override
    */
-  public getCacheKey(sourceText: string, sourcePath: Config.Path, options: TransformOptions): string {
+  public getCacheKey(sourceText: string, sourcePath: string, options: TransformOptions): string {
     const heftJestDataFile: IHeftJestDataFileJson = BuildTransformer._getHeftJestDataFileJson(
       options.config.rootDir
     );
@@ -327,7 +329,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
    */
   public async getCacheKeyAsync(
     sourceText: string,
-    sourcePath: Config.Path,
+    sourcePath: string,
     options: TransformOptions
   ): Promise<string> {
     const heftJestDataFile: IHeftJestDataFileJson = await BuildTransformer._getHeftJestDataFileJsonAsync(
@@ -343,7 +345,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
   /**
    * @override
    */
-  public process(sourceText: string, sourcePath: Config.Path, options: TransformOptions): TransformedSource {
+  public process(sourceText: string, sourcePath: string, options: TransformOptions): TransformedSource {
     const jestOptions: Config.ProjectConfig = options.config;
     const heftJestDataFile: IHeftJestDataFileJson = BuildTransformer._getHeftJestDataFileJson(
       jestOptions.rootDir
@@ -394,7 +396,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
    */
   public async processAsync(
     sourceText: string,
-    sourcePath: Config.Path,
+    sourcePath: string,
     options: TransformOptions
   ): Promise<TransformedSource> {
     const jestOptions: Config.ProjectConfig = options.config;

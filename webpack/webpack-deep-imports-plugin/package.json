@@ -27,7 +27,7 @@
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
-    "webpack": "~5.68.0"
+    "webpack": "~5.75.0"
   },
   "sideEffects": false,
   "dependencies": {

@@ -16,7 +16,7 @@ export const assetsFolderPath: string = `${rushLibFolderRootPath}/assets`;
 /**
  * The folder name ("scripts") where the scripts in rush-lib are built.
  */
-const scriptsFolderName: string = 'scripts';
+export const scriptsFolderName: string = 'scripts';
 
 export const pnpmfileShimFilename: string = 'PnpmfileShim.js';
 export const installRunScriptFilename: string = 'install-run.js';

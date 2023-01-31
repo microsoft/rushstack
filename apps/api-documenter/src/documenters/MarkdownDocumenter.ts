@@ -32,6 +32,7 @@ import {
   ApiPropertyItem,
   ApiInterface,
   Excerpt,
+  ApiAbstractMixin,
   ApiParameterListMixin,
   ApiReturnTypeMixin,
   ApiDeclaredItem,
@@ -502,6 +503,11 @@ export class MarkdownDocumenter {
   private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
+    const abstractClassesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Abstract Class', 'Description']
+    });
+
     const classesTable: DocTable = new DocTable({
       configuration,
       headerTitles: ['Class', 'Description']
@@ -550,7 +556,11 @@ export class MarkdownDocumenter {
 
       switch (apiMember.kind) {
         case ApiItemKind.Class:
-          classesTable.addRow(row);
+          if (ApiAbstractMixin.isBaseClassOf(apiMember) && apiMember.isAbstract) {
+            abstractClassesTable.addRow(row);
+          } else {
+            classesTable.addRow(row);
+          }
           this._writeApiItemPage(apiMember);
           break;
 
@@ -589,6 +599,11 @@ export class MarkdownDocumenter {
     if (classesTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration, title: 'Classes' }));
       output.appendNode(classesTable);
+    }
+
+    if (abstractClassesTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration, title: 'Abstract Classes' }));
+      output.appendNode(abstractClassesTable);
     }
 
     if (enumerationsTable.rows.length > 0) {
@@ -1033,6 +1048,10 @@ export class MarkdownDocumenter {
 
     const section: DocSection = new DocSection({ configuration });
 
+    // Output modifiers in syntactically correct order: first access modifier (here: `protected`), then
+    // `static` or `abstract` (no member can be both, so the order between the two of them does not matter),
+    // last `readonly`. If `override` was supported, it would go directly before `readonly`.
+
     if (ApiProtectedMixin.isBaseClassOf(apiItem)) {
       if (apiItem.isProtected) {
         section.appendNode(
@@ -1041,18 +1060,26 @@ export class MarkdownDocumenter {
       }
     }
 
-    if (ApiReadonlyMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.isReadonly) {
-        section.appendNode(
-          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'readonly' })])
-        );
-      }
-    }
-
     if (ApiStaticMixin.isBaseClassOf(apiItem)) {
       if (apiItem.isStatic) {
         section.appendNode(
           new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'static' })])
+        );
+      }
+    }
+
+    if (ApiAbstractMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isAbstract) {
+        section.appendNode(
+          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'abstract' })])
+        );
+      }
+    }
+
+    if (ApiReadonlyMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isReadonly) {
+        section.appendNode(
+          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'readonly' })])
         );
       }
     }
