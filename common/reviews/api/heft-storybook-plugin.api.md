@@ -14,7 +14,7 @@ export default _default;
 export interface IStorybookPluginOptions {
     startupModulePath?: string;
     staticBuildModulePath?: string;
-    staticBuildOutputDir?: string;
+    staticBuildOutputFolder?: string;
     storykitPackageName: string;
 }
 
