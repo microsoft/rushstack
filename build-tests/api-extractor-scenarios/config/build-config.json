@@ -24,6 +24,7 @@
     "excerptTokens",
     "exportDuplicate",
     "exportEquals",
+    "exportEquals2",
     "exportImportedExternal",
     "exportImportedExternal2",
     "exportImportedExternalDefault",
