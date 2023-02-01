@@ -1,6 +1,13 @@
 # Change Log - @rushstack/hashed-folder-copy-plugin
 
-This log was last generated on Wed, 01 Feb 2023 02:16:34 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Feb 2023 16:23:04 GMT and should not be manually modified.
+
+## 0.2.0
+Wed, 01 Feb 2023 16:23:04 GMT
+
+### Minor changes
+
+- Apply webpack's "output.hashSalt" configuration property (if present) to the folder hash.
 
 ## 0.1.58
 Wed, 01 Feb 2023 02:16:34 GMT

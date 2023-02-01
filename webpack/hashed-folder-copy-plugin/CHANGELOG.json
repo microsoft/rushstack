@@ -2,6 +2,18 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v0.2.0",
+      "date": "Wed, 01 Feb 2023 16:23:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Apply webpack's \"output.hashSalt\" configuration property (if present) to the folder hash."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.58",
       "tag": "@rushstack/hashed-folder-copy-plugin_v0.1.58",
       "date": "Wed, 01 Feb 2023 02:16:34 GMT",
