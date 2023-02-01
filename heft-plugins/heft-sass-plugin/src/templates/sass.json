@@ -38,11 +38,19 @@
 
   /**
    * If specified, folders where compiled CSS files will be emitted to. They will be named by appending
-   * ".css" to the source file name for ease of reference translation.
+   * ".css" to the source file name for ease of reference translation, unless "preserveSCSSExtension" is set.
    *
    * Default value: undefined
    */
   // "cssOutputFolders": [],
+
+  /**
+   * If set, when emitting compiled CSS from a file with a ".scss" extension, the emitted CSS will have
+   * the extension ".scss" instead of ".scss.css".
+   *
+   * Default value: false
+   */
+  // "preserveSCSSExtension": true,
 
   /**
    * Files with these extensions will pass through the Sass transpiler for typings generation.
