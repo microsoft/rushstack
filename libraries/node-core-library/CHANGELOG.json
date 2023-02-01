@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.55.0",
+      "tag": "@rushstack/node-core-library_v3.55.0",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump @types/node peerDependency to ^14.18.36."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.54.0",
       "tag": "@rushstack/node-core-library_v3.54.0",
       "date": "Mon, 30 Jan 2023 16:22:30 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 30 Jan 2023 16:22:30 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Feb 2023 02:16:34 GMT and should not be manually modified.
+
+## 3.55.0
+Wed, 01 Feb 2023 02:16:34 GMT
+
+### Minor changes
+
+- Bump @types/node peerDependency to ^14.18.36.
 
 ## 3.54.0
 Mon, 30 Jan 2023 16:22:30 GMT
