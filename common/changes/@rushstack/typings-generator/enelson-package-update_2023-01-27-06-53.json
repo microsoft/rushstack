@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/typings-generator",
-      "comment": "",
-      "type": "none"
+      "comment": "Bump @types/node peerDependency to ^14.18.36.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/typings-generator"
