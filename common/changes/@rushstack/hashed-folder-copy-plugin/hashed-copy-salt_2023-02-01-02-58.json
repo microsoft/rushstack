@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "comment": "Apply webpack's \"output.hashSalt\" configuration property (if present) to the folder hash.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin"
+}
