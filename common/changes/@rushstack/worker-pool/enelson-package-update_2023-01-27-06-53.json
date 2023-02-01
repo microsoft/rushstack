@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/worker-pool",
+      "comment": "Bump @types/node peerDependency to ^14.18.36.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/worker-pool"
+}

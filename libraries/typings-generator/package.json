@@ -29,10 +29,10 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/glob": "7.1.1",
-    "@types/node": "12.20.24"
+    "@types/node": "14.18.36"
   },
   "peerDependencies": {
-    "@types/node": "^12.20.24"
+    "@types/node": "^14.18.36"
   },
   "peerDependenciesMeta": {
     "@types/node": {

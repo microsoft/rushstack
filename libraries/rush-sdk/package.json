@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node-fetch": "1.6.9",
+    "@types/node-fetch": "2.6.2",
     "tapable": "2.2.1"
   },
   "devDependencies": {
@@ -31,6 +31,6 @@
     "@rushstack/terminal": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/semver": "7.3.5",
-    "@types/webpack-env": "1.13.0"
+    "@types/webpack-env": "1.18.0"
   }
 }

@@ -21,7 +21,7 @@
   "peerDependencies": {
     "@rushstack/module-minifier": "*",
     "webpack": "^5.68.0",
-    "@types/node": "^12.20.24"
+    "@types/node": "^14.18.36"
   },
   "dependencies": {
     "@rushstack/worker-pool": "workspace:*",
@@ -35,9 +35,9 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/module-minifier": "workspace:*",
     "@types/heft-jest": "1.0.1",
+    "@types/node": "14.18.36",
     "memfs": "3.4.3",
-    "webpack": "~5.75.0",
-    "@types/node": "12.20.24"
+    "webpack": "~5.75.0"
   },
   "sideEffects": false,
   "peerDependenciesMeta": {

@@ -340,7 +340,7 @@ export class AmazonS3Client {
   public _getSha256Hmac(key: string | Buffer, data: string): Buffer;
   public _getSha256Hmac(key: string | Buffer, data: string, encoding: 'hex'): string;
   public _getSha256Hmac(key: string | Buffer, data: string, encoding?: 'hex'): Buffer | string {
-    const hash: crypto.Hash = crypto.createHmac('sha256', key);
+    const hash: crypto.Hmac = crypto.createHmac('sha256', key);
     hash.update(data);
     if (encoding) {
       return hash.digest(encoding);

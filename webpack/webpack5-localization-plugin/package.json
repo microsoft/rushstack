@@ -17,7 +17,7 @@
   },
   "peerDependencies": {
     "webpack": "^5.68.0",
-    "@types/node": "^12.20.24"
+    "@types/node": "^14.18.36"
   },
   "dependencies": {
     "@rushstack/localization-utilities": "workspace:*",
@@ -28,9 +28,9 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
+    "@types/node": "14.18.36",
     "memfs": "3.4.3",
-    "webpack": "~5.75.0",
-    "@types/node": "12.20.24"
+    "webpack": "~5.75.0"
   },
   "peerDependenciesMeta": {
     "@types/node": {
