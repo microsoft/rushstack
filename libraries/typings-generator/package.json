@@ -27,8 +27,8 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/node": "18.17.15"
+    "heft-rushstack-internal-node-rig": "workspace:*",
+    "@types/glob": "7.1.1"
   },
   "peerDependencies": {
     "@types/node": "*"

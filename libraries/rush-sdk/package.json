@@ -36,11 +36,10 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "heft-rushstack-internal-node-rig": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "@types/node": "18.17.15",
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.0"
   }

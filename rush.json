@@ -1136,6 +1136,14 @@
       "reviewCategory": "vscode-extensions"
     },
 
+    // "rushstack-internal-rigs" folder (alphabetical order)
+    {
+      "packageName": "heft-rushstack-internal-node-rig",
+      "projectFolder": "rushstack-internal-rigs/heft-rushstack-internal-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+
     // "webpack" folder (alphabetical order)
     {
       "packageName": "@rushstack/webpack-embedded-dependencies-plugin",

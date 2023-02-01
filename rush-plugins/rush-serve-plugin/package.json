@@ -31,12 +31,10 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "heft-rushstack-internal-node-rig": "workspace:*",
     "@types/compression": "~1.7.2",
     "@types/cors": "~2.8.12",
     "@types/express": "4.17.13",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
     "@types/ws": "8.5.5"
   },
   "exports": {
