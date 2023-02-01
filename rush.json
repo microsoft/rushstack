@@ -1085,6 +1085,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "local-node-rig",
+      "projectFolder": "rigs/local-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "rush-plugins" folder (alphabetical order)
     {

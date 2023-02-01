@@ -23,10 +23,8 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
     "webpack": "~5.82.1"
   },
   "sideEffects": false,

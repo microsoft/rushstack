@@ -30,11 +30,9 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/enhanced-resolve": "3.0.7",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
     "@types/webpack": "4.41.32",
     "webpack": "~4.47.0",
     "@rushstack/heft-webpack5-plugin": "workspace:*"

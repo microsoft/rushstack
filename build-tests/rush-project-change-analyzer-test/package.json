@@ -17,6 +17,6 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "18.17.15",
-    "@rushstack/heft-node-rig": "workspace:*"
+    "local-node-rig": "workspace:*"
   }
 }
