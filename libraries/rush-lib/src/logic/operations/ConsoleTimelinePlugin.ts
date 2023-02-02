@@ -72,6 +72,8 @@ const TIMELINE_WIDTH: number = 109;
 const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
   [OperationStatus.Ready]: '?',
   [OperationStatus.Executing]: '?',
+  [OperationStatus.RemoteExecuting]: '?',
+  [OperationStatus.RemotePending]: '?',
   [OperationStatus.Success]: '#',
   [OperationStatus.SuccessWithWarning]: '!',
   [OperationStatus.Failure]: '!',
@@ -87,6 +89,8 @@ const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
 const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => string> = {
   [OperationStatus.Ready]: colors.yellow,
   [OperationStatus.Executing]: colors.yellow,
+  [OperationStatus.RemoteExecuting]: colors.yellow,
+  [OperationStatus.RemotePending]: colors.yellow,
   [OperationStatus.Success]: colors.green,
   [OperationStatus.SuccessWithWarning]: colors.yellow,
   [OperationStatus.Failure]: colors.red,

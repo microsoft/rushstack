@@ -5,7 +5,7 @@ import { OperationExecutionRecord } from './OperationExecutionRecord';
 import { OperationStatus } from './OperationStatus';
 
 /**
- * Implmentation of the async iteration protocol for a collection of IOperation objects.
+ * Implementation of the async iteration protocol for a collection of IOperation objects.
  * The async iterator will wait for an operation to be ready for execution, or terminate if there are no more operations.
  *
  * @remarks
@@ -18,6 +18,10 @@ export class AsyncOperationQueue
 {
   private readonly _queue: OperationExecutionRecord[];
   private readonly _pendingIterators: ((result: IteratorResult<OperationExecutionRecord>) => void)[];
+  private readonly _totalOperations: number;
+
+  private _completedOperations: number;
+  private _isDone: boolean;
 
   /**
    * @param operations - The set of operations to be executed
@@ -29,6 +33,9 @@ export class AsyncOperationQueue
   public constructor(operations: Iterable<OperationExecutionRecord>, sortFn: IOperationSortFunction) {
     this._queue = computeTopologyAndSort(operations, sortFn);
     this._pendingIterators = [];
+    this._totalOperations = this._queue.length;
+    this._isDone = false;
+    this._completedOperations = 0;
   }
 
   /**
@@ -50,25 +57,59 @@ export class AsyncOperationQueue
   }
 
   /**
+   * Set a callback to be invoked when one operation is completed.
+   * If all operations are completed, set the queue to done, resolve all pending iterators in next cycle.
+   */
+  public complete(): void {
+    this._completedOperations++;
+    if (this._completedOperations === this._totalOperations) {
+      this._isDone = true;
+    }
+  }
+
+  /**
    * Routes ready operations with 0 dependencies to waiting iterators. Normally invoked as part of `next()`, but
    * if the caller does not update operation dependencies prior to calling `next()`, may need to be invoked manually.
    */
   public assignOperations(): void {
     const { _queue: queue, _pendingIterators: waitingIterators } = this;
 
+    if (this._isDone) {
+      for (const resolveAsyncIterator of waitingIterators.splice(0)) {
+        resolveAsyncIterator({
+          value: undefined,
+          done: true
+        });
+      }
+      return;
+    }
+
     // By iterating in reverse order we do less array shuffling when removing operations
     for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];
 
-      if (operation.status === OperationStatus.Blocked) {
+      if (
+        operation.status === OperationStatus.Blocked ||
+        operation.status === OperationStatus.Success ||
+        operation.status === OperationStatus.SuccessWithWarning ||
+        operation.status === OperationStatus.FromCache ||
+        operation.status === OperationStatus.NoOp ||
+        operation.status === OperationStatus.Failure
+      ) {
         // It shouldn't be on the queue, remove it
         queue.splice(i, 1);
+      } else if (
+        operation.status === OperationStatus.RemotePending ||
+        operation.status === OperationStatus.RemoteExecuting
+      ) {
+        // This operation is not ready to execute yet, but it may become ready later
+        // next one plz :)
+        continue;
       } else if (operation.status !== OperationStatus.Ready) {
         // Sanity check
         throw new Error(`Unexpected status "${operation.status}" for queued operation: ${operation.name}`);
       } else if (operation.dependencies.size === 0) {
         // This task is ready to process, hand it to the iterator.
-        queue.splice(i, 1);
         // Needs to have queue semantics, otherwise tools that iterate it get confused
         waitingIterators.shift()!({
           value: operation,
@@ -78,13 +119,26 @@ export class AsyncOperationQueue
       // Otherwise operation is still waiting
     }
 
-    if (queue.length === 0) {
-      // Queue is empty, flush
-      for (const resolveAsyncIterator of waitingIterators.splice(0)) {
-        resolveAsyncIterator({
-          value: undefined,
-          done: true
-        });
+    if (waitingIterators.length > 0) {
+      // cycle through the queue again to find the next operation that is executed remotely
+      for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
+        const operation: OperationExecutionRecord = queue[i];
+
+        if (operation.status === OperationStatus.RemoteExecuting) {
+          // try to attempt to get the lock again
+          waitingIterators.shift()!({
+            value: operation,
+            done: false
+          });
+        }
+      }
+
+      if (waitingIterators.length > 0) {
+        // Queue is not empty, but no operations are ready to process
+        // Pause for a second and start over
+        setTimeout(() => {
+          this.assignOperations();
+        }, 1000);
       }
     }
   }
@@ -95,6 +149,19 @@ export class AsyncOperationQueue
    */
   public [Symbol.asyncIterator](): AsyncIterator<OperationExecutionRecord> {
     return this;
+  }
+
+  /**
+   * Recursively sets the status of all operations that consume the specified operation.
+   */
+  public static setOperationConsumersStatusRecursively(
+    operation: OperationExecutionRecord,
+    operationStatus: OperationStatus
+  ): void {
+    for (const consumer of operation.consumers) {
+      consumer.status = operationStatus;
+      AsyncOperationQueue.setOperationConsumersStatusRecursively(consumer, operationStatus);
+    }
   }
 }
 

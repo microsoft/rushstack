@@ -5,6 +5,7 @@ import { Operation } from '../Operation';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
 import { MockOperationRunner } from './MockOperationRunner';
 import { AsyncOperationQueue, IOperationSortFunction } from '../AsyncOperationQueue';
+import { OperationStatus } from '../OperationStatus';
 
 function addDependency(consumer: OperationExecutionRecord, dependency: OperationExecutionRecord): void {
   consumer.dependencies.add(dependency);
@@ -40,6 +41,8 @@ describe(AsyncOperationQueue.name, () => {
       for (const consumer of operation.consumers) {
         consumer.dependencies.delete(operation);
       }
+      operation.status = OperationStatus.Success;
+      queue.complete();
     }
 
     expect(actualOrder).toEqual(expectedOrder);
@@ -68,7 +71,7 @@ describe(AsyncOperationQueue.name, () => {
     expect(actualOrder).toEqual(expectedOrder);
   });
 
-  it('detects cyles', async () => {
+  it('detects cycles', async () => {
     const operations = [createRecord('a'), createRecord('b'), createRecord('c'), createRecord('d')];
 
     addDependency(operations[0], operations[2]);
@@ -124,6 +127,8 @@ describe(AsyncOperationQueue.name, () => {
           }
 
           --concurrency;
+          operation.status = OperationStatus.Success;
+          queue.complete();
         }
       })
     );
@@ -131,5 +136,54 @@ describe(AsyncOperationQueue.name, () => {
     for (const [operation, operationConcurrency] of expectedConcurrency) {
       expect(actualConcurrency.get(operation)).toEqual(operationConcurrency);
     }
+  });
+
+  it('handles remote executed operations', async () => {
+    const operations = [
+      createRecord('a'),
+      createRecord('b'),
+      createRecord('c'),
+      createRecord('d'),
+      createRecord('e')
+    ];
+
+    addDependency(operations[2], operations[1]);
+    addDependency(operations[3], operations[1]);
+    addDependency(operations[4], operations[1]);
+    addDependency(operations[3], operations[2]);
+    addDependency(operations[4], operations[3]);
+
+    // b remote executing -> a -> b (remote executed) -> c -> d -> e
+    const expectedOrder: string[] = ['b', 'a', 'b', 'c', 'd', 'e'];
+
+    const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
+
+    const actualOrder: string[] = [];
+    let remoteExecuted: boolean = false;
+    for await (const operation of queue) {
+      actualOrder.push(operation.name);
+
+      if (operation === operations[1]) {
+        if (!remoteExecuted) {
+          operations[1].status = OperationStatus.RemoteExecuting;
+          AsyncOperationQueue.setOperationConsumersStatusRecursively(
+            operations[1],
+            OperationStatus.RemotePending
+          );
+          // remote executed operation is finished later
+          remoteExecuted = true;
+          continue;
+        } else {
+          AsyncOperationQueue.setOperationConsumersStatusRecursively(operations[1], OperationStatus.Ready);
+        }
+      }
+      for (const consumer of operation.consumers) {
+        consumer.dependencies.delete(operation);
+      }
+      operation.status = OperationStatus.Success;
+      queue.complete();
+    }
+
+    expect(actualOrder).toEqual(expectedOrder);
   });
 });
