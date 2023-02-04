@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-serve-plugin
 
-This log was last generated on Wed, 01 Feb 2023 02:16:34 GMT and should not be manually modified.
+This log was last generated on Sat, 04 Feb 2023 01:22:24 GMT and should not be manually modified.
+
+## 0.4.0
+Sat, 04 Feb 2023 01:22:24 GMT
+
+### Minor changes
+
+- Support workspace-level routing rules in the plugin config, to serve files that are not associated with any specific project.
 
 ## 0.3.14
 Wed, 01 Feb 2023 02:16:34 GMT
