@@ -18,12 +18,12 @@
     "@rushstack/module-minifier": "workspace:*",
     "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/webpack-env": "1.13.0",
+    "@types/webpack-env": "1.18.0",
     "eslint": "~8.7.0",
     "html-webpack-plugin": "~5.5.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~4.8.4",
-    "webpack": "~5.68.0"
+    "webpack": "~5.75.0"
   }
 }

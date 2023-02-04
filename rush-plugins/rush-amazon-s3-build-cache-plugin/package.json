@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
-  "version": "5.88.0",
+  "version": "5.90.0",
   "description": "Rush plugin for Amazon S3 cloud build cache",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24",
-    "@types/node-fetch": "1.6.9"
+    "@types/node": "14.18.36",
+    "@types/node-fetch": "2.6.2"
   }
 }

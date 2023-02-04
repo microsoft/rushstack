@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1010,
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -184,6 +184,7 @@
           ],
           "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
+          "isAbstract": true,
           "name": "AbstractClass",
           "preserveMemberOrder": false,
           "members": [
@@ -215,6 +216,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": true,
               "name": "member"
             }
           ],
@@ -245,6 +247,7 @@
               }
             }
           ],
+          "isAbstract": false,
           "name": "ClassWithTypeParameter",
           "preserveMemberOrder": false,
           "members": [],
@@ -387,6 +390,7 @@
           ],
           "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsClassWithTypeParameter",
           "preserveMemberOrder": false,
           "members": [],
@@ -481,6 +485,7 @@
                     }
                   ],
                   "releaseTag": "Public",
+                  "isAbstract": false,
                   "name": "SomeClass3",
                   "preserveMemberOrder": false,
                   "members": [],
@@ -499,6 +504,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "SomeClass1",
               "preserveMemberOrder": false,
               "members": [],
@@ -524,6 +530,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "SomeClass2",
               "preserveMemberOrder": false,
               "members": [],
@@ -544,6 +551,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "SomeClass4",
               "preserveMemberOrder": false,
               "members": [],
@@ -666,6 +674,7 @@
           ],
           "fileUrlPath": "src/apiItemKinds/classes.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SimpleClass",
           "preserveMemberOrder": false,
           "members": [
@@ -697,6 +706,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "member"
             },
             {
@@ -744,6 +754,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "optionalParamMethod"
             },
             {
@@ -773,7 +784,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -806,7 +818,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -835,7 +848,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -864,7 +878,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "implementsTokenRanges": []

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/loader-raw-script",
-  "version": "1.3.273",
+  "version": "1.3.279",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -23,6 +23,6 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24"
+    "@types/node": "14.18.36"
   }
 }

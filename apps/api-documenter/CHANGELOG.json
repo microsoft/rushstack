@@ -2,6 +2,125 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.21.3",
+      "tag": "@microsoft/api-documenter_v7.21.3",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.21.2",
+      "tag": "@microsoft/api-documenter_v7.21.2",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.21.1",
+      "tag": "@microsoft/api-documenter_v7.21.1",
+      "date": "Mon, 30 Jan 2023 00:55:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.21.0",
+      "tag": "@microsoft/api-documenter_v7.21.0",
+      "date": "Sun, 29 Jan 2023 20:09:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where `<b>`/`<i>` tags sometimes interfered with parsing of other Markdown on the same line; italics and boldface are now emitted using `*` and `_`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.20.1",
+      "tag": "@microsoft/api-documenter_v7.20.1",
+      "date": "Thu, 26 Jan 2023 02:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.20.0",
+      "tag": "@microsoft/api-documenter_v7.20.0",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Display the 'abstract' modifier for classes and members (GitHub #3661)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.19.28",
+      "tag": "@microsoft/api-documenter_v7.19.28",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.19.27",
       "tag": "@microsoft/api-documenter_v7.19.27",
       "date": "Tue, 20 Dec 2022 01:18:22 GMT",

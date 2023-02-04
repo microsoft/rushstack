@@ -6,7 +6,7 @@
 
 Some property with multiple modifiers.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 protected static readonly multipleModifiersProperty: boolean;

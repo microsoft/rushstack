@@ -6,14 +6,14 @@
 
 This is an example class.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 
 ```
-<b>Extends:</b> [DocBaseClass](./api-documenter-test.docbaseclass.md)
+**Extends:** [DocBaseClass](./api-documenter-test.docbaseclass.md)
 
-<b>Implements:</b> [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface2](./api-documenter-test.idocinterface2.md)
+**Implements:** [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface2](./api-documenter-test.idocinterface2.md)
 
 ## Remarks
 
@@ -35,7 +35,7 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [multipleModifiersProperty](./api-documenter-test.docclass1.multiplemodifiersproperty.md) | <p><code>protected</code></p><p><code>readonly</code></p><p><code>static</code></p> | boolean | Some property with multiple modifiers. |
+|  [multipleModifiersProperty](./api-documenter-test.docclass1.multiplemodifiersproperty.md) | <p><code>protected</code></p><p><code>static</code></p><p><code>readonly</code></p> | boolean | Some property with multiple modifiers. |
 |  [protectedProperty](./api-documenter-test.docclass1.protectedproperty.md) | <code>protected</code> | string | Some protected property. |
 |  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) | <code>readonly</code> | string |  |
 |  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |

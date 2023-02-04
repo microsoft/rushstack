@@ -2,6 +2,170 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.0.5",
+      "tag": "@rushstack/lockfile-explorer_v1.0.5",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.4",
+      "tag": "@rushstack/lockfile-explorer_v1.0.4",
+      "date": "Mon, 30 Jan 2023 16:22:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.3",
+      "tag": "@rushstack/lockfile-explorer_v1.0.3",
+      "date": "Mon, 30 Jan 2023 00:55:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.2",
+      "tag": "@rushstack/lockfile-explorer_v1.0.2",
+      "date": "Thu, 26 Jan 2023 02:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@rushstack/lockfile-explorer_v1.0.1",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.0",
+      "tag": "@rushstack/lockfile-explorer_v1.0.0",
+      "date": "Wed, 25 Jan 2023 03:01:43 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Initial feature-complete release of Lockfile Explorer"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/lockfile-explorer_v0.2.2",
+      "date": "Tue, 24 Jan 2023 00:16:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with the tab component"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/lockfile-explorer_v0.2.1",
+      "date": "Sun, 22 Jan 2023 20:37:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the upgrade notice wasn't displayed until after pressing CTRL+C"
+          },
+          {
+            "comment": "Fix a regression where some CSS styles were not being loaded properly"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/lockfile-explorer_v0.2.0",
+      "date": "Sat, 21 Jan 2023 04:36:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"lfx\" as an alias for the \"lockfile-explorer\" shell command"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add some basic command-line help and improve some message strings"
+          },
+          {
+            "comment": "Add support for rush components"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.8",
+      "tag": "@rushstack/lockfile-explorer_v0.1.8",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.7",
+      "tag": "@rushstack/lockfile-explorer_v0.1.7",
+      "date": "Wed, 18 Jan 2023 05:02:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Print an upgrade notice when there is a newer release of the @rushstack/lockfile-explorer package"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.6",
       "tag": "@rushstack/lockfile-explorer_v0.1.6",
       "date": "Tue, 20 Dec 2022 01:18:22 GMT",

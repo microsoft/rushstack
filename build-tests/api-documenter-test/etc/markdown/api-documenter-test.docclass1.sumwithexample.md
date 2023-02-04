@@ -6,7 +6,7 @@
 
 Returns the sum of two numbers.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static sumWithExample(x: number, y: number): number;
@@ -19,7 +19,7 @@ static sumWithExample(x: number, y: number): number;
 |  x | number | the first number to add |
 |  y | number | the second number to add |
 
-<b>Returns:</b>
+**Returns:**
 
 number
 

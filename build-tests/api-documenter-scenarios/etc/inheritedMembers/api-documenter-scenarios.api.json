@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1010,
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -197,6 +197,7 @@
           ],
           "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "Class1",
           "preserveMemberOrder": false,
           "members": [
@@ -227,7 +228,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -256,7 +258,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Method",
@@ -303,6 +306,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "someOverload"
             }
           ],
@@ -346,6 +350,7 @@
               }
             }
           ],
+          "isAbstract": false,
           "name": "Class2",
           "preserveMemberOrder": false,
           "members": [
@@ -376,7 +381,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Method",
@@ -423,6 +429,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "someMethod"
             },
             {
@@ -452,7 +459,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "extendsTokenRange": {
@@ -505,6 +513,7 @@
           ],
           "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsAnonymousClass",
           "preserveMemberOrder": false,
           "members": [],
@@ -535,6 +544,7 @@
           ],
           "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsClassFromAnotherPackage",
           "preserveMemberOrder": false,
           "members": [],
@@ -565,6 +575,7 @@
           ],
           "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsClassLikeVariable",
           "preserveMemberOrder": false,
           "members": [],
@@ -595,6 +606,7 @@
           ],
           "fileUrlPath": "src/inheritedMembers/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ExtendsUnexportedClass",
           "preserveMemberOrder": false,
           "members": [],
@@ -916,6 +928,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "Class3",
               "preserveMemberOrder": false,
               "members": [
@@ -964,6 +977,7 @@
                     }
                   ],
                   "isOptional": false,
+                  "isAbstract": false,
                   "name": "someMethod"
                 },
                 {
@@ -1011,6 +1025,7 @@
                     }
                   ],
                   "isOptional": false,
+                  "isAbstract": false,
                   "name": "someOverload"
                 },
                 {
@@ -1058,6 +1073,7 @@
                     }
                   ],
                   "isOptional": false,
+                  "isAbstract": false,
                   "name": "someOverload"
                 },
                 {
@@ -1087,7 +1103,8 @@
                     "endIndex": 2
                   },
                   "isStatic": false,
-                  "isProtected": false
+                  "isProtected": false,
+                  "isAbstract": false
                 }
               ],
               "implementsTokenRanges": []

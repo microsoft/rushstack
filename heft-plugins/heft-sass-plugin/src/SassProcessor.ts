@@ -37,6 +37,11 @@ export interface ISassConfiguration {
   cssOutputFolders?: string[] | undefined;
 
   /**
+   * If `true`, when emitting compiled CSS from a file with a ".scss" extension, the emitted CSS will have the extension ".scss" instead of ".scss.css"
+   */
+  preserveSCSSExtension?: boolean | undefined;
+
+  /**
    * Determines whether export values are wrapped in a default property, or not.
    * Defaults to true.
    */
@@ -101,14 +106,22 @@ export class SassProcessor extends StringValuesTypingsGenerator {
 
     const { allFileExtensions, isFileModule } = buildExtensionClassifier(sassConfiguration);
 
-    const { cssOutputFolders } = sassConfiguration;
+    const { cssOutputFolders, preserveSCSSExtension = false } = sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
       ? (relativePath: string): string[] => {
-          return cssOutputFolders.map(
-            (folder: string) =>
-              `${folder}/${relativePath.endsWith('.css') ? relativePath : `${relativePath}.css`}`
-          );
+          const lastDot: number = relativePath.lastIndexOf('.');
+          const oldExtension: string = relativePath.slice(lastDot);
+          const cssRelativePath: string =
+            oldExtension === '.css' || (oldExtension === '.scss' && preserveSCSSExtension)
+              ? relativePath
+              : `${relativePath}.css`;
+
+          const cssPaths: string[] = [];
+          for (const outputFolder of cssOutputFolders) {
+            cssPaths.push(`${outputFolder}/${cssRelativePath}`);
+          }
+          return cssPaths;
         }
       : undefined;
 

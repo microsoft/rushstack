@@ -27,10 +27,11 @@ export interface IPhasedCommandHandlerOptions {
   rushConfiguration: RushConfiguration;
   command: IPhasedCommand;
   portParameterLongName: string | undefined;
+  globalRoutingRules: IRoutingRule[];
 }
 
 export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions): Promise<void> {
-  const { rushSession, command, portParameterLongName } = options;
+  const { rushSession, command, portParameterLongName, globalRoutingRules } = options;
 
   const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
 
@@ -99,7 +100,8 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
 
       const routingRules: Iterable<IRoutingRule> = await serveConfig.loadProjectConfigsAsync(
         selectedProjects,
-        logger.terminal
+        logger.terminal,
+        globalRoutingRules
       );
 
       const fileRoutingRules: Map<string, IRoutingRule> = new Map();
@@ -108,6 +110,7 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       function setHeaders(response: express.Response, path?: string, stat?: unknown): void {
         response.set('Access-Control-Allow-Origin', '*');
         response.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+
         // TODO: Generalize headers and MIME types with an external database or JSON file.
         if (path && wbnRegex.test(path)) {
           response.set('X-Content-Type-Options', 'nosniff');

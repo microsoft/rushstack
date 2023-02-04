@@ -1,6 +1,42 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Tue, 20 Dec 2022 21:56:32 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Feb 2023 02:16:34 GMT and should not be manually modified.
+
+## 0.4.0
+Wed, 01 Feb 2023 02:16:34 GMT
+
+### Minor changes
+
+- Bump @types/node peerDependency to ^14.18.36.
+
+## 0.3.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Move the @types/node dependency to an optional peerDependency.
+
+## 0.2.4
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.2.3
+Thu, 26 Jan 2023 02:55:10 GMT
+
+### Patches
+
+- Upgrade to webpack 5.75.0
+
+## 0.2.2
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.2.1
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.2.0
 Tue, 20 Dec 2022 21:56:32 GMT

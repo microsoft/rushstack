@@ -519,6 +519,7 @@ export interface INodePackageJson {
     name: string;
     optionalDependencies?: IPackageJsonDependencyTable;
     peerDependencies?: IPackageJsonDependencyTable;
+    peerDependenciesMeta?: IPeerDependenciesMetaTable;
     private?: boolean;
     repository?: string | IPackageJsonRepository;
     resolutions?: Record<string, string>;
@@ -597,6 +598,14 @@ export interface IPathFormatFileLocationOptions {
     line?: number;
     message: string;
     pathToFormat: string;
+}
+
+// @public
+export interface IPeerDependenciesMetaTable {
+    // (undocumented)
+    [dependencyName: string]: {
+        optional?: boolean;
+    };
 }
 
 // @public

@@ -6,7 +6,7 @@
 
 A variable exported from within a namespace.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 nestedVariable: boolean

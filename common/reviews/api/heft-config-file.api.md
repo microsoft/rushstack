@@ -117,6 +117,4 @@ export enum PathResolutionMethod {
 // @beta (undocumented)
 export type PropertyInheritanceCustomFunction<TObject> = (currentObject: TObject, parentObject: TObject) => TObject;
 
-// (No @packageDocumentation comment for this package)
-
 ```
