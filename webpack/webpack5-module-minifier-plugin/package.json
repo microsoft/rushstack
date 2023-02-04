@@ -21,7 +21,7 @@
   "peerDependencies": {
     "@rushstack/module-minifier": "*",
     "webpack": "^5.68.0",
-    "@types/node": "^14.18.36"
+    "@types/node": "*"
   },
   "dependencies": {
     "@rushstack/worker-pool": "workspace:*",

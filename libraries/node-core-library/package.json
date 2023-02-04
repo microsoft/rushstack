@@ -36,7 +36,7 @@
     "@types/semver": "7.3.5"
   },
   "peerDependencies": {
-    "@types/node": "^14.18.36"
+    "@types/node": "*"
   },
   "peerDependenciesMeta": {
     "@types/node": {
