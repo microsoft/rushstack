@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Change the peer dependency selector on `@types/node` to a wildcard (`*`).",
+      "type": "patch",
+      "packageName": "@rushstack/module-minifier"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier",
+  "email": "iclanton@users.noreply.github.com"
+}

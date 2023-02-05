@@ -23,7 +23,7 @@
     "@types/webpack-sources": "*",
     "webpack": "^4.31.0",
     "webpack-sources": "~1.4.3",
-    "@types/node": "^14.18.36"
+    "@types/node": "*"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {

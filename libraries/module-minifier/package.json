@@ -30,7 +30,7 @@
     "@types/serialize-javascript": "5.0.2"
   },
   "peerDependencies": {
-    "@types/node": "^14.18.36"
+    "@types/node": "*"
   },
   "peerDependenciesMeta": {
     "@types/node": {

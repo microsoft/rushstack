@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Change the peer dependency selector on `@types/node` to a wildcard (`*`).",
+      "type": "patch",
+      "packageName": "@rushstack/node-core-library"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "iclanton@users.noreply.github.com"
+}
