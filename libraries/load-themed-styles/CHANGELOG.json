@@ -2,6 +2,21 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "2.0.28",
+      "tag": "@microsoft/load-themed-styles_v2.0.28",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.14.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.27",
       "tag": "@microsoft/load-themed-styles_v2.0.27",
       "date": "Wed, 01 Feb 2023 02:16:34 GMT",

@@ -2,6 +2,26 @@
   "name": "@rushstack/worker-pool",
   "entries": [
     {
+      "version": "0.3.1",
+      "tag": "@rushstack/worker-pool_v0.3.1",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change the peer dependency selector on `@types/node` to a wildcard (`*`)."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@rushstack/worker-pool_v0.3.0",
       "date": "Wed, 01 Feb 2023 02:16:34 GMT",

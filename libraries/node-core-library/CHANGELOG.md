@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 01 Feb 2023 02:16:34 GMT and should not be manually modified.
+This log was last generated on Sun, 05 Feb 2023 03:02:02 GMT and should not be manually modified.
+
+## 3.55.1
+Sun, 05 Feb 2023 03:02:02 GMT
+
+### Patches
+
+- Change the peer dependency selector on `@types/node` to a wildcard (`*`).
 
 ## 3.55.0
 Wed, 01 Feb 2023 02:16:34 GMT

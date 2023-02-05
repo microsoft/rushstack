@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.55.1",
+      "tag": "@rushstack/node-core-library_v3.55.1",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change the peer dependency selector on `@types/node` to a wildcard (`*`)."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.55.0",
       "tag": "@rushstack/node-core-library_v3.55.0",
       "date": "Wed, 01 Feb 2023 02:16:34 GMT",

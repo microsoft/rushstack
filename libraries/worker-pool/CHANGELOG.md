@@ -1,6 +1,13 @@
 # Change Log - @rushstack/worker-pool
 
-This log was last generated on Wed, 01 Feb 2023 02:16:34 GMT and should not be manually modified.
+This log was last generated on Sun, 05 Feb 2023 03:02:02 GMT and should not be manually modified.
+
+## 0.3.1
+Sun, 05 Feb 2023 03:02:02 GMT
+
+### Patches
+
+- Change the peer dependency selector on `@types/node` to a wildcard (`*`).
 
 ## 0.3.0
 Wed, 01 Feb 2023 02:16:34 GMT
