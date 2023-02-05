@@ -182,6 +182,18 @@ for (const property in rushLibModule) {
 }
 
 /**
+ * Used by the .js stubs for path-based imports of `@microsoft/rush-lib` internal APIs.
+ */
+export function _rushSdk_loadInternalModule(srcImportPath: string): unknown {
+  if (!exports._RushInternals) {
+    throw new Error(
+      `Rush version ${exports.Rush.version} does not support internal API imports via rush-sdk`
+    );
+  }
+  return exports._RushInternals.loadModule(srcImportPath);
+}
+
+/**
  * Require `@microsoft/rush-lib` under the specified folder path.
  */
 function requireRushLibUnderFolderPath(folderPath: string): RushLibModuleType {

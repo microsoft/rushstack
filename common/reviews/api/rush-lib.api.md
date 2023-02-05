@@ -768,6 +768,8 @@ export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
+    // (undocumented)
+    static get _rushLibPackageFolder(): string;
     // @internal (undocumented)
     static get _rushLibPackageJson(): IPackageJson;
     static get version(): string;
@@ -964,6 +966,11 @@ export class _RushGlobalFolder {
     constructor();
     readonly nodeSpecificPath: string;
     readonly path: string;
+}
+
+// @internal
+export class _RushInternals {
+    static loadModule(srcImportPath: string): unknown;
 }
 
 // @beta
