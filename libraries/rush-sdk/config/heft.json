@@ -7,6 +7,12 @@
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
   "eventActions": [
     {
+      "actionKind": "deleteGlobs",
+      "heftEvent": "clean",
+      "actionId": "defaultClean",
+      "globsToDelete": ["dist", "lib", "lib-shim", "temp"]
+    },
+    {
       /**
        * (Required) The kind of built-in operation that should be performed.
        * The "copyFiles" action copies files that match the specified patterns.

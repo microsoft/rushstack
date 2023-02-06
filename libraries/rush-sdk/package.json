@@ -8,11 +8,11 @@
     "directory": "apps/rush-sdk"
   },
   "homepage": "https://rushjs.io",
-  "main": "lib/index.js",
+  "main": "lib-shim/index.js",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft build --clean",
+    "build": "heft build --clean && node lib-shim/generate-stubs",
+    "_phase:build": "heft build --clean && node lib-shim/generate-stubs",
     "_phase:test": "heft test --no-build"
   },
   "license": "MIT",
