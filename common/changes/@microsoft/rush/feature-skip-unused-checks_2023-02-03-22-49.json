@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Disable unused depcheck feature for upgrade-interactive.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
