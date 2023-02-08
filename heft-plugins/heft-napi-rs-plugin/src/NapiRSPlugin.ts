@@ -44,7 +44,7 @@ export class NapiRSPlugin implements IHeftPlugin {
     // There is only a cli for running `napi build` so we will use child_process to exec it
 
     // emulate `napi build --platform --release`
-    let buildArgs = ['build', '--release', './lib'];
+    let buildArgs = ['build', '--platform', '--release', './lib'];
 
     const napiBuildResults: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
       'napi',
