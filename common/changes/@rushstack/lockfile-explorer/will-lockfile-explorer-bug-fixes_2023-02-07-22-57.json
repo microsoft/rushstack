@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Support context parameter in pnpmfile readPackage",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}
