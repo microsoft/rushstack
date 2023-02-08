@@ -1579,14 +1579,14 @@ importers:
 
   ../../heft-plugins/heft-napi-rs-plugin:
     specifiers:
-      '@napi-rs/cli': ^2.14.6
+      '@napi-rs/cli': ^2.14.7
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/node': 14.18.36
     dependencies:
-      '@napi-rs/cli': 2.14.6
+      '@napi-rs/cli': 2.14.7
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -2461,7 +2461,7 @@ importers:
 
   ../../rust/hello-world:
     specifiers:
-      '@napi-rs/cli': ^2.14.6
+      '@napi-rs/cli': ^2.14.7
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-napi-rs-plugin': workspace:*
@@ -2473,7 +2473,7 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
-      '@napi-rs/cli': 2.14.6
+      '@napi-rs/cli': 2.14.7
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-napi-rs-plugin': link:../../heft-plugins/heft-napi-rs-plugin
@@ -5977,8 +5977,8 @@ packages:
       glob-to-regexp: 0.3.0
     dev: true
 
-  /@napi-rs/cli/2.14.6:
-    resolution: {integrity: sha512-q63+fI0JB9LV3RDYQN7yyAzmWDrErz+5ZMM1EyB5RA7ZwTTRYvXxg204w9+xTuZnpQfSyLMxxKGz2mfDVqFing==}
+  /@napi-rs/cli/2.14.7:
+    resolution: {integrity: sha512-H+YCgdbBNMWn8c878C3RsRYcMxamWI7rB0H+1TqOy9n6u31isikcRyW1VDyoNHp7ApfmzV0+tpPopVi0W7WHAA==}
     engines: {node: '>= 10'}
     hasBin: true
 
