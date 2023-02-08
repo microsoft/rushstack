@@ -17,7 +17,7 @@
   // "forwardPorts": [],
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "onCreateCommand": "npm install -g @microsoft/rush @rushstack/heft && rush update --bypass-policy",
+  "onCreateCommand": "/bin/bash ./.devcontainer/setup.sh",
 
   // Configure tool-specific properties.
   "customizations": {
