@@ -83,7 +83,7 @@ export class OperationMetadataManager {
       },
       {
         sourcePath: errorLogPath,
-        destinationPath: this._relativeLogPath
+        destinationPath: this._errorLogPath
       }
     ];
 
