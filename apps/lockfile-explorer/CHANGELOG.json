@@ -2,6 +2,18 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.0.7",
+      "tag": "@rushstack/lockfile-explorer_v1.0.7",
+      "date": "Wed, 08 Feb 2023 19:58:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Support context parameter in pnpmfile readPackage"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.6",
       "tag": "@rushstack/lockfile-explorer_v1.0.6",
       "date": "Sun, 05 Feb 2023 03:02:02 GMT",
