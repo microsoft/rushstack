@@ -823,6 +823,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-napi-rs-plugin",
+      "projectFolder": "heft-plugins/heft-napi-rs-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@rushstack/heft-sass-plugin",
       "projectFolder": "heft-plugins/heft-sass-plugin",
       "reviewCategory": "libraries",
@@ -1105,6 +1111,13 @@
       "projectFolder": "webpack/webpack5-localization-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    // "rust" folder
+    {
+      "packageName": "@rushstack/rust-hello-world",
+      "projectFolder": "rust/hello-world",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     }
   ]
 }

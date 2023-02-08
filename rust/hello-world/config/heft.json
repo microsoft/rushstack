@@ -1,0 +1,11 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+
+  /**
+   * The list of Heft plugins to be loaded.
+   */
+  "heftPlugins": [{ "plugin": "@rushstack/heft-napi-rs-plugin" }]
+}
