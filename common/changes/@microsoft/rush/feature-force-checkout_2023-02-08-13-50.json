@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "use force checkout before pushing the published package.json changes",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
