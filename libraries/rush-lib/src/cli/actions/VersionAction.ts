@@ -221,7 +221,7 @@ export class VersionAction extends BaseRushAction {
     const publishGit: PublishGit = new PublishGit(git, targetBranch);
 
     // Make changes in temp branch.
-    publishGit.checkout(tempBranch, true);
+    publishGit.checkout(tempBranch, { createBranch: true });
 
     const uncommittedChanges: ReadonlyArray<string> = git.getUncommittedChanges();
 
@@ -260,7 +260,7 @@ export class VersionAction extends BaseRushAction {
 
       // Now merge to target branch.
       publishGit.fetch();
-      publishGit.checkout(targetBranch);
+      publishGit.checkout(targetBranch, { force: true });
       publishGit.pull(!this._ignoreGitHooksParameter.value);
       publishGit.merge(tempBranch, !this._ignoreGitHooksParameter.value);
       publishGit.push(targetBranch, !this._ignoreGitHooksParameter.value);

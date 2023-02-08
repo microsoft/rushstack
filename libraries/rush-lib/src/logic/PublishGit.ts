@@ -19,10 +19,18 @@ export class PublishGit {
     this._gitTagSeparator = git.getTagSeparator();
   }
 
-  public checkout(branchName: string | undefined, createBranch: boolean = false): void {
+  public checkout(
+    branchName: string | undefined,
+    options: { createBranch?: boolean; force?: boolean } = {}
+  ): void {
     const params: string[] = ['checkout'];
-    if (createBranch) {
+
+    if (options.createBranch) {
       params.push('-b');
+    }
+
+    if (options.force) {
+      params.push('-f');
     }
 
     params.push(branchName || DUMMY_BRANCH_NAME);

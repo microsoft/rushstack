@@ -279,7 +279,7 @@ export class PublishAction extends BaseRushAction {
       const tempBranchName: string = `publish-${Date.now()}`;
 
       // Make changes in temp branch.
-      publishGit.checkout(tempBranchName, true);
+      publishGit.checkout(tempBranchName, { createBranch: true });
 
       this._setDependenciesBeforePublish();
 
@@ -331,7 +331,7 @@ export class PublishAction extends BaseRushAction {
         publishGit.push(tempBranchName, !this._ignoreGitHooksParameter.value);
 
         // Now merge to target branch.
-        publishGit.checkout(this._targetBranch.value!);
+        publishGit.checkout(this._targetBranch.value!, { force: true });
         publishGit.pull(!this._ignoreGitHooksParameter.value);
         publishGit.merge(tempBranchName, !this._ignoreGitHooksParameter.value);
         publishGit.push(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
