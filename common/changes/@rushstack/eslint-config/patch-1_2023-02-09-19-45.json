@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Replace the @typescript-eslint/no-parameter-properties rule with the replacement rule (@typescript-eslint/parameter-properties).",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config"
+}
