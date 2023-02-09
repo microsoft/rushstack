@@ -2,8 +2,10 @@
 
 echo "🚀 Setting up Rushstack codespace..."
 
-echo "🔑 Setting up GitHub user config..."
-node ./.devcontainer/setGitConfigUserName.js ${GITHUB_USER}
+# Set local git config
+echo "🔑 Setting up local git config..."
+git config --local user.email ${GITHUB_USER}@users.noreply.github.com
+git config --local user.name "$(git config --system user.name)"
 
 # Install Rush and Heft Dependencies
 echo "📦 Installing Rush, Heft, & Prettier dependencies..."
