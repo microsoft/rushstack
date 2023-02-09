@@ -31,6 +31,7 @@ export {
 } from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
+export { CobuildConfiguration } from './api/CobuildConfiguration';
 export { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from './logic/buildCache/CacheEntryId';
 export {
   FileSystemBuildCacheProvider,
@@ -98,7 +99,8 @@ export { OperationStatus } from './logic/operations/OperationStatus';
 export {
   RushSession,
   IRushSessionOptions,
-  CloudBuildCacheProviderFactory
+  CloudBuildCacheProviderFactory,
+  CobuildLockProviderFactory
 } from './pluginFramework/RushSession';
 
 export {

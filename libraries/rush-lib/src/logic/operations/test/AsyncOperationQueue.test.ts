@@ -166,15 +166,9 @@ describe(AsyncOperationQueue.name, () => {
       if (operation === operations[1]) {
         if (!remoteExecuted) {
           operations[1].status = OperationStatus.RemoteExecuting;
-          AsyncOperationQueue.setOperationConsumersStatusRecursively(
-            operations[1],
-            OperationStatus.RemotePending
-          );
           // remote executed operation is finished later
           remoteExecuted = true;
           continue;
-        } else {
-          AsyncOperationQueue.setOperationConsumersStatusRecursively(operations[1], OperationStatus.Ready);
         }
       }
       for (const consumer of operation.consumers) {

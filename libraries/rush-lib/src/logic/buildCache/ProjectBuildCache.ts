@@ -74,6 +74,10 @@ export class ProjectBuildCache {
     return ProjectBuildCache._tarUtilityPromise;
   }
 
+  public get cacheId(): string | undefined {
+    return this._cacheId;
+  }
+
   public static async tryGetProjectBuildCache(
     options: IProjectBuildCacheOptions
   ): Promise<ProjectBuildCache | undefined> {
@@ -133,8 +137,8 @@ export class ProjectBuildCache {
     }
   }
 
-  public async tryRestoreFromCacheAsync(terminal: ITerminal): Promise<boolean> {
-    const cacheId: string | undefined = this._cacheId;
+  public async tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
+    const cacheId: string | undefined = specifiedCacheId || this._cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
@@ -213,13 +217,13 @@ export class ProjectBuildCache {
     return restoreSuccess;
   }
 
-  public async trySetCacheEntryAsync(terminal: ITerminal): Promise<boolean> {
+  public async trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
     if (!this._cacheWriteEnabled) {
       // Skip writing local and cloud build caches, without any noise
       return true;
     }
 
-    const cacheId: string | undefined = this._cacheId;
+    const cacheId: string | undefined = specifiedCacheId || this._cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;

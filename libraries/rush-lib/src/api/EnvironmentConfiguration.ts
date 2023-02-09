@@ -144,6 +144,17 @@ export enum EnvironmentVariableNames {
   RUSH_BUILD_CACHE_WRITE_ALLOWED = 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
 
   /**
+   * Setting this environment variable overrides the value of `cobuildEnabled` in the `cobuild.json`
+   * configuration file.
+   *
+   * @remarks
+   * Specify `1` to enable the cobuild or `0` to disable it.
+   *
+   * If there is no build cache configured, then this environment variable is ignored.
+   */
+  RUSH_COBUILD_ENABLED = 'RUSH_COBUILD_ENABLED',
+
+  /**
    * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
    */
   RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
@@ -195,6 +206,8 @@ export class EnvironmentConfiguration {
   private static _buildCacheEnabled: boolean | undefined;
 
   private static _buildCacheWriteAllowed: boolean | undefined;
+
+  private static _cobuildEnabled: boolean | undefined;
 
   private static _gitBinaryPath: string | undefined;
 
@@ -291,6 +304,15 @@ export class EnvironmentConfiguration {
   public static get buildCacheWriteAllowed(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._buildCacheWriteAllowed;
+  }
+
+  /**
+   * If set, enables or disables the cobuild feature.
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_ENABLED}
+   */
+  public static get cobuildEnabled(): boolean | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._cobuildEnabled;
   }
 
   /**
@@ -418,6 +440,15 @@ export class EnvironmentConfiguration {
             EnvironmentConfiguration._buildCacheWriteAllowed =
               EnvironmentConfiguration.parseBooleanEnvironmentVariable(
                 EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED,
+                value
+              );
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_COBUILD_ENABLED: {
+            EnvironmentConfiguration._cobuildEnabled =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_COBUILD_ENABLED,
                 value
               );
             break;

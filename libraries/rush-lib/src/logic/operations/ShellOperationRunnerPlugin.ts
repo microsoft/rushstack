@@ -31,6 +31,7 @@ function createShellOperations(
 ): Set<Operation> {
   const {
     buildCacheConfiguration,
+    cobuildConfiguration,
     isIncrementalBuildAllowed,
     phaseSelection: selectedPhases,
     projectChangeAnalyzer,
@@ -79,6 +80,7 @@ function createShellOperations(
       if (commandToRun) {
         operation.runner = new ShellOperationRunner({
           buildCacheConfiguration,
+          cobuildConfiguration,
           commandToRun: commandToRun || '',
           displayName,
           isIncrementalBuildAllowed,

@@ -37,6 +37,7 @@ import { IExecutionResult } from '../../logic/operations/IOperationExecutionResu
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
+import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -299,8 +300,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const changedProjectsOnly: boolean = !!this._changedProjectsOnly?.value;
 
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    let cobuildConfiguration: CobuildConfiguration | undefined;
     if (!this._disableBuildCache) {
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
+        terminal,
+        this.rushConfiguration,
+        this.rushSession
+      );
+      cobuildConfiguration = await CobuildConfiguration.tryLoadAsync(
         terminal,
         this.rushConfiguration,
         this.rushSession
@@ -325,6 +332,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const initialCreateOperationsContext: ICreateOperationsContext = {
       buildCacheConfiguration,
+      cobuildConfiguration,
       customParameters: customParametersByName,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       isInitial: true,

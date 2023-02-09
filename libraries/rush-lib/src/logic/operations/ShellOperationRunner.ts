@@ -35,11 +35,14 @@ import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvid
 import { RushConstants } from '../RushConstants';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { OperationMetadataManager } from './OperationMetadataManager';
+import { RunnerWatcher } from './RunnerWatcher';
+import { CobuildLock, ICobuildCompletedState } from '../cobuild/CobuildLock';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { ProjectChangeAnalyzer, IRawRepoState } from '../ProjectChangeAnalyzer';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
 export interface IProjectDeps {
@@ -51,6 +54,7 @@ export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  cobuildConfiguration: CobuildConfiguration | undefined;
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
@@ -95,6 +99,7 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _phase: IPhase;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  private readonly _cobuildConfiguration: CobuildConfiguration | undefined;
   private readonly _commandName: string;
   private readonly _commandToRun: string;
   private readonly _isCacheReadAllowed: boolean;
@@ -108,6 +113,7 @@ export class ShellOperationRunner implements IOperationRunner {
    * undefined === we didn't create one because the feature is not enabled
    */
   private _projectBuildCache: ProjectBuildCache | undefined | UNINITIALIZED = UNINITIALIZED;
+  private _cobuildLock: CobuildLock | undefined | UNINITIALIZED = UNINITIALIZED;
 
   public constructor(options: IOperationRunnerOptions) {
     const { phase } = options;
@@ -117,6 +123,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this._phase = phase;
     this._rushConfiguration = options.rushConfiguration;
     this._buildCacheConfiguration = options.buildCacheConfiguration;
+    this._cobuildConfiguration = options.cobuildConfiguration;
     this._commandName = phase.name;
     this._commandToRun = options.commandToRun;
     this._isCacheReadAllowed = options.isIncrementalBuildAllowed;
@@ -150,6 +157,10 @@ export class ShellOperationRunner implements IOperationRunner {
       context.collatedWriter.terminal,
       this._logFilenameIdentifier
     );
+    const runnerWatcher: RunnerWatcher = new RunnerWatcher({
+      interval: 10 * 1000
+      // interval: 1000
+    });
 
     try {
       const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
@@ -247,6 +258,16 @@ export class ShellOperationRunner implements IOperationRunner {
         });
       }
 
+      // Try to acquire the cobuild lock
+      let cobuildLock: CobuildLock | undefined;
+      if (this._cobuildConfiguration?.cobuildEnabled) {
+        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
+          terminal,
+          trackedFiles
+        );
+        cobuildLock = await this._tryGetCobuildLockAsync(terminal, projectBuildCache);
+      }
+
       // If possible, we want to skip this operation -- either by restoring it from the
       // cache, if caching is enabled, or determining that the project
       // is unchanged (using the older incremental execution logic). These two approaches,
@@ -264,8 +285,30 @@ export class ShellOperationRunner implements IOperationRunner {
       //     false if a dependency wasn't able to be skipped.
       //
       let buildCacheReadAttempted: boolean = false;
-      if (this._isCacheReadAllowed) {
-        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
+      if (cobuildLock) {
+        // handling rebuilds. "rush rebuild" or "rush retest" command will save operations to
+        // the build cache once completed, but does not retrieve them (since the "incremental"
+        // flag is disabled). However, we still need a cobuild to be able to retrieve a finished
+        // build from another cobuild in this case.
+        const cobuildCompletedState: ICobuildCompletedState | undefined =
+          await cobuildLock.getCompletedStateAsync();
+        if (cobuildCompletedState) {
+          const { status, cacheId } = cobuildCompletedState;
+
+          const restoreFromCacheSuccess: boolean | undefined =
+            await cobuildLock.projectBuildCache.tryRestoreFromCacheAsync(terminal, cacheId);
+
+          if (restoreFromCacheSuccess) {
+            // Restore the original state of the operation without cache
+            await context._operationStateFile?.tryRestoreAsync();
+            if (cobuildCompletedState) {
+              return cobuildCompletedState.status;
+            }
+            return status;
+          }
+        }
+      } else if (this._isCacheReadAllowed) {
+        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
           terminal,
           trackedProjectFiles,
           operationMetadataManager: context._operationMetadataManager
@@ -317,8 +360,25 @@ export class ShellOperationRunner implements IOperationRunner {
         return OperationStatus.Success;
       }
 
+      if (this.isCacheWriteAllowed && cobuildLock) {
+        const acquireSuccess: boolean = await cobuildLock.tryAcquireLockAsync();
+        if (acquireSuccess) {
+          if (context.status === OperationStatus.RemoteExecuting) {
+            // This operation is used to marked remote executing, now change it to executing
+            context.status = OperationStatus.Executing;
+          }
+          runnerWatcher.addCallback(async () => {
+            await cobuildLock?.renewLockAsync();
+          });
+        } else {
+          // failed to acquire the lock, mark current operation to remote executing
+          return OperationStatus.RemoteExecuting;
+        }
+      }
+
       // Run the operation
       terminal.writeLine('Invoking: ' + this._commandToRun);
+      runnerWatcher.start();
 
       const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
         this._commandToRun,
@@ -366,6 +426,37 @@ export class ShellOperationRunner implements IOperationRunner {
         }
       );
 
+      let setCompletedStatePromise: Promise<void> | undefined;
+      let setCacheEntryPromise: Promise<boolean> | undefined;
+      if (cobuildLock && this.isCacheWriteAllowed) {
+        const { projectBuildCache } = cobuildLock;
+        const cacheId: string | undefined = projectBuildCache.cacheId;
+        const contextId: string = cobuildLock.cobuildConfiguration.contextId;
+
+        if (cacheId) {
+          const finalCacheId: string =
+            status === OperationStatus.Failure ? `${cacheId}-${contextId}-failed` : cacheId;
+          switch (status) {
+            case OperationStatus.SuccessWithWarning:
+            case OperationStatus.Success:
+            case OperationStatus.Failure: {
+              setCompletedStatePromise = cobuildLock
+                .setCompletedStateAsync({
+                  status,
+                  cacheId: finalCacheId
+                })
+                .then(() => {
+                  return cobuildLock?.releaseLockAsync();
+                });
+              setCacheEntryPromise = cobuildLock.projectBuildCache.trySetCacheEntryAsync(
+                terminal,
+                finalCacheId
+              );
+            }
+          }
+        }
+      }
+
       const taskIsSuccessful: boolean =
         status === OperationStatus.Success ||
         (status === OperationStatus.SuccessWithWarning &&
@@ -373,9 +464,10 @@ export class ShellOperationRunner implements IOperationRunner {
           !!this._rushConfiguration.experimentsConfiguration.configuration
             .buildCacheWithAllowWarningsInSuccessfulBuild);
 
+      let writeProjectStatePromise: Promise<boolean> | undefined;
       if (taskIsSuccessful && projectDeps) {
         // Write deps on success.
-        const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(projectDeps, currentDepsPath, {
+        writeProjectStatePromise = JsonFile.saveAsync(projectDeps, currentDepsPath, {
           ensureFolderExists: true
         });
 
@@ -389,23 +481,22 @@ export class ShellOperationRunner implements IOperationRunner {
 
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
-        const setCacheEntryPromise: Promise<boolean> | undefined = this.isCacheWriteAllowed
-          ? (
-              await this._tryGetProjectBuildCacheAsync({
-                terminal,
-                trackedProjectFiles,
-                operationMetadataManager: context._operationMetadataManager
-              })
-            )?.trySetCacheEntryAsync(terminal)
-          : undefined;
-
-        const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
-
-        if (terminalProvider.hasErrors) {
-          status = OperationStatus.Failure;
-        } else if (cacheWriteSuccess === false) {
-          status = OperationStatus.SuccessWithWarning;
+        if (!setCacheEntryPromise && this.isCacheWriteAllowed) {
+          setCacheEntryPromise = (
+            await this._tryGetProjectBuildCacheAsync(terminal, trackedFiles)
+          )?.trySetCacheEntryAsync(terminal);
         }
+      }
+      const [, cacheWriteSuccess] = await Promise.all([
+        writeProjectStatePromise,
+        setCacheEntryPromise,
+        setCompletedStatePromise
+      ]);
+
+      if (terminalProvider.hasErrors) {
+        status = OperationStatus.Failure;
+      } else if (cacheWriteSuccess === false) {
+        status = OperationStatus.SuccessWithWarning;
       }
 
       normalizeNewlineTransform.close();
@@ -419,6 +510,7 @@ export class ShellOperationRunner implements IOperationRunner {
       return status;
     } finally {
       projectLogWritable.close();
+      runnerWatcher.stop();
     }
   }
 
@@ -512,6 +604,24 @@ export class ShellOperationRunner implements IOperationRunner {
     }
 
     return this._projectBuildCache;
+  }
+
+  private async _tryGetCobuildLockAsync(
+    terminal: ITerminal,
+    projectBuildCache: ProjectBuildCache | undefined
+  ): Promise<CobuildLock | undefined> {
+    if (this._cobuildLock === UNINITIALIZED) {
+      this._cobuildLock = undefined;
+
+      if (projectBuildCache && this._cobuildConfiguration && this._cobuildConfiguration.cobuildEnabled) {
+        this._cobuildLock = new CobuildLock({
+          cobuildConfiguration: this._cobuildConfiguration,
+          projectBuildCache: projectBuildCache,
+          terminal
+        });
+      }
+    }
+    return this._cobuildLock;
   }
 }
 

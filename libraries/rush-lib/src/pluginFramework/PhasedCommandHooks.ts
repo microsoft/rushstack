@@ -8,10 +8,10 @@ import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import type { IPhase } from '../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-
 import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
-import { IExecutionResult } from '../logic/operations/IOperationExecutionResult';
+import type { IExecutionResult } from '../logic/operations/IOperationExecutionResult';
+import type { CobuildConfiguration } from '../api/CobuildConfiguration';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -33,6 +33,10 @@ export interface ICreateOperationsContext {
    * The configuration for the build cache, if the feature is enabled.
    */
   readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  /**
+   * The configuration for the cobuild, if cobuild feature and build cache feature are both enabled.
+   */
+  readonly cobuildConfiguration: CobuildConfiguration | undefined;
   /**
    * The set of custom parameters for the executing command.
    * Maps from the `longName` field in command-line.json to the parser configuration in ts-command-line.

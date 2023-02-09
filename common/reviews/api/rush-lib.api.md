@@ -95,6 +95,23 @@ export class ChangeManager {
 // @beta (undocumented)
 export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
 
+// @beta
+export class CobuildConfiguration {
+    readonly cobuildEnabled: boolean;
+    // Warning: (ae-forgotten-export) The symbol "ICobuildLockProvider" needs to be exported by the entry point index.d.ts
+    readonly cobuildLockProvider: ICobuildLockProvider;
+    // (undocumented)
+    get contextId(): string;
+    // (undocumented)
+    static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string;
+    static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<CobuildConfiguration | undefined>;
+}
+
+// Warning: (ae-forgotten-export) The symbol "ICobuildJson" needs to be exported by the entry point index.d.ts
+//
+// @beta (undocumented)
+export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuildLockProvider;
+
 // @public
 export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
@@ -149,6 +166,7 @@ export class EnvironmentConfiguration {
     static get buildCacheCredential(): string | undefined;
     static get buildCacheEnabled(): boolean | undefined;
     static get buildCacheWriteAllowed(): boolean | undefined;
+    static get cobuildEnabled(): boolean | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -173,6 +191,7 @@ export enum EnvironmentVariableNames {
     RUSH_BUILD_CACHE_CREDENTIAL = "RUSH_BUILD_CACHE_CREDENTIAL",
     RUSH_BUILD_CACHE_ENABLED = "RUSH_BUILD_CACHE_ENABLED",
     RUSH_BUILD_CACHE_WRITE_ALLOWED = "RUSH_BUILD_CACHE_WRITE_ALLOWED",
+    RUSH_COBUILD_ENABLED = "RUSH_COBUILD_ENABLED",
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
@@ -258,6 +277,7 @@ export interface IConfigurationEnvironmentVariable {
 // @alpha
 export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    readonly cobuildConfiguration: CobuildConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
@@ -432,6 +452,7 @@ export interface IOperationRunnerContext {
     // @internal
     _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
+    status: OperationStatus;
     stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
 }
@@ -672,7 +693,9 @@ export enum OperationStatus {
     Failure = "FAILURE",
     FromCache = "FROM CACHE",
     NoOp = "NO OP",
+    Queued = "Queued",
     Ready = "READY",
+    RemoteExecuting = "REMOTE EXECUTING",
     Skipped = "SKIPPED",
     Success = "SUCCESS",
     SuccessWithWarning = "SUCCESS WITH WARNINGS"
@@ -954,6 +977,8 @@ export class RushConstants {
     static readonly buildCommandName: string;
     static readonly bulkCommandKind: 'bulk';
     static readonly changeFilesFolderName: string;
+    static readonly cobuildFilename: string;
+    static readonly cobuildLockVersion: number;
     static readonly commandLineFilename: string;
     static readonly commonFolderName: string;
     static readonly commonVersionsFilename: string;
@@ -1026,11 +1051,15 @@ export class RushSession {
     // (undocumented)
     getCloudBuildCacheProviderFactory(cacheProviderName: string): CloudBuildCacheProviderFactory | undefined;
     // (undocumented)
+    getCobuildLockProviderFactory(cobuildLockProviderName: string): CobuildLockProviderFactory | undefined;
+    // (undocumented)
     getLogger(name: string): ILogger;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
     // (undocumented)
     registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: CloudBuildCacheProviderFactory): void;
+    // (undocumented)
+    registerCobuildLockProviderFactory(cobuildLockProviderName: string, factory: CobuildLockProviderFactory): void;
     // (undocumented)
     get terminalProvider(): ITerminalProvider;
 }

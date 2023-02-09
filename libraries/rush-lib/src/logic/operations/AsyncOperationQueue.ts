@@ -84,6 +84,10 @@ export class AsyncOperationQueue
       return;
     }
 
+    queue.forEach((q) => {
+      console.log(q.name, q.status);
+    });
+
     // By iterating in reverse order we do less array shuffling when removing operations
     for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];
@@ -99,9 +103,13 @@ export class AsyncOperationQueue
         // It shouldn't be on the queue, remove it
         queue.splice(i, 1);
       } else if (
-        operation.status === OperationStatus.RemotePending ||
-        operation.status === OperationStatus.RemoteExecuting
+        operation.status === OperationStatus.Queued ||
+        operation.status === OperationStatus.Executing
       ) {
+        // This operation is currently executing
+        // next one plz :)
+        continue;
+      } else if (operation.status === OperationStatus.RemoteExecuting) {
         // This operation is not ready to execute yet, but it may become ready later
         // next one plz :)
         continue;
@@ -111,6 +119,7 @@ export class AsyncOperationQueue
       } else if (operation.dependencies.size === 0) {
         // This task is ready to process, hand it to the iterator.
         // Needs to have queue semantics, otherwise tools that iterate it get confused
+        operation.status = OperationStatus.Queued;
         waitingIterators.shift()!({
           value: operation,
           done: false
@@ -149,19 +158,6 @@ export class AsyncOperationQueue
    */
   public [Symbol.asyncIterator](): AsyncIterator<OperationExecutionRecord> {
     return this;
-  }
-
-  /**
-   * Recursively sets the status of all operations that consume the specified operation.
-   */
-  public static setOperationConsumersStatusRecursively(
-    operation: OperationExecutionRecord,
-    operationStatus: OperationStatus
-  ): void {
-    for (const consumer of operation.consumers) {
-      consumer.status = operationStatus;
-      AsyncOperationQueue.setOperationConsumersStatusRecursively(consumer, operationStatus);
-    }
   }
 }
 

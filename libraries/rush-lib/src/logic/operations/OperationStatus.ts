@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
 /**
@@ -11,6 +11,10 @@ export enum OperationStatus {
    */
   Ready = 'READY',
   /**
+   * The Operation is Queued
+   */
+  Queued = 'Queued',
+  /**
    * The Operation is currently executing
    */
   Executing = 'EXECUTING',
@@ -18,11 +22,6 @@ export enum OperationStatus {
    * The Operation is currently executing by a remote process
    */
   RemoteExecuting = 'REMOTE EXECUTING',
-  /**
-   * The Operation is pending because one of the upstream operation is
-   * executing by a remote process
-   */
-  RemotePending = 'REMOTE PENDING',
   /**
    * The Operation completed successfully and did not write to standard output
    */

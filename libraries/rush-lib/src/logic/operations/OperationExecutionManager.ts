@@ -189,6 +189,11 @@ export class OperationExecutionManager {
       record: OperationExecutionRecord
     ) => {
       this._onOperationComplete(record);
+
+      if (record.status !== OperationStatus.RemoteExecuting) {
+        // If the operation was not remote, then we can notify queue that it is complete
+        executionQueue.complete();
+      }
     };
 
     await Async.forEachAsync(
@@ -328,8 +333,10 @@ export class OperationExecutionManager {
         item.runner.isSkipAllowed = false;
       }
 
-      // Remove this operation from the dependencies, to unblock the scheduler
-      item.dependencies.delete(record);
+      if (status !== OperationStatus.RemoteExecuting) {
+        // Remove this operation from the dependencies, to unblock the scheduler
+        item.dependencies.delete(record);
+      }
     }
   }
 }

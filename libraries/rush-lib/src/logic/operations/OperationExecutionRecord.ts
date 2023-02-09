@@ -138,6 +138,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
     try {
       this.status = await this.runner.executeAsync(this);
+
+      if (this.status === OperationStatus.RemoteExecuting) {
+        this.stopwatch.reset();
+      }
+
       // Delegate global state reporting
       onResult(this);
     } catch (error) {
@@ -146,9 +151,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       // Delegate global state reporting
       onResult(this);
     } finally {
-      this._collatedWriter?.close();
-      this.stdioSummarizer.close();
-      this.stopwatch.stop();
+      if (this.status !== OperationStatus.RemoteExecuting) {
+        this._collatedWriter?.close();
+        this.stdioSummarizer.close();
+        this.stopwatch.stop();
+      }
     }
   }
 }
