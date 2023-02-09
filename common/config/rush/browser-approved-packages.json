@@ -35,6 +35,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/heft-napi-rs-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },
