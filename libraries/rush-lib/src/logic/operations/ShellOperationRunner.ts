@@ -34,7 +34,7 @@ import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProj
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { RushConstants } from '../RushConstants';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { OperationStateFile } from './OperationStateFile';
+import { OperationMetadataManager } from './OperationMetadataManager';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -209,17 +209,17 @@ export class ShellOperationRunner implements IOperationRunner {
       }
 
       let projectDeps: IProjectDeps | undefined;
-      let trackedFiles: string[] | undefined;
+      let trackedProjectFiles: string[] | undefined;
       try {
         const fileHashes: Map<string, string> | undefined =
           await this._projectChangeAnalyzer._tryGetProjectDependenciesAsync(this._rushProject, terminal);
 
         if (fileHashes) {
           const files: { [filePath: string]: string } = {};
-          trackedFiles = [];
+          trackedProjectFiles = [];
           for (const [filePath, fileHash] of fileHashes) {
             files[filePath] = fileHash;
-            trackedFiles.push(filePath);
+            trackedProjectFiles.push(filePath);
           }
 
           projectDeps = {
@@ -265,10 +265,11 @@ export class ShellOperationRunner implements IOperationRunner {
       //
       let buildCacheReadAttempted: boolean = false;
       if (this._isCacheReadAllowed) {
-        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
+        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
           terminal,
-          trackedFiles
-        );
+          trackedProjectFiles,
+          operationMetadataManager: context._operationMetadataManager
+        });
 
         buildCacheReadAttempted = !!projectBuildCache;
         const restoreFromCacheSuccess: boolean | undefined =
@@ -276,7 +277,11 @@ export class ShellOperationRunner implements IOperationRunner {
 
         if (restoreFromCacheSuccess) {
           // Restore the original state of the operation without cache
-          await context._operationStateFile?.tryRestoreAsync();
+          await context._operationMetadataManager?.tryRestoreAsync({
+            terminal,
+            logPath: projectLogWritable.logPath,
+            errorLogPath: projectLogWritable.errorLogPath
+          });
           return OperationStatus.FromCache;
         }
       }
@@ -374,18 +379,24 @@ export class ShellOperationRunner implements IOperationRunner {
           ensureFolderExists: true
         });
 
-        // If the operation without cache was successful, we can save the state to disk
+        // If the operation without cache was successful, we can save the metadata to disk
         const { duration: durationInSeconds } = context.stopwatch;
-        await context._operationStateFile?.writeAsync({
-          nonCachedDurationMs: durationInSeconds * 1000
+        await context._operationMetadataManager?.saveAsync({
+          durationInSeconds,
+          logPath: projectLogWritable.logPath,
+          errorLogPath: projectLogWritable.errorLogPath
         });
 
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
         const setCacheEntryPromise: Promise<boolean> | undefined = this.isCacheWriteAllowed
-          ? (await this._tryGetProjectBuildCacheAsync(terminal, trackedFiles))?.trySetCacheEntryAsync(
-              terminal
-            )
+          ? (
+              await this._tryGetProjectBuildCacheAsync({
+                terminal,
+                trackedProjectFiles,
+                operationMetadataManager: context._operationMetadataManager
+              })
+            )?.trySetCacheEntryAsync(terminal)
           : undefined;
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
@@ -411,10 +422,15 @@ export class ShellOperationRunner implements IOperationRunner {
     }
   }
 
-  private async _tryGetProjectBuildCacheAsync(
-    terminal: ITerminal,
-    trackedProjectFiles: string[] | undefined
-  ): Promise<ProjectBuildCache | undefined> {
+  private async _tryGetProjectBuildCacheAsync({
+    terminal,
+    trackedProjectFiles,
+    operationMetadataManager
+  }: {
+    terminal: ITerminal;
+    trackedProjectFiles: string[] | undefined;
+    operationMetadataManager: OperationMetadataManager | undefined;
+  }): Promise<ProjectBuildCache | undefined> {
     if (this._projectBuildCache === UNINITIALIZED) {
       this._projectBuildCache = undefined;
 
@@ -443,7 +459,7 @@ export class ShellOperationRunner implements IOperationRunner {
               const projectOutputFolderNames: ReadonlyArray<string> =
                 operationSettings.outputFolderNames || [];
               const additionalProjectOutputFilePaths: ReadonlyArray<string> = [
-                OperationStateFile.getFilenameRelativeToProjectRoot(this._phase)
+                ...(operationMetadataManager?.relativeFilepaths || [])
               ];
               const additionalContext: Record<string, string> = {};
               if (operationSettings.dependsOnEnvVars) {

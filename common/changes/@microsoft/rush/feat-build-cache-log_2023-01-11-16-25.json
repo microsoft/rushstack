@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Include operation log files in the cache, and restore them during cache hits.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
