@@ -20,13 +20,13 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-3.1.1.tgz
-      '@rushstack/heft': file:rushstack-heft-0.49.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.49.6.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.8.4
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-3.1.1.tgz_esueefhpt5ql6xiqdj4wcgwfzi
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.49.5.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.49.6.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.8.4
       typescript: 4.8.4
@@ -34,13 +34,13 @@ importers:
   typescript-v3-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-3.1.1.tgz
-      '@rushstack/heft': file:rushstack-heft-0.49.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.49.6.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.8.4
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-3.1.1.tgz_esueefhpt5ql6xiqdj4wcgwfzi
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.49.5.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.49.6.tgz
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.8.4
       typescript: 4.8.4
@@ -2258,7 +2258,7 @@ packages:
     dev: false
 
   /json-buffer/3.0.0:
-    resolution: {integrity: sha1-Wx85evx11ne96Lz8Dkfh+aPZqJg=}
+    resolution: {integrity: sha512-CuUqjv0FUZIdXkHPI8MezCnFCdaTAacej1TZYulLoAg1h/PhwkdXFN4V/gzY4g+fMBCOV2xF+rp7t2XD2ns/NQ==}
     dev: false
 
   /json-parse-even-better-errors/2.3.1:
@@ -3989,12 +3989,12 @@ packages:
     engines: {node: '>=5.6.0'}
     dependencies:
       '@pnpm/link-bins': 5.3.25
-      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.7.tgz_@types+node@14.18.36
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz_@types+node@14.18.36
-      '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.0.6.tgz_@types+node@14.18.36
+      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.8.tgz_@types+node@14.18.36
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz_@types+node@14.18.36
+      '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.0.7.tgz_@types+node@14.18.36
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.17.tgz
-      '@rushstack/stream-collator': file:../temp/tarballs/rushstack-stream-collator-4.0.225.tgz_@types+node@14.18.36
-      '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.5.0.tgz_@types+node@14.18.36
+      '@rushstack/stream-collator': file:../temp/tarballs/rushstack-stream-collator-4.0.226.tgz_@types+node@14.18.36
+      '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.5.1.tgz_@types+node@14.18.36
       '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.13.1.tgz
       '@types/node-fetch': 2.6.2
       '@yarnpkg/lockfile': 1.0.2
@@ -4111,15 +4111,15 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.49.5.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.49.5.tgz}
+  file:../temp/tarballs/rushstack-heft-0.49.6.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.49.6.tgz}
     name: '@rushstack/heft'
-    version: 0.49.5
+    version: 0.49.6
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
-      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.7.tgz
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz
+      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.8.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.17.tgz
       '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.13.1.tgz
       '@types/tapable': 1.0.6
@@ -4136,37 +4136,37 @@ packages:
       - '@types/node'
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-config-file-0.11.7.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.11.7.tgz}
+  file:../temp/tarballs/rushstack-heft-config-file-0.11.8.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.11.8.tgz}
     name: '@rushstack/heft-config-file'
-    version: 0.11.7
+    version: 0.11.8
     engines: {node: '>=10.13.0'}
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.17.tgz
       jsonpath-plus: 4.0.0
     transitivePeerDependencies:
       - '@types/node'
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-config-file-0.11.7.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.11.7.tgz}
-    id: file:../temp/tarballs/rushstack-heft-config-file-0.11.7.tgz
+  file:../temp/tarballs/rushstack-heft-config-file-0.11.8.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.11.8.tgz}
+    id: file:../temp/tarballs/rushstack-heft-config-file-0.11.8.tgz
     name: '@rushstack/heft-config-file'
-    version: 0.11.7
+    version: 0.11.8
     engines: {node: '>=10.13.0'}
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz_@types+node@14.18.36
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz_@types+node@14.18.36
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.17.tgz
       jsonpath-plus: 4.0.0
     transitivePeerDependencies:
       - '@types/node'
     dev: false
 
-  file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz}
+  file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz}
     name: '@rushstack/node-core-library'
-    version: 3.55.0
+    version: 3.55.1
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -4182,11 +4182,11 @@ packages:
       z-schema: 5.0.3
     dev: true
 
-  file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz}
-    id: file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz
+  file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz}
+    id: file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz
     name: '@rushstack/node-core-library'
-    version: 3.55.0
+    version: 3.55.1
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -4203,13 +4203,13 @@ packages:
       z-schema: 5.0.3
     dev: false
 
-  file:../temp/tarballs/rushstack-package-deps-hash-4.0.6.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-package-deps-hash-4.0.6.tgz}
-    id: file:../temp/tarballs/rushstack-package-deps-hash-4.0.6.tgz
+  file:../temp/tarballs/rushstack-package-deps-hash-4.0.7.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-package-deps-hash-4.0.7.tgz}
+    id: file:../temp/tarballs/rushstack-package-deps-hash-4.0.7.tgz
     name: '@rushstack/package-deps-hash'
-    version: 4.0.6
+    version: 4.0.7
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz_@types+node@14.18.36
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz_@types+node@14.18.36
     transitivePeerDependencies:
       - '@types/node'
     dev: false
@@ -4222,30 +4222,30 @@ packages:
       resolve: 1.22.1
       strip-json-comments: 3.1.1
 
-  file:../temp/tarballs/rushstack-stream-collator-4.0.225.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-stream-collator-4.0.225.tgz}
-    id: file:../temp/tarballs/rushstack-stream-collator-4.0.225.tgz
+  file:../temp/tarballs/rushstack-stream-collator-4.0.226.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-stream-collator-4.0.226.tgz}
+    id: file:../temp/tarballs/rushstack-stream-collator-4.0.226.tgz
     name: '@rushstack/stream-collator'
-    version: 4.0.225
+    version: 4.0.226
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz_@types+node@14.18.36
-      '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.5.0.tgz_@types+node@14.18.36
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz_@types+node@14.18.36
+      '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.5.1.tgz_@types+node@14.18.36
     transitivePeerDependencies:
       - '@types/node'
     dev: false
 
-  file:../temp/tarballs/rushstack-terminal-0.5.0.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-terminal-0.5.0.tgz}
-    id: file:../temp/tarballs/rushstack-terminal-0.5.0.tgz
+  file:../temp/tarballs/rushstack-terminal-0.5.1.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-terminal-0.5.1.tgz}
+    id: file:../temp/tarballs/rushstack-terminal-0.5.1.tgz
     name: '@rushstack/terminal'
-    version: 0.5.0
+    version: 0.5.1
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
       '@types/node':
         optional: true
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.0.tgz_@types+node@14.18.36
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.1.tgz_@types+node@14.18.36
       '@types/node': 14.18.36
       wordwrap: 1.0.0
     dev: false
