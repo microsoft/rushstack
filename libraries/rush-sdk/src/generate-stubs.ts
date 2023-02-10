@@ -47,17 +47,20 @@ function generateLibFilesRecursively(options: {
   }
 }
 
-const rushLibFolder: string = Import.resolvePackage({
-  baseFolderPath: __dirname,
-  packageName: '@microsoft/rush-lib'
-});
+// Entry point invoked by "runScript" action from config/heft.json
+export function run(): void {
+  const rushLibFolder: string = Import.resolvePackage({
+    baseFolderPath: __dirname,
+    packageName: '@microsoft/rush-lib'
+  });
 
-const stubsTargetPath: string = path.resolve(__dirname, '../lib');
-console.log('Generating stubs under: ' + stubsTargetPath);
-generateLibFilesRecursively({
-  parentSourcePath: path.join(rushLibFolder, 'lib'),
-  parentTargetPath: stubsTargetPath,
-  parentSrcImportPathWithSlash: '',
-  libShimIndexPath: path.join(__dirname, '../lib-shim/index')
-});
-console.log('Finished generating stubs.');
+  const stubsTargetPath: string = path.resolve(__dirname, '../lib');
+  console.log('generate-stubs: Generating stub files under: ' + stubsTargetPath);
+  generateLibFilesRecursively({
+    parentSourcePath: path.join(rushLibFolder, 'lib'),
+    parentTargetPath: stubsTargetPath,
+    parentSrcImportPathWithSlash: '',
+    libShimIndexPath: path.join(__dirname, '../lib-shim/index')
+  });
+  console.log('generate-stubs: Completed successfully.');
+}

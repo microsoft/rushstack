@@ -10,7 +10,7 @@
       "actionKind": "deleteGlobs",
       "heftEvent": "clean",
       "actionId": "defaultClean",
-      "globsToDelete": ["dist", "lib", "lib-shim", "temp"]
+      "globsToDelete": ["lib-shim"]
     },
     {
       /**
@@ -91,6 +91,12 @@
           // "hardlink": false
         }
       ]
+    },
+    {
+      "actionKind": "runScript",
+      "heftEvent": "post-build",
+      "actionId": "generate-stubs",
+      "scriptPath": "./lib-shim/generate-stubs.js"
     }
   ]
 }
