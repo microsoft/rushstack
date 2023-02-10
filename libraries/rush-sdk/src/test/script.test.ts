@@ -22,7 +22,8 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
         currentWorkingDirectory: mockPackageFolder,
         environment: {
           ...process.env,
-          RUSH_SDK_DEBUG: '1'
+          RUSH_SDK_DEBUG: '1',
+          RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
         }
       }
     );
@@ -44,7 +45,8 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
         currentWorkingDirectory: mockPackageFolder,
         environment: {
           ...process.env,
-          RUSH_SDK_DEBUG: '1'
+          RUSH_SDK_DEBUG: '1',
+          RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
         }
       }
     );
@@ -93,7 +95,8 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));
         currentWorkingDirectory: mockPackageFolder,
         environment: {
           ...process.env,
-          RUSH_SDK_DEBUG: '1'
+          RUSH_SDK_DEBUG: '1',
+          RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
         }
       }
     );
