@@ -18,7 +18,7 @@ export class RushInternals {
    * @returns the module object as would be returned by `require()`
    */
   public static loadModule(srcImportPath: string): unknown {
-    const libPath: string = path.join(Rush._rushLibPackageFolder, 'lib', srcImportPath);
+    const libPath: string = `${Rush._rushLibPackageFolder}/lib/${srcImportPath}`;
     try {
       return require(libPath);
     } catch (e) {
