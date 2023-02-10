@@ -15,8 +15,8 @@
 
     "module": "commonjs",
     "target": "es6",
-    "lib": ["es5", "es2015.collection", "es2015.iterable", "es2015.promise"]
+    "lib": ["es5", "es2015.collection", "es2015.iterable", "es2015.promise"],
+    "rootDir": "src"
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["src/**/*.ts"]
 }
