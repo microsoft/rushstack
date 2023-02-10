@@ -84,10 +84,6 @@ export class AsyncOperationQueue
       return;
     }
 
-    queue.forEach((q) => {
-      console.log(q.name, q.status);
-    });
-
     // By iterating in reverse order we do less array shuffling when removing operations
     for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];

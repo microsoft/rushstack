@@ -66,6 +66,8 @@ describe(AsyncOperationQueue.name, () => {
       for (const consumer of operation.consumers) {
         consumer.dependencies.delete(operation);
       }
+      operation.status = OperationStatus.Success;
+      queue.complete();
     }
 
     expect(actualOrder).toEqual(expectedOrder);
