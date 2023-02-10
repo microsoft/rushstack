@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "use force checkout before pushing the published package.json changes",
-      "type": "none"
+      "comment": "move `git add` later, as some modified files were missing",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/rush"
