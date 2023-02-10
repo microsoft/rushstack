@@ -1,6 +1,18 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Sun, 05 Feb 2023 03:02:02 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 1.0.8
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 1.0.7
+Wed, 08 Feb 2023 19:58:16 GMT
+
+### Patches
+
+- Support context parameter in pnpmfile readPackage
 
 ## 1.0.6
 Sun, 05 Feb 2023 03:02:02 GMT

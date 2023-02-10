@@ -127,3 +127,8 @@ export {
   IOperationStateFileOptions as _IOperationStateFileOptions,
   IOperationStateJson as _IOperationStateJson
 } from './logic/operations/OperationStateFile';
+export {
+  OperationMetadataManager as _OperationMetadataManager,
+  IOperationMetadataManagerOptions as _IOperationMetadataManagerOptions,
+  IOperationMetaData as _IOperationMetadata
+} from './logic/operations/OperationMetadataManager';

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "",
+      "comment": "Include operation log files in the cache, and restore them during cache hits.",
       "type": "none"
     }
   ],

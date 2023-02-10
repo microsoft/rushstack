@@ -418,7 +418,7 @@ function buildRules(profile) {
           //                    just to save some typing.
           //
           // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-          '@typescript-eslint/no-parameter-properties': 'warn',
+          '@typescript-eslint/parameter-properties': 'warn',
 
           // RATIONALE:         When left in shipping code, unused variables often indicate a mistake.  Dead code
           //                    may impact performance.

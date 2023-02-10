@@ -1,6 +1,23 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 29 Jan 2023 20:10:17 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Feb 2023 20:27:06 GMT and should not be manually modified.
+
+## 5.90.2
+Wed, 08 Feb 2023 20:27:06 GMT
+
+_Version update only_
+
+## 5.90.1
+Wed, 08 Feb 2023 19:58:35 GMT
+
+### Patches
+
+- Fix determination of the root of the current Git worktree when in a multi-worktree setup.
+
+### Updates
+
+- Disable unused depcheck feature for upgrade-interactive.
+- Fix an issue where deleting the `common/temp/node_modules` folder encounters an EPERM error and aborts.
 
 ## 5.90.0
 Sun, 29 Jan 2023 20:10:17 GMT

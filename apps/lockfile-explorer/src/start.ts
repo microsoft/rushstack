@@ -169,7 +169,7 @@ function startApp(debugMode: boolean): void {
       const {
         hooks: { readPackage }
       } = require(appState.pnpmfileLocation);
-      const parsedPackage = readPackage(packageJson);
+      const parsedPackage = readPackage(packageJson, {});
       res.send(parsedPackage);
     }
   );
