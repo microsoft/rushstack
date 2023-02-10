@@ -150,7 +150,7 @@ export enum EnvironmentVariableNames {
    * @remarks
    * Specify `1` to enable the cobuild or `0` to disable it.
    *
-   * If there is no build cache configured, then this environment variable is ignored.
+   * If there is no cobuild configured, then this environment variable is ignored.
    */
   RUSH_COBUILD_ENABLED = 'RUSH_COBUILD_ENABLED',
 
