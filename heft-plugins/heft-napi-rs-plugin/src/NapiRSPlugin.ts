@@ -7,9 +7,7 @@ import {
   ScopedLogger
 } from '@rushstack/heft';
 
-import { SubprocessTerminator } from '@rushstack/node-core-library';
-
-import * as child_process from 'child_process';
+import { executeCommandAndCaptureOutput } from './childProcessUtils';
 
 const PLUGIN_NAME: string = 'NapiRSPlugin';
 
@@ -46,15 +44,12 @@ export class NapiRSPlugin implements IHeftPlugin {
     // emulate `napi build --platform --release`
     let buildArgs = ['build', '--platform', '--release', './lib'];
 
-    const napiBuildResults: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
+    const napiBuildResults = executeCommandAndCaptureOutput(
       'napi',
       buildArgs,
-      {
-        shell: true,
-        stdio: ['inherit', 'inherit'],
-        encoding: 'utf8',
-        ...SubprocessTerminator.RECOMMENDED_OPTIONS
-      }
+      heftConfiguration.buildFolder,
+      process.env,
+      true
     );
 
     logger.terminal.writeLine('\n' + napiBuildResults.output.join(''));
