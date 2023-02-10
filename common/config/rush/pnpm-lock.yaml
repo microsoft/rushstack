@@ -2574,6 +2574,25 @@ importers:
       '@types/node': 14.18.36
       webpack: 5.75.0
 
+  ../../webpack/webpack-embedded-dependencies-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 14.18.36
+      webpack: ~5.75.0
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 14.18.36
+      webpack: 5.75.0
+
   ../../webpack/webpack-plugin-utilities:
     specifiers:
       '@rushstack/eslint-config': workspace:*
