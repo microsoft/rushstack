@@ -260,7 +260,7 @@ export class VersionAction extends BaseRushAction {
 
       // Now merge to target branch.
       publishGit.fetch();
-      publishGit.checkout(targetBranch, { force: true });
+      publishGit.checkout(targetBranch);
       publishGit.pull(!this._ignoreGitHooksParameter.value);
       publishGit.merge(tempBranch, !this._ignoreGitHooksParameter.value);
       publishGit.push(targetBranch, !this._ignoreGitHooksParameter.value);

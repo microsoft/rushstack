@@ -290,14 +290,6 @@ export class PublishAction extends BaseRushAction {
       this._setDependenciesBeforeCommit();
 
       if (git.hasUncommittedChanges()) {
-        // Stage, commit, and push the changes to remote temp branch.
-        publishGit.addChanges(':/*');
-        publishGit.commit(
-          this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE,
-          !this._ignoreGitHooksParameter.value
-        );
-        publishGit.push(tempBranchName, !this._ignoreGitHooksParameter.value);
-
         this._setDependenciesBeforePublish();
 
         // Override tag parameter if there is a hotfix change.
@@ -326,12 +318,20 @@ export class PublishAction extends BaseRushAction {
 
         this._setDependenciesBeforeCommit();
 
+        // Stage, commit, and push the changes to remote temp branch.
+        publishGit.addChanges(':/*');
+        publishGit.commit(
+          this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE,
+          !this._ignoreGitHooksParameter.value
+        );
+        publishGit.push(tempBranchName, !this._ignoreGitHooksParameter.value);
+
         // Create and push appropriate Git tags.
         this._gitAddTags(publishGit, orderedChanges);
         publishGit.push(tempBranchName, !this._ignoreGitHooksParameter.value);
 
         // Now merge to target branch.
-        publishGit.checkout(this._targetBranch.value!, { force: true });
+        publishGit.checkout(this._targetBranch.value!);
         publishGit.pull(!this._ignoreGitHooksParameter.value);
         publishGit.merge(tempBranchName, !this._ignoreGitHooksParameter.value);
         publishGit.push(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
