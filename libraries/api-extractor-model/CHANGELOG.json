@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.26.4",
+      "tag": "@microsoft/api-extractor-model_v7.26.4",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.26.3",
       "tag": "@microsoft/api-extractor-model_v7.26.3",
       "date": "Sun, 05 Feb 2023 03:02:02 GMT",

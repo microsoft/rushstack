@@ -2,6 +2,27 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.0.8",
+      "tag": "@rushstack/lockfile-explorer_v1.0.8",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.7",
       "tag": "@rushstack/lockfile-explorer_v1.0.7",
       "date": "Wed, 08 Feb 2023 19:58:16 GMT",

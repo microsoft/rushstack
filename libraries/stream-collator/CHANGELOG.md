@@ -1,6 +1,11 @@
 # Change Log - @rushstack/stream-collator
 
-This log was last generated on Sun, 05 Feb 2023 03:02:02 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 4.0.227
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
 
 ## 4.0.226
 Sun, 05 Feb 2023 03:02:02 GMT

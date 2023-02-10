@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.2.0",
+      "tag": "@rushstack/eslint-config_v3.2.0",
+      "date": "Fri, 10 Feb 2023 01:18:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace the @typescript-eslint/no-parameter-properties rule with the replacement rule (@typescript-eslint/parameter-properties)."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.1",
       "tag": "@rushstack/eslint-config_v3.1.1",
       "date": "Mon, 10 Oct 2022 15:23:44 GMT",

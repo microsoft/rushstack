@@ -1,6 +1,11 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sun, 05 Feb 2023 03:02:02 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 3.55.2
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
 
 ## 3.55.1
 Sun, 05 Feb 2023 03:02:02 GMT

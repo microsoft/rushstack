@@ -2,6 +2,33 @@
   "name": "@microsoft/webpack5-load-themed-styles-loader",
   "entries": [
     {
+      "version": "0.1.11",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.11",
+      "date": "Fri, 10 Feb 2023 01:18:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.0.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.0.28` to `^2.0.29`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.10",
       "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.10",
       "date": "Sun, 05 Feb 2023 03:02:02 GMT",
