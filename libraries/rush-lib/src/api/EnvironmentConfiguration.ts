@@ -154,6 +154,12 @@ export enum EnvironmentVariableNames {
   RUSH_TAR_BINARY_PATH = 'RUSH_TAR_BINARY_PATH',
 
   /**
+   * Explicitly specifies the path for the version of `\@microsoft/rush-lib` being executed.
+   * Will be set upon loading Rush.
+   */
+  RUSH_LIB_PATH = 'RUSH_LIB_PATH',
+
+  /**
    * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
    * the repository root folder.  The original working directory (where the Rush command was invoked) is assigned
    * to the the child process's `RUSH_INVOKED_FOLDER` environment variable, in case it is needed by the script.
@@ -441,6 +447,7 @@ export class EnvironmentConfiguration {
             break;
 
           case EnvironmentVariableNames.RUSH_INVOKED_FOLDER:
+          case EnvironmentVariableNames.RUSH_LIB_PATH:
             // Assigned by Rush itself
             break;
 

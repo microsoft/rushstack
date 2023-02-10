@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add code path to @rushstack/rush-sdk for using the @microsoft/rush-lib version from a parent process.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
