@@ -118,7 +118,11 @@ export { IRushPluginConfigurationBase as _IRushPluginConfigurationBase } from '.
 export { ILogger } from './pluginFramework/logging/Logger';
 
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
-export { ICobuildLockProvider } from './logic/cobuild/ICobuildLockProvider';
+export {
+  ICobuildLockProvider,
+  ICobuildContext,
+  ICobuildCompletedState
+} from './logic/cobuild/ICobuildLockProvider';
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 

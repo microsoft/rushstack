@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RedisCobuildLockProvider getCompletedStateKey works 1`] = `"cobuild:v1:123:abc:completed"`;
+
+exports[`RedisCobuildLockProvider getLockKey works 1`] = `"cobuild:v1:123:abc:lock"`;

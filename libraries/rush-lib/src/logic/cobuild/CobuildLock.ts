@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { InternalError, ITerminal } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 
-import type { ITerminal } from '@rushstack/node-core-library';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import type { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
-import { OperationStatus } from '../operations/OperationStatus';
+import type { OperationStatus } from '../operations/OperationStatus';
+import type { ICobuildContext } from './ICobuildLockProvider';
 
 export interface ICobuildLockOptions {
   cobuildConfiguration: CobuildConfiguration;
@@ -19,97 +20,55 @@ export interface ICobuildCompletedState {
   cacheId: string;
 }
 
-const KEY_SEPARATOR: string = ':';
-const COMPLETED_STATE_SEPARATOR: string = ';';
-
 export class CobuildLock {
-  public readonly options: ICobuildLockOptions;
-  public readonly lockKey: string;
-  public readonly completedKey: string;
-
   public readonly projectBuildCache: ProjectBuildCache;
   public readonly cobuildConfiguration: CobuildConfiguration;
 
+  private _cobuildContext: ICobuildContext;
+
   public constructor(options: ICobuildLockOptions) {
-    this.options = options;
-    const { cobuildConfiguration, projectBuildCache } = options;
+    const { cobuildConfiguration, projectBuildCache, terminal } = options;
     this.projectBuildCache = projectBuildCache;
     this.cobuildConfiguration = cobuildConfiguration;
 
     const { contextId } = cobuildConfiguration;
     const { cacheId } = projectBuildCache;
-    // Example: cobuild:v1:<contextId>:<cacheId>:lock
-    this.lockKey = ['cobuild', `v${RushConstants.cobuildLockVersion}`, contextId, cacheId, 'lock'].join(
-      KEY_SEPARATOR
-    );
-    // Example: cobuild:v1:<contextId>:<cacheId>:completed
-    this.completedKey = [
-      'cobuild',
-      `v${RushConstants.cobuildLockVersion}`,
+
+    if (!cacheId) {
+      // This should never happen
+      throw new InternalError(`Cache id is require for cobuild lock`);
+    }
+
+    this._cobuildContext = {
+      terminal,
       contextId,
       cacheId,
-      'completed'
-    ].join(KEY_SEPARATOR);
+      version: RushConstants.cobuildLockVersion
+    };
   }
 
   public async setCompletedStateAsync(state: ICobuildCompletedState): Promise<void> {
-    const { terminal } = this.options;
-    const serializedState: string = this._serializeCompletedState(state);
-    terminal.writeDebugLine(`Set completed state by key ${this.completedKey}: ${serializedState}`);
-    await this.cobuildConfiguration.cobuildLockProvider.setCompletedStateAsync({
-      key: this.completedKey,
-      value: serializedState,
-      terminal
-    });
+    await this.cobuildConfiguration.cobuildLockProvider.setCompletedStateAsync(this._cobuildContext, state);
   }
 
   public async getCompletedStateAsync(): Promise<ICobuildCompletedState | undefined> {
-    const { terminal } = this.options;
-    const state: string | undefined =
-      await this.cobuildConfiguration.cobuildLockProvider.getCompletedStateAsync({
-        key: this.completedKey,
-        terminal
-      });
-    terminal.writeDebugLine(`Get completed state by key ${this.completedKey}: ${state}`);
-    if (!state) {
-      return;
-    }
-    return this._deserializeCompletedState(state);
+    const state: ICobuildCompletedState | undefined =
+      await this.cobuildConfiguration.cobuildLockProvider.getCompletedStateAsync(this._cobuildContext);
+    return state;
   }
 
   public async tryAcquireLockAsync(): Promise<boolean> {
-    const { terminal } = this.options;
-    // const result: boolean = true;
-    // const result: boolean = false;
-    // const result: boolean = Math.random() > 0.5;
-    const acquireLockResult: boolean = await this.cobuildConfiguration.cobuildLockProvider.acquireLockAsync({
-      lockKey: this.lockKey,
-      terminal
-    });
-    terminal.writeDebugLine(`Acquired lock for ${this.lockKey}, result: ${acquireLockResult}`);
+    const acquireLockResult: boolean = await this.cobuildConfiguration.cobuildLockProvider.acquireLockAsync(
+      this._cobuildContext
+    );
     return acquireLockResult;
   }
 
   public async releaseLockAsync(): Promise<void> {
-    const { terminal } = this.options;
-    terminal.writeDebugLine(`Released lock for ${this.lockKey}`);
-    return;
+    await this.cobuildConfiguration.cobuildLockProvider.releaseLockAsync(this._cobuildContext);
   }
 
   public async renewLockAsync(): Promise<void> {
-    const { terminal } = this.options;
-    terminal.writeDebugLine(`Renewed lock for ${this.lockKey}`);
-    return;
-  }
-
-  private _serializeCompletedState(state: ICobuildCompletedState): string {
-    // Example: SUCCESS;1234567890
-    // Example: FAILURE;1234567890
-    return `${state.status}${COMPLETED_STATE_SEPARATOR}${state.cacheId}`;
-  }
-
-  private _deserializeCompletedState(state: string): ICobuildCompletedState | undefined {
-    const [status, cacheId] = state.split(COMPLETED_STATE_SEPARATOR);
-    return { status: status as ICobuildCompletedState['status'], cacheId };
+    await this.cobuildConfiguration.cobuildLockProvider.renewLockAsync(this._cobuildContext);
   }
 }

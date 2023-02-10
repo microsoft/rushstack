@@ -75,6 +75,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@redis/client",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries" ]
     },

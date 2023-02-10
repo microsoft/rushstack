@@ -98,7 +98,6 @@ export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) =
 // @beta
 export class CobuildConfiguration {
     readonly cobuildEnabled: boolean;
-    // Warning: (ae-forgotten-export) The symbol "ICobuildLockProvider" needs to be exported by the entry point index.d.ts
     readonly cobuildLockProvider: ICobuildLockProvider;
     // (undocumented)
     get contextId(): string;
@@ -261,6 +260,39 @@ export interface ICloudBuildCacheProvider {
     updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
     // (undocumented)
     updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void>;
+}
+
+// @beta (undocumented)
+export interface ICobuildCompletedState {
+    cacheId: string;
+    // (undocumented)
+    status: OperationStatus.Success | OperationStatus.SuccessWithWarning | OperationStatus.Failure;
+}
+
+// @beta (undocumented)
+export interface ICobuildContext {
+    // (undocumented)
+    cacheId: string;
+    // (undocumented)
+    contextId: string;
+    // (undocumented)
+    terminal: ITerminal;
+    // (undocumented)
+    version: number;
+}
+
+// @beta (undocumented)
+export interface ICobuildLockProvider {
+    // (undocumented)
+    acquireLockAsync(context: ICobuildContext): Promise<boolean>;
+    // (undocumented)
+    getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined>;
+    // (undocumented)
+    releaseLockAsync(context: ICobuildContext): Promise<void>;
+    // (undocumented)
+    renewLockAsync(context: ICobuildContext): Promise<void>;
+    // (undocumented)
+    setCompletedStateAsync(context: ICobuildContext, state: ICobuildCompletedState): Promise<void>;
 }
 
 // @public
