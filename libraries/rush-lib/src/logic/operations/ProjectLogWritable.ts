@@ -13,8 +13,10 @@ export class ProjectLogWritable extends TerminalWritable {
   private readonly _project: RushConfigurationProject;
   private readonly _terminal: CollatedTerminal;
 
-  private _logPath: string;
-  private _errorLogPath: string;
+  public readonly logPath: string;
+  public readonly errorLogPath: string;
+  public readonly relativeLogPath: string;
+  public readonly relativeErrorLogPath: string;
 
   private _logWriter: FileWriter | undefined = undefined;
   private _errorLogWriter: FileWriter | undefined = undefined;
@@ -29,22 +31,35 @@ export class ProjectLogWritable extends TerminalWritable {
     this._terminal = terminal;
 
     function getLogFilePaths(
-      basePath: string,
-      logFilenameIdentifier: string
-    ): { logPath: string; errorLogPath: string } {
+      projectFolder: string,
+      logFilenameIdentifier: string,
+      logFolder?: string
+    ): { logPath: string; errorLogPath: string; relativeLogPath: string; relativeErrorLogPath: string } {
       const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
+      const logFilename: string = `${unscopedProjectName}.${logFilenameIdentifier}.log`;
+      const errorLogFilename: string = `${unscopedProjectName}.${logFilenameIdentifier}.error.log`;
+
+      const relativeLogPath: string = logFolder ? `${logFolder}/${logFilename}` : logFilename;
+      const relativeErrorLogPath: string = logFolder ? `${logFolder}/${errorLogFilename}` : errorLogFilename;
+
+      const logPath: string = `${projectFolder}/${relativeLogPath}`;
+      const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
 
       return {
-        logPath: `${basePath}/${unscopedProjectName}.${logFilenameIdentifier}.log`,
-        errorLogPath: `${basePath}/${unscopedProjectName}.${logFilenameIdentifier}.error.log`
+        logPath,
+        errorLogPath,
+        relativeLogPath,
+        relativeErrorLogPath
       };
     }
 
     const projectFolder: string = this._project.projectFolder;
-    const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = getLogFilePaths(
-      projectFolder,
-      'build'
-    );
+    const {
+      logPath: legacyLogPath,
+      errorLogPath: legacyErrorLogPath,
+      relativeLogPath: legacyRelativeLogPath,
+      relativeErrorLogPath: legacyRelativeErrorLogPath
+    } = getLogFilePaths(projectFolder, 'build');
     // If the phased commands experiment is enabled, put logs under `rush-logs`
     if (project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
       // Delete the legacy logs
@@ -54,18 +69,26 @@ export class ProjectLogWritable extends TerminalWritable {
       const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
       FileSystem.ensureFolder(logPathPrefix);
 
-      const { logPath, errorLogPath } = getLogFilePaths(logPathPrefix, logFilenameIdentifier);
-      this._logPath = logPath;
-      this._errorLogPath = errorLogPath;
+      const { logPath, errorLogPath, relativeLogPath, relativeErrorLogPath } = getLogFilePaths(
+        projectFolder,
+        logFilenameIdentifier,
+        RushConstants.rushLogsFolderName
+      );
+      this.logPath = logPath;
+      this.errorLogPath = errorLogPath;
+      this.relativeLogPath = relativeLogPath;
+      this.relativeErrorLogPath = relativeErrorLogPath;
     } else {
-      this._logPath = legacyLogPath;
-      this._errorLogPath = legacyErrorLogPath;
+      this.logPath = legacyLogPath;
+      this.errorLogPath = legacyErrorLogPath;
+      this.relativeLogPath = legacyRelativeLogPath;
+      this.relativeErrorLogPath = legacyRelativeErrorLogPath;
     }
 
-    FileSystem.deleteFile(this._logPath);
-    FileSystem.deleteFile(this._errorLogPath);
+    FileSystem.deleteFile(this.logPath);
+    FileSystem.deleteFile(this.errorLogPath);
 
-    this._logWriter = FileWriter.open(this._logPath);
+    this._logWriter = FileWriter.open(this.logPath);
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
@@ -78,7 +101,7 @@ export class ProjectLogWritable extends TerminalWritable {
     if (chunk.kind === TerminalChunkKind.Stderr) {
       // Only stderr gets written to *.<phaseName>.error.log
       if (!this._errorLogWriter) {
-        this._errorLogWriter = FileWriter.open(this._errorLogPath);
+        this._errorLogWriter = FileWriter.open(this.errorLogPath);
       }
       this._errorLogWriter.write(chunk.text);
     }

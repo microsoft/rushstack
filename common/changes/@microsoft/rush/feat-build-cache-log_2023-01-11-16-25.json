@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Disable unused depcheck feature for upgrade-interactive.",
+      "comment": "Include operation log files in the cache, and restore them during cache hits.",
       "type": "none"
     }
   ],

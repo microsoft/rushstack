@@ -389,6 +389,24 @@ export interface IOperationExecutionResult {
     readonly stopwatch: IStopwatchResult;
 }
 
+// @internal (undocumented)
+export interface _IOperationMetadata {
+    // (undocumented)
+    durationInSeconds: number;
+    // (undocumented)
+    errorLogPath: string;
+    // (undocumented)
+    logPath: string;
+}
+
+// @internal (undocumented)
+export interface _IOperationMetadataManagerOptions {
+    // (undocumented)
+    phase: IPhase;
+    // (undocumented)
+    rushProject: RushConfigurationProject;
+}
+
 // @alpha
 export interface IOperationOptions {
     phase?: IPhase | undefined;
@@ -412,7 +430,7 @@ export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
     // @internal
-    _operationStateFile?: _OperationStateFile;
+    _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
     stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
@@ -421,9 +439,9 @@ export interface IOperationRunnerContext {
 // @internal (undocumented)
 export interface _IOperationStateFileOptions {
     // (undocumented)
-    phase: IPhase;
+    metadataFolder: string;
     // (undocumented)
-    rushProject: RushConfigurationProject;
+    projectFolder: string;
 }
 
 // @internal (undocumented)
@@ -617,10 +635,28 @@ export class Operation {
 }
 
 // @internal
+export class _OperationMetadataManager {
+    constructor(options: _IOperationMetadataManagerOptions);
+    get relativeFilepaths(): string[];
+    // (undocumented)
+    saveAsync({ durationInSeconds, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
+    // (undocumented)
+    readonly stateFile: _OperationStateFile;
+    // (undocumented)
+    tryRestoreAsync({ terminal, logPath, errorLogPath }: {
+        terminal: ITerminal;
+        logPath: string;
+        errorLogPath: string;
+    }): Promise<void>;
+}
+
+// @internal
 export class _OperationStateFile {
     constructor(options: _IOperationStateFileOptions);
-    readonly filename: string;
-    static getFilenameRelativeToProjectRoot(phase: IPhase): string;
+    // (undocumented)
+    static filename: string;
+    readonly filepath: string;
+    readonly relativeFilepath: string;
     // (undocumented)
     get state(): _IOperationStateJson | undefined;
     // (undocumented)

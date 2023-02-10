@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove runtime dependency on @rushstack/rush-sdk from the AzureStorageAuthentication class in @rushstack/rush-azure-storage-build-cache-plugin so that it can be used in isolation.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
