@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 08 Feb 2023 20:27:06 GMT and should not be manually modified.
+This log was last generated on Sat, 11 Feb 2023 02:04:14 GMT and should not be manually modified.
+
+## 5.91.0
+Sat, 11 Feb 2023 02:04:14 GMT
+
+### Updates
+
+- Remove runtime dependency on @rushstack/rush-sdk from the AzureStorageAuthentication class in @rushstack/rush-azure-storage-build-cache-plugin so that it can be used in isolation.
+- Include operation log files in the cache, and restore them during cache hits.
 
 ## 5.90.2
 Wed, 08 Feb 2023 20:27:06 GMT
