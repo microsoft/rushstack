@@ -12,12 +12,7 @@ console.log(fixtures);
 
 const defaultConfigurationWithPlugin = {
   context: TESTS_FOLDER_PATH,
-  plugins: [new EmbeddedDependenciesWebpackPlugin()],
-  resolve: {
-    // Have a centralized mock node_modules folder which contains fake and
-    // real examples of node_modules with valid/invalid licenses
-    modules: ['...']
-  }
+  plugins: [new EmbeddedDependenciesWebpackPlugin()]
 };
 
 for (const fixture of fixtures) {
@@ -27,7 +22,20 @@ for (const fixture of fixtures) {
         `./fixtures/${fixture}/src`,
         defaultConfigurationWithPlugin
       );
+
       expect(stats).toBeDefined();
+    });
+
+    it('should generate a secondary asset with the correct default name', async () => {
+      const stats = await Testing.getTestingWebpackCompiler(
+        `./fixtures/${fixture}/src`,
+        defaultConfigurationWithPlugin
+      );
+      const embeddedDepAsset = stats
+        ?.toJson({ all: false, assets: true })
+        .assets?.some((asset) => asset.name === 'embedded-dependencies.json');
+
+      expect(embeddedDepAsset).toBe(true);
     });
   });
 }
