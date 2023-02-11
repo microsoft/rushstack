@@ -94,7 +94,7 @@
     },
     {
       "actionKind": "runScript",
-      "heftEvent": "post-build",
+      "heftEvent": "bundle",
       "actionId": "generate-stubs",
       "scriptPath": "./lib-shim/generate-stubs.js"
     }
