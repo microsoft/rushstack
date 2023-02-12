@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 11 Feb 2023 02:04:14 GMT and should not be manually modified.
+This log was last generated on Sun, 12 Feb 2023 02:50:42 GMT and should not be manually modified.
+
+## 5.92.0
+Sun, 12 Feb 2023 02:50:42 GMT
+
+### Updates
+
+- Enable @rushstack/rush-sdk to import internal APIs from the proxied @microsoft/rush-lib instance (GitHub #3895)
 
 ## 5.91.0
 Sat, 11 Feb 2023 02:04:14 GMT

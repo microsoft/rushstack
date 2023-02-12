@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.92.0",
+      "tag": "@microsoft/rush_v5.92.0",
+      "date": "Sun, 12 Feb 2023 02:50:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Enable @rushstack/rush-sdk to import internal APIs from the proxied @microsoft/rush-lib instance (GitHub #3895)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.91.0",
       "tag": "@microsoft/rush_v5.91.0",
       "date": "Sat, 11 Feb 2023 02:04:14 GMT",
