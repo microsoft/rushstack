@@ -1,4 +1,5 @@
 packages:
   - rush-lib-test
+  - rush-sdk-test
   - typescript-newest-test
   - typescript-v3-test

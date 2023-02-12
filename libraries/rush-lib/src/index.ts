@@ -84,6 +84,7 @@ export {
 export { VersionPolicyConfiguration } from './api/VersionPolicyConfiguration';
 
 export { ILaunchOptions, Rush } from './api/Rush';
+export { RushInternals as _RushInternals } from './api/RushInternals';
 
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
 

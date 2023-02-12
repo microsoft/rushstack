@@ -180,7 +180,7 @@
     },
     {
       "name": "@rushstack/rush-sdk",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/set-webpack-public-path-plugin",

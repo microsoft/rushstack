@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Enable @rushstack/rush-sdk to import internal APIs from the proxied @microsoft/rush-lib instance",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

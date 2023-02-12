@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
-const rushSdkPath: string = path.join(__dirname, '../../lib/index.js');
+const rushSdkPath: string = path.join(__dirname, '../../lib-shim/index.js');
 const sandboxRepoPath: string = `${__dirname}/sandbox`;
 const mockPackageFolder: string = `${sandboxRepoPath}/mock-package`;
 const mockRushLibPath: string = `${__dirname}/fixture/mock-rush-lib.js`;
@@ -32,7 +32,12 @@ console.log(require(${JSON.stringify(rushSdkPath)}));
       }
     );
     expect(result.stderr.trim()).toMatchInlineSnapshot(`""`);
-    expect(result.stdout.trim()).toMatchInlineSnapshot(`"{ foo: [Getter] }"`);
+    expect(result.stdout.trim()).toMatchInlineSnapshot(`
+"{
+  _rushSdk_loadInternalModule: [Function: _rushSdk_loadInternalModule],
+  foo: [Getter]
+}"
+`);
     expect(result.status).toBe(0);
   });
 });
