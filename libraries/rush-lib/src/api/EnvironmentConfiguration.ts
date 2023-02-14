@@ -154,6 +154,13 @@ export enum EnvironmentVariableNames {
   RUSH_TAR_BINARY_PATH = 'RUSH_TAR_BINARY_PATH',
 
   /**
+   * If defined, when Rush runs any bulk or phased command in verbose mode, operations will
+   * be wrapped in the folding header and footer defined for this style in the `logging.json`
+   * configuration file.
+   */
+  RUSH_LOG_FOLDING_STYLE = 'RUSH_LOG_FOLDING_STYLE',
+
+  /**
    * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
    * the repository root folder.  The original working directory (where the Rush command was invoked) is assigned
    * to the the child process's `RUSH_INVOKED_FOLDER` environment variable, in case it is needed by the script.
@@ -199,6 +206,8 @@ export class EnvironmentConfiguration {
   private static _gitBinaryPath: string | undefined;
 
   private static _tarBinaryPath: string | undefined;
+
+  private static _logFoldingStyle: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -309,6 +318,16 @@ export class EnvironmentConfiguration {
   public static get tarBinaryPath(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._tarBinaryPath;
+  }
+
+  /**
+   * If defined, when Rush runs any bulk or phased command in verbose mode, the selected log
+   * folding style will be used to print a header and footer above and below the build output.
+   * See {@link EnvironmentVariableNames.RUSH_LOG_FOLDING_STYLE}
+   */
+  public static get logFoldingStyle(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._logFoldingStyle;
   }
 
   /**
@@ -430,6 +449,11 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_TAR_BINARY_PATH: {
             EnvironmentConfiguration._tarBinaryPath = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_LOG_FOLDING_STYLE: {
+            EnvironmentConfiguration._logFoldingStyle = value;
             break;
           }
 

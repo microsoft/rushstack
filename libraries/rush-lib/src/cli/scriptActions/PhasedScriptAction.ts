@@ -21,10 +21,11 @@ import {
   OperationExecutionManager
 } from '../../logic/operations/OperationExecutionManager';
 import { RushConstants } from '../../logic/RushConstants';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { EnvironmentVariableNames, EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import { LoggingConfiguration, ILogFoldingStyle } from '../../api/LoggingConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
 import { Operation } from '../../logic/operations/Operation';
@@ -307,6 +308,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
     }
 
+    const loggingConfiguration: LoggingConfiguration = LoggingConfiguration.load(this.rushConfiguration);
+
     const projectSelection: Set<RushConfigurationProject> =
       await this._selectionParameters.getSelectedProjectsAsync(terminal);
 
@@ -342,6 +345,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       parallelism,
       changedProjectsOnly
     };
+
+    if (EnvironmentConfiguration.logFoldingStyle) {
+      const style: ILogFoldingStyle = loggingConfiguration.getLogFoldingStyleByName(
+        EnvironmentConfiguration.logFoldingStyle
+      );
+      executionManagerOptions.projectLogHeader = style.header;
+      executionManagerOptions.projectLogFooter = style.footer;
+    }
 
     const internalOptions: IRunPhasesOptions = {
       initialCreateOperationsContext,

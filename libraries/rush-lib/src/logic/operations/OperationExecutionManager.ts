@@ -18,6 +18,8 @@ export interface IOperationExecutionManagerOptions {
   parallelism: number;
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
+  projectLogHeader?: string;
+  projectLogFooter?: string;
 }
 
 /**
@@ -37,6 +39,8 @@ export class OperationExecutionManager {
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
   private readonly _totalOperations: number;
+  private readonly _projectLogHeader: string | undefined;
+  private readonly _projectLogFooter: string | undefined;
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
@@ -48,6 +52,7 @@ export class OperationExecutionManager {
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
   private _completedOperations: number;
+  private _lastTask: string | undefined = undefined;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
     const { quietMode, debugMode, parallelism, changedProjectsOnly } = options;
@@ -57,6 +62,8 @@ export class OperationExecutionManager {
     this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
+    this._projectLogHeader = options.projectLogHeader;
+    this._projectLogFooter = options.projectLogFooter;
 
     // TERMINAL PIPELINE:
     //
@@ -137,11 +144,31 @@ export class OperationExecutionManager {
 
       const middlePart: string = colors.gray(']' + '='.repeat(middlePartLengthMinusTwoBrackets) + '[');
 
+      if (!this._quietMode) {
+        if (this._projectLogFooter && this._lastTask) {
+          this._terminal.writeStdoutLine(
+            this._injectValues(this._projectLogFooter, {
+              taskName: this._lastTask
+            })
+          );
+        }
+      }
+
       this._terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart);
 
       if (!this._quietMode) {
         this._terminal.writeStdoutLine('');
+
+        if (this._projectLogHeader) {
+          this._terminal.writeStdoutLine(
+            this._injectValues(this._projectLogHeader, {
+              taskName: writer.taskName
+            })
+          );
+        }
       }
+
+      this._lastTask = writer.taskName;
     }
   };
 
@@ -200,6 +227,16 @@ export class OperationExecutionManager {
         concurrency: maxParallelism
       }
     );
+
+    if (!this._quietMode) {
+      if (this._projectLogFooter && this._lastTask) {
+        this._terminal.writeStdoutLine(
+          this._injectValues(this._projectLogFooter, {
+            taskName: this._lastTask
+          })
+        );
+      }
+    }
 
     const status: OperationStatus = this._hasAnyFailures
       ? OperationStatus.Failure
@@ -331,5 +368,16 @@ export class OperationExecutionManager {
       // Remove this operation from the dependencies, to unblock the scheduler
       item.dependencies.delete(record);
     }
+  }
+
+  private _injectValues(line: string, replacements: Record<string, string>): string {
+    for (const key of Object.keys(replacements)) {
+      const searchKey: string = '[' + key + ']';
+      while (line.indexOf(searchKey) >= 0) {
+        line = line.replace(searchKey, replacements[key]);
+      }
+    }
+
+    return line;
   }
 }

@@ -154,6 +154,7 @@ export class EnvironmentConfiguration {
     // @internal
     static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
     static get gitBinaryPath(): string | undefined;
+    static get logFoldingStyle(): string | undefined;
     // (undocumented)
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
     static get pnpmStorePathOverride(): string | undefined;
@@ -177,6 +178,7 @@ export enum EnvironmentVariableNames {
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
     RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
+    RUSH_LOG_FOLDING_STYLE = "RUSH_LOG_FOLDING_STYLE",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PNPM_VERIFY_STORE_INTEGRITY = "RUSH_PNPM_VERIFY_STORE_INTEGRITY",
@@ -962,6 +964,7 @@ export class RushConstants {
     static readonly experimentsFilename: string;
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: string;
+    static readonly loggingConfigFilename: string;
     static readonly nodeModulesFolderName: string;
     static readonly nonbrowserApprovedPackagesFilename: string;
     static readonly npmShrinkwrapFilename: string;

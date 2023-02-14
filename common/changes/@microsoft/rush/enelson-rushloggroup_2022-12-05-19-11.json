@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add RUSH_BUILD_FOLDING_HEADER and RUSH_BUILD_FOLDING_FOOTER environment variables.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
