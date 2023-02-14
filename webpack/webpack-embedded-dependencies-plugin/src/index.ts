@@ -53,14 +53,25 @@ interface IPackageData {
 interface IEmbeddedDependenciesWebpackPluginOptions {
   outputFileName?: string;
   generateLicenseFile?: boolean;
-  generateLicenseFileFunction?: (packages: IPackageData[]) => string;
+  generateLicenseFileFunction?: LicenseFileGeneratorFunction;
 }
 
+type LicenseFileGeneratorFunction = (packages: IPackageData[]) => string;
 type PackageMapKey = `${string}@${string}`;
 type ThirdPartyPackageMap = Map<PackageMapKey, { dir: string; data: IPackageData }>;
 type FlattenedPackageEntry = [PackageMapKey, { dir: string; data: IPackageData }];
 
 export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginInstance {
+  public outputFileName: string;
+  public generateLicenseFile: boolean;
+  public generateLicenseFileFunction?: LicenseFileGeneratorFunction;
+
+  public constructor(options?: IEmbeddedDependenciesWebpackPluginOptions) {
+    this.outputFileName = options?.outputFileName || 'embedded-dependencies.json';
+    this.generateLicenseFile = options?.generateLicenseFile || false;
+    this.generateLicenseFileFunction = options?.generateLicenseFileFunction || undefined;
+  }
+
   public apply(compiler: Compiler): void {
     const thirdPartyPackages: ThirdPartyPackageMap = new Map();
 
@@ -111,10 +122,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
 
           console.log(dataToStringify);
 
-          compilation.emitAsset(
-            'embedded-dependencies.json',
-            new sources.RawSource(JSON.stringify(dataToStringify))
-          );
+          compilation.emitAsset(this.outputFileName, new sources.RawSource(JSON.stringify(dataToStringify)));
 
           callback();
         }

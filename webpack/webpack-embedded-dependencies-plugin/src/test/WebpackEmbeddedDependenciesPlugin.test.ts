@@ -15,6 +15,11 @@ const defaultConfigurationWithPlugin = {
   plugins: [new EmbeddedDependenciesWebpackPlugin()]
 };
 
+const defaultConfigurationCustomOutputFileName = {
+  context: TESTS_FOLDER_PATH,
+  plugins: [new EmbeddedDependenciesWebpackPlugin({ outputFileName: 'custom-file-name.json' })]
+};
+
 for (const fixture of fixtures) {
   describe('WebpackEmbeddedDependenciesPlugin', () => {
     it('should run', async () => {
@@ -34,6 +39,18 @@ for (const fixture of fixtures) {
       const embeddedDepAsset = stats
         ?.toJson({ all: false, assets: true })
         .assets?.some((asset) => asset.name === 'embedded-dependencies.json');
+
+      expect(embeddedDepAsset).toBe(true);
+    });
+
+    it('should generate a secondary asset with a custom outputFileName', async () => {
+      const stats = await Testing.getTestingWebpackCompiler(
+        `./fixtures/${fixture}/src`,
+        defaultConfigurationCustomOutputFileName
+      );
+      const embeddedDepAsset = stats
+        ?.toJson({ all: false, assets: true })
+        .assets?.some((asset) => asset.name === 'custom-file-name.json');
 
       expect(embeddedDepAsset).toBe(true);
     });
