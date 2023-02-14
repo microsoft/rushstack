@@ -26,7 +26,9 @@ export async function getTestingWebpackCompiler(
 
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
-      if (err) reject(err);
+      if (err) {
+        return reject(err);
+      }
       if (stats?.hasErrors()) reject(stats?.toJson().errors);
 
       resolve(stats);
