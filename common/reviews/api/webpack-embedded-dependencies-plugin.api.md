@@ -4,8 +4,8 @@
 
 ```ts
 
-import type { Compiler } from 'webpack';
-import type { WebpackPluginInstance } from 'webpack';
+import { Compiler } from 'webpack';
+import { WebpackPluginInstance } from 'webpack';
 
 // @public (undocumented)
 class EmbeddedDependenciesWebpackPlugin implements WebpackPluginInstance {

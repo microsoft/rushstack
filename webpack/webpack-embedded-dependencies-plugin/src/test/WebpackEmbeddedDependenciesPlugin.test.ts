@@ -38,4 +38,17 @@ for (const fixture of fixtures) {
       expect(embeddedDepAsset).toBe(true);
     });
   });
+
+  switch (fixture) {
+    case 'dependencies-with-copyleft-licenses':
+      break;
+    case 'dependencies-with-licenses':
+      break;
+    case 'dependencies-with-transient-copyleft-license':
+      break;
+    case 'no-dependencies':
+      break;
+    default:
+      break;
+  }
 }

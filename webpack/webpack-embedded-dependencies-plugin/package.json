@@ -15,7 +15,8 @@
     "_phase:build": "heft build --clean"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/node-core-library": "workspace:*",
+    "glob": "~7.0.5"
   },
   "peerDependencies": {
     "webpack": "^5.35.1"
@@ -32,6 +33,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
-    "webpack": "~5.75.0"
+    "webpack": "~5.75.0",
+    "@types/glob": "7.1.1"
   }
 }
