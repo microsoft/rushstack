@@ -174,5 +174,5 @@ async function parseCopyright(modulePath: string): Promise<string | undefined> {
 }
 
 function parsePackageAuthor(p: IPackageData): string | undefined {
-  return typeof p.author === 'string' ? p.author : p.author ? p.author.name : undefined;
+  return typeof p.author === 'string' ? p.author : p.author?.name;
 }
