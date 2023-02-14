@@ -48,8 +48,7 @@ export class NapiRSPlugin implements IHeftPlugin {
       'napi',
       buildArgs,
       heftConfiguration.buildFolder,
-      process.env,
-      true
+      process.env
     );
 
     logger.terminal.writeLine('\n' + napiBuildResults.output.join(''));
