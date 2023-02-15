@@ -39,6 +39,7 @@ describe(RedisCobuildLockProvider.name, () => {
   function prepareSubject(): RedisCobuildLockProvider {
     return new RedisCobuildLockProvider({} as IRedisCobuildLockProviderOptions);
   }
+
   const context: ICobuildContext = {
     contextId: '123',
     cacheId: 'abc',

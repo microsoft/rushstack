@@ -171,6 +171,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-redis-cobuild-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
     },

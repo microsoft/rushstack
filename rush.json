@@ -797,6 +797,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-redis-cobuild-plugin-integration-test",
+      "projectFolder": "build-tests/rush-redis-cobuild-plugin-integration-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "set-webpack-public-path-plugin-webpack4-test",
       "projectFolder": "build-tests/set-webpack-public-path-plugin-webpack4-test",
       "reviewCategory": "tests",

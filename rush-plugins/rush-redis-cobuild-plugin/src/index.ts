@@ -4,4 +4,5 @@
 import { RushRedisCobuildPlugin } from './RushRedisCobuildPlugin';
 
 export default RushRedisCobuildPlugin;
+export { RedisCobuildLockProvider } from './RedisCobuildLockProvider';
 export type { IRedisCobuildLockProviderOptions } from './RedisCobuildLockProvider';

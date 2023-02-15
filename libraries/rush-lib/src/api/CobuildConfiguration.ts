@@ -75,6 +75,7 @@ export class CobuildConfiguration {
   public static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string {
     return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.cobuildFilename);
   }
+
   private static async _loadAsync(
     jsonFilePath: string,
     terminal: ITerminal,
@@ -107,5 +108,13 @@ export class CobuildConfiguration {
   public get contextId(): string {
     // FIXME: hardcode
     return '123';
+  }
+
+  public async connectLockProviderAsync(): Promise<void> {
+    await this.cobuildLockProvider.connectAsync();
+  }
+
+  public async disconnectLockProviderAsync(): Promise<void> {
+    await this.cobuildLockProvider.disconnectAsync();
   }
 }

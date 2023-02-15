@@ -14,13 +14,16 @@ import type {
 
 /**
  * The redis client options
- * @public
+ * @beta
  */
 export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {}
 
 const KEY_SEPARATOR: string = ':';
 const COMPLETED_STATE_SEPARATOR: string = ';';
 
+/**
+ * @beta
+ */
 export class RedisCobuildLockProvider implements ICobuildLockProvider {
   private readonly _options: IRedisCobuildLockProviderOptions;
 
@@ -31,6 +34,14 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   public constructor(options: IRedisCobuildLockProviderOptions) {
     this._options = options;
     this._redisClient = createClient(this._options);
+  }
+
+  public async connectAsync(): Promise<void> {
+    await this._redisClient.connect();
+  }
+
+  public async disconnectAsync(): Promise<void> {
+    await this._redisClient.disconnect();
   }
 
   public async acquireLockAsync(context: ICobuildContext): Promise<boolean> {
@@ -89,7 +100,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     let lockKey: string | undefined = this._lockKeyMap.get(context);
     if (!lockKey) {
       lockKey = ['cobuild', `v${version}`, contextId, cacheId, 'lock'].join(KEY_SEPARATOR);
-      this._completedKeyMap.set(context, lockKey);
+      this._lockKeyMap.set(context, lockKey);
     }
     return lockKey;
   }

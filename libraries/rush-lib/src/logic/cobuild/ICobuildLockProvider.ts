@@ -30,6 +30,8 @@ export interface ICobuildCompletedState {
  * @beta
  */
 export interface ICobuildLockProvider {
+  connectAsync(): Promise<void>;
+  disconnectAsync(): Promise<void>;
   acquireLockAsync(context: ICobuildContext): Promise<boolean>;
   renewLockAsync(context: ICobuildContext): Promise<void>;
   releaseLockAsync(context: ICobuildContext): Promise<void>;

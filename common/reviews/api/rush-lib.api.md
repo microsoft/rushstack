@@ -100,7 +100,11 @@ export class CobuildConfiguration {
     readonly cobuildEnabled: boolean;
     readonly cobuildLockProvider: ICobuildLockProvider;
     // (undocumented)
+    connectLockProviderAsync(): Promise<void>;
+    // (undocumented)
     get contextId(): string;
+    // (undocumented)
+    disconnectLockProviderAsync(): Promise<void>;
     // (undocumented)
     static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string;
     static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<CobuildConfiguration | undefined>;
@@ -285,6 +289,10 @@ export interface ICobuildContext {
 export interface ICobuildLockProvider {
     // (undocumented)
     acquireLockAsync(context: ICobuildContext): Promise<boolean>;
+    // (undocumented)
+    connectAsync(): Promise<void>;
+    // (undocumented)
+    disconnectAsync(): Promise<void>;
     // (undocumented)
     getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined>;
     // (undocumented)

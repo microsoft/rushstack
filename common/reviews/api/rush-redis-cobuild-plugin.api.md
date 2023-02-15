@@ -4,13 +4,37 @@
 
 ```ts
 
+import type { ICobuildCompletedState } from '@rushstack/rush-sdk';
+import type { ICobuildContext } from '@rushstack/rush-sdk';
+import type { ICobuildLockProvider } from '@rushstack/rush-sdk';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { RedisClientOptions } from '@redis/client';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
 
-// @public
+// @beta
 export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
+}
+
+// @beta (undocumented)
+export class RedisCobuildLockProvider implements ICobuildLockProvider {
+    constructor(options: IRedisCobuildLockProviderOptions);
+    // (undocumented)
+    acquireLockAsync(context: ICobuildContext): Promise<boolean>;
+    // (undocumented)
+    connectAsync(): Promise<void>;
+    // (undocumented)
+    disconnectAsync(): Promise<void>;
+    // (undocumented)
+    getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined>;
+    getCompletedStateKey(context: ICobuildContext): string;
+    getLockKey(context: ICobuildContext): string;
+    // (undocumented)
+    releaseLockAsync(context: ICobuildContext): Promise<void>;
+    // (undocumented)
+    renewLockAsync(context: ICobuildContext): Promise<void>;
+    // (undocumented)
+    setCompletedStateAsync(context: ICobuildContext, state: ICobuildCompletedState): Promise<void>;
 }
 
 // @public (undocumented)
