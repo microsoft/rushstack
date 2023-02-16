@@ -261,10 +261,11 @@ export class ShellOperationRunner implements IOperationRunner {
       // Try to acquire the cobuild lock
       let cobuildLock: CobuildLock | undefined;
       if (this._cobuildConfiguration?.cobuildEnabled) {
-        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
+        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
           terminal,
-          trackedFiles
-        );
+          trackedProjectFiles,
+          operationMetadataManager: context._operationMetadataManager
+        });
         cobuildLock = await this._tryGetCobuildLockAsync(projectBuildCache);
       }
 
@@ -300,7 +301,11 @@ export class ShellOperationRunner implements IOperationRunner {
 
           if (restoreFromCacheSuccess) {
             // Restore the original state of the operation without cache
-            await context._operationStateFile?.tryRestoreAsync();
+            await context._operationMetadataManager?.tryRestoreAsync({
+              terminal,
+              logPath: projectLogWritable.logPath,
+              errorLogPath: projectLogWritable.errorLogPath
+            });
             if (cobuildCompletedState) {
               return cobuildCompletedState.status;
             }
@@ -308,7 +313,7 @@ export class ShellOperationRunner implements IOperationRunner {
           }
         }
       } else if (this._isCacheReadAllowed) {
-        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
+        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
           terminal,
           trackedProjectFiles,
           operationMetadataManager: context._operationMetadataManager
@@ -483,7 +488,11 @@ export class ShellOperationRunner implements IOperationRunner {
         // write a new cache entry.
         if (!setCacheEntryPromise && this.isCacheWriteAllowed) {
           setCacheEntryPromise = (
-            await this._tryGetProjectBuildCacheAsync(terminal, trackedFiles)
+            await this._tryGetProjectBuildCacheAsync({
+              terminal,
+              trackedProjectFiles,
+              operationMetadataManager: context._operationMetadataManager
+            })
           )?.trySetCacheEntryAsync(terminal);
         }
       }
