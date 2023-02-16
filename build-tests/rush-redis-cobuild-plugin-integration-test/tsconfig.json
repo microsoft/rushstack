@@ -12,6 +12,7 @@
     "declarationMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
+    "esModuleInterop": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
     "types": ["node"],

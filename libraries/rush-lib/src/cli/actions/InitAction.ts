@@ -156,6 +156,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/artifactory.json',
       'common/config/rush/build-cache.json',
+      'common/config/rush/cobuild.json',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',

@@ -2,14 +2,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal, ConsoleTerminalProvider } from '@rushstack/node-core-library';
-import { ICobuildCompletedState, ICobuildContext, OperationStatus } from '@rushstack/rush-sdk';
+import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import { ICobuildCompletedState, ICobuildContext, OperationStatus, RushSession } from '@rushstack/rush-sdk';
 import { IRedisCobuildLockProviderOptions, RedisCobuildLockProvider } from '../RedisCobuildLockProvider';
 
 import * as redisAPI from '@redis/client';
 import type { RedisClientType } from '@redis/client';
 
-const terminal = new Terminal(new ConsoleTerminalProvider());
+const rushSession: RushSession = new RushSession({
+  terminalProvider: new ConsoleTerminalProvider(),
+  getIsDebugMode: () => false
+});
 
 describe(RedisCobuildLockProvider.name, () => {
   let storage: Record<string, string | number> = {};
@@ -37,14 +40,13 @@ describe(RedisCobuildLockProvider.name, () => {
   });
 
   function prepareSubject(): RedisCobuildLockProvider {
-    return new RedisCobuildLockProvider({} as IRedisCobuildLockProviderOptions);
+    return new RedisCobuildLockProvider({} as IRedisCobuildLockProviderOptions, rushSession);
   }
 
   const context: ICobuildContext = {
     contextId: '123',
     cacheId: 'abc',
-    version: 1,
-    terminal
+    version: 1
   };
 
   it('getLockKey works', () => {

@@ -188,12 +188,7 @@ export class OperationExecutionManager {
     const onOperationComplete: (record: OperationExecutionRecord) => void = (
       record: OperationExecutionRecord
     ) => {
-      this._onOperationComplete(record);
-
-      if (record.status !== OperationStatus.RemoteExecuting) {
-        // If the operation was not remote, then we can notify queue that it is complete
-        executionQueue.complete();
-      }
+      this._onOperationComplete(record, executionQueue);
     };
 
     await Async.forEachAsync(
@@ -221,7 +216,7 @@ export class OperationExecutionManager {
   /**
    * Handles the result of the operation and propagates any relevant effects.
    */
-  private _onOperationComplete(record: OperationExecutionRecord): void {
+  private _onOperationComplete(record: OperationExecutionRecord, executionQueue: AsyncOperationQueue): void {
     const { runner, name, status } = record;
 
     let blockCacheWrite: boolean = !runner.isCacheWriteAllowed;
@@ -246,6 +241,7 @@ export class OperationExecutionManager {
         const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
         for (const blockedRecord of blockedQueue) {
           if (blockedRecord.status === OperationStatus.Ready) {
+            executionQueue.complete();
             this._completedOperations++;
 
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
@@ -337,6 +333,11 @@ export class OperationExecutionManager {
         // Remove this operation from the dependencies, to unblock the scheduler
         item.dependencies.delete(record);
       }
+    }
+
+    if (record.status !== OperationStatus.RemoteExecuting) {
+      // If the operation was not remote, then we can notify queue that it is complete
+      executionQueue.complete();
     }
   }
 }

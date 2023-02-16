@@ -33,7 +33,7 @@ export class RushRedisCobuildPlugin implements IRushPlugin {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
       rushSession.registerCobuildLockProviderFactory('redis', (): RedisCobuildLockProvider => {
         const options: IRushRedisCobuildPluginOptions = this._options;
-        return new RedisCobuildLockProviderModule.RedisCobuildLockProvider(options);
+        return new RedisCobuildLockProviderModule.RedisCobuildLockProvider(options, rushSession);
       });
     });
   }

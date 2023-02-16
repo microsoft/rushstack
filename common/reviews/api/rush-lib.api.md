@@ -280,8 +280,6 @@ export interface ICobuildContext {
     // (undocumented)
     contextId: string;
     // (undocumented)
-    terminal: ITerminal;
-    // (undocumented)
     version: number;
 }
 

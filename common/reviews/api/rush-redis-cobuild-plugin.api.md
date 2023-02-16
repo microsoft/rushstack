@@ -18,7 +18,7 @@ export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
 
 // @beta (undocumented)
 export class RedisCobuildLockProvider implements ICobuildLockProvider {
-    constructor(options: IRedisCobuildLockProviderOptions);
+    constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession);
     // (undocumented)
     acquireLockAsync(context: ICobuildContext): Promise<boolean>;
     // (undocumented)

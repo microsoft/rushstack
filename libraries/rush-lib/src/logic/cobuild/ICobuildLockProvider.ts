@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/node-core-library';
 import type { OperationStatus } from '../operations/OperationStatus';
 
 /**
@@ -11,7 +10,6 @@ export interface ICobuildContext {
   contextId: string;
   cacheId: string;
   version: number;
-  terminal: ITerminal;
 }
 
 /**

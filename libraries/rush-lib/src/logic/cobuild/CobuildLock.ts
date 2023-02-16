@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError, ITerminal } from '@rushstack/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
@@ -12,7 +12,6 @@ import type { ICobuildContext } from './ICobuildLockProvider';
 export interface ICobuildLockOptions {
   cobuildConfiguration: CobuildConfiguration;
   projectBuildCache: ProjectBuildCache;
-  terminal: ITerminal;
 }
 
 export interface ICobuildCompletedState {
@@ -27,7 +26,7 @@ export class CobuildLock {
   private _cobuildContext: ICobuildContext;
 
   public constructor(options: ICobuildLockOptions) {
-    const { cobuildConfiguration, projectBuildCache, terminal } = options;
+    const { cobuildConfiguration, projectBuildCache } = options;
     this.projectBuildCache = projectBuildCache;
     this.cobuildConfiguration = cobuildConfiguration;
 
@@ -40,7 +39,6 @@ export class CobuildLock {
     }
 
     this._cobuildContext = {
-      terminal,
       contextId,
       cacheId,
       version: RushConstants.cobuildLockVersion

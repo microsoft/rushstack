@@ -265,7 +265,7 @@ export class ShellOperationRunner implements IOperationRunner {
           terminal,
           trackedFiles
         );
-        cobuildLock = await this._tryGetCobuildLockAsync(terminal, projectBuildCache);
+        cobuildLock = await this._tryGetCobuildLockAsync(projectBuildCache);
       }
 
       // If possible, we want to skip this operation -- either by restoring it from the
@@ -341,6 +341,22 @@ export class ShellOperationRunner implements IOperationRunner {
         }
       }
 
+      if (this.isCacheWriteAllowed && cobuildLock) {
+        const acquireSuccess: boolean = await cobuildLock.tryAcquireLockAsync();
+        if (acquireSuccess) {
+          if (context.status === OperationStatus.RemoteExecuting) {
+            // This operation is used to marked remote executing, now change it to executing
+            context.status = OperationStatus.Executing;
+          }
+          runnerWatcher.addCallback(async () => {
+            await cobuildLock?.renewLockAsync();
+          });
+        } else {
+          // failed to acquire the lock, mark current operation to remote executing
+          return OperationStatus.RemoteExecuting;
+        }
+      }
+
       // If the deps file exists, remove it before starting execution.
       FileSystem.deleteFile(currentDepsPath);
 
@@ -358,22 +374,6 @@ export class ShellOperationRunner implements IOperationRunner {
         }
 
         return OperationStatus.Success;
-      }
-
-      if (this.isCacheWriteAllowed && cobuildLock) {
-        const acquireSuccess: boolean = await cobuildLock.tryAcquireLockAsync();
-        if (acquireSuccess) {
-          if (context.status === OperationStatus.RemoteExecuting) {
-            // This operation is used to marked remote executing, now change it to executing
-            context.status = OperationStatus.Executing;
-          }
-          runnerWatcher.addCallback(async () => {
-            await cobuildLock?.renewLockAsync();
-          });
-        } else {
-          // failed to acquire the lock, mark current operation to remote executing
-          return OperationStatus.RemoteExecuting;
-        }
       }
 
       // Run the operation
@@ -607,7 +607,6 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   private async _tryGetCobuildLockAsync(
-    terminal: ITerminal,
     projectBuildCache: ProjectBuildCache | undefined
   ): Promise<CobuildLock | undefined> {
     if (this._cobuildLock === UNINITIALIZED) {
@@ -616,8 +615,7 @@ export class ShellOperationRunner implements IOperationRunner {
       if (projectBuildCache && this._cobuildConfiguration && this._cobuildConfiguration.cobuildEnabled) {
         this._cobuildLock = new CobuildLock({
           cobuildConfiguration: this._cobuildConfiguration,
-          projectBuildCache: projectBuildCache,
-          terminal
+          projectBuildCache: projectBuildCache
         });
       }
     }

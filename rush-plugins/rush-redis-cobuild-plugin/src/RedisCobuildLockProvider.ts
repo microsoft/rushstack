@@ -3,7 +3,12 @@
 
 import { createClient } from '@redis/client';
 
-import type { ICobuildLockProvider, ICobuildContext, ICobuildCompletedState } from '@rushstack/rush-sdk';
+import type {
+  ICobuildLockProvider,
+  ICobuildContext,
+  ICobuildCompletedState,
+  RushSession
+} from '@rushstack/rush-sdk';
 import type {
   RedisClientOptions,
   RedisClientType,
@@ -11,6 +16,7 @@ import type {
   RedisModules,
   RedisScripts
 } from '@redis/client';
+import type { ITerminal } from '@rushstack/node-core-library';
 
 /**
  * The redis client options
@@ -26,18 +32,30 @@ const COMPLETED_STATE_SEPARATOR: string = ';';
  */
 export class RedisCobuildLockProvider implements ICobuildLockProvider {
   private readonly _options: IRedisCobuildLockProviderOptions;
+  private _terminal: ITerminal;
 
   private _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
   private _lockKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
   private _completedKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
 
-  public constructor(options: IRedisCobuildLockProviderOptions) {
+  public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = options;
-    this._redisClient = createClient(this._options);
+    this._terminal = rushSession.getLogger('RedisCobuildLockProvider').terminal;
+    try {
+      this._redisClient = createClient(this._options);
+    } catch (e) {
+      throw new Error(`Failed to create redis client: ${e.message}`);
+    }
   }
 
   public async connectAsync(): Promise<void> {
     await this._redisClient.connect();
+    // Check the connection works at early stage
+    try {
+      await this._redisClient.ping();
+    } catch (e) {
+      throw new Error(`Failed to connect to redis server: ${e.message}`);
+    }
   }
 
   public async disconnectAsync(): Promise<void> {
@@ -45,7 +63,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   }
 
   public async acquireLockAsync(context: ICobuildContext): Promise<boolean> {
-    const { terminal } = context;
+    const { _terminal: terminal } = this;
     const lockKey: string = this.getLockKey(context);
     const incrResult: number = await this._redisClient.incr(lockKey);
     const result: boolean = incrResult === 1;
@@ -57,14 +75,14 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   }
 
   public async renewLockAsync(context: ICobuildContext): Promise<void> {
-    const { terminal } = context;
+    const { _terminal: terminal } = this;
     const lockKey: string = this.getLockKey(context);
     await this._redisClient.expire(lockKey, 30);
     terminal.writeDebugLine(`Renewed lock for ${lockKey}`);
   }
 
   public async releaseLockAsync(context: ICobuildContext): Promise<void> {
-    const { terminal } = context;
+    const { _terminal: terminal } = this;
     const lockKey: string = this.getLockKey(context);
     await this._redisClient.set(lockKey, 0);
     terminal.writeDebugLine(`Released lock for ${lockKey}`);
@@ -74,7 +92,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     context: ICobuildContext,
     state: ICobuildCompletedState
   ): Promise<void> {
-    const { terminal } = context;
+    const { _terminal: terminal } = this;
     const key: string = this.getCompletedStateKey(context);
     const value: string = this._serializeCompletedState(state);
     await this._redisClient.set(key, value);
@@ -82,12 +100,14 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   }
 
   public async getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined> {
+    const { _terminal: terminal } = this;
     const key: string = this.getCompletedStateKey(context);
     let state: ICobuildCompletedState | undefined;
     const value: string | null = await this._redisClient.get(key);
     if (value) {
       state = this._deserializeCompletedState(value);
     }
+    terminal.writeDebugLine(`Get completed state for ${key}: ${value}`);
     return state;
   }
 

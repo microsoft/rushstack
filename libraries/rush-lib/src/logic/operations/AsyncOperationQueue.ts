@@ -90,6 +90,7 @@ export class AsyncOperationQueue
 
       if (
         operation.status === OperationStatus.Blocked ||
+        operation.status === OperationStatus.Skipped ||
         operation.status === OperationStatus.Success ||
         operation.status === OperationStatus.SuccessWithWarning ||
         operation.status === OperationStatus.FromCache ||
