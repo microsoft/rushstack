@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "move `git add` later, as some modified files were missing",
+      "comment": "During publishing, run `git add` later to ensure all files are committed.",
       "type": "patch"
     }
   ],
