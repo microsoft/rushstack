@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 17 Feb 2023 02:14:43 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Feb 2023 14:46:59 GMT and should not be manually modified.
+
+## 5.93.1
+Fri, 17 Feb 2023 14:46:59 GMT
+
+### Updates
+
+- Fix a regression where "rush-sdk" failed to load older versions of "rush-lib" (GitHub #3979)
 
 ## 5.93.0
 Fri, 17 Feb 2023 02:14:43 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.93.1",
+      "tag": "@microsoft/rush_v5.93.1",
+      "date": "Fri, 17 Feb 2023 14:46:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression where \"rush-sdk\" failed to load older versions of \"rush-lib\" (GitHub #3979)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.93.0",
       "tag": "@microsoft/rush_v5.93.0",
       "date": "Fri, 17 Feb 2023 02:14:43 GMT",
