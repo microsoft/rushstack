@@ -154,7 +154,7 @@ export enum EnvironmentVariableNames {
   RUSH_TAR_BINARY_PATH = 'RUSH_TAR_BINARY_PATH',
 
   /**
-   * Explicitly specifies the path for the version of `\@microsoft/rush-lib` being executed.
+   * Explicitly specifies the path for the version of `@microsoft/rush-lib` being executed.
    * Will be set upon loading Rush.
    */
   RUSH_LIB_PATH = 'RUSH_LIB_PATH',

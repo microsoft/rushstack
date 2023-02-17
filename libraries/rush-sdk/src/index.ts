@@ -104,7 +104,8 @@ if (rushLibModule === undefined) {
     try {
       rushLibModule = _require(rushLibPath);
     } catch (error) {
-      terminal.writeVerboseLine(`Filed to load ${RUSH_LIB_NAME} via process.env.${rushLibVariable}`);
+      // Log this as a warning, since it is unexpected to define an incorrect value of the variable.
+      terminal.writeWarningLine(`Failed to load ${RUSH_LIB_NAME} via process.env.${rushLibVariable}`);
     }
 
     if (rushLibModule !== undefined) {
