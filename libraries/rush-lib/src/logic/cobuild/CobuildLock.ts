@@ -65,4 +65,8 @@ export class CobuildLock {
   public async renewLockAsync(): Promise<void> {
     await this.cobuildConfiguration.cobuildLockProvider.renewLockAsync(this._cobuildContext);
   }
+
+  public get cobuildContext(): ICobuildContext {
+    return this._cobuildContext;
+  }
 }

@@ -2,7 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import {
+  AlreadyReportedError,
+  FileSystem,
+  ITerminal,
+  JsonFile,
+  JsonSchema
+} from '@rushstack/node-core-library';
 import schemaJson from '../schemas/cobuild.schema.json';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CobuildLockProviderFactory, RushSession } from '../pluginFramework/RushSession';
@@ -10,6 +16,7 @@ import { RushConstants } from '../logic/RushConstants';
 
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
 import type { RushConfiguration } from './RushConfiguration';
+import { CobuildContextId, GetCobuildContextIdFunction } from '../logic/cobuild/CobuildContextId';
 
 export interface ICobuildJson {
   cobuildEnabled: boolean;
@@ -19,6 +26,7 @@ export interface ICobuildJson {
 
 export interface ICobuildConfigurationOptions {
   cobuildJson: ICobuildJson;
+  getCobuildContextId: GetCobuildContextIdFunction;
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
 }
@@ -38,15 +46,18 @@ export class CobuildConfiguration {
   public readonly cobuildEnabled: boolean;
   /**
    * Method to calculate the cobuild context id
-   * FIXME:
    */
-  // public readonly getCacheEntryId: GetCacheEntryIdFunction;
+  public readonly cobuildContextId: string;
   public readonly cobuildLockProvider: ICobuildLockProvider;
 
   private constructor(options: ICobuildConfigurationOptions) {
     this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? options.cobuildJson.cobuildEnabled;
 
-    const { cobuildJson } = options;
+    const { cobuildJson, getCobuildContextId } = options;
+
+    this.cobuildContextId = getCobuildContextId({
+      environment: process.env
+    });
 
     const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
       options.rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
@@ -87,27 +98,26 @@ export class CobuildConfiguration {
       CobuildConfiguration._jsonSchema
     );
 
-    // FIXME:
-    // let getCacheEntryId: GetCacheEntryIdFunction;
-    // try {
-    //   getCacheEntryId = CacheEntryId.parsePattern(cobuildJson.cacheEntryNamePattern);
-    // } catch (e) {
-    //   terminal.writeErrorLine(
-    //     `Error parsing cache entry name pattern "${cobuildJson.cacheEntryNamePattern}": ${e}`
-    //   );
-    //   throw new AlreadyReportedError();
-    // }
+    let getCobuildContextId: GetCobuildContextIdFunction;
+    try {
+      getCobuildContextId = CobuildContextId.parsePattern(cobuildJson.cobuildContextIdPattern);
+    } catch (e) {
+      terminal.writeErrorLine(
+        `Error parsing cobuild context id pattern "${cobuildJson.cobuildContextIdPattern}": ${e}`
+      );
+      throw new AlreadyReportedError();
+    }
 
     return new CobuildConfiguration({
       cobuildJson,
+      getCobuildContextId,
       rushConfiguration,
       rushSession
     });
   }
 
   public get contextId(): string {
-    // FIXME: hardcode
-    return '123';
+    return this.cobuildContextId;
   }
 
   public async connectLockProviderAsync(): Promise<void> {

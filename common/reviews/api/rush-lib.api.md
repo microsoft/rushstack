@@ -97,7 +97,9 @@ export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) =
 
 // @beta
 export class CobuildConfiguration {
+    readonly cobuildContextId: string;
     readonly cobuildEnabled: boolean;
+    // (undocumented)
     readonly cobuildLockProvider: ICobuildLockProvider;
     // (undocumented)
     connectLockProviderAsync(): Promise<void>;

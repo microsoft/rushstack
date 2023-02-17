@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CobuildContextId Invalid pattern names throws an error if a environment variable is missing 1`] = `"The \\"cobuildContextIdPattern\\" value in cobuild.json contains missing environment variable: AUTHOR_NAME"`;
+
+exports[`CobuildContextId Invalid pattern names throws an error if multiple environment variables are missing 1`] = `"The \\"cobuildContextIdPattern\\" value in cobuild.json contains missing environment variables: MR_ID, AUTHOR_NAME"`;
