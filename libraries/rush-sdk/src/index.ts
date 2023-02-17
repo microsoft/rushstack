@@ -15,7 +15,7 @@ import {
 } from '@rushstack/node-core-library';
 import type { SpawnSyncReturns } from 'child_process';
 
-const RUSH_LIB_NAME: string = '@microsoft/rush-lib';
+const RUSH_LIB_NAME: '@microsoft/rush-lib' = '@microsoft/rush-lib';
 
 const verboseEnabled: boolean = typeof process !== 'undefined' && process.env.RUSH_SDK_DEBUG === '1';
 const terminal: Terminal = new Terminal(
@@ -28,6 +28,7 @@ type RushLibModuleType = Record<string, unknown>;
 declare const global: NodeJS.Global &
   typeof globalThis & {
     ___rush___rushLibModule?: RushLibModuleType;
+    ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
     ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
   };
 
@@ -46,7 +47,9 @@ function _require<TResult>(moduleName: string): TResult {
 // SCENARIO 1:  Rush's PluginManager has initialized "rush-sdk" with Rush's own instance of rush-lib.
 // The Rush host process will assign "global.___rush___rushLibModule" before loading the plugin.
 let rushLibModule: RushLibModuleType | undefined =
-  global.___rush___rushLibModule || global.___rush___rushLibModuleFromInstallAndRunRush;
+  global.___rush___rushLibModule ||
+  global.___rush___rushLibModuleFromEnvironment ||
+  global.___rush___rushLibModuleFromInstallAndRunRush;
 let errorMessage: string = '';
 
 // SCENARIO 2:  The project importing "rush-sdk" has installed its own instance of "rush-lib"
@@ -89,7 +92,31 @@ if (rushLibModule === undefined) {
   }
 }
 
-// SCENARIO 3:  A tool or script depends on "rush-sdk", and is meant to be used inside a monorepo folder.
+// SCENARIO 3: A tool or script has been invoked as a child process by an instance of "rush-lib" and can use the
+// version that invoked it. In this case, use process.env.RUSH_LIB_PATH to find "rush-lib".
+if (rushLibModule === undefined) {
+  const rushLibVariable: 'RUSH_LIB_PATH' = 'RUSH_LIB_PATH';
+  const rushLibPath: string | undefined = process.env[rushLibVariable];
+  if (rushLibPath) {
+    terminal.writeVerboseLine(
+      `Try to load ${RUSH_LIB_NAME} from process.env.${rushLibVariable} from caller package`
+    );
+    try {
+      rushLibModule = _require(rushLibPath);
+    } catch (error) {
+      // Log this as a warning, since it is unexpected to define an incorrect value of the variable.
+      terminal.writeWarningLine(`Failed to load ${RUSH_LIB_NAME} via process.env.${rushLibVariable}`);
+    }
+
+    if (rushLibModule !== undefined) {
+      // to track which scenario is active and how it got initialized.
+      global.___rush___rushLibModuleFromEnvironment = rushLibModule;
+      terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} from process.env.${rushLibVariable}`);
+    }
+  }
+}
+
+// SCENARIO 4:  A standalone tool or script depends on "rush-sdk", and is meant to be used inside a monorepo folder.
 // In this case, we can use install-run-rush.js to obtain the appropriate rush-lib version for the monorepo.
 if (rushLibModule === undefined) {
   try {
