@@ -155,6 +155,15 @@ export enum EnvironmentVariableNames {
   RUSH_COBUILD_ENABLED = 'RUSH_COBUILD_ENABLED',
 
   /**
+   * Setting this environment variable overrides the value of `cobuildContextId` calculated by
+   * `cobuildContextIdPattern` in the `cobuild.json` configuration file.
+   *
+   * @remarks
+   * If there is no cobuild configured, then this environment variable is ignored.
+   */
+  RUSH_COBUILD_CONTEXT_ID = 'RUSH_COBUILD_CONTEXT_ID',
+
+  /**
    * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
    */
   RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
@@ -208,6 +217,8 @@ export class EnvironmentConfiguration {
   private static _buildCacheWriteAllowed: boolean | undefined;
 
   private static _cobuildEnabled: boolean | undefined;
+
+  private static _cobuildContextId: string | undefined;
 
   private static _gitBinaryPath: string | undefined;
 
@@ -313,6 +324,15 @@ export class EnvironmentConfiguration {
   public static get cobuildEnabled(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._cobuildEnabled;
+  }
+
+  /**
+   * Provides a determined cobuild context id if configured
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID}
+   */
+  public static get cobuildContextId(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._cobuildContextId;
   }
 
   /**
@@ -451,6 +471,11 @@ export class EnvironmentConfiguration {
                 EnvironmentVariableNames.RUSH_COBUILD_ENABLED,
                 value
               );
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID: {
+            EnvironmentConfiguration._cobuildContextId = value;
             break;
           }
 

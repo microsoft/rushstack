@@ -55,9 +55,11 @@ export class CobuildConfiguration {
 
     const { cobuildJson, getCobuildContextId } = options;
 
-    this.cobuildContextId = getCobuildContextId({
-      environment: process.env
-    });
+    this.cobuildContextId =
+      EnvironmentConfiguration.cobuildContextId ??
+      getCobuildContextId({
+        environment: process.env
+      });
 
     const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
       options.rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
