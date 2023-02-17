@@ -171,6 +171,7 @@ export class EnvironmentConfiguration {
     static get buildCacheCredential(): string | undefined;
     static get buildCacheEnabled(): boolean | undefined;
     static get buildCacheWriteAllowed(): boolean | undefined;
+    static get cobuildContextId(): string | undefined;
     static get cobuildEnabled(): boolean | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
@@ -196,6 +197,7 @@ export enum EnvironmentVariableNames {
     RUSH_BUILD_CACHE_CREDENTIAL = "RUSH_BUILD_CACHE_CREDENTIAL",
     RUSH_BUILD_CACHE_ENABLED = "RUSH_BUILD_CACHE_ENABLED",
     RUSH_BUILD_CACHE_WRITE_ALLOWED = "RUSH_BUILD_CACHE_WRITE_ALLOWED",
+    RUSH_COBUILD_CONTEXT_ID = "RUSH_COBUILD_CONTEXT_ID",
     RUSH_COBUILD_ENABLED = "RUSH_COBUILD_ENABLED",
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",

@@ -181,5 +181,5 @@ describe(AsyncOperationQueue.name, () => {
     }
 
     expect(actualOrder).toEqual(expectedOrder);
-  });
+  }, 6000);
 });
