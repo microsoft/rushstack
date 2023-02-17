@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.93.0",
+      "tag": "@microsoft/rush_v5.93.0",
+      "date": "Fri, 17 Feb 2023 02:14:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the RUSH_LIB_PATH environment variable."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.92.0",
       "tag": "@microsoft/rush_v5.92.0",
       "date": "Sun, 12 Feb 2023 02:50:42 GMT",

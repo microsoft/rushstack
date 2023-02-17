@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 12 Feb 2023 02:50:42 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Feb 2023 02:14:43 GMT and should not be manually modified.
+
+## 5.93.0
+Fri, 17 Feb 2023 02:14:43 GMT
+
+### Updates
+
+- Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the RUSH_LIB_PATH environment variable.
 
 ## 5.92.0
 Sun, 12 Feb 2023 02:50:42 GMT
