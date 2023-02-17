@@ -23,7 +23,7 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
         environment: {
           ...process.env,
           RUSH_SDK_DEBUG: '1',
-          RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
+          _RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
         }
       }
     );
@@ -46,7 +46,7 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
         environment: {
           ...process.env,
           RUSH_SDK_DEBUG: '1',
-          RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
+          _RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
         }
       }
     );
@@ -55,7 +55,7 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
     expect(result.status).toBe(0);
   });
 
-  it('Should load via process.env.RUSH_LIB_PATH (for child processes)', () => {
+  it('Should load via process.env._RUSH_LIB_PATH (for child processes)', () => {
     const result = Executable.spawnSync(
       'node',
       ['-e', `console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`],
@@ -64,7 +64,7 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
         environment: {
           ...process.env,
           RUSH_SDK_DEBUG: '1',
-          RUSH_LIB_PATH: mockRushLibPath
+          _RUSH_LIB_PATH: mockRushLibPath
         }
       }
     );
@@ -96,7 +96,7 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));
         environment: {
           ...process.env,
           RUSH_SDK_DEBUG: '1',
-          RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
+          _RUSH_LIB_PATH: '' // Need to clear if invoked via Rush
         }
       }
     );
