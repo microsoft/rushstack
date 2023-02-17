@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-redis-cobuild-plugin",
+      "comment": "Implement a redis lock provider for cobuild feature",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-redis-cobuild-plugin"
+}
