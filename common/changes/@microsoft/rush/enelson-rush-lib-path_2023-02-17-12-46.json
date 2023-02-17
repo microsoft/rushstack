@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rename internal RUSH_LIB_PATH environment variable to _RUSH_LIB_PATH.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

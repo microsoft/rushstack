@@ -93,9 +93,9 @@ if (rushLibModule === undefined) {
 }
 
 // SCENARIO 3: A tool or script has been invoked as a child process by an instance of "rush-lib" and can use the
-// version that invoked it. In this case, use process.env.RUSH_LIB_PATH to find "rush-lib".
+// version that invoked it. In this case, use process.env._RUSH_LIB_PATH to find "rush-lib".
 if (rushLibModule === undefined) {
-  const rushLibVariable: 'RUSH_LIB_PATH' = 'RUSH_LIB_PATH';
+  const rushLibVariable: '_RUSH_LIB_PATH' = '_RUSH_LIB_PATH';
   const rushLibPath: string | undefined = process.env[rushLibVariable];
   if (rushLibPath) {
     terminal.writeVerboseLine(
