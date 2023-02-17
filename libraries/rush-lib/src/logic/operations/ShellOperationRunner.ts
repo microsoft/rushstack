@@ -418,7 +418,13 @@ export class ShellOperationRunner implements IOperationRunner {
           subProcess.on('close', (code: number) => {
             try {
               if (code !== 0) {
-                reject(new OperationError('error', `Returned error code: ${code}`));
+                if (cobuildLock) {
+                  // In order to preventing the worst case that all cobuild tasks go through the same failure,
+                  // allowing a failing build to be cached and retrieved
+                  resolve(OperationStatus.Failure);
+                } else {
+                  reject(new OperationError('error', `Returned error code: ${code}`));
+                }
               } else if (hasWarningOrError) {
                 resolve(OperationStatus.SuccessWithWarning);
               } else {
@@ -500,7 +506,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
       if (terminalProvider.hasErrors) {
         status = OperationStatus.Failure;
-      } else if (cacheWriteSuccess === false) {
+      } else if (cacheWriteSuccess === false && status === OperationStatus.Success) {
         status = OperationStatus.SuccessWithWarning;
       }
 
