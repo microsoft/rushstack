@@ -238,8 +238,8 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "RUSH_JSON_FILENAME": () => (/* binding */ RUSH_JSON_FILENAME),
-/* harmony export */   "getNpmPath": () => (/* binding */ getNpmPath),
 /* harmony export */   "findRushJsonFolder": () => (/* binding */ findRushJsonFolder),
+/* harmony export */   "getNpmPath": () => (/* binding */ getNpmPath),
 /* harmony export */   "installAndRun": () => (/* binding */ installAndRun),
 /* harmony export */   "runWithErrorAndStatusCode": () => (/* binding */ runWithErrorAndStatusCode)
 /* harmony export */ });

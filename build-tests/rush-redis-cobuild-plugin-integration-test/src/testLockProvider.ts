@@ -30,7 +30,6 @@ async function main(): Promise<void> {
     status: OperationStatus.Success,
     cacheId: 'test-cache-id'
   });
-  await lockProvider.releaseLockAsync(context);
   const completedState = await lockProvider.getCompletedStateAsync(context);
   console.log('Completed state: ', completedState);
   await lockProvider.disconnectAsync();

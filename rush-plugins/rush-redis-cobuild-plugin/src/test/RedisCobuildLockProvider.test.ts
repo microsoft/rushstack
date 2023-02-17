@@ -79,11 +79,6 @@ describe(RedisCobuildLockProvider.name, () => {
     expect(result2).toBe(false);
   });
 
-  it('releaseLockAsync works', async () => {
-    const subject: RedisCobuildLockProvider = prepareSubject();
-    expect(() => subject.releaseLockAsync(context)).not.toThrowError();
-  });
-
   it('set and get completedState works', async () => {
     const subject: RedisCobuildLockProvider = prepareSubject();
     const cacheId: string = 'foo';

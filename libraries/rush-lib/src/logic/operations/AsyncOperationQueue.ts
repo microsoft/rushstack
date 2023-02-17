@@ -126,26 +126,26 @@ export class AsyncOperationQueue
     }
 
     if (waitingIterators.length > 0) {
-      // cycle through the queue again to find the next operation that is executed remotely
-      for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
-        const operation: OperationExecutionRecord = queue[i];
+      // Pause for a few time
+      setTimeout(() => {
+        // cycle through the queue again to find the next operation that is executed remotely
+        for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
+          const operation: OperationExecutionRecord = queue[i];
 
-        if (operation.status === OperationStatus.RemoteExecuting) {
-          // try to attempt to get the lock again
-          waitingIterators.shift()!({
-            value: operation,
-            done: false
-          });
+          if (operation.status === OperationStatus.RemoteExecuting) {
+            // try to attempt to get the lock again
+            waitingIterators.shift()!({
+              value: operation,
+              done: false
+            });
+          }
         }
-      }
 
-      if (waitingIterators.length > 0) {
-        // Queue is not empty, but no operations are ready to process
-        // Pause for a second and start over
-        setTimeout(() => {
+        if (waitingIterators.length > 0) {
+          // Queue is not empty, but no operations are ready to process, start over
           this.assignOperations();
-        }, 1000);
-      }
+        }
+      }, 5000);
     }
   }
 

@@ -294,8 +294,6 @@ export interface ICobuildLockProvider {
     // (undocumented)
     getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined>;
     // (undocumented)
-    releaseLockAsync(context: ICobuildContext): Promise<void>;
-    // (undocumented)
     renewLockAsync(context: ICobuildContext): Promise<void>;
     // (undocumented)
     setCompletedStateAsync(context: ICobuildContext, state: ICobuildCompletedState): Promise<void>;

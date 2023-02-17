@@ -431,7 +431,22 @@ export class ShellOperationRunner implements IOperationRunner {
         }
       );
 
-      let setCompletedStatePromise: Promise<void> | undefined;
+      const taskIsSuccessful: boolean =
+        status === OperationStatus.Success ||
+        (status === OperationStatus.SuccessWithWarning &&
+          this.warningsAreAllowed &&
+          !!this._rushConfiguration.experimentsConfiguration.configuration
+            .buildCacheWithAllowWarningsInSuccessfulBuild);
+
+      // Save the metadata to disk
+      const { duration: durationInSeconds } = context.stopwatch;
+      await context._operationMetadataManager?.saveAsync({
+        durationInSeconds,
+        logPath: projectLogWritable.logPath,
+        errorLogPath: projectLogWritable.errorLogPath
+      });
+
+      let setCompletedStatePromiseFunction: (() => Promise<void> | undefined) | undefined;
       let setCacheEntryPromise: Promise<boolean> | undefined;
       if (cobuildLock && this.isCacheWriteAllowed) {
         const { projectBuildCache } = cobuildLock;
@@ -445,14 +460,13 @@ export class ShellOperationRunner implements IOperationRunner {
             case OperationStatus.SuccessWithWarning:
             case OperationStatus.Success:
             case OperationStatus.Failure: {
-              setCompletedStatePromise = cobuildLock
-                .setCompletedStateAsync({
-                  status,
+              const currentStatus: ICobuildCompletedState['status'] = status;
+              setCompletedStatePromiseFunction = () => {
+                return cobuildLock?.setCompletedStateAsync({
+                  status: currentStatus,
                   cacheId: finalCacheId
-                })
-                .then(() => {
-                  return cobuildLock?.releaseLockAsync();
                 });
+              };
               setCacheEntryPromise = cobuildLock.projectBuildCache.trySetCacheEntryAsync(
                 terminal,
                 finalCacheId
@@ -462,26 +476,11 @@ export class ShellOperationRunner implements IOperationRunner {
         }
       }
 
-      const taskIsSuccessful: boolean =
-        status === OperationStatus.Success ||
-        (status === OperationStatus.SuccessWithWarning &&
-          this.warningsAreAllowed &&
-          !!this._rushConfiguration.experimentsConfiguration.configuration
-            .buildCacheWithAllowWarningsInSuccessfulBuild);
-
       let writeProjectStatePromise: Promise<boolean> | undefined;
       if (taskIsSuccessful && projectDeps) {
         // Write deps on success.
         writeProjectStatePromise = JsonFile.saveAsync(projectDeps, currentDepsPath, {
           ensureFolderExists: true
-        });
-
-        // If the operation without cache was successful, we can save the metadata to disk
-        const { duration: durationInSeconds } = context.stopwatch;
-        await context._operationMetadataManager?.saveAsync({
-          durationInSeconds,
-          logPath: projectLogWritable.logPath,
-          errorLogPath: projectLogWritable.errorLogPath
         });
 
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
@@ -496,11 +495,8 @@ export class ShellOperationRunner implements IOperationRunner {
           )?.trySetCacheEntryAsync(terminal);
         }
       }
-      const [, cacheWriteSuccess] = await Promise.all([
-        writeProjectStatePromise,
-        setCacheEntryPromise,
-        setCompletedStatePromise
-      ]);
+      const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
+      await setCompletedStatePromiseFunction?.();
 
       if (terminalProvider.hasErrors) {
         status = OperationStatus.Failure;

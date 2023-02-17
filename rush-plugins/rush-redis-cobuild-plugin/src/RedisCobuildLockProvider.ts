@@ -49,9 +49,9 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   }
 
   public async connectAsync(): Promise<void> {
-    await this._redisClient.connect();
-    // Check the connection works at early stage
     try {
+      await this._redisClient.connect();
+      // Check the connection works at early stage
       await this._redisClient.ping();
     } catch (e) {
       throw new Error(`Failed to connect to redis server: ${e.message}`);
@@ -59,17 +59,26 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   }
 
   public async disconnectAsync(): Promise<void> {
-    await this._redisClient.disconnect();
+    try {
+      await this._redisClient.disconnect();
+    } catch (e) {
+      throw new Error(`Failed to disconnect to redis server: ${e.message}`);
+    }
   }
 
   public async acquireLockAsync(context: ICobuildContext): Promise<boolean> {
     const { _terminal: terminal } = this;
     const lockKey: string = this.getLockKey(context);
-    const incrResult: number = await this._redisClient.incr(lockKey);
-    const result: boolean = incrResult === 1;
-    terminal.writeDebugLine(`Acquired lock for ${lockKey}: ${incrResult}, 1 is success`);
-    if (result) {
-      await this.renewLockAsync(context);
+    let result: boolean = false;
+    try {
+      const incrResult: number = await this._redisClient.incr(lockKey);
+      result = incrResult === 1;
+      terminal.writeDebugLine(`Acquired lock for ${lockKey}: ${incrResult}, 1 is success`);
+      if (result) {
+        await this.renewLockAsync(context);
+      }
+    } catch (e) {
+      throw new Error(`Failed to acquire lock for ${lockKey}: ${e.message}`);
     }
     return result;
   }
@@ -77,15 +86,12 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   public async renewLockAsync(context: ICobuildContext): Promise<void> {
     const { _terminal: terminal } = this;
     const lockKey: string = this.getLockKey(context);
-    await this._redisClient.expire(lockKey, 30);
+    try {
+      await this._redisClient.expire(lockKey, 30);
+    } catch (e) {
+      throw new Error(`Failed to renew lock for ${lockKey}: ${e.message}`);
+    }
     terminal.writeDebugLine(`Renewed lock for ${lockKey}`);
-  }
-
-  public async releaseLockAsync(context: ICobuildContext): Promise<void> {
-    const { _terminal: terminal } = this;
-    const lockKey: string = this.getLockKey(context);
-    await this._redisClient.set(lockKey, 0);
-    terminal.writeDebugLine(`Released lock for ${lockKey}`);
   }
 
   public async setCompletedStateAsync(
@@ -95,7 +101,11 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     const { _terminal: terminal } = this;
     const key: string = this.getCompletedStateKey(context);
     const value: string = this._serializeCompletedState(state);
-    await this._redisClient.set(key, value);
+    try {
+      await this._redisClient.set(key, value);
+    } catch (e) {
+      throw new Error(`Failed to set completed state for ${key}: ${e.message}`);
+    }
     terminal.writeDebugLine(`Set completed state for ${key}: ${value}`);
   }
 
@@ -103,11 +113,15 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     const { _terminal: terminal } = this;
     const key: string = this.getCompletedStateKey(context);
     let state: ICobuildCompletedState | undefined;
-    const value: string | null = await this._redisClient.get(key);
-    if (value) {
-      state = this._deserializeCompletedState(value);
+    try {
+      const value: string | null = await this._redisClient.get(key);
+      if (value) {
+        state = this._deserializeCompletedState(value);
+      }
+      terminal.writeDebugLine(`Get completed state for ${key}: ${value}`);
+    } catch (e) {
+      throw new Error(`Failed to get completed state for ${key}: ${e.message}`);
     }
-    terminal.writeDebugLine(`Get completed state for ${key}: ${value}`);
     return state;
   }
 

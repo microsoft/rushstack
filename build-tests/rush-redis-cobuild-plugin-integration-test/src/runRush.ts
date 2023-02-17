@@ -1,5 +1,6 @@
-import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
-import * as rushLib from '@microsoft/rush-lib';
+// Import from lib-commonjs for easy debugging
+import { RushCommandLineParser } from '@microsoft/rush-lib/lib-commonjs/cli/RushCommandLineParser';
+import * as rushLib from '@microsoft/rush-lib/lib-commonjs';
 
 // Setup redis cobuild plugin
 const builtInPluginConfigurations: rushLib._IBuiltInPluginConfiguration[] = [];

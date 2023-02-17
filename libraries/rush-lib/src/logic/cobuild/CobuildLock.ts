@@ -62,10 +62,6 @@ export class CobuildLock {
     return acquireLockResult;
   }
 
-  public async releaseLockAsync(): Promise<void> {
-    await this.cobuildConfiguration.cobuildLockProvider.releaseLockAsync(this._cobuildContext);
-  }
-
   public async renewLockAsync(): Promise<void> {
     await this.cobuildConfiguration.cobuildLockProvider.renewLockAsync(this._cobuildContext);
   }

@@ -30,8 +30,6 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     getCompletedStateKey(context: ICobuildContext): string;
     getLockKey(context: ICobuildContext): string;
     // (undocumented)
-    releaseLockAsync(context: ICobuildContext): Promise<void>;
-    // (undocumented)
     renewLockAsync(context: ICobuildContext): Promise<void>;
     // (undocumented)
     setCompletedStateAsync(context: ICobuildContext, state: ICobuildCompletedState): Promise<void>;
