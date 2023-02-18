@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.90.2",
+  "version": "5.93.1",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -8,7 +8,7 @@
     "directory": "apps/rush-sdk"
   },
   "homepage": "https://rushjs.io",
-  "main": "lib/index.js",
+  "main": "lib-shim/index.js",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
     "build": "heft build --clean",

@@ -1198,9 +1198,11 @@ importers:
     specifiers:
       '@microsoft/rush-lib': workspace:*
       '@rushstack/node-core-library': workspace:*
+      '@rushstack/rush-sdk': workspace:*
     devDependencies:
       '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/rush-sdk': link:../../libraries/rush-sdk
 
   ../../build-tests/localization-plugin-test-01:
     specifiers:

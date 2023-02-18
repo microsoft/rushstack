@@ -2,6 +2,57 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.93.1",
+      "tag": "@microsoft/rush_v5.93.1",
+      "date": "Fri, 17 Feb 2023 14:46:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression where \"rush-sdk\" failed to load older versions of \"rush-lib\" (GitHub #3979)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.93.0",
+      "tag": "@microsoft/rush_v5.93.0",
+      "date": "Fri, 17 Feb 2023 02:14:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the RUSH_LIB_PATH environment variable."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.92.0",
+      "tag": "@microsoft/rush_v5.92.0",
+      "date": "Sun, 12 Feb 2023 02:50:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Enable @rushstack/rush-sdk to import internal APIs from the proxied @microsoft/rush-lib instance (GitHub #3895)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.91.0",
+      "tag": "@microsoft/rush_v5.91.0",
+      "date": "Sat, 11 Feb 2023 02:04:14 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove runtime dependency on @rushstack/rush-sdk from the AzureStorageAuthentication class in @rushstack/rush-azure-storage-build-cache-plugin so that it can be used in isolation."
+          },
+          {
+            "comment": "Include operation log files in the cache, and restore them during cache hits."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.90.2",
       "tag": "@microsoft/rush_v5.90.2",
       "date": "Wed, 08 Feb 2023 20:27:06 GMT",
