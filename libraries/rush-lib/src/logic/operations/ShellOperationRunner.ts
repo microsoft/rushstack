@@ -159,7 +159,6 @@ export class ShellOperationRunner implements IOperationRunner {
     );
     const runnerWatcher: RunnerWatcher = new RunnerWatcher({
       interval: 10 * 1000
-      // interval: 1000
     });
 
     try {
