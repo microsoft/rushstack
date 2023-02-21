@@ -5,12 +5,27 @@
 ```ts
 
 import { Compiler } from 'webpack';
+import type { IPackageJson } from '@rushstack/node-core-library';
 import { WebpackPluginInstance } from 'webpack';
 
-// @public (undocumented)
+// @alpha
 class EmbeddedDependenciesWebpackPlugin implements WebpackPluginInstance {
+    // Warning: (ae-forgotten-export) The symbol "IEmbeddedDependenciesWebpackPluginOptions" needs to be exported by the entry point index.d.ts
+    constructor(options?: IEmbeddedDependenciesWebpackPluginOptions);
     // (undocumented)
     apply(compiler: Compiler): void;
+    // Warning: (ae-forgotten-export) The symbol "LicenseFileName" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    generatedLicenseFilename: LicenseFileName;
+    // (undocumented)
+    generateLicenseFile: boolean;
+    // Warning: (ae-forgotten-export) The symbol "LicenseFileGeneratorFunction" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    generateLicenseFileFunction?: LicenseFileGeneratorFunction;
+    // (undocumented)
+    outputFileName: string;
 }
 export default EmbeddedDependenciesWebpackPlugin;
 
