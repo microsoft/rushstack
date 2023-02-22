@@ -23,7 +23,7 @@ describe('webpack5-load-themed-style-loader', () => {
     if (stats !== undefined) {
       const content = stats.toJson({ source: true }).modules?.[0].source;
       const match = MATCH_GENERATED_LOADER_STRING_REGEXP.exec(content as string);
-      const loadThemedStylesLibPath = match?.[1];
+      const loadThemedStylesLibPath = JSON.parse(`"${match?.[1]}"`);
       const expectedPath: string = require.resolve('@microsoft/load-themed-styles');
 
       expect(loadThemedStylesLibPath).toEqual(expectedPath);
