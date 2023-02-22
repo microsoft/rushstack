@@ -84,6 +84,7 @@ export {
 export { VersionPolicyConfiguration } from './api/VersionPolicyConfiguration';
 
 export { ILaunchOptions, Rush } from './api/Rush';
+export { RushInternals as _RushInternals } from './api/RushInternals';
 
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
 
@@ -126,3 +127,8 @@ export {
   IOperationStateFileOptions as _IOperationStateFileOptions,
   IOperationStateJson as _IOperationStateJson
 } from './logic/operations/OperationStateFile';
+export {
+  OperationMetadataManager as _OperationMetadataManager,
+  IOperationMetadataManagerOptions as _IOperationMetadataManagerOptions,
+  IOperationMetaData as _IOperationMetadata
+} from './logic/operations/OperationMetadataManager';

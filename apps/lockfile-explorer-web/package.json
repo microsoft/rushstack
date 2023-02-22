@@ -18,7 +18,8 @@
     "@lifaon/path": "~2.1.0",
     "@reduxjs/toolkit": "~1.8.6",
     "react-redux": "~8.0.4",
-    "redux": "~4.2.0"
+    "redux": "~4.2.0",
+    "@rushstack/rush-themed-ui": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
@@ -27,7 +28,6 @@
     "@types/heft-jest": "1.0.1",
     "@types/react-dom": "16.9.14",
     "@types/react": "16.14.23",
-    "@types/webpack-env": "1.13.0",
-    "office-ui-fabric-core": "~11.0.1"
+    "@types/webpack-env": "1.18.0"
   }
 }

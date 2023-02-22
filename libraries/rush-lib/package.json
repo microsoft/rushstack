@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.86.0",
+  "version": "5.93.1",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -30,11 +30,12 @@
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "@types/node-fetch": "1.6.9",
+    "@types/node-fetch": "2.6.2",
     "@yarnpkg/lockfile": "~1.0.2",
     "builtin-modules": "~3.1.0",
     "cli-table": "~0.3.1",
     "colors": "~1.2.1",
+    "dependency-path": "~9.2.8",
     "figures": "3.0.0",
     "git-repo-info": "~2.1.0",
     "glob-escape": "~0.0.2",
@@ -43,7 +44,7 @@
     "ignore": "~5.1.6",
     "inquirer": "~7.3.3",
     "js-yaml": "~3.13.1",
-    "jszip": "~3.7.1",
+    "jszip": "~3.8.0",
     "lodash": "~4.17.15",
     "node-fetch": "2.6.7",
     "npm-check": "~6.0.1",
@@ -65,6 +66,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/webpack-deep-imports-plugin": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/cli-table": "0.3.0",
     "@types/glob": "7.1.1",
@@ -72,7 +74,7 @@
     "@types/inquirer": "7.3.1",
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",
-    "@types/node": "12.20.24",
+    "@types/node": "14.18.36",
     "@types/npm-package-arg": "6.1.0",
     "@types/npm-packlist": "~1.1.1",
     "@types/read-package-tree": "5.1.0",
@@ -81,11 +83,17 @@
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.1",
-    "@types/webpack-env": "1.13.0",
-    "webpack": "~5.68.0"
+    "@types/webpack-env": "1.18.0",
+    "webpack": "~5.75.0"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*"
-  }
+  },
+  "sideEffects": [
+    "lib-esnext/start-pnpm.js",
+    "lib-esnext/start.js",
+    "lib-esnext/startx.js",
+    "lib-esnext/utilities/SetRushLibPath.js"
+  ]
 }

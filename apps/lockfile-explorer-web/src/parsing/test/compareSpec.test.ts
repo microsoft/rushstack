@@ -6,6 +6,7 @@ import { compareSpec } from '../compareSpec';
 
 const packageJson: IPackageJson = {
   name: 'testPackage',
+  version: '0.0.0',
   dependencies: {
     package1: '0.0.0'
   },
@@ -17,6 +18,7 @@ const packageJson: IPackageJson = {
 
 const parsedPackageJson: IPackageJson = {
   name: 'testPackage',
+  version: '0.0.0',
   dependencies: {
     package1: '1.0.0'
   },

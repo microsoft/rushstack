@@ -1,6 +1,73 @@
 # Change Log - @rushstack/webpack5-module-minifier-plugin
 
-This log was last generated on Fri, 09 Dec 2022 16:18:28 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 5.3.2
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 5.3.1
+Sun, 05 Feb 2023 03:02:02 GMT
+
+### Patches
+
+- Change the peer dependency selector on `@types/node` to a wildcard (`*`).
+
+## 5.3.0
+Wed, 01 Feb 2023 02:16:34 GMT
+
+### Minor changes
+
+- Bump @types/node peerDependency to ^14.18.36.
+
+## 5.2.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Move the @types/node dependency to an optional peerDependency.
+
+## 5.1.49
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 5.1.48
+Sat, 28 Jan 2023 01:22:02 GMT
+
+_Version update only_
+
+## 5.1.47
+Thu, 26 Jan 2023 02:55:10 GMT
+
+### Patches
+
+- Upgrade to webpack 5.75.0
+
+## 5.1.46
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 5.1.45
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 5.1.44
+Tue, 20 Dec 2022 01:18:22 GMT
+
+### Patches
+
+- Fix a formatting issue in the LICENSE file.
+
+## 5.1.43
+Thu, 15 Dec 2022 01:18:56 GMT
+
+### Patches
+
+- Make @types/estree a dependency instead of devDependency
 
 ## 5.1.42
 Fri, 09 Dec 2022 16:18:28 GMT

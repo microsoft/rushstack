@@ -21,7 +21,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node": "12.20.24",
+    "@types/node": "14.18.36",
     "eslint": "~8.7.0",
     "heft-example-plugin-01": "workspace:*",
     "typescript": "~4.8.4"

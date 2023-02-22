@@ -8,9 +8,11 @@ import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { DependencySpecifier } from '../../logic/DependencySpecifier';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-
-import { SemVerStyle } from '../../logic/PackageJsonUpdater';
-import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
+import {
+  type IPackageForRushAdd,
+  type IPackageJsonUpdaterRushAddOptions,
+  SemVerStyle
+} from '../../logic/PackageJsonUpdaterTypes';
 
 export class AddAction extends BaseAddAndRemoveAction {
   protected readonly _allFlag: CommandLineFlagParameter;
@@ -79,7 +81,7 @@ export class AddAction extends BaseAddAndRemoveAction {
     });
   }
 
-  public getUpdateOptions(): PackageJsonUpdaterType.IPackageJsonUpdaterRushAddOptions {
+  public getUpdateOptions(): IPackageJsonUpdaterRushAddOptions {
     const projects: RushConfigurationProject[] = super.getProjects();
 
     if (this._caretFlag.value && this._exactFlag.value) {
@@ -88,7 +90,7 @@ export class AddAction extends BaseAddAndRemoveAction {
       );
     }
 
-    const packagesToAdd: PackageJsonUpdaterType.IPackageForRushAdd[] = [];
+    const packagesToAdd: IPackageForRushAdd[] = [];
 
     for (const specifiedPackageName of this.specifiedPackageNameList) {
       /**
@@ -121,7 +123,7 @@ export class AddAction extends BaseAddAndRemoveAction {
       /**
        * RangeStyle
        */
-      let rangeStyle: PackageJsonUpdaterType.SemVerStyle;
+      let rangeStyle: SemVerStyle;
       if (version && version !== 'latest') {
         if (this._exactFlag.value || this._caretFlag.value) {
           throw new Error(

@@ -1,6 +1,53 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Fri, 09 Dec 2022 16:18:28 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 0.2.2
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 0.2.1
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 0.2.0
+Wed, 01 Feb 2023 02:16:34 GMT
+
+### Minor changes
+
+- Add support for storybook static build
+
+## 0.1.99
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 0.1.98
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.1.97
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.1.96
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.1.95
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.1.94
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
 
 ## 0.1.93
 Fri, 09 Dec 2022 16:18:28 GMT

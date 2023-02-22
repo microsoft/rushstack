@@ -18,7 +18,7 @@
     "@types/heft-jest": "1.0.1",
     "@types/react-dom": "16.9.14",
     "@types/react": "16.14.23",
-    "@types/webpack-env": "1.13.0",
+    "@types/webpack-env": "1.18.0",
     "autoprefixer": "~10.4.2",
     "css-loader": "~5.2.7",
     "eslint": "~8.7.0",

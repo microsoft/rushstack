@@ -1,0 +1,7 @@
+$shadow: 0 2px 10px hsla(0, 0%, 0%, 0.141);
+$background-primary: white;
+
+@mixin card {
+  box-shadow: $shadow;
+  background-color: $background-primary;
+}

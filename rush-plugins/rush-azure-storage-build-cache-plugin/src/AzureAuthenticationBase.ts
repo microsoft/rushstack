@@ -12,6 +12,59 @@ import { PrintUtilities } from '@rushstack/terminal';
 /**
  * @public
  */
+export type ExpiredCredentialBehavior = 'logWarning' | 'throwError' | 'ignore';
+
+/**
+ * @public
+ */
+export interface ITryGetCachedCredentialOptionsBase {
+  /**
+   * The behavior to take when the cached credential has expired.
+   * Defaults to 'throwError'
+   */
+  expiredCredentialBehavior?: ExpiredCredentialBehavior;
+  terminal?: ITerminal;
+}
+
+/**
+ * @public
+ */
+export interface ITryGetCachedCredentialOptionsLogWarning extends ITryGetCachedCredentialOptionsBase {
+  /**
+   * {@inheritdoc ITryGetCachedCredentialOptionsBase.expiredCredentialBehavior}
+   */
+  expiredCredentialBehavior: 'logWarning';
+  terminal: ITerminal;
+}
+
+/**
+ * @public
+ */
+export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCredentialOptionsBase {
+  /**
+   * {@inheritdoc ITryGetCachedCredentialOptionsBase.expiredCredentialBehavior}
+   */
+  expiredCredentialBehavior: 'throwError';
+}
+
+/**
+ * @public
+ */
+export interface ITryGetCachedCredentialOptionsIgnore extends ITryGetCachedCredentialOptionsBase {
+  /**
+   * {@inheritdoc ITryGetCachedCredentialOptionsBase.expiredCredentialBehavior}
+   */
+  expiredCredentialBehavior: 'ignore';
+}
+
+export type ITryGetCachedCredentialOptions =
+  | ITryGetCachedCredentialOptionsLogWarning
+  | ITryGetCachedCredentialOptionsThrow
+  | ITryGetCachedCredentialOptionsIgnore;
+
+/**
+ * @public
+ */
 export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 
 /**
@@ -19,6 +72,7 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
  */
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
+  credentialUpdateCommandForLogging?: string | undefined;
 }
 
 /**
@@ -35,7 +89,7 @@ export interface IAzureAuthenticationBaseOptions {
 export abstract class AzureAuthenticationBase {
   protected abstract readonly _credentialNameForCache: string;
   protected abstract readonly _credentialKindForLogging: string;
-  protected abstract readonly _credentialUpdateCommandForLogging: string | undefined;
+  protected readonly _credentialUpdateCommandForLogging: string | undefined;
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
 
@@ -56,6 +110,7 @@ export abstract class AzureAuthenticationBase {
 
   public constructor(options: IAzureAuthenticationBaseOptions) {
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
+    this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
@@ -124,7 +179,15 @@ export abstract class AzureAuthenticationBase {
   }
 
   public async tryGetCachedCredentialAsync(
-    doNotThrowIfExpired?: boolean
+    options?: ITryGetCachedCredentialOptionsThrow | ITryGetCachedCredentialOptionsIgnore
+  ): Promise<ICredentialCacheEntry | undefined>;
+  public async tryGetCachedCredentialAsync(
+    options: ITryGetCachedCredentialOptionsLogWarning
+  ): Promise<ICredentialCacheEntry | undefined>;
+  public async tryGetCachedCredentialAsync(
+    { expiredCredentialBehavior, terminal }: ITryGetCachedCredentialOptions = {
+      expiredCredentialBehavior: 'throwError'
+    }
   ): Promise<ICredentialCacheEntry | undefined> {
     let cacheEntry: ICredentialCacheEntry | undefined;
     await CredentialCache.usingAsync(
@@ -138,16 +201,20 @@ export abstract class AzureAuthenticationBase {
 
     const expirationTime: number | undefined = cacheEntry?.expires?.getTime();
     if (expirationTime && expirationTime < Date.now()) {
-      if (!doNotThrowIfExpired) {
+      if (expiredCredentialBehavior === 'logWarning' || expiredCredentialBehavior === 'throwError') {
         let errorMessage: string = `Cached Azure ${this._credentialKindForLogging} credentials have expired.`;
         if (this._credentialUpdateCommandForLogging) {
           errorMessage += ` Update the credentials by running "${this._credentialUpdateCommandForLogging}".`;
         }
 
-        throw new Error(errorMessage);
-      } else {
-        return undefined;
+        if (expiredCredentialBehavior === 'logWarning') {
+          terminal.writeWarningLine(errorMessage);
+        } else if (expiredCredentialBehavior === 'throwError') {
+          throw new Error(errorMessage);
+        }
       }
+
+      return undefined;
     } else {
       return cacheEntry;
     }

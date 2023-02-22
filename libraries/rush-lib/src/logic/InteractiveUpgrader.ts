@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import npmCheck from 'npm-check';
+import type * as NpmCheck from 'npm-check';
 import colors from 'colors/safe';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -71,7 +72,10 @@ export class InteractiveUpgrader {
   ): Promise<NpmCheck.INpmCheckPackage[]> {
     const { projectFolder } = rushProject;
 
-    const currentState: NpmCheck.INpmCheckCurrentState = await npmCheck({ cwd: projectFolder });
+    const currentState: NpmCheck.INpmCheckCurrentState = await npmCheck({
+      cwd: projectFolder,
+      skipUnused: true
+    });
 
     return currentState.get('packages');
   }

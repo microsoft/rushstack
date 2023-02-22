@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.19.26",
+  "version": "7.21.5",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
@@ -34,7 +34,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "12.20.24",
+    "@types/node": "14.18.36",
     "@types/resolve": "1.20.2"
   }
 }

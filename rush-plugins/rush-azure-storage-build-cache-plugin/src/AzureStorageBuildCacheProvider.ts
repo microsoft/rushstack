@@ -43,7 +43,10 @@ export class AzureStorageBuildCacheProvider
   private _containerClient: ContainerClient | undefined;
 
   public constructor(options: IAzureStorageBuildCacheProviderOptions) {
-    super(options);
+    super({
+      credentialUpdateCommandForLogging: `rush ${RushConstants.updateCloudCredentialsCommandName}`,
+      ...options
+    });
 
     this._blobPrefix = options.blobPrefix;
     this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
@@ -60,7 +63,7 @@ export class AzureStorageBuildCacheProvider
     terminal: ITerminal,
     cacheId: string
   ): Promise<Buffer | undefined> {
-    const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
+    const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId, terminal);
 
     try {
       const blobExists: boolean = await blobClient.exists();
@@ -128,7 +131,7 @@ export class AzureStorageBuildCacheProvider
       return false;
     }
 
-    const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
+    const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId, terminal);
     const blockBlobClient: BlockBlobClient = blobClient.getBlockBlobClient();
     let blobAlreadyExists: boolean = false;
 
@@ -175,17 +178,21 @@ export class AzureStorageBuildCacheProvider
     }
   }
 
-  private async _getBlobClientForCacheIdAsync(cacheId: string): Promise<BlobClient> {
-    const client: ContainerClient = await this._getContainerClientAsync();
+  private async _getBlobClientForCacheIdAsync(cacheId: string, terminal: ITerminal): Promise<BlobClient> {
+    const client: ContainerClient = await this._getContainerClientAsync(terminal);
     const blobName: string = this._blobPrefix ? `${this._blobPrefix}/${cacheId}` : cacheId;
     return client.getBlobClient(blobName);
   }
 
-  private async _getContainerClientAsync(): Promise<ContainerClient> {
+  private async _getContainerClientAsync(terminal: ITerminal): Promise<ContainerClient> {
     if (!this._containerClient) {
       let sasString: string | undefined = this._environmentCredential;
       if (!sasString) {
-        const credentialEntry: ICredentialCacheEntry | undefined = await this.tryGetCachedCredentialAsync();
+        const credentialEntry: ICredentialCacheEntry | undefined = await this.tryGetCachedCredentialAsync({
+          expiredCredentialBehavior: 'logWarning',
+          terminal
+        });
+
         sasString = credentialEntry?.credential;
       }
 

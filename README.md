@@ -5,11 +5,12 @@
 
 
 
-[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
+[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a> 
 
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
 for large scale TypeScript monorepos.
 
+ [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
 
 ## Documentation Links
 
@@ -90,6 +91,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/webpack/webpack-plugin-utilities](./webpack/webpack-plugin-utilities/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack-plugin-utilities.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack-plugin-utilities) | [changelog](./webpack/webpack-plugin-utilities/CHANGELOG.md) | [@rushstack/webpack-plugin-utilities](https://www.npmjs.com/package/@rushstack/webpack-plugin-utilities) |
 | [/webpack/webpack4-localization-plugin](./webpack/webpack4-localization-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack4-localization-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack4-localization-plugin) | [changelog](./webpack/webpack4-localization-plugin/CHANGELOG.md) | [@rushstack/webpack4-localization-plugin](https://www.npmjs.com/package/@rushstack/webpack4-localization-plugin) |
 | [/webpack/webpack4-module-minifier-plugin](./webpack/webpack4-module-minifier-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack4-module-minifier-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack4-module-minifier-plugin) | [changelog](./webpack/webpack4-module-minifier-plugin/CHANGELOG.md) | [@rushstack/webpack4-module-minifier-plugin](https://www.npmjs.com/package/@rushstack/webpack4-module-minifier-plugin) |
+| [/webpack/webpack5-load-themed-styles-loader](./webpack/webpack5-load-themed-styles-loader/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fwebpack5-load-themed-styles-loader.svg)](https://badge.fury.io/js/%40microsoft%2Fwebpack5-load-themed-styles-loader) | [changelog](./webpack/webpack5-load-themed-styles-loader/CHANGELOG.md) | [@microsoft/webpack5-load-themed-styles-loader](https://www.npmjs.com/package/@microsoft/webpack5-load-themed-styles-loader) |
 | [/webpack/webpack5-localization-plugin](./webpack/webpack5-localization-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack5-localization-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack5-localization-plugin) | [changelog](./webpack/webpack5-localization-plugin/CHANGELOG.md) | [@rushstack/webpack5-localization-plugin](https://www.npmjs.com/package/@rushstack/webpack5-localization-plugin) |
 | [/webpack/webpack5-module-minifier-plugin](./webpack/webpack5-module-minifier-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack5-module-minifier-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack5-module-minifier-plugin) | [changelog](./webpack/webpack5-module-minifier-plugin/CHANGELOG.md) | [@rushstack/webpack5-module-minifier-plugin](https://www.npmjs.com/package/@rushstack/webpack5-module-minifier-plugin) |
 
@@ -147,14 +149,17 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |
 | [/build-tests/rush-amazon-s3-build-cache-plugin-integration-test](./build-tests/rush-amazon-s3-build-cache-plugin-integration-test/) | Tests connecting to an amazon S3 endpoint |
+| [/build-tests/rush-lib-declaration-paths-test](./build-tests/rush-lib-declaration-paths-test/) | This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid. |
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/set-webpack-public-path-plugin-webpack4-test](./build-tests/set-webpack-public-path-plugin-webpack4-test/) | Building this project tests the set-webpack-public-path-plugin using Webpack 4 |
 | [/build-tests/ts-command-line-test](./build-tests/ts-command-line-test/) | Building this project is a regression test for ts-command-line |
+| [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
+| [/webpack/webpack-deep-imports-plugin](./webpack/webpack-deep-imports-plugin/) | This plugin creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder. |
 <!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice

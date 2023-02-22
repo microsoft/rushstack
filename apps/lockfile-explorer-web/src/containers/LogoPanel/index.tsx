@@ -12,7 +12,9 @@ export const LogoPanel = (): JSX.Element => {
   return (
     <div className={styles.LogoPanel}>
       <div className={styles.Icon}>
-        <img className={styles.Image} src={require('./lockfile-explorer-icon.svg')} />
+        <a href="https://lfx.rushstack.io/" target="_blank" rel="noreferrer">
+          <img className={styles.Image} src={require('./lockfile-explorer-icon.svg')} />
+        </a>
       </div>
       <div>
         <a href="https://lfx.rushstack.io/" target="_blank" rel="noreferrer">
@@ -24,8 +26,8 @@ export const LogoPanel = (): JSX.Element => {
           </div>
           <div className={styles.Detail}>{appPackageVersion}</div>
         </a>
-        <a href="https://rushstack.io/" target="_blank" rel="noreferrer">
-          <div className={styles.Detail}>rushstack.io</div>
+        <a href="https://lfx.rushstack.io/" target="_blank" rel="noreferrer">
+          <div className={styles.Detail}>lfx.rushstack.io</div>
         </a>
       </div>
     </div>

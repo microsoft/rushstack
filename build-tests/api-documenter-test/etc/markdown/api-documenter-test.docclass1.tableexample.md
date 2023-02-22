@@ -6,12 +6,12 @@
 
 An example with tables:
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 tableExample(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 

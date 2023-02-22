@@ -60,6 +60,15 @@
             "uniqueItems": true
           },
 
+          "dependsOnAdditionalFiles": {
+            "type": "array",
+            "description": "Specify a list of glob (minimatch) paths (absolute or relative) pointing to files (within or outside the .git repository) that affect the output of this operation. If provided, the hash values of these files will become part of the final hash when reading and writing from cache.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+
           "disableBuildCacheForOperation": {
             "description": "Disable caching for this operation. The operation will never be restored from cache. This may be useful if this operation affects state outside of its folder.",
             "type": "boolean"

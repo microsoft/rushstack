@@ -6,7 +6,7 @@
 
 Some method. Overrides `Class3.someMethod`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 someMethod(x: boolean): void;
@@ -18,7 +18,7 @@ someMethod(x: boolean): void;
 |  --- | --- | --- |
 |  x | boolean |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

@@ -31,7 +31,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import { matchesWithStar } from './Utils';
-import { scriptsFolderName } from '../../utilities/PathConstants';
+import { createLinksScriptFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -665,7 +665,7 @@ export class DeployManager {
     if (deployState.scenarioConfiguration.json.linkCreation === 'script') {
       console.log('Copying create-links.js');
       FileSystem.copyFile({
-        sourcePath: `${scriptsFolderName}/create-links.js`,
+        sourcePath: `${scriptsFolderPath}/${createLinksScriptFilename}`,
         destinationPath: path.join(deployState.targetRootFolder, 'create-links.js'),
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });

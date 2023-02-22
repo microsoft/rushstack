@@ -1,6 +1,67 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Fri, 09 Dec 2022 16:18:28 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 0.14.5
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 0.14.4
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 0.14.3
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 0.14.2
+Tue, 31 Jan 2023 01:23:23 GMT
+
+_Version update only_
+
+## 0.14.1
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 0.14.0
+Mon, 30 Jan 2023 00:55:44 GMT
+
+### Minor changes
+
+- Upgrade Jest from `~27.4.2` to `~29.3.1`
+
+## 0.13.2
+Thu, 26 Jan 2023 02:55:10 GMT
+
+### Patches
+
+- Upgrade to webpack 5.75.0
+
+## 0.13.1
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.13.0
+Sun, 22 Jan 2023 20:37:08 GMT
+
+### Minor changes
+
+- Disable "mini-css-extract-plugin" for the "library" rig profile because there isn't a straightforward way to load .css files from a library
+
+## 0.12.17
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.12.16
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
 
 ## 0.12.15
 Fri, 09 Dec 2022 16:18:28 GMT
