@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@rushstack/heft-storybook-plugin_v0.2.3",
+      "date": "Wed, 22 Feb 2023 16:26:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where static build output ends up in the wrong folder."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@rushstack/heft-storybook-plugin_v0.2.2",
       "date": "Fri, 10 Feb 2023 01:18:51 GMT",
