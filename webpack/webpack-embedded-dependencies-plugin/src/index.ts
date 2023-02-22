@@ -87,7 +87,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     });
 
     // Tap into compilation so we can tap into compilation.hooks.processAssets
-    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation) => {
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapAsync(
         { name: PLUGIN_NAME, stage: Compilation.PROCESS_ASSETS_STAGE_REPORT },
         async (assets, callback) => {
@@ -198,7 +198,8 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
       return `
         <hr />
         ${pkg.name} - ${pkg.version}
-
+        <br />
+        <br />
         ${licenseContent}
       `;
     };
