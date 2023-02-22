@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-storybook-plugin",
-      "comment": "fix storybook static build wrong folder",
+      "comment": "Fix an issue where static build output ends up in the wrong folder.",
       "type": "patch"
     }
   ],
