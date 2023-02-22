@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "fix storybook static build wrong folder",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin"
+}
