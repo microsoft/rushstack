@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 import path from 'path';
 
-import type { IPackageJson } from '@rushstack/node-core-library';
+import { Async, IPackageJson } from '@rushstack/node-core-library';
 
 import { LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 import { Compilation, Compiler, WebpackPluginInstance, sources, WebpackError } from 'webpack';
@@ -47,6 +47,7 @@ type PackageMapKey = `${string}@${string}`;
 type LicenseFileName = `${string}.${'html' | 'md' | 'txt'}`;
 type ThirdPartyPackageMap = Map<PackageMapKey, { dir: string; data: IPackageData }>;
 type FlattenedPackageEntry = [PackageMapKey, { dir: string; data: IPackageData }];
+type LicenseSourceCache = Map<string, string>;
 
 /**
  * @alpha
@@ -58,6 +59,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
   public generateLicenseFile: boolean;
   public generateLicenseFileFunction: LicenseFileGeneratorFunction;
   public generatedLicenseFilename: LicenseFileName;
+  private _licenseSourceCache: LicenseSourceCache = new Map();
 
   public constructor(options?: IEmbeddedDependenciesWebpackPluginOptions) {
     this.outputFileName = options?.outputFileName || 'embedded-dependencies.json';
@@ -99,21 +101,44 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
 
           const packages: IPackageData[] = [];
 
-          for (const [, { dir, data }] of rawPackages) {
+          Async.forEachAsync(rawPackages, async ([, { dir, data }]) => {
             const { name, version } = data;
+            let licenseSource: string | undefined;
             const license: string | undefined = parseLicense(data);
             const licensePath: string | undefined = await this._getLicenseFilePath(dir, compiler);
-            const copyright: string | undefined =
-              (await this._parseCopyright(dir, compiler)) || parsePackageAuthor(data);
+            if (licensePath) {
+              licenseSource = this._licenseSourceCache.get(licensePath);
+              if (!licenseSource) {
+                licenseSource = await FileSystem.readFile(licensePath);
+                // Cache the license source content with the path as the identifier.
+                // The default license generator can use this later if it is enabled.
+                this._licenseSourceCache.set(licensePath, licenseSource);
+              }
 
-            packages.push({
-              name,
-              version,
-              license,
-              licensePath,
-              copyright
-            });
-          }
+              const copyright: string | undefined =
+                (await this._parseCopyright(licenseSource)) || parsePackageAuthor(data);
+
+              packages.push({
+                name,
+                version,
+                license,
+                licensePath,
+                copyright
+              });
+            } else {
+              // If there is no license file path, we still should populate the other required fields
+              const copyright: string | undefined = parsePackageAuthor(data);
+
+              packages.push({
+                name,
+                version,
+                license,
+                copyright
+              });
+            }
+          }).catch((error: unknown) => {
+            this._emitWebpackError(compilation, 'Failed to process embedded dependencies', error);
+          });
 
           const dataToStringify: IEmbeddedDependenciesFile = {
             embeddedDependencies: packages
@@ -176,6 +201,9 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     }
   }
 
+  /**
+   * Searches a third party package directory for a license file.
+   */
   private async _getLicenseFilePath(modulePath: string, compiler: Compiler): Promise<string | undefined> {
     type InputFileSystemReadDirResults = Parameters<
       Parameters<typeof compiler.inputFileSystem.readdir>[1]
@@ -198,16 +226,11 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
   /**
    * Given a module path, try to parse the module's copyright attribution.
    */
-  private async _parseCopyright(modulePath: string, compiler: Compiler): Promise<string | undefined> {
-    const licenseFile: string | undefined = await this._getLicenseFilePath(modulePath, compiler);
+  private async _parseCopyright(licenseSource: string): Promise<string | undefined> {
+    const match: RegExpMatchArray | null = licenseSource.match(COPYRIGHT_REGEX);
 
-    if (licenseFile) {
-      const license: string = await FileSystem.readFileAsync(licenseFile);
-      const match: RegExpMatchArray | null = license.match(COPYRIGHT_REGEX);
-
-      if (match) {
-        return match[0];
-      }
+    if (match) {
+      return match[0];
     }
 
     return undefined;
@@ -217,18 +240,12 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     const licenseFileStrings: string[] = [];
 
     const licenseTemplateForPackage = (pkg: IPackageData, licenseContent: string): string => {
-      return `
-        <hr />
-        ${pkg.name} - ${pkg.version}
-        <br />
-        <br />
-        ${licenseContent}
-      `;
+      return '<hr />' + pkg.name + ' - ' + pkg.version + '<br /><br />' + licenseContent;
     };
 
     for (const pkg of packages) {
       if (pkg.licensePath) {
-        const licenseContent: string | undefined = FileSystem.readFile(pkg.licensePath);
+        const licenseContent: string = this._licenseSourceCache.get(pkg.licensePath) || '';
         licenseFileStrings.push(licenseTemplateForPackage(pkg, licenseContent));
       }
     }

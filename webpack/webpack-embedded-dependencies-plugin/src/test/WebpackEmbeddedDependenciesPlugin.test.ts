@@ -139,7 +139,7 @@ for (const fixture of fixtures) {
     case 'dependencies-with-transient-copyleft-license':
       break;
     case 'no-dependencies':
-      it('should emit a warning if there are no third party deps but license generation is set to true', async () => {
+      it('should not emit a warning if there are no third party deps but license generation is set to true', async () => {
         const stats = await Testing.getTestingWebpackCompiler(
           `./fixtures/${fixture}/src`,
           configurationWithLicenseFileGenerated
@@ -148,9 +148,7 @@ for (const fixture of fixtures) {
         const warnings = stats?.toJson({ all: false, warnings: true }).warnings;
 
         expect(warnings).toBeDefined();
-        expect(warnings?.length).toBe(1);
-        expect(warnings?.[0].message).toContain('[embedded-dependencies-webpack-plugin]');
-        expect(warnings?.[0].message).toContain('No third party dependencies were found');
+        expect(warnings?.length).toBe(0);
       });
 
       break;
