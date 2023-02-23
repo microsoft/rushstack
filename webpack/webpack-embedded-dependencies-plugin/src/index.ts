@@ -122,15 +122,6 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
           compilation.emitAsset(this.outputFileName, new sources.RawSource(JSON.stringify(dataToStringify)));
 
           if (this.generateLicenseFile) {
-            if (packages.length === 0) {
-              compilation.warnings.push(
-                new WebpackError(
-                  `[embedded-dependencies-webpack-plugin]: No third party dependencies were found. Skipping license file generation.`
-                )
-              );
-
-              return;
-            }
             // We should try catch here because generator function can be output from user config
             try {
               compilation.emitAsset(
@@ -148,6 +139,26 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     });
   }
 
+  /**
+   * Default error handler for try/catch blocks in the plugin
+   * try/catches emit errors of type `unknown` and we need to handle them based on what
+   * type the error is. This function provides a convenient way to handle errors and then
+   * propagate them to webpack as WebpackError objects on `compilation.errors` array.
+   *
+   * @remarks
+   * _If we need to push errors to `compilation.warnings` array, we should just create a companion function
+   * that does the same thing but pushes to `compilation.warnings` array instead._
+   *
+   * @example
+   * ```typescript
+   * try {
+   *   // do some operation
+   *   FileSystem.readFile('some-file');
+   * } catch (error: unknown) {
+   *   this._emitWebpackError(compilation, 'Failed to do some operation', error);
+   * }
+   * ```
+   */
   private _emitWebpackError(compilation: Compilation, errorMessage: string, error: unknown): void {
     // If the error is a string, we can just emit it as is with message prefix and error message
     if (typeof error === 'string') {
@@ -160,7 +171,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
       // If error is not a string or an instance of Error, we can emit it with message prefix and error message and JSON.stringify it
     } else {
       compilation.errors.push(
-        new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${JSON.stringify(error)}`)
+        new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${JSON.stringify(error || '')}`)
       );
     }
   }
