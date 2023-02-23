@@ -5,30 +5,41 @@
 ```ts
 
 import { Compiler } from 'webpack';
-import type { IPackageJson } from '@rushstack/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
 import { WebpackPluginInstance } from 'webpack';
 
 // @alpha
 class EmbeddedDependenciesWebpackPlugin implements WebpackPluginInstance {
-    // Warning: (ae-forgotten-export) The symbol "IEmbeddedDependenciesWebpackPluginOptions" needs to be exported by the entry point index.d.ts
     constructor(options?: IEmbeddedDependenciesWebpackPluginOptions);
-    // (undocumented)
     apply(compiler: Compiler): void;
-    // Warning: (ae-forgotten-export) The symbol "LicenseFileName" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    generatedLicenseFilename: LicenseFileName;
-    // (undocumented)
-    generateLicenseFile: boolean;
-    // Warning: (ae-forgotten-export) The symbol "LicenseFileGeneratorFunction" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    generateLicenseFileFunction: LicenseFileGeneratorFunction;
-    // (undocumented)
-    outputFileName: string;
 }
 export default EmbeddedDependenciesWebpackPlugin;
 
-// (No @packageDocumentation comment for this package)
+// @alpha
+export interface IEmbeddedDependenciesWebpackPluginOptions {
+    generatedLicenseFilename?: LicenseFileName;
+    generateLicenseFile?: boolean;
+    generateLicenseFileFunction?: LicenseFileGeneratorFunction;
+    outputFileName?: string;
+}
+
+// @alpha
+export interface IPackageData extends IPackageJson {
+    author?: string | {
+        name?: string;
+    };
+    copyright: string | undefined;
+    licenses?: {
+        type: string;
+        url: string;
+    }[];
+    licenseSource?: string;
+}
+
+// @alpha
+export type LicenseFileGeneratorFunction = (packages: IPackageData[]) => string;
+
+// @alpha
+export type LicenseFileName = `${string}.${'html' | 'md' | 'txt'}`;
 
 ```
