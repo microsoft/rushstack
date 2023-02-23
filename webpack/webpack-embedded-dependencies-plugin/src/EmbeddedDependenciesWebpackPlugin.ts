@@ -1,5 +1,5 @@
 import path from 'path';
-import { Async, IPackageJson } from '@rushstack/node-core-library';
+import { Async, IPackageJson, Sort } from '@rushstack/node-core-library';
 import { LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 import { Compilation, Compiler, WebpackPluginInstance, sources, WebpackError } from 'webpack';
 
@@ -182,13 +182,9 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
       compilation.hooks.processAssets.tapPromise(
         { name: PLUGIN_NAME, stage: Compilation.PROCESS_ASSETS_STAGE_REPORT },
         async (assets) => {
-          const rawPackages: FlattenedPackageEntry[] = Array.from(thirdPartyPackages).sort((first, next) => {
-            return first[0].localeCompare(next[0]);
-          });
-
           const packages: IPackageData[] = [];
 
-          Async.forEachAsync(rawPackages, async ([, { dir, data }]) => {
+          Async.forEachAsync(Array.from(thirdPartyPackages), async ([, { dir, data }]) => {
             const { name, version } = data;
             let licenseSource: string | undefined;
             const license: string | undefined = parseLicense(data);
@@ -217,9 +213,15 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
                 copyright
               });
             }
-          }).catch((error: unknown) => {
-            this._emitWebpackError(compilation, 'Failed to process embedded dependencies', error);
-          });
+          })
+            .catch((error: unknown) => {
+              this._emitWebpackError(compilation, 'Failed to process embedded dependencies', error);
+            })
+            .finally(() => {
+              // Sort the packages by name after we have processed all of them
+              // Note this is a mutable sort
+              Sort.sortBy(packages, (pkg) => pkg.name);
+            });
 
           const dataToStringify: IEmbeddedDependenciesFile = {
             embeddedDependencies: packages

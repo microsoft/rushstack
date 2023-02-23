@@ -12,8 +12,6 @@ const FAKE_NODE_MODULES_FOLDER_PATH: string = path.resolve(path.join(TESTS_FOLDE
 
 const fixtures: string[] = FileSystem.readFolderItemNames(FIXTURES_FOLDER_PATH);
 
-console.log(`Fixtures: ${fixtures}`);
-
 const defaultConfigurationWithPlugin = {
   context: TESTS_FOLDER_PATH,
   plugins: [new EmbeddedDependenciesWebpackPlugin()]
