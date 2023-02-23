@@ -23,7 +23,7 @@ class EmbeddedDependenciesWebpackPlugin implements WebpackPluginInstance {
     // Warning: (ae-forgotten-export) The symbol "LicenseFileGeneratorFunction" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    generateLicenseFileFunction?: LicenseFileGeneratorFunction;
+    generateLicenseFileFunction: LicenseFileGeneratorFunction;
     // (undocumented)
     outputFileName: string;
 }

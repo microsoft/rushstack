@@ -10,6 +10,7 @@ import { Compilation, Compiler, WebpackPluginInstance, sources, WebpackError } f
 import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils';
 
 const PLUGIN_NAME: 'EmbeddedDependenciesWebpackPlugin' = 'EmbeddedDependenciesWebpackPlugin';
+const PLUGIN_ERROR_PREFIX: string = '[embedded-dependencies-webpack-plugin]';
 
 interface IEmbeddedDependenciesFile {
   name?: string;
@@ -41,7 +42,7 @@ interface IEmbeddedDependenciesWebpackPluginOptions {
   generatedLicenseFilename?: LicenseFileName;
 }
 
-type LicenseFileGeneratorFunction = (packages: IPackageJson[]) => string;
+type LicenseFileGeneratorFunction = (packages: IPackageData[]) => string;
 type PackageMapKey = `${string}@${string}`;
 type LicenseFileName = `${string}.${'html' | 'md' | 'txt'}`;
 type ThirdPartyPackageMap = Map<PackageMapKey, { dir: string; data: IPackageData }>;
@@ -55,13 +56,14 @@ type FlattenedPackageEntry = [PackageMapKey, { dir: string; data: IPackageData }
 export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginInstance {
   public outputFileName: string;
   public generateLicenseFile: boolean;
-  public generateLicenseFileFunction?: LicenseFileGeneratorFunction;
+  public generateLicenseFileFunction: LicenseFileGeneratorFunction;
   public generatedLicenseFilename: LicenseFileName;
 
   public constructor(options?: IEmbeddedDependenciesWebpackPluginOptions) {
     this.outputFileName = options?.outputFileName || 'embedded-dependencies.json';
     this.generateLicenseFile = options?.generateLicenseFile || false;
-    this.generateLicenseFileFunction = options?.generateLicenseFileFunction || undefined;
+    this.generateLicenseFileFunction =
+      options?.generateLicenseFileFunction || this._defaultLicenseFileGenerator;
     this.generatedLicenseFilename = options?.generatedLicenseFilename || 'THIRD-PARTY-NOTICES.html';
   }
 
@@ -88,9 +90,9 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
 
     // Tap into compilation so we can tap into compilation.hooks.processAssets
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      compilation.hooks.processAssets.tapAsync(
+      compilation.hooks.processAssets.tapPromise(
         { name: PLUGIN_NAME, stage: Compilation.PROCESS_ASSETS_STAGE_REPORT },
-        async (assets, callback) => {
+        async (assets) => {
           const rawPackages: FlattenedPackageEntry[] = Array.from(thirdPartyPackages).sort((first, next) => {
             return first[0].localeCompare(next[0]);
           });
@@ -126,35 +128,41 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
                   `[embedded-dependencies-webpack-plugin]: No third party dependencies were found. Skipping license file generation.`
                 )
               );
-              callback();
+
               return;
             }
             // We should try catch here because generator function can be output from user config
             try {
-              if (this.generateLicenseFileFunction) {
-                compilation.emitAsset(
-                  this.generatedLicenseFilename,
-                  new sources.RawSource(this.generateLicenseFileFunction(packages))
-                );
-              } else {
-                compilation.emitAsset(
-                  this.generatedLicenseFilename,
-                  new sources.RawSource(this._defaultLicenseFileGenerator(packages))
-                );
-              }
-            } catch (e) {
-              compilation.errors.push(
-                new WebpackError(
-                  `[embedded-dependencies-webpack-plugin]: Failed to generate license file: ${e}`
-                )
+              compilation.emitAsset(
+                this.generatedLicenseFilename,
+                new sources.RawSource(this.generateLicenseFileFunction(packages))
               );
+            } catch (error: unknown) {
+              this._emitWebpackError(compilation, 'Failed to generate license file', error);
             }
           }
 
-          callback();
+          return;
         }
       );
     });
+  }
+
+  private _emitWebpackError(compilation: Compilation, errorMessage: string, error: unknown): void {
+    // If the error is a string, we can just emit it as is with message prefix and error message
+    if (typeof error === 'string') {
+      compilation.errors.push(new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${error}`));
+      // If error is an instance of Error, we can emit it with message prefix, error message and stack trace
+    } else if (error instanceof Error) {
+      compilation.errors.push(
+        new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${error.message}\n${error.stack || ''}`)
+      );
+      // If error is not a string or an instance of Error, we can emit it with message prefix and error message and JSON.stringify it
+    } else {
+      compilation.errors.push(
+        new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${JSON.stringify(error)}`)
+      );
+    }
   }
 
   private async _getLicenseFilePath(modulePath: string, compiler: Compiler): Promise<string | undefined> {
@@ -162,6 +170,9 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
       Parameters<typeof compiler.inputFileSystem.readdir>[1]
     >[1];
 
+    // TODO: Real fs.readdir can take an arguement ({ withFileTypes: true }) which will filter out directories for better performance
+    //       and return a list of Dirent objects. Currently the webpack types are hand generated for fs.readdir so
+    //       we can't use this feature yet, or we would have to cast the types of inputFileSystem.readdir.
     const files: InputFileSystemReadDirResults = await LegacyAdapters.convertCallbackToPromise(
       compiler.inputFileSystem.readdir,
       modulePath
