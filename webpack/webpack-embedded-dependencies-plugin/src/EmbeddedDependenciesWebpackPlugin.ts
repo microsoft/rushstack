@@ -127,7 +127,6 @@ export type LicenseFileName = `${string}.${'html' | 'md' | 'txt'}`;
 
 type PackageMapKey = `${string}@${string}`;
 type ThirdPartyPackageMap = Map<PackageMapKey, { dir: string; data: IPackageData }>;
-type FlattenedPackageEntry = [PackageMapKey, { dir: string; data: IPackageData }];
 type DefaultLicenseTemplate = `<hr />${string}<br /><br />${string}`;
 
 /**
