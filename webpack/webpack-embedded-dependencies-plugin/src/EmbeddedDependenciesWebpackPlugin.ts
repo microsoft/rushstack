@@ -156,9 +156,10 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
    * @param compiler - The webpack compiler instance.
    */
   public apply(compiler: Compiler): void {
-    const thirdPartyPackages: ThirdPartyPackageMap = new Map();
+    // Tap into compilation so we can tap into compilation.hooks.processAssets
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, { normalModuleFactory }) => {
+      const thirdPartyPackages: ThirdPartyPackageMap = new Map();
 
-    compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
       normalModuleFactory.hooks.module.tap(
         PLUGIN_NAME,
         (module, moduleCreateData: IWebpackModuleCreateData, resolveData) => {
@@ -174,10 +175,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
           return module;
         }
       );
-    });
 
-    // Tap into compilation so we can tap into compilation.hooks.processAssets
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapPromise(
         { name: PLUGIN_NAME, stage: Compilation.PROCESS_ASSETS_STAGE_REPORT },
         async (assets) => {
