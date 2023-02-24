@@ -193,9 +193,9 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
                 const { name, version } = data;
                 let licenseSource: string | undefined;
                 const license: string | undefined = parseLicense(data);
-                const licensePath: string | undefined = await this._getLicenseFilePath(dir, compiler);
+                const licensePath: string | undefined = await this._getLicenseFilePathAsync(dir, compiler);
                 if (licensePath) {
-                  licenseSource = await FileSystem.readFile(licensePath);
+                  licenseSource = await FileSystem.readFileAsync(licensePath);
 
                   const copyright: string | undefined =
                     this._parseCopyright(licenseSource) || parsePackageAuthor(data);
@@ -293,7 +293,10 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
   /**
    * Searches a third party package directory for a license file.
    */
-  private async _getLicenseFilePath(modulePath: string, compiler: Compiler): Promise<string | undefined> {
+  private async _getLicenseFilePathAsync(
+    modulePath: string,
+    compiler: Compiler
+  ): Promise<string | undefined> {
     type InputFileSystemReadDirResults = Parameters<
       Parameters<typeof compiler.inputFileSystem.readdir>[1]
     >[1];

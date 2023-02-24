@@ -70,13 +70,15 @@ export async function getTestingWebpackCompiler(
 
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
-      if (err) {
-        return reject(err);
-      }
+      compiler.close(() => {
+        if (err) {
+          return reject(err);
+        }
 
-      _processAndHandleStatsErrorsAndWarnings(stats, reject);
+        _processAndHandleStatsErrorsAndWarnings(stats, reject);
 
-      resolve(stats);
+        resolve(stats);
+      });
     });
   });
 }

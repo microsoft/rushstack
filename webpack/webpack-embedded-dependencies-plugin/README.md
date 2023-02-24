@@ -5,14 +5,15 @@
 `npm install @rushstack/webpack-embedded-dependencies-plugin --save`
 
 ## Overview
+
 A webpack plugin for generating a list of embedded dependencies. Embedded dependencies are third-party packages which are being
-bundled into your released code and are often times subject to license, security, and other legal requirements. This plugin
+bundled into your released code and are oftentimes subject to license, security, and other legal requirements. This plugin
 aims to make it easier to generate a list of embedded dependencies and their associated metadata, so they can be analyzed by additional tools.
 
 The plugin also includes the ability to generate a secondary asset which contains the license text for each embedded dependency into a single file called
-THIRD-PARTY-NOTICES.html. This is a common legal requirement for large companies deploying commercial services/products containing open source code.
+THIRD-PARTY-NOTICES.html. This is a common legal requirement when deploying services or products containing open-source code.
 
-# Plugin
+## Plugin
 
 ```typescript
 // webpack.config.js
