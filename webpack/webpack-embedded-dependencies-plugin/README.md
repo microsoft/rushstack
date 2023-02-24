@@ -76,35 +76,6 @@ new EmbeddedDependenciesWebpackPlugin({
 Name of the generated license file. Defaults to THIRD-PARTY-NOTICES.html
 
 ## Types
-<!--
-/**
- * @alpha
- * Function type that generates the license file.
- *
- * @example
- * ```ts
- * const licenseFileGenerator: LicenseFileGeneratorFunction = (packages: IPackageData[]): string => {
- *  return packages
- *   .map((pkg) => {
- *    return `<h2>${pkg.name}</h2><p>${pkg.license}</p>`;
- *  }).join('');
- * }
- * ```
- */
-export declare type LicenseFileGeneratorFunction = (packages: IPackageData[]) => string;
-
-/**
- * @alpha
- * Loose string type that represents the name of the generated license file.
- *
- * @example
- * ```ts
- * const licenseFileName: LicenseFileName = 'custom-license-file-name.html';
- * const licenseMarkdownFileName: LicenseFileName = 'custom-license-file-name.md';
- * const licenseTextFileName: LicenseFileName = 'custom-license-file-name.txt';
- * ```
- */
-export declare type LicenseFileName = `${string}.${'html' | 'md' | 'txt'}`; -->
 
 ### `LicenseFileGeneratorFunction`
 
