@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-plugin-utilities",
+      "comment": "Added Testing.getTestingWebpackCompiler utility function for webpack plugin testing.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack-plugin-utilities"
+}

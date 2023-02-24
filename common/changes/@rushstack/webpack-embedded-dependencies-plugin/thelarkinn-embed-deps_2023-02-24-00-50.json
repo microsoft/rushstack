@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-embedded-dependencies-plugin",
+      "comment": "Introduce webpack-embedded-dependencies-plugin",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack-embedded-dependencies-plugin"
+}
