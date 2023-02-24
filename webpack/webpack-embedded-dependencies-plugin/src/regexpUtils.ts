@@ -23,4 +23,4 @@ export const LICENSE_FILES_REGEXP: RegExp = /^LICENSE(-MIT)?(\.(txt|md))?$/i;
  * - `'Copyright 2023 Some Licenser Name'`
  *
  */
-export const COPYRIGHT_REGEX: RegExp = /Copyright\s*(\([cC]\)|©)?\s*\d{4}\s*.*$/m;
+export const COPYRIGHT_REGEX: RegExp = /Copyright\s*(\([cC]\)|©)?\s*\d{4}\s*.*$/im;

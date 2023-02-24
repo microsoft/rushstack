@@ -8,7 +8,7 @@ import { Testing } from '@rushstack/webpack-plugin-utilities';
 import { FileSystem } from '@rushstack/node-core-library';
 
 const TESTS_FOLDER_PATH: string = path.resolve(path.join(process.cwd(), 'src', 'test'));
-const FIXTURES_FOLDER_PATH: string = path.resolve(path.join(TESTS_FOLDER_PATH, 'fixtures'));
+const FIXTURES_FOLDER_PATH: string = path.resolve(TESTS_FOLDER_PATH, 'fixtures');
 const FAKE_NODE_MODULES_FOLDER_PATH: string = path.resolve(path.join(TESTS_FOLDER_PATH, 'node_modules'));
 const VIRTUAL_FILE_SYSTEM_OUTPUT_PATH: string = path.join(
   process.cwd(),
