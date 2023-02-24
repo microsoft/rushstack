@@ -167,7 +167,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
           const pkg: IPackageData | undefined = resourceResolveData?.descriptionFileData;
           const filePath: string | undefined = resourceResolveData?.descriptionFileRoot;
 
-          if (pkg && filePath && filePath.includes('node_modules')) {
+          if (pkg && filePath?.includes('node_modules')) {
             const key: PackageMapKey = makePackageMapKeyForPackage(pkg);
             thirdPartyPackages.set(key, { dir: filePath, data: pkg });
           }
@@ -181,7 +181,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
         async (assets) => {
           const packages: IPackageData[] = [];
 
-          Async.forEachAsync(Array.from(thirdPartyPackages), async ([, { dir, data }]) => {
+          Async.forEachAsync(thirdPartyPackages, async ([, { dir, data }]) => {
             const { name, version } = data;
             let licenseSource: string | undefined;
             const license: string | undefined = parseLicense(data);
@@ -190,7 +190,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
               licenseSource = await FileSystem.readFile(licensePath);
 
               const copyright: string | undefined =
-                (await this._parseCopyright(licenseSource)) || parsePackageAuthor(data);
+                this._parseCopyright(licenseSource) || parsePackageAuthor(data);
 
               packages.push({
                 name,
@@ -265,20 +265,23 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
    * ```
    */
   private _emitWebpackError(compilation: Compilation, errorMessage: string, error: unknown): void {
+    let emittedError: WebpackError;
     // If the error is a string, we can just emit it as is with message prefix and error message
     if (typeof error === 'string') {
-      compilation.errors.push(new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${error}`));
+      emittedError = new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${error}`);
       // If error is an instance of Error, we can emit it with message prefix, error message and stack trace
     } else if (error instanceof Error) {
-      compilation.errors.push(
-        new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${error.message}\n${error.stack || ''}`)
+      emittedError = new WebpackError(
+        `${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${error.message}\n${error.stack || ''}`
       );
       // If error is not a string or an instance of Error, we can emit it with message prefix and error message and JSON.stringify it
     } else {
-      compilation.errors.push(
-        new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${JSON.stringify(error || '')}`)
+      emittedError = new WebpackError(
+        `${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${JSON.stringify(error || '')}`
       );
     }
+
+    compilation.errors.push(emittedError);
   }
 
   /**
@@ -306,7 +309,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
   /**
    * Given a module path, try to parse the module's copyright attribution.
    */
-  private async _parseCopyright(licenseSource: string): Promise<string | undefined> {
+  private _parseCopyright(licenseSource: string): string | undefined {
     const match: RegExpMatchArray | null = licenseSource.match(COPYRIGHT_REGEX);
 
     if (match) {
@@ -317,7 +320,6 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
   }
 
   private _defaultLicenseFileGenerator(packages: IPackageData[]): string {
-    const licenseFileStrings: DefaultLicenseTemplate[] = [];
     const licenseContent = (pkg: IPackageData): string =>
       pkg.licenseSource || pkg.copyright || 'License or Copyright not found';
 
@@ -325,11 +327,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
       return `<hr />${pkg.name} - ${pkg.version}<br /><br />${licenseContent(pkg)}`;
     };
 
-    for (const pkg of packages) {
-      licenseFileStrings.push(licenseTemplateForPackage(pkg));
-    }
-
-    return licenseFileStrings.join('\n');
+    return packages.map(licenseTemplateForPackage).join('\n');
   }
 }
 
