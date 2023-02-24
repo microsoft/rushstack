@@ -32,14 +32,14 @@ export async function getTestingWebpackCompiler(
         return reject(err);
       }
 
-      _processAndHandleStatsErrors(stats, reject);
+      _processAndHandleStatsErrorsAndWarnings(stats, reject);
 
       resolve(stats);
     });
   });
 }
 
-function _processAndHandleStatsErrors(
+function _processAndHandleStatsErrorsAndWarnings(
   stats: Stats | MultiStats | undefined,
   reject: (reason: unknown) => void
 ): void {

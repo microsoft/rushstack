@@ -20,17 +20,13 @@
   },
   "peerDependencies": {
     "@types/webpack": "^4.39.8",
-    "webpack": "^5.35.1",
-    "memfs": "^3.4.3"
+    "webpack": "^5.35.1"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
       "optional": true
     },
     "webpack": {
-      "optional": true
-    },
-    "memfs": {
       "optional": true
     }
   },
