@@ -10,7 +10,7 @@
  * - `'license'`
  * - `'license.txt'`
  */
-export const LICENSE_FILES_REGEXP: RegExp = /^LICENSE(-MIT)?(\.(txt|md))?$/i;
+export const LICENSE_FILES_REGEXP: RegExp = /^LICENSE(-[A-Z-]+)?(\.(txt|md))?$/i;
 
 /**
  * Regular expression used to match common copyright statements. It is by no means exhaustive however it
