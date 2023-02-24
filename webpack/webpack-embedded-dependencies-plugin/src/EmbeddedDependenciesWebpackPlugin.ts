@@ -1,9 +1,10 @@
 import path from 'path';
-import { Async, IPackageJson, Sort, LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 import { sources, Compilation, WebpackError } from 'webpack';
+import { Async, Sort, LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils';
 
 import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { IPackageJson } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: 'EmbeddedDependenciesWebpackPlugin' = 'EmbeddedDependenciesWebpackPlugin';
 const PLUGIN_ERROR_PREFIX: string = '[embedded-dependencies-webpack-plugin]';

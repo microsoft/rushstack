@@ -4,18 +4,18 @@
 
 ```ts
 
-import { Compiler } from 'webpack';
-import { IPackageJson } from '@rushstack/node-core-library';
-import { WebpackPluginInstance } from 'webpack';
+import type { Compiler } from 'webpack';
+import type { IPackageJson } from '@rushstack/node-core-library';
+import type { WebpackPluginInstance } from 'webpack';
 
-// @alpha
+// @beta
 class EmbeddedDependenciesWebpackPlugin implements WebpackPluginInstance {
     constructor(options?: IEmbeddedDependenciesWebpackPluginOptions);
     apply(compiler: Compiler): void;
 }
 export default EmbeddedDependenciesWebpackPlugin;
 
-// @alpha
+// @beta
 export interface IEmbeddedDependenciesWebpackPluginOptions {
     generatedLicenseFilename?: LicenseFileName;
     generateLicenseFile?: boolean;
@@ -23,7 +23,7 @@ export interface IEmbeddedDependenciesWebpackPluginOptions {
     outputFileName?: string;
 }
 
-// @alpha
+// @beta
 export interface IPackageData extends IPackageJson {
     author?: string | {
         name?: string;
@@ -36,10 +36,10 @@ export interface IPackageData extends IPackageJson {
     licenseSource?: string;
 }
 
-// @alpha
+// @beta
 export type LicenseFileGeneratorFunction = (packages: IPackageData[]) => string;
 
-// @alpha
+// @beta
 export type LicenseFileName = `${string}.${'html' | 'md' | 'txt'}`;
 
 ```
