@@ -2581,21 +2581,17 @@ importers:
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/webpack-plugin-utilities': workspace:*
-      '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
-      glob: ~7.0.5
       memfs: 3.4.3
       webpack: ~5.75.0
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
-      glob: 7.0.6
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@rushstack/webpack-plugin-utilities': link:../webpack-plugin-utilities
-      '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
       memfs: 3.4.3
