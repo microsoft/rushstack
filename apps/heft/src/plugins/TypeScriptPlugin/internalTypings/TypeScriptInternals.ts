@@ -3,23 +3,15 @@
 
 import type * as TTypescript from 'typescript';
 
-// The specifics of these types aren't important
 /**
- * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3969-L4010
+ * https://github.com/microsoft/TypeScript/blob/e9868e96e87996df46a13b4323866acc639e71ce/src/compiler/types.ts#L8010
  */
-export interface IEmitResolver {}
-
-/**
- * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L5969-L5988
- */
-export interface IEmitHost {
-  writeFile: TTypescript.WriteFileCallback;
+export interface ISourceFileMayBeEmittedHost {
+  getCompilerOptions(): TTypescript.CompilerOptions;
+  isSourceFileFromExternalLibrary(file: TTypescript.SourceFile): boolean;
+  getResolvedProjectReferenceToRedirect(fileName: string): TTypescript.ResolvedProjectReference | undefined;
+  isSourceOfProjectReferenceRedirect(fileName: string): boolean;
 }
-
-/**
- * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3338-L3341
- */
-export interface IEmitTransformers {}
 
 export interface IExtendedProgram extends TTypescript.Program {
   /**
@@ -37,15 +29,6 @@ export interface IExtendedSourceFile extends TTypescript.SourceFile {
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3011
    */
   version: string;
-}
-
-/**
- * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/utilities.ts#L3799-L3803
- */
-export interface IResolveModuleNameResolutionHost {
-  getCanonicalFileName(p: string): string;
-  getCommonSourceDirectory(): string;
-  getCurrentDirectory(): string;
 }
 
 export interface IExtendedTypeScript {
@@ -99,40 +82,13 @@ export interface IExtendedTypeScript {
   ): string[];
 
   /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/emitter.ts#L261-L614
+   * https://github.com/microsoft/TypeScript/blob/e9868e96e87996df46a13b4323866acc639e71ce/src/compiler/utilities.ts#L6168
    */
-  emitFiles(
-    resolver: IEmitResolver,
-    host: IEmitHost,
-    targetSourceFile: TTypescript.SourceFile | undefined,
-    emitTransformers: IEmitTransformers,
-    emitOnlyDtsFiles?: boolean,
-    onlyBuildInfo?: boolean,
+  sourceFileMayBeEmitted(
+    sourceFile: TTypescript.SourceFile,
+    host: ISourceFileMayBeEmittedHost,
     forceDtsEmit?: boolean
-  ): TTypescript.EmitResult;
-
-  /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/transformer.ts#L30-L35
-   */
-  getTransformers(
-    compilerOptions: TTypescript.CompilerOptions,
-    customTransformers?: TTypescript.CustomTransformers,
-    emitOnlyDtsFiles?: boolean
-  ): IEmitTransformers;
-
-  /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/utilities.ts#L6100-L6108
-   */
-  removeFileExtension(path: string): string;
-
-  /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/utilities.ts#L3826-L3833
-   */
-  getExternalModuleNameFromPath(
-    host: IResolveModuleNameResolutionHost,
-    fileName: string,
-    referencePath?: string
-  ): string;
+  ): boolean;
 
   Diagnostics: {
     // https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/diagnosticMessages.json#L4252-L4255
