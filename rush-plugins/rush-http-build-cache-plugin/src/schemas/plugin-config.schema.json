@@ -9,10 +9,10 @@
       "description": "(Required) The URL of the server that stores the caches (e.g. \"https://build-caches.example.com\").",
       "format": "uri"
     },
-    "method": {
+    "uploadMethod": {
       "type": "string",
-      "description": "(Required) The URL of the server that stores the caches (e.g. \"https://build-caches.example.com\").",
-      "enum": ["PUT", "POST", "GET", "PATCH"],
+      "description": "(Optional) The HTTP method to use when writing to the cache (defaults to PUT).",
+      "enum": ["PUT", "POST", "PATCH"],
       "default": "PUT"
     },
     "headers": {
@@ -25,7 +25,7 @@
     },
     "tokenHandler": {
       "type": "string",
-      "description": "(Optional) Shell command that prints the authorization token needed to communicate with the HTTPS server and exits with code 0."
+      "description": "(Optional) Shell command that prints the authorization token needed to communicate with the HTTPS server and exits with code 0. This command will be executed from the root of the monorepo."
     },
     "cacheKeyPrefix": {
       "type": "string",

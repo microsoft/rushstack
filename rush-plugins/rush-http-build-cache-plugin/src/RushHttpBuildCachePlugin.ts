@@ -14,9 +14,14 @@ const PLUGIN_NAME: string = 'HttpBuildCachePlugin';
  */
 export interface IRushHttpBuildCachePluginOptions {
   /**
-   * The url to the service that caches builds.
+   * The URL of the server that stores the caches (e.g. "https://build-caches.example.com").
    */
   url: string;
+
+  /**
+   * The HTTP method to use when writing to the cache (defaults to PUT).
+   */
+  uploadMethod?: string;
 
   /**
    * An optional set of HTTP headers to pass to the cache server.
@@ -55,12 +60,14 @@ export class RushHttpBuildCachePlugin implements IRushPlugin {
       rushSession.registerCloudBuildCacheProviderFactory(
         'http',
         (buildCacheConfig): HttpBuildCacheProvider => {
-          const { url, headers, tokenHandler, cacheKeyPrefix, isCacheWriteAllowed } = this._options;
+          const { url, uploadMethod, headers, tokenHandler, cacheKeyPrefix, isCacheWriteAllowed } =
+            this._options;
 
           const options: IHttpBuildCacheProviderOptions = {
             pluginName: this.pluginName,
             rushProjectRoot: rushConfig.rushJsonFolder,
             url: url,
+            uploadMethod: uploadMethod,
             headers: headers,
             tokenHandler: tokenHandler,
             cacheKeyPrefix: cacheKeyPrefix,

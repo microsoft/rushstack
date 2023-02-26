@@ -256,7 +256,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     let credentials: string | undefined = this._environmentCredential;
 
-    if (typeof credentials !== 'string') {
+    if (credentials === undefined) {
       credentials = await this._tryGetCredentialsFromCache();
     }
 
