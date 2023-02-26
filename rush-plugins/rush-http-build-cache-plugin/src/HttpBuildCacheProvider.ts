@@ -61,7 +61,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
-    this._url = new URL(options.url);
+    this._url = new URL(options.url.endsWith('/') ? options.url : options.url + '/');
     this._uploadMethod = options.uploadMethod ?? 'PUT';
     this._headers = options.headers ?? {};
     this._tokenHandler = options.tokenHandler;
