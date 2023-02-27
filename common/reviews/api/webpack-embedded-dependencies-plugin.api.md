@@ -21,6 +21,7 @@ export interface IEmbeddedDependenciesWebpackPluginOptions {
     generateLicenseFile?: boolean;
     generateLicenseFileFunction?: LicenseFileGeneratorFunction;
     outputFileName?: string;
+    packageFilterPredicate?: (packageJson: IPackageData, filePath: string) => boolean;
 }
 
 // @beta

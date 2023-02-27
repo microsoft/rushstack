@@ -74,7 +74,19 @@ new EmbeddedDependenciesWebpackPlugin({
 })
 ```
 
-Name of the generated license file. Defaults to THIRD-PARTY-NOTICES.html
+Name of the generated license file. Defaults to THIRD-PARTY-NOTICES.html but can be customized to any name you want.
+
+### `packageFilterPredicate`: `(packageJson: IPackageData, filePath: string) => boolean`
+
+Function that allows you to filter out packages that you don't want to include in any generated files.
+
+```typescript
+new EmbeddedDependenciesWebpackPlugin({
+  packageFilterPredicate: (packageJson: IPackageData, filePath: string): boolean => {
+    return packageJson.name !== 'my-package-to-exclude';
+  }
+})
+```
 
 ## Types
 
@@ -104,6 +116,7 @@ const licenseFileName: LicenseFileName = 'custom-license-file-name.html';
 const licenseMarkdownFileName: LicenseFileName = 'custom-license-file-name.md';
 const licenseTextFileName: LicenseFileName = 'custom-license-file-name.txt';
 ```
+
 
 ## Links
 

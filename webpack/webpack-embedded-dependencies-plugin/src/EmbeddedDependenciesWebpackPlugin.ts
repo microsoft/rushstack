@@ -10,6 +10,7 @@ const PLUGIN_NAME: 'EmbeddedDependenciesWebpackPlugin' = 'EmbeddedDependenciesWe
 const PLUGIN_ERROR_PREFIX: string = '[embedded-dependencies-webpack-plugin]';
 const DEFAULT_GENERATED_LICENSE_FILE_NAME: 'THIRD-PARTY-NOTICES.html' = 'THIRD-PARTY-NOTICES.html';
 const DEFAULT_EMBEDDED_DEPENDENCIES_FILE_NAME: 'embedded-dependencies.json' = 'embedded-dependencies.json';
+const DEFAULT_PACKAGE_FILTER_FUNCTION: (packageJson: IPackageData, filePath: string) => boolean = () => true;
 
 interface IEmbeddedDependenciesFile {
   name?: string;
@@ -97,6 +98,12 @@ export interface IEmbeddedDependenciesWebpackPluginOptions {
    * Name of the generated license file. Defaults to THIRD-PARTY-NOTICES.html
    */
   generatedLicenseFilename?: LicenseFileName;
+
+  /**
+   * Predicate function that determines whether a package should be included in the embedded
+   * dependencies file or the generated license file.
+   */
+  packageFilterPredicate?: (packageJson: IPackageData, filePath: string) => boolean;
 }
 
 /**
@@ -145,6 +152,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
   private readonly _generateLicenseFile: boolean;
   private readonly _generateLicenseFileFunction: LicenseFileGeneratorFunction;
   private readonly _generatedLicenseFilename: LicenseFileName;
+  private readonly _packageFilterFunction: (packageJson: IPackageData, filePath: string) => boolean;
 
   public constructor(options?: IEmbeddedDependenciesWebpackPluginOptions) {
     this._outputFileName = options?.outputFileName || DEFAULT_EMBEDDED_DEPENDENCIES_FILE_NAME;
@@ -152,6 +160,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
     this._generateLicenseFileFunction =
       options?.generateLicenseFileFunction || this._defaultLicenseFileGenerator;
     this._generatedLicenseFilename = options?.generatedLicenseFilename || DEFAULT_GENERATED_LICENSE_FILE_NAME;
+    this._packageFilterFunction = options?.packageFilterPredicate || DEFAULT_PACKAGE_FILTER_FUNCTION;
   }
 
   /**
@@ -173,7 +182,12 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
           const pkg: IPackageData | undefined = resourceResolveData?.descriptionFileData;
           const filePath: string | undefined = resourceResolveData?.descriptionFileRoot;
 
-          if (pkg && filePath?.includes('node_modules')) {
+          if (
+            pkg &&
+            filePath &&
+            this._packageFilterFunction(pkg, filePath) &&
+            filePath?.includes('node_modules')
+          ) {
             const key: PackageNameAndVersion = makePackageMapKeyForPackage(pkg);
             thirdPartyPackages.set(key, { packageFolderPath: filePath, packageJsonData: pkg });
           }
