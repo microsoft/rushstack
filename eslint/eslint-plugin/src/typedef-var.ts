@@ -51,6 +51,11 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
           // An explicit type declaration was provided
           return;
         }
+        
+        if (node.init?.type === 'CallExpression') {
+          // The variable is declared by a function call
+          return;
+        }
 
         // These are @typescript-eslint/typedef exemptions
         if (
