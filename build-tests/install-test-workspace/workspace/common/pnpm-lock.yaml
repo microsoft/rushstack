@@ -395,8 +395,11 @@ packages:
   /@types/node-fetch/2.6.2:
     resolution: {integrity: sha512-DHqhlq5jeESLy19TYhLakJ07kNumXWjcDdxXsLUMJZ6ue8VZJj4kLPQVE/2mdHh3xZziNF1xppu5lwmS53HR+A==}
     dependencies:
-      '@types/node': 14.18.36
+      '@types/node': 12.20.24
       form-data: 3.0.1
+
+  /@types/node/12.20.24:
+    resolution: {integrity: sha512-yxDeaQIAJlMav7fH5AQqPH1u8YIuhYJXYBzxaQ4PifsU0GDO38MSdmEDeRlIxrKbC6NbEaaEHDanWb+y30U8SQ==}
 
   /@types/node/14.18.36:
     resolution: {integrity: sha512-FXKWbsJ6a1hIrRxv+FoukuHnGTgEzKYGi7kilfMae96AL9UNkPFNWJEEYWzdRI9ooIkbr4AKldyuSTLql06vLQ==}
@@ -3663,7 +3666,7 @@ packages:
       '@pnpm/link-bins': 5.3.25
       '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.9.tgz_@types+node@14.18.36
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.2.tgz_@types+node@14.18.36
-      '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.0.8.tgz_@types+node@14.18.36
+      '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.0.9.tgz_@types+node@14.18.36
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.18.tgz
       '@rushstack/stream-collator': file:../temp/tarballs/rushstack-stream-collator-4.0.227.tgz_@types+node@14.18.36
       '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.5.2.tgz_@types+node@14.18.36
@@ -3872,11 +3875,11 @@ packages:
       semver: 7.3.8
       z-schema: 5.0.3
 
-  file:../temp/tarballs/rushstack-package-deps-hash-4.0.8.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-package-deps-hash-4.0.8.tgz}
-    id: file:../temp/tarballs/rushstack-package-deps-hash-4.0.8.tgz
+  file:../temp/tarballs/rushstack-package-deps-hash-4.0.9.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-package-deps-hash-4.0.9.tgz}
+    id: file:../temp/tarballs/rushstack-package-deps-hash-4.0.9.tgz
     name: '@rushstack/package-deps-hash'
-    version: 4.0.8
+    version: 4.0.9
     dependencies:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.2.tgz_@types+node@14.18.36
     transitivePeerDependencies:
