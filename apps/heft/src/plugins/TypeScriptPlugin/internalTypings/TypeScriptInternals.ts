@@ -39,15 +39,6 @@ export interface IExtendedSourceFile extends TTypescript.SourceFile {
   version: string;
 }
 
-/**
- * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/utilities.ts#L3799-L3803
- */
-export interface IResolveModuleNameResolutionHost {
-  getCanonicalFileName(p: string): string;
-  getCommonSourceDirectory(): string;
-  getCurrentDirectory(): string;
-}
-
 export interface IExtendedTypeScript {
   /**
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/performance.ts#L3
@@ -57,6 +48,7 @@ export interface IExtendedTypeScript {
      * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/performance.ts#L119-L121
      */
     disable(): void;
+
     /**
      * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/performance.ts#L110-L116
      */
@@ -84,11 +76,6 @@ export interface IExtendedTypeScript {
   };
 
   /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/utilities.ts#L4720-L4734
-   */
-  readJson(filePath: string): object;
-
-  /**
    * https://github.com/microsoft/TypeScript/blob/782c09d783e006a697b4ba6d1e7ec2f718ce8393/src/compiler/utilities.ts#L6540
    */
   matchFiles(
@@ -106,42 +93,6 @@ export interface IExtendedTypeScript {
     realpath: (path: string) => string,
     directoryExists: (path: string) => boolean
   ): string[];
-
-  /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/emitter.ts#L261-L614
-   */
-  emitFiles(
-    resolver: IEmitResolver,
-    host: IEmitHost,
-    targetSourceFile: TTypescript.SourceFile | undefined,
-    emitTransformers: IEmitTransformers,
-    emitOnlyDtsFiles?: boolean,
-    onlyBuildInfo?: boolean,
-    forceDtsEmit?: boolean
-  ): TTypescript.EmitResult;
-
-  /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/transformer.ts#L30-L35
-   */
-  getTransformers(
-    compilerOptions: TTypescript.CompilerOptions,
-    customTransformers?: TTypescript.CustomTransformers,
-    emitOnlyDtsFiles?: boolean
-  ): IEmitTransformers;
-
-  /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/utilities.ts#L6100-L6108
-   */
-  removeFileExtension(path: string): string;
-
-  /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/utilities.ts#L3826-L3833
-   */
-  getExternalModuleNameFromPath(
-    host: IResolveModuleNameResolutionHost,
-    fileName: string,
-    referencePath?: string
-  ): string;
 
   Diagnostics: {
     // https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/diagnosticMessages.json#L4252-L4255

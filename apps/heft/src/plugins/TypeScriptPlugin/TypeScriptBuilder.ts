@@ -363,11 +363,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
         const innerCompilerOptions: TTypescript.CompilerOptions = innerProgram.getCompilerOptions();
 
-        const { changedFiles } = this._configureProgramForMultiEmit(
-          innerProgram,
-          outerWriteFile ?? host?.writeFile,
-          ts
-        );
+        const { changedFiles } = this._configureProgramForMultiEmit(innerProgram, ts);
 
         const result: TTypescript.EmitResult = originalEmit.call(
           newProgram,
@@ -403,7 +399,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private _configureProgramForMultiEmit(
     innerProgram: TTypescript.Program,
-    outerWriteFile: TTypescript.WriteFileCallback | undefined,
     ts: ExtendedTypeScript
   ): { changedFiles: Set<IExtendedSourceFile> } {
     interface IProgramWithMultiEmit extends TTypescript.Program {
@@ -423,34 +418,28 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       program.__innerEmit = innerEmit = program.emit;
     }
 
-    interface IKindOptions {
-      compilerOptions: TTypescript.CompilerOptions;
-    }
-
     let foundPrimary: boolean = false;
     let defaultModuleKind: TTypescript.ModuleKind;
 
-    const multiEmitMap: Map<ICachedEmitModuleKind, IKindOptions> = new Map();
+    const multiEmitMap: Map<ICachedEmitModuleKind, TTypescript.CompilerOptions> = new Map();
     for (const moduleKindToEmit of this._moduleKindsToEmit) {
-      const kindOptions: IKindOptions = {
-        compilerOptions: moduleKindToEmit.isPrimary
-          ? {
-              ...innerGetCompilerOptions()
-            }
-          : {
-              ...innerGetCompilerOptions(),
-              module: moduleKindToEmit.moduleKind,
-              outDir: moduleKindToEmit.outFolderPath,
+      const kindCompilerOptions: TTypescript.CompilerOptions = moduleKindToEmit.isPrimary
+        ? {
+            ...innerGetCompilerOptions()
+          }
+        : {
+            ...innerGetCompilerOptions(),
+            module: moduleKindToEmit.moduleKind,
+            outDir: moduleKindToEmit.outFolderPath,
 
-              // Don't emit declarations for secondary module kinds
-              declaration: false,
-              declarationMap: false
-            }
-      };
-      if (!kindOptions.compilerOptions.outDir) {
+            // Don't emit declarations for secondary module kinds
+            declaration: false,
+            declarationMap: false
+          };
+      if (!kindCompilerOptions.outDir) {
         throw new InternalError('Expected compilerOptions.outDir to be assigned');
       }
-      multiEmitMap.set(moduleKindToEmit, kindOptions);
+      multiEmitMap.set(moduleKindToEmit, kindCompilerOptions);
 
       if (moduleKindToEmit.isPrimary) {
         if (foundPrimary) {
@@ -492,9 +481,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       const diagnostics: TTypescript.Diagnostic[] = [];
       let emitSkipped: boolean = false;
       try {
-        for (const [moduleKindToEmit, kindOptions] of multiEmitMap) {
-          const kindCompilerOptions: TTypescript.CompilerOptions = kindOptions.compilerOptions;
-
+        for (const [moduleKindToEmit, kindCompilerOptions] of multiEmitMap) {
           program.getCompilerOptions = () => kindCompilerOptions;
           // Need to mutate the compiler options for the `module` field specifically, because emitWorker() captures
           // options in the closure and passes it to `ts.getTransformers()`
@@ -657,7 +644,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       filesToWrite.push({ filePath, data });
     };
 
-    const { changedFiles } = this._configureProgramForMultiEmit(innerProgram, writeFileCallback, ts);
+    const { changedFiles } = this._configureProgramForMultiEmit(innerProgram, ts);
 
     const emitResult: TTypescript.EmitResult = genericProgram.emit(undefined, writeFileCallback);
     //#endregion
