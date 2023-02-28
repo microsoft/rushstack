@@ -138,11 +138,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
     try {
       this.status = await this.runner.executeAsync(this);
-
-      if (this.status === OperationStatus.RemoteExecuting) {
-        this.stopwatch.reset();
-      }
-
       // Delegate global state reporting
       onResult(this);
     } catch (error) {

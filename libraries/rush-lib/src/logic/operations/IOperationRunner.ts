@@ -6,7 +6,7 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
 import type { OperationMetadataManager } from './OperationMetadataManager';
-import type { IStopwatchResult } from '../../utilities/Stopwatch';
+import type { Stopwatch } from '../../utilities/Stopwatch';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -39,7 +39,7 @@ export interface IOperationRunnerContext {
   /**
    * Object used to track elapsed time.
    */
-  stopwatch: IStopwatchResult;
+  stopwatch: Stopwatch;
   /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
@@ -47,6 +47,12 @@ export interface IOperationRunnerContext {
    * 'failure'.
    */
   status: OperationStatus;
+
+  /**
+   * Error which occurred while executing this operation, this is stored in case we need
+   * it later (for example to re-print errors at end of execution).
+   */
+  error?: Error;
 }
 
 /**
@@ -63,11 +69,6 @@ export interface IOperationRunner {
   readonly name: string;
 
   /**
-   * This flag determines if the operation is allowed to be skipped if up to date.
-   */
-  isSkipAllowed: boolean;
-
-  /**
    * Indicates that this runner's duration has meaning.
    */
   reportTiming: boolean;
@@ -82,11 +83,6 @@ export interface IOperationRunner {
    * exit code
    */
   warningsAreAllowed: boolean;
-
-  /**
-   * Indicates if the output of this operation may be written to the cache
-   */
-  isCacheWriteAllowed: boolean;
 
   /**
    * Method to be executed for the operation.

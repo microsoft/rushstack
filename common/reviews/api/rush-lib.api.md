@@ -477,8 +477,6 @@ export interface IOperationOptions {
 // @beta
 export interface IOperationRunner {
     executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
-    isCacheWriteAllowed: boolean;
-    isSkipAllowed: boolean;
     readonly name: string;
     reportTiming: boolean;
     silent: boolean;
@@ -489,12 +487,14 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
+    error?: Error;
     // @internal
     _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
     status: OperationStatus;
     stdioSummarizer: StdioSummarizer;
-    stopwatch: IStopwatchResult;
+    // Warning: (ae-forgotten-export) The symbol "Stopwatch" needs to be exported by the entry point index.d.ts
+    stopwatch: Stopwatch;
 }
 
 // @internal (undocumented)

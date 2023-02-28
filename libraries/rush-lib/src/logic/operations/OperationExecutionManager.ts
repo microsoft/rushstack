@@ -11,6 +11,10 @@ import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import { IExecutionResult } from './IOperationExecutionResult';
+import {
+  CacheableOperationRunnerPlugin,
+  IOperationBuildCacheContext
+} from './CacheableOperationRunnerPlugin';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -219,8 +223,11 @@ export class OperationExecutionManager {
   private _onOperationComplete(record: OperationExecutionRecord, executionQueue: AsyncOperationQueue): void {
     const { runner, name, status } = record;
 
-    let blockCacheWrite: boolean = !runner.isCacheWriteAllowed;
-    let blockSkip: boolean = !runner.isSkipAllowed;
+    const buildCacheContext: IOperationBuildCacheContext | undefined =
+      CacheableOperationRunnerPlugin.getBuildCacheContextByRunner(runner);
+
+    let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
+    let blockSkip: boolean = !buildCacheContext?.isSkipAllowed;
 
     const silent: boolean = runner.silent;
 
@@ -321,12 +328,15 @@ export class OperationExecutionManager {
 
     // Apply status changes to direct dependents
     for (const item of record.consumers) {
-      if (blockCacheWrite) {
-        item.runner.isCacheWriteAllowed = false;
-      }
-
-      if (blockSkip) {
-        item.runner.isSkipAllowed = false;
+      const itemRunnerBuildCacheContext: IOperationBuildCacheContext | undefined =
+        CacheableOperationRunnerPlugin.getBuildCacheContextByRunner(item.runner);
+      if (itemRunnerBuildCacheContext) {
+        if (blockCacheWrite) {
+          itemRunnerBuildCacheContext.isCacheWriteAllowed = false;
+        }
+        if (blockSkip) {
+          itemRunnerBuildCacheContext.isSkipAllowed = false;
+        }
       }
 
       if (status !== OperationStatus.RemoteExecuting) {

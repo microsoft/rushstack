@@ -3,7 +3,7 @@
 
 export type ICallbackFn = () => Promise<void> | void;
 
-export interface IRunnerWatcherOptions {
+export interface IPeriodicCallbackOptions {
   interval: number;
 }
 
@@ -12,13 +12,13 @@ export interface IRunnerWatcherOptions {
  *
  * @beta
  */
-export class RunnerWatcher {
+export class PeriodicCallback {
   private _callbacks: ICallbackFn[];
   private _interval: number;
   private _timeoutId: NodeJS.Timeout | undefined;
   private _isRunning: boolean;
 
-  public constructor(options: IRunnerWatcherOptions) {
+  public constructor(options: IPeriodicCallbackOptions) {
     this._callbacks = [];
     this._interval = options.interval;
     this._isRunning = false;
