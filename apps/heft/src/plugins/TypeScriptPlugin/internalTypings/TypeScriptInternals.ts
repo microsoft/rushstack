@@ -54,6 +54,10 @@ export interface IExtendedTypeScript {
    */
   performance: {
     /**
+     * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/performance.ts#L119-L121
+     */
+    disable(): void;
+    /**
      * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/performance.ts#L110-L116
      */
     enable(): void;
