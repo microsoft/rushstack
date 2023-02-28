@@ -146,9 +146,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _typescriptLogger!: IScopedLogger;
   private _typescriptTerminal!: ITerminal;
   private _emitCompletedCallbackManager: EmitCompletedCallbackManager;
+  private readonly _suppressedDiagnosticCodes: Set<number> = new Set();
 
   private __tsCacheFilePath: string | undefined;
-  private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
   private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
   public get filename(): string {
@@ -273,6 +273,18 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const ts: ExtendedTypeScript = require(this._configuration.typeScriptToolPath);
 
     ts.performance.enable();
+
+    const suppressedCodes: (number | undefined)[] = [
+      ts.Diagnostics.Property_0_has_no_initializer_and_is_not_definitely_assigned_in_the_constructor?.code,
+      // This diagnostic code is not present in old versions of TypeScript
+      ts.Diagnostics
+        .Element_implicitly_has_an_any_type_because_expression_of_type_0_can_t_be_used_to_index_type_1?.code
+    ];
+    for (const code of suppressedCodes) {
+      if (code !== undefined) {
+        this._suppressedDiagnosticCodes.add(code);
+      }
+    }
 
     const measureTsPerformance: PerformanceMeasurer = <TResult extends object | void>(
       measurementName: string,
@@ -999,12 +1011,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     // These pedantic checks also should not be treated as hard errors
-    switch (diagnostic.code) {
-      case ts.Diagnostics.Property_0_has_no_initializer_and_is_not_definitely_assigned_in_the_constructor
-        .code:
-      case ts.Diagnostics
-        .Element_implicitly_has_an_any_type_because_expression_of_type_0_can_t_be_used_to_index_type_1.code:
-        return ts.DiagnosticCategory.Warning;
+    if (this._suppressedDiagnosticCodes.has(diagnostic.code)) {
+      return ts.DiagnosticCategory.Warning;
     }
 
     return diagnostic.category;
