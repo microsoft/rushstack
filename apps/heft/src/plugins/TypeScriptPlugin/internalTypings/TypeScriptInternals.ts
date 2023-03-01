@@ -3,24 +3,6 @@
 
 import type * as TTypescript from 'typescript';
 
-// The specifics of these types aren't important
-/**
- * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3969-L4010
- */
-export interface IEmitResolver {}
-
-/**
- * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L5969-L5988
- */
-export interface IEmitHost {
-  writeFile: TTypescript.WriteFileCallback;
-}
-
-/**
- * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3338-L3341
- */
-export interface IEmitTransformers {}
-
 export interface IExtendedProgram extends TTypescript.Program {
   /**
    * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3205
