@@ -279,9 +279,11 @@ export class CertificateManager {
 
     certificate.serialNumber = CA_SERIAL_NUMBER;
 
-    const now: Date = new Date();
-    certificate.validity.notBefore = now;
-    certificate.validity.notAfter.setUTCDate(certificate.validity.notBefore.getUTCDate() + validityInDays);
+    const notBefore: Date = new Date();
+    const notAfter: Date = new Date(notBefore);
+    notAfter.setUTCDate(notBefore.getUTCDate() + validityInDays);
+    certificate.validity.notBefore = notBefore;
+    certificate.validity.notAfter = notAfter;
 
     const attrs: pki.CertificateField[] = [
       {
@@ -359,9 +361,11 @@ export class CertificateManager {
       forge
     );
 
-    const now: Date = new Date();
-    certificate.validity.notBefore = now;
-    certificate.validity.notAfter.setUTCDate(certificate.validity.notBefore.getUTCDate() + validityInDays);
+    const notBefore: Date = new Date();
+    const notAfter: Date = new Date(notBefore);
+    notAfter.setUTCDate(notBefore.getUTCDate() + validityInDays);
+    certificate.validity.notBefore = notBefore;
+    certificate.validity.notAfter = notAfter;
 
     const subjectAttrs: pki.CertificateField[] = [
       {
