@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Fri, 10 Feb 2023 01:18:50 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Mar 2023 04:11:20 GMT and should not be manually modified.
+
+## 1.2.17
+Fri, 03 Mar 2023 04:11:20 GMT
+
+### Patches
+
+- Fix an issue where certificate expiration was calculated incorrectly and certificates were set to expire too late.
 
 ## 1.2.16
 Fri, 10 Feb 2023 01:18:50 GMT
