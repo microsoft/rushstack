@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 
 import { OperationStatus } from './OperationStatus';
 import type { Operation, IExecuteOperationContext } from './Operation';
 import { OperationGroupRecord } from './OperationGroupRecord';
 import { CancellationToken } from '../pluginFramework/CancellationToken';
-import { computeTopology } from './AsyncOperationQueue';
-import { IOperationState } from './IOperationRunner';
+import { calculateCriticalPathLengths } from './calculateCriticalPath';
+import type { IOperationState } from './IOperationRunner';
 
 export interface IOperationExecutionOptions {
   cancellationToken: CancellationToken;
@@ -25,34 +25,45 @@ export interface IOperationExecutionOptions {
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
+  /**
+   * The set of operations that will be executed
+   */
   private readonly _operations: Operation[];
-  private readonly _groupRecords: Map<string, OperationGroupRecord>;
-  private readonly _totalOperations: number;
+  /**
+   * Group records are metadata-only entities used for tracking the start and end of a set of related tasks.
+   * This is the only extent to which the operation graph is aware of Heft phases.
+   */
+  private readonly _groupRecordByName: Map<string, OperationGroupRecord>;
+  /**
+   * The total number of non-silent operations in the graph.
+   * Silent operations are generally used to simplify the construction of the graph.
+   */
+  private readonly _trackedOperationCount: number;
 
   public constructor(operations: ReadonlySet<Operation>) {
-    const groupRecords: Map<string, OperationGroupRecord> = new Map();
-    this._groupRecords = groupRecords;
+    const groupRecordByName: Map<string, OperationGroupRecord> = new Map();
+    this._groupRecordByName = groupRecordByName;
 
-    let totalOperations: number = 0;
+    let trackedOperationCount: number = 0;
     for (const operation of operations) {
       const { groupName } = operation;
       let group: OperationGroupRecord | undefined = undefined;
-      if (groupName && !(group = groupRecords.get(groupName))) {
+      if (groupName && !(group = groupRecordByName.get(groupName))) {
         group = new OperationGroupRecord(groupName);
-        groupRecords.set(groupName, group);
+        groupRecordByName.set(groupName, group);
       }
 
       group?.addOperation(operation);
 
       if (!operation.runner?.silent) {
         // Only count non-silent operations
-        totalOperations++;
+        trackedOperationCount++;
       }
     }
 
-    this._totalOperations = totalOperations;
+    this._trackedOperationCount = trackedOperationCount;
 
-    this._operations = computeTopology(operations);
+    this._operations = calculateCriticalPathLengths(operations);
 
     for (const consumer of operations) {
       for (const dependency of consumer.dependencies) {
@@ -71,8 +82,6 @@ export class OperationExecutionManager {
    * operations are completed successfully, or rejects when any operation fails.
    */
   public async executeAsync(executionOptions: IOperationExecutionOptions): Promise<OperationStatus> {
-    const totalOperations: number = this._totalOperations;
-
     let hasReportedFailures: boolean = false;
 
     const { cancellationToken, parallelism, terminal, requestRun } = executionOptions;
@@ -80,8 +89,8 @@ export class OperationExecutionManager {
     const startedGroups: Set<OperationGroupRecord> = new Set();
     const finishedGroups: Set<OperationGroupRecord> = new Set();
 
-    const maxParallelism: number = Math.min(totalOperations, parallelism);
-    const groupRecords: Map<string, OperationGroupRecord> = this._groupRecords;
+    const maxParallelism: number = Math.min(this._operations.length, parallelism);
+    const groupRecords: Map<string, OperationGroupRecord> = this._groupRecordByName;
     for (const groupRecord of groupRecords.values()) {
       groupRecord.reset();
     }
@@ -100,7 +109,7 @@ export class OperationExecutionManager {
 
       queueWork: <T>(workFn: () => Promise<T>, priority: number): Promise<T> => {
         // TODO: Update to throttle parallelism
-        // Can just be a standard queue from async
+        // Can just be a standard priority queue from async
         return workFn();
       },
 
@@ -155,7 +164,7 @@ export class OperationExecutionManager {
     await Promise.all(this._operations.map((record: Operation) => record._executeAsync(executionContext)));
 
     const finalStatus: OperationStatus =
-      this._totalOperations === 0
+      this._trackedOperationCount === 0
         ? OperationStatus.NoOp
         : cancellationToken.isCancelled
         ? OperationStatus.Cancelled

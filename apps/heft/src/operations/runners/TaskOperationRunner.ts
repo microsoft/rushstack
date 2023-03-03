@@ -3,7 +3,7 @@
 
 import { performance } from 'perf_hooks';
 
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
 import { OperationStatus } from '../OperationStatus';
 import { HeftTask } from '../../pluginFramework/HeftTask';
@@ -81,6 +81,12 @@ export class TaskOperationRunner implements IOperationRunner {
     const { cancellationToken, requestRun } = context;
     const { hooks, logger } = taskSession;
 
+    // Need to clear any errors or warnings from the previous invocation, particularly
+    // if this is an immediate rerun
+    logger.resetErrorsAndWarnings();
+
+    const isWatchMode: boolean = taskSession.parameters.watch && !!requestRun;
+
     const { terminal } = logger;
 
     // Exit the task early if cancellation is requested
@@ -101,12 +107,12 @@ export class TaskOperationRunner implements IOperationRunner {
       this._fileOperations = fileOperations;
     }
 
-    const shouldRunIncremental: boolean = taskSession.parameters.watch && hooks.runIncremental.isUsed();
+    const shouldRunIncremental: boolean = isWatchMode && hooks.runIncremental.isUsed();
     let watchFileSystemAdapter: WatchFileSystemAdapter | undefined;
     const getWatchFileSystemAdapter = (): WatchFileSystemAdapter => {
       if (!watchFileSystemAdapter) {
         watchFileSystemAdapter = this._watchFileSystemAdapter ||= new WatchFileSystemAdapter();
-        watchFileSystemAdapter.reset();
+        watchFileSystemAdapter.prepare();
       }
       return watchFileSystemAdapter;
     };
@@ -166,20 +172,30 @@ export class TaskOperationRunner implements IOperationRunner {
           },
           terminal.writeVerboseLine.bind(terminal)
         )
-      : OperationStatus.Success;
+      : // This branch only occurs if only file operations are defined.
+        OperationStatus.Success;
 
     if (this._fileOperations) {
       const { copyOperations, deleteOperations } = this._fileOperations;
 
       await Promise.all([
         copyOperations.size > 0
-          ? copyFilesAsync(copyOperations, logger.terminal, requestRun && getWatchFileSystemAdapter())
-          : Promise.resolve(undefined),
+          ? copyFilesAsync(
+              copyOperations,
+              logger.terminal,
+              isWatchMode ? getWatchFileSystemAdapter() : undefined
+            )
+          : Promise.resolve(),
         deleteOperations.size > 0 ? deleteFilesAsync(deleteOperations, logger.terminal) : Promise.resolve()
       ]);
     }
 
-    watchFileSystemAdapter?.watch(requestRun!);
+    if (watchFileSystemAdapter) {
+      if (!requestRun) {
+        throw new InternalError(`watchFileSystemAdapter was initialized but requestRun is not defined!`);
+      }
+      watchFileSystemAdapter.watch(requestRun);
+    }
 
     // Even if the entire process has completed, we should mark the operation as cancelled if
     // cancellation has been requested.

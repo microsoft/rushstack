@@ -13,13 +13,22 @@ import type { Stopwatch } from '../utilities/Stopwatch';
  * @beta
  */
 export interface IOperationRunnerContext {
+  /**
+   * A cancellation token for the overarching execution. Runners should do their best to gracefully abort
+   * as soon as possible if the cancellation token is canceled.
+   */
   cancellationToken: CancellationToken;
 
+  /**
+   * If this is the first time this operation has been executed.
+   */
   isFirstRun: boolean;
 
+  /**
+   * A callback to the overarching orchestrator to request that the operation be invoked again.
+   * Used in watch mode to signal that inputs have changed.
+   */
   requestRun?: () => void;
-
-  queueWork<T>(workFn: () => Promise<T>, priority: number): Promise<T>;
 }
 
 /**

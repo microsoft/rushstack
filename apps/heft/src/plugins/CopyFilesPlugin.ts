@@ -71,12 +71,12 @@ export async function copyFilesAsync(
   terminal: ITerminal,
   watchFileSystemAdapter?: WatchFileSystemAdapter
 ): Promise<void> {
-  const copyDescriptors: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
+  const copyDescriptorByDestination: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
     copyOperations,
     watchFileSystemAdapter
   );
 
-  await _copyFilesInnerAsync(copyDescriptors, terminal);
+  await _copyFilesInnerAsync(copyDescriptorByDestination, terminal);
 }
 
 async function _getCopyDescriptorsAsync(
@@ -85,12 +85,13 @@ async function _getCopyDescriptorsAsync(
 ): Promise<Map<string, ICopyDescriptor>> {
   // Create a map to deduplicate and prevent double-writes
   // resolvedDestinationFilePath -> descriptor
-  const destinationCopyDescriptors: Map<string, ICopyDescriptor> = new Map();
+  const copyDescriptorByDestination: Map<string, ICopyDescriptor> = new Map();
 
   await Async.forEachAsync(
     copyConfigurations,
     async (copyConfiguration: ICopyOperation) => {
-      // The source path is required to be a folder
+      // "sourcePath" is required to be a folder. To copy a single file, put the parent folder in "sourcePath"
+      // and the filename in "includeGlobs"
       const sourceFolder: string | undefined = copyConfiguration.sourcePath;
       const sourceFilePaths: Set<string> | undefined = await getFilePathsAsync(copyConfiguration, fs);
 
@@ -107,7 +108,7 @@ async function _getCopyDescriptorsAsync(
 
           // Throw if a duplicate copy target with a different source or options is specified
           const existingDestinationCopyDescriptor: ICopyDescriptor | undefined =
-            destinationCopyDescriptors.get(resolvedDestinationPath);
+            copyDescriptorByDestination.get(resolvedDestinationPath);
           if (existingDestinationCopyDescriptor) {
             if (
               existingDestinationCopyDescriptor.sourcePath === sourceFilePath &&
@@ -128,14 +129,14 @@ async function _getCopyDescriptorsAsync(
             hardlink: !!copyConfiguration.hardlink
           };
 
-          destinationCopyDescriptors.set(resolvedDestinationPath, processedCopyDescriptor);
+          copyDescriptorByDestination.set(resolvedDestinationPath, processedCopyDescriptor);
         }
       }
     },
     { concurrency: Constants.maxParallelism }
   );
 
-  return destinationCopyDescriptors;
+  return copyDescriptorByDestination;
 }
 
 async function _copyFilesInnerAsync(

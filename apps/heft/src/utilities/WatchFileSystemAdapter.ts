@@ -31,9 +31,22 @@ export interface IWatchedFileState {
  * Interface contract for `WatchFileSystemAdapter` for cross-version compatibility
  */
 export interface IWatchFileSystemAdapter extends FileSystemAdapter {
-  reset(): void;
+  /**
+   * Prepares for incoming glob requests.
+   * File mtimes will be recorded at this time for any files that do not receive explicit
+   * stat() or lstat() calls.
+   */
+  prepare(): void;
+  /**
+   * Watches all files that have been accessed since `prepare()` was called.
+   * Clears the tracked file lists.
+   */
   watch(onChange: () => void): void;
-  getFileState(filePath: string): IWatchedFileState;
+  /**
+   * Tells the adapter to track the specified file as used.
+   * Returns an object containing data about the state of said file.
+   */
+  getFileStateAndTrack(filePath: string): IWatchedFileState;
 }
 
 /**
@@ -159,7 +172,10 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     }
   };
 
-  public reset(): void {
+  /**
+   * @inheritdoc
+   */
+  public prepare(): void {
     this._lastQueryTime = Date.now();
 
     if (this._watcher) {
@@ -170,6 +186,9 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   public watch(onChange: () => void): void {
     if (this._files.size === 0 && this._contexts.size === 0 && this._missing.size === 0) {
       return;
@@ -196,7 +215,10 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     watcher.once('aggregated', onChange);
   }
 
-  public getFileState(filePath: string): IWatchedFileState {
+  /**
+   * @inheritdoc
+   */
+  public getFileStateAndTrack(filePath: string): IWatchedFileState {
     if (!this._lastFiles || !this._times) {
       return {
         changed: true

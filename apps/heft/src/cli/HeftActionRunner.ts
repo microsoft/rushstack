@@ -166,7 +166,7 @@ export class HeftActionRunner {
     // default.
     if (os.platform() === 'win32') {
       // On desktop Windows, some people have complained that their system becomes
-      // sluggish if Rush is using all the CPU cores.  Leave one thread for
+      // sluggish if Node is using all the CPU cores.  Leave one thread for
       // other operations. For CI environments, you can use the "max" argument to use all available cores.
       this._parallelism = Math.max(numberOfCores - 1, 1);
     } else {
@@ -263,6 +263,8 @@ export class HeftActionRunner {
 
     const operations: ReadonlySet<Operation> = this._generateOperations();
 
+    // Set up the ability to terminate the build via Ctrl+C and have it exit gracefully if pressed once,
+    // less gracefully if pressed a second time.
     const cliCancellationTokenSource: CancellationTokenSource = new CancellationTokenSource();
     const cliCancellationToken: CancellationToken = cliCancellationTokenSource.token;
     const cli: Interface = createInterface(process.stdin, undefined, undefined, true);
@@ -292,73 +294,74 @@ export class HeftActionRunner {
     executionManager: OperationExecutionManager,
     cliCancellationToken: CancellationToken
   ): Promise<void> {
-    let resolveRequestRun!: (requestRun: true) => void;
-    function createRequestRunPromise(): Promise<true> {
-      return new Promise<true>((resolve: (requestRun: true) => void, reject: (err: Error) => void) => {
+    let runRequested: boolean = true;
+    let isRunning: boolean = true;
+    let cancellationTokenSource: CancellationTokenSource = new CancellationTokenSource();
+
+    const { _terminal: terminal } = this;
+
+    let resolveRequestRun!: () => void;
+    function createRequestRunPromise(): Promise<void> {
+      return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
         resolveRequestRun = resolve;
+      }).then(() => {
+        runRequested = true;
+        if (isRunning) {
+          // If there's a source file change, we need to cancel the incremental build and wait for the
+          // execution to finish before we begin execution again.
+          cancellationTokenSource.cancel();
+          terminal.writeLine(Colors.bold('New run requested, cancelling incremental build...'));
+        }
       });
     }
-    let requestRunPromise: Promise<true> = createRequestRunPromise();
+    let requestRunPromise: Promise<void> = createRequestRunPromise();
+
+    function cancelExecution(): void {
+      cancellationTokenSource.cancel();
+    }
 
     function requestRun(): void {
-      resolveRequestRun(true);
+      // The wrapper here allows operation runners to hang onto a single instance, despite the underlying
+      // promise changing.
+      resolveRequestRun();
     }
 
     // eslint-disable-next-line no-constant-condition
     while (!cliCancellationToken.isCancelled) {
+      if (cancellationTokenSource.isCancelled) {
+        cancellationTokenSource = new CancellationTokenSource();
+        cliCancellationToken.onCancelledPromise.finally(cancelExecution);
+      }
+
       // Create the cancellation token which is passed to the incremental build.
-      const cancellationTokenSource: CancellationTokenSource = new CancellationTokenSource();
       const cancellationToken: CancellationToken = cancellationTokenSource.token;
-
-      function cancelExecution(): void {
-        cancellationTokenSource.cancel();
-      }
-
-      cliCancellationToken.onCancelledPromise.then(cancelExecution, cancelExecution);
-
-      // Start the incremental build and wait for a source file to change
-      const executePromise: Promise<void> = this._executeOnceAsync(
-        executionManager,
-        cancellationToken,
-        requestRun
-      );
-
-      try {
-        // Whichever promise settles first will be the result of the race.
-        const isBuildTrigger: true | void = await Promise.race([requestRunPromise, executePromise]);
-        if (isBuildTrigger) {
-          // If there's a source file change, we need to cancel the incremental build and wait for the
-          // execution to finish before we begin execution again.
-          cancellationTokenSource.cancel();
-          this._terminal.writeLine(
-            Colors.bold('New run requested, cancelling and restarting incremental build...')
-          );
-          await executePromise;
-        } else {
-          this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
-          this._terminal.writeLine('');
-          await requestRunPromise;
-        }
-      } catch (e) {
-        // Swallow AlreadyReportedErrors, since we likely have already logged them out to the terminal.
-        // We also need to wait for source file changes here so that we don't continuously loop after
-        // encountering an error.
-        if (e instanceof AlreadyReportedError) {
-          this._terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
-          this._terminal.writeLine('');
-          await requestRunPromise;
-        } else {
-          // We don't know where this error is coming from, throw
-          throw e;
-        }
-      }
-
-      requestRunPromise = createRequestRunPromise();
 
       // Write an empty line to the terminal for separation between iterations. We've already iterated
       // at this point, so log out that we're about to start a new run.
-      this._terminal.writeLine('');
-      this._terminal.writeLine(Colors.bold('Starting incremental build...'));
+      terminal.writeLine('');
+      terminal.writeLine(Colors.bold('Starting incremental build...'));
+
+      // Start the incremental build and wait for a source file to change
+      runRequested = false;
+      isRunning = true;
+
+      try {
+        await this._executeOnceAsync(executionManager, cancellationToken, requestRun);
+      } catch (err) {
+        if (!(err instanceof AlreadyReportedError)) {
+          throw err;
+        }
+      } finally {
+        isRunning = false;
+      }
+
+      if (!runRequested) {
+        terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+        terminal.writeLine('');
+        await requestRunPromise;
+      }
+
+      requestRunPromise = createRequestRunPromise();
     }
   }
 
@@ -446,9 +449,6 @@ export class HeftActionRunner {
         const taskOperation: Operation = _getOrCreateTaskOperation(internalHeftSession, task, operations);
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
         taskOperation.addDependency(phaseOperation);
-        // Set the 'start' lifecycle operation as a dependency of all tasks to ensure the 'start' lifecycle
-        // operation runs first
-        taskOperation.addDependency(startLifecycleOperation);
         // Set the task operation as a dependency of the 'stop' lifecycle operation to ensure the task operation
         // runs first
         finishLifecycleOperation.addDependency(taskOperation);

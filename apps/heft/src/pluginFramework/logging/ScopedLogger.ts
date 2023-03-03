@@ -37,6 +37,11 @@ export interface IScopedLogger {
    * Call this function to emit an warning to the heft runtime.
    */
   emitWarning(warning: Error): void;
+
+  /**
+   * Reset the errors and warnings for this scoped logger.
+   */
+  resetErrorsAndWarnings(): void;
 }
 
 export interface IScopedLoggerOptions {
@@ -114,7 +119,7 @@ export class ScopedLogger implements IScopedLogger {
   }
 
   /**
-   * Reset the errors and warnings for this scoped logger.
+   * {@inheritdoc IScopedLogger.resetErrorsAndWarnings}
    */
   public resetErrorsAndWarnings(): void {
     this._errors = [];

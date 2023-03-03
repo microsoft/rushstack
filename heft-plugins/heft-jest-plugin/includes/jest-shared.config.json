@@ -26,6 +26,9 @@
 
   "coverageDirectory": "<rootDir>/temp/coverage",
 
+  // Use V8 instead of Babel to avoid the overhead of instrumenting code
+  "coverageProvider": "v8",
+
   "collectCoverageFrom": [
     "lib/**/*.js",
     "!lib/**/*.d.ts",
@@ -49,6 +52,8 @@
 
   "snapshotResolver": "../lib/exports/jest-source-map-snapshot-resolver.js",
 
+  // Instruct jest not to run the transformer pipeline by default on JS files. The output files from TypeScript
+  // will already be fully transformed, so this avoids redundant file system operations.
   "transformIgnorePatterns": ["\\.c?js$"],
 
   // jest-identity-mock-transform returns a proxy for exported key/value pairs, where Webpack would return a module
@@ -62,7 +67,7 @@
 
   // The modulePathIgnorePatterns below accepts these sorts of paths:
   //   - <rootDir>/lib
-  //   - <rootDir>/lib/file.ts
+  //   - <rootDir>/lib/file.js
   // ...and ignores anything else under <rootDir>
   "modulePathIgnorePatterns": [],
 

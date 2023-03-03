@@ -21,7 +21,7 @@
           "sourcePath": {
             "title": "Source Path",
             "type": "string",
-            "description": "The target file or folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the file or folder will be copied.",
+            "description": "The target folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the folder will be copied. To copy a single file, set \"includeGlobs\" to an array containing the exact name of the file.",
             "pattern": "[^\\\\]"
           },
 

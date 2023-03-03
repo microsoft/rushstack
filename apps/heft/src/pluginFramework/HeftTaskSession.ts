@@ -168,7 +168,7 @@ export interface IHeftTaskFileOperations {
   copyOperations: Set<ICopyOperation>;
 
   /**
-   * Delete operations to be performed during the `run` or `runIncremental` hook. These operations will be
+   * Delete operations to be performed following the `run` or `runIncremental` hook. These operations will be
    * performed after the task `run` or `runIncremental` hook has completed.
    *
    * @public

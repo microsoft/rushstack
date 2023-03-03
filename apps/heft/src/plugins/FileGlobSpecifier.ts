@@ -91,7 +91,7 @@ export type WatchGlobFn = (
 ) => Promise<Map<string, IWatchedFileState>>;
 
 function isWatchFileSystemAdapter(adapter: FileSystemAdapter): adapter is IWatchFileSystemAdapter {
-  return !!(adapter as IWatchFileSystemAdapter).getFileState;
+  return !!(adapter as IWatchFileSystemAdapter).getFileStateAndTrack;
 }
 
 export interface IWatchGlobOptions extends IGlobOptions {
@@ -102,12 +102,16 @@ export async function watchGlobAsync(
   pattern: string | string[],
   options: IWatchGlobOptions
 ): Promise<Map<string, IWatchedFileState>> {
+  const { fs, cwd, absolute } = options;
+  if (!cwd && !absolute) {
+    throw new Error(`"cwd" must be set in the options passed to "watchGlobAsync" if "absolute" is not set`);
+  }
+
   const rawFiles: string[] = await glob(pattern, options);
 
   const results: Map<string, IWatchedFileState> = new Map();
-  const { fs, cwd = process.cwd() } = options;
   for (const file of rawFiles) {
-    results.set(file, fs.getFileState(path.resolve(cwd, file)));
+    results.set(file, fs.getFileStateAndTrack(cwd ? path.resolve(cwd, file) : path.normalize(file)));
   }
 
   return results;
@@ -128,7 +132,7 @@ export async function getFilePathsAsync(
   if (fs && isWatchFileSystemAdapter(fs)) {
     const changedFiles: Set<string> = new Set();
     for (const file of rawFiles) {
-      if (fs.getFileState(path.normalize(file)).changed) {
+      if (fs.getFileStateAndTrack(path.normalize(file)).changed) {
         changedFiles.add(file);
       }
     }

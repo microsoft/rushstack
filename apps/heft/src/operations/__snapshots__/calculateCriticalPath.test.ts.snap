@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calculateCriticalPathLength sets the critical path: a 1`] = `0`;
+
+exports[`calculateCriticalPathLength sets the critical path: b 1`] = `1`;
+
+exports[`calculateCriticalPathLength sets the critical path: c 1`] = `2`;
+
+exports[`calculateCriticalPathLength sets the critical path: d 1`] = `3`;
+
+exports[`calculateCriticalPathLength sets the critical path: e 1`] = `4`;
+
+exports[`calculateCriticalPathLength sets the critical path: f 1`] = `5`;
+
+exports[`calculateCriticalPathLength sets the critical path: g 1`] = `3`;
+
+exports[`calculateCriticalPathLengths sets the critical path: a 1`] = `1`;
+
+exports[`calculateCriticalPathLengths sets the critical path: b 1`] = `2`;
+
+exports[`calculateCriticalPathLengths sets the critical path: c 1`] = `3`;
+
+exports[`calculateCriticalPathLengths sets the critical path: d 1`] = `4`;
+
+exports[`calculateCriticalPathLengths sets the critical path: e 1`] = `5`;
+
+exports[`calculateCriticalPathLengths sets the critical path: f 1`] = `6`;
+
+exports[`calculateCriticalPathLengths sets the critical path: g 1`] = `13`;
+
+exports[`calculateShortestPath returns the shortest path: long 1`] = `
+Array [
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+]
+`;
+
+exports[`calculateShortestPath returns the shortest path: with multiple shortcuts 1`] = `
+Array [
+  "a",
+  "c",
+  "f",
+]
+`;
+
+exports[`calculateShortestPath returns the shortest path: with shortcut 1`] = `
+Array [
+  "a",
+  "c",
+  "d",
+  "e",
+  "f",
+]
+`;

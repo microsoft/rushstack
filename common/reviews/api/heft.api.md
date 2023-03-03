@@ -285,6 +285,7 @@ export interface IScopedLogger {
     emitWarning(warning: Error): void;
     readonly hasErrors: boolean;
     readonly loggerName: string;
+    resetErrorsAndWarnings(): void;
     readonly terminal: ITerminal;
 }
 

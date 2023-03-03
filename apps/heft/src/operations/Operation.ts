@@ -35,10 +35,25 @@ export interface IOperationOptions {
   weight?: number | undefined;
 }
 
+/**
+ * Information provided to `executeAsync` by the `OperationExecutionManager`.
+ */
 export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 'isFirstRun'> {
+  /**
+   * Function to invoke before execution of an operation, for logging.
+   */
   beforeExecute(operation: Operation, state: IOperationState): void;
+  /**
+   * Function to invoke after execution of an operation, for logging.
+   */
   afterExecute(operation: Operation, state: IOperationState): void;
-
+  /**
+   * Function used to schedule the concurrency-limited execution of an operation.
+   */
+  queueWork<T>(workFn: () => Promise<T>, priority: number): Promise<T>;
+  /**
+   * Terminal to write output to.
+   */
   terminal: ITerminal;
 }
 
@@ -60,7 +75,9 @@ export class Operation implements IOperationStates {
    * A set of all operations that wait for this operation.
    */
   public readonly consumers: Set<Operation> = new Set<Operation>();
-
+  /**
+   * If specified, the name of a grouping to which this Operation belongs, for logging start and end times.
+   */
   public readonly groupName: string | undefined;
 
   /**
@@ -113,12 +130,25 @@ export class Operation implements IOperationStates {
    */
   public weight: number;
 
+  /**
+   * The state of this operation the previous time a manager was invoked.
+   */
   public lastState: IOperationState | undefined = undefined;
 
+  /**
+   * The current state of this operation
+   */
   public state: IOperationState | undefined = undefined;
 
+  /**
+   * A cached execution promise for the current OperationExecutionManager invocation of this operation.
+   */
   private _promise: Promise<OperationStatus> | undefined = undefined;
 
+  /**
+   * If true, then a run of this operation is currently wanted.
+   * This is used to track state from the `requestRun` callback passed to the runner.
+   */
   private _runPending: boolean = true;
 
   public constructor(options?: IOperationOptions) {
@@ -206,18 +236,28 @@ export class Operation implements IOperationStates {
     const innerContext: IOperationRunnerContext = {
       cancellationToken,
       isFirstRun: !this.lastState,
-      queueWork,
-      requestRun: () => {
-        switch (this.state?.status) {
-          case OperationStatus.Ready:
-            return;
-          case OperationStatus.Executing:
-            this._runPending = true;
-            return;
-          default:
-            return requestRun?.();
-        }
-      }
+      requestRun: requestRun
+        ? () => {
+            switch (this.state?.status) {
+              case OperationStatus.Ready:
+              case OperationStatus.Executing:
+                // If current status has not yet resolved to a fixed value,
+                // re-executing this operation does not require a full rerun
+                // of the operation graph. Simply mark that a run is requested.
+
+                // This variable is on the Operation instead of the
+                // containing closure to deal with scenarios in which
+                // the runner hangs on to an old copy of the callback.
+                this._runPending = true;
+                return;
+              default:
+                // The requestRun callback is assumed to remain constant
+                // throughout the lifetime of the process, so it is safe
+                // to capture here.
+                return requestRun();
+            }
+          }
+        : undefined
     };
 
     await queueWork(async () => {
@@ -242,6 +282,15 @@ export class Operation implements IOperationStates {
           innerState.status = OperationStatus.Failure;
           innerState.error = error as OperationError;
         }
+
+        // Since runner.executeAsync is async, a change could have occurred that requires re-execution
+        // This operation is still active, so can re-execute immediately, rather than forcing a whole
+        // new execution pass.
+
+        // As currently written, this does mean that if a job is scheduled with higher priority while
+        // this operation is still executing, it will still wait for this retry. This may not be desired
+        // and if it becomes a problem, the retry loop will need to be moved outside of the `queueWork` call.
+        // This introduces complexity regarding tracking of timing and start/end logging, however.
 
         if (this._runPending) {
           if (cancellationToken.isCancelled) {

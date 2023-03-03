@@ -1,7 +1,9 @@
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 import { Writable } from 'stream';
 
 // Regex to filter out screen clearing directives
+// Can't use the AnsiEscape.removeCodes() function from node-core-library because we are only
+// removing the clear screen directives, but want to preserve coloring.
 // eslint-disable-next-line no-control-regex
 const FILTER_REGEX: RegExp = /\x1B\[2J\x1B\[0f|\x1B\[2J\x1B\[3J\x1B\[H/g;
 
