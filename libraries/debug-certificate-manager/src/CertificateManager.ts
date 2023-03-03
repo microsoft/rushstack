@@ -85,6 +85,8 @@ export interface ICertificateGenerationOptions {
   validityInDays?: number;
 }
 
+const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
+
 /**
  * A utility class to handle generating, trusting, and untrustring a debug certificate.
  * Contains two public methods to `ensureCertificate` and `untrustCertificate`.
@@ -139,6 +141,14 @@ export class CertificateManager {
       if (now > notAfter) {
         messages.push(
           `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
+        );
+      }
+
+      now.setUTCDate(now.getUTCDate() + optionsWithDefaults.validityInDays);
+      if (notAfter > now) {
+        messages.push(
+          `The existing development certificate's expiration date ${notAfter} exceeds the allowed limit ${now}. ` +
+            `This will be rejected by many browsers.`
         );
       }
 
@@ -713,6 +723,9 @@ function applyDefaultOptions(
   const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
   return {
     subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
-    validityInDays: options?.validityInDays ?? 365
+    validityInDays: Math.min(
+      MAX_CERTIFICATE_VALIDITY_DAYS,
+      options?.validityInDays ?? MAX_CERTIFICATE_VALIDITY_DAYS
+    )
   };
 }
