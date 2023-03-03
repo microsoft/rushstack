@@ -1,40 +1,59 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { CommandLineStringListParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export class UpdateAutoinstallerAction extends BaseRushAction {
-  private readonly _name: CommandLineStringParameter;
+  private readonly _namesParameter: CommandLineStringListParameter;
+  private readonly _allParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'update-autoinstaller',
       summary: 'Updates autoinstaller package dependencies',
-      documentation: 'Use this command to regenerate the shrinkwrap file for an autoinstaller folder.',
+      documentation: 'Use this command to regenerate the lockfile for an autoinstaller folder.',
       parser
     });
 
-    this._name = this.defineStringParameter({
+    this._namesParameter = this.defineStringListParameter({
       parameterLongName: '--name',
       argumentName: 'AUTOINSTALLER_NAME',
-      required: true,
       description:
-        'Specifies the name of the autoinstaller, which must be one of the folders under common/autoinstallers.'
+        'Specifies the name of the autoinstaller, which must be one of the folders under common/autoinstallers. Provide this' +
+        ' option more than once to update multiple autoinstallers. Required unless --all is specified.'
+    });
+
+    this._allParameter = this.defineFlagParameter({
+      parameterLongName: '--all',
+      description:
+        'If this flag is provided, all existing autoinstallers in the autoinstallers folder will be detected and updated. Not compatible with --name parameter.'
     });
   }
 
   protected async runAsync(): Promise<void> {
-    const autoinstallerName: string = this._name.value!;
+    let autoinstallerNames: string[] | undefined = [];
 
-    const autoinstaller: Autoinstaller = new Autoinstaller({
-      autoinstallerName,
-      rushConfiguration: this.rushConfiguration
-    });
-    autoinstaller.update();
+    if (this._namesParameter.values.length > 0) {
+      if (this._allParameter.value) {
+        throw new Error(
+          `${this._allParameter.longName} is not compatible with ${this._namesParameter.longName}`
+        );
+      }
+      autoinstallerNames.push(...this._namesParameter.values);
+    } else if (this._allParameter.value) {
+      autoinstallerNames = undefined;
+    } else {
+      console.log(this.renderHelpText() + '\n');
+      throw new Error(
+        `Specify ${this._namesParameter.longName} parameter or the ${this._allParameter.longName} flag.`
+      );
+    }
+
+    Autoinstaller.updateAutoinstallers(this.rushConfiguration, autoinstallerNames);
 
     console.log('\nSuccess.');
   }

@@ -21,6 +21,7 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import { Autoinstaller } from '../../logic/Autoinstaller';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -34,6 +35,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _debugPackageManagerParameter: CommandLineFlagParameter;
   protected readonly _maxInstallAttempts: CommandLineIntegerParameter;
   protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
+  protected readonly _autoinstallersParameter: CommandLineFlagParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
@@ -83,6 +85,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+    });
+    this._autoinstallersParameter = this.defineFlagParameter({
+      parameterLongName: '--autoinstallers',
+      description: `After installing all packages, also refresh the install for all existing autoinstallers.`
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
@@ -150,6 +156,14 @@ export abstract class BaseInstallAction extends BaseRushAction {
     let installSuccessful: boolean = true;
     try {
       await installManager.doInstallAsync();
+
+      if (this._autoinstallersParameter.value) {
+        if (installManagerOptions.allowShrinkwrapUpdates) {
+          Autoinstaller.updateAutoinstallers(this.rushConfiguration);
+        } else {
+          await Autoinstaller.prepareAutoinstallersAsync(this.rushConfiguration);
+        }
+      }
 
       if (warnAboutScriptUpdate) {
         console.log(

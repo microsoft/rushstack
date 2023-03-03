@@ -4,7 +4,14 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 
-import { FileSystem, IPackageJson, JsonFile, LockFile, NewlineKind } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  FolderItem,
+  IPackageJson,
+  JsonFile,
+  LockFile,
+  NewlineKind
+} from '@rushstack/node-core-library';
 import { Utilities } from '../utilities/Utilities';
 
 import { PackageName, IParsedPackageNameOrError } from '@rushstack/node-core-library';
@@ -155,7 +162,14 @@ export class Autoinstaller {
     }
   }
 
-  public update(): void {
+  /**
+   * Update this autoinstaller, installing the latest packages defined in the package.json file
+   * and regenerating the lockfile.
+   *
+   * Returns `true` if the lockfile was updated and should be committed to git, or `false` if
+   * the autoinstaller folder is already up-to-date.
+   */
+  public update(): boolean {
     const autoinstallerPackageJsonPath: string = path.join(this.folderFullPath, 'package.json');
 
     if (!FileSystem.exists(autoinstallerPackageJsonPath)) {
@@ -184,7 +198,7 @@ export class Autoinstaller {
       );
     }
 
-    this._logIfConsoleOutputIsNotRestricted();
+    this._logIfConsoleOutputIsNotRestricted('');
 
     Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this.folderFullPath);
 
@@ -206,13 +220,11 @@ export class Autoinstaller {
         keepEnvironment: true
       });
       this._logIfConsoleOutputIsNotRestricted('"npm shrinkwrap" completed');
-      this._logIfConsoleOutputIsNotRestricted();
+      this._logIfConsoleOutputIsNotRestricted('');
     }
 
     if (!FileSystem.exists(this.shrinkwrapFilePath)) {
-      throw new Error(
-        'The package manager did not create the expected shrinkwrap file: ' + this.shrinkwrapFilePath
-      );
+      throw new Error('The package manager did not create the expected lockfile: ' + this.shrinkwrapFilePath);
     }
 
     const newFileContents: string = FileSystem.readFile(this.shrinkwrapFilePath, {
@@ -220,17 +232,115 @@ export class Autoinstaller {
     });
     if (oldFileContents !== newFileContents) {
       this._logIfConsoleOutputIsNotRestricted(
-        colors.green('The shrinkwrap file has been updated.') + '  Please commit the updated file:'
+        colors.green('The lockfile has been updated.') + '  Please commit the updated file:'
       );
       this._logIfConsoleOutputIsNotRestricted(`\n  ${this.shrinkwrapFilePath}`);
+      return true;
     } else {
       this._logIfConsoleOutputIsNotRestricted(colors.green('Already up to date.'));
+      return false;
     }
   }
 
   private _logIfConsoleOutputIsNotRestricted(message?: string): void {
     if (!this._restrictConsoleOutput) {
       console.log(message);
+    }
+  }
+
+  public static getAutoinstallerNames(rushConfiguration: RushConfiguration): string[] {
+    const autoinstallerNames: string[] = [];
+    const files: FolderItem[] = FileSystem.exists(rushConfiguration.commonAutoinstallersFolder)
+      ? FileSystem.readFolderItems(rushConfiguration.commonAutoinstallersFolder)
+      : [];
+
+    for (const file of files) {
+      if (
+        file.isDirectory() &&
+        FileSystem.exists(path.join(rushConfiguration.commonAutoinstallersFolder, file.name, 'package.json'))
+      ) {
+        autoinstallerNames.push(file.name);
+      }
+    }
+
+    return autoinstallerNames;
+  }
+
+  public static async prepareAutoinstallersAsync(
+    rushConfiguration: RushConfiguration,
+    specificNames?: string[]
+  ): Promise<void> {
+    const autoinstallerNames: string[] = [];
+
+    if (specificNames) {
+      autoinstallerNames.push(...specificNames);
+    } else {
+      autoinstallerNames.push(...Autoinstaller.getAutoinstallerNames(rushConfiguration));
+    }
+
+    for (const autoinstallerName of autoinstallerNames) {
+      const autoinstaller: Autoinstaller = new Autoinstaller({
+        autoinstallerName,
+        rushConfiguration
+      });
+      await autoinstaller.prepareAsync();
+      console.log('');
+    }
+
+    console.log(colors.gray('='.repeat(79)));
+
+    if (autoinstallerNames.length === 0) {
+      console.log('\nNo autoinstallers to prepare.');
+      return;
+    }
+
+    console.log(colors.green(`\n${autoinstallerNames.length} autoinstaller(s) prepared.`));
+  }
+
+  public static updateAutoinstallers(rushConfiguration: RushConfiguration, specificNames?: string[]): void {
+    const autoinstallerNames: string[] = [];
+
+    if (specificNames) {
+      autoinstallerNames.push(...specificNames);
+    } else {
+      autoinstallerNames.push(...Autoinstaller.getAutoinstallerNames(rushConfiguration));
+    }
+
+    const updated: Autoinstaller[] = [];
+    const skipped: Autoinstaller[] = [];
+
+    for (const autoinstallerName of autoinstallerNames) {
+      const autoinstaller: Autoinstaller = new Autoinstaller({
+        autoinstallerName,
+        rushConfiguration
+      });
+      if (autoinstaller.update()) {
+        updated.push(autoinstaller);
+      } else {
+        skipped.push(autoinstaller);
+      }
+      console.log('');
+    }
+
+    console.log(colors.gray('='.repeat(79)));
+
+    if (skipped.length + updated.length === 0) {
+      console.log('\nNo autoinstallers to update.');
+      return;
+    }
+
+    if (skipped.length > 0) {
+      console.log(colors.green(`\n${skipped.length} autoinstaller(s) already up to date.`));
+    }
+
+    if (updated.length > 0) {
+      console.log(
+        colors.green(`\n${updated.length} autoinstaller(s) were updated. `) +
+          `Please commit the updated files:\n`
+      );
+      for (const autoinstaller of updated) {
+        console.log(`  ${autoinstaller.shrinkwrapFilePath}`);
+      }
     }
   }
 }
