@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.93.2",
+      "tag": "@microsoft/rush_v5.93.2",
+      "date": "Mon, 06 Mar 2023 20:18:01 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Do not delete the local pnpm store after all install attempts has failed. `rush purge` will still delete a local store."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.93.1",
       "tag": "@microsoft/rush_v5.93.1",
       "date": "Fri, 17 Feb 2023 14:46:59 GMT",

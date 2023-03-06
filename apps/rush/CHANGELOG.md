@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 17 Feb 2023 14:46:59 GMT and should not be manually modified.
+This log was last generated on Mon, 06 Mar 2023 20:18:01 GMT and should not be manually modified.
+
+## 5.93.2
+Mon, 06 Mar 2023 20:18:01 GMT
+
+### Updates
+
+- Do not delete the local pnpm store after all install attempts has failed. `rush purge` will still delete a local store.
 
 ## 5.93.1
 Fri, 17 Feb 2023 14:46:59 GMT
