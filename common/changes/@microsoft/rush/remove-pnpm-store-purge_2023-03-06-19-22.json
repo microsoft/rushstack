@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Do not delete the local pnpm store after all install attempts has failed. `rush purge` will still delete a local store.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
