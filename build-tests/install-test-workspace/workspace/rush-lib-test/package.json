@@ -1,0 +1,20 @@
+{
+  "name": "rush-lib-test",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A minimal example project that imports APIs from @rushstack/rush-lib",
+  "license": "MIT",
+  "scripts": {
+    "build": "rimraf ./lib/ && tsc",
+    "start": "node lib/start.js"
+  },
+  "dependencies": {
+    "@microsoft/rush-lib": "*",
+    "colors": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "14.18.36",
+    "rimraf": "^4.1.2",
+    "typescript": "~4.8.4"
+  }
+}

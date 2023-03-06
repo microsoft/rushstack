@@ -5,7 +5,7 @@ import type { StdioSummarizer } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
-import type { OperationStateFile } from './OperationStateFile';
+import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
 /**
@@ -31,11 +31,11 @@ export interface IOperationRunnerContext {
    */
   stdioSummarizer: StdioSummarizer;
   /**
-   * Object used to record state of the operation.
+   * Object used to manage metadata of the operation.
    *
    * @internal
    */
-  _operationStateFile?: OperationStateFile;
+  _operationMetadataManager?: OperationMetadataManager;
   /**
    * Object used to track elapsed time.
    */

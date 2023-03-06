@@ -19,6 +19,14 @@ const MINIMUM_GIT_VERSION: IGitVersion = {
   patch: 0
 };
 
+const STANDARD_GIT_OPTIONS: readonly string[] = [
+  // Don't request any optional file locks
+  '--no-optional-locks',
+  // Ensure that commands don't run automatic maintenance, since performance of the command itself is paramount
+  '-c',
+  'maintenance.auto=false'
+];
+
 interface IGitTreeState {
   files: Map<string, string>; // type "blob"
   submodules: Map<string, string>; // type "commit"
@@ -300,12 +308,36 @@ export async function getRepoStateAsync(
 ): Promise<Map<string, string>> {
   const statePromise: Promise<IGitTreeState> = spawnGitAsync(
     gitPath,
-    ['--no-optional-locks', 'ls-tree', '-r', '-z', '--full-name', 'HEAD', '--'],
+    STANDARD_GIT_OPTIONS.concat([
+      'ls-tree',
+      // Recursively expand trees
+      '-r',
+      // Use NUL as the separator
+      '-z',
+      // Specify the full path to files relative to the root
+      '--full-name',
+      // As of last commit
+      'HEAD',
+      '--'
+    ]),
     rootDirectory
   ).then(parseGitLsTree);
   const locallyModifiedPromise: Promise<Map<string, boolean>> = spawnGitAsync(
     gitPath,
-    ['--no-optional-locks', 'status', '-z', '-u', '--no-renames', '--ignore-submodules', '--'],
+    STANDARD_GIT_OPTIONS.concat([
+      'status',
+      // Use NUL as the separator
+      '-z',
+      // Include untracked files
+      '-u',
+      // Disable rename detection so that renames show up as add + delete
+      '--no-renames',
+      // Don't process submodules with this command; they'll be handled individually
+      '--ignore-submodules',
+      // Don't compare against the remote
+      '--no-ahead-behind',
+      '--'
+    ]),
     rootDirectory
   ).then(parseGitStatus);
 
@@ -332,7 +364,7 @@ export async function getRepoStateAsync(
 
   const hashObjectPromise: Promise<string> = spawnGitAsync(
     gitPath,
-    ['--no-optional-locks', 'hash-object', '--stdin-paths'],
+    STANDARD_GIT_OPTIONS.concat(['hash-object', '--stdin-paths']),
     rootDirectory,
     Readable.from(getFilesToHash(), {
       encoding: 'utf-8',
@@ -391,8 +423,7 @@ export function getRepoChanges(
 
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
     gitPath || 'git',
-    [
-      '--no-optional-locks',
+    STANDARD_GIT_OPTIONS.concat([
       'diff-index',
       '--color=never',
       '--no-renames',
@@ -401,7 +432,7 @@ export function getRepoChanges(
       '-z',
       revision,
       '--'
-    ],
+    ]),
     {
       currentWorkingDirectory: rootDirectory
     }
@@ -441,7 +472,10 @@ export function ensureGitMinimumVersion(gitPath?: string): void {
 }
 
 function getGitVersion(gitPath?: string): IGitVersion {
-  const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(gitPath || 'git', ['version']);
+  const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+    gitPath || 'git',
+    STANDARD_GIT_OPTIONS.concat(['version'])
+  );
 
   if (result.status !== 0) {
     throw new Error(

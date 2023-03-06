@@ -191,6 +191,7 @@ export enum EnvironmentVariableNames {
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
     RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
+    RUSH_LIB_PATH = "_RUSH_LIB_PATH",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PNPM_VERIFY_STORE_INTEGRITY = "RUSH_PNPM_VERIFY_STORE_INTEGRITY",
@@ -419,6 +420,24 @@ export interface IOperationExecutionResult {
     readonly stopwatch: IStopwatchResult;
 }
 
+// @internal (undocumented)
+export interface _IOperationMetadata {
+    // (undocumented)
+    durationInSeconds: number;
+    // (undocumented)
+    errorLogPath: string;
+    // (undocumented)
+    logPath: string;
+}
+
+// @internal (undocumented)
+export interface _IOperationMetadataManagerOptions {
+    // (undocumented)
+    phase: IPhase;
+    // (undocumented)
+    rushProject: RushConfigurationProject;
+}
+
 // @alpha
 export interface IOperationOptions {
     phase?: IPhase | undefined;
@@ -442,7 +461,7 @@ export interface IOperationRunnerContext {
     collatedWriter: CollatedWriter;
     debugMode: boolean;
     // @internal
-    _operationStateFile?: _OperationStateFile;
+    _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
     stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
@@ -451,9 +470,9 @@ export interface IOperationRunnerContext {
 // @internal (undocumented)
 export interface _IOperationStateFileOptions {
     // (undocumented)
-    phase: IPhase;
+    metadataFolder: string;
     // (undocumented)
-    rushProject: RushConfigurationProject;
+    projectFolder: string;
 }
 
 // @internal (undocumented)
@@ -644,10 +663,28 @@ export class Operation {
 }
 
 // @internal
+export class _OperationMetadataManager {
+    constructor(options: _IOperationMetadataManagerOptions);
+    get relativeFilepaths(): string[];
+    // (undocumented)
+    saveAsync({ durationInSeconds, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
+    // (undocumented)
+    readonly stateFile: _OperationStateFile;
+    // (undocumented)
+    tryRestoreAsync({ terminal, logPath, errorLogPath }: {
+        terminal: ITerminal;
+        logPath: string;
+        errorLogPath: string;
+    }): Promise<void>;
+}
+
+// @internal
 export class _OperationStateFile {
     constructor(options: _IOperationStateFileOptions);
-    readonly filename: string;
-    static getFilenameRelativeToProjectRoot(phase: IPhase): string;
+    // (undocumented)
+    static filename: string;
+    readonly filepath: string;
+    readonly relativeFilepath: string;
     // (undocumented)
     get state(): _IOperationStateJson | undefined;
     // (undocumented)
@@ -795,6 +832,8 @@ export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
+    // (undocumented)
+    static get _rushLibPackageFolder(): string;
     // @internal (undocumented)
     static get _rushLibPackageJson(): IPackageJson;
     static get version(): string;
@@ -1003,6 +1042,11 @@ export class _RushGlobalFolder {
     constructor();
     readonly nodeSpecificPath: string;
     readonly path: string;
+}
+
+// @internal
+export class _RushInternals {
+    static loadModule(srcImportPath: string): unknown;
 }
 
 // @beta

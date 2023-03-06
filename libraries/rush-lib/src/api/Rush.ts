@@ -1,7 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson, ITerminalProvider, PackageJsonLookup } from '@rushstack/node-core-library';
+import * as path from 'path';
+
+import {
+  InternalError,
+  IPackageJson,
+  ITerminalProvider,
+  PackageJsonLookup
+} from '@rushstack/node-core-library';
+
+import '../utilities/SetRushLibPath';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushStartupBanner } from '../cli/RushStartupBanner';
@@ -50,6 +59,7 @@ export interface ILaunchOptions {
  */
 export class Rush {
   private static __rushLibPackageJson: IPackageJson | undefined = undefined;
+  private static __rushLibPackageFolder: string | undefined = undefined;
 
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
@@ -117,11 +127,25 @@ export class Rush {
    * @internal
    */
   public static get _rushLibPackageJson(): IPackageJson {
-    if (!Rush.__rushLibPackageJson) {
-      Rush.__rushLibPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
-    }
+    Rush._ensureOwnPackageJsonIsLoaded();
+    return Rush.__rushLibPackageJson!;
+  }
 
-    return Rush.__rushLibPackageJson;
+  public static get _rushLibPackageFolder(): string {
+    Rush._ensureOwnPackageJsonIsLoaded();
+    return Rush.__rushLibPackageFolder!;
+  }
+
+  private static _ensureOwnPackageJsonIsLoaded(): void {
+    if (!Rush.__rushLibPackageJson) {
+      const packageJsonFilePath: string | undefined =
+        PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(__dirname);
+      if (!packageJsonFilePath) {
+        throw new InternalError('Unable to locate the package.json file for this module');
+      }
+      Rush.__rushLibPackageFolder = path.dirname(packageJsonFilePath);
+      Rush.__rushLibPackageJson = PackageJsonLookup.instance.loadPackageJson(packageJsonFilePath);
+    }
   }
 
   /**

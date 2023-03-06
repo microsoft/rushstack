@@ -2,6 +2,96 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.3.2",
+      "tag": "@rushstack/module-minifier_v0.3.2",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@rushstack/module-minifier_v0.3.1",
+      "date": "Sun, 05 Feb 2023 03:02:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change the peer dependency selector on `@types/node` to a wildcard (`*`)."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/module-minifier_v0.3.0",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump @types/node peerDependency to ^14.18.36."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/module-minifier_v0.2.0",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Move the @types/node dependency to an optional peerDependency."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.49",
       "tag": "@rushstack/module-minifier_v0.1.49",
       "date": "Mon, 30 Jan 2023 00:55:44 GMT",

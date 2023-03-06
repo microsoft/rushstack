@@ -405,9 +405,10 @@ export class ProjectChangeAnalyzer {
   private async _getRepoDepsAsync(terminal: ITerminal): Promise<IGitState | undefined> {
     try {
       const gitPath: string = this._git.getGitPathOrThrow();
-      const rootDir: string | undefined = this._git.getGitInfo()?.root;
 
-      if (rootDir) {
+      if (this._git.isPathUnderGitWorkingTree()) {
+        // Do not use getGitInfo().root; it is the root of the *primary* worktree, not the *current* one.
+        const rootDir: string = getRepoRoot(this._rushConfiguration.rushJsonFolder, gitPath);
         // Load the package deps hash for the whole repository
         // Include project shrinkwrap files as part of the computation
         const additionalFilesToHash: string[] = [];

@@ -2,6 +2,84 @@
   "name": "@rushstack/trace-import",
   "entries": [
     {
+      "version": "0.1.11",
+      "tag": "@rushstack/trace-import_v0.1.11",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.13.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.10",
+      "tag": "@rushstack/trace-import_v0.1.10",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.9",
+      "tag": "@rushstack/trace-import_v0.1.9",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.8",
+      "tag": "@rushstack/trace-import_v0.1.8",
+      "date": "Mon, 30 Jan 2023 16:22:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.7",
       "tag": "@rushstack/trace-import_v0.1.7",
       "date": "Mon, 30 Jan 2023 00:55:44 GMT",

@@ -16,7 +16,7 @@
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/webpack-env": "1.13.0",
+    "@types/webpack-env": "1.18.0",
     "eslint": "~8.7.0",
     "file-loader": "~6.0.0",
     "tslint": "~5.20.1",
