@@ -2,6 +2,96 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.21.5",
+      "tag": "@microsoft/api-documenter_v7.21.5",
+      "date": "Fri, 10 Feb 2023 01:18:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.13.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.21.4",
+      "tag": "@microsoft/api-documenter_v7.21.4",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.21.3",
+      "tag": "@microsoft/api-documenter_v7.21.3",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.21.2",
+      "tag": "@microsoft/api-documenter_v7.21.2",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.21.1",
       "tag": "@microsoft/api-documenter_v7.21.1",
       "date": "Mon, 30 Jan 2023 00:55:44 GMT",

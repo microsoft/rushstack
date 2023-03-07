@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/node-core-library",
-  "version": "3.53.3",
+  "version": "3.55.2",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
@@ -31,12 +31,12 @@
     "@types/fs-extra": "7.0.0",
     "@types/heft-jest": "1.0.1",
     "@types/jju": "1.4.1",
+    "@types/node": "14.18.36",
     "@types/resolve": "1.20.2",
-    "@types/semver": "7.3.5",
-    "@types/node": "12.20.24"
+    "@types/semver": "7.3.5"
   },
   "peerDependencies": {
-    "@types/node": "^12.20.24"
+    "@types/node": "*"
   },
   "peerDependenciesMeta": {
     "@types/node": {

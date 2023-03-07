@@ -1,6 +1,52 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 29 Jan 2023 20:10:17 GMT and should not be manually modified.
+This log was last generated on Fri, 17 Feb 2023 14:46:59 GMT and should not be manually modified.
+
+## 5.93.1
+Fri, 17 Feb 2023 14:46:59 GMT
+
+### Updates
+
+- Fix a regression where "rush-sdk" failed to load older versions of "rush-lib" (GitHub #3979)
+
+## 5.93.0
+Fri, 17 Feb 2023 02:14:43 GMT
+
+### Updates
+
+- Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the RUSH_LIB_PATH environment variable.
+
+## 5.92.0
+Sun, 12 Feb 2023 02:50:42 GMT
+
+### Updates
+
+- Enable @rushstack/rush-sdk to import internal APIs from the proxied @microsoft/rush-lib instance (GitHub #3895)
+
+## 5.91.0
+Sat, 11 Feb 2023 02:04:14 GMT
+
+### Updates
+
+- Remove runtime dependency on @rushstack/rush-sdk from the AzureStorageAuthentication class in @rushstack/rush-azure-storage-build-cache-plugin so that it can be used in isolation.
+- Include operation log files in the cache, and restore them during cache hits.
+
+## 5.90.2
+Wed, 08 Feb 2023 20:27:06 GMT
+
+_Version update only_
+
+## 5.90.1
+Wed, 08 Feb 2023 19:58:35 GMT
+
+### Patches
+
+- Fix determination of the root of the current Git worktree when in a multi-worktree setup.
+
+### Updates
+
+- Disable unused depcheck feature for upgrade-interactive.
+- Fix an issue where deleting the `common/temp/node_modules` folder encounters an EPERM error and aborts.
 
 ## 5.90.0
 Sun, 29 Jan 2023 20:10:17 GMT

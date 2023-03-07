@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/worker-pool",
-  "version": "0.1.48",
+  "version": "0.3.2",
   "description": "Lightweight worker pool using NodeJS worker_threads",
   "main": "lib/index.js",
   "typings": "dist/worker-pool.d.ts",
@@ -20,10 +20,10 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24"
+    "@types/node": "14.18.36"
   },
   "peerDependencies": {
-    "@types/node": "^12.20.24"
+    "@types/node": "*"
   },
   "peerDependenciesMeta": {
     "@types/node": {

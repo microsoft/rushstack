@@ -72,6 +72,7 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
  */
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
+  credentialUpdateCommandForLogging?: string | undefined;
 }
 
 /**
@@ -88,7 +89,7 @@ export interface IAzureAuthenticationBaseOptions {
 export abstract class AzureAuthenticationBase {
   protected abstract readonly _credentialNameForCache: string;
   protected abstract readonly _credentialKindForLogging: string;
-  protected abstract readonly _credentialUpdateCommandForLogging: string | undefined;
+  protected readonly _credentialUpdateCommandForLogging: string | undefined;
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
 
@@ -109,6 +110,7 @@ export abstract class AzureAuthenticationBase {
 
   public constructor(options: IAzureAuthenticationBaseOptions) {
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
+    this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {

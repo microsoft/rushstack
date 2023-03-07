@@ -5,11 +5,12 @@
 
 
 
-[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
+[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a> 
 
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
 for large scale TypeScript monorepos.
 
+ [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
 
 ## Documentation Links
 

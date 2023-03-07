@@ -286,6 +286,12 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
     }
 
     const hash: crypto.Hash = crypto.createHash('md5');
+    // If the webpack config specified a salt, apply it here
+    const hashSalt: string | undefined = compilation.outputOptions?.hashSalt;
+    if (hashSalt) {
+      hash.update(hashSalt);
+    }
+
     // Sort the paths to maximize hash stability
     for (const assetPath of Array.from(assetsToAdd.keys()).sort()) {
       hash.update(assetPath);

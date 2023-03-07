@@ -1,0 +1,5 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/typescript.schema.json",
+
+  "emitFolderNameForTests": "lib-shim"
+}

@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@rushstack/rush-sdk Should load via env when Rush has loaded (for child processes): stderr 1`] = `""`;
+
+exports[`@rushstack/rush-sdk Should load via env when Rush has loaded (for child processes): stdout 1`] = `
+"Try to load @microsoft/rush-lib from process.env._RUSH_LIB_PATH from caller package
+Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
+[
+  '_rushSdk_loadInternalModule',
+  'ApprovedPackagesConfiguration',
+  'ApprovedPackagesItem',
+  'ApprovedPackagesPolicy',
+  'BuildCacheConfiguration',
+  'BumpType',
+  'ChangeManager',
+  'CommonVersionsConfiguration',
+  'CredentialCache',
+  'DependencyType',
+  'EnvironmentConfiguration',
+  'EnvironmentVariableNames',
+  'Event',
+  'EventHooks',
+  'ExperimentsConfiguration',
+  'FileSystemBuildCacheProvider',
+  'IndividualVersionPolicy',
+  'LockStepVersionPolicy',
+  'LookupByPath',
+  'NpmOptionsConfiguration',
+  'Operation',
+  'OperationStatus',
+  'PackageJsonDependency',
+  'PackageJsonEditor',
+  'PackageManager',
+  'PackageManagerOptionsConfigurationBase',
+  'PhasedCommandHooks',
+  'PnpmOptionsConfiguration',
+  'ProjectChangeAnalyzer',
+  'RepoStateFile',
+  'Rush',
+  'RushConfiguration',
+  'RushConfigurationProject',
+  'RushConstants',
+  'RushLifecycleHooks',
+  'RushSession',
+  'RushUserConfiguration',
+  'VersionPolicy',
+  'VersionPolicyConfiguration',
+  'VersionPolicyDefinitionName',
+  'YarnOptionsConfiguration',
+  '_BaseFlag',
+  '_LastInstallFlag',
+  '_OperationMetadataManager',
+  '_OperationStateFile',
+  '_RushGlobalFolder',
+  '_RushInternals'
+]"
+`;
+
+exports[`@rushstack/rush-sdk Should load via global (for plugins): stderr 1`] = `""`;
+
+exports[`@rushstack/rush-sdk Should load via global (for plugins): stdout 1`] = `"[ '_rushSdk_loadInternalModule', 'foo' ]"`;
+
+exports[`@rushstack/rush-sdk Should load via install-run (for standalone tools): stderr 1`] = `""`;
+
+exports[`@rushstack/rush-sdk Should load via install-run (for standalone tools): stdout 1`] = `
+"Trying to load  @microsoft/rush-lib installed by install-run-rush
+Loaded @microsoft/rush-lib installed by install-run-rush
+[ '_rushSdk_loadInternalModule', 'foo' ]"
+`;
+
+exports[`@rushstack/rush-sdk Should load via process.env._RUSH_LIB_PATH (for child processes): stderr 1`] = `""`;
+
+exports[`@rushstack/rush-sdk Should load via process.env._RUSH_LIB_PATH (for child processes): stdout 1`] = `
+"Try to load @microsoft/rush-lib from process.env._RUSH_LIB_PATH from caller package
+Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
+[ '_rushSdk_loadInternalModule', 'foo' ]"
+`;

@@ -30,7 +30,7 @@
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "@types/node-fetch": "1.6.9",
+    "@types/node-fetch": "2.6.2",
     "@yarnpkg/lockfile": "~1.0.2",
     "builtin-modules": "~3.1.0",
     "cli-table": "~0.3.1",
@@ -75,7 +75,7 @@
     "@types/inquirer": "7.3.1",
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",
-    "@types/node": "12.20.24",
+    "@types/node": "14.18.36",
     "@types/npm-package-arg": "6.1.0",
     "@types/npm-packlist": "~1.1.1",
     "@types/read-package-tree": "5.1.0",
@@ -85,11 +85,17 @@
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.1",
     "@types/normalize-path": "~3.0.0",
-    "@types/webpack-env": "1.13.0",
+    "@types/webpack-env": "1.18.0",
     "webpack": "~5.75.0"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:5.90.0-pr3481.16",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:5.90.0-pr3481.16"
-  }
+  },
+  "sideEffects": [
+    "lib-esnext/start-pnpm.js",
+    "lib-esnext/start.js",
+    "lib-esnext/startx.js",
+    "lib-esnext/utilities/SetRushLibPath.js"
+  ]
 }

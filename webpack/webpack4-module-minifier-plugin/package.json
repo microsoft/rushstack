@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack4-module-minifier-plugin",
-  "version": "0.9.48",
+  "version": "0.11.2",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "lib/index.js",
   "typings": "dist/webpack4-module-minifier-plugin.d.ts",
@@ -23,7 +23,7 @@
     "@types/webpack-sources": "*",
     "webpack": "^4.31.0",
     "webpack-sources": "~1.4.3",
-    "@types/node": "^12.20.24"
+    "@types/node": "*"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
@@ -47,11 +47,11 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
+    "@types/node": "14.18.36",
     "@types/webpack": "4.41.32",
     "@types/webpack-sources": "1.4.2",
     "webpack": "~4.44.2",
-    "webpack-sources": "~1.4.3",
-    "@types/node": "12.20.24"
+    "webpack-sources": "~1.4.3"
   },
   "sideEffects": [
     "./lib/OverrideWebpackIdentifierAllocation"

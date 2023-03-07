@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-deps-hash",
-  "version": "4.0.4",
+  "version": "4.0.9",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -21,7 +21,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24"
+    "@types/node": "14.18.36"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"
