@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-azure-storage-build-cache-plugin",
-  "version": "5.90.0-pr3481.16",
+  "version": "5.93.1-pr3481.17",
   "description": "Rush plugin for Azure storage cloud build cache",
   "repository": {
     "type": "git",
@@ -21,11 +21,11 @@
     "@azure/identity": "~2.1.0",
     "@azure/storage-blob": "~12.11.0",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/rush-sdk": "workspace:5.90.0-pr3481.16",
+    "@rushstack/rush-sdk": "workspace:5.93.1-pr3481.17",
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
-    "@microsoft/rush-lib": "workspace:5.90.0-pr3481.16",
+    "@microsoft/rush-lib": "workspace:5.93.1-pr3481.17",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",

@@ -8,8 +8,8 @@
     "_phase:build": "node build.js"
   },
   "devDependencies": {
-    "@microsoft/rush-lib": "workspace:5.90.0-pr3481.16",
+    "@microsoft/rush-lib": "workspace:5.93.1-pr3481.17",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/rush-sdk": "workspace:5.90.0-pr3481.16"
+    "@rushstack/rush-sdk": "workspace:5.93.1-pr3481.17"
   }
 }

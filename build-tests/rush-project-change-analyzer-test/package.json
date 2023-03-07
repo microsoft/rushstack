@@ -9,7 +9,7 @@
     "_phase:build": "heft build --clean"
   },
   "dependencies": {
-    "@microsoft/rush-lib": "workspace:5.90.0-pr3481.16",
+    "@microsoft/rush-lib": "workspace:5.93.1-pr3481.17",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
