@@ -97,7 +97,9 @@ export class WebpackConfigurationLoader {
 
 function findWebpackConfig(buildFolder: string, configurationRegExp: RegExp): string {
   try {
-    const configs = FileSystem.readFolderItemNames(buildFolder).filter((config) => configurationRegExp.test);
+    const configs = FileSystem.readFolderItemNames(buildFolder).filter((config) =>
+      configurationRegExp.test(config)
+    );
 
     if (configs.length > 1) {
       throw new Error(`Error: Found more than one matching webpack configuration file.`);
