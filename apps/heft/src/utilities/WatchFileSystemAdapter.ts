@@ -47,7 +47,7 @@ export interface IWatchFileSystemAdapter extends FileSystemAdapter {
    * Tells the adapter to track the specified file (or folder) as used.
    * Returns an object containing data about the state of said file (or folder).
    */
-  getStateAndTrack(filePath: string): IWatchedFileState;
+  getStateAndTrackAsync(filePath: string): Promise<IWatchedFileState>;
 }
 
 interface ITimeEntry {
@@ -133,7 +133,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       if (err) {
         this._missing.set(filePath, Date.now());
       } else {
-        this._files.set(filePath, stats.mtimeMs || stats.ctimeMs || Date.now());
+        this._files.set(filePath, +stats.mtime || +stats.ctime || Date.now());
       }
       callback(err, stats);
     });
@@ -144,7 +144,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.lstatSync(filePath);
-      this._files.set(filePath, stats.mtimeMs || stats.ctimeMs || Date.now());
+      this._files.set(filePath, +stats.mtime || +stats.ctime || Date.now());
       return stats;
     } catch (err) {
       this._missing.set(filePath, Date.now());
@@ -159,7 +159,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       if (err) {
         this._missing.set(filePath, Date.now());
       } else {
-        this._files.set(filePath, stats.mtimeMs || stats.ctimeMs || Date.now());
+        this._files.set(filePath, +stats.mtime || +stats.ctime || Date.now());
       }
       callback(err, stats);
     });
@@ -170,7 +170,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.statSync(filePath);
-      this._files.set(filePath, stats.mtimeMs || stats.ctimeMs || Date.now());
+      this._files.set(filePath, +stats.mtime || +stats.ctime || Date.now());
       return stats;
     } catch (err) {
       this._missing.set(filePath, Date.now());
@@ -224,22 +224,34 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   /**
    * @inheritdoc
    */
-  public getStateAndTrack(filePath: string): IWatchedFileState {
-    if (!this._lastFiles || !this._times) {
-      return {
-        changed: true
-      };
+  public async getStateAndTrackAsync(filePath: string): Promise<IWatchedFileState> {
+    const normalizedSourcePath: string = path.normalize(filePath);
+    const oldTime: number | undefined = this._lastFiles?.get(normalizedSourcePath);
+    let newTimeEntry: ITimeEntry | undefined = this._times?.get(normalizedSourcePath);
+
+    if (!newTimeEntry) {
+      // Need to record a timestamp, otherwise first rerun will select everything
+      try {
+        const stats: fs.Stats = await fs.promises.lstat(normalizedSourcePath);
+        const rounded: number = +stats.mtime || +stats.ctime || Date.now();
+        newTimeEntry = {
+          timestamp: rounded,
+          safeTime: rounded
+        };
+      } catch (err) {
+        this._missing.set(normalizedSourcePath, Date.now());
+      }
     }
 
-    const normalizedSourcePath: string = path.normalize(filePath);
-    const oldTime: number | undefined = this._lastFiles.get(normalizedSourcePath);
-    const newTimeEntry: ITimeEntry | undefined = this._times.get(normalizedSourcePath);
     const newTime: number | undefined =
-      (newTimeEntry && (newTimeEntry.timestamp ?? newTimeEntry.safeTime)) || 0;
-    this._files.set(normalizedSourcePath, newTime);
+      (newTimeEntry && (newTimeEntry.timestamp ?? newTimeEntry.safeTime)) || this._lastQueryTime;
+
+    if (newTime) {
+      this._files.set(normalizedSourcePath, newTime);
+    }
 
     return {
-      changed: newTime === undefined || newTime !== oldTime
+      changed: newTime !== oldTime
     };
   }
 }

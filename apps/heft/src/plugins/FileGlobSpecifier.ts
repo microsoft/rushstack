@@ -3,6 +3,9 @@
 
 import * as path from 'path';
 import glob, { FileSystemAdapter } from 'fast-glob';
+
+import { Async } from '@rushstack/node-core-library';
+
 import type { IWatchFileSystemAdapter, IWatchedFileState } from '../utilities/WatchFileSystemAdapter';
 
 /**
@@ -91,7 +94,7 @@ export type WatchGlobFn = (
 ) => Promise<Map<string, IWatchedFileState>>;
 
 function isWatchFileSystemAdapter(adapter: FileSystemAdapter): adapter is IWatchFileSystemAdapter {
-  return !!(adapter as IWatchFileSystemAdapter).getStateAndTrack;
+  return !!(adapter as IWatchFileSystemAdapter).getStateAndTrackAsync;
 }
 
 export interface IWatchGlobOptions extends IGlobOptions {
@@ -110,9 +113,16 @@ export async function watchGlobAsync(
   const rawFiles: string[] = await glob(pattern, options);
 
   const results: Map<string, IWatchedFileState> = new Map();
-  for (const file of rawFiles) {
-    results.set(file, fs.getStateAndTrack(cwd ? path.resolve(cwd, file) : path.normalize(file)));
-  }
+  await Async.forEachAsync(
+    rawFiles,
+    async (file: string) => {
+      const state: IWatchedFileState = await fs.getStateAndTrackAsync(path.normalize(file));
+      results.set(file, state);
+    },
+    {
+      concurrency: 20
+    }
+  );
 
   return results;
 }
@@ -131,11 +141,18 @@ export async function getFilePathsAsync(
 
   if (fs && isWatchFileSystemAdapter(fs)) {
     const changedFiles: Set<string> = new Set();
-    for (const file of rawFiles) {
-      if (fs.getStateAndTrack(path.normalize(file)).changed) {
-        changedFiles.add(file);
+    await Async.forEachAsync(
+      rawFiles,
+      async (file: string) => {
+        const state: IWatchedFileState = await fs.getStateAndTrackAsync(path.normalize(file));
+        if (state.changed) {
+          changedFiles.add(file);
+        }
+      },
+      {
+        concurrency: 20
       }
-    }
+    );
     return changedFiles;
   }
 

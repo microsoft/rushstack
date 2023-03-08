@@ -300,17 +300,20 @@ export class HeftActionRunner {
 
     const { _terminal: terminal } = this;
 
-    let resolveRequestRun!: () => void;
+    let resolveRequestRun!: (requestor?: string) => void;
     function createRequestRunPromise(): Promise<void> {
-      return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
-        resolveRequestRun = resolve;
-      }).then(() => {
+      return new Promise<string | undefined>(
+        (resolve: (requestor?: string) => void, reject: (err: Error) => void) => {
+          resolveRequestRun = resolve;
+        }
+      ).then((requestor: string | undefined) => {
+        terminal.writeLine(Colors.bold(`New run requested by ${requestor || 'unknown task'}`));
         runRequested = true;
         if (isRunning) {
+          terminal.writeLine(Colors.bold(`Cancelling incremental build...`));
           // If there's a source file change, we need to cancel the incremental build and wait for the
           // execution to finish before we begin execution again.
           cancellationTokenSource.cancel();
-          terminal.writeLine(Colors.bold('New run requested, cancelling incremental build...'));
         }
       });
     }
@@ -320,10 +323,10 @@ export class HeftActionRunner {
       cancellationTokenSource.cancel();
     }
 
-    function requestRun(): void {
+    function requestRun(requestor?: string): void {
       // The wrapper here allows operation runners to hang onto a single instance, despite the underlying
       // promise changing.
-      resolveRequestRun();
+      resolveRequestRun(requestor);
     }
 
     // eslint-disable-next-line no-constant-condition
@@ -358,7 +361,7 @@ export class HeftActionRunner {
       if (!runRequested) {
         terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
         terminal.writeLine('');
-        await requestRunPromise;
+        await Promise.race([requestRunPromise, cliCancellationToken.onCancelledPromise]);
       }
 
       requestRunPromise = createRequestRunPromise();
@@ -368,7 +371,7 @@ export class HeftActionRunner {
   private async _executeOnceAsync(
     executionManager: OperationExecutionManager,
     cancellationToken: CancellationToken,
-    requestRun?: () => void
+    requestRun?: (requestor?: string) => void
   ): Promise<void> {
     // Execute the action operations
     await runWithLoggingAsync(

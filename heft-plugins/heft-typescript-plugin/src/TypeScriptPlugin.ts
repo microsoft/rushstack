@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+
 import type * as TTypescript from 'typescript';
 import { SyncHook } from 'tapable';
 import { FileSystem, Path, type ITerminal } from '@rushstack/node-core-library';
@@ -315,7 +317,7 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
         ...typeScriptConfiguration?.staticAssetsToCopy,
 
         // For now - these may need to be revised later
-        sourcePath: 'src',
+        sourcePath: path.resolve(heftConfiguration.buildFolderPath, 'src'),
         destinationFolders: Array.from(destinationFolderPaths),
         flatten: false,
         hardlink: false

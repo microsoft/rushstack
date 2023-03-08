@@ -38,7 +38,7 @@ export interface IOperationOptions {
 /**
  * Information provided to `executeAsync` by the `OperationExecutionManager`.
  */
-export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 'isFirstRun'> {
+export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 'isFirstRun' | 'requestRun'> {
   /**
    * Function to invoke before execution of an operation, for logging.
    */
@@ -51,6 +51,13 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
    * Function used to schedule the concurrency-limited execution of an operation.
    */
   queueWork<T>(workFn: () => Promise<T>, priority: number): Promise<T>;
+
+  /**
+   * A callback to the overarching orchestrator to request that the operation be invoked again.
+   * Used in watch mode to signal that inputs have changed.
+   */
+  requestRun?: (requestor?: string) => void;
+
   /**
    * Terminal to write output to.
    */
@@ -259,7 +266,7 @@ export class Operation implements IOperationStates {
                 // The requestRun callback is assumed to remain constant
                 // throughout the lifetime of the process, so it is safe
                 // to capture here.
-                return requestRun();
+                return requestRun(this.name);
               default:
                 throw new InternalError(`Unexpected status: ${this.state?.status}`);
             }
