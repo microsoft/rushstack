@@ -23,6 +23,11 @@
                   ],
                   "fileExtensions": [".json", ".js", ".map"],
                   "hardlink": true
+                },
+                {
+                  "sourcePath": "src/cli/test",
+                  "destinationFolders": ["lib-commonjs/cli/test"],
+                  "includeGlobs": ["**/*.js"]
                 }
               ]
             }
