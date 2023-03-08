@@ -101,10 +101,12 @@ function* _resolveDeleteOperationPaths(
   heftConfiguration: HeftConfiguration,
   deleteOperations: Iterable<IDeleteOperation>
 ): IterableIterator<IDeleteOperation> {
+  const { buildFolderPath } = heftConfiguration;
   for (const deleteOperation of deleteOperations) {
+    const { sourcePath } = deleteOperation;
     yield {
       ...deleteOperation,
-      sourcePath: path.resolve(heftConfiguration.buildFolderPath, deleteOperation.sourcePath ?? '.')
+      sourcePath: sourcePath ? path.resolve(buildFolderPath, sourcePath) : buildFolderPath
     };
   }
 }

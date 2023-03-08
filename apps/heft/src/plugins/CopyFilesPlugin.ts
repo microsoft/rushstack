@@ -188,14 +188,16 @@ function* _resolveCopyOperationPaths(
   heftConfiguration: HeftConfiguration,
   copyOperations: Iterable<ICopyOperation>
 ): IterableIterator<ICopyOperation> {
-  function resolvePath(inputPath: string): string {
-    return path.resolve(heftConfiguration.buildFolderPath, inputPath);
+  const { buildFolderPath } = heftConfiguration;
+
+  function resolvePath(inputPath: string | undefined): string {
+    return inputPath ? path.resolve(buildFolderPath, inputPath) : buildFolderPath;
   }
 
   for (const copyOperation of copyOperations) {
     yield {
       ...copyOperation,
-      sourcePath: resolvePath(copyOperation.sourcePath ?? '.'),
+      sourcePath: resolvePath(copyOperation.sourcePath),
       destinationFolders: copyOperation.destinationFolders.map(resolvePath)
     };
   }

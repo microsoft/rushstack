@@ -133,7 +133,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       if (err) {
         this._missing.set(filePath, Date.now());
       } else {
-        this._files.set(filePath, +stats.mtime || +stats.ctime || Date.now());
+        this._files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
       }
       callback(err, stats);
     });
@@ -144,7 +144,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.lstatSync(filePath);
-      this._files.set(filePath, +stats.mtime || +stats.ctime || Date.now());
+      this._files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
       return stats;
     } catch (err) {
       this._missing.set(filePath, Date.now());
@@ -159,7 +159,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       if (err) {
         this._missing.set(filePath, Date.now());
       } else {
-        this._files.set(filePath, +stats.mtime || +stats.ctime || Date.now());
+        this._files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
       }
       callback(err, stats);
     });
@@ -170,7 +170,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.statSync(filePath);
-      this._files.set(filePath, +stats.mtime || +stats.ctime || Date.now());
+      this._files.set(filePath, stats.mtime.getTime() || stats.ctime.getTime() || Date.now());
       return stats;
     } catch (err) {
       this._missing.set(filePath, Date.now());
@@ -233,7 +233,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       // Need to record a timestamp, otherwise first rerun will select everything
       try {
         const stats: fs.Stats = await fs.promises.lstat(normalizedSourcePath);
-        const rounded: number = +stats.mtime || +stats.ctime || Date.now();
+        const rounded: number = stats.mtime.getTime() || stats.ctime.getTime() || Date.now();
         newTimeEntry = {
           timestamp: rounded,
           safeTime: rounded
